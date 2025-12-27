@@ -1,0 +1,9 @@
+{
+  "@@locale": "ko",
+  "appTitle": "OnMyBehalf",
+  "splashTagline": "혼자서 지키지 못했던 계획을, 함께",
+  "loginWithGoogle": "Google로 시작하기",
+  "loginWithApple": "Apple로 시작하기",
+  "privacyMessage": "강요하지 않아요. 기록은 둘만 봅니다."
+}
+

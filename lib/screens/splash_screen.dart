@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import 'login_screen.dart';
 
@@ -74,34 +75,34 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.warmOffWhite,
+      backgroundColor: AppColors.background, // Warm Stone (#F4F1EE)
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 로고 영역 (임시로 텍스트로 대체)
-              // TODO: 실제 로고 이미지로 교체
+              // 로고 영역 (Soft Stone 배경)
               Container(
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppColors.warmCoral,
+                  color: AppColors.surface, // Soft Stone (#E8E3DE)
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.favorite_outline,
                   size: 40,
-                  color: AppColors.primaryText,
+                  color: AppColors.primary, // Smoky Plum (#6F5A6E)
                 ),
               ),
               const SizedBox(height: 24),
-              // 태그라인
+              // 태그라인 (Text Secondary)
               Text(
-                '혼자서 지키지 못했던 계획을, 함께',
+                AppLocalizations.of(context)!.splashTagline,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.secondaryText,
+                      color: AppColors.textSecondary, // #7A7377
+                      fontSize: 16,
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -112,4 +113,3 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
-

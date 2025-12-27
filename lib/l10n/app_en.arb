@@ -1,0 +1,24 @@
+{
+  "@@locale": "en",
+  "appTitle": "OnMyBehalf",
+  "@appTitle": {
+    "description": "The application title"
+  },
+  "splashTagline": "Plans we couldn't keep alone, together",
+  "@splashTagline": {
+    "description": "Tagline shown on splash screen"
+  },
+  "loginWithGoogle": "Continue with Google",
+  "@loginWithGoogle": {
+    "description": "Google login button text"
+  },
+  "loginWithApple": "Continue with Apple",
+  "@loginWithApple": {
+    "description": "Apple login button text"
+  },
+  "privacyMessage": "We don't push. Your records are private between you two.",
+  "@privacyMessage": {
+    "description": "Privacy message shown at bottom of login screen"
+  }
+}
+

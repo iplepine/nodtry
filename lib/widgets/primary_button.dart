@@ -20,12 +20,24 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.warmCoral,
-          foregroundColor: AppColors.primaryText,
+          backgroundColor: AppColors.primary, // Smoky Plum
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: AppColors.secondary, // Pale Stone
+          disabledForegroundColor: AppColors.textDisabled, // 비활성 텍스트
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12), // Soft radius (8~12dp)
+          ),
+        ).copyWith(
+          // Pressed state: Deep Plum
+          overlayColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.pressed)) {
+                return AppColors.primaryPressed; // Deep Plum (#5A4658)
+              }
+              return null;
+            },
           ),
         ),
         child: isLoading
@@ -34,7 +46,7 @@ class PrimaryButton extends StatelessWidget {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryText),
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
             : Text(
@@ -42,10 +54,10 @@ class PrimaryButton extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
+                  color: Colors.white,
                 ),
               ),
       ),
     );
   }
 }
-

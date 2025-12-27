@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
 
@@ -48,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.warmOffWhite,
+      backgroundColor: AppColors.background, // Warm Stone (#F4F1EE)
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -61,27 +62,28 @@ class _LoginScreenState extends State<LoginScreen> {
               Column(
                 children: [
                   PrimaryButton(
-                    text: 'Google로 시작하기',
+                    text: AppLocalizations.of(context)!.loginWithGoogle,
                     onPressed: _handleGoogleLogin,
                     isLoading: _isGoogleLoading,
                   ),
                   const SizedBox(height: 12),
                   PrimaryButton(
-                    text: 'Apple로 시작하기',
+                    text: AppLocalizations.of(context)!.loginWithApple,
                     onPressed: _handleAppleLogin,
                     isLoading: _isAppleLoading,
                   ),
                 ],
               ),
 
-              // 하단: 신뢰 메시지
+              // 하단: 신뢰 메시지 (Text Disabled)
               const Spacer(flex: 3),
               Padding(
                 padding: const EdgeInsets.only(bottom: 32),
                 child: Text(
-                  '강요하지 않아요. 기록은 둘만 봅니다.',
+                  AppLocalizations.of(context)!.privacyMessage,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.secondaryText,
+                        color: AppColors.textDisabled, // #B4ADB0
+                        fontSize: 12,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -93,4 +95,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
