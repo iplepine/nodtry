@@ -133,6 +133,42 @@
         "type": "String"
       }
     }
+  },
+  "tabToday": "Today",
+  "@tabToday": {
+    "description": "Today tab label"
+  },
+  "tabHistory": "History",
+  "@tabHistory": {
+    "description": "History tab label"
+  },
+  "tabUs": "Us",
+  "@tabUs": {
+    "description": "Us tab label"
+  },
+  "historyEmpty": "No history yet",
+  "@historyEmpty": {
+    "description": "Empty state message for history tab"
+  },
+  "usConnectedPeople": "Connected People",
+  "@usConnectedPeople": {
+    "description": "Section title for connected people"
+  },
+  "usManaging": "Managing",
+  "@usManaging": {
+    "description": "Status label for managing someone"
+  },
+  "usEntrusted": "Entrusted",
+  "@usEntrusted": {
+    "description": "Status label for being managed"
+  },
+  "usInviteNew": "Invite New Person",
+  "@usInviteNew": {
+    "description": "Button to invite new person"
+  },
+  "usNoConnections": "No connections yet",
+  "@usNoConnections": {
+    "description": "Empty state message for us tab"
   }
 }
 

@@ -102,4 +102,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String homeContextManaging(String name) {
     return 'Managing $name';
   }
+
+  @override
+  String get tabToday => 'Today';
+
+  @override
+  String get tabHistory => 'History';
+
+  @override
+  String get tabUs => 'Us';
+
+  @override
+  String get historyEmpty => 'No history yet';
+
+  @override
+  String get usConnectedPeople => 'Connected People';
+
+  @override
+  String get usManaging => 'Managing';
+
+  @override
+  String get usEntrusted => 'Entrusted';
+
+  @override
+  String get usInviteNew => 'Invite New Person';
+
+  @override
+  String get usNoConnections => 'No connections yet';
 }

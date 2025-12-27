@@ -271,6 +271,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Managing {name}'**
   String homeContextManaging(String name);
+
+  /// Today tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get tabToday;
+
+  /// History tab label
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get tabHistory;
+
+  /// Us tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Us'**
+  String get tabUs;
+
+  /// Empty state message for history tab
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
+  String get historyEmpty;
+
+  /// Section title for connected people
+  ///
+  /// In en, this message translates to:
+  /// **'Connected People'**
+  String get usConnectedPeople;
+
+  /// Status label for managing someone
+  ///
+  /// In en, this message translates to:
+  /// **'Managing'**
+  String get usManaging;
+
+  /// Status label for being managed
+  ///
+  /// In en, this message translates to:
+  /// **'Entrusted'**
+  String get usEntrusted;
+
+  /// Button to invite new person
+  ///
+  /// In en, this message translates to:
+  /// **'Invite New Person'**
+  String get usInviteNew;
+
+  /// Empty state message for us tab
+  ///
+  /// In en, this message translates to:
+  /// **'No connections yet'**
+  String get usNoConnections;
 }
 
 class _AppLocalizationsDelegate

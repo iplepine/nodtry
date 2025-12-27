@@ -52,6 +52,15 @@
         "type": "String"
       }
     }
-  }
+  },
+  "tabToday": "오늘",
+  "tabHistory": "기록",
+  "tabUs": "우리",
+  "historyEmpty": "아직 기록이 없어요",
+  "usConnectedPeople": "연결된 사람",
+  "usManaging": "관리 중",
+  "usEntrusted": "맡긴 중",
+  "usInviteNew": "새 사람 초대",
+  "usNoConnections": "아직 연결된 사람이 없어요"
 }
 

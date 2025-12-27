@@ -100,4 +100,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String homeContextManaging(String name) {
     return '$name를 관리 중';
   }
+
+  @override
+  String get tabToday => '오늘';
+
+  @override
+  String get tabHistory => '기록';
+
+  @override
+  String get tabUs => '우리';
+
+  @override
+  String get historyEmpty => '아직 기록이 없어요';
+
+  @override
+  String get usConnectedPeople => '연결된 사람';
+
+  @override
+  String get usManaging => '관리 중';
+
+  @override
+  String get usEntrusted => '맡긴 중';
+
+  @override
+  String get usInviteNew => '새 사람 초대';
+
+  @override
+  String get usNoConnections => '아직 연결된 사람이 없어요';
 }
