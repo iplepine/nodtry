@@ -203,8 +203,8 @@ abstract class AppLocalizations {
   /// Message when there's a task to report
   ///
   /// In en, this message translates to:
-  /// **'You have something to do today'**
-  String get homeTodayTask;
+  /// **'You have something to do now'**
+  String get homeNowTask;
 
   /// Button to report completion
   ///
@@ -239,7 +239,7 @@ abstract class AppLocalizations {
   /// Message when there's nothing to do
   ///
   /// In en, this message translates to:
-  /// **'It\'s a quiet day today'**
+  /// **'You can rest for a while now'**
   String get homeQuietDay;
 
   /// Message when report is checked
@@ -272,11 +272,11 @@ abstract class AppLocalizations {
   /// **'Managing {name}'**
   String homeContextManaging(String name);
 
-  /// Today tab label
+  /// Now tab label
   ///
   /// In en, this message translates to:
-  /// **'Today'**
-  String get tabToday;
+  /// **'Now'**
+  String get tabNow;
 
   /// History tab label
   ///
@@ -348,13 +348,37 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'No plan for this month yet'**
-  String get todayNoPlan;
+  String get nowNoPlan;
 
   /// Button to create a new plan
   ///
   /// In en, this message translates to:
   /// **'Create Plan'**
-  String get todayCreatePlan;
+  String get nowCreatePlan;
+
+  /// Message showing time until next action
+  ///
+  /// In en, this message translates to:
+  /// **'Next action in {time}'**
+  String nowNextActionIn(String time);
+
+  /// Message showing days until next schedule
+  ///
+  /// In en, this message translates to:
+  /// **'Next schedule in D-{days}'**
+  String nowNextActionDays(int days);
+
+  /// Quiet state message - rest
+  ///
+  /// In en, this message translates to:
+  /// **'You can rest for a while now'**
+  String get nowQuietRest;
+
+  /// Quiet state message - no action needed
+  ///
+  /// In en, this message translates to:
+  /// **'No need to worry for a while'**
+  String get nowQuietNoAction;
 }
 
 class _AppLocalizationsDelegate

@@ -1,4 +1,4 @@
-/// 홈 화면 Today Card 상태 모델
+/// 홈 화면 Now Card 상태 모델
 enum HomeCardState {
   /// Type A: Action Card (보고 필요)
   reportNeeded,
@@ -9,7 +9,7 @@ enum HomeCardState {
   /// Type C: Waiting Card (확인 대기)
   waitingForCheck,
   
-  /// Type D: Quiet Card (오늘 할 일 없음)
+  /// Type D: Quiet Card (지금 할 일 없음)
   quietDay,
   
   /// Type E: Acknowledged Card (확인 완료)

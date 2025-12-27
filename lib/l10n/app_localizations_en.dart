@@ -62,7 +62,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get waitingForConnection => 'Your partner is reviewing the connection';
 
   @override
-  String get homeTodayTask => 'You have something to do today';
+  String get homeNowTask => 'You have something to do now';
 
   @override
   String get homeDidIt => 'Did it';
@@ -80,7 +80,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeWaitingForCheck => 'Waiting for confirmation';
 
   @override
-  String get homeQuietDay => 'It\'s a quiet day today';
+  String get homeQuietDay => 'You can rest for a while now';
 
   @override
   String get homeChecked => 'Checked';
@@ -104,7 +104,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get tabToday => 'Today';
+  String get tabNow => 'Now';
 
   @override
   String get tabHistory => 'History';
@@ -142,8 +142,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get headerPlanEnded => 'Plan ended';
 
   @override
-  String get todayNoPlan => 'No plan for this month yet';
+  String get nowNoPlan => 'No plan for this month yet';
 
   @override
-  String get todayCreatePlan => 'Create Plan';
+  String get nowCreatePlan => 'Create Plan';
+
+  @override
+  String nowNextActionIn(String time) {
+    return 'Next action in $time';
+  }
+
+  @override
+  String nowNextActionDays(int days) {
+    return 'Next schedule in D-$days';
+  }
+
+  @override
+  String get nowQuietRest => 'You can rest for a while now';
+
+  @override
+  String get nowQuietNoAction => 'No need to worry for a while';
 }

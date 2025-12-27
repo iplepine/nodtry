@@ -68,8 +68,8 @@
   "@waitingForConnection": {
     "description": "Message while waiting for connection"
   },
-  "homeTodayTask": "You have something to do today",
-  "@homeTodayTask": {
+  "homeNowTask": "You have something to do now",
+  "@homeNowTask": {
     "description": "Message when there's a task to report"
   },
   "homeDidIt": "Did it",
@@ -92,7 +92,7 @@
   "@homeWaitingForCheck": {
     "description": "Message while waiting for partner's check"
   },
-  "homeQuietDay": "It's a quiet day today",
+  "homeQuietDay": "You can rest for a while now",
   "@homeQuietDay": {
     "description": "Message when there's nothing to do"
   },
@@ -134,9 +134,9 @@
       }
     }
   },
-  "tabToday": "Today",
-  "@tabToday": {
-    "description": "Today tab label"
+  "tabNow": "Now",
+  "@tabNow": {
+    "description": "Now tab label"
   },
   "tabHistory": "History",
   "@tabHistory": {
@@ -190,13 +190,39 @@
   "@headerPlanEnded": {
     "description": "Message when plan period ended"
   },
-  "todayNoPlan": "No plan for this month yet",
-  "@todayNoPlan": {
+  "nowNoPlan": "No plan for this month yet",
+  "@nowNoPlan": {
     "description": "Message when there's no active plan"
   },
-  "todayCreatePlan": "Create Plan",
-  "@todayCreatePlan": {
+  "nowCreatePlan": "Create Plan",
+  "@nowCreatePlan": {
     "description": "Button to create a new plan"
+  },
+  "nowNextActionIn": "Next action in {time}",
+  "@nowNextActionIn": {
+    "description": "Message showing time until next action",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "nowNextActionDays": "Next schedule in D-{days}",
+  "@nowNextActionDays": {
+    "description": "Message showing days until next schedule",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "nowQuietRest": "You can rest for a while now",
+  "@nowQuietRest": {
+    "description": "Quiet state message - rest"
+  },
+  "nowQuietNoAction": "No need to worry for a while",
+  "@nowQuietNoAction": {
+    "description": "Quiet state message - no action needed"
   }
 }
 

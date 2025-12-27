@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/quiet_header.dart';
+import '../../widgets/time_chip.dart';
 import '../../models/home_state.dart';
+import '../../utils/time_formatter.dart';
 
-/// 오늘 탭 - Today Card 기반 관계 중심 홈
+/// 지금 탭 - Now Card 기반 관계 중심 홈
 /// 
-/// "오늘, 우리 사이에 오고 가야 할 말이 있나?"에만 답한다
-class TodayTab extends StatefulWidget {
-  const TodayTab({super.key});
+/// "지금 이 순간, 가장 먼저 신경 써야 할 건 무엇인가?"에 답한다
+class NowTab extends StatefulWidget {
+  const NowTab({super.key});
 
   @override
-  State<TodayTab> createState() => _TodayTabState();
+  State<NowTab> createState() => _NowTabState();
 }
 
-class _TodayTabState extends State<TodayTab>
+class _NowTabState extends State<NowTab>
     with SingleTickerProviderStateMixin {
   // TODO: 실제 데이터에서 상태를 가져와야 함
   // 실천자 영역
@@ -85,6 +87,12 @@ class _TodayTabState extends State<TodayTab>
 
   Future<void> _loadHomeState() async {
     // TODO: 실제 데이터에서 상태 계산
+    // 스펙: '지금' 탭 카드 시간 선택 규칙
+    // 1. 오늘 미완료 실천 행동
+    // 2. 오늘 확인이 필요한 관리자 행동
+    // 3. 오늘이 모두 완료된 경우, 가장 가까운 미래 행동 (D-1, D-2, 시간 단위)
+    // 4. 아무 행동도 없을 경우 Quiet 상태
+    
     // 임시 테스트 데이터 - 여러 상태를 시뮬레이션
     final possibleStates = <HomeCardState>[
       // 테스트 시나리오 1: 실천자 보고 필요 + 관리자 확인 필요 + 대기 중
@@ -103,9 +111,13 @@ class _TodayTabState extends State<TodayTab>
       // 테스트 시나리오 4: 계획 없음
       // HomeCardState.planNeeded,
       
-      // 테스트 시나리오 5: 조용한 하루
+      // 테스트 시나리오 5: 조용한 하루 (스펙: 모든 조건 만족 시에만 표시)
       // HomeCardState.quietDay,
     ];
+    
+    // TODO: 실제 데이터에서 미래 행동 확인
+    // - 오늘이 모두 완료된 경우, 가장 가까운 미래 행동 계산
+    // - 시간 표현: D-1, D-2 또는 "3시간 남음" 형식
     
     // Step 1: Primary Executor Card 선택
     final primaryExecutorCard = HomeCardStatePriority.selectPrimaryExecutorCard(possibleStates);
@@ -122,6 +134,12 @@ class _TodayTabState extends State<TodayTab>
     // TODO: 실제 데이터에서 관리 대상 이름 가져오기
     // 임시: 테스트용 이름
     final managerPartnerName = managerQuickCard != null ? '민지' : null;
+    
+    // 스펙: Quiet 상태는 아래 조건을 모두 만족할 때만 표시
+    // - 미완료 실천 행동 없음
+    // - 확인 필요 관리자 행동 없음
+    // - 가까운 미래 행동도 없음
+    // TODO: 실제 데이터로 Quiet 상태 조건 확인
     
     if (mounted) {
       setState(() {
@@ -153,6 +171,119 @@ class _TodayTabState extends State<TodayTab>
     // TODO: 계획 생성 플로우 진입
   }
 
+  /// Time Chip 텍스트 가져오기
+  /// 
+  /// 스펙: 시간 표현은 상대적 표현만 사용
+  /// - D-1, D-2 (미래)
+  /// - 3시간 남음, 30분 남음 (미래)
+  /// - 곧 (미래)
+  /// - 3시간 전, 어제 (과거)
+  String? _getTimeChipText(HomeCardState state) {
+    // TODO: 실제 데이터에서 시간 정보 가져오기
+    // 임시: 테스트용
+    switch (state) {
+      case HomeCardState.reportNeeded:
+        // 오늘 미완료 실천 행동 → "지금"
+        return '지금';
+      case HomeCardState.planNeeded:
+        // 계획 없음 → Time Chip 없음
+        return null;
+      case HomeCardState.waitingForCheck:
+        // 확인 대기 중 → 과거 시간 표시 가능
+        // TODO: 실제 보고 시간에서 경과 시간 계산
+        // 예: "2시간 전"
+        return null; // 임시로 null, 실제 데이터 연동 시 계산
+      case HomeCardState.checked:
+        // 확인 완료 → 과거 시간 표시 가능
+        // TODO: 실제 확인 시간에서 경과 시간 계산
+        // 예: "어제"
+        return null; // 임시로 null, 실제 데이터 연동 시 계산
+      default:
+        return null;
+    }
+  }
+
+  /// Time Chip 타입 가져오기
+  TimeChipType? _getTimeChipType(HomeCardState state) {
+    if (_getTimeChipText(state) == null) return null;
+    
+    final text = _getTimeChipText(state)!;
+    if (text == '지금') {
+      return TimeChipType.now;
+    } else if (text == '곧') {
+      return TimeChipType.soon;
+    } else if (text.contains('전') || text == '어제' || text == '방금 전') {
+      // 과거 시간 표현
+      return TimeChipType.past;
+    } else {
+      // D-1, D-2, 3시간 남음 등 (미래)
+      return TimeChipType.upcoming;
+    }
+  }
+
+  /// Manager Quick Card용 Time Chip 텍스트
+  String? _getManagerTimeChipText(HomeCardState state) {
+    // TODO: 실제 데이터에서 시간 정보 가져오기
+    // 관리자 카드는 확인이 필요한 상태이므로 "지금" 또는 시간 정보 표시
+    if (state == HomeCardState.checkNeeded) {
+      // 임시: 테스트용
+      return '지금';
+    }
+    return null;
+  }
+
+  /// Manager Quick Card용 Time Chip 타입
+  TimeChipType? _getManagerTimeChipType(HomeCardState state) {
+    if (_getManagerTimeChipText(state) == null) return null;
+    
+    final text = _getManagerTimeChipText(state)!;
+    if (text == '지금') {
+      return TimeChipType.now;
+    } else if (text == '곧') {
+      return TimeChipType.soon;
+    } else if (text.contains('전') || text == '어제' || text == '방금 전') {
+      return TimeChipType.past;
+    } else {
+      return TimeChipType.upcoming;
+    }
+  }
+
+  /// Secondary Executor Card용 Time Chip 텍스트
+  /// 
+  /// 과거 시간 표현: "2시간 전", "어제" 등
+  String? _getSecondaryTimeChipText(HomeCardState state) {
+    // TODO: 실제 데이터에서 시간 정보 가져오기
+    switch (state) {
+      case HomeCardState.waitingForCheck:
+        // 확인 대기 중 → 보고한 시간부터 경과 시간 표시
+        // TODO: 실제 보고 시간에서 경과 시간 계산
+        // 예: DateTime.now().difference(보고시간)을 TimeFormatter.formatTimePast()로 변환
+        // 임시 테스트 데이터
+        final pastDuration = const Duration(hours: 2);
+        return TimeFormatter.formatTimePast(pastDuration);
+      case HomeCardState.checked:
+        // 확인 완료 → 확인된 시간부터 경과 시간 표시
+        // TODO: 실제 확인 시간에서 경과 시간 계산
+        // 임시 테스트 데이터
+        final pastDuration = const Duration(days: 1);
+        return TimeFormatter.formatTimePast(pastDuration);
+      default:
+        return null;
+    }
+  }
+
+  /// Secondary Executor Card용 Time Chip 타입
+  TimeChipType? _getSecondaryTimeChipType(HomeCardState state) {
+    if (_getSecondaryTimeChipText(state) == null) return null;
+    
+    final text = _getSecondaryTimeChipText(state)!;
+    if (text.contains('전') || text == '어제' || text == '방금 전') {
+      return TimeChipType.past;
+    } else {
+      return TimeChipType.upcoming;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -166,7 +297,7 @@ class _TodayTabState extends State<TodayTab>
           },
         ),
         
-        // Today Card
+        // Now Card
         Expanded(
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -195,6 +326,8 @@ class _TodayTabState extends State<TodayTab>
                           state: _primaryExecutorCard!,
                           onDidIt: _handleDidIt,
                           onCreatePlan: _handleCreatePlan,
+                          timeChipText: _getTimeChipText(_primaryExecutorCard!),
+                          timeChipType: _getTimeChipType(_primaryExecutorCard!),
                         ),
                       ),
                     ),
@@ -207,7 +340,11 @@ class _TodayTabState extends State<TodayTab>
                       padding: const EdgeInsets.only(bottom: 12),
                       child: FadeTransition(
                         opacity: _secondaryFadeAnimation,
-                        child: _SecondaryExecutorCard(state: state),
+                        child: _SecondaryExecutorCard(
+                          state: state,
+                          timeChipText: _getSecondaryTimeChipText(state),
+                          timeChipType: _getSecondaryTimeChipType(state),
+                        ),
                       ),
                     )),
                     const SizedBox(height: 24),
@@ -225,6 +362,8 @@ class _TodayTabState extends State<TodayTab>
                         state: _managerQuickCard!,
                         partnerName: _managerQuickCardPartnerName,
                         onCheckIt: _handleCheckIt,
+                        timeChipText: _getManagerTimeChipText(_managerQuickCard!),
+                        timeChipType: _getManagerTimeChipType(_managerQuickCard!),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -248,11 +387,15 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final HomeCardState state;
   final VoidCallback? onDidIt;
   final VoidCallback? onCreatePlan;
+  final String? timeChipText; // Time Chip 표시 텍스트 (예: "D-1", "3시간 남음")
+  final TimeChipType? timeChipType; // Time Chip 타입
 
   const _PrimaryExecutorCard({
     required this.state,
     this.onDidIt,
     this.onCreatePlan,
+    this.timeChipText,
+    this.timeChipType,
   });
 
   @override
@@ -269,6 +412,19 @@ class _PrimaryExecutorCard extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
+            // Time Chip (카드 상단 우측)
+            if (timeChipText != null && timeChipType != null)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TimeChip(
+                    text: timeChipText!,
+                    type: timeChipType!,
+                  ),
+                ],
+              ),
+            if (timeChipText != null && timeChipType != null)
+              const SizedBox(height: 12),
             _buildMessage(context, l10n),
             const SizedBox(height: 24),
             _buildButton(context, l10n),
@@ -283,10 +439,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
     
     switch (state) {
       case HomeCardState.reportNeeded:
-        message = l10n.homeTodayTask;
+        message = l10n.homeNowTask;
         break;
       case HomeCardState.planNeeded:
-        message = l10n.todayNoPlan;
+        message = l10n.nowNoPlan;
         break;
       default:
         message = '';
@@ -313,7 +469,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
       buttonText = l10n.homeDidIt;
       onPressed = onDidIt;
     } else if (state == HomeCardState.planNeeded) {
-      buttonText = l10n.todayCreatePlan;
+      buttonText = l10n.nowCreatePlan;
       onPressed = onCreatePlan;
     } else {
       return const SizedBox.shrink();
@@ -357,8 +513,14 @@ class _PrimaryExecutorCard extends StatelessWidget {
 /// Secondary Executor Card 위젯 (작은 카드)
 class _SecondaryExecutorCard extends StatelessWidget {
   final HomeCardState state;
+  final String? timeChipText; // Time Chip 표시 텍스트 (예: "2시간 전", "어제")
+  final TimeChipType? timeChipType; // Time Chip 타입
 
-  const _SecondaryExecutorCard({required this.state});
+  const _SecondaryExecutorCard({
+    required this.state,
+    this.timeChipText,
+    this.timeChipType,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -372,7 +534,24 @@ class _SecondaryExecutorCard extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: _buildMessage(context, l10n),
+        child: Column(
+          children: [
+            // Time Chip (상단 우측)
+            if (timeChipText != null && timeChipType != null)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TimeChip(
+                    text: timeChipText!,
+                    type: timeChipType!,
+                  ),
+                ],
+              ),
+            if (timeChipText != null && timeChipType != null)
+              const SizedBox(height: 8),
+            _buildMessage(context, l10n),
+          ],
+        ),
       ),
     );
   }
@@ -388,7 +567,9 @@ class _SecondaryExecutorCard extends StatelessWidget {
         message = '${l10n.homeChecked}\n${l10n.homeThankYou}';
         break;
       case HomeCardState.quietDay:
-        message = l10n.homeQuietDay;
+        // 스펙: Quiet 상태는 "지금은 잠시 쉬어도 돼요" 또는 "당분간 신경 쓸 일은 없어요"
+        // TODO: 실제 데이터에 따라 적절한 메시지 선택
+        message = l10n.nowQuietRest;
         break;
       default:
         message = '';
@@ -410,11 +591,15 @@ class _ManagerQuickCard extends StatelessWidget {
   final HomeCardState state;
   final String? partnerName; // 관리 대상 이름
   final VoidCallback? onCheckIt;
+  final String? timeChipText; // Time Chip 표시 텍스트
+  final TimeChipType? timeChipType; // Time Chip 타입
 
   const _ManagerQuickCard({
     required this.state,
     this.partnerName,
     this.onCheckIt,
+    this.timeChipText,
+    this.timeChipType,
   });
 
   @override
@@ -431,7 +616,7 @@ class _ManagerQuickCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           children: [
-            // 프로필 아이콘과 메시지 (가로 배치)
+            // 프로필 아이콘, 메시지, Time Chip (가로 배치)
             Row(
               children: [
                 if (partnerName != null) ...[
@@ -456,6 +641,14 @@ class _ManagerQuickCard extends StatelessWidget {
                     textAlign: TextAlign.left,
                   ),
                 ),
+                // Time Chip (우측 상단)
+                if (timeChipText != null && timeChipType != null) ...[
+                  const SizedBox(width: 8),
+                  TimeChip(
+                    text: timeChipText!,
+                    type: timeChipType!,
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 12),

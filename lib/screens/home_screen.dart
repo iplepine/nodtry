@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
-import 'tabs/today_tab.dart';
+import 'tabs/now_tab.dart';
 import 'tabs/history_tab.dart';
 import 'tabs/us_tab.dart';
 
 /// 홈 화면 - 하단 탭 구조
-/// 
-/// 3개 탭: 오늘 · 기록 · 우리
+///
+/// 3개 탭: 지금 · 기록 · 우리
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBody: true,
@@ -56,14 +56,12 @@ class _HomeScreenState extends State<HomeScreen> {
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
-            unselectedLabelStyle: const TextStyle(
-              fontSize: 12,
-            ),
+            unselectedLabelStyle: const TextStyle(fontSize: 12),
             items: [
               BottomNavigationBarItem(
                 icon: const Icon(Icons.today_outlined),
                 activeIcon: const Icon(Icons.today),
-                label: l10n.tabToday,
+                label: l10n.tabNow,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.history_outlined),
@@ -85,14 +83,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCurrentTab() {
     switch (_currentIndex) {
       case 0:
-        return const TodayTab();
+        return const NowTab();
       case 1:
         return const HistoryTab();
       case 2:
         return const UsTab();
       default:
-        return const TodayTab();
+        return const NowTab();
     }
   }
 }
-

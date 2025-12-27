@@ -17,13 +17,13 @@
   "enterCodeBelow": "아래에 코드를 입력해주세요",
   "sendConnectionRequest": "연결 요청 보내기",
   "waitingForConnection": "상대가 연결을 확인 중이에요",
-  "homeTodayTask": "오늘 할 일이 있어요",
+  "homeNowTask": "지금 할 일이 있어요",
   "homeDidIt": "했어",
   "homeReceivedMessage": "전달받은 말이 있어요",
   "homeCheckIt": "확인하기",
   "homeSentWaiting": "전달했어요",
   "homeWaitingForCheck": "확인을 기다리고 있어요",
-  "homeQuietDay": "오늘은 조용한 하루예요",
+  "homeQuietDay": "지금은 잠시 쉬어도 돼요",
   "homeChecked": "확인됐어요",
   "homeThankYou": "고마워요",
   "homeContextWeek": "{total}주 중 · {week}주차",
@@ -53,7 +53,7 @@
       }
     }
   },
-  "tabToday": "오늘",
+  "tabNow": "지금",
   "tabHistory": "기록",
   "tabUs": "우리",
   "historyEmpty": "아직 기록이 없어요",
@@ -75,7 +75,25 @@
   },
   "headerNoPlan": "아직 계획이 없어요",
   "headerPlanEnded": "4주가 끝났어요",
-  "todayNoPlan": "이번 달 계획이 아직 없어요",
-  "todayCreatePlan": "계획 짜기"
+  "nowNoPlan": "이번 달 계획이 아직 없어요",
+  "nowCreatePlan": "계획 짜기",
+  "nowNextActionIn": "다음 행동까지 {time} 남았어요",
+  "@nowNextActionIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "nowNextActionDays": "다음 일정까지 D-{days}예요",
+  "@nowNextActionDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "nowQuietRest": "지금은 잠시 쉬어도 돼요",
+  "nowQuietNoAction": "당분간 신경 쓸 일은 없어요"
 }
 

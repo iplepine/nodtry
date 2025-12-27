@@ -60,7 +60,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get waitingForConnection => '상대가 연결을 확인 중이에요';
 
   @override
-  String get homeTodayTask => '오늘 할 일이 있어요';
+  String get homeNowTask => '지금 할 일이 있어요';
 
   @override
   String get homeDidIt => '했어';
@@ -78,7 +78,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeWaitingForCheck => '확인을 기다리고 있어요';
 
   @override
-  String get homeQuietDay => '오늘은 조용한 하루예요';
+  String get homeQuietDay => '지금은 잠시 쉬어도 돼요';
 
   @override
   String get homeChecked => '확인됐어요';
@@ -102,7 +102,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get tabToday => '오늘';
+  String get tabNow => '지금';
 
   @override
   String get tabHistory => '기록';
@@ -140,8 +140,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get headerPlanEnded => '4주가 끝났어요';
 
   @override
-  String get todayNoPlan => '이번 달 계획이 아직 없어요';
+  String get nowNoPlan => '이번 달 계획이 아직 없어요';
 
   @override
-  String get todayCreatePlan => '계획 짜기';
+  String get nowCreatePlan => '계획 짜기';
+
+  @override
+  String nowNextActionIn(String time) {
+    return '다음 행동까지 $time 남았어요';
+  }
+
+  @override
+  String nowNextActionDays(int days) {
+    return '다음 일정까지 D-$days예요';
+  }
+
+  @override
+  String get nowQuietRest => '지금은 잠시 쉬어도 돼요';
+
+  @override
+  String get nowQuietNoAction => '당분간 신경 쓸 일은 없어요';
 }
