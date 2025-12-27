@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/quiet_header.dart';
 
 /// 기록 탭 - 우리가 나눈 말의 흔적을 보는 곳
 /// 
@@ -15,9 +16,25 @@ class HistoryTab extends StatelessWidget {
     // TODO: 실제 데이터에서 기록 가져오기
     final historyItems = <_HistoryItem>[];
     
-    return historyItems.isEmpty
-        ? _buildEmptyState(context, l10n)
-        : _buildHistoryList(context, l10n, historyItems);
+    return Column(
+      children: [
+        // 헤더
+        QuietHeader(
+          partnerName: null, // TODO: 실제 데이터에서 가져오기
+          periodState: HeaderPeriodState.noPlan, // TODO: 실제 상태 확인
+          onSettingsTap: () {
+            // TODO: 우리 탭으로 이동
+          },
+        ),
+        
+        // 기록 리스트
+        Expanded(
+          child: historyItems.isEmpty
+              ? _buildEmptyState(context, l10n)
+              : _buildHistoryList(context, l10n, historyItems),
+        ),
+      ],
+    );
   }
 
   Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {

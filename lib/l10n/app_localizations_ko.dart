@@ -127,4 +127,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get usNoConnections => '아직 연결된 사람이 없어요';
+
+  @override
+  String headerWeekProgress(int week, int total) {
+    return '$total주 중 · $week주차';
+  }
+
+  @override
+  String get headerNoPlan => '아직 계획이 없어요';
+
+  @override
+  String get headerPlanEnded => '4주가 끝났어요';
 }

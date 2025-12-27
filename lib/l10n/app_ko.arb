@@ -61,6 +61,19 @@
   "usManaging": "관리 중",
   "usEntrusted": "맡긴 중",
   "usInviteNew": "새 사람 초대",
-  "usNoConnections": "아직 연결된 사람이 없어요"
+  "usNoConnections": "아직 연결된 사람이 없어요",
+  "headerWeekProgress": "{total}주 중 · {week}주차",
+  "@headerWeekProgress": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "headerNoPlan": "아직 계획이 없어요",
+  "headerPlanEnded": "4주가 끝났어요"
 }
 

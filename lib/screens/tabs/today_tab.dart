@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/quiet_header.dart';
 import '../../models/home_state.dart';
 
 /// 오늘 탭 - Today Card 기반 관계 중심 홈
@@ -53,27 +54,44 @@ class _TodayTabState extends State<TodayTab> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            
-            // Today Card
-            _TodayCard(
-              state: _currentState,
-              onDidIt: _handleDidIt,
-              onCheckIt: _handleCheckIt,
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // 보조 정보 (Context Footer)
-            _ContextFooter(),
-          ],
+    return Column(
+      children: [
+        // 헤더
+        QuietHeader(
+          partnerName: null, // TODO: 실제 데이터에서 가져오기
+          periodState: HeaderPeriodState.noPlan, // TODO: 실제 상태 확인
+          onSettingsTap: () {
+            // TODO: 우리 탭으로 이동
+          },
         ),
-      ),
+        
+        // Today Card
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 24),
+                  
+                  // Today Card
+                  _TodayCard(
+                    state: _currentState,
+                    onDidIt: _handleDidIt,
+                    onCheckIt: _handleCheckIt,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // 보조 정보 (Context Footer)
+                  _ContextFooter(),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -325,6 +325,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No connections yet'**
   String get usNoConnections;
+
+  /// Week progress in header
+  ///
+  /// In en, this message translates to:
+  /// **'{week} of {total} weeks'**
+  String headerWeekProgress(int week, int total);
+
+  /// Message when there's no plan
+  ///
+  /// In en, this message translates to:
+  /// **'No plan yet'**
+  String get headerNoPlan;
+
+  /// Message when plan period ended
+  ///
+  /// In en, this message translates to:
+  /// **'Plan ended'**
+  String get headerPlanEnded;
 }
 
 class _AppLocalizationsDelegate

@@ -129,4 +129,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usNoConnections => 'No connections yet';
+
+  @override
+  String headerWeekProgress(int week, int total) {
+    return '$week of $total weeks';
+  }
+
+  @override
+  String get headerNoPlan => 'No plan yet';
+
+  @override
+  String get headerPlanEnded => 'Plan ended';
 }

@@ -169,6 +169,26 @@
   "usNoConnections": "No connections yet",
   "@usNoConnections": {
     "description": "Empty state message for us tab"
+  },
+  "headerWeekProgress": "{week} of {total} weeks",
+  "@headerWeekProgress": {
+    "description": "Week progress in header",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "headerNoPlan": "No plan yet",
+  "@headerNoPlan": {
+    "description": "Message when there's no plan"
+  },
+  "headerPlanEnded": "Plan ended",
+  "@headerPlanEnded": {
+    "description": "Message when plan period ended"
   }
 }
 

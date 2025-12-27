@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/quiet_header.dart';
 
 /// 우리 탭 - 사람과 관계를 관리하는 공간
 /// 
@@ -16,39 +17,56 @@ class UsTab extends StatelessWidget {
     // TODO: 실제 데이터에서 연결된 사람 목록 가져오기
     final connectedPeople = <_ConnectedPerson>[];
     
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 24),
-          
-          // 연결된 사람 목록
-          if (connectedPeople.isEmpty)
-            _buildEmptyState(context, l10n)
-          else ...[
-            Text(
-              l10n.usConnectedPeople,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
+    return Column(
+      children: [
+        // 헤더
+        QuietHeader(
+          partnerName: null, // TODO: 실제 데이터에서 가져오기
+          periodState: HeaderPeriodState.noPlan, // TODO: 실제 상태 확인
+          onSettingsTap: () {
+            // TODO: 우리 탭의 설정 섹션으로 스크롤 또는 이동
+          },
+        ),
+        
+        // 내용
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 24),
+                
+                // 연결된 사람 목록
+                if (connectedPeople.isEmpty)
+                  _buildEmptyState(context, l10n)
+                else ...[
+                  Text(
+                    l10n.usConnectedPeople,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
+                  const SizedBox(height: 16),
+                  ...connectedPeople.map((person) => _PersonCard(person: person)),
+                ],
+                
+                const SizedBox(height: 32),
+                
+                // 새 사람 초대 버튼
+                PrimaryButton(
+                  text: l10n.usInviteNew,
+                  onPressed: () {
+                    // TODO: 초대 화면으로 이동
+                  },
+                ),
+                const SizedBox(height: 24),
+              ],
             ),
-            const SizedBox(height: 16),
-            ...connectedPeople.map((person) => _PersonCard(person: person)),
-          ],
-          
-          const SizedBox(height: 32),
-          
-          // 새 사람 초대 버튼
-          PrimaryButton(
-            text: l10n.usInviteNew,
-            onPressed: () {
-              // TODO: 초대 화면으로 이동
-            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
