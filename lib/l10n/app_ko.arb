@@ -74,6 +74,8 @@
     }
   },
   "headerNoPlan": "아직 계획이 없어요",
-  "headerPlanEnded": "4주가 끝났어요"
+  "headerPlanEnded": "4주가 끝났어요",
+  "todayNoPlan": "이번 달 계획이 아직 없어요",
+  "todayCreatePlan": "계획 짜기"
 }
 

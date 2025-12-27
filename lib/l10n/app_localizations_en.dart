@@ -140,4 +140,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get headerPlanEnded => 'Plan ended';
+
+  @override
+  String get todayNoPlan => 'No plan for this month yet';
+
+  @override
+  String get todayCreatePlan => 'Create Plan';
 }

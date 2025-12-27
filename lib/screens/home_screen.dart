@@ -27,43 +27,56 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: true,
       extendBodyBehindAppBar: false,
       body: _buildCurrentTab(),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textDisabled,
-        selectedLabelStyle: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 12,
-        ),
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.today_outlined),
-            activeIcon: const Icon(Icons.today),
-            label: l10n.tabToday,
+        child: SafeArea(
+          top: false,
+          child: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: AppColors.textDisabled,
+            selectedLabelStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 12,
+            ),
+            items: [
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.today_outlined),
+                activeIcon: const Icon(Icons.today),
+                label: l10n.tabToday,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.history_outlined),
+                activeIcon: const Icon(Icons.history),
+                label: l10n.tabHistory,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.favorite_outline),
+                activeIcon: const Icon(Icons.favorite),
+                label: l10n.tabUs,
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.history_outlined),
-            activeIcon: const Icon(Icons.history),
-            label: l10n.tabHistory,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.favorite_outline),
-            activeIcon: const Icon(Icons.favorite),
-            label: l10n.tabUs,
-          ),
-        ],
         ),
       ),
     );

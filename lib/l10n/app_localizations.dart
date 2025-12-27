@@ -343,6 +343,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plan ended'**
   String get headerPlanEnded;
+
+  /// Message when there's no active plan
+  ///
+  /// In en, this message translates to:
+  /// **'No plan for this month yet'**
+  String get todayNoPlan;
+
+  /// Button to create a new plan
+  ///
+  /// In en, this message translates to:
+  /// **'Create Plan'**
+  String get todayCreatePlan;
 }
 
 class _AppLocalizationsDelegate

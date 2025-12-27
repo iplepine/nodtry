@@ -138,4 +138,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get headerPlanEnded => '4주가 끝났어요';
+
+  @override
+  String get todayNoPlan => '이번 달 계획이 아직 없어요';
+
+  @override
+  String get todayCreatePlan => '계획 짜기';
 }

@@ -31,8 +31,15 @@ class UsTab extends StatelessWidget {
         // 내용
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.only(
+              left: 24,
+              right: 24,
+              top: 24,
+              bottom: MediaQuery.of(context).padding.bottom + 80, // 하단 탭 높이 + 안전 영역
+            ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 24),

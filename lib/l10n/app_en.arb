@@ -189,6 +189,14 @@
   "headerPlanEnded": "Plan ended",
   "@headerPlanEnded": {
     "description": "Message when plan period ended"
+  },
+  "todayNoPlan": "No plan for this month yet",
+  "@todayNoPlan": {
+    "description": "Message when there's no active plan"
+  },
+  "todayCreatePlan": "Create Plan",
+  "@todayCreatePlan": {
+    "description": "Button to create a new plan"
   }
 }
 
