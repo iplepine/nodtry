@@ -127,6 +127,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We don\'t push. Your records are private between you two.'**
   String get privacyMessage;
+
+  /// Headline on connect screen
+  ///
+  /// In en, this message translates to:
+  /// **'Want to entrust this month to someone?'**
+  String get connectHeadline;
+
+  /// Subtitle on connect screen
+  ///
+  /// In en, this message translates to:
+  /// **'You make the plan, and your partner manages it.'**
+  String get connectSubtitle;
+
+  /// Button to create invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Create Invite Code'**
+  String get createInviteCode;
+
+  /// Button to enter invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Invite Code'**
+  String get enterInviteCode;
+
+  /// Label for invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Code'**
+  String get inviteCode;
+
+  /// Button to copy code
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyCode;
+
+  /// Button to share code
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareCode;
+
+  /// Message when code is copied
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied'**
+  String get codeCopied;
+
+  /// Message below invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Share this code with your partner'**
+  String get codeShareMessage;
+
+  /// Instruction to enter code
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code below'**
+  String get enterCodeBelow;
+
+  /// Button to send connection request
+  ///
+  /// In en, this message translates to:
+  /// **'Send Connection Request'**
+  String get sendConnectionRequest;
+
+  /// Message while waiting for connection
+  ///
+  /// In en, this message translates to:
+  /// **'Your partner is reviewing the connection'**
+  String get waitingForConnection;
 }
 
 class _AppLocalizationsDelegate

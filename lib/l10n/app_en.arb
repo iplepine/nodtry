@@ -19,6 +19,54 @@
   "privacyMessage": "We don't push. Your records are private between you two.",
   "@privacyMessage": {
     "description": "Privacy message shown at bottom of login screen"
+  },
+  "connectHeadline": "Want to entrust this month to someone?",
+  "@connectHeadline": {
+    "description": "Headline on connect screen"
+  },
+  "connectSubtitle": "You make the plan, and your partner manages it.",
+  "@connectSubtitle": {
+    "description": "Subtitle on connect screen"
+  },
+  "createInviteCode": "Create Invite Code",
+  "@createInviteCode": {
+    "description": "Button to create invite code"
+  },
+  "enterInviteCode": "Enter Invite Code",
+  "@enterInviteCode": {
+    "description": "Button to enter invite code"
+  },
+  "inviteCode": "Invite Code",
+  "@inviteCode": {
+    "description": "Label for invite code"
+  },
+  "copyCode": "Copy",
+  "@copyCode": {
+    "description": "Button to copy code"
+  },
+  "shareCode": "Share",
+  "@shareCode": {
+    "description": "Button to share code"
+  },
+  "codeCopied": "Code copied",
+  "@codeCopied": {
+    "description": "Message when code is copied"
+  },
+  "codeShareMessage": "Share this code with your partner",
+  "@codeShareMessage": {
+    "description": "Message below invite code"
+  },
+  "enterCodeBelow": "Enter the code below",
+  "@enterCodeBelow": {
+    "description": "Instruction to enter code"
+  },
+  "sendConnectionRequest": "Send Connection Request",
+  "@sendConnectionRequest": {
+    "description": "Button to send connection request"
+  },
+  "waitingForConnection": "Your partner is reviewing the connection",
+  "@waitingForConnection": {
+    "description": "Message while waiting for connection"
   }
 }
 

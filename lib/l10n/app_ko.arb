@@ -4,6 +4,18 @@
   "splashTagline": "혼자서 지키지 못했던 계획을, 함께",
   "loginWithGoogle": "Google로 시작하기",
   "loginWithApple": "Apple로 시작하기",
-  "privacyMessage": "강요하지 않아요. 기록은 둘만 봅니다."
+  "privacyMessage": "강요하지 않아요. 기록은 둘만 봅니다.",
+  "connectHeadline": "이번 달, 누군가에게 맡겨볼래요?",
+  "connectSubtitle": "계획은 내가 세우고, 관리는 상대가 해주는 방식이에요.",
+  "createInviteCode": "초대 코드 만들기",
+  "enterInviteCode": "초대 코드 입력",
+  "inviteCode": "초대 코드",
+  "copyCode": "코드 복사",
+  "shareCode": "공유하기",
+  "codeCopied": "코드가 복사되었어요",
+  "codeShareMessage": "이 코드를 상대에게 공유해주세요",
+  "enterCodeBelow": "아래에 코드를 입력해주세요",
+  "sendConnectionRequest": "연결 요청 보내기",
+  "waitingForConnection": "상대가 연결을 확인 중이에요"
 }
 
