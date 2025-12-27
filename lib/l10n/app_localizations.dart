@@ -199,6 +199,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your partner is reviewing the connection'**
   String get waitingForConnection;
+
+  /// Message when there's a task to report
+  ///
+  /// In en, this message translates to:
+  /// **'You have something to do today'**
+  String get homeTodayTask;
+
+  /// Button to report completion
+  ///
+  /// In en, this message translates to:
+  /// **'Did it'**
+  String get homeDidIt;
+
+  /// Message when there's a verification needed
+  ///
+  /// In en, this message translates to:
+  /// **'You have a message'**
+  String get homeReceivedMessage;
+
+  /// Button to check verification
+  ///
+  /// In en, this message translates to:
+  /// **'Check it'**
+  String get homeCheckIt;
+
+  /// Message when report is sent and waiting
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get homeSentWaiting;
+
+  /// Message while waiting for partner's check
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for confirmation'**
+  String get homeWaitingForCheck;
+
+  /// Message when there's nothing to do
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a quiet day today'**
+  String get homeQuietDay;
+
+  /// Message when report is checked
+  ///
+  /// In en, this message translates to:
+  /// **'Checked'**
+  String get homeChecked;
+
+  /// Thank you message after check
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you'**
+  String get homeThankYou;
+
+  /// Week context information
+  ///
+  /// In en, this message translates to:
+  /// **'{week} of {total} weeks'**
+  String homeContextWeek(int week, int total);
+
+  /// Context about who is managing
+  ///
+  /// In en, this message translates to:
+  /// **'Entrusted to {name}'**
+  String homeContextEntrusted(String name);
+
+  /// Context about who is being managed
+  ///
+  /// In en, this message translates to:
+  /// **'Managing {name}'**
+  String homeContextManaging(String name);
 }
 
 class _AppLocalizationsDelegate

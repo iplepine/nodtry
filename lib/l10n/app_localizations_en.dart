@@ -60,4 +60,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get waitingForConnection => 'Your partner is reviewing the connection';
+
+  @override
+  String get homeTodayTask => 'You have something to do today';
+
+  @override
+  String get homeDidIt => 'Did it';
+
+  @override
+  String get homeReceivedMessage => 'You have a message';
+
+  @override
+  String get homeCheckIt => 'Check it';
+
+  @override
+  String get homeSentWaiting => 'Sent';
+
+  @override
+  String get homeWaitingForCheck => 'Waiting for confirmation';
+
+  @override
+  String get homeQuietDay => 'It\'s a quiet day today';
+
+  @override
+  String get homeChecked => 'Checked';
+
+  @override
+  String get homeThankYou => 'Thank you';
+
+  @override
+  String homeContextWeek(int week, int total) {
+    return '$week of $total weeks';
+  }
+
+  @override
+  String homeContextEntrusted(String name) {
+    return 'Entrusted to $name';
+  }
+
+  @override
+  String homeContextManaging(String name) {
+    return 'Managing $name';
+  }
 }

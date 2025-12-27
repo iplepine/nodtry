@@ -58,4 +58,46 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get waitingForConnection => '상대가 연결을 확인 중이에요';
+
+  @override
+  String get homeTodayTask => '오늘 할 일이 있어요';
+
+  @override
+  String get homeDidIt => '했어';
+
+  @override
+  String get homeReceivedMessage => '전달받은 말이 있어요';
+
+  @override
+  String get homeCheckIt => '확인하기';
+
+  @override
+  String get homeSentWaiting => '전달했어요';
+
+  @override
+  String get homeWaitingForCheck => '확인을 기다리고 있어요';
+
+  @override
+  String get homeQuietDay => '오늘은 조용한 하루예요';
+
+  @override
+  String get homeChecked => '확인됐어요';
+
+  @override
+  String get homeThankYou => '고마워요';
+
+  @override
+  String homeContextWeek(int week, int total) {
+    return '$total주 중 · $week주차';
+  }
+
+  @override
+  String homeContextEntrusted(String name) {
+    return '$name에게 맡긴 중';
+  }
+
+  @override
+  String homeContextManaging(String name) {
+    return '$name를 관리 중';
+  }
 }

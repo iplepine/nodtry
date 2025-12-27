@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
+import 'home_screen.dart';
 
 enum ConnectState {
   initial, // 초기 상태 - 코드 생성/입력 선택
@@ -93,8 +94,23 @@ class _ConnectScreenState extends State<ConnectScreen> {
         setState(() {
           _state = ConnectState.waiting;
         });
+        
+        // 임시: 연결 완료 시뮬레이션 (3초 후 홈 화면으로 이동)
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            _navigateToHome();
+          }
+        });
       }
     });
+  }
+
+  void _navigateToHome() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const HomeScreen(),
+      ),
+    );
   }
 
   void _connectManually() {
@@ -132,6 +148,9 @@ class _ConnectScreenState extends State<ConnectScreen> {
               
               // 연결 대기 중
               if (_state == ConnectState.waiting) _buildWaitingState(),
+              
+              // 연결 완료 (임시: 테스트용)
+              if (_state == ConnectState.connected) _buildConnectedState(),
               
               const SizedBox(height: 40),
             ],
@@ -356,6 +375,38 @@ class _ConnectScreenState extends State<ConnectScreen> {
                   color: AppColors.textPrimary,
                 ),
             textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConnectedState() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.check_circle,
+            size: 48,
+            color: AppColors.primary,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Connected!',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          PrimaryButton(
+            text: 'Go to Home',
+            onPressed: _navigateToHome,
           ),
         ],
       ),

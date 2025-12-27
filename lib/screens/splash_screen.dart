@@ -3,6 +3,7 @@ import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
 import 'connect_screen.dart';
+import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -124,6 +125,17 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _navigateToNext() {
     // TODO: 커플 연결 여부 확인 후 적절한 화면으로 이동
+    // 임시: 연결되어 있으면 홈 화면으로, 아니면 Connect 화면으로
+    // 실제로는 인증 상태와 연결 상태를 확인해야 함
+    
+    // 임시 테스트용: 홈 화면으로 바로 이동
+    // Navigator.of(context).pushReplacement(
+    //   MaterialPageRoute(
+    //     builder: (context) => const HomeScreen(),
+    //   ),
+    // );
+    
+    // 실제: Connect 화면으로 이동
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const ConnectScreen(),
@@ -205,6 +217,32 @@ class _SplashScreenState extends State<SplashScreen>
                         text: AppLocalizations.of(context)!.loginWithApple,
                         onPressed: _handleAppleLogin,
                         isLoading: _isAppleLoading,
+                      ),
+                      const SizedBox(height: 24),
+                      // 임시: 홈 화면으로 바로 이동 (개발/테스트용)
+                      OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => const HomeScreen(),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.textSecondary,
+                          side: BorderSide(color: AppColors.divider),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          '🏠 홈으로 (임시)',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ],
                   ),

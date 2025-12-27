@@ -67,6 +67,72 @@
   "waitingForConnection": "Your partner is reviewing the connection",
   "@waitingForConnection": {
     "description": "Message while waiting for connection"
+  },
+  "homeTodayTask": "You have something to do today",
+  "@homeTodayTask": {
+    "description": "Message when there's a task to report"
+  },
+  "homeDidIt": "Did it",
+  "@homeDidIt": {
+    "description": "Button to report completion"
+  },
+  "homeReceivedMessage": "You have a message",
+  "@homeReceivedMessage": {
+    "description": "Message when there's a verification needed"
+  },
+  "homeCheckIt": "Check it",
+  "@homeCheckIt": {
+    "description": "Button to check verification"
+  },
+  "homeSentWaiting": "Sent",
+  "@homeSentWaiting": {
+    "description": "Message when report is sent and waiting"
+  },
+  "homeWaitingForCheck": "Waiting for confirmation",
+  "@homeWaitingForCheck": {
+    "description": "Message while waiting for partner's check"
+  },
+  "homeQuietDay": "It's a quiet day today",
+  "@homeQuietDay": {
+    "description": "Message when there's nothing to do"
+  },
+  "homeChecked": "Checked",
+  "@homeChecked": {
+    "description": "Message when report is checked"
+  },
+  "homeThankYou": "Thank you",
+  "@homeThankYou": {
+    "description": "Thank you message after check"
+  },
+  "homeContextWeek": "{week} of {total} weeks",
+  "@homeContextWeek": {
+    "description": "Week context information",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeContextEntrusted": "Entrusted to {name}",
+  "@homeContextEntrusted": {
+    "description": "Context about who is managing",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeContextManaging": "Managing {name}",
+  "@homeContextManaging": {
+    "description": "Context about who is being managed",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }
 
