@@ -24,8 +24,12 @@ class _HomeScreenState extends State<HomeScreen> {
     
     return Scaffold(
       backgroundColor: AppColors.background,
+      extendBody: true,
+      extendBodyBehindAppBar: false,
       body: _buildCurrentTab(),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
@@ -60,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: l10n.tabUs,
           ),
         ],
+        ),
       ),
     );
   }

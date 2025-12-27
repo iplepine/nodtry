@@ -8,12 +8,19 @@ import 'theme/app_theme.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 상태바 스타일 설정 (iOS는 자동으로 처리됨)
+  // Edge-to-edge를 위한 시스템 UI 오버레이 설정
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
+  );
+  
+  // Edge-to-edge 활성화
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
   );
 
   runApp(const OnMyBehalfApp());

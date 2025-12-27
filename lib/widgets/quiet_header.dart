@@ -28,26 +28,31 @@ class QuietHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        child: Row(
-          children: [
-            // 좌측: 관계 정보
-            Expanded(
-              child: _buildRelationshipInfo(context),
-            ),
-            
-            // 중앙: 기간 정보
-            Expanded(
-              child: _buildPeriodInfo(context),
-            ),
-            
-            // 우측: 설정
-            _buildSettingsButton(context),
-          ],
-        ),
+    // Edge-to-edge: 상태바 영역까지 확장
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: statusBarHeight + 12,
+        bottom: 12,
+      ),
+      child: Row(
+        children: [
+          // 좌측: 관계 정보
+          Expanded(
+            child: _buildRelationshipInfo(context),
+          ),
+          
+          // 중앙: 기간 정보
+          Expanded(
+            child: _buildPeriodInfo(context),
+          ),
+          
+          // 우측: 설정
+          _buildSettingsButton(context),
+        ],
       ),
     );
   }
