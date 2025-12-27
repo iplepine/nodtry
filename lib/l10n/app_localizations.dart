@@ -125,7 +125,7 @@ abstract class AppLocalizations {
   /// Privacy message shown at bottom of login screen
   ///
   /// In en, this message translates to:
-  /// **'We don\'t push. Your records are private between you two.'**
+  /// **'We don\'t push.\nYour records are private between you two.'**
   String get privacyMessage;
 
   /// Headline on connect screen

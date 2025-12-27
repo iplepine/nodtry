@@ -23,17 +23,23 @@ class AppColors {
   }
 
   // ============================================
-  // Theme A: Smoky Plum × Warm Stone
+  // Theme A: Velvet Wine Plum × Dark Stone
+  // "집중하게 만드는 관리자 색"
   // ============================================
-  static const Color _smokyPlumBackground = Color(0xFFF4F1EE); // Warm Stone
-  static const Color _smokyPlumSurface = Color(0xFFE8E3DE); // Soft Stone
-  static const Color _smokyPlumPrimary = Color(0xFF6F5A6E); // Smoky Plum
-  static const Color _smokyPlumPrimaryPressed = Color(0xFF5A4658); // Deep Plum
-  static const Color _smokyPlumSecondary = Color(0xFFCFC9C4); // Pale Stone
-  static const Color _smokyPlumDivider = Color(0xFFDED8D2); // Stone Line
-  static const Color _smokyPlumTextPrimary = Color(0xFF2F2A2C);
-  static const Color _smokyPlumTextSecondary = Color(0xFF7A7377);
-  static const Color _smokyPlumTextDisabled = Color(0xFFB4ADB0);
+  static const Color _smokyPlumBackground = Color(0xFFEEEAE6); // Dark Warm Stone
+  static const Color _smokyPlumSurface = Color(0xFFDFD9D4); // Soft Dark Stone
+  static const Color _smokyPlumPrimary = Color(0xFF552A3E); // Velvet Wine Plum
+  static const Color _smokyPlumPrimaryPressed = Color(0xFF462232); // Deep Velvet Wine
+  static const Color _smokyPlumPrimarySoft = Color(0xFF6E4156); // Muted Wine Plum (≤5%)
+  static const Color _smokyPlumSecondary = Color(0xFFC9C1BB); // Secondary
+  static const Color _smokyPlumOutline = Color(0xFFCCC4BE); // Outline
+  static const Color _smokyPlumDivider = Color(0xFFD2CBC6); // Stone Line
+  static const Color _smokyPlumDisabled = Color(0xFFB5ADA8); // Disabled
+  static const Color _smokyPlumTextPrimary = Color(0xFF201A1D);
+  static const Color _smokyPlumTextSecondary = Color(0xFF6E6469);
+  static const Color _smokyPlumTextDisabled = Color(0xFFA29A9E);
+  static const Color _smokyPlumAccentWine = Color(0xFF6A1F2B); // Accent Wine (≤5%)
+  static const Color _smokyPlumAccentInkViolet = Color(0xFF3A2A46); // Accent Ink Violet (포커스/전환, ≤400ms)
 
   // ============================================
   // Theme B: Deep Olive × Sand
@@ -97,6 +103,24 @@ class AppColors {
     }
   }
 
+  static Color get outline {
+    switch (_currentTheme) {
+      case AppThemeType.smokyPlum:
+        return _smokyPlumOutline;
+      case AppThemeType.deepOlive:
+        return _deepOliveDivider; // Deep Olive에는 별도 outline 없음
+    }
+  }
+
+  static Color get disabled {
+    switch (_currentTheme) {
+      case AppThemeType.smokyPlum:
+        return _smokyPlumDisabled;
+      case AppThemeType.deepOlive:
+        return _deepOliveTextDisabled; // Deep Olive에는 별도 disabled 없음
+    }
+  }
+
   static Color get divider {
     switch (_currentTheme) {
       case AppThemeType.smokyPlum:
@@ -134,6 +158,40 @@ class AppColors {
         return _smokyPlumTextDisabled;
       case AppThemeType.deepOlive:
         return _deepOliveTextDisabled;
+    }
+  }
+
+  // ============================================
+  // Accent Colors (Theme A only)
+  // ============================================
+  
+  /// Accent Wine - 아이콘·선택 상태 (≤5%)
+  static Color get accentWine {
+    switch (_currentTheme) {
+      case AppThemeType.smokyPlum:
+        return _smokyPlumAccentWine;
+      case AppThemeType.deepOlive:
+        return _deepOlivePrimary; // Deep Olive에는 accent 없음
+    }
+  }
+
+  /// Accent Ink Violet - 포커스/전환 순간 (≤400ms)
+  static Color get accentInkViolet {
+    switch (_currentTheme) {
+      case AppThemeType.smokyPlum:
+        return _smokyPlumAccentInkViolet;
+      case AppThemeType.deepOlive:
+        return _deepOlivePrimary; // Deep Olive에는 accent 없음
+    }
+  }
+
+  /// Primary Soft - 배지·포커스 (제한적, ≤5%)
+  static Color get primarySoft {
+    switch (_currentTheme) {
+      case AppThemeType.smokyPlum:
+        return _smokyPlumPrimarySoft;
+      case AppThemeType.deepOlive:
+        return _deepOlivePrimary; // Deep Olive에는 primarySoft 없음
     }
   }
 

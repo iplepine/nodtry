@@ -22,7 +22,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyMessage =>
-      'We don\'t push. Your records are private between you two.';
+      'We don\'t push.\nYour records are private between you two.';
 
   @override
   String get connectHeadline => 'Want to entrust this month to someone?';
