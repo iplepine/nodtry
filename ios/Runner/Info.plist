@@ -62,5 +62,12 @@
 		<string>Mind Gardener requires access to your camera to take a profile picture.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>fetch</string>
+			<string>remote-notification</string>
+		</array>
+		<key>NSUserNotificationsUsageDescription</key>
+		<string>We need to send you notifications to remind you of your planned activities.</string>
 	</dict>
 </plist>

@@ -38,6 +38,11 @@
     - `title` (string)
     - `days` (array of int): [1, 3, 5] (월, 수, 금)
     - `count` (int): 주 N회
+    - `notificationTime` (map?): 알림 설정 (Optional)
+      - `type` (string): 'preset' | 'custom'
+      - `value` (string): 'morning' | 'lunch' | 'dinner' | 'bedtime' | 'HH:mm'
+      - `hour` (int): 0-23
+      - `minute` (int): 0-59
   - `createdAt` (timestamp)
 
 ### `actions`
