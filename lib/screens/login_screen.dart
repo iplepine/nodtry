@@ -91,23 +91,37 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
 
               // 게스트 로그인 (둘러보기)
-              TextButton(
-                onPressed: () async {
-                  try {
-                    await FirebaseAuth.instance.signInAnonymously();
-                    if (context.mounted) {
-                      context.go(AppRoutes.home);
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    try {
+                      await FirebaseAuth.instance.signInAnonymously();
+                      if (context.mounted) {
+                        context.go(AppRoutes.home);
+                      }
+                    } catch (e) {
+                      debugPrint('Guest login failed: $e');
+                      // TODO: 에러 처리 (스낵바 등)
                     }
-                  } catch (e) {
-                    debugPrint('Guest login failed: $e');
-                    // TODO: 에러 처리 (스낵바 등)
-                  }
-                },
-                child: Text(
-                  AppLocalizations.of(context)!.loginGuest,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    decoration: TextDecoration.underline,
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColors.secondary), // 은은한 테두리
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)!.loginGuest,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ),
