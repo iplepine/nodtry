@@ -59,14 +59,7 @@ class HistoryTab extends StatelessWidget {
         Expanded(
           child: historyItems.isEmpty
               ? _buildEmptyState(context, l10n)
-              : Padding(
-                  padding: EdgeInsets.only(
-                    bottom:
-                        MediaQuery.of(context).padding.bottom +
-                        80, // 하단 탭 높이 + 안전 영역
-                  ),
-                  child: _buildHistoryList(context, l10n, historyItems),
-                ),
+              : _buildHistoryList(context, l10n, historyItems),
         ),
       ],
     );
@@ -100,9 +93,11 @@ class HistoryTab extends StatelessWidget {
     AppLocalizations l10n,
     List<HistoryItem> items,
   ) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom + 80;
+
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomPadding),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];

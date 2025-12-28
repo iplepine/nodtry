@@ -42,7 +42,7 @@ class _UsTabState extends State<UsTab> {
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 100), // 하단 탭 공간 확보
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 100), // 하단 탭 공간 확보
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

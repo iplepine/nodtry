@@ -457,6 +457,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
 
     return Card(
       elevation: 1,
+      margin: EdgeInsets.zero,
       color: AppColors.surface.withValues(
         alpha: 0.7,
       ), // Theme A: Soft Dark Stone (Opacity 0.7)
@@ -589,6 +590,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
+      margin: EdgeInsets.zero,
       color: AppColors.surface.withValues(
         alpha: 0.7,
       ), // Theme A: Soft Dark Stone (Opacity 0.7)
@@ -664,6 +666,7 @@ class _ManagerQuickCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
+      margin: EdgeInsets.zero,
       color: AppColors.surface.withValues(
         alpha: 0.6,
       ), // Theme A: Soft Dark Stone (Opacity 0.6, 실천자보다 약함)
