@@ -1,4 +1,4 @@
-# OnMyBehalf – 계획 생성 화면 UI (유저 피드백 반영 최종안)
+# IfTogether – 계획 생성 화면 UI (유저 피드백 반영 최종안)
 ## Plan Creation UI – User Feedback Applied
 
 ---
@@ -183,7 +183,7 @@
 
 ## 9. 최종 UX 정의 문장 (업데이트)
 
-OnMyBehalf의 계획 화면은  
+IfTogether의 계획 화면은  
 결정을 요구하는 화면이 아니라,  
 "이 정도면 괜찮지?"라고  
 상대에게 말을 건네는 화면이다.

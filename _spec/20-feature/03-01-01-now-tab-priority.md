@@ -1,4 +1,4 @@
-# OnMyBehalf – 지금 탭 실천/관리 카드 우선순위 스펙
+# IfTogether – 지금 탭 실천/관리 카드 우선순위 스펙
 ## Executor-First, Manager-Quick Resolution
 
 ---

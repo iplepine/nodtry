@@ -1,11 +1,11 @@
-# OnMyBehalf – 지금 탭 카드 계층 스펙
+# IfTogether – 지금 탭 카드 계층 스펙
 ## Primary Action + Secondary Upcoming Cards
 
 ---
 
 ## 0. 문서 목적
 
-이 문서는 OnMyBehalf 앱의 **지금 탭**에서
+이 문서는 IfTogether 앱의 **지금 탭**에서
 - 현재 시점에서 가장 임박한 카드들을 어떤 "우선순위 계층"으로 보여줄지
 - 각 카드가 어떤 역할과 크기를 가져야 하는지를
 - 시간 표현 방식과 카드 선택 규칙을

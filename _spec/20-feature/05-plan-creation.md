@@ -1,11 +1,11 @@
-# OnMyBehalf – 계획 생성 방식 결정 스펙 (최종)
+# IfTogether – 계획 생성 방식 결정 스펙 (최종)
 ## Monthly Calendar vs Repeating Action
 
 ---
 
 ## 0. 문서 목적
 
-이 문서는 OnMyBehalf 앱에서
+이 문서는 IfTogether 앱에서
 계획을 어떤 단위로 생성할 것인지에 대한
 최종 UX 결정을 정의한다.
 
@@ -25,7 +25,7 @@
 
 ## 2. 최종 선택
 
-OnMyBehalf는
+IfTogether는
 **B안: '한 가지 행동을 한 달 동안 반복 설정' 방식**을 채택한다.
 
 ---
@@ -77,7 +77,7 @@ OnMyBehalf는
 
 ## 6. 최종 정의 문장
 
-OnMyBehalf에서 계획을 세운다는 것은  
+IfTogether에서 계획을 세운다는 것은  
 한 달을 설계하는 일이 아니라,  
 한 가지 행동을 한 달 동안 함께 해보기로  
 약속하는 일이다.

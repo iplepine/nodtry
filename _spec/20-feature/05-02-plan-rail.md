@@ -1,11 +1,11 @@
-# OnMyBehalf – 계획 진입점 고정 UI 스펙 (항상 같은 위치)
+# IfTogether – 계획 진입점 고정 UI 스펙 (항상 같은 위치)
 ## Persistent Plan Entry + Add New Plan While Active
 
 ---
 
 ## 0. 문서 목적
 
-이 문서는 OnMyBehalf에서
+이 문서는 IfTogether에서
 - 계획이 없어도,
 - 계획이 있어도,
 

@@ -1,6 +1,6 @@
 # Personas & Stakeholders
 
-이 문서는 OnMyBehalf의 UX 설계와 의사결정을 돕기 위한 페르소나를 정의합니다.
+이 문서는 IfTogether의 UX 설계와 의사결정을 돕기 위한 페르소나를 정의합니다.
 
 ---
 

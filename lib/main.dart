@@ -72,7 +72,7 @@ class _OnMyBehalfAppState extends State<OnMyBehalfApp> {
               : AppTheme.deepOliveTheme;
 
           return MaterialApp.router(
-            title: 'OnMyBehalf',
+            title: 'IfTogether',
             debugShowCheckedModeBanner: false,
             theme: themeData,
             locale: _settingsProvider.currentLocale,

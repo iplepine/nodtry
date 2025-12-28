@@ -126,13 +126,32 @@ class HistoryCard extends StatelessWidget {
       child: Row(
         children: [
           if (item.verifierName != null) ...[
-            CircleAvatar(
-              radius: 12,
-              backgroundColor: AppColors.secondary.withValues(alpha: 0.3),
-              child: Text(
-                item.verifierName![0],
-                style: TextStyle(fontSize: 10, color: AppColors.textPrimary),
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.secondary.withValues(alpha: 0.3),
+                image: item.verifierImageUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(
+                          item.verifierImageUrl!,
+                        ), // TODO: CacheNetworkImage
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
+              child: item.verifierImageUrl == null
+                  ? Center(
+                      child: Text(
+                        item.verifierName![0],
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    )
+                  : null,
             ),
             const SizedBox(width: 8),
           ],
