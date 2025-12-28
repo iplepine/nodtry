@@ -98,12 +98,6 @@ class DeveloperScreen extends StatelessWidget {
                     icon: Icons.rocket_launch,
                   ),
                   _ScreenInfo(
-                    name: l10n.developerScreenLogin,
-                    route: AppRoutes.login,
-                    description: l10n.developerScreenLoginDesc,
-                    icon: Icons.login,
-                  ),
-                  _ScreenInfo(
                     name: l10n.developerScreenConnect,
                     route: AppRoutes.connect,
                     description: l10n.developerScreenConnectDesc,
@@ -145,10 +139,6 @@ class DeveloperScreen extends StatelessWidget {
                     _buildDeepLinkItem(
                       l10n.developerScreenSplash,
                       'onmybehalf://splash',
-                    ),
-                    _buildDeepLinkItem(
-                      l10n.developerScreenLogin,
-                      'onmybehalf://login',
                     ),
                     _buildDeepLinkItem(
                       l10n.developerScreenConnect,
