@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Continue with Apple'**
   String get loginWithApple;
 
+  /// Button to start the app without logging in (Guest Mode)
+  ///
+  /// In en, this message translates to:
+  /// **'Start without login'**
+  String get loginGuest;
+
   /// Privacy message shown at bottom of login screen
   ///
   /// In en, this message translates to:

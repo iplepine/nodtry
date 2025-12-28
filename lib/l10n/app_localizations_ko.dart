@@ -21,6 +21,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get loginWithApple => 'Apple로 시작하기';
 
   @override
+  String get loginGuest => '로그인 없이 시작하기';
+
+  @override
   String get privacyMessage => '강요하지 않아요. 기록은 둘만 봅니다.';
 
   @override

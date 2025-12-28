@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginWithApple => 'Continue with Apple';
 
   @override
+  String get loginGuest => 'Start without login';
+
+  @override
   String get privacyMessage =>
       'We don\'t push.\nYour records are private between you two.';
 

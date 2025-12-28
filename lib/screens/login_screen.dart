@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
+import 'package:go_router/go_router.dart';
+import '../routes/app_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -75,6 +77,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
 
+              const SizedBox(height: 16),
+
+              // 게스트 로그인 (둘러보기)
+              TextButton(
+                onPressed: () {
+                  // TODO: 실제 게스트 인증 처리 (Firebase Anonymous Auth)
+                  // MVP 단계에서는 Auth 로직 없이 바로 홈으로 이동
+                  context.go(AppRoutes.home);
+                },
+                child: Text(
+                  AppLocalizations.of(context)!.loginGuest,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+
               // 하단: 신뢰 메시지 (Text Disabled)
               const Spacer(flex: 3),
               Padding(
@@ -82,9 +102,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Text(
                   AppLocalizations.of(context)!.privacyMessage,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textDisabled, // #B4ADB0
-                        fontSize: 12,
-                      ),
+                    color: AppColors.textDisabled, // #B4ADB0
+                    fontSize: 12,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),

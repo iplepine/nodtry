@@ -16,6 +16,10 @@
   "@loginWithApple": {
     "description": "Apple login button text"
   },
+  "loginGuest": "Start without login",
+  "@loginGuest": {
+    "description": "Button to start the app without logging in (Guest Mode)"
+  },
   "privacyMessage": "We don't push.\nYour records are private between you two.",
   "@privacyMessage": {
     "description": "Privacy message shown at bottom of login screen"
