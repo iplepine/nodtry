@@ -58,9 +58,9 @@
   - 연결된 관계 목록
 
 **참고 문서:**
-- `_spec/vibe/mvp-spec.md`
-- `_spec/vibe/role-mode-spec.md`
-- `_spec/vibe/architecture-spec.md`
+- `_spec/00-meta/mvp-spec.md`
+- `_spec/10-domain/role-mode-spec.md`
+- `_spec/00-meta/architecture-spec.md`
 
 ---
 
@@ -119,8 +119,8 @@
   - UI 권한 변경
 
 **참고 문서:**
-- `_spec/vibe/mvp-spec.md` (4-5장)
-- `_spec/vibe/role-mode-spec.md`
+- `_spec/00-meta/mvp-spec.md` (4-5장)
+- `_spec/10-domain/role-mode-spec.md`
 
 ---
 
@@ -155,7 +155,7 @@
   - `updateUserMode()`
 
 **참고 문서:**
-- `_spec/vibe/architecture-spec.md`
+- `_spec/00-meta/architecture-spec.md`
 
 ---
 
@@ -191,7 +191,7 @@
 - [ ] 오프라인 지원
 
 **참고 문서:**
-- `_spec/vibe/architecture-spec.md`
+- `_spec/00-meta/architecture-spec.md`
 
 ---
 
@@ -218,7 +218,7 @@
 - [ ] 로그아웃 기능
 
 **참고 문서:**
-- `_spec/vibe/feature/01-splash-login.md`
+- `_spec/20-feature/01-splash-login.md`
 
 ---
 
@@ -260,8 +260,8 @@
   - "계획 짜기" 버튼 → 계획 생성 플로우 진입
 
 **참고 문서:**
-- `_spec/vibe/feature/03-01-now-tab.md`
-- `_spec/vibe/feature/03-02-now-tab-executor-manager.md`
+- `_spec/20-feature/03-01-now-tab.md`
+- `_spec/20-feature/03-02-now-tab-executor-manager.md`
 
 ---
 
@@ -289,7 +289,7 @@
   - 우리 탭 "새 계획 시작" → 계획 작성 화면
 
 **참고 문서:**
-- `_spec/vibe/mvp-spec.md` (4.1장)
+- `_spec/00-meta/mvp-spec.md` (4.1장)
 
 ---
 
@@ -309,7 +309,7 @@
   - 관리자 코멘트 표시
 
 **참고 문서:**
-- `_spec/vibe/mvp-spec.md` (5.1장)
+- `_spec/00-meta/mvp-spec.md` (5.1장)
 
 ---
 
@@ -336,7 +336,7 @@
   - 연결 완료 시 홈 화면으로 이동
 
 **참고 문서:**
-- `_spec/vibe/feature/02-connect.md`
+- `_spec/20-feature/02-connect.md`
 
 ---
 
@@ -362,7 +362,7 @@
   - 기록이 없을 때 UI
 
 **참고 문서:**
-- `_spec/vibe/feature/03-home.md` (3장)
+- `_spec/20-feature/03-home.md` (3장)
 
 ---
 
@@ -392,7 +392,7 @@
   - Quiet Header 설정 버튼 연결
 
 **참고 문서:**
-- `_spec/vibe/feature/03-home.md` (4장)
+- `_spec/20-feature/03-home.md` (4장)
 
 ---
 
@@ -418,7 +418,7 @@
   - 우리 탭의 설정 섹션으로 이동
 
 **참고 문서:**
-- `_spec/vibe/feature/04-header.md`
+- `_spec/20-feature/04-header.md`
 
 ---
 
@@ -440,7 +440,7 @@
   - 관리 대상별 데이터 필터링
 
 **참고 문서:**
-- `_spec/vibe/role-mode-spec.md`
+- `_spec/10-domain/role-mode-spec.md`
 
 ---
 
@@ -464,7 +464,7 @@
   - 시간 표현 정확도 향상
 
 **참고 문서:**
-- `_spec/vibe/feature/03-01-now-tab.md` (11장)
+- `_spec/20-feature/03-01-now-tab.md` (11장)
 
 ---
 
@@ -515,7 +515,7 @@
   - 사용자가 테마 선택 가능하도록
 
 **참고 문서:**
-- `_spec/vibe/design-spec.md`
+- `_spec/50-ui/design-spec.md`
 
 ---
 
@@ -540,7 +540,7 @@
 - 통계/대시보드
 
 **참고 문서:**
-- `_spec/vibe/mvp-spec.md` (7장)
+- `_spec/00-meta/mvp-spec.md` (7장)
 
 ---
 
@@ -602,11 +602,11 @@
 
 ## 📚 참고 문서
 
-- [MVP 스펙](../vibe/mvp-spec.md)
-- [역할 모드 스펙](../vibe/role-mode-spec.md)
-- [디자인 스펙](../vibe/design-spec.md)
-- [아키텍쳐 스펙](../vibe/architecture-spec.md)
-- [화면 스펙](../vibe/feature/)
+- [MVP 스펙](../mvp-spec.md)
+- [역할 모드 스펙](../../10-domain/role-mode-spec.md)
+- [디자인 스펙](../../50-ui/design-spec.md)
+- [아키텍쳐 스펙](../architecture-spec.md)
+- [화면 스펙](../../20-feature/)
 
 ---
 

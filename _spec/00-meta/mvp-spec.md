@@ -38,7 +38,7 @@ OnMyBehalf는 **관계 기반 책임(Accountability) 설계 시스템**이다.
 
 > **중요 변경사항**  
 > 실행자/관리자는 고정된 역할이 아닌 **모드(Mode)**로 전환됩니다.  
-> 자세한 내용은 [역할 모드 스펙](./role-mode-spec.md)을 참고하세요.
+> 자세한 내용은 [역할 모드 스펙](../10-domain/role-mode-spec.md)을 참고하세요.
 
 ### 모드: 실행자 모드 (Executor Mode)
 
