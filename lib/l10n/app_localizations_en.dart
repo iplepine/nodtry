@@ -164,16 +164,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowQuietNoAction => 'No need to worry for a while';
 
   @override
-  String get planProposal => 'Plan Proposal';
+  String recordGazeWeekCount(int count) {
+    return '${count}th promise this week';
+  }
 
   @override
-  String get planPreparing => 'Preparing proposal';
+  String recordGazeWeekProgress(int week, int total) {
+    return 'Week $week of $total';
+  }
+
+  @override
+  String recordGazeDoneCount(int count) {
+    return 'Already done $count times';
+  }
+
+  @override
+  String get managerSuggestionTitle => 'If you entrust this promise to someone';
+
+  @override
+  String get managerSuggestionSubtitle => 'it might become a little easier';
+
+  @override
+  String get managerSuggestionAlternative =>
+      'If keeping it alone is hard, you can try together';
+
+  @override
+  String get managerSuggestionButton => 'Find someone to entrust';
+
+  @override
+  String get managerSuggestionQuestion =>
+      'Is there someone who can take care of this promise?';
+
+  @override
+  String get planProposal => 'My Promise';
+
+  @override
+  String get planPreparing => 'Preparing promise';
 
   @override
   String get planWhatToPromise => 'What would you like to promise?';
 
   @override
   String get planPromiseHint => 'Something you think you can keep';
+
+  @override
+  String get planMyPromise => 'A promise I made to myself';
+
+  @override
+  String get planKeepWatching => 'A promise I want to keep';
 
   @override
   String get planActionHint =>
@@ -426,4 +464,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get developerScreenSummaryDesc => 'Screen 5: Plan proposal summary';
+
+  @override
+  String get settingsPlanCreation => 'Plan Creation';
+
+  @override
+  String get settingsPlanCreationTitle => 'Create New Promise';
+
+  @override
+  String get settingsPlanCreationDesc => 'All steps in one screen';
 }

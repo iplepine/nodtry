@@ -380,16 +380,64 @@ abstract class AppLocalizations {
   /// **'No need to worry for a while'**
   String get nowQuietNoAction;
 
-  /// Title for plan proposal screens
+  /// Record gaze - showing count in current week
   ///
   /// In en, this message translates to:
-  /// **'Plan Proposal'**
+  /// **'{count}th promise this week'**
+  String recordGazeWeekCount(int count);
+
+  /// Record gaze - showing week progress
+  ///
+  /// In en, this message translates to:
+  /// **'Week {week} of {total}'**
+  String recordGazeWeekProgress(int week, int total);
+
+  /// Record gaze - showing completion count
+  ///
+  /// In en, this message translates to:
+  /// **'Already done {count} times'**
+  String recordGazeDoneCount(int count);
+
+  /// Manager suggestion title - soft approach
+  ///
+  /// In en, this message translates to:
+  /// **'If you entrust this promise to someone'**
+  String get managerSuggestionTitle;
+
+  /// Manager suggestion subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'it might become a little easier'**
+  String get managerSuggestionSubtitle;
+
+  /// Alternative manager suggestion text
+  ///
+  /// In en, this message translates to:
+  /// **'If keeping it alone is hard, you can try together'**
+  String get managerSuggestionAlternative;
+
+  /// Button to find manager - soft approach
+  ///
+  /// In en, this message translates to:
+  /// **'Find someone to entrust'**
+  String get managerSuggestionButton;
+
+  /// Question to suggest manager - soft approach
+  ///
+  /// In en, this message translates to:
+  /// **'Is there someone who can take care of this promise?'**
+  String get managerSuggestionQuestion;
+
+  /// Title for plan proposal screens - solo-first approach
+  ///
+  /// In en, this message translates to:
+  /// **'My Promise'**
   String get planProposal;
 
   /// Progress hint for plan preparation
   ///
   /// In en, this message translates to:
-  /// **'Preparing proposal'**
+  /// **'Preparing promise'**
   String get planPreparing;
 
   /// Title asking what to promise
@@ -403,6 +451,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something you think you can keep'**
   String get planPromiseHint;
+
+  /// Alternative title for solo plan
+  ///
+  /// In en, this message translates to:
+  /// **'A promise I made to myself'**
+  String get planMyPromise;
+
+  /// Alternative title for solo plan
+  ///
+  /// In en, this message translates to:
+  /// **'A promise I want to keep'**
+  String get planKeepWatching;
 
   /// Hint text for action input field
   ///
@@ -895,6 +955,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Screen 5: Plan proposal summary'**
   String get developerScreenSummaryDesc;
+
+  /// Section title for plan creation in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Creation'**
+  String get settingsPlanCreation;
+
+  /// Title for plan creation option
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Promise'**
+  String get settingsPlanCreationTitle;
+
+  /// Description for unified plan creation screen
+  ///
+  /// In en, this message translates to:
+  /// **'All steps in one screen'**
+  String get settingsPlanCreationDesc;
 }
 
 class _AppLocalizationsDelegate

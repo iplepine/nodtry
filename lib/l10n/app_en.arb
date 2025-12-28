@@ -224,11 +224,61 @@
   "@nowQuietNoAction": {
     "description": "Quiet state message - no action needed"
   },
-  "planProposal": "Plan Proposal",
-  "@planProposal": {
-    "description": "Title for plan proposal screens"
+  "recordGazeWeekCount": "{count}th promise this week",
+  "@recordGazeWeekCount": {
+    "description": "Record gaze - showing count in current week",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "planPreparing": "Preparing proposal",
+  "recordGazeWeekProgress": "Week {week} of {total}",
+  "@recordGazeWeekProgress": {
+    "description": "Record gaze - showing week progress",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "recordGazeDoneCount": "Already done {count} times",
+  "@recordGazeDoneCount": {
+    "description": "Record gaze - showing completion count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "managerSuggestionTitle": "If you entrust this promise to someone",
+  "@managerSuggestionTitle": {
+    "description": "Manager suggestion title - soft approach"
+  },
+  "managerSuggestionSubtitle": "it might become a little easier",
+  "@managerSuggestionSubtitle": {
+    "description": "Manager suggestion subtitle"
+  },
+  "managerSuggestionAlternative": "If keeping it alone is hard, you can try together",
+  "@managerSuggestionAlternative": {
+    "description": "Alternative manager suggestion text"
+  },
+  "managerSuggestionButton": "Find someone to entrust",
+  "@managerSuggestionButton": {
+    "description": "Button to find manager - soft approach"
+  },
+  "managerSuggestionQuestion": "Is there someone who can take care of this promise?",
+  "@managerSuggestionQuestion": {
+    "description": "Question to suggest manager - soft approach"
+  },
+  "planProposal": "My Promise",
+  "@planProposal": {
+    "description": "Title for plan proposal screens - solo-first approach"
+  },
+  "planPreparing": "Preparing promise",
   "@planPreparing": {
     "description": "Progress hint for plan preparation"
   },
@@ -239,6 +289,14 @@
   "planPromiseHint": "Something you think you can keep",
   "@planPromiseHint": {
     "description": "Hint about what kind of promise to make"
+  },
+  "planMyPromise": "A promise I made to myself",
+  "@planMyPromise": {
+    "description": "Alternative title for solo plan"
+  },
+  "planKeepWatching": "A promise I want to keep",
+  "@planKeepWatching": {
+    "description": "Alternative title for solo plan"
   },
   "planActionHint": "e.g., Spending time with kids, Making time to read",
   "@planActionHint": {
@@ -567,6 +625,18 @@
   "developerScreenSummaryDesc": "Screen 5: Plan proposal summary",
   "@developerScreenSummaryDesc": {
     "description": "Summary screen description"
+  },
+  "settingsPlanCreation": "Plan Creation",
+  "@settingsPlanCreation": {
+    "description": "Section title for plan creation in settings"
+  },
+  "settingsPlanCreationTitle": "Create New Promise",
+  "@settingsPlanCreationTitle": {
+    "description": "Title for plan creation option"
+  },
+  "settingsPlanCreationDesc": "All steps in one screen",
+  "@settingsPlanCreationDesc": {
+    "description": "Description for unified plan creation screen"
   }
 }
 

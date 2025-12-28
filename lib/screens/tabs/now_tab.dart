@@ -306,6 +306,28 @@ class _NowTabState extends State<NowTab>
     }
   }
 
+  /// 기록의 시선 텍스트 생성
+  /// 
+  /// "이번 주 약속 중 2번째", "4주 중 2주차", "이미 3번은 했어요" 등
+  /// 사실 전달형 표현으로 외부 시선 느낌 제공
+  String? _getRecordGazeText(HomeCardState state) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    // TODO: 실제 데이터에서 가져오기
+    // 임시 테스트 데이터
+    switch (state) {
+      case HomeCardState.reportNeeded:
+        // 이번 주 약속 중 N번째
+        final weekCount = 2; // TODO: 실제 데이터
+        return l10n.recordGazeWeekCount(weekCount);
+      case HomeCardState.planNeeded:
+        // 계획이 없을 때는 기록의 시선 표시 안 함
+        return null;
+      default:
+        return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: 실제 데이터에서 계획 상태 가져오기
@@ -354,6 +376,7 @@ class _NowTabState extends State<NowTab>
                           onCreatePlan: _handleCreatePlan,
                           timeChipText: _getTimeChipText(_primaryExecutorCard!),
                           timeChipType: _getTimeChipType(_primaryExecutorCard!),
+                          recordGazeText: _getRecordGazeText(_primaryExecutorCard!),
                         ),
                       ),
                     ),
@@ -422,6 +445,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final VoidCallback? onCreatePlan;
   final String? timeChipText; // Time Chip 표시 텍스트 (예: "D-1", "3시간 남음")
   final TimeChipType? timeChipType; // Time Chip 타입
+  final String? recordGazeText; // 기록의 시선 텍스트 (예: "이번 주 약속 중 2번째", "4주 중 2주차")
 
   const _PrimaryExecutorCard({
     required this.state,
@@ -429,6 +453,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     this.onCreatePlan,
     this.timeChipText,
     this.timeChipType,
+    this.recordGazeText,
   });
 
   @override
@@ -459,6 +484,18 @@ class _PrimaryExecutorCard extends StatelessWidget {
             if (timeChipText != null && timeChipType != null)
               const SizedBox(height: 12),
             _buildMessage(context, l10n),
+            // 기록의 시선 (사실 전달)
+            if (recordGazeText != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                recordGazeText!,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ],
             const SizedBox(height: 24),
             _buildButton(context, l10n),
           ],

@@ -47,7 +47,7 @@ class _PlanDaySelectionScreenState extends State<PlanDaySelectionScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          l10n.planProposal,
+          l10n.planMyPromise,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 18,

@@ -47,14 +47,46 @@ class DeveloperScreen extends StatelessWidget {
               SizedBox(height: 8),
               Text(
                 l10n.developerScreenNavigationDesc,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
               SizedBox(height: 32),
 
-              // 화면 목록
+              // 메인 화면 섹션
+              _buildScreenSection(
+                context,
+                title: l10n.developerMainSection,
+                screens: [
+                  _ScreenInfo(
+                    name: l10n.developerScreenHome,
+                    route: AppRoutes.home,
+                    description: l10n.developerScreenHomeDesc,
+                    icon: Icons.home,
+                  ),
+                  _ScreenInfo(
+                    name: l10n.developerScreenSettings,
+                    route: AppRoutes.settings,
+                    description: l10n.developerScreenSettingsDesc,
+                    icon: Icons.settings,
+                  ),
+                ],
+              ),
+              SizedBox(height: 32),
+              // 계획 생성 섹션
+              _buildScreenSection(
+                context,
+                title: l10n.developerPlanSection,
+                screens: [
+                  _ScreenInfo(
+                    name: l10n.developerScreenActionSelection,
+                    route: AppRoutes.planActionSelection,
+                    description: l10n.developerScreenActionSelectionDesc,
+                    icon: Icons.check_circle_outline,
+                  ),
+                ],
+              ),
+              SizedBox(height: 32),
+
+              // 인증 & 연결 섹션
               _buildScreenSection(
                 context,
                 title: l10n.developerAuthSection,
@@ -76,64 +108,6 @@ class DeveloperScreen extends StatelessWidget {
                     route: AppRoutes.connect,
                     description: l10n.developerScreenConnectDesc,
                     icon: Icons.link,
-                  ),
-                ],
-              ),
-              SizedBox(height: 32),
-
-              _buildScreenSection(
-                context,
-                title: l10n.developerMainSection,
-                screens: [
-                  _ScreenInfo(
-                    name: l10n.developerScreenHome,
-                    route: AppRoutes.home,
-                    description: l10n.developerScreenHomeDesc,
-                    icon: Icons.home,
-                  ),
-                  _ScreenInfo(
-                    name: l10n.developerScreenSettings,
-                    route: AppRoutes.settings,
-                    description: l10n.developerScreenSettingsDesc,
-                    icon: Icons.settings,
-                  ),
-                ],
-              ),
-              SizedBox(height: 32),
-
-              _buildScreenSection(
-                context,
-                title: l10n.developerPlanSection,
-                screens: [
-                  _ScreenInfo(
-                    name: l10n.developerScreenActionSelection,
-                    route: AppRoutes.planActionSelection,
-                    description: l10n.developerScreenActionSelectionDesc,
-                    icon: Icons.check_circle_outline,
-                  ),
-                  _ScreenInfo(
-                    name: l10n.developerScreenDescription,
-                    route: AppRoutes.planDescription,
-                    description: l10n.developerScreenDescriptionDesc,
-                    icon: Icons.description,
-                  ),
-                  _ScreenInfo(
-                    name: l10n.developerScreenFrequency,
-                    route: AppRoutes.planFrequency,
-                    description: l10n.developerScreenFrequencyDesc,
-                    icon: Icons.repeat,
-                  ),
-                  _ScreenInfo(
-                    name: l10n.developerScreenDaySelection,
-                    route: AppRoutes.planDaySelection,
-                    description: l10n.developerScreenDaySelectionDesc,
-                    icon: Icons.calendar_today,
-                  ),
-                  _ScreenInfo(
-                    name: l10n.developerScreenSummary,
-                    route: AppRoutes.planSummary,
-                    description: l10n.developerScreenSummaryDesc,
-                    icon: Icons.summarize,
                   ),
                 ],
               ),
@@ -168,12 +142,30 @@ class DeveloperScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 8),
-                    _buildDeepLinkItem(l10n.developerScreenSplash, 'onmybehalf://splash'),
-                    _buildDeepLinkItem(l10n.developerScreenLogin, 'onmybehalf://login'),
-                    _buildDeepLinkItem(l10n.developerScreenConnect, 'onmybehalf://connect'),
-                    _buildDeepLinkItem(l10n.developerScreenHome, 'onmybehalf://home'),
-                    _buildDeepLinkItem(l10n.developerScreenDeveloper, 'onmybehalf://developer'),
-                    _buildDeepLinkItem(l10n.developerScreenSettings, 'onmybehalf://settings'),
+                    _buildDeepLinkItem(
+                      l10n.developerScreenSplash,
+                      'onmybehalf://splash',
+                    ),
+                    _buildDeepLinkItem(
+                      l10n.developerScreenLogin,
+                      'onmybehalf://login',
+                    ),
+                    _buildDeepLinkItem(
+                      l10n.developerScreenConnect,
+                      'onmybehalf://connect',
+                    ),
+                    _buildDeepLinkItem(
+                      l10n.developerScreenHome,
+                      'onmybehalf://home',
+                    ),
+                    _buildDeepLinkItem(
+                      l10n.developerScreenDeveloper,
+                      'onmybehalf://developer',
+                    ),
+                    _buildDeepLinkItem(
+                      l10n.developerScreenSettings,
+                      'onmybehalf://settings',
+                    ),
                   ],
                 ),
               ),
@@ -212,10 +204,7 @@ class DeveloperScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.divider,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.divider, width: 1),
       ),
       child: Material(
         color: Colors.transparent,
@@ -233,11 +222,7 @@ class DeveloperScreen extends StatelessWidget {
                     color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    screen.icon,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
+                  child: Icon(screen.icon, color: AppColors.primary, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -263,10 +248,7 @@ class DeveloperScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  color: AppColors.textDisabled,
-                ),
+                Icon(Icons.chevron_right, color: AppColors.textDisabled),
               ],
             ),
           ),
@@ -334,4 +316,3 @@ class _ScreenInfo {
     required this.icon,
   });
 }
-

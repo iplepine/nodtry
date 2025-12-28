@@ -9,6 +9,7 @@ import '../screens/plan/plan_frequency_screen.dart';
 import '../screens/plan/plan_description_screen.dart';
 import '../screens/plan/plan_day_selection_screen.dart';
 import '../screens/plan/plan_summary_screen.dart';
+import '../screens/plan/plan_create_screen.dart';
 import '../screens/settings_screen.dart';
 
 /// 앱 라우팅 경로 상수
@@ -23,6 +24,7 @@ class AppRoutes {
   static const String settings = '/settings';
   
   // 계획 생성 플로우
+  static const String planCreate = '/plan/create';
   static const String planActionSelection = '/plan/action';
   static const String planFrequency = '/plan/frequency';
   static const String planDescription = '/plan/description';
@@ -79,7 +81,13 @@ final GoRouter appRouter = GoRouter(
       name: 'settings',
       builder: (context, state) => const SettingsScreen(),
     ),
-    // 계획 생성 플로우
+    // 통합 계획 생성 화면
+    GoRoute(
+      path: AppRoutes.planCreate,
+      name: 'plan-create',
+      builder: (context, state) => const PlanCreateScreen(),
+    ),
+    // 계획 생성 플로우 (기존 단계별 화면 - 하위 호환성 유지)
     GoRoute(
       path: AppRoutes.planActionSelection,
       name: 'plan-action',

@@ -95,10 +95,44 @@
   },
   "nowQuietRest": "지금은 잠시 쉬어도 돼요",
   "nowQuietNoAction": "당분간 신경 쓸 일은 없어요",
-  "planProposal": "계획 제안",
-  "planPreparing": "제안 준비 중",
+  "recordGazeWeekCount": "이번 주 약속 중 {count}번째",
+  "@recordGazeWeekCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recordGazeWeekProgress": "{total}주 중 {week}주차",
+  "@recordGazeWeekProgress": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "recordGazeDoneCount": "이미 {count}번은 했어요",
+  "@recordGazeDoneCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "managerSuggestionTitle": "이 약속, 누군가에게 맡기면",
+  "managerSuggestionSubtitle": "조금 쉬워질지도 몰라요",
+  "managerSuggestionAlternative": "혼자 지키기 버거우면, 같이 해볼 수도 있어요",
+  "managerSuggestionButton": "맡아줄 사람 찾기",
+  "managerSuggestionQuestion": "이 약속을 맡아줄 사람이 있나요?",
+  "planProposal": "내가 정한 약속",
+  "planPreparing": "약속 준비 중",
   "planWhatToPromise": "무엇을 약속할까요?",
   "planPromiseHint": "지킬 수 있을 것 같은 정도면 좋아요",
+  "planMyPromise": "내가 나에게 한 말",
+  "planKeepWatching": "지켜보고 싶은 약속",
   "planActionHint": "ex) 아이랑 시간 보내기, 책 읽는 시간 만들기",
   "planOneLineEnough": "한 줄만 적어도 돼요",
   "planNext": "다음",
@@ -180,6 +214,9 @@
   "developerScreenFrequencyDesc": "Screen 2: 반복 빈도",
   "developerScreenDaySelectionDesc": "Screen 3: 요일 선택",
   "developerScreenDescriptionDesc": "Screen 3: 구체 행동 설명",
-  "developerScreenSummaryDesc": "Screen 5: 계획 제안 요약"
+  "developerScreenSummaryDesc": "Screen 5: 계획 제안 요약",
+  "settingsPlanCreation": "계획 생성",
+  "settingsPlanCreationTitle": "새 약속 만들기",
+  "settingsPlanCreationDesc": "모든 단계를 한 화면에서"
 }
 

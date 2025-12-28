@@ -162,16 +162,52 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowQuietNoAction => '당분간 신경 쓸 일은 없어요';
 
   @override
-  String get planProposal => '계획 제안';
+  String recordGazeWeekCount(int count) {
+    return '이번 주 약속 중 $count번째';
+  }
 
   @override
-  String get planPreparing => '제안 준비 중';
+  String recordGazeWeekProgress(int week, int total) {
+    return '$total주 중 $week주차';
+  }
+
+  @override
+  String recordGazeDoneCount(int count) {
+    return '이미 $count번은 했어요';
+  }
+
+  @override
+  String get managerSuggestionTitle => '이 약속, 누군가에게 맡기면';
+
+  @override
+  String get managerSuggestionSubtitle => '조금 쉬워질지도 몰라요';
+
+  @override
+  String get managerSuggestionAlternative => '혼자 지키기 버거우면, 같이 해볼 수도 있어요';
+
+  @override
+  String get managerSuggestionButton => '맡아줄 사람 찾기';
+
+  @override
+  String get managerSuggestionQuestion => '이 약속을 맡아줄 사람이 있나요?';
+
+  @override
+  String get planProposal => '내가 정한 약속';
+
+  @override
+  String get planPreparing => '약속 준비 중';
 
   @override
   String get planWhatToPromise => '무엇을 약속할까요?';
 
   @override
   String get planPromiseHint => '지킬 수 있을 것 같은 정도면 좋아요';
+
+  @override
+  String get planMyPromise => '내가 나에게 한 말';
+
+  @override
+  String get planKeepWatching => '지켜보고 싶은 약속';
 
   @override
   String get planActionHint => 'ex) 아이랑 시간 보내기, 책 읽는 시간 만들기';
@@ -418,4 +454,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get developerScreenSummaryDesc => 'Screen 5: 계획 제안 요약';
+
+  @override
+  String get settingsPlanCreation => '계획 생성';
+
+  @override
+  String get settingsPlanCreationTitle => '새 약속 만들기';
+
+  @override
+  String get settingsPlanCreationDesc => '모든 단계를 한 화면에서';
 }
