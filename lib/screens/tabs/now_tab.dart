@@ -326,7 +326,8 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
         // 헤더
         QuietHeader(
           partnerName: null, // TODO: 실제 데이터에서 가져오기
-          periodState: HeaderPeriodState.noPlan, // TODO: 실제 상태 확인
+          periodState:
+              HeaderPeriodState.inProgress, // 임시: 텍스트 숨김 (User Feedback)
           onSettingsTap: null,
         ),
 
