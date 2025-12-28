@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
-import 'connect_screen.dart';
-import 'home_screen.dart';
+import '../routes/app_router.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -128,19 +128,8 @@ class _SplashScreenState extends State<SplashScreen>
     // 임시: 연결되어 있으면 홈 화면으로, 아니면 Connect 화면으로
     // 실제로는 인증 상태와 연결 상태를 확인해야 함
     
-    // 임시 테스트용: 홈 화면으로 바로 이동
-    // Navigator.of(context).pushReplacement(
-    //   MaterialPageRoute(
-    //     builder: (context) => const HomeScreen(),
-    //   ),
-    // );
-    
     // 실제: Connect 화면으로 이동
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const ConnectScreen(),
-      ),
-    );
+    context.go(AppRoutes.connect);
   }
 
   @override
@@ -219,14 +208,10 @@ class _SplashScreenState extends State<SplashScreen>
                         isLoading: _isAppleLoading,
                       ),
                       const SizedBox(height: 24),
-                      // 임시: 홈 화면으로 바로 이동 (개발/테스트용)
+                      // 개발자 화면으로 이동
                       OutlinedButton(
                         onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
-                            ),
-                          );
+                          context.go(AppRoutes.developer);
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.textSecondary,
@@ -237,7 +222,7 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                         ),
                         child: const Text(
-                          '🏠 홈으로 (임시)',
+                          '🛠️ 개발자 화면',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,

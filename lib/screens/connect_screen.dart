@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
-import 'home_screen.dart';
+import '../routes/app_router.dart';
 
 enum ConnectState {
   initial, // 초기 상태 - 코드 생성/입력 선택
@@ -106,11 +107,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
   }
 
   void _navigateToHome() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const HomeScreen(),
-      ),
-    );
+    context.go(AppRoutes.home);
   }
 
   void _connectManually() {

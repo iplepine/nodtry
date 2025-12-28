@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
-import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
+import 'routes/app_router.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +31,7 @@ class OnMyBehalfApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'OnMyBehalf',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
@@ -45,7 +45,7 @@ class OnMyBehalfApp extends StatelessWidget {
         Locale('en', ''), // English
         Locale('ko', ''), // Korean
       ],
-      home: const SplashScreen(),
+      routerConfig: appRouter,
     );
   }
 }
