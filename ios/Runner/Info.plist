@@ -55,7 +55,6 @@
 				<string>onmybehalf</string>
 			</array>
 		</dict>
-		</dict>
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Mind Gardener requires access to your photo library to select a profile picture.</string>
