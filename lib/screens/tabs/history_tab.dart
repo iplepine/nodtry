@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/quiet_header.dart';
+import '../../models/history_item.dart';
+import '../../widgets/history/history_card.dart';
 
 /// 기록 탭 - 우리가 나눈 말의 흔적을 보는 곳
-/// 
+///
 /// 성과를 분석하는 곳이 아니라 기억을 보는 곳
 class HistoryTab extends StatelessWidget {
   const HistoryTab({super.key});
@@ -12,28 +14,55 @@ class HistoryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
-    // TODO: 실제 데이터에서 기록 가져오기
-    final historyItems = <_HistoryItem>[];
-    
+
+    // Mock Data for MVP
+    final historyItems = [
+      HistoryItem(
+        date: DateTime.now().subtract(const Duration(days: 1)),
+        title: '책 30분 읽기',
+        status: HistoryStatus.verified,
+        comment: '어제도 고마워요. 덕분에 책 읽는 시간이 생겼어요.',
+        verifierName: '지수',
+      ),
+      HistoryItem(
+        date: DateTime.now().subtract(const Duration(days: 2)),
+        title: '책 30분 읽기',
+        status: HistoryStatus.done,
+        comment: '오늘은 조금 늦었지만 완료!',
+      ),
+      HistoryItem(
+        date: DateTime.now().subtract(const Duration(days: 3)),
+        title: '책 30분 읽기',
+        status: HistoryStatus.skipped,
+        comment: '야근 때문에...',
+      ),
+      HistoryItem(
+        date: DateTime.now().subtract(const Duration(days: 4)),
+        title: '책 30분 읽기',
+        status: HistoryStatus.verified,
+        comment: '꾸준히 하는 모습 멋져요',
+        verifierName: '지수',
+      ),
+    ];
+
     return Column(
       children: [
         // 헤더
         QuietHeader(
           partnerName: null, // TODO: 실제 데이터에서 가져오기
           periodState: HeaderPeriodState.noPlan, // TODO: 실제 상태 확인
-          onSettingsTap: () {
-            // TODO: 우리 탭으로 이동
-          },
+          onSettingsTap: null,
         ),
-        
+
         // 기록 리스트
         Expanded(
           child: historyItems.isEmpty
               ? _buildEmptyState(context, l10n)
               : Padding(
                   padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).padding.bottom + 80, // 하단 탭 높이 + 안전 영역
+                    bottom:
+                        MediaQuery.of(context).padding.bottom +
+                        80, // 하단 탭 높이 + 안전 영역
                   ),
                   child: _buildHistoryList(context, l10n, historyItems),
                 ),
@@ -49,19 +78,16 @@ class HistoryTab extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.history,
-              size: 64,
-              color: AppColors.textDisabled,
-            ),
+            Icon(Icons.history, size: 64, color: AppColors.textDisabled),
             const SizedBox(height: 24),
             Text(
               l10n.historyEmpty,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
+            // TODO: Add action button to switch to US tab or Plan creation if needed
           ],
         ),
       ),
@@ -71,92 +97,16 @@ class HistoryTab extends StatelessWidget {
   Widget _buildHistoryList(
     BuildContext context,
     AppLocalizations l10n,
-    List<_HistoryItem> items,
+    List<HistoryItem> items,
   ) {
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        return _HistoryItemCard(item: item);
+        return HistoryCard(item: item);
       },
     );
   }
 }
-
-/// 기록 항목 데이터 모델 (임시)
-class _HistoryItem {
-  final DateTime date;
-  final String status; // "했어", "확인됐어요", "이번엔 못 했어"
-  final String? comment; // 선택적 코멘트
-
-  _HistoryItem({
-    required this.date,
-    required this.status,
-    this.comment, // 실제 데이터 연동 시 사용됨
-  });
-  
-  // comment가 null이 아닌지 확인하는 getter
-  bool get hasComment => comment != null && comment!.isNotEmpty;
-}
-
-/// 기록 항목 카드
-class _HistoryItemCard extends StatelessWidget {
-  final _HistoryItem item;
-
-  const _HistoryItemCard({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: AppColors.surface,
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _formatDate(item.date),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                ),
-                Text(
-                  item.status,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-              ],
-            ),
-            if (item.hasComment) ...[
-              const SizedBox(height: 8),
-              Text(
-                item.comment!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    // TODO: 다국어 날짜 포맷
-    return '${date.year}.${date.month}.${date.day}';
-  }
-}
-

@@ -10,7 +10,7 @@ import '../../utils/time_formatter.dart';
 import '../../routes/app_router.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
-/// 
+///
 /// "지금 이 순간, 가장 먼저 신경 써야 할 건 무엇인가?"에 답한다
 class NowTab extends StatefulWidget {
   const NowTab({super.key});
@@ -19,17 +19,16 @@ class NowTab extends StatefulWidget {
   State<NowTab> createState() => _NowTabState();
 }
 
-class _NowTabState extends State<NowTab>
-    with SingleTickerProviderStateMixin {
+class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
   // TODO: 실제 데이터에서 상태를 가져와야 함
   // 실천자 영역
   HomeCardState? _primaryExecutorCard;
   List<HomeCardState> _secondaryExecutorCards = [];
-  
+
   // 관리자 영역
   HomeCardState? _managerQuickCard;
   String? _managerQuickCardPartnerName; // 관리 대상 이름
-  
+
   late AnimationController _animationController;
   late Animation<double> _primaryFadeAnimation;
   late Animation<double> _primaryScaleAnimation;
@@ -43,45 +42,29 @@ class _NowTabState extends State<NowTab>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    
+
     // Primary Card 애니메이션: Fade + Scale
-    _primaryFadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _primaryScaleAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    ));
-    
+    _primaryFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _primaryScaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
     // Secondary Card 애니메이션: Fade
-    _secondaryFadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
+    _secondaryFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
     // Manager Card 애니메이션: Fade
-    _managerFadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
+    _managerFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
     _loadHomeState();
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -95,7 +78,7 @@ class _NowTabState extends State<NowTab>
     // 2. 오늘 확인이 필요한 관리자 행동
     // 3. 오늘이 모두 완료된 경우, 가장 가까운 미래 행동 (D-1, D-2, 시간 단위)
     // 4. 아무 행동도 없을 경우 Quiet 상태
-    
+
     // 임시 테스트 데이터 - 여러 상태를 시뮬레이션
     final possibleStates = <HomeCardState>[
       // 테스트 시나리오 1: 실천자 보고 필요 + 관리자 확인 필요 + 대기 중
@@ -103,47 +86,51 @@ class _NowTabState extends State<NowTab>
       HomeCardState.checkNeeded, // Manager Quick Card
       HomeCardState.waitingForCheck, // Secondary Executor Card
       HomeCardState.checked, // Secondary Executor Card
-      
       // 테스트 시나리오 2: 관리자 확인 필요만
       // HomeCardState.checkNeeded,
-      
+
       // 테스트 시나리오 3: 실천자 보고 필요만
       // HomeCardState.reportNeeded,
       // HomeCardState.checked,
-      
+
       // 테스트 시나리오 4: 계획 없음
       // HomeCardState.planNeeded,
-      
+
       // 테스트 시나리오 5: 조용한 하루 (스펙: 모든 조건 만족 시에만 표시)
       // HomeCardState.quietDay,
     ];
-    
+
     // TODO: 실제 데이터에서 미래 행동 확인
     // - 오늘이 모두 완료된 경우, 가장 가까운 미래 행동 계산
     // - 시간 표현: D-1, D-2 또는 "3시간 남음" 형식
-    
+
     // Step 1: Primary Executor Card 선택
-    final primaryExecutorCard = HomeCardStatePriority.selectPrimaryExecutorCard(possibleStates);
-    
-    // Step 2: Secondary Executor Cards 선택 (최대 3개)
-    final secondaryExecutorCards = HomeCardStatePriority.selectSecondaryExecutorCards(
+    final primaryExecutorCard = HomeCardStatePriority.selectPrimaryExecutorCard(
       possibleStates,
-      primaryExecutorCard,
     );
-    
+
+    // Step 2: Secondary Executor Cards 선택 (최대 3개)
+    final secondaryExecutorCards =
+        HomeCardStatePriority.selectSecondaryExecutorCards(
+          possibleStates,
+          primaryExecutorCard,
+        );
+
     // Step 3: Manager Quick Card 선택
-    final managerQuickCard = HomeCardStatePriority.selectManagerQuickCard(possibleStates);
-    
+    final managerQuickCard = HomeCardStatePriority.selectManagerQuickCard(
+      possibleStates,
+    );
+
     // TODO: 실제 데이터에서 관리 대상 이름 가져오기
     // 임시: 테스트용 이름
     final managerPartnerName = managerQuickCard != null ? '민지' : null;
-    
+
     // 스펙: Quiet 상태는 아래 조건을 모두 만족할 때만 표시
     // - 미완료 실천 행동 없음
     // - 확인 필요 관리자 행동 없음
     // - 가까운 미래 행동도 없음
     // TODO: 실제 데이터로 Quiet 상태 조건 확인
-    
+
     if (mounted) {
       setState(() {
         _primaryExecutorCard = primaryExecutorCard;
@@ -151,7 +138,7 @@ class _NowTabState extends State<NowTab>
         _managerQuickCard = managerQuickCard;
         _managerQuickCardPartnerName = managerPartnerName;
       });
-      
+
       // 애니메이션 시작
       _animationController.forward();
     }
@@ -194,7 +181,7 @@ class _NowTabState extends State<NowTab>
   }
 
   /// Time Chip 텍스트 가져오기
-  /// 
+  ///
   /// 스펙: 시간 표현은 상대적 표현만 사용
   /// - D-1, D-2 (미래)
   /// - 3시간 남음, 30분 남음 (미래)
@@ -228,7 +215,7 @@ class _NowTabState extends State<NowTab>
   /// Time Chip 타입 가져오기
   TimeChipType? _getTimeChipType(HomeCardState state) {
     if (_getTimeChipText(state) == null) return null;
-    
+
     final text = _getTimeChipText(state)!;
     if (text == '지금') {
       return TimeChipType.now;
@@ -257,7 +244,7 @@ class _NowTabState extends State<NowTab>
   /// Manager Quick Card용 Time Chip 타입
   TimeChipType? _getManagerTimeChipType(HomeCardState state) {
     if (_getManagerTimeChipText(state) == null) return null;
-    
+
     final text = _getManagerTimeChipText(state)!;
     if (text == '지금') {
       return TimeChipType.now;
@@ -271,7 +258,7 @@ class _NowTabState extends State<NowTab>
   }
 
   /// Secondary Executor Card용 Time Chip 텍스트
-  /// 
+  ///
   /// 과거 시간 표현: "2시간 전", "어제" 등
   String? _getSecondaryTimeChipText(HomeCardState state) {
     // TODO: 실제 데이터에서 시간 정보 가져오기
@@ -297,7 +284,7 @@ class _NowTabState extends State<NowTab>
   /// Secondary Executor Card용 Time Chip 타입
   TimeChipType? _getSecondaryTimeChipType(HomeCardState state) {
     if (_getSecondaryTimeChipText(state) == null) return null;
-    
+
     final text = _getSecondaryTimeChipText(state)!;
     if (text.contains('전') || text == '어제' || text == '방금 전') {
       return TimeChipType.past;
@@ -307,12 +294,12 @@ class _NowTabState extends State<NowTab>
   }
 
   /// 기록의 시선 텍스트 생성
-  /// 
+  ///
   /// "이번 주 약속 중 2번째", "4주 중 2주차", "이미 3번은 했어요" 등
   /// 사실 전달형 표현으로 외부 시선 느낌 제공
   String? _getRecordGazeText(HomeCardState state) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // TODO: 실제 데이터에서 가져오기
     // 임시 테스트 데이터
     switch (state) {
@@ -340,11 +327,9 @@ class _NowTabState extends State<NowTab>
         QuietHeader(
           partnerName: null, // TODO: 실제 데이터에서 가져오기
           periodState: HeaderPeriodState.noPlan, // TODO: 실제 상태 확인
-          onSettingsTap: () {
-            // TODO: 우리 탭으로 이동
-          },
+          onSettingsTap: null,
         ),
-        
+
         // Now Card
         Expanded(
           child: SingleChildScrollView(
@@ -354,16 +339,17 @@ class _NowTabState extends State<NowTab>
                 left: 24,
                 right: 24,
                 top: 24,
-                bottom: MediaQuery.of(context).padding.bottom + 80, // 하단 탭 높이 + 안전 영역
+                bottom:
+                    MediaQuery.of(context).padding.bottom +
+                    80, // 하단 탭 높이 + 안전 영역
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  
                   // ============================================
                   // 실천자 영역 (Executor Area)
                   // ============================================
-                  
+
                   // Primary Executor Card (큰 카드, 1개)
                   if (_primaryExecutorCard != null) ...[
                     FadeTransition(
@@ -376,40 +362,44 @@ class _NowTabState extends State<NowTab>
                           onCreatePlan: _handleCreatePlan,
                           timeChipText: _getTimeChipText(_primaryExecutorCard!),
                           timeChipType: _getTimeChipType(_primaryExecutorCard!),
-                          recordGazeText: _getRecordGazeText(_primaryExecutorCard!),
+                          recordGazeText: _getRecordGazeText(
+                            _primaryExecutorCard!,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
                   ],
-                  
+
                   // Plan Rail (고정 진입점) - Primary Card 아래
                   PlanRail(
                     state: planRailState,
                     planSummary: planSummary,
                     onNewPlanTap: _handleCreatePlan,
                   ),
-                  
+
                   // Secondary Executor Cards (작은 카드, 0~3개)
                   if (_secondaryExecutorCards.isNotEmpty) ...[
-                    ..._secondaryExecutorCards.map((state) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: FadeTransition(
-                        opacity: _secondaryFadeAnimation,
-                        child: _SecondaryExecutorCard(
-                          state: state,
-                          timeChipText: _getSecondaryTimeChipText(state),
-                          timeChipType: _getSecondaryTimeChipType(state),
+                    ..._secondaryExecutorCards.map(
+                      (state) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: FadeTransition(
+                          opacity: _secondaryFadeAnimation,
+                          child: _SecondaryExecutorCard(
+                            state: state,
+                            timeChipText: _getSecondaryTimeChipText(state),
+                            timeChipType: _getSecondaryTimeChipType(state),
+                          ),
                         ),
                       ),
-                    )),
+                    ),
                     const SizedBox(height: 24),
                   ],
-                  
+
                   // ============================================
                   // 관리자 영역 (Manager Area)
                   // ============================================
-                  
+
                   // Manager Quick Card (작은 카드, 버튼 있음)
                   if (_managerQuickCard != null) ...[
                     FadeTransition(
@@ -418,13 +408,17 @@ class _NowTabState extends State<NowTab>
                         state: _managerQuickCard!,
                         partnerName: _managerQuickCardPartnerName,
                         onCheckIt: _handleCheckIt,
-                        timeChipText: _getManagerTimeChipText(_managerQuickCard!),
-                        timeChipType: _getManagerTimeChipType(_managerQuickCard!),
+                        timeChipText: _getManagerTimeChipText(
+                          _managerQuickCard!,
+                        ),
+                        timeChipType: _getManagerTimeChipType(
+                          _managerQuickCard!,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                   ],
-                  
+
                   // 보조 정보 (Context Footer)
                   _ContextFooter(),
                   const SizedBox(height: 24),
@@ -459,13 +453,13 @@ class _PrimaryExecutorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Card(
       elevation: 1,
-      color: AppColors.surface, // Theme A: Soft Dark Stone (#DFD9D4)
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      color: AppColors.surface.withValues(
+        alpha: 0.7,
+      ), // Theme A: Soft Dark Stone (Opacity 0.7)
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -474,12 +468,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
             if (timeChipText != null && timeChipType != null)
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TimeChip(
-                    text: timeChipText!,
-                    type: timeChipType!,
-                  ),
-                ],
+                children: [TimeChip(text: timeChipText!, type: timeChipType!)],
               ),
             if (timeChipText != null && timeChipType != null)
               const SizedBox(height: 12),
@@ -490,9 +479,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
               Text(
                 recordGazeText!,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: 12,
-                    ),
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -506,7 +495,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
 
   Widget _buildMessage(BuildContext context, AppLocalizations l10n) {
     String message;
-    
+
     switch (state) {
       case HomeCardState.reportNeeded:
         message = l10n.homeNowTask;
@@ -517,13 +506,13 @@ class _PrimaryExecutorCard extends StatelessWidget {
       default:
         message = '';
     }
-    
+
     return Text(
       message,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: AppColors.textPrimary,
-            height: 1.5,
-          ),
+        color: AppColors.textPrimary,
+        height: 1.5,
+      ),
       textAlign: TextAlign.center,
     );
   }
@@ -531,10 +520,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
   Widget _buildButton(BuildContext context, AppLocalizations l10n) {
     // Theme A: Primary (Velvet Wine Plum #552A3E)
     final buttonTextColor = Colors.white; // Primary 위에는 흰색 텍스트
-    
+
     VoidCallback? onPressed;
     String buttonText;
-    
+
     if (state == HomeCardState.reportNeeded) {
       buttonText = l10n.homeDidIt;
       onPressed = onDidIt;
@@ -544,29 +533,30 @@ class _PrimaryExecutorCard extends StatelessWidget {
     } else {
       return const SizedBox.shrink();
     }
-    
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary, // Theme A: Velvet Wine Plum
-          foregroundColor: buttonTextColor,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ).copyWith(
-          overlayColor: WidgetStateProperty.resolveWith<Color?>(
-            (Set<WidgetState> states) {
-              if (states.contains(WidgetState.pressed)) {
-                return AppColors.primaryPressed; // Theme A: Deep Velvet Wine
-              }
-              return null;
-            },
-          ),
-        ),
+        style:
+            ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary, // Theme A: Velvet Wine Plum
+              foregroundColor: buttonTextColor,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ).copyWith(
+              overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                Set<WidgetState> states,
+              ) {
+                if (states.contains(WidgetState.pressed)) {
+                  return AppColors.primaryPressed; // Theme A: Deep Velvet Wine
+                }
+                return null;
+              }),
+            ),
         child: Text(
           buttonText,
           style: TextStyle(
@@ -595,13 +585,13 @@ class _SecondaryExecutorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Card(
       elevation: 0,
-      color: AppColors.surface.withValues(alpha: 0.7), // Theme A: Soft Dark Stone (Opacity 0.7)
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      color: AppColors.surface.withValues(
+        alpha: 0.7,
+      ), // Theme A: Soft Dark Stone (Opacity 0.7)
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
@@ -610,12 +600,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
             if (timeChipText != null && timeChipType != null)
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TimeChip(
-                    text: timeChipText!,
-                    type: timeChipType!,
-                  ),
-                ],
+                children: [TimeChip(text: timeChipText!, type: timeChipType!)],
               ),
             if (timeChipText != null && timeChipType != null)
               const SizedBox(height: 8),
@@ -628,7 +613,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
 
   Widget _buildMessage(BuildContext context, AppLocalizations l10n) {
     String message;
-    
+
     switch (state) {
       case HomeCardState.waitingForCheck:
         message = '${l10n.homeSentWaiting}\n${l10n.homeWaitingForCheck}';
@@ -644,13 +629,13 @@ class _SecondaryExecutorCard extends StatelessWidget {
       default:
         message = '';
     }
-    
+
     return Text(
       message,
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textPrimary,
-            height: 1.4,
-          ),
+        color: AppColors.textPrimary,
+        height: 1.4,
+      ),
       textAlign: TextAlign.center,
     );
   }
@@ -675,13 +660,13 @@ class _ManagerQuickCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Card(
       elevation: 0,
-      color: AppColors.surface.withValues(alpha: 0.6), // Theme A: Soft Dark Stone (Opacity 0.6, 실천자보다 약함)
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      color: AppColors.surface.withValues(
+        alpha: 0.6,
+      ), // Theme A: Soft Dark Stone (Opacity 0.6, 실천자보다 약함)
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
@@ -705,19 +690,16 @@ class _ManagerQuickCard extends StatelessWidget {
                   child: Text(
                     l10n.homeReceivedMessage,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textPrimary,
-                          height: 1.4,
-                        ),
+                      color: AppColors.textPrimary,
+                      height: 1.4,
+                    ),
                     textAlign: TextAlign.left,
                   ),
                 ),
                 // Time Chip (우측 상단)
                 if (timeChipText != null && timeChipType != null) ...[
                   const SizedBox(width: 8),
-                  TimeChip(
-                    text: timeChipText!,
-                    type: timeChipType!,
-                  ),
+                  TimeChip(text: timeChipText!, type: timeChipType!),
                 ],
               ],
             ),
@@ -726,35 +708,41 @@ class _ManagerQuickCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                      onPressed: onCheckIt,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary, // Theme A: Velvet Wine Plum
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ).copyWith(
-                        overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.pressed)) {
-                              return AppColors.primaryPressed; // Theme A: Deep Velvet Wine
-                            }
-                            return null;
-                          },
-                        ),
+                onPressed: onCheckIt,
+                style:
+                    ElevatedButton.styleFrom(
+                      backgroundColor:
+                          AppColors.primary, // Theme A: Velvet Wine Plum
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
                       ),
-                      child: Text(
-                        l10n.homeCheckIt,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                    ).copyWith(
+                      overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                        Set<WidgetState> states,
+                      ) {
+                        if (states.contains(WidgetState.pressed)) {
+                          return AppColors
+                              .primaryPressed; // Theme A: Deep Velvet Wine
+                        }
+                        return null;
+                      }),
                     ),
+                child: Text(
+                  l10n.homeCheckIt,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
                   ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -770,20 +758,20 @@ class _ContextFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: 실제 데이터에서 가져오기
     final contextInfo = <String>[];
-    
+
     if (contextInfo.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Column(
       children: contextInfo.map((info) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
             info,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
         );
@@ -791,4 +779,3 @@ class _ContextFooter extends StatelessWidget {
     );
   }
 }
-

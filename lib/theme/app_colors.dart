@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'app_theme_enum.dart';
 
 /// OnMyBehalf Color System — Multi-Theme Support
-/// 
+///
 /// Theme A: Smoky Plum × Warm Stone
 /// "우리가 서로를 맡기는 관계"의 색
-/// 
+///
 /// Theme B: Deep Olive × Sand
 /// 단단함 · 책임감 · 안정적인 섹시함
 class AppColors {
@@ -26,11 +26,17 @@ class AppColors {
   // Theme A: Velvet Wine Plum × Dark Stone
   // "집중하게 만드는 관리자 색"
   // ============================================
-  static const Color _smokyPlumBackground = Color(0xFFEEEAE6); // Dark Warm Stone
+  static const Color _smokyPlumBackground = Color(
+    0xFFEEEAE6,
+  ); // Dark Warm Stone
   static const Color _smokyPlumSurface = Color(0xFFDFD9D4); // Soft Dark Stone
   static const Color _smokyPlumPrimary = Color(0xFF552A3E); // Velvet Wine Plum
-  static const Color _smokyPlumPrimaryPressed = Color(0xFF462232); // Deep Velvet Wine
-  static const Color _smokyPlumPrimarySoft = Color(0xFF6E4156); // Muted Wine Plum (≤5%)
+  static const Color _smokyPlumPrimaryPressed = Color(
+    0xFF462232,
+  ); // Deep Velvet Wine
+  static const Color _smokyPlumPrimarySoft = Color(
+    0xFF6E4156,
+  ); // Muted Wine Plum (≤5%)
   static const Color _smokyPlumSecondary = Color(0xFFC9C1BB); // Secondary
   static const Color _smokyPlumOutline = Color(0xFFCCC4BE); // Outline
   static const Color _smokyPlumDivider = Color(0xFFD2CBC6); // Stone Line
@@ -38,8 +44,12 @@ class AppColors {
   static const Color _smokyPlumTextPrimary = Color(0xFF201A1D);
   static const Color _smokyPlumTextSecondary = Color(0xFF6E6469);
   static const Color _smokyPlumTextDisabled = Color(0xFFA29A9E);
-  static const Color _smokyPlumAccentWine = Color(0xFF6A1F2B); // Accent Wine (≤5%)
-  static const Color _smokyPlumAccentInkViolet = Color(0xFF3A2A46); // Accent Ink Violet (포커스/전환, ≤400ms)
+  static const Color _smokyPlumAccentWine = Color(
+    0xFF6A1F2B,
+  ); // Accent Wine (≤5%)
+  static const Color _smokyPlumAccentInkViolet = Color(
+    0xFF3A2A46,
+  ); // Accent Ink Violet (포커스/전환, ≤400ms)
 
   // ============================================
   // Theme B: Deep Olive × Sand
@@ -57,7 +67,7 @@ class AppColors {
   // ============================================
   // Core Palette Getters (현재 테마에 따라 반환)
   // ============================================
-  
+
   static Color get background {
     switch (_currentTheme) {
       case AppThemeType.smokyPlum:
@@ -133,7 +143,7 @@ class AppColors {
   // ============================================
   // Text Colors Getters
   // ============================================
-  
+
   static Color get textPrimary {
     switch (_currentTheme) {
       case AppThemeType.smokyPlum:
@@ -164,7 +174,7 @@ class AppColors {
   // ============================================
   // Accent Colors (Theme A only)
   // ============================================
-  
+
   /// Accent Wine - 아이콘·선택 상태 (≤5%)
   static Color get accentWine {
     switch (_currentTheme) {
@@ -198,10 +208,10 @@ class AppColors {
   // ============================================
   // Dark Mode Colors (향후 구현)
   // ============================================
-  
+
   static const Color darkBackgroundSmokyPlum = Color(0xFF1E1A1D);
   static const Color darkSurfaceSmokyPlum = Color(0xFF2A2328);
-  
+
   static Color get darkBackground {
     switch (_currentTheme) {
       case AppThemeType.smokyPlum:
@@ -225,43 +235,53 @@ class AppColors {
   // ============================================
   // Legacy colors (하위 호환성, 추후 제거 예정)
   // ============================================
-  
+
   @Deprecated('Use background instead')
   static Color get neutral99 => background;
-  
+
   @Deprecated('Use surface instead')
   static Color get secondary90 => surface;
-  
+
   @Deprecated('Use textPrimary instead')
   static Color get neutral10 => textPrimary;
-  
+
   @Deprecated('Use textSecondary instead')
   static Color get neutral40 => textSecondary;
-  
+
   @Deprecated('Use primary instead')
   static Color get primary70 => primary;
-  
+
   @Deprecated('Use primaryPressed instead')
   static Color get primary60 => primaryPressed;
-  
+
   @Deprecated('Use background instead')
   static Color get warmOffWhite => background;
-  
+
   @Deprecated('Use surface instead')
   static Color get lightSand => surface;
-  
+
   @Deprecated('Use textPrimary instead')
   static Color get primaryText => textPrimary;
-  
+
   @Deprecated('Use textSecondary instead')
   static Color get secondaryText => textSecondary;
-  
+
   @Deprecated('Use textDisabled instead')
   static Color get neutral50 => textDisabled;
-  
+
   @Deprecated('Use primary instead')
   static Color get warmCoral => primary;
-  
+
   @Deprecated('Use primary instead')
   static Color get softSageGreen => primary;
+
+  // ============================================
+  // Status Colors
+  // ============================================
+
+  static const Color _success = Color(0xFF6B8E23); // Warm Olive Green
+  static const Color _error = Color(0xFFD32F2F); // Standard Error Red
+
+  static Color get success => _success;
+  static Color get error => _error;
 }
