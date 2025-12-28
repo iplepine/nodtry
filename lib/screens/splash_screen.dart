@@ -24,6 +24,7 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _buttonFadeAnimation;
 
   bool _isGoogleLoading = false;
+  bool _isGuestLoading = false;
 
   @override
   void initState() {
@@ -151,6 +152,32 @@ class _SplashScreenState extends State<SplashScreen>
     }
   }
 
+  Future<void> _handleGuestLogin() async {
+    setState(() {
+      _isGuestLoading = true;
+    });
+
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+      if (mounted) {
+        _navigateToNext();
+      }
+    } catch (e) {
+      debugPrint('Guest login failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGuestLoading = false;
+        });
+      }
+    }
+  }
+
   void _navigateToNext() {
     // TODO: 커플 연결 여부 확인 후 적절한 화면으로 이동
     // 로그인/스플래시 -> 홈 or 연결 화면
@@ -232,20 +259,11 @@ class _SplashScreenState extends State<SplashScreen>
                       ],
 
                       // 게스트 로그인 (둘러보기) - OutlinedButton 스타일 적용
+                      // 게스트 로그인 (둘러보기) - OutlinedButton 스타일 적용
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton(
-                          onPressed: () async {
-                            try {
-                              await FirebaseAuth.instance.signInAnonymously();
-                              if (context.mounted) {
-                                context.go(AppRoutes.home);
-                              }
-                            } catch (e) {
-                              debugPrint('Guest login failed: $e');
-                              // TODO: 에러 처리
-                            }
-                          },
+                          onPressed: _isGuestLoading ? null : _handleGuestLogin,
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(color: AppColors.secondary),
                             padding: const EdgeInsets.symmetric(
@@ -256,14 +274,25 @@ class _SplashScreenState extends State<SplashScreen>
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: Text(
-                            AppLocalizations.of(context)!.loginGuest,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
+                          child: _isGuestLoading
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.textSecondary,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  AppLocalizations.of(context)!.loginGuest,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
                         ),
                       ),
 
