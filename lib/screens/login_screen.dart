@@ -5,6 +5,8 @@ import '../widgets/primary_button.dart';
 import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:io';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,37 +17,44 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isGoogleLoading = false;
-  bool _isAppleLoading = false;
 
   Future<void> _handleGoogleLogin() async {
     setState(() {
       _isGoogleLoading = true;
     });
 
-    // TODO: Google 로그인 로직 구현
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      if (Platform.isAndroid) {
+        // Android: Google Sign-In
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-    if (mounted) {
-      setState(() {
-        _isGoogleLoading = false;
-      });
-      // TODO: 로그인 성공 후 다음 화면으로 이동
-    }
-  }
+        if (googleUser != null) {
+          final GoogleSignInAuthentication googleAuth =
+              await googleUser.authentication;
 
-  Future<void> _handleAppleLogin() async {
-    setState(() {
-      _isAppleLoading = true;
-    });
+          if (googleAuth.accessToken != null && googleAuth.idToken != null) {
+            final credential = GoogleAuthProvider.credential(
+              accessToken: googleAuth.accessToken,
+              idToken: googleAuth.idToken,
+            );
 
-    // TODO: Apple 로그인 로직 구현
-    await Future.delayed(const Duration(seconds: 1));
+            await FirebaseAuth.instance.signInWithCredential(credential);
 
-    if (mounted) {
-      setState(() {
-        _isAppleLoading = false;
-      });
-      // TODO: 로그인 성공 후 다음 화면으로 이동
+            if (mounted) {
+              context.go(AppRoutes.home);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Google login failed: $e');
+      // TODO: 에러 처리
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGoogleLoading = false;
+        });
+      }
     }
   }
 
@@ -64,17 +73,18 @@ class _LoginScreenState extends State<LoginScreen> {
               // 중앙: 로그인 버튼
               Column(
                 children: [
-                  PrimaryButton(
-                    text: AppLocalizations.of(context)!.loginWithGoogle,
-                    onPressed: _handleGoogleLogin,
-                    isLoading: _isGoogleLoading,
-                  ),
-                  const SizedBox(height: 12),
-                  PrimaryButton(
-                    text: AppLocalizations.of(context)!.loginWithApple,
-                    onPressed: _handleAppleLogin,
-                    isLoading: _isAppleLoading,
-                  ),
+                  // Android에서만 구글 로그인 버튼 표시
+                  if (Platform.isAndroid) ...[
+                    PrimaryButton(
+                      text: AppLocalizations.of(context)!.loginWithGoogle,
+                      onPressed: _handleGoogleLogin,
+                      isLoading: _isGoogleLoading,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
+                  // iOS에서는 애플 로그인을 넣어야 하지만, 게스트 모드만 제공하기 위해 숨김처리
+                  // if (Platform.isIOS) ... [ Apple Login Button ]
                 ],
               ),
 
