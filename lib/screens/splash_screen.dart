@@ -4,9 +4,9 @@ import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
 import '../routes/app_router.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:io';
+import '../services/auth_service.dart';
+import '../services/database_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -102,14 +102,20 @@ class _SplashScreenState extends State<SplashScreen>
     });
   }
 
-  Future<void> _checkAuthAndNavigate() async {
-    // TODO: 실제 인증 상태 확인 로직 구현
-    // - 로그인 상태 확인
-    // - 커플 연결 여부 확인
-    // - 다음 화면으로 이동
+  final AuthService _authService = AuthService();
+  final DatabaseService _databaseService = DatabaseService();
 
-    // 임시: 로그인되지 않은 상태로 가정
-    // 로그인 화면은 이미 표시됨
+  Future<void> _checkAuthAndNavigate() async {
+    // 이미 로그인되어 있으면 다음 화면으로 이동
+    final user = _authService.currentUser;
+    if (user != null) {
+      // 로그인 시 사용자 문서 확인/생성
+      await _databaseService.createUser(user);
+      _navigateToNext();
+    } else {
+      // 로그인 안 되어 있으면 로그인 화면 유지 (자동 로그인 실패)
+      // 아무것도 하지 않음 (로그인 버튼들이 보임)
+    }
   }
 
   Future<void> _handleGoogleLogin() async {
@@ -119,30 +125,19 @@ class _SplashScreenState extends State<SplashScreen>
 
     try {
       if (Platform.isAndroid) {
-        // Android: Google Sign-In
-        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-        if (googleUser != null) {
-          final GoogleSignInAuthentication googleAuth =
-              await googleUser.authentication;
-
-          if (googleAuth.accessToken != null && googleAuth.idToken != null) {
-            final credential = GoogleAuthProvider.credential(
-              accessToken: googleAuth.accessToken,
-              idToken: googleAuth.idToken,
-            );
-
-            await FirebaseAuth.instance.signInWithCredential(credential);
-
-            if (mounted) {
-              _navigateToNext();
-            }
-          }
+        final result = await _authService.signInWithGoogle();
+        if (result != null && mounted) {
+          await _databaseService.createUser(result.user!);
+          _navigateToNext();
         }
       }
     } catch (e) {
       debugPrint('Google login failed: $e');
-      // TODO: 에러 처리
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -158,8 +153,9 @@ class _SplashScreenState extends State<SplashScreen>
     });
 
     try {
-      await FirebaseAuth.instance.signInAnonymously();
+      final result = await _authService.signInAnonymously();
       if (mounted) {
+        await _databaseService.createUser(result.user!);
         _navigateToNext();
       }
     } catch (e) {
