@@ -119,6 +119,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyEmpty => 'No history yet';
 
   @override
+  String get usMeTitle => 'Me';
+
+  @override
+  String get usDefaultNameMe => 'Me';
+
+  @override
+  String get usYouTitle => 'You';
+
+  @override
+  String get usProfileEdit => 'Edit';
+
+  @override
+  String get usStatusMessagePlaceholder => 'Set status message';
+
+  @override
+  String get usMyIntroduction => 'My Introduction';
+
+  @override
+  String get usMyInviteCode => 'My Invite Code';
+
+  @override
+  String get usBadgeSupported => 'Supported';
+
+  @override
+  String get usBadgeCheering => 'Cheering';
+
+  @override
+  String get usBadgeMutual => 'Together';
+
+  @override
+  String get usEmptyMatesTitle => 'No mates connected yet';
+
+  @override
+  String get usEmptyMatesSubtitle =>
+      'Send your invite code to become each other\'s safe base';
+
+  @override
   String get usConnectedPeople => 'Connected People';
 
   @override

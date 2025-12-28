@@ -117,19 +117,55 @@ class AppLocalizationsKo extends AppLocalizations {
   String get historyEmpty => '아직 기록이 없어요';
 
   @override
-  String get usConnectedPeople => '연결된 사람';
+  String get usMeTitle => '나';
 
   @override
-  String get usManaging => '관리 중';
+  String get usDefaultNameMe => '나';
 
   @override
-  String get usEntrusted => '맡긴 중';
+  String get usYouTitle => '너';
 
   @override
-  String get usInviteNew => '새 사람 초대';
+  String get usProfileEdit => '편집';
 
   @override
-  String get usNoConnections => '아직 연결된 사람이 없어요';
+  String get usStatusMessagePlaceholder => '상태 메시지 설정';
+
+  @override
+  String get usMyIntroduction => '내 소개';
+
+  @override
+  String get usMyInviteCode => '내 초대 코드';
+
+  @override
+  String get usBadgeSupported => '지지받는 중';
+
+  @override
+  String get usBadgeCheering => '응원하는 중';
+
+  @override
+  String get usBadgeMutual => '함께하는 중';
+
+  @override
+  String get usEmptyMatesTitle => '아직 연결된 메이트가 없어요';
+
+  @override
+  String get usEmptyMatesSubtitle => '초대 코드를 보내서 서로의 안전 기지가 되어주세요';
+
+  @override
+  String get usConnectedPeople => 'Connected People';
+
+  @override
+  String get usManaging => 'Managing';
+
+  @override
+  String get usEntrusted => 'Entrusted';
+
+  @override
+  String get usInviteNew => 'Invite New Person';
+
+  @override
+  String get usNoConnections => 'No connections yet';
 
   @override
   String headerWeekProgress(int week, int total) {

@@ -302,6 +302,78 @@ abstract class AppLocalizations {
   /// **'No history yet'**
   String get historyEmpty;
 
+  /// Us tab - Me section title
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get usMeTitle;
+
+  /// Us tab - Default user name
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get usDefaultNameMe;
+
+  /// Us tab - You section title
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get usYouTitle;
+
+  /// Us tab - Profile edit button
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get usProfileEdit;
+
+  /// Us tab - Status message placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Set status message'**
+  String get usStatusMessagePlaceholder;
+
+  /// Us tab - My introduction button
+  ///
+  /// In en, this message translates to:
+  /// **'My Introduction'**
+  String get usMyIntroduction;
+
+  /// Us tab - My invite code button
+  ///
+  /// In en, this message translates to:
+  /// **'My Invite Code'**
+  String get usMyInviteCode;
+
+  /// Us tab - Badge: They support Me
+  ///
+  /// In en, this message translates to:
+  /// **'Supported'**
+  String get usBadgeSupported;
+
+  /// Us tab - Badge: I cheer Them
+  ///
+  /// In en, this message translates to:
+  /// **'Cheering'**
+  String get usBadgeCheering;
+
+  /// Us tab - Badge: Mutual support
+  ///
+  /// In en, this message translates to:
+  /// **'Together'**
+  String get usBadgeMutual;
+
+  /// Us tab - Empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No mates connected yet'**
+  String get usEmptyMatesTitle;
+
+  /// Us tab - Empty state subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Send your invite code to become each other\'s safe base'**
+  String get usEmptyMatesSubtitle;
+
   /// Section title for connected people
   ///
   /// In en, this message translates to:

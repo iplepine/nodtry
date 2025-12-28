@@ -154,6 +154,54 @@
   "@historyEmpty": {
     "description": "Empty state message for history tab"
   },
+  "usMeTitle": "Me",
+  "@usMeTitle": {
+    "description": "Us tab - Me section title"
+  },
+  "usDefaultNameMe": "Me",
+  "@usDefaultNameMe": {
+    "description": "Us tab - Default user name"
+  },
+  "usYouTitle": "You",
+  "@usYouTitle": {
+    "description": "Us tab - You section title"
+  },
+  "usProfileEdit": "Edit",
+  "@usProfileEdit": {
+    "description": "Us tab - Profile edit button"
+  },
+  "usStatusMessagePlaceholder": "Set status message",
+  "@usStatusMessagePlaceholder": {
+    "description": "Us tab - Status message placeholder"
+  },
+  "usMyIntroduction": "My Introduction",
+  "@usMyIntroduction": {
+    "description": "Us tab - My introduction button"
+  },
+  "usMyInviteCode": "My Invite Code",
+  "@usMyInviteCode": {
+    "description": "Us tab - My invite code button"
+  },
+  "usBadgeSupported": "Supported",
+  "@usBadgeSupported": {
+    "description": "Us tab - Badge: They support Me"
+  },
+  "usBadgeCheering": "Cheering",
+  "@usBadgeCheering": {
+    "description": "Us tab - Badge: I cheer Them"
+  },
+  "usBadgeMutual": "Together",
+  "@usBadgeMutual": {
+    "description": "Us tab - Badge: Mutual support"
+  },
+  "usEmptyMatesTitle": "No mates connected yet",
+  "@usEmptyMatesTitle": {
+    "description": "Us tab - Empty state title"
+  },
+  "usEmptyMatesSubtitle": "Send your invite code to become each other's safe base",
+  "@usEmptyMatesSubtitle": {
+    "description": "Us tab - Empty state subtitle"
+  },
   "usConnectedPeople": "Connected People",
   "@usConnectedPeople": {
     "description": "Section title for connected people"
