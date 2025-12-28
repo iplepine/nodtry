@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
+import 'dart:io';
 import 'package:go_router/go_router.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../routes/app_router.dart';
 
 /// 우리 탭 - 안전 기지 & 연결 허브
@@ -19,11 +22,13 @@ class _UsTabState extends State<UsTab> {
   // TODO: 실제 데이터는 Provider/Repository에서 관리
   String? _name;
   String? _statusMessage;
+  File? _profileImage;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final displayName = _name ?? l10n.usDefaultNameMe;
+    // status and image handled directly via state variables
 
     // TODO: 실제 데이터 연동
     final connectedPeople = <_ConnectedPerson>[
@@ -46,6 +51,7 @@ class _UsTabState extends State<UsTab> {
                 l10n: l10n,
                 name: displayName,
                 statusMessage: _statusMessage,
+                profileImage: _profileImage,
                 onEditProfile: () => _showEditProfileDialog(
                   context,
                   displayName,
@@ -69,6 +75,7 @@ class _UsTabState extends State<UsTab> {
     String currentName,
     String? currentStatus,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final TextEditingController nameController = TextEditingController(
       text: currentName,
     );
@@ -76,106 +83,165 @@ class _UsTabState extends State<UsTab> {
       text: currentStatus,
     );
 
+    // Dialog 내부에서 이미지를 변경하고 보여주기 위해 임시 변수 사용하지 않고
+    // 부모의 _profileImage를 직접 수정하여 반영 (간소화)
+    // 하지만 Dialog가 닫힐 때 취소하면 원복해야 하므로, 복잡해질 수 있음.
+    // 여기서는 StatefulBuilder를 사용하여 Dialog 내부 상태를 관리.
+    File? tempProfileImage = _profileImage;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(
-          "프로필 편집", // TODO: L10n
-          style: TextStyle(color: AppColors.textPrimary),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 프로필 사진 편집 (Placeholder)
-            GestureDetector(
-              onTap: () {
-                // TODO: 이미지 피커 연동
-              },
-              child: Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.person,
-                      size: 48,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.surface, width: 2),
-                    ),
-                    child: Icon(
-                      Icons.camera_alt,
-                      size: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // 이름 입력
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: "이름", // TODO: L10n
-                labelStyle: TextStyle(color: AppColors.textSecondary),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.divider),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary),
-                ),
-              ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateDialog) {
+          return AlertDialog(
+            scrollable: true,
+            backgroundColor: AppColors.surface,
+            title: Text(
+              "프로필 편집", // TODO: L10n
               style: TextStyle(color: AppColors.textPrimary),
             ),
-            const SizedBox(height: 16),
-            // 상태 메시지 입력
-            TextField(
-              controller: statusController,
-              decoration: InputDecoration(
-                labelText: "상태 메시지", // TODO: L10n
-                labelStyle: TextStyle(color: AppColors.textSecondary),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.divider),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 프로필 사진 편집
+                Semantics(
+                  label: l10n.usProfileEditImageLabel,
+                  button: true,
+                  child: GestureDetector(
+                    onTap: () async {
+                      final picker = ImagePicker();
+                      final pickedFile = await picker.pickImage(
+                        source: ImageSource.gallery,
+                      );
+
+                      if (pickedFile != null) {
+                        final croppedFile = await ImageCropper().cropImage(
+                          sourcePath: pickedFile.path,
+                          uiSettings: [
+                            AndroidUiSettings(
+                              toolbarTitle: '프로필 사진 자르기',
+                              toolbarColor: AppColors.primary,
+                              toolbarWidgetColor: Colors.white,
+                              initAspectRatio: CropAspectRatioPreset.square,
+                              lockAspectRatio: true,
+                            ),
+                            IOSUiSettings(
+                              title: '프로필 사진 자르기',
+                              aspectRatioLockEnabled: true,
+                              resetAspectRatioEnabled: false,
+                            ),
+                          ],
+                        );
+
+                        if (croppedFile != null) {
+                          setStateDialog(() {
+                            tempProfileImage = File(croppedFile.path);
+                          });
+                        }
+                      }
+                    },
+                    child: Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                            image: tempProfileImage != null
+                                ? DecorationImage(
+                                    image: FileImage(tempProfileImage!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: tempProfileImage == null
+                              ? Icon(
+                                  Icons.person,
+                                  size: 48,
+                                  color: AppColors.primary,
+                                )
+                              : null,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.surface,
+                              width: 2,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.camera_alt,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary),
+                const SizedBox(height: 24),
+                // 이름 입력
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: "이름", // TODO: L10n
+                    labelStyle: TextStyle(color: AppColors.textSecondary),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.divider),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 16),
+                // 상태 메시지 입력
+                TextField(
+                  controller: statusController,
+                  decoration: InputDecoration(
+                    labelText: "상태 메시지", // TODO: L10n
+                    labelStyle: TextStyle(color: AppColors.textSecondary),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.divider),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  "취소",
+                  style: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
-              style: TextStyle(color: AppColors.textPrimary),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("취소", style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _name = nameController.text;
-                _statusMessage = statusController.text.isEmpty
-                    ? null
-                    : statusController.text;
-              });
-              Navigator.pop(context);
-            },
-            child: Text("저장", style: TextStyle(color: AppColors.primary)),
-          ),
-        ],
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _name = nameController.text;
+                    _statusMessage = statusController.text.isEmpty
+                        ? null
+                        : statusController.text;
+                    _profileImage = tempProfileImage;
+                  });
+                  Navigator.pop(context);
+                },
+                child: Text("저장", style: TextStyle(color: AppColors.primary)),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -186,12 +252,14 @@ class _MeSection extends StatelessWidget {
   final AppLocalizations l10n;
   final String name;
   final String? statusMessage;
+  final File? profileImage;
   final VoidCallback onEditProfile;
 
   const _MeSection({
     required this.l10n,
     required this.name,
     this.statusMessage,
+    this.profileImage,
     required this.onEditProfile,
   });
 
@@ -217,6 +285,7 @@ class _MeSection extends StatelessWidget {
                 Icons.settings_outlined,
                 color: AppColors.textSecondary,
               ),
+              tooltip: l10n.settingsTitle, // "설정"
             ),
           ],
         ),
@@ -247,12 +316,16 @@ class _MeSection extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
+                      image: profileImage != null
+                          ? DecorationImage(
+                              image: FileImage(profileImage!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
-                    child: Icon(
-                      Icons.person,
-                      size: 32,
-                      color: AppColors.primary,
-                    ),
+                    child: profileImage == null
+                        ? Icon(Icons.person, size: 32, color: AppColors.primary)
+                        : null,
                   ),
                   const SizedBox(width: 16),
 
@@ -419,12 +492,17 @@ class _YouSection extends StatelessWidget {
                 // TODO: 초대 화면
               },
               borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.add_circle,
-                  color: AppColors.primary,
-                  size: 28,
+              child: Semantics(
+                label:
+                    l10n.usAddConnectionLabel, // "새 연결 추가" (Need to add to ARB)
+                button: true,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.add_circle,
+                    color: AppColors.primary,
+                    size: 28,
+                  ),
                 ),
               ),
             ),

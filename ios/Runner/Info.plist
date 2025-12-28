@@ -55,6 +55,11 @@
 				<string>onmybehalf</string>
 			</array>
 		</dict>
+		</dict>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Mind Gardener requires access to your photo library to select a profile picture.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Mind Gardener requires access to your camera to take a profile picture.</string>
 </dict>
 </plist>

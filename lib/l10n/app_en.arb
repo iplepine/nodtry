@@ -190,6 +190,14 @@
   "@usBadgeCheering": {
     "description": "Us tab - Badge: I cheer Them"
   },
+  "usProfileEditImageLabel": "Change profile picture",
+  "@usProfileEditImageLabel": {
+    "description": "Us tab - Profile edit image label"
+  },
+  "usAddConnectionLabel": "Add new connection",
+  "@usAddConnectionLabel": {
+    "description": "Us tab - Add new connection button label"
+  },
   "usBadgeMutual": "Together",
   "@usBadgeMutual": {
     "description": "Us tab - Badge: Mutual support"

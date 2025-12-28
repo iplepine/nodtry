@@ -146,6 +146,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usBadgeCheering => 'Cheering';
 
   @override
+  String get usProfileEditImageLabel => 'Change profile picture';
+
+  @override
+  String get usAddConnectionLabel => 'Add new connection';
+
+  @override
   String get usBadgeMutual => 'Together';
 
   @override

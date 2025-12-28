@@ -144,6 +144,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usBadgeCheering => '응원하는 중';
 
   @override
+  String get usProfileEditImageLabel => '프로필 사진 변경';
+
+  @override
+  String get usAddConnectionLabel => '새 연결 추가';
+
+  @override
   String get usBadgeMutual => '함께하는 중';
 
   @override

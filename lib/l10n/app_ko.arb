@@ -67,6 +67,8 @@
   "usMyInviteCode": "내 초대 코드",
   "usBadgeSupported": "지지받는 중",
   "usBadgeCheering": "응원하는 중",
+  "usProfileEditImageLabel": "프로필 사진 변경",
+  "usAddConnectionLabel": "새 연결 추가",
   "usBadgeMutual": "함께하는 중",
   "usEmptyMatesTitle": "아직 연결된 메이트가 없어요",
   "usEmptyMatesSubtitle": "초대 코드를 보내서 서로의 안전 기지가 되어주세요",

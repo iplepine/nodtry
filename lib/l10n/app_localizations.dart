@@ -356,6 +356,18 @@ abstract class AppLocalizations {
   /// **'Cheering'**
   String get usBadgeCheering;
 
+  /// Us tab - Profile edit image label
+  ///
+  /// In en, this message translates to:
+  /// **'Change profile picture'**
+  String get usProfileEditImageLabel;
+
+  /// Us tab - Add new connection button label
+  ///
+  /// In en, this message translates to:
+  /// **'Add new connection'**
+  String get usAddConnectionLabel;
+
   /// Us tab - Badge: Mutual support
   ///
   /// In en, this message translates to:
