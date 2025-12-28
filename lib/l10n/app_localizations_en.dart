@@ -38,6 +38,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterInviteCode => 'Enter Invite Code';
 
   @override
+  String get startSolo => 'Start Solo';
+
+  @override
   String get inviteCode => 'Invite Code';
 
   @override

@@ -152,6 +152,12 @@ abstract class AppLocalizations {
   /// **'Enter Invite Code'**
   String get enterInviteCode;
 
+  /// Button to start without connecting to a partner
+  ///
+  /// In en, this message translates to:
+  /// **'Start Solo'**
+  String get startSolo;
+
   /// Label for invite code
   ///
   /// In en, this message translates to:

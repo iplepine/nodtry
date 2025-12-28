@@ -207,6 +207,22 @@ class _ConnectScreenState extends State<ConnectScreen> {
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ),
+        const SizedBox(height: 16),
+        TextButton(
+          onPressed: _navigateToHome,
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.textSecondary,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          ),
+          child: Text(
+            AppLocalizations.of(context)!.startSolo,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
       ],
     );
   }

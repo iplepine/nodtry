@@ -36,6 +36,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get enterInviteCode => '초대 코드 입력';
 
   @override
+  String get startSolo => '혼자 시작하기';
+
+  @override
   String get inviteCode => '초대 코드';
 
   @override

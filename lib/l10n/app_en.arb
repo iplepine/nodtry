@@ -36,6 +36,10 @@
   "@enterInviteCode": {
     "description": "Button to enter invite code"
   },
+  "startSolo": "Start Solo",
+  "@startSolo": {
+    "description": "Button to start without connecting to a partner"
+  },
   "inviteCode": "Invite Code",
   "@inviteCode": {
     "description": "Label for invite code"
