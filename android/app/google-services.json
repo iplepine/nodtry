@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "175020407210",
+    "project_id": "iftogether-a6f7c",
+    "storage_bucket": "iftogether-a6f7c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:175020407210:android:87bbf4c4743a5e7ee313d3",
+        "android_client_info": {
+          "package_name": "com.mind__gardener.mind_gardener"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAL85FHpbXzm1Q4iH9yGH156NQubi1mFrY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
 import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -81,10 +82,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // 게스트 로그인 (둘러보기)
               TextButton(
-                onPressed: () {
-                  // TODO: 실제 게스트 인증 처리 (Firebase Anonymous Auth)
-                  // MVP 단계에서는 Auth 로직 없이 바로 홈으로 이동
-                  context.go(AppRoutes.home);
+                onPressed: () async {
+                  try {
+                    await FirebaseAuth.instance.signInAnonymously();
+                    if (context.mounted) {
+                      context.go(AppRoutes.home);
+                    }
+                  } catch (e) {
+                    debugPrint('Guest login failed: $e');
+                    // TODO: 에러 처리 (스낵바 등)
+                  }
                 },
                 child: Text(
                   AppLocalizations.of(context)!.loginGuest,

@@ -6,10 +6,12 @@ import 'theme/app_theme.dart';
 import 'theme/app_theme_enum.dart';
 import 'routes/app_router.dart';
 import 'providers/app_settings_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Edge-to-edge를 위한 시스템 UI 오버레이 설정
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -19,11 +21,11 @@ void main() {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
-  
+
   // Edge-to-edge 활성화
-  SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.edgeToEdge,
-  );
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const OnMyBehalfApp());
 }
@@ -64,26 +66,27 @@ class _OnMyBehalfAppState extends State<OnMyBehalfApp> {
       child: Builder(
         builder: (context) {
           // 현재 테마에 따라 ThemeData 가져오기
-          final themeData = _settingsProvider.currentTheme == AppThemeType.smokyPlum
+          final themeData =
+              _settingsProvider.currentTheme == AppThemeType.smokyPlum
               ? AppTheme.smokyPlumTheme
               : AppTheme.deepOliveTheme;
-          
+
           return MaterialApp.router(
             title: 'OnMyBehalf',
             debugShowCheckedModeBanner: false,
             theme: themeData,
             locale: _settingsProvider.currentLocale,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en', ''), // English
-          Locale('ko', ''), // Korean
-        ],
-        routerConfig: appRouter,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en', ''), // English
+              Locale('ko', ''), // Korean
+            ],
+            routerConfig: appRouter,
           );
         },
       ),
