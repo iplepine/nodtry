@@ -297,7 +297,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDayTitle => '요일은 안 정해도 돼요';
 
   @override
-  String get planDaySubtitle => '그냥 그날 컨디션 보고 할게요';
+  String get planDaySubtitle => '정해두면 기억하기가 조금 더 쉬워요';
 
   @override
   String get planDaySkip => '그냥 그날 컨디션 보고 할게요';
@@ -324,7 +324,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planSummaryAdjustable => '부담되면 언제든 조정할 수 있어요';
 
   @override
-  String get planSummarySend => '이 정도면 어떨지 물어볼게요';
+  String get planSummarySend => '이렇게 할게요';
 
   @override
   String get planSummarySent => '계획 제안이 전송되었어요';

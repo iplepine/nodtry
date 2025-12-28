@@ -11,7 +11,7 @@ enum PlanRailState {
 }
 
 /// Plan Rail - 계획 진입점 고정 바
-/// 
+///
 /// '지금' 탭에서 항상 같은 위치에 표시되는 계획 진입점
 class PlanRail extends StatelessWidget {
   final PlanRailState state;
@@ -33,17 +33,12 @@ class PlanRail extends StatelessWidget {
       decoration: BoxDecoration(
         color: _getBackgroundColor(),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.divider,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.divider, width: 1),
       ),
       child: Row(
         children: [
           // 좌측: 요약
-          Expanded(
-            child: _buildSummary(context),
-          ),
+          Expanded(child: _buildSummary(context)),
           const SizedBox(width: 12),
           // 우측: 새 약속 버튼
           _buildActionChip(context),
@@ -69,10 +64,7 @@ class PlanRail extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               '한 가지 약속만 정해볼까요?',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],
         );
@@ -105,19 +97,12 @@ class PlanRail extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: AppColors.divider,
-            width: 1,
-          ),
+          border: Border.all(color: AppColors.divider, width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.add,
-              size: 14,
-              color: AppColors.textSecondary,
-            ),
+            Icon(Icons.add, size: 14, color: AppColors.textSecondary),
             const SizedBox(width: 4),
             Text(
               '새 약속',
@@ -153,7 +138,7 @@ class PlanRail extends StatelessWidget {
       if (onNewPlanTap != null) {
         onNewPlanTap!();
       } else {
-        context.push(AppRoutes.planActionSelection);
+        context.push(AppRoutes.planCreate);
       }
     }
   }
@@ -163,9 +148,7 @@ class PlanRail extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           '이미 제안한 약속이 있어요',
           style: TextStyle(
@@ -176,19 +159,14 @@ class PlanRail extends StatelessWidget {
         ),
         content: Text(
           '또 제안할까요?',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               '이번 건 기다릴래요',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -197,7 +175,7 @@ class PlanRail extends StatelessWidget {
               if (onNewPlanTap != null) {
                 onNewPlanTap!();
               } else {
-                context.push(AppRoutes.planActionSelection);
+                context.push(AppRoutes.planCreate);
               }
             },
             child: Text(
@@ -213,4 +191,3 @@ class PlanRail extends StatelessWidget {
     );
   }
 }
-

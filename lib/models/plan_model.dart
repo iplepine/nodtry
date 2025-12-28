@@ -148,4 +148,8 @@ class NotificationTime {
       minute: minute,
     );
   }
+
+  static NotificationTime none() {
+    return NotificationTime(type: 'none', value: 'none', hour: 0, minute: 0);
+  }
 }

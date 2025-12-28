@@ -305,7 +305,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDayTitle => 'You don\'t have to set days';
 
   @override
-  String get planDaySubtitle => 'I\'ll decide based on how I feel that day';
+  String get planDaySubtitle =>
+      'But choosing them can make it easier to remember.';
 
   @override
   String get planDaySkip => 'I\'ll decide based on how I feel that day';
@@ -334,7 +335,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can adjust anytime if it\'s too much';
 
   @override
-  String get planSummarySend => 'I\'ll ask if this is okay';
+  String get planSummarySend => 'I\'ll do this';
 
   @override
   String get planSummarySent => 'Plan proposal has been sent';

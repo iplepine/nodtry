@@ -1,14 +1,20 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/primary_button.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/plan_model.dart';
 import '../../services/notification_service.dart';
 
-/// 통합 계획 생성 화면
+import 'widgets/plan_action_step.dart';
+import 'widgets/plan_frequency_step.dart';
+import 'widgets/plan_description_step.dart';
+import 'widgets/plan_day_selection_step.dart';
+// import 'widgets/plan_notification_step.dart'; // Merged into Day Selection step
+
+/// 통합 계획 생성 화면 (Wizard 방식)
 ///
-/// 모든 단계를 하나의 화면에서 처리
+/// 5단계의 PageView로 구성되어 순차적으로 진행
 class PlanCreateScreen extends StatefulWidget {
   const PlanCreateScreen({super.key});
 
@@ -17,14 +23,21 @@ class PlanCreateScreen extends StatefulWidget {
 }
 
 class _PlanCreateScreenState extends State<PlanCreateScreen> {
+  // Page Controller
+  final PageController _pageController = PageController();
+  int _currentStep = 1;
+  static const int _totalSteps = 4; // Reduced from 5 to 4
+
   // Step 1: 행동
   final TextEditingController _actionController = TextEditingController();
+  final FocusNode _actionFocus = FocusNode();
 
   // Step 2: 빈도
   int? _selectedFrequency;
 
   // Step 3: 설명 (선택)
   final TextEditingController _descriptionController = TextEditingController();
+  final FocusNode _descriptionFocus = FocusNode();
 
   // Step 4: 요일 (선택)
   final Set<int> _selectedDays = {}; // 0=월요일, 6=일요일
@@ -37,561 +50,311 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
     super.initState();
     _selectedFrequency = 3; // 기본값: 주 3회
 
-    // 알림 서비스 초기화 및 권한 요청 (여기서 할지, 버튼 클릭 시 할지 고민, 일단 초기화는 해둠)
+    // 알림 서비스 초기화
     NotificationService().init();
+
+    // 입력 상태 변경 감지하여 UI 업데이트 (버튼 활성화/비활성화)
+    _actionController.addListener(_onActionChanged);
   }
 
   @override
   void dispose() {
+    _pageController.dispose();
+    _actionController.removeListener(_onActionChanged);
     _actionController.dispose();
     _descriptionController.dispose();
+    _actionFocus.dispose();
+    _descriptionFocus.dispose();
     super.dispose();
+  }
+
+  void _onActionChanged() {
+    setState(() {});
+  }
+
+  void _nextPage() {
+    if (_currentStep < _totalSteps) {
+      // Validation for Step 1
+      if (_currentStep == 1 && _actionController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("어떤 약속을 할지 알려주세요!"), // Simple validation message
+            duration: Duration(seconds: 1),
+          ),
+        );
+        return;
+      }
+
+      // Focus Handling
+      FocusManager.instance.primaryFocus?.unfocus();
+
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      _savePlan();
+    }
+  }
+
+  void _prevPage() {
+    if (_currentStep > 1) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      context.pop();
+    }
+  }
+
+  Future<void> _savePlan() async {
+    // Final Validation just in case
+    if (_actionController.text.trim().isEmpty) return;
+
+    final planItem = PlanItem(
+      title: _actionController.text,
+      count: _selectedFrequency ?? 3,
+      days: _selectedDays.toList(),
+      notificationTime: _notificationTime,
+    );
+
+    // Check permissions and schedule if needed
+    if (_selectedDays.isNotEmpty || _notificationTime.type != 'none') {
+      // Note: Requesting permissions at the end might be better UX than interruption
+      await NotificationService().requestPermissions();
+      await NotificationService().schedulePlanReminder(
+        planId: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title: planItem.title,
+        hour: _notificationTime.hour,
+        minute: _notificationTime.minute,
+        days: planItem.days,
+      );
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("계획 제안이 완료되었습니다.\n상대방과 대화해보세요!"),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      context.pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // MediaQuery를 사용하여 안전하게 키보드 높이 감지
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final isKeyboardVisible = bottomInset > 0;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          l10n.planMyPromise,
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+    return PopScope(
+      canPop: _currentStep == 1,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_currentStep > 1) {
+          _prevPage();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            onPressed: () {
+              if (_currentStep > 1) {
+                _prevPage();
+              } else {
+                context.pop();
+              }
+            },
           ),
-        ),
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Step 1: 행동 선택
-                    _buildActionSection(l10n),
-                    const SizedBox(height: 32),
-
-                    // Step 2: 빈도 선택
-                    _buildFrequencySection(l10n),
-                    const SizedBox(height: 32),
-
-                    // Step 3: 설명 (선택)
-                    _buildDescriptionSection(l10n),
-                    const SizedBox(height: 32),
-
-                    // Step 4: 요일 선택 (선택)
-                    _buildDaySelectionSection(l10n),
-                    const SizedBox(height: 32),
-
-                    // Step 5: 알림 시간 (선택)
-                    _buildNotificationSection(l10n),
-                  ],
-                ),
-              ),
+          titleSpacing: 0,
+          title: Text(
+            "약속 준비 중 · $_currentStep/$_totalSteps",
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
             ),
-
-            // 하단 버튼
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border(
-                  top: BorderSide(color: AppColors.divider, width: 1),
-                ),
-              ),
-              child: SafeArea(
-                child: PrimaryButton(
-                  text: l10n.planSummarySend,
-                  onPressed: _actionController.text.trim().isNotEmpty
-                      ? () async {
-                          // TODO: 실제 Repository 저장 로직 구현
-                          // 현재는 로그와 스낵바로 확인
-                          final planItem = PlanItem(
-                            title: _actionController.text,
-                            count: 3, // placeholder
-                            days: _selectedDays.toList(),
-                            notificationTime: _notificationTime,
-                          );
-
-                          print("Saving Plan: ${planItem.toMap()}");
-
-                          // 알림 스케줄링 테스트
-                          if (_selectedDays.isNotEmpty) {
-                            await NotificationService().requestPermissions();
-                            await NotificationService().schedulePlanReminder(
-                              planId:
-                                  DateTime.now().millisecondsSinceEpoch ~/ 1000,
-                              title: planItem.title,
-                              hour: _notificationTime.hour,
-                              minute: _notificationTime.minute,
-                              days: planItem.days,
-                            );
-                          }
-
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  "계획이 저장되고 알림이 설정되었습니다 (${_notificationTime.hour}:${_notificationTime.minute})",
-                                ),
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                            context.pop();
-                          }
-                        }
-                      : null,
-                ),
-              ),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 24),
+              child: isKeyboardVisible
+                  ? GestureDetector(
+                      onTap: _nextPage,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          _currentStep == _totalSteps
+                              ? l10n.planSummarySend
+                              : "다음",
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Row(
+                      children: List.generate(_totalSteps, (index) {
+                        final isActive = index < _currentStep;
+                        return Container(
+                          margin: const EdgeInsets.only(left: 4),
+                          width: isActive ? 12 : 6,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? AppColors.primary
+                                : AppColors.divider,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        );
+                      }),
+                    ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildActionSection(AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.planWhatToPromise,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.planPromiseHint,
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _actionController,
-          decoration: InputDecoration(
-            hintText: l10n.planActionHint,
-            hintStyle: TextStyle(color: AppColors.textDisabled, fontSize: 14),
-            filled: true,
-            fillColor: AppColors.surface,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.divider, width: 1),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.divider, width: 1),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-          style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
-          onChanged: (_) => setState(() {}),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFrequencySection(AppLocalizations l10n) {
-    final options = [
-      _FrequencyOption(
-        value: 2,
-        label: l10n.planFrequencyLight,
-        description: l10n.planFrequencyWeekly2,
-      ),
-      _FrequencyOption(
-        value: 3,
-        label: l10n.planFrequencyModerate,
-        description: l10n.planFrequencyWeekly3,
-        isDefault: true,
-      ),
-      _FrequencyOption(
-        value: 4,
-        label: l10n.planFrequencyMore,
-        description: l10n.planFrequencyWeekly4,
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.planFrequencyTitle,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.planFrequencySubtitle,
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: 16),
-        ...options.map(
-          (option) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _buildFrequencyCard(option, l10n),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFrequencyCard(_FrequencyOption option, AppLocalizations l10n) {
-    final isSelected = _selectedFrequency == option.value;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _selectedFrequency = option.value;
-          });
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.1)
-                : AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.divider,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        option.label,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        option.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isSelected)
-                  Icon(Icons.check_circle, color: AppColors.primary, size: 24),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDescriptionSection(AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.planDescriptionTitle,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.planDescriptionSubtitle,
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _descriptionController,
-          maxLines: 3,
-          decoration: InputDecoration(
-            hintText: l10n.planDescriptionHint,
-            hintStyle: TextStyle(color: AppColors.textDisabled, fontSize: 14),
-            filled: true,
-            fillColor: AppColors.surface,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.divider, width: 1),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.divider, width: 1),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-          style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.planDescriptionOptional,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-            fontStyle: FontStyle.italic,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDaySelectionSection(AppLocalizations l10n) {
-    final dayNames = [
-      l10n.dayMonday,
-      l10n.dayTuesday,
-      l10n.dayWednesday,
-      l10n.dayThursday,
-      l10n.dayFriday,
-      l10n.daySaturday,
-      l10n.daySunday,
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.planDayTitle,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.planDaySubtitle,
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: List.generate(7, (index) {
-            final isSelected = _selectedDays.contains(index);
-            return _buildDayChip(
-              context,
-              index,
-              dayNames[index],
-              isSelected,
-              l10n,
-            );
-          }),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.planDaySkip,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-            fontStyle: FontStyle.italic,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDayChip(
-    BuildContext context,
-    int dayIndex,
-    String dayName,
-    bool isSelected,
-    AppLocalizations l10n,
-  ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            if (isSelected) {
-              _selectedDays.remove(dayIndex);
-            } else {
-              _selectedDays.add(dayIndex);
-            }
-          });
-        },
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.1)
-                : AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.divider,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Text(
-            dayName,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: isSelected ? AppColors.primary : AppColors.textPrimary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNotificationSection(AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "알림 시간 (선택)", // TODO: l10n
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          "제 시간에 못 해도 괜찮아요. 오늘 안에만 하면 돼요.", // Warm copy
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: 16),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
+        body: SafeArea(
+          child: Column(
             children: [
-              _buildNotificationChip(l10n, 'morning', "아침"),
-              const SizedBox(width: 8),
-              _buildNotificationChip(l10n, 'lunch', "점심"),
-              const SizedBox(width: 8),
-              _buildNotificationChip(l10n, 'dinner', "저녁"),
-              const SizedBox(width: 8),
-              _buildNotificationChip(l10n, 'bedtime', "자기 전"),
-              const SizedBox(width: 8),
-              _buildCustomTimeChip(context, l10n),
+              // Content (PageView)
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics:
+                      const NeverScrollableScrollPhysics(), // Disable swipe to enforce flow
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentStep = index + 1;
+                    });
+                  },
+                  children: [
+                    // Step 1: Action (행동)
+                    _buildStepContainer(
+                      child: PlanActionStep(
+                        controller: _actionController,
+                        focusNode: _actionFocus,
+                      ),
+                    ),
+
+                    // Step 2: Frequency (빈도)
+                    _buildStepContainer(
+                      child: PlanFrequencyStep(
+                        selectedFrequency: _selectedFrequency,
+                        onFrequencySelected: (value) {
+                          setState(() {
+                            _selectedFrequency = value;
+                          });
+                        },
+                      ),
+                    ),
+
+                    // Step 3: Description (설명)
+                    _buildStepContainer(
+                      child: PlanDescriptionStep(
+                        controller: _descriptionController,
+                        focusNode: _descriptionFocus,
+                      ),
+                    ),
+
+                    // Step 4: Days & Notification (요일 + 알림)
+                    _buildStepContainer(
+                      child: PlanDaySelectionStep(
+                        selectedDays: _selectedDays,
+                        onDayToggle: (dayIndex) {
+                          setState(() {
+                            if (_selectedDays.contains(dayIndex)) {
+                              _selectedDays.remove(dayIndex);
+                            } else {
+                              _selectedDays.add(dayIndex);
+                            }
+                          });
+                        },
+                        notificationTime: _notificationTime,
+                        onTimeChanged: (newTime) {
+                          setState(() {
+                            _notificationTime = newTime;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Bottom Button (Visible only when keyboard is hidden to avoid crowding)
+              if (!isKeyboardVisible) _buildBottomBar(l10n),
             ],
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildNotificationChip(
-    AppLocalizations l10n,
-    String value,
-    String label,
-  ) {
-    final isSelected =
-        _notificationTime.type == 'preset' && _notificationTime.value == value;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (selected) {
-        if (selected) {
-          setState(() {
-            _notificationTime = NotificationTime.preset(value);
-          });
-        }
-      },
-      selectedColor: AppColors.primary.withValues(alpha: 0.1),
-      backgroundColor: AppColors.surface,
-      labelStyle: TextStyle(
-        color: isSelected ? AppColors.primary : AppColors.textPrimary,
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-      ),
-      side: BorderSide(
-        color: isSelected ? AppColors.primary : AppColors.divider,
       ),
     );
   }
 
-  Widget _buildCustomTimeChip(BuildContext context, AppLocalizations l10n) {
-    final isCustom = _notificationTime.type == 'custom';
-    final label = isCustom
-        ? "${_notificationTime.hour.toString().padLeft(2, '0')}:${_notificationTime.minute.toString().padLeft(2, '0')}"
-        : "직접 설정";
+  Widget _buildStepContainer({required Widget child}) {
+    // Padded container for consistency
+    return SingleChildScrollView(
+      child: Padding(padding: const EdgeInsets.all(24.0), child: child),
+    );
+  }
 
-    return ChoiceChip(
-      label: Text(label),
-      selected: isCustom,
-      onSelected: (selected) async {
-        if (selected) {
-          final TimeOfDay? picked = await showTimePicker(
-            context: context,
-            initialTime: TimeOfDay(
-              hour: _notificationTime.hour,
-              minute: _notificationTime.minute,
+  Widget _buildBottomBar(AppLocalizations l10n) {
+    String buttonText = "다음";
+    if (_currentStep == _totalSteps) {
+      buttonText = l10n.planSummarySend; // "이렇게 제안할게요"
+    }
+
+    bool isButtonEnabled = true;
+    if (_currentStep == 1 && _actionController.text.trim().isEmpty) {
+      isButtonEnabled = false;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.divider, width: 1.0)),
+      ),
+      child: SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: AppColors.textDisabled.withValues(
+                alpha: 0.3,
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
             ),
-          );
-          if (picked != null) {
-            setState(() {
-              _notificationTime = NotificationTime.custom(
-                picked.hour,
-                picked.minute,
-              );
-            });
-          }
-        }
-      },
-      selectedColor: AppColors.primary.withValues(alpha: 0.1),
-      backgroundColor: AppColors.surface,
-      labelStyle: TextStyle(
-        color: isCustom ? AppColors.primary : AppColors.textPrimary,
-        fontWeight: isCustom ? FontWeight.w600 : FontWeight.normal,
+            onPressed: isButtonEnabled ? _nextPage : null,
+            child: Text(
+              buttonText,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
       ),
-      side: BorderSide(color: isCustom ? AppColors.primary : AppColors.divider),
     );
   }
-}
-
-class _FrequencyOption {
-  final int value;
-  final String label;
-  final String description;
-  final bool isDefault;
-
-  _FrequencyOption({
-    required this.value,
-    required this.label,
-    required this.description,
-    this.isDefault = false,
-  });
 }

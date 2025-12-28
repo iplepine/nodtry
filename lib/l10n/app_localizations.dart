@@ -641,7 +641,7 @@ abstract class AppLocalizations {
   /// Subtitle for day selection
   ///
   /// In en, this message translates to:
-  /// **'I\'ll decide based on how I feel that day'**
+  /// **'But choosing them can make it easier to remember.'**
   String get planDaySubtitle;
 
   /// Skip button text for day selection
@@ -695,7 +695,7 @@ abstract class AppLocalizations {
   /// Button to send proposal
   ///
   /// In en, this message translates to:
-  /// **'I\'ll ask if this is okay'**
+  /// **'I\'ll do this'**
   String get planSummarySend;
 
   /// Message when proposal is sent

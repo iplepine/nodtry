@@ -63,12 +63,15 @@ class NotificationService {
     required List<int> days,
   }) async {
     // Cancel existing notifications for this plan (simple strategy: cancel all range)
-    // For MVP, assuming planId * 100 + dayIndex is unique enough
+    // Use modulo to prevent integer overflow (32-bit limit for Notification ID)
+    // Max Int32 is ~2.14 billion.
+    // 200,000,000 * 10 = 2,000,000,000 (Safe)
+    // 200 million seconds is approx 6.3 years.
 
     for (int day in days) {
       // 0-based index for logic if needed, but TZ uses weekday
       await _scheduleWeekly(
-        id: planId * 100 + day,
+        id: (planId % 200000000) * 10 + day,
         title: title,
         body: "오늘 약속, 같이 이어갈까요?", // Warm Accountability Copy
         hour: hour,
@@ -101,7 +104,7 @@ class NotificationService {
         ),
         iOS: DarwinNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       // uiLocalNotificationDateInterpretation:
       //     UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
@@ -134,7 +137,9 @@ class NotificationService {
     // Naively cancel a range, or store IDs.
     // For MVP, assuming max 7 days
     for (int i = 1; i <= 7; i++) {
-      await flutterLocalNotificationsPlugin.cancel(planId * 100 + i);
+      await flutterLocalNotificationsPlugin.cancel(
+        (planId % 200000000) * 10 + i,
+      );
     }
   }
 }

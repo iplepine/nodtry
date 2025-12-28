@@ -159,7 +159,7 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
 
   void _handleCreatePlan() {
     // 계획 생성 플로우 진입
-    context.push(AppRoutes.planActionSelection);
+    context.push(AppRoutes.planCreate);
   }
 
   /// Plan Rail 상태 결정

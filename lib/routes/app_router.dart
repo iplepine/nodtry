@@ -3,11 +3,6 @@ import '../screens/splash_screen.dart';
 import '../screens/connect_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/developer_screen.dart';
-import '../screens/plan/plan_action_selection_screen.dart';
-import '../screens/plan/plan_frequency_screen.dart';
-import '../screens/plan/plan_description_screen.dart';
-import '../screens/plan/plan_day_selection_screen.dart';
-import '../screens/plan/plan_summary_screen.dart';
 import '../screens/plan/plan_create_screen.dart';
 import '../screens/settings_screen.dart';
 
@@ -23,11 +18,6 @@ class AppRoutes {
 
   // 계획 생성 플로우
   static const String planCreate = '/plan/create';
-  static const String planActionSelection = '/plan/action';
-  static const String planFrequency = '/plan/frequency';
-  static const String planDescription = '/plan/description';
-  static const String planDaySelection = '/plan/days';
-  static const String planSummary = '/plan/summary';
 
   // 딥링크 경로
   static const String deepLinkSplash = '/splash';
@@ -80,63 +70,5 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const PlanCreateScreen(),
     ),
     // 계획 생성 플로우 (기존 단계별 화면 - 하위 호환성 유지)
-    GoRoute(
-      path: AppRoutes.planActionSelection,
-      name: 'plan-action',
-      builder: (context, state) => const PlanActionSelectionScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.planFrequency,
-      name: 'plan-frequency',
-      builder: (context, state) {
-        final action = state.uri.queryParameters['action'];
-        return PlanFrequencyScreen(action: action);
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.planDescription,
-      name: 'plan-description',
-      builder: (context, state) {
-        final action = state.uri.queryParameters['action'];
-        final frequency = int.tryParse(
-          state.uri.queryParameters['frequency'] ?? '',
-        );
-        return PlanDescriptionScreen(action: action, frequency: frequency);
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.planDaySelection,
-      name: 'plan-days',
-      builder: (context, state) {
-        final action = state.uri.queryParameters['action'];
-        final frequency = int.tryParse(
-          state.uri.queryParameters['frequency'] ?? '',
-        );
-        final description = state.uri.queryParameters['description'];
-        return PlanDaySelectionScreen(
-          action: action,
-          frequency: frequency,
-          description: description,
-        );
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.planSummary,
-      name: 'plan-summary',
-      builder: (context, state) {
-        final action = state.uri.queryParameters['action'];
-        final frequency = int.tryParse(
-          state.uri.queryParameters['frequency'] ?? '',
-        );
-        final description = state.uri.queryParameters['description'];
-        final days = state.uri.queryParameters['days'];
-        return PlanSummaryScreen(
-          action: action,
-          frequency: frequency,
-          description: description,
-          days: days,
-        );
-      },
-    ),
   ],
 );

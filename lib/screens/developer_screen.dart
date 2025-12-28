@@ -78,7 +78,7 @@ class DeveloperScreen extends StatelessWidget {
                 screens: [
                   _ScreenInfo(
                     name: l10n.developerScreenActionSelection,
-                    route: AppRoutes.planActionSelection,
+                    route: AppRoutes.planCreate,
                     description: l10n.developerScreenActionSelectionDesc,
                     icon: Icons.check_circle_outline,
                   ),

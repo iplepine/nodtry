@@ -414,7 +414,7 @@
   "@planDayTitle": {
     "description": "Title for day selection screen"
   },
-  "planDaySubtitle": "I'll decide based on how I feel that day",
+  "planDaySubtitle": "But choosing them can make it easier to remember.",
   "@planDaySubtitle": {
     "description": "Subtitle for day selection"
   },
@@ -450,7 +450,7 @@
   "@planSummaryAdjustable": {
     "description": "Message about adjustability"
   },
-  "planSummarySend": "I'll ask if this is okay",
+  "planSummarySend": "I'll do this",
   "@planSummarySend": {
     "description": "Button to send proposal"
   },
