@@ -203,7 +203,7 @@ abstract class AppLocalizations {
   /// Message when there's a task to report
   ///
   /// In en, this message translates to:
-  /// **'You have something to do now'**
+  /// **'You can do it now'**
   String get homeNowTask;
 
   /// Button to report completion
@@ -379,6 +379,522 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No need to worry for a while'**
   String get nowQuietNoAction;
+
+  /// Title for plan proposal screens
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Proposal'**
+  String get planProposal;
+
+  /// Progress hint for plan preparation
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing proposal'**
+  String get planPreparing;
+
+  /// Title asking what to promise
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to promise?'**
+  String get planWhatToPromise;
+
+  /// Hint about what kind of promise to make
+  ///
+  /// In en, this message translates to:
+  /// **'Something you think you can keep'**
+  String get planPromiseHint;
+
+  /// Hint text for action input field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Spending time with kids, Making time to read'**
+  String get planActionHint;
+
+  /// Message when input is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Just one line is enough'**
+  String get planOneLineEnough;
+
+  /// Next button text
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get planNext;
+
+  /// Title for frequency selection screen
+  ///
+  /// In en, this message translates to:
+  /// **'How about this much?'**
+  String get planFrequencyTitle;
+
+  /// Subtitle for frequency selection
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s okay if you don\'t keep it perfectly'**
+  String get planFrequencySubtitle;
+
+  /// Title for description screen
+  ///
+  /// In en, this message translates to:
+  /// **'You can write it in detail if you want'**
+  String get planDescriptionTitle;
+
+  /// Subtitle for description screen
+  ///
+  /// In en, this message translates to:
+  /// **'You can change it later'**
+  String get planDescriptionSubtitle;
+
+  /// Label for description input
+  ///
+  /// In en, this message translates to:
+  /// **'What specifically would you like to do?'**
+  String get planDescriptionLabel;
+
+  /// Example text for description
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Squats and stretching at home'**
+  String get planDescriptionExample;
+
+  /// Hint text for description input field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Squats and stretching at home, leg workout at gym...'**
+  String get planDescriptionHint;
+
+  /// Skip button for description screen
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get planDescriptionSkip;
+
+  /// Message that description is optional
+  ///
+  /// In en, this message translates to:
+  /// **'You can skip this step'**
+  String get planDescriptionOptional;
+
+  /// Title for day selection screen
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have to set days'**
+  String get planDayTitle;
+
+  /// Subtitle for day selection
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll decide based on how I feel that day'**
+  String get planDaySubtitle;
+
+  /// Skip button text for day selection
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll decide based on how I feel that day'**
+  String get planDaySkip;
+
+  /// Title for summary screen
+  ///
+  /// In en, this message translates to:
+  /// **'This is what I\'ll propose'**
+  String get planSummaryTitle;
+
+  /// Label for frequency in summary
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get planSummaryFrequency;
+
+  /// Label for days in summary
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get planSummaryDay;
+
+  /// Label for description in summary
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get planSummaryDescription;
+
+  /// Text when no days are selected
+  ///
+  /// In en, this message translates to:
+  /// **'Decide based on condition'**
+  String get planSummaryDayConditional;
+
+  /// Info message about proposal
+  ///
+  /// In en, this message translates to:
+  /// **'This is a proposal. Your partner will review and decide together.'**
+  String get planSummaryInfo;
+
+  /// Message about adjustability
+  ///
+  /// In en, this message translates to:
+  /// **'You can adjust anytime if it\'s too much'**
+  String get planSummaryAdjustable;
+
+  /// Button to send proposal
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll ask if this is okay'**
+  String get planSummarySend;
+
+  /// Message when proposal is sent
+  ///
+  /// In en, this message translates to:
+  /// **'Plan proposal has been sent'**
+  String get planSummarySent;
+
+  /// Light frequency option label
+  ///
+  /// In en, this message translates to:
+  /// **'Lightly'**
+  String get planFrequencyLight;
+
+  /// Moderate frequency option label
+  ///
+  /// In en, this message translates to:
+  /// **'Moderately'**
+  String get planFrequencyModerate;
+
+  /// More frequency option label
+  ///
+  /// In en, this message translates to:
+  /// **'A bit more'**
+  String get planFrequencyMore;
+
+  /// 2 times per week description
+  ///
+  /// In en, this message translates to:
+  /// **'2 times/week'**
+  String get planFrequencyWeekly2;
+
+  /// 3 times per week description
+  ///
+  /// In en, this message translates to:
+  /// **'3 times/week'**
+  String get planFrequencyWeekly3;
+
+  /// 4 times per week description
+  ///
+  /// In en, this message translates to:
+  /// **'4 times/week'**
+  String get planFrequencyWeekly4;
+
+  /// Light frequency with count for summary
+  ///
+  /// In en, this message translates to:
+  /// **'Lightly (2 times/week)'**
+  String get planFrequencyLightWithCount;
+
+  /// Moderate frequency with count for summary
+  ///
+  /// In en, this message translates to:
+  /// **'Moderately (3 times/week)'**
+  String get planFrequencyModerateWithCount;
+
+  /// More frequency with count for summary
+  ///
+  /// In en, this message translates to:
+  /// **'A bit more (4 times/week)'**
+  String get planFrequencyMoreWithCount;
+
+  /// Message when connection is successful
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get connectConnected;
+
+  /// Button to go to home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Home'**
+  String get connectGoToHome;
+
+  /// Plan section title in Us tab
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get usPlanSection;
+
+  /// Message when there's no plan in Us tab
+  ///
+  /// In en, this message translates to:
+  /// **'No current plan'**
+  String get usNoPlanMessage;
+
+  /// Subtitle when there's no plan
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to start a new promise?'**
+  String get usNoPlanSubtitle;
+
+  /// Button to start a new plan
+  ///
+  /// In en, this message translates to:
+  /// **'Start New Plan'**
+  String get usStartNewPlan;
+
+  /// Monday abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get dayMonday;
+
+  /// Tuesday abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get dayTuesday;
+
+  /// Wednesday abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get dayWednesday;
+
+  /// Thursday abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get dayThursday;
+
+  /// Friday abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get dayFriday;
+
+  /// Saturday abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get daySaturday;
+
+  /// Sunday abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get daySunday;
+
+  /// Settings screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Language setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// Korean language option
+  ///
+  /// In en, this message translates to:
+  /// **'한국어'**
+  String get settingsLanguageKorean;
+
+  /// English language option
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get settingsLanguageEnglish;
+
+  /// Theme setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Color Theme'**
+  String get settingsTheme;
+
+  /// Smoky Plum theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Smoky Plum × Warm Stone'**
+  String get settingsThemeSmokyPlum;
+
+  /// Deep Olive theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Deep Olive × Sand'**
+  String get settingsThemeDeepOlive;
+
+  /// Developer screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Developer Screen'**
+  String get developerTitle;
+
+  /// Developer screen navigation section title
+  ///
+  /// In en, this message translates to:
+  /// **'Screen Navigation'**
+  String get developerScreenNavigation;
+
+  /// Developer screen navigation description
+  ///
+  /// In en, this message translates to:
+  /// **'Navigate to any screen directly'**
+  String get developerScreenNavigationDesc;
+
+  /// Auth section title in developer screen
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication & Connection'**
+  String get developerAuthSection;
+
+  /// Main section title in developer screen
+  ///
+  /// In en, this message translates to:
+  /// **'Main Screens'**
+  String get developerMainSection;
+
+  /// Plan section title in developer screen
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Creation'**
+  String get developerPlanSection;
+
+  /// Deep link section title
+  ///
+  /// In en, this message translates to:
+  /// **'Deep Links'**
+  String get developerDeepLink;
+
+  /// Deep link format label
+  ///
+  /// In en, this message translates to:
+  /// **'Deep Link URL Format:'**
+  String get developerDeepLinkFormat;
+
+  /// Splash screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Splash'**
+  String get developerScreenSplash;
+
+  /// Login screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get developerScreenLogin;
+
+  /// Connect screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get developerScreenConnect;
+
+  /// Home screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get developerScreenHome;
+
+  /// Developer screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Developer'**
+  String get developerScreenDeveloper;
+
+  /// Settings screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get developerScreenSettings;
+
+  /// Splash screen description
+  ///
+  /// In en, this message translates to:
+  /// **'App launch screen'**
+  String get developerScreenSplashDesc;
+
+  /// Login screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Google/Apple login'**
+  String get developerScreenLoginDesc;
+
+  /// Connect screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Couple connection screen'**
+  String get developerScreenConnectDesc;
+
+  /// Home screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Now/History/Us tabs'**
+  String get developerScreenHomeDesc;
+
+  /// Settings screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Language and theme settings'**
+  String get developerScreenSettingsDesc;
+
+  /// Action selection screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Action Selection'**
+  String get developerScreenActionSelection;
+
+  /// Frequency screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get developerScreenFrequency;
+
+  /// Day selection screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Day Selection'**
+  String get developerScreenDaySelection;
+
+  /// Description screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get developerScreenDescription;
+
+  /// Summary screen name
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get developerScreenSummary;
+
+  /// Action selection screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Screen 1: Action selection'**
+  String get developerScreenActionSelectionDesc;
+
+  /// Frequency screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Screen 2: Repeat frequency'**
+  String get developerScreenFrequencyDesc;
+
+  /// Day selection screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Screen 4: Day selection'**
+  String get developerScreenDaySelectionDesc;
+
+  /// Description screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Screen 3: Specific action description'**
+  String get developerScreenDescriptionDesc;
+
+  /// Summary screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Screen 5: Plan proposal summary'**
+  String get developerScreenSummaryDesc;
 }
 
 class _AppLocalizationsDelegate

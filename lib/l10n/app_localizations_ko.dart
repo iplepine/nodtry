@@ -60,7 +60,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get waitingForConnection => '상대가 연결을 확인 중이에요';
 
   @override
-  String get homeNowTask => '지금 할 일이 있어요';
+  String get homeNowTask => '지금 해볼 수 있어요';
 
   @override
   String get homeDidIt => '했어';
@@ -160,4 +160,262 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nowQuietNoAction => '당분간 신경 쓸 일은 없어요';
+
+  @override
+  String get planProposal => '계획 제안';
+
+  @override
+  String get planPreparing => '제안 준비 중';
+
+  @override
+  String get planWhatToPromise => '무엇을 약속할까요?';
+
+  @override
+  String get planPromiseHint => '지킬 수 있을 것 같은 정도면 좋아요';
+
+  @override
+  String get planActionHint => 'ex) 아이랑 시간 보내기, 책 읽는 시간 만들기';
+
+  @override
+  String get planOneLineEnough => '한 줄만 적어도 돼요';
+
+  @override
+  String get planNext => '다음';
+
+  @override
+  String get planFrequencyTitle => '요 정도면 어떨까요?';
+
+  @override
+  String get planFrequencySubtitle => '완벽하게 안 지켜도 괜찮아요';
+
+  @override
+  String get planDescriptionTitle => '원하면, 구체적으로 적어도 괜찮아요';
+
+  @override
+  String get planDescriptionSubtitle => '나중에 바꿀 수 있어요';
+
+  @override
+  String get planDescriptionLabel => '구체적으로 뭘 할지 적어볼까요?';
+
+  @override
+  String get planDescriptionExample => '예: 집에서 스쿼트랑 스트레칭';
+
+  @override
+  String get planDescriptionHint => '예: 집에서 스쿼트랑 스트레칭, 헬스장 가서 하체 운동...';
+
+  @override
+  String get planDescriptionSkip => '건너뛰기';
+
+  @override
+  String get planDescriptionOptional => '이 단계는 건너뛰어도 괜찮아요';
+
+  @override
+  String get planDayTitle => '요일은 안 정해도 돼요';
+
+  @override
+  String get planDaySubtitle => '그냥 그날 컨디션 보고 할게요';
+
+  @override
+  String get planDaySkip => '그냥 그날 컨디션 보고 할게요';
+
+  @override
+  String get planSummaryTitle => '이렇게 제안할 거예요';
+
+  @override
+  String get planSummaryFrequency => '빈도';
+
+  @override
+  String get planSummaryDay => '요일';
+
+  @override
+  String get planSummaryDescription => '설명';
+
+  @override
+  String get planSummaryDayConditional => '컨디션 보고 결정';
+
+  @override
+  String get planSummaryInfo => '이건 제안이에요. 상대가 보고 같이 정해요.';
+
+  @override
+  String get planSummaryAdjustable => '부담되면 언제든 조정할 수 있어요';
+
+  @override
+  String get planSummarySend => '이 정도면 어떨지 물어볼게요';
+
+  @override
+  String get planSummarySent => '계획 제안이 전송되었어요';
+
+  @override
+  String get planFrequencyLight => '가볍게';
+
+  @override
+  String get planFrequencyModerate => '적당히';
+
+  @override
+  String get planFrequencyMore => '조금 더';
+
+  @override
+  String get planFrequencyWeekly2 => '주 2회';
+
+  @override
+  String get planFrequencyWeekly3 => '주 3회';
+
+  @override
+  String get planFrequencyWeekly4 => '주 4회';
+
+  @override
+  String get planFrequencyLightWithCount => '가볍게 (주 2회)';
+
+  @override
+  String get planFrequencyModerateWithCount => '적당히 (주 3회)';
+
+  @override
+  String get planFrequencyMoreWithCount => '조금 더 (주 4회)';
+
+  @override
+  String get connectConnected => '연결되었어요';
+
+  @override
+  String get connectGoToHome => '홈으로 가기';
+
+  @override
+  String get usPlanSection => '계획';
+
+  @override
+  String get usNoPlanMessage => '현재 계획이 없어요';
+
+  @override
+  String get usNoPlanSubtitle => '새로운 약속을 시작해볼까요?';
+
+  @override
+  String get usStartNewPlan => '새 계획 시작';
+
+  @override
+  String get dayMonday => '월';
+
+  @override
+  String get dayTuesday => '화';
+
+  @override
+  String get dayWednesday => '수';
+
+  @override
+  String get dayThursday => '목';
+
+  @override
+  String get dayFriday => '금';
+
+  @override
+  String get daySaturday => '토';
+
+  @override
+  String get daySunday => '일';
+
+  @override
+  String get settingsTitle => '설정';
+
+  @override
+  String get settingsLanguage => '언어';
+
+  @override
+  String get settingsLanguageKorean => '한국어';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsTheme => '색상 테마';
+
+  @override
+  String get settingsThemeSmokyPlum => 'Smoky Plum × Warm Stone';
+
+  @override
+  String get settingsThemeDeepOlive => 'Deep Olive × Sand';
+
+  @override
+  String get developerTitle => '개발자 화면';
+
+  @override
+  String get developerScreenNavigation => '화면 이동';
+
+  @override
+  String get developerScreenNavigationDesc => '각 화면으로 바로 이동할 수 있습니다';
+
+  @override
+  String get developerAuthSection => '인증 & 연결';
+
+  @override
+  String get developerMainSection => '메인 화면';
+
+  @override
+  String get developerPlanSection => '계획 생성';
+
+  @override
+  String get developerDeepLink => '딥링크';
+
+  @override
+  String get developerDeepLinkFormat => '딥링크 URL 형식:';
+
+  @override
+  String get developerScreenSplash => '스플래시';
+
+  @override
+  String get developerScreenLogin => '로그인';
+
+  @override
+  String get developerScreenConnect => '연결';
+
+  @override
+  String get developerScreenHome => '홈';
+
+  @override
+  String get developerScreenDeveloper => '개발자';
+
+  @override
+  String get developerScreenSettings => '설정';
+
+  @override
+  String get developerScreenSplashDesc => '앱 시작 화면';
+
+  @override
+  String get developerScreenLoginDesc => 'Google/Apple 로그인';
+
+  @override
+  String get developerScreenConnectDesc => '커플 연결 화면';
+
+  @override
+  String get developerScreenHomeDesc => '지금/기록/우리 탭';
+
+  @override
+  String get developerScreenSettingsDesc => '언어 및 테마 설정';
+
+  @override
+  String get developerScreenActionSelection => '행동 선택';
+
+  @override
+  String get developerScreenFrequency => '빈도 설정';
+
+  @override
+  String get developerScreenDaySelection => '요일 선택';
+
+  @override
+  String get developerScreenDescription => '설명';
+
+  @override
+  String get developerScreenSummary => '요약';
+
+  @override
+  String get developerScreenActionSelectionDesc => 'Screen 1: 행동 선택';
+
+  @override
+  String get developerScreenFrequencyDesc => 'Screen 2: 반복 빈도';
+
+  @override
+  String get developerScreenDaySelectionDesc => 'Screen 3: 요일 선택';
+
+  @override
+  String get developerScreenDescriptionDesc => 'Screen 3: 구체 행동 설명';
+
+  @override
+  String get developerScreenSummaryDesc => 'Screen 5: 계획 제안 요약';
 }

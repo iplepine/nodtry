@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/quiet_header.dart';
 import '../../widgets/time_chip.dart';
+import '../../widgets/plan_rail.dart';
 import '../../models/home_state.dart';
 import '../../utils/time_formatter.dart';
+import '../../routes/app_router.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 /// 
@@ -168,7 +171,26 @@ class _NowTabState extends State<NowTab>
   }
 
   void _handleCreatePlan() {
-    // TODO: 계획 생성 플로우 진입
+    // 계획 생성 플로우 진입
+    context.push(AppRoutes.planActionSelection);
+  }
+
+  /// Plan Rail 상태 결정
+  PlanRailState _getPlanRailState() {
+    // TODO: 실제 데이터에서 계획 상태 확인
+    // 임시: planNeeded 상태면 noPlan, 아니면 activePlan
+    if (_primaryExecutorCard == HomeCardState.planNeeded) {
+      return PlanRailState.noPlan;
+    }
+    // TODO: pendingApproval 상태 확인
+    return PlanRailState.activePlan;
+  }
+
+  /// Plan Rail 요약 텍스트 생성
+  String? _getPlanSummary() {
+    // TODO: 실제 데이터에서 계획 정보 가져오기
+    // 예: "운동 · 주 3회 · 월/수/금"
+    return '운동 · 주 3회 · 월/수/금';
   }
 
   /// Time Chip 텍스트 가져오기
@@ -286,6 +308,10 @@ class _NowTabState extends State<NowTab>
 
   @override
   Widget build(BuildContext context) {
+    // TODO: 실제 데이터에서 계획 상태 가져오기
+    final planRailState = _getPlanRailState();
+    final planSummary = _getPlanSummary();
+
     return Column(
       children: [
         // 헤더
@@ -333,6 +359,13 @@ class _NowTabState extends State<NowTab>
                     ),
                     const SizedBox(height: 16),
                   ],
+                  
+                  // Plan Rail (고정 진입점) - Primary Card 아래
+                  PlanRail(
+                    state: planRailState,
+                    planSummary: planSummary,
+                    onNewPlanTap: _handleCreatePlan,
+                  ),
                   
                   // Secondary Executor Cards (작은 카드, 0~3개)
                   if (_secondaryExecutorCards.isNotEmpty) ...[

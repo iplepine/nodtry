@@ -68,7 +68,7 @@
   "@waitingForConnection": {
     "description": "Message while waiting for connection"
   },
-  "homeNowTask": "You have something to do now",
+  "homeNowTask": "You can do it now",
   "@homeNowTask": {
     "description": "Message when there's a task to report"
   },
@@ -223,6 +223,350 @@
   "nowQuietNoAction": "No need to worry for a while",
   "@nowQuietNoAction": {
     "description": "Quiet state message - no action needed"
+  },
+  "planProposal": "Plan Proposal",
+  "@planProposal": {
+    "description": "Title for plan proposal screens"
+  },
+  "planPreparing": "Preparing proposal",
+  "@planPreparing": {
+    "description": "Progress hint for plan preparation"
+  },
+  "planWhatToPromise": "What would you like to promise?",
+  "@planWhatToPromise": {
+    "description": "Title asking what to promise"
+  },
+  "planPromiseHint": "Something you think you can keep",
+  "@planPromiseHint": {
+    "description": "Hint about what kind of promise to make"
+  },
+  "planActionHint": "e.g., Spending time with kids, Making time to read",
+  "@planActionHint": {
+    "description": "Hint text for action input field"
+  },
+  "planOneLineEnough": "Just one line is enough",
+  "@planOneLineEnough": {
+    "description": "Message when input is empty"
+  },
+  "planNext": "Next",
+  "@planNext": {
+    "description": "Next button text"
+  },
+  "planFrequencyTitle": "How about this much?",
+  "@planFrequencyTitle": {
+    "description": "Title for frequency selection screen"
+  },
+  "planFrequencySubtitle": "It's okay if you don't keep it perfectly",
+  "@planFrequencySubtitle": {
+    "description": "Subtitle for frequency selection"
+  },
+  "planDescriptionTitle": "You can write it in detail if you want",
+  "@planDescriptionTitle": {
+    "description": "Title for description screen"
+  },
+  "planDescriptionSubtitle": "You can change it later",
+  "@planDescriptionSubtitle": {
+    "description": "Subtitle for description screen"
+  },
+  "planDescriptionLabel": "What specifically would you like to do?",
+  "@planDescriptionLabel": {
+    "description": "Label for description input"
+  },
+  "planDescriptionExample": "e.g., Squats and stretching at home",
+  "@planDescriptionExample": {
+    "description": "Example text for description"
+  },
+  "planDescriptionHint": "e.g., Squats and stretching at home, leg workout at gym...",
+  "@planDescriptionHint": {
+    "description": "Hint text for description input field"
+  },
+  "planDescriptionSkip": "Skip",
+  "@planDescriptionSkip": {
+    "description": "Skip button for description screen"
+  },
+  "planDescriptionOptional": "You can skip this step",
+  "@planDescriptionOptional": {
+    "description": "Message that description is optional"
+  },
+  "planDayTitle": "You don't have to set days",
+  "@planDayTitle": {
+    "description": "Title for day selection screen"
+  },
+  "planDaySubtitle": "I'll decide based on how I feel that day",
+  "@planDaySubtitle": {
+    "description": "Subtitle for day selection"
+  },
+  "planDaySkip": "I'll decide based on how I feel that day",
+  "@planDaySkip": {
+    "description": "Skip button text for day selection"
+  },
+  "planSummaryTitle": "This is what I'll propose",
+  "@planSummaryTitle": {
+    "description": "Title for summary screen"
+  },
+  "planSummaryFrequency": "Frequency",
+  "@planSummaryFrequency": {
+    "description": "Label for frequency in summary"
+  },
+  "planSummaryDay": "Days",
+  "@planSummaryDay": {
+    "description": "Label for days in summary"
+  },
+  "planSummaryDescription": "Description",
+  "@planSummaryDescription": {
+    "description": "Label for description in summary"
+  },
+  "planSummaryDayConditional": "Decide based on condition",
+  "@planSummaryDayConditional": {
+    "description": "Text when no days are selected"
+  },
+  "planSummaryInfo": "This is a proposal. Your partner will review and decide together.",
+  "@planSummaryInfo": {
+    "description": "Info message about proposal"
+  },
+  "planSummaryAdjustable": "You can adjust anytime if it's too much",
+  "@planSummaryAdjustable": {
+    "description": "Message about adjustability"
+  },
+  "planSummarySend": "I'll ask if this is okay",
+  "@planSummarySend": {
+    "description": "Button to send proposal"
+  },
+  "planSummarySent": "Plan proposal has been sent",
+  "@planSummarySent": {
+    "description": "Message when proposal is sent"
+  },
+  "planFrequencyLight": "Lightly",
+  "@planFrequencyLight": {
+    "description": "Light frequency option label"
+  },
+  "planFrequencyModerate": "Moderately",
+  "@planFrequencyModerate": {
+    "description": "Moderate frequency option label"
+  },
+  "planFrequencyMore": "A bit more",
+  "@planFrequencyMore": {
+    "description": "More frequency option label"
+  },
+  "planFrequencyWeekly2": "2 times/week",
+  "@planFrequencyWeekly2": {
+    "description": "2 times per week description"
+  },
+  "planFrequencyWeekly3": "3 times/week",
+  "@planFrequencyWeekly3": {
+    "description": "3 times per week description"
+  },
+  "planFrequencyWeekly4": "4 times/week",
+  "@planFrequencyWeekly4": {
+    "description": "4 times per week description"
+  },
+  "planFrequencyLightWithCount": "Lightly (2 times/week)",
+  "@planFrequencyLightWithCount": {
+    "description": "Light frequency with count for summary"
+  },
+  "planFrequencyModerateWithCount": "Moderately (3 times/week)",
+  "@planFrequencyModerateWithCount": {
+    "description": "Moderate frequency with count for summary"
+  },
+  "planFrequencyMoreWithCount": "A bit more (4 times/week)",
+  "@planFrequencyMoreWithCount": {
+    "description": "More frequency with count for summary"
+  },
+  "connectConnected": "Connected",
+  "@connectConnected": {
+    "description": "Message when connection is successful"
+  },
+  "connectGoToHome": "Go to Home",
+  "@connectGoToHome": {
+    "description": "Button to go to home screen"
+  },
+  "usPlanSection": "Plan",
+  "@usPlanSection": {
+    "description": "Plan section title in Us tab"
+  },
+  "usNoPlanMessage": "No current plan",
+  "@usNoPlanMessage": {
+    "description": "Message when there's no plan in Us tab"
+  },
+  "usNoPlanSubtitle": "Would you like to start a new promise?",
+  "@usNoPlanSubtitle": {
+    "description": "Subtitle when there's no plan"
+  },
+  "usStartNewPlan": "Start New Plan",
+  "@usStartNewPlan": {
+    "description": "Button to start a new plan"
+  },
+  "dayMonday": "Mon",
+  "@dayMonday": {
+    "description": "Monday abbreviation"
+  },
+  "dayTuesday": "Tue",
+  "@dayTuesday": {
+    "description": "Tuesday abbreviation"
+  },
+  "dayWednesday": "Wed",
+  "@dayWednesday": {
+    "description": "Wednesday abbreviation"
+  },
+  "dayThursday": "Thu",
+  "@dayThursday": {
+    "description": "Thursday abbreviation"
+  },
+  "dayFriday": "Fri",
+  "@dayFriday": {
+    "description": "Friday abbreviation"
+  },
+  "daySaturday": "Sat",
+  "@daySaturday": {
+    "description": "Saturday abbreviation"
+  },
+  "daySunday": "Sun",
+  "@daySunday": {
+    "description": "Sunday abbreviation"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings screen title"
+  },
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Language setting label"
+  },
+  "settingsLanguageKorean": "한국어",
+  "@settingsLanguageKorean": {
+    "description": "Korean language option"
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "English language option"
+  },
+  "settingsTheme": "Color Theme",
+  "@settingsTheme": {
+    "description": "Theme setting label"
+  },
+  "settingsThemeSmokyPlum": "Smoky Plum × Warm Stone",
+  "@settingsThemeSmokyPlum": {
+    "description": "Smoky Plum theme option"
+  },
+  "settingsThemeDeepOlive": "Deep Olive × Sand",
+  "@settingsThemeDeepOlive": {
+    "description": "Deep Olive theme option"
+  },
+  "developerTitle": "Developer Screen",
+  "@developerTitle": {
+    "description": "Developer screen title"
+  },
+  "developerScreenNavigation": "Screen Navigation",
+  "@developerScreenNavigation": {
+    "description": "Developer screen navigation section title"
+  },
+  "developerScreenNavigationDesc": "Navigate to any screen directly",
+  "@developerScreenNavigationDesc": {
+    "description": "Developer screen navigation description"
+  },
+  "developerAuthSection": "Authentication & Connection",
+  "@developerAuthSection": {
+    "description": "Auth section title in developer screen"
+  },
+  "developerMainSection": "Main Screens",
+  "@developerMainSection": {
+    "description": "Main section title in developer screen"
+  },
+  "developerPlanSection": "Plan Creation",
+  "@developerPlanSection": {
+    "description": "Plan section title in developer screen"
+  },
+  "developerDeepLink": "Deep Links",
+  "@developerDeepLink": {
+    "description": "Deep link section title"
+  },
+  "developerDeepLinkFormat": "Deep Link URL Format:",
+  "@developerDeepLinkFormat": {
+    "description": "Deep link format label"
+  },
+  "developerScreenSplash": "Splash",
+  "@developerScreenSplash": {
+    "description": "Splash screen name"
+  },
+  "developerScreenLogin": "Login",
+  "@developerScreenLogin": {
+    "description": "Login screen name"
+  },
+  "developerScreenConnect": "Connect",
+  "@developerScreenConnect": {
+    "description": "Connect screen name"
+  },
+  "developerScreenHome": "Home",
+  "@developerScreenHome": {
+    "description": "Home screen name"
+  },
+  "developerScreenDeveloper": "Developer",
+  "@developerScreenDeveloper": {
+    "description": "Developer screen name"
+  },
+  "developerScreenSettings": "Settings",
+  "@developerScreenSettings": {
+    "description": "Settings screen name"
+  },
+  "developerScreenSplashDesc": "App launch screen",
+  "@developerScreenSplashDesc": {
+    "description": "Splash screen description"
+  },
+  "developerScreenLoginDesc": "Google/Apple login",
+  "@developerScreenLoginDesc": {
+    "description": "Login screen description"
+  },
+  "developerScreenConnectDesc": "Couple connection screen",
+  "@developerScreenConnectDesc": {
+    "description": "Connect screen description"
+  },
+  "developerScreenHomeDesc": "Now/History/Us tabs",
+  "@developerScreenHomeDesc": {
+    "description": "Home screen description"
+  },
+  "developerScreenSettingsDesc": "Language and theme settings",
+  "@developerScreenSettingsDesc": {
+    "description": "Settings screen description"
+  },
+  "developerScreenActionSelection": "Action Selection",
+  "@developerScreenActionSelection": {
+    "description": "Action selection screen name"
+  },
+  "developerScreenFrequency": "Frequency",
+  "@developerScreenFrequency": {
+    "description": "Frequency screen name"
+  },
+  "developerScreenDaySelection": "Day Selection",
+  "@developerScreenDaySelection": {
+    "description": "Day selection screen name"
+  },
+  "developerScreenDescription": "Description",
+  "@developerScreenDescription": {
+    "description": "Description screen name"
+  },
+  "developerScreenSummary": "Summary",
+  "@developerScreenSummary": {
+    "description": "Summary screen name"
+  },
+  "developerScreenActionSelectionDesc": "Screen 1: Action selection",
+  "@developerScreenActionSelectionDesc": {
+    "description": "Action selection screen description"
+  },
+  "developerScreenFrequencyDesc": "Screen 2: Repeat frequency",
+  "@developerScreenFrequencyDesc": {
+    "description": "Frequency screen description"
+  },
+  "developerScreenDaySelectionDesc": "Screen 4: Day selection",
+  "@developerScreenDaySelectionDesc": {
+    "description": "Day selection screen description"
+  },
+  "developerScreenDescriptionDesc": "Screen 3: Specific action description",
+  "@developerScreenDescriptionDesc": {
+    "description": "Description screen description"
+  },
+  "developerScreenSummaryDesc": "Screen 5: Plan proposal summary",
+  "@developerScreenSummaryDesc": {
+    "description": "Summary screen description"
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 import '../routes/app_router.dart';
+import '../l10n/app_localizations.dart';
 
 /// 개발자 화면 - 모든 화면으로 이동할 수 있는 디버그 화면
 class DeveloperScreen extends StatelessWidget {
@@ -9,11 +10,12 @@ class DeveloperScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          '개발자 화면',
+          l10n.developerTitle,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 18,
@@ -35,7 +37,7 @@ class DeveloperScreen extends StatelessWidget {
             children: [
               // 헤더
               Text(
-                '화면 이동',
+                l10n.developerScreenNavigation,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -44,7 +46,7 @@ class DeveloperScreen extends StatelessWidget {
               ),
               SizedBox(height: 8),
               Text(
-                '각 화면으로 바로 이동할 수 있습니다',
+                l10n.developerScreenNavigationDesc,
                 style: TextStyle(
                   fontSize: 14,
                   color: AppColors.textSecondary,
@@ -55,24 +57,24 @@ class DeveloperScreen extends StatelessWidget {
               // 화면 목록
               _buildScreenSection(
                 context,
-                title: '인증 & 연결',
+                title: l10n.developerAuthSection,
                 screens: [
                   _ScreenInfo(
-                    name: '스플래시',
+                    name: l10n.developerScreenSplash,
                     route: AppRoutes.splash,
-                    description: '앱 시작 화면',
+                    description: l10n.developerScreenSplashDesc,
                     icon: Icons.rocket_launch,
                   ),
                   _ScreenInfo(
-                    name: '로그인',
+                    name: l10n.developerScreenLogin,
                     route: AppRoutes.login,
-                    description: 'Google/Apple 로그인',
+                    description: l10n.developerScreenLoginDesc,
                     icon: Icons.login,
                   ),
                   _ScreenInfo(
-                    name: '연결',
+                    name: l10n.developerScreenConnect,
                     route: AppRoutes.connect,
-                    description: '커플 연결 화면',
+                    description: l10n.developerScreenConnectDesc,
                     icon: Icons.link,
                   ),
                 ],
@@ -81,13 +83,57 @@ class DeveloperScreen extends StatelessWidget {
 
               _buildScreenSection(
                 context,
-                title: '메인 화면',
+                title: l10n.developerMainSection,
                 screens: [
                   _ScreenInfo(
-                    name: '홈',
+                    name: l10n.developerScreenHome,
                     route: AppRoutes.home,
-                    description: '지금/기록/우리 탭',
+                    description: l10n.developerScreenHomeDesc,
                     icon: Icons.home,
+                  ),
+                  _ScreenInfo(
+                    name: l10n.developerScreenSettings,
+                    route: AppRoutes.settings,
+                    description: l10n.developerScreenSettingsDesc,
+                    icon: Icons.settings,
+                  ),
+                ],
+              ),
+              SizedBox(height: 32),
+
+              _buildScreenSection(
+                context,
+                title: l10n.developerPlanSection,
+                screens: [
+                  _ScreenInfo(
+                    name: l10n.developerScreenActionSelection,
+                    route: AppRoutes.planActionSelection,
+                    description: l10n.developerScreenActionSelectionDesc,
+                    icon: Icons.check_circle_outline,
+                  ),
+                  _ScreenInfo(
+                    name: l10n.developerScreenDescription,
+                    route: AppRoutes.planDescription,
+                    description: l10n.developerScreenDescriptionDesc,
+                    icon: Icons.description,
+                  ),
+                  _ScreenInfo(
+                    name: l10n.developerScreenFrequency,
+                    route: AppRoutes.planFrequency,
+                    description: l10n.developerScreenFrequencyDesc,
+                    icon: Icons.repeat,
+                  ),
+                  _ScreenInfo(
+                    name: l10n.developerScreenDaySelection,
+                    route: AppRoutes.planDaySelection,
+                    description: l10n.developerScreenDaySelectionDesc,
+                    icon: Icons.calendar_today,
+                  ),
+                  _ScreenInfo(
+                    name: l10n.developerScreenSummary,
+                    route: AppRoutes.planSummary,
+                    description: l10n.developerScreenSummaryDesc,
+                    icon: Icons.summarize,
                   ),
                 ],
               ),
@@ -96,7 +142,7 @@ class DeveloperScreen extends StatelessWidget {
               // 딥링크 섹션
               Divider(height: 32),
               Text(
-                '딥링크',
+                l10n.developerDeepLink,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -114,7 +160,7 @@ class DeveloperScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '딥링크 URL 형식:',
+                      l10n.developerDeepLinkFormat,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -122,11 +168,12 @@ class DeveloperScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 8),
-                    _buildDeepLinkItem('스플래시', 'onmybehalf://splash'),
-                    _buildDeepLinkItem('로그인', 'onmybehalf://login'),
-                    _buildDeepLinkItem('연결', 'onmybehalf://connect'),
-                    _buildDeepLinkItem('홈', 'onmybehalf://home'),
-                    _buildDeepLinkItem('개발자', 'onmybehalf://developer'),
+                    _buildDeepLinkItem(l10n.developerScreenSplash, 'onmybehalf://splash'),
+                    _buildDeepLinkItem(l10n.developerScreenLogin, 'onmybehalf://login'),
+                    _buildDeepLinkItem(l10n.developerScreenConnect, 'onmybehalf://connect'),
+                    _buildDeepLinkItem(l10n.developerScreenHome, 'onmybehalf://home'),
+                    _buildDeepLinkItem(l10n.developerScreenDeveloper, 'onmybehalf://developer'),
+                    _buildDeepLinkItem(l10n.developerScreenSettings, 'onmybehalf://settings'),
                   ],
                 ),
               ),
@@ -173,7 +220,7 @@ class DeveloperScreen extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.go(screen.route),
+          onTap: () => context.push(screen.route),
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: EdgeInsets.all(16),
