@@ -489,7 +489,7 @@ class _YouSection extends StatelessWidget {
             // 새 연결 추가 버튼
             InkWell(
               onTap: () {
-                // TODO: 초대 화면
+                context.push(AppRoutes.connect);
               },
               borderRadius: BorderRadius.circular(20),
               child: Semantics(
