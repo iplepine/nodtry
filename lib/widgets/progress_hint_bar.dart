@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 /// 진행 맥락 힌트 바
-/// 
+///
 /// 계획 생성 플로우에서 현재 단계를 표시하는 위젯
 class ProgressHintBar extends StatelessWidget {
   final String hint;
@@ -21,13 +21,8 @@ class ProgressHintBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.5),
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.divider,
-            width: 1,
-          ),
-        ),
+        color: AppColors.surface.withValues(alpha: 0.5),
+        border: Border(bottom: BorderSide(color: AppColors.divider, width: 1)),
       ),
       child: Row(
         children: [
@@ -50,9 +45,7 @@ class ProgressHintBar extends StatelessWidget {
                 (index) => Expanded(
                   child: Container(
                     height: 2,
-                    margin: EdgeInsets.only(
-                      left: index > 0 ? 4 : 0,
-                    ),
+                    margin: EdgeInsets.only(left: index > 0 ? 4 : 0),
                     decoration: BoxDecoration(
                       color: index < currentStep
                           ? AppColors.primary
@@ -69,4 +62,3 @@ class ProgressHintBar extends StatelessWidget {
     );
   }
 }
-

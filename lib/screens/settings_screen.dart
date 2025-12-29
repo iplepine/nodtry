@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme_enum.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/app_settings_provider.dart';
+import '../routes/app_router.dart';
 
 /// 설정 화면 - 언어 및 테마 변경
 class SettingsScreen extends StatefulWidget {
@@ -133,7 +134,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 16),
               _buildPlanCreationOption(context, l10n),
+              const SizedBox(height: 32),
+
+              // 개발자 옵션
+              Text(
+                'Developer', // TODO: Add to ARB
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildDeveloperOption(context),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeveloperOption(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          context.push(AppRoutes.developer);
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider, width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Developer Options',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Debug menu for development',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: AppColors.textDisabled),
+              ],
+            ),
           ),
         ),
       ),
@@ -207,7 +271,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Container(
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary.withOpacity(0.1)
+                ? AppColors.primary.withValues(alpha: 0.1)
                 : AppColors.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
@@ -256,7 +320,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Container(
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary.withOpacity(0.1)
+                ? AppColors.primary.withValues(alpha: 0.1)
                 : AppColors.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(

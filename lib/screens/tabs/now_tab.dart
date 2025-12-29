@@ -6,21 +6,27 @@ import '../../widgets/quiet_header.dart';
 import '../../widgets/time_chip.dart';
 import '../../widgets/plan_rail.dart';
 import '../../models/home_state.dart';
-import '../../utils/time_formatter.dart';
+
 import '../../routes/app_router.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 ///
 /// "지금 이 순간, 가장 먼저 신경 써야 할 건 무엇인가?"에 답한다
-class NowTab extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/repository_provider.dart';
+
+/// 지금 탭 - Now Card 기반 관계 중심 홈
+///
+/// "지금 이 순간, 가장 먼저 신경 써야 할 건 무엇인가?"에 답한다
+class NowTab extends ConsumerStatefulWidget {
   const NowTab({super.key});
 
   @override
-  State<NowTab> createState() => _NowTabState();
+  ConsumerState<NowTab> createState() => _NowTabState();
 }
 
-class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
-  // TODO: 실제 데이터에서 상태를 가져와야 함
+class _NowTabState extends ConsumerState<NowTab>
+    with SingleTickerProviderStateMixin {
   // 실천자 영역
   HomeCardState? _primaryExecutorCard;
   List<HomeCardState> _secondaryExecutorCards = [];
@@ -62,7 +68,12 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
-    _loadHomeState();
+    // 초기 로딩은 build 후 post frame callback에서 호출하지 않고
+    // Riverpod watch를 통해 반응형으로 처리하거나, initState에서 한 번 호출.
+    // 여기서는 간단히 initState에서 호출.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadHomeState();
+    });
   }
 
   @override
@@ -72,33 +83,17 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _loadHomeState() async {
-    // TODO: 실제 데이터에서 상태 계산
-    // 스펙: '지금' 탭 카드 시간 선택 규칙
-    // 1. 오늘 미완료 실천 행동
-    // 2. 오늘 확인이 필요한 관리자 행동
-    // 3. 오늘이 모두 완료된 경우, 가장 가까운 미래 행동 (D-1, D-2, 시간 단위)
-    // 4. 아무 행동도 없을 경우 Quiet 상태
+    // Repository에서 상태 가져오기
+    final repository = ref.read(recordRepositoryProvider);
+    final possibleStates = await repository.getHomeCardStates();
 
-    // 임시 테스트 데이터 - 여러 상태를 시뮬레이션
-    final possibleStates = <HomeCardState>[
-      // 테스트 시나리오 1: 실천자 보고 필요 + 관리자 확인 필요 + 대기 중
-      HomeCardState.reportNeeded, // Primary Executor Card
-      HomeCardState.checkNeeded, // Manager Quick Card
-      HomeCardState.waitingForCheck, // Secondary Executor Card
-      HomeCardState.checked, // Secondary Executor Card
-      // 테스트 시나리오 2: 관리자 확인 필요만
-      // HomeCardState.checkNeeded,
+    // 초기 상태: 데이터 없음
+    // final possibleStates = <HomeCardState>[];
 
-      // 테스트 시나리오 3: 실천자 보고 필요만
-      // HomeCardState.reportNeeded,
-      // HomeCardState.checked,
-
-      // 테스트 시나리오 4: 계획 없음
-      // HomeCardState.planNeeded,
-
-      // 테스트 시나리오 5: 조용한 하루 (스펙: 모든 조건 만족 시에만 표시)
-      // HomeCardState.quietDay,
-    ];
+    // TODO: 실제 데이터가 없을 경우(신규 유저) planNeeded 상태 추가
+    if (possibleStates.isEmpty) {
+      possibleStates.add(HomeCardState.planNeeded);
+    }
 
     // TODO: 실제 데이터에서 미래 행동 확인
     // - 오늘이 모두 완료된 경우, 가장 가까운 미래 행동 계산
@@ -122,7 +117,7 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
     );
 
     // TODO: 실제 데이터에서 관리 대상 이름 가져오기
-    // 임시: 테스트용 이름
+    // 임시: 테스트용 이름 (MockRepository에서 가져올 수도 있음)
     final managerPartnerName = managerQuickCard != null ? '민지' : null;
 
     // 스펙: Quiet 상태는 아래 조건을 모두 만족할 때만 표시
@@ -165,8 +160,8 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
   /// Plan Rail 상태 결정
   PlanRailState _getPlanRailState() {
     // TODO: 실제 데이터에서 계획 상태 확인
-    // 임시: planNeeded 상태면 noPlan, 아니면 activePlan
-    if (_primaryExecutorCard == HomeCardState.planNeeded) {
+    if (_primaryExecutorCard == HomeCardState.planNeeded ||
+        _primaryExecutorCard == null) {
       return PlanRailState.noPlan;
     }
     // TODO: pendingApproval 상태 확인
@@ -176,8 +171,7 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
   /// Plan Rail 요약 텍스트 생성
   String? _getPlanSummary() {
     // TODO: 실제 데이터에서 계획 정보 가져오기
-    // 예: "운동 · 주 3회 · 월/수/금"
-    return '운동 · 주 3회 · 월/수/금';
+    return null;
   }
 
   /// Time Chip 텍스트 가져오기
@@ -189,27 +183,7 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
   /// - 3시간 전, 어제 (과거)
   String? _getTimeChipText(HomeCardState state) {
     // TODO: 실제 데이터에서 시간 정보 가져오기
-    // 임시: 테스트용
-    switch (state) {
-      case HomeCardState.reportNeeded:
-        // 오늘 미완료 실천 행동 → "지금"
-        return '지금';
-      case HomeCardState.planNeeded:
-        // 계획 없음 → Time Chip 없음
-        return null;
-      case HomeCardState.waitingForCheck:
-        // 확인 대기 중 → 과거 시간 표시 가능
-        // TODO: 실제 보고 시간에서 경과 시간 계산
-        // 예: "2시간 전"
-        return null; // 임시로 null, 실제 데이터 연동 시 계산
-      case HomeCardState.checked:
-        // 확인 완료 → 과거 시간 표시 가능
-        // TODO: 실제 확인 시간에서 경과 시간 계산
-        // 예: "어제"
-        return null; // 임시로 null, 실제 데이터 연동 시 계산
-      default:
-        return null;
-    }
+    return null;
   }
 
   /// Time Chip 타입 가져오기
@@ -233,11 +207,6 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
   /// Manager Quick Card용 Time Chip 텍스트
   String? _getManagerTimeChipText(HomeCardState state) {
     // TODO: 실제 데이터에서 시간 정보 가져오기
-    // 관리자 카드는 확인이 필요한 상태이므로 "지금" 또는 시간 정보 표시
-    if (state == HomeCardState.checkNeeded) {
-      // 임시: 테스트용
-      return '지금';
-    }
     return null;
   }
 
@@ -262,23 +231,7 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
   /// 과거 시간 표현: "2시간 전", "어제" 등
   String? _getSecondaryTimeChipText(HomeCardState state) {
     // TODO: 실제 데이터에서 시간 정보 가져오기
-    switch (state) {
-      case HomeCardState.waitingForCheck:
-        // 확인 대기 중 → 보고한 시간부터 경과 시간 표시
-        // TODO: 실제 보고 시간에서 경과 시간 계산
-        // 예: DateTime.now().difference(보고시간)을 TimeFormatter.formatTimePast()로 변환
-        // 임시 테스트 데이터
-        final pastDuration = const Duration(hours: 2);
-        return TimeFormatter.formatTimePast(pastDuration);
-      case HomeCardState.checked:
-        // 확인 완료 → 확인된 시간부터 경과 시간 표시
-        // TODO: 실제 확인 시간에서 경과 시간 계산
-        // 임시 테스트 데이터
-        final pastDuration = const Duration(days: 1);
-        return TimeFormatter.formatTimePast(pastDuration);
-      default:
-        return null;
-    }
+    return null;
   }
 
   /// Secondary Executor Card용 Time Chip 타입
@@ -298,21 +251,8 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
   /// "이번 주 약속 중 2번째", "4주 중 2주차", "이미 3번은 했어요" 등
   /// 사실 전달형 표현으로 외부 시선 느낌 제공
   String? _getRecordGazeText(HomeCardState state) {
-    final l10n = AppLocalizations.of(context)!;
-
     // TODO: 실제 데이터에서 가져오기
-    // 임시 테스트 데이터
-    switch (state) {
-      case HomeCardState.reportNeeded:
-        // 이번 주 약속 중 N번째
-        final weekCount = 2; // TODO: 실제 데이터
-        return l10n.recordGazeWeekCount(weekCount);
-      case HomeCardState.planNeeded:
-        // 계획이 없을 때는 기록의 시선 표시 안 함
-        return null;
-      default:
-        return null;
-    }
+    return null;
   }
 
   @override
@@ -373,11 +313,13 @@ class _NowTabState extends State<NowTab> with SingleTickerProviderStateMixin {
                   ],
 
                   // Plan Rail (고정 진입점) - Primary Card 아래
-                  PlanRail(
-                    state: planRailState,
-                    planSummary: planSummary,
-                    onNewPlanTap: _handleCreatePlan,
-                  ),
+                  // '계획 없음' 상태일 때는 Primary Card가 계획 생성을 유도하므로 중복 노출 방지
+                  if (planRailState != PlanRailState.noPlan)
+                    PlanRail(
+                      state: planRailState,
+                      planSummary: planSummary,
+                      onNewPlanTap: _handleCreatePlan,
+                    ),
 
                   // Secondary Executor Cards (작은 카드, 0~3개)
                   if (_secondaryExecutorCards.isNotEmpty) ...[

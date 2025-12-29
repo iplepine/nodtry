@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/app_colors.dart';
 import '../routes/app_router.dart';
 import '../l10n/app_localizations.dart';
+import '../providers/repository_provider.dart';
 
 /// 개발자 화면 - 모든 화면으로 이동할 수 있는 디버그 화면
-class DeveloperScreen extends StatelessWidget {
+class DeveloperScreen extends ConsumerWidget {
   const DeveloperScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -49,6 +51,15 @@ class DeveloperScreen extends StatelessWidget {
                 l10n.developerScreenNavigationDesc,
                 style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
+              SizedBox(height: 8),
+              Text(
+                l10n.developerScreenNavigationDesc,
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              ),
+              SizedBox(height: 32),
+
+              // 데이터 소스 섹션
+              _buildRepositorySection(context, ref),
               SizedBox(height: 32),
 
               // 메인 화면 섹션
@@ -166,6 +177,63 @@ class DeveloperScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildRepositorySection(BuildContext context, WidgetRef ref) {
+    final currentType = ref.watch(repositoryTypeProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Data Source',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 16),
+        Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Column(
+            children: [
+              RadioListTile<RepositoryType>(
+                title: Text('Mock Data'),
+                subtitle: Text('사용자 정의 테스트 데이터를 사용합니다.'),
+                value: RepositoryType.mock,
+                groupValue: currentType,
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(repositoryTypeProvider.notifier).setType(value);
+                  }
+                },
+                contentPadding: EdgeInsets.zero,
+                activeColor: AppColors.primary,
+              ),
+              RadioListTile<RepositoryType>(
+                title: Text('Real Data (Firestore)'),
+                subtitle: Text('실제 서버 데이터를 사용합니다.'),
+                value: RepositoryType.real,
+                groupValue: currentType,
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(repositoryTypeProvider.notifier).setType(value);
+                  }
+                },
+                contentPadding: EdgeInsets.zero,
+                activeColor: AppColors.primary,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildScreenSection(
     BuildContext context, {
     required String title,
@@ -209,7 +277,7 @@ class DeveloperScreen extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(screen.icon, color: AppColors.primary, size: 24),

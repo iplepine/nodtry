@@ -123,9 +123,9 @@ class PlanRail extends StatelessWidget {
       case PlanRailState.noPlan:
         return AppColors.surface; // Opacity 100%
       case PlanRailState.activePlan:
-        return AppColors.surface.withOpacity(0.7); // Opacity 70~80%
+        return AppColors.surface.withValues(alpha: 0.7); // Opacity 70~80%
       case PlanRailState.pendingApproval:
-        return AppColors.surface.withOpacity(0.7);
+        return AppColors.surface.withValues(alpha: 0.7);
     }
   }
 
