@@ -55,6 +55,7 @@ class _UsTabState extends ConsumerState<UsTab> {
                     user?.displayName ?? l10n.usDefaultNameMe,
                     user?.statusMessage,
                   ),
+                  inviteCode: user?.inviteCode,
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, stack) => Text('Error: $err'),
@@ -263,6 +264,7 @@ class _MeSection extends StatelessWidget {
   final String name;
   final String? statusMessage;
   final File? profileImage;
+  final String? inviteCode;
   final VoidCallback onEditProfile;
 
   const _MeSection({
@@ -270,6 +272,7 @@ class _MeSection extends StatelessWidget {
     required this.name,
     this.statusMessage,
     this.profileImage,
+    this.inviteCode,
     required this.onEditProfile,
   });
 
@@ -402,7 +405,7 @@ class _MeSection extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "ABCD-1234", // TODO: 실제 코드
+                      inviteCode ?? '코드 없음',
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -414,11 +417,13 @@ class _MeSection extends StatelessWidget {
                   ],
                 ),
                 onTap: () {
-                  Clipboard.setData(const ClipboardData(text: "ABCD-1234"));
+                  if (inviteCode != null) {
+                    Clipboard.setData(ClipboardData(text: inviteCode!));
 
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(l10n.codeCopied)));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(l10n.codeCopied)));
+                  }
                 },
               ),
             ],

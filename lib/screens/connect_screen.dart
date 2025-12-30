@@ -53,21 +53,28 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
 
   Future<void> _generateCode() async {
     try {
-      final repository = ref.read(connectRepositoryProvider);
-      final code = await repository.generateInviteCode();
+      // 내 프로필에서 기존 초대 코드 가져오기
+      final useCase = ref.read(getMyProfileUseCaseProvider);
+      final user = await useCase.execute();
 
-      if (mounted) {
+      if (user?.inviteCode != null && mounted) {
         setState(() {
-          _inviteCode = code;
+          _inviteCode = user!.inviteCode!;
           _state = ConnectState.codeGenerated;
         });
+      } else {
+        // 코드가 없는 경우 (예외 상황)
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('초대 코드를 찾을 수 없습니다.')));
+        }
       }
     } catch (e) {
-      // TODO: 에러 처리
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('코드를 생성하는 중 오류가 발생했습니다.')));
+      ).showSnackBar(SnackBar(content: Text('코드를 불러오는 중 오류가 발생했습니다: $e')));
     }
   }
 
