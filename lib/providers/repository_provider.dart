@@ -11,8 +11,16 @@ import '../repositories/user_repository.dart';
 import '../repositories/mock_user_repository.dart';
 import '../repositories/real_user_repository.dart';
 import '../usecases/update_profile_use_case.dart';
+import '../usecases/guest_login_use_case.dart';
+import '../usecases/get_user_use_case.dart';
+import '../services/auth_service.dart';
 
 // ... (ConnectRepository related imports and providers kept below)
+
+/// AuthService Provider
+final authServiceProvider = Provider<AuthService>((ref) {
+  return AuthService();
+});
 
 /// UserRepository Provider
 final userRepositoryProvider = Provider<UserRepository>((ref) {
@@ -26,10 +34,23 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
   return MockUserRepository();
 });
 
+/// GetUserUseCase Provider
+final getUserUseCaseProvider = Provider<GetUserUseCase>((ref) {
+  final repository = ref.watch(userRepositoryProvider);
+  return GetUserUseCase(repository);
+});
+
 /// My Profile Provider (Future)
 final myProfileProvider = FutureProvider<UserModel?>((ref) async {
-  final repository = ref.watch(userRepositoryProvider);
-  return repository.getMyProfile();
+  final useCase = ref.watch(getUserUseCaseProvider);
+  return useCase.execute();
+});
+
+/// GuestLoginUseCase Provider
+final guestLoginUseCaseProvider = Provider<GuestLoginUseCase>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final userRepository = ref.watch(userRepositoryProvider);
+  return GuestLoginUseCase(authService, userRepository);
 });
 
 /// UpdateProfileUseCase Provider

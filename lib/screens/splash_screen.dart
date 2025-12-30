@@ -122,10 +122,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     });
 
     try {
-      final result = await _authService.signInAnonymously();
+      await ref.read(guestLoginUseCaseProvider).execute();
+
       if (mounted) {
-        final repository = ref.read(userRepositoryProvider);
-        await repository.initializeUser(result.user!);
         _navigateToNext();
       }
     } catch (e) {
