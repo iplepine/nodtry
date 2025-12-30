@@ -33,8 +33,8 @@ class UserModel {
       statusMessage: data['statusMessage'],
       inviteCode: data['inviteCode'],
       isAnonymous: data['isAnonymous'] ?? false,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 

@@ -1,5 +1,6 @@
 import '../models/home_state.dart';
 import '../models/history_item.dart';
+import '../models/plan_model.dart';
 
 /// 기록 관련 데이터 저장소 인터페이스
 ///
@@ -10,4 +11,7 @@ abstract class RecordRepository {
 
   /// '기록' 탭의 히스토리 아이템 목록을 가져옵니다.
   Future<List<HistoryItem>> getHistoryItems();
+
+  /// 새로운 계획을 생성합니다.
+  Future<void> createPlan(Plan plan);
 }

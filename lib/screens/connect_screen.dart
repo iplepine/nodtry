@@ -121,20 +121,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   // I will check the file content first to be safe, or just view_file.
   // But to be quick, I'll update `_copyCode` and `_shareCode` to accept arguments and remove old `_buildCodeCard` if present.
 
-  Future<void> _copyCode(String code) async {
-    await Clipboard.setData(ClipboardData(text: code));
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.codeCopied),
-        duration: const Duration(seconds: 1),
-        backgroundColor: AppColors.surface,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   Future<void> _submitCode(String code) async {
     final myCode = ref.read(myProfileProvider).asData?.value?.inviteCode;
     if (code == myCode) {

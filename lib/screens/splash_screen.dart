@@ -83,18 +83,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       }
 
       try {
-        final userModelFn = await ref.read(myProfileProvider.future);
+        // AutoLoginUseCase 실행 (5초 타임아웃 및 로그아웃 처리 포함됨)
+        final userModel = await ref.read(autoLoginUseCaseProvider).execute();
 
-        if (userModelFn != null) {
+        if (userModel != null) {
           _navigateToNext();
           return;
         }
       } catch (e) {
-        // 에러 무시 (로그아웃 처리)
+        debugPrint('Auto login failed: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('자동 로그인 실패: $e'),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
       }
 
-      // 실패 시 로그아웃
-      await _authService.signOut();
       if (mounted) {
         setState(() {
           _isAutoLoggingIn = false;
@@ -110,10 +117,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     try {
       if (Platform.isAndroid) {
-        final result = await _authService.signInWithGoogle();
+        final useCase = ref.read(loginWithGoogleUseCaseProvider);
+        final result = await useCase.execute();
+
         if (result != null && mounted) {
-          final repository = ref.read(userRepositoryProvider);
-          await repository.initializeUser(result.user!);
           _navigateToNext();
         }
       }
@@ -224,105 +231,129 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               const Spacer(flex: 1),
 
               // 로그인 버튼 영역 (아래에서 애니메이션)
-              if (_isAutoLoggingIn)
-                Padding(
-                  padding: const EdgeInsets.only(top: 40),
-                  child: Column(
-                    children: [
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 16),
-                      Text(
-                        "로그인 중...", // Localization needed ideally
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                SlideTransition(
-                  position: _buttonSlideAnimation,
-                  child: FadeTransition(
-                    opacity: _buttonFadeAnimation,
-                    child: Column(
-                      children: [
-                        // Android에서만 구글 로그인 버튼 표시
-                        if (Platform.isAndroid) ...[
-                          PrimaryButton(
-                            text: AppLocalizations.of(context)!.loginWithGoogle,
-                            onPressed: _handleGoogleLogin,
-                            isLoading: _isGoogleLoading,
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-
-                        // 게스트 로그인 (둘러보기) - OutlinedButton 스타일 적용
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: _isGuestLoading
-                                ? null
-                                : _handleGuestLogin,
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: AppColors.secondary),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+              // 로그인 버튼 영역 (아래에서 애니메이션)
+              SizedBox(
+                height: 240, // 높이 조정 (280 -> 240)
+                width: double.infinity, // 전체 너비 사용
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
+                  child: _isAutoLoggingIn
+                      ? Column(
+                          key: const ValueKey('loading'),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.center, // 중앙 정렬
+                          children: [
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 16),
+                            Text(
+                              "로그인 중...",
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: AppColors.textSecondary),
                             ),
-                            child: _isGuestLoading
-                                ? SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        AppColors.textSecondary,
+                          ],
+                        )
+                      : SlideTransition(
+                          key: const ValueKey('buttons'),
+                          position: _buttonSlideAnimation,
+                          child: FadeTransition(
+                            opacity: _buttonFadeAnimation,
+                            child: Column(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.center, // 중앙 정렬
+                              children: [
+                                // Android에서만 구글 로그인 버튼 표시
+                                if (Platform.isAndroid) ...[
+                                  PrimaryButton(
+                                    text: AppLocalizations.of(
+                                      context,
+                                    )!.loginWithGoogle,
+                                    onPressed: _handleGoogleLogin,
+                                    isLoading: _isGoogleLoading,
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+
+                                // 게스트 로그인 (둘러보기) - OutlinedButton 스타일 적용
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: OutlinedButton(
+                                    onPressed: _isGuestLoading
+                                        ? null
+                                        : _handleGuestLogin,
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(
+                                        color: AppColors.secondary,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                  )
-                                : Text(
-                                    AppLocalizations.of(context)!.loginGuest,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.textSecondary,
+                                    child: _isGuestLoading
+                                        ? SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    AppColors.textSecondary,
+                                                  ),
+                                            ),
+                                          )
+                                        : Text(
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.loginGuest,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 24),
+                                // 개발자 화면으로 이동
+                                OutlinedButton(
+                                  onPressed: () {
+                                    context.go(AppRoutes.developer);
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.textSecondary,
+                                    side: BorderSide(color: AppColors.divider),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 24),
-                        // 개발자 화면으로 이동
-                        OutlinedButton(
-                          onPressed: () {
-                            context.go(AppRoutes.developer);
-                          },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.textSecondary,
-                            side: BorderSide(color: AppColors.divider),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            '🛠️ 개발자 화면',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                                  child: const Text(
+                                    '🛠️ 개발자 화면',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
                 ),
+              ),
 
               // 하단: 신뢰 메시지
               const Spacer(flex: 2),

@@ -39,21 +39,98 @@ class _UsTabState extends ConsumerState<UsTab> {
             children: [
               // 1. Me Section
               profileAsync.when(
-                data: (user) => _MeSection(
-                  l10n: l10n,
-                  name: (user?.displayName?.isNotEmpty ?? false)
-                      ? user!.displayName!
-                      : l10n.usDefaultNameMe,
-                  statusMessage: user?.statusMessage,
-                  profileImage:
-                      null, // TODO: user.profileImageUrl to File or NetworkImage logic
-                  onEditProfile: () => _showEditProfileDialog(
-                    context,
-                    user?.displayName ?? l10n.usDefaultNameMe,
-                    user?.statusMessage,
-                  ),
-                  inviteCode: user?.inviteCode,
-                ),
+                data: (user) {
+                  return Column(
+                    children: [
+                      // 게스트 경고 메시지 (익명 유저인 경우)
+                      if (user?.isAnonymous ?? false)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 24),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFFFFF4E5,
+                            ), // Soft Orange background
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFFFD180)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.warning_amber_rounded,
+                                color: Color(0xFFFF9800), // Orange
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '휴대폰을 바꾸거나 앱/데이터를 삭제하면 기록을 잃을 수 있어요.',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: const Color(0xFF5D4037),
+                                            height: 1.4,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    InkWell(
+                                      onTap: () =>
+                                          _linkGoogleAccount(context, ref),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            '계정 연결하고 기록 지키기',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  color: const Color(
+                                                    0xFFE65100,
+                                                  ), // Darker Orange
+                                                  fontWeight: FontWeight.bold,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          const Icon(
+                                            Icons.arrow_forward_ios_rounded,
+                                            size: 12,
+                                            color: Color(0xFFE65100),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      _MeSection(
+                        l10n: l10n,
+                        name: (user?.displayName?.isNotEmpty ?? false)
+                            ? user!.displayName!
+                            : l10n.usDefaultNameMe,
+                        statusMessage: user?.statusMessage,
+                        profileImage: null, // TODO: user.profileImageUrl logic
+                        onEditProfile: () => _showEditProfileDialog(
+                          context,
+                          user?.displayName ?? l10n.usDefaultNameMe,
+                          user?.statusMessage,
+                        ),
+                        inviteCode: user?.inviteCode,
+                      ),
+                    ],
+                  );
+                },
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, stack) => Text('Error: $err'),
               ),
@@ -91,6 +168,28 @@ class _UsTabState extends ConsumerState<UsTab> {
         },
       ),
     );
+  }
+
+  Future<void> _linkGoogleAccount(BuildContext context, WidgetRef ref) async {
+    try {
+      // TODO: 로딩 표시 추가 (전체 화면 오버레이 또는 버튼 로딩)
+      final useCase = ref.read(linkWithGoogleUseCaseProvider);
+      final credential = await useCase.execute();
+
+      if (credential != null && mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('구글 계정이 성공적으로 연결되었습니다!')));
+        // Provider 갱신을 통해 UI 업데이트 (isAnonymous가 false가 됨)
+        ref.invalidate(myProfileProvider);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('계정 연결 실패: $e')));
+      }
+    }
   }
 }
 
@@ -393,7 +492,7 @@ class _YouSection extends ConsumerWidget {
     WidgetRef ref,
     ConnectedUser person,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
+    // final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

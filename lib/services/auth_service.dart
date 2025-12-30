@@ -61,7 +61,30 @@ class AuthService {
   }
 
   /// 익명 계정을 영구 계정(구글)으로 전환 (계정 연결)
-  // Future<UserCredential?> linkWithGoogle() async {
-  //   // TODO: 추후 구현 (스펙 9단계)
-  // }
+  Future<UserCredential?> linkWithGoogle() async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) throw Exception('No current user');
+
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return null; // User canceled the sign-in
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Create a new credential
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Link credential to current user
+      return await currentUser.linkWithCredential(credential);
+    } catch (e) {
+      debugPrint("Error linking with Google: $e");
+      rethrow;
+    }
+  }
 }

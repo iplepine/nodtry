@@ -1,32 +1,32 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/plan_model.dart';
 import '../../services/notification_service.dart';
+import '../../providers/repository_provider.dart';
+import '../../providers/home_provider.dart';
 
 import 'widgets/plan_action_step.dart';
 import 'widgets/plan_frequency_step.dart';
 import 'widgets/plan_description_step.dart';
 import 'widgets/plan_day_selection_step.dart';
-// import 'widgets/plan_notification_step.dart'; // Merged into Day Selection step
 
 /// 통합 계획 생성 화면 (Wizard 방식)
-///
-/// 5단계의 PageView로 구성되어 순차적으로 진행
-class PlanCreateScreen extends StatefulWidget {
+class PlanCreateScreen extends ConsumerStatefulWidget {
   const PlanCreateScreen({super.key});
 
   @override
-  State<PlanCreateScreen> createState() => _PlanCreateScreenState();
+  ConsumerState<PlanCreateScreen> createState() => _PlanCreateScreenState();
 }
 
-class _PlanCreateScreenState extends State<PlanCreateScreen> {
+class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
   // Page Controller
   final PageController _pageController = PageController();
   int _currentStep = 1;
-  static const int _totalSteps = 4; // Reduced from 5 to 4
+  static const int _totalSteps = 4;
 
   // Step 1: 행동
   final TextEditingController _actionController = TextEditingController();
@@ -49,11 +49,7 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
   void initState() {
     super.initState();
     _selectedFrequency = 3; // 기본값: 주 3회
-
-    // 알림 서비스 초기화
     NotificationService().init();
-
-    // 입력 상태 변경 감지하여 UI 업데이트 (버튼 활성화/비활성화)
     _actionController.addListener(_onActionChanged);
   }
 
@@ -74,20 +70,16 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
 
   void _nextPage() {
     if (_currentStep < _totalSteps) {
-      // Validation for Step 1
       if (_currentStep == 1 && _actionController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("어떤 약속을 할지 알려주세요!"), // Simple validation message
+            content: Text("어떤 약속을 할지 알려주세요!"),
             duration: Duration(seconds: 1),
           ),
         );
         return;
       }
-
-      // Focus Handling
       FocusManager.instance.primaryFocus?.unfocus();
-
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -110,8 +102,18 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
   }
 
   Future<void> _savePlan() async {
-    // Final Validation just in case
     if (_actionController.text.trim().isEmpty) return;
+
+    // 현재 사용자 ID 가져오기
+    final userState = ref.read(myProfileProvider);
+    final userId = userState.asData?.value?.uid;
+
+    if (userId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("사용자 정보를 찾을 수 없습니다.")));
+      return;
+    }
 
     final planItem = PlanItem(
       title: _actionController.text,
@@ -120,9 +122,45 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
       notificationTime: _notificationTime,
     );
 
-    // Check permissions and schedule if needed
+    final plan = Plan(
+      userId: userId,
+      startDate: DateTime.now(),
+      endDate: DateTime.now().add(const Duration(days: 30)), // 기본 30일?
+      state: 'pending_approval',
+      items: [planItem],
+      createdAt: DateTime.now(),
+    );
+
+    debugPrint(
+      '[PlanCreateScreen] UseCase execution started. Plan UserId: ${plan.userId}',
+    );
+    try {
+      // UseCase를 통해 저장
+      await ref.read(createNewPlanUseCaseProvider).execute(plan);
+      debugPrint('[PlanCreateScreen] UseCase execution finished.');
+
+      // Provider 갱신 (Now Tab 업데이트)
+      ref.invalidate(homeCardStateProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("계획 제안이 완료되었습니다.\n상대방과 대화해보세요!"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("저장 중 오류가 발생했습니다: $e")));
+      }
+    }
+
+    // 알림 설정 (로컬 알림 유지)
     if (_selectedDays.isNotEmpty || _notificationTime.type != 'none') {
-      // Note: Requesting permissions at the end might be better UX than interruption
       await NotificationService().requestPermissions();
       await NotificationService().schedulePlanReminder(
         planId: DateTime.now().millisecondsSinceEpoch ~/ 1000,
@@ -132,22 +170,11 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
         days: planItem.days,
       );
     }
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("계획 제안이 완료되었습니다.\n상대방과 대화해보세요!"),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      context.pop();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // MediaQuery를 사용하여 안전하게 키보드 높이 감지
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final isKeyboardVisible = bottomInset > 0;
 
@@ -233,27 +260,22 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              // Content (PageView)
               Expanded(
                 child: PageView(
                   controller: _pageController,
-                  physics:
-                      const NeverScrollableScrollPhysics(), // Disable swipe to enforce flow
+                  physics: const NeverScrollableScrollPhysics(),
                   onPageChanged: (index) {
                     setState(() {
                       _currentStep = index + 1;
                     });
                   },
                   children: [
-                    // Step 1: Action (행동)
                     _buildStepContainer(
                       child: PlanActionStep(
                         controller: _actionController,
                         focusNode: _actionFocus,
                       ),
                     ),
-
-                    // Step 2: Frequency (빈도)
                     _buildStepContainer(
                       child: PlanFrequencyStep(
                         selectedFrequency: _selectedFrequency,
@@ -264,16 +286,12 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
                         },
                       ),
                     ),
-
-                    // Step 3: Description (설명)
                     _buildStepContainer(
                       child: PlanDescriptionStep(
                         controller: _descriptionController,
                         focusNode: _descriptionFocus,
                       ),
                     ),
-
-                    // Step 4: Days & Notification (요일 + 알림)
                     _buildStepContainer(
                       child: PlanDaySelectionStep(
                         selectedDays: _selectedDays,
@@ -297,8 +315,6 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
                   ],
                 ),
               ),
-
-              // Bottom Button (Visible only when keyboard is hidden to avoid crowding)
               if (!isKeyboardVisible) _buildBottomBar(l10n),
             ],
           ),
@@ -308,7 +324,6 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
   }
 
   Widget _buildStepContainer({required Widget child}) {
-    // Padded container for consistency
     return SingleChildScrollView(
       child: Padding(padding: const EdgeInsets.all(24.0), child: child),
     );
@@ -317,7 +332,7 @@ class _PlanCreateScreenState extends State<PlanCreateScreen> {
   Widget _buildBottomBar(AppLocalizations l10n) {
     String buttonText = "다음";
     if (_currentStep == _totalSteps) {
-      buttonText = l10n.planSummarySend; // "이렇게 제안할게요"
+      buttonText = l10n.planSummarySend;
     }
 
     bool isButtonEnabled = true;

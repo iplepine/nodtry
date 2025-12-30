@@ -1,4 +1,5 @@
 import '../usecases/disconnect_connection_use_case.dart';
+import '../usecases/create_new_plan_use_case.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../repositories/record_repository.dart';
@@ -13,6 +14,10 @@ import '../repositories/user_repository.dart';
 import '../repositories/mock_user_repository.dart';
 import '../repositories/real_user_repository.dart';
 import '../usecases/update_profile_use_case.dart';
+import '../usecases/auto_login_use_case.dart';
+import '../usecases/link_with_google_use_case.dart';
+import '../usecases/login_with_google_use_case.dart';
+
 import '../usecases/guest_login_use_case.dart';
 import '../usecases/get_my_profile_use_case.dart';
 import '../usecases/get_connected_profiles_use_case.dart';
@@ -174,3 +179,25 @@ final disconnectConnectionUseCaseProvider =
       final repository = ref.watch(connectRepositoryProvider);
       return DisconnectConnectionUseCase(repository);
     });
+
+final createNewPlanUseCaseProvider = Provider<CreateNewPlanUseCase>((ref) {
+  final repository = ref.watch(recordRepositoryProvider);
+  return CreateNewPlanUseCase(repository);
+});
+final autoLoginUseCaseProvider = Provider<AutoLoginUseCase>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final getMyProfileUseCase = ref.watch(getMyProfileUseCaseProvider);
+  return AutoLoginUseCase(authService, getMyProfileUseCase);
+});
+
+final linkWithGoogleUseCaseProvider = Provider<LinkWithGoogleUseCase>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final userRepository = ref.watch(userRepositoryProvider);
+  return LinkWithGoogleUseCase(authService, userRepository);
+});
+
+final loginWithGoogleUseCaseProvider = Provider<LoginWithGoogleUseCase>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final userRepository = ref.watch(userRepositoryProvider);
+  return LoginWithGoogleUseCase(authService, userRepository);
+});

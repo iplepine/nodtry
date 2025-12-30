@@ -55,7 +55,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: AppColors.background,
       extendBody: true,
       extendBodyBehindAppBar: false,
-      body: _buildCurrentTab(),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: const [NowTab(), HistoryTab(), UsTab()],
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.surface,
@@ -107,18 +110,5 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildCurrentTab() {
-    switch (_currentIndex) {
-      case 0:
-        return const NowTab();
-      case 1:
-        return const HistoryTab();
-      case 2:
-        return const UsTab();
-      default:
-        return const NowTab();
-    }
   }
 }
