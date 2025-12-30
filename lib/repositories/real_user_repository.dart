@@ -77,7 +77,9 @@ class RealUserRepository implements UserRepository {
       'updatedAt': FieldValue.serverTimestamp(),
     };
 
-    if (name != null) updates['displayName'] = name;
+    if (name != null) {
+      updates['displayName'] = name.isEmpty ? '나' : name;
+    }
     if (statusMessage != null) updates['statusMessage'] = statusMessage;
 
     // 이미지 업로드는 Storage 설정 후 구현 필요

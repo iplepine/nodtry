@@ -14,11 +14,6 @@ class UpdateProfileUseCase {
     String? statusMessage,
     File? image,
   }) async {
-    // 비즈니스 로직: 유효성 검사 등
-    if (name != null && name.isEmpty) {
-      throw Exception('Name cannot be empty');
-    }
-
     // 1. 서버 업데이트
     await _repository.updateProfile(
       name: name,
