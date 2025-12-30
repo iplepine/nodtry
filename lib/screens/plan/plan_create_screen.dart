@@ -126,7 +126,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
       userId: userId,
       startDate: DateTime.now(),
       endDate: DateTime.now().add(const Duration(days: 30)), // 기본 30일?
-      state: 'pending_approval',
+      state: PlanState.pendingApproval,
       items: [planItem],
       createdAt: DateTime.now(),
     );

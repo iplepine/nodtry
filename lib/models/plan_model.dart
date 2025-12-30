@@ -1,12 +1,52 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum PlanState {
+  draft,
+  pendingApproval,
+  active,
+  completed,
+  rejected;
+
+  String toMap() {
+    switch (this) {
+      case PlanState.draft:
+        return 'draft';
+      case PlanState.pendingApproval:
+        return 'pending_approval';
+      case PlanState.active:
+        return 'active';
+      case PlanState.completed:
+        return 'completed';
+      case PlanState.rejected:
+        return 'rejected';
+    }
+  }
+
+  static PlanState fromMap(String value) {
+    switch (value) {
+      case 'draft':
+        return PlanState.draft;
+      case 'pending_approval':
+        return PlanState.pendingApproval;
+      case 'active':
+        return PlanState.active;
+      case 'completed':
+        return PlanState.completed;
+      case 'rejected':
+        return PlanState.rejected;
+      default:
+        return PlanState.draft;
+    }
+  }
+}
+
 class Plan {
   final String? id;
   final String userId;
   final String? managerId;
   final DateTime startDate;
   final DateTime endDate;
-  final String state; // 'draft', 'pending_approval', 'active', 'completed'
+  final PlanState state;
   final List<PlanItem> items;
   final DateTime createdAt;
 
@@ -27,7 +67,7 @@ class Plan {
       'managerId': managerId,
       'startDate': Timestamp.fromDate(startDate),
       'endDate': Timestamp.fromDate(endDate),
-      'state': state,
+      'state': state.toMap(),
       'items': items.map((x) => x.toMap()).toList(),
       'createdAt': Timestamp.fromDate(createdAt),
     };
@@ -40,7 +80,7 @@ class Plan {
       managerId: map['managerId'],
       startDate: (map['startDate'] as Timestamp).toDate(),
       endDate: (map['endDate'] as Timestamp).toDate(),
-      state: map['state'] ?? 'draft',
+      state: PlanState.fromMap(map['state'] ?? 'draft'),
       items: List<PlanItem>.from(
         (map['items'] as List<dynamic>).map<PlanItem>(
           (x) => PlanItem.fromMap(x as Map<String, dynamic>),
