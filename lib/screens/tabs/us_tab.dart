@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Riverpod Import
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import 'dart:io';
@@ -7,30 +8,25 @@ import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../routes/app_router.dart';
+import '../../providers/repository_provider.dart'; // Repository Provider Import
 
 /// 우리 탭 - 안전 기지 & 연결 허브
 ///
 /// "나(Me)"와 "너(You)"의 관계를 관리하는 공간
-class UsTab extends StatefulWidget {
+class UsTab extends ConsumerStatefulWidget {
   const UsTab({super.key});
 
   @override
-  State<UsTab> createState() => _UsTabState();
+  ConsumerState<UsTab> createState() => _UsTabState();
 }
 
-class _UsTabState extends State<UsTab> {
-  // TODO: 실제 데이터는 Provider/Repository에서 관리
-  String? _name;
-  String? _statusMessage;
-  File? _profileImage;
-
+class _UsTabState extends ConsumerState<UsTab> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final displayName = _name ?? l10n.usDefaultNameMe;
-    // status and image handled directly via state variables
+    final profileAsync = ref.watch(myProfileProvider);
 
-    // TODO: 실제 데이터 연동
+    // TODO: 실제 데이터 연동 (Relations)
     final connectedPeople = <_ConnectedPerson>[
       // 예시 데이터
       // _ConnectedPerson(name: "지민", isSupported: true, isCheering: false),
@@ -47,16 +43,21 @@ class _UsTabState extends State<UsTab> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Me Section
-              _MeSection(
-                l10n: l10n,
-                name: displayName,
-                statusMessage: _statusMessage,
-                profileImage: _profileImage,
-                onEditProfile: () => _showEditProfileDialog(
-                  context,
-                  displayName,
-                  _statusMessage,
+              profileAsync.when(
+                data: (user) => _MeSection(
+                  l10n: l10n,
+                  name: user?.displayName ?? l10n.usDefaultNameMe,
+                  statusMessage: user?.statusMessage,
+                  profileImage:
+                      null, // TODO: user.profileImageUrl to File or NetworkImage logic
+                  onEditProfile: () => _showEditProfileDialog(
+                    context,
+                    user?.displayName ?? l10n.usDefaultNameMe,
+                    user?.statusMessage,
+                  ),
                 ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Text('Error: $err'),
               ),
 
               const SizedBox(height: 48),
@@ -83,11 +84,7 @@ class _UsTabState extends State<UsTab> {
       text: currentStatus,
     );
 
-    // Dialog 내부에서 이미지를 변경하고 보여주기 위해 임시 변수 사용하지 않고
-    // 부모의 _profileImage를 직접 수정하여 반영 (간소화)
-    // 하지만 Dialog가 닫힐 때 취소하면 원복해야 하므로, 복잡해질 수 있음.
-    // 여기서는 StatefulBuilder를 사용하여 Dialog 내부 상태를 관리.
-    File? tempProfileImage = _profileImage;
+    File? tempProfileImage; // 로컬 프리뷰용
 
     showDialog(
       context: context,
@@ -154,7 +151,7 @@ class _UsTabState extends State<UsTab> {
                                     image: FileImage(tempProfileImage!),
                                     fit: BoxFit.cover,
                                   )
-                                : null,
+                                : null, // 서버 이미지 URL 처리 필요
                           ),
                           child: tempProfileImage == null
                               ? Icon(
@@ -227,15 +224,28 @@ class _UsTabState extends State<UsTab> {
                 ),
               ),
               TextButton(
-                onPressed: () {
-                  setState(() {
-                    _name = nameController.text;
-                    _statusMessage = statusController.text.isEmpty
-                        ? null
-                        : statusController.text;
-                    _profileImage = tempProfileImage;
-                  });
-                  Navigator.pop(context);
+                onPressed: () async {
+                  try {
+                    final updateUseCase = ref.read(
+                      updateProfileUseCaseProvider,
+                    );
+                    await updateUseCase.execute(
+                      name: nameController.text,
+                      statusMessage: statusController.text.isEmpty
+                          ? null
+                          : statusController.text,
+                      image: tempProfileImage,
+                    );
+
+                    // Provider 새로고침
+                    ref.invalidate(myProfileProvider);
+
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  } catch (e) {
+                    // 에러 처리
+                  }
                 },
                 child: Text("저장", style: TextStyle(color: AppColors.primary)),
               ),
