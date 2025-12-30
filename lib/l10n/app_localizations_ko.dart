@@ -27,10 +27,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get privacyMessage => '강요하지 않아요. 기록은 둘만 봅니다.';
 
   @override
-  String get connectHeadline => '이번 달, 누군가에게 맡겨볼래요?';
+  String get connectHeadline => '혼자서는 지키기 힘든 약속,';
 
   @override
-  String get connectSubtitle => '계획은 내가 세우고, 관리는 상대가 해주는 방식이에요.';
+  String get connectSubtitle => '누군가 지켜봐준다면 해낼 수 있을 거예요.';
 
   @override
   String get createInviteCode => '초대 코드 만들기';
