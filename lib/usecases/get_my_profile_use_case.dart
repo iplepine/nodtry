@@ -41,6 +41,7 @@ class GetMyProfileUseCase {
         // 캐시도 없고 에러남 -> 에러 전파??
         // Stream 에러 처리는 복잡하므로 여기선 로그 남기고 종료
         // yield* Stream.error(e);
+        yield null;
       }
       // 캐시가 있으면 아무것도 안함 (캐시된 데이터가 최신이라 믿음)
     }
