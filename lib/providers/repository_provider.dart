@@ -12,7 +12,7 @@ import '../repositories/mock_user_repository.dart';
 import '../repositories/real_user_repository.dart';
 import '../usecases/update_profile_use_case.dart';
 import '../usecases/guest_login_use_case.dart';
-import '../usecases/get_user_use_case.dart';
+import '../usecases/get_my_profile_use_case.dart';
 import '../services/auth_service.dart';
 
 // ... (ConnectRepository related imports and providers kept below)
@@ -34,15 +34,15 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
   return MockUserRepository();
 });
 
-/// GetUserUseCase Provider
-final getUserUseCaseProvider = Provider<GetUserUseCase>((ref) {
+/// GetMyProfileUseCase Provider
+final getMyProfileUseCaseProvider = Provider<GetMyProfileUseCase>((ref) {
   final repository = ref.watch(userRepositoryProvider);
-  return GetUserUseCase(repository);
+  return GetMyProfileUseCase(repository);
 });
 
 /// My Profile Provider (Future)
 final myProfileProvider = FutureProvider<UserModel?>((ref) async {
-  final useCase = ref.watch(getUserUseCaseProvider);
+  final useCase = ref.watch(getMyProfileUseCaseProvider);
   return useCase.execute();
 });
 
