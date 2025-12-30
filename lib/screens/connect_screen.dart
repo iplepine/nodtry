@@ -48,8 +48,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
 
     final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
     final text = clipboardData?.text;
+    final myCode = ref.read(myProfileProvider).asData?.value?.inviteCode;
 
     if (text != null && _isValidInviteCode(text)) {
+      if (text == myCode) return; // 내 코드면 무시
+
       if (!mounted) return;
 
       // 사용자에게 붙여넣기 의사 묻기
@@ -109,21 +112,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       UserModel? user;
 
       // Stream의 최신 데이터 대기 (캐시 -> 리모트 순으로 올 수 있음)
-      // 화면에서는 'loading'을 보여주는 방식이 아니므로, 일단 첫 데이터라도 가져와서 보여줌
-      // 여기서는 execute()가 닫힐 때까지 기다리는 것보다는,
-      // myProfileProvider의 상태를 읽는 것이 더 나을 수도 있음.
-      // 하지만 execute() 직접 호출 방식을 유지한다면:
-
       final stream = useCase.execute();
       await for (final u in stream) {
         if (u != null) {
           user = u;
-          // 캐시 데이터가 오면 일단 보여주고, 나중에 리모트 데이터가 오면 갱신될 수도 있음.
-          // 하지만 여기선 generateCode 버튼 클릭 시점이므로,
-          // 가장 최신(혹은 캐시) 데이터를 받아서 할당.
-          break; // 첫 유효 데이터만 받고 루프 종료 (빠른 반응성)
-          // 만약 리모트까지 기다리려면 break 하지 않고 리모트 이벤트까지 수신해야 함.
-          // 여기선 일단 첫 데이터(캐시)라도 있으면 보여줌.
+          break; // 첫 유효 데이터만 받고 루프 종료
         }
       }
 
@@ -167,6 +160,14 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   }
 
   Future<void> _submitCode(String code) async {
+    final myCode = ref.read(myProfileProvider).asData?.value?.inviteCode;
+    if (code == myCode) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('본인의 초대 코드는 사용할 수 없습니다.')));
+      return;
+    }
+
     setState(() {
       _state = ConnectState.codeEntered; // 입력 상태 유지
     });
