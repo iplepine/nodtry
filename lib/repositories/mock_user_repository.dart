@@ -18,7 +18,7 @@ class MockUserRepository implements UserRepository {
       uid: 'mock-uid-1234',
       displayName: '나(Mock)',
       statusMessage: '오늘도 힘내자!',
-      inviteCode: 'TEST01',
+      inviteCode: 'TEST0123',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );

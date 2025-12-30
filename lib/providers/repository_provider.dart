@@ -53,8 +53,8 @@ final getMyProfileUseCaseProvider = Provider<GetMyProfileUseCase>((ref) {
   return GetMyProfileUseCase(repository, userLocalDataSource);
 });
 
-/// My Profile Provider (Future)
-final myProfileProvider = FutureProvider<UserModel?>((ref) async {
+/// My Profile Provider (Stream)
+final myProfileProvider = StreamProvider<UserModel?>((ref) {
   final useCase = ref.watch(getMyProfileUseCaseProvider);
   return useCase.execute();
 });

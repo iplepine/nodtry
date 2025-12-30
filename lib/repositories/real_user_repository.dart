@@ -36,11 +36,11 @@ class RealUserRepository implements UserRepository {
   }
 
   String _generateInviteCode() {
-    // 6자리 영문 대문자 + 숫자 (UX상 6자리가 입력하기 편함)
+    // 8자리 영문 대문자 + 숫자 (스펙 준수)
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     return String.fromCharCodes(
       Iterable.generate(
-        6,
+        8,
         (_) => chars.codeUnitAt(DateTime.now().microsecond % chars.length),
       ),
     );

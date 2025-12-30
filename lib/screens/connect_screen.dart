@@ -8,6 +8,7 @@ import '../widgets/primary_button.dart';
 import '../routes/app_router.dart';
 import '../providers/repository_provider.dart';
 import '../repositories/connect_repository.dart';
+import '../models/user_model.dart';
 
 enum ConnectState {
   initial, // 초기 상태 - 코드 생성/입력 선택
@@ -27,11 +28,8 @@ class ConnectScreen extends ConsumerStatefulWidget {
 class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   ConnectState _state = ConnectState.initial;
   String _inviteCode = '';
-  final List<TextEditingController> _codeControllers = List.generate(
-    6,
-    (index) => TextEditingController(),
-  );
-  final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
+  final TextEditingController _codeController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -81,41 +79,53 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   }
 
   bool _isValidInviteCode(String code) {
-    // 6자리 영문 대문자+숫자 체크
-    final regex = RegExp(r'^[A-Z0-9]{6}$');
+    // 8자리 영문 대문자+숫자 체크
+    final regex = RegExp(r'^[A-Z0-9]{8}$');
     return regex.hasMatch(code);
   }
 
   void _fillCode(String code) {
-    if (code.length != 6) return;
+    if (code.length != 8) return;
 
     setState(() {
       _state = ConnectState.codeEntered;
+      _codeController.text = code;
     });
-
-    for (int i = 0; i < 6; i++) {
-      _codeControllers[i].text = code[i];
-    }
 
     _connectManually();
   }
 
   @override
   void dispose() {
-    for (var controller in _codeControllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
+    _codeController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   Future<void> _generateCode() async {
     try {
-      // 내 프로필에서 기존 초대 코드 가져오기
+      // 내 프로필에서 기존 초대 코드 가져오기 (Stream 처리)
       final useCase = ref.read(getMyProfileUseCaseProvider);
-      final user = await useCase.execute();
+      UserModel? user;
+
+      // Stream의 최신 데이터 대기 (캐시 -> 리모트 순으로 올 수 있음)
+      // 화면에서는 'loading'을 보여주는 방식이 아니므로, 일단 첫 데이터라도 가져와서 보여줌
+      // 여기서는 execute()가 닫힐 때까지 기다리는 것보다는,
+      // myProfileProvider의 상태를 읽는 것이 더 나을 수도 있음.
+      // 하지만 execute() 직접 호출 방식을 유지한다면:
+
+      final stream = useCase.execute();
+      await for (final u in stream) {
+        if (u != null) {
+          user = u;
+          // 캐시 데이터가 오면 일단 보여주고, 나중에 리모트 데이터가 오면 갱신될 수도 있음.
+          // 하지만 여기선 generateCode 버튼 클릭 시점이므로,
+          // 가장 최신(혹은 캐시) 데이터를 받아서 할당.
+          break; // 첫 유효 데이터만 받고 루프 종료 (빠른 반응성)
+          // 만약 리모트까지 기다리려면 break 하지 않고 리모트 이벤트까지 수신해야 함.
+          // 여기선 일단 첫 데이터(캐시)라도 있으면 보여줌.
+        }
+      }
 
       if (user?.inviteCode != null && mounted) {
         setState(() {
@@ -123,7 +133,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
           _state = ConnectState.codeGenerated;
         });
       } else {
-        // 코드가 없는 경우 (예외 상황)
         if (mounted) {
           ScaffoldMessenger.of(
             context,
@@ -157,17 +166,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     _copyCode();
   }
 
-  void _onCodeChanged(int index, String value) {
-    if (value.isNotEmpty && index < 5) {
-      _focusNodes[index + 1].requestFocus();
-    }
-
-    // 모든 칸이 채워지면 연결 요청
-    if (_codeControllers.every((controller) => controller.text.isNotEmpty)) {
-      _connectManually();
-    }
-  }
-
   Future<void> _submitCode(String code) async {
     setState(() {
       _state = ConnectState.codeEntered; // 입력 상태 유지
@@ -198,8 +196,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   }
 
   void _connectManually() {
-    final code = _codeControllers.map((c) => c.text).join();
-    if (code.length == 6) {
+    final code = _codeController.text;
+    if (code.length == 8) {
       _submitCode(code);
     }
   }
@@ -217,31 +215,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
         }
       });
     });
-
-    // Watch connection status stream (UI 업데이트용 - 현재는 _state로 관리되어 크게 필요 없으나 미래를 위해)
-    // final statusAsync = ref.watch(connectionStatusStreamProvider);
-
-    // Status에 따른 화면 전환 로직
-    // build 내에서 부수 효과(네비게이션 등)를 직접 일으키는 건 지양해야 함.
-    // 하지만 상태값(_state) 변경은 가능.
-
-    // statusAsync.whenData((status) {
-    //   if (status == ConnectionStatus.active &&
-    //       _state != ConnectState.connected) {
-    //     // 연결 완료
-    //     WidgetsBinding.instance.addPostFrameCallback((_) {
-    //       if (mounted) {
-    //         setState(() {
-    //           _state = ConnectState.connected;
-    //         });
-    //       }
-    //     });
-    //   } else if (status == ConnectionStatus.pending &&
-    //       _state != ConnectState.waiting) {
-    //     // 대기 중 (이미 _submitCode에서 설정했지만, 스트림 소스일 경우 동기화)
-    //     // 여기서는 UI 로컬 상태와 Provider 상태가 섞여 있어 조심해야 함.
-    //   }
-    // });
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -265,10 +238,9 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
               if (_state == ConnectState.codeGenerated) _buildCodeCard(),
 
               // 코드 입력: 입력 필드
-              if (_state == ConnectState.codeEntered) _buildCodeInput(),
-
-              // 연결 대기 중
-              if (_state == ConnectState.waiting) _buildWaitingState(),
+              if (_state == ConnectState.codeEntered ||
+                  _state == ConnectState.waiting)
+                _buildCodeInput(),
 
               // 연결 완료 (임시: 테스트용)
               if (_state == ConnectState.connected) _buildConnectedState(),
@@ -368,7 +340,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
           ),
           const SizedBox(height: 16),
           // 코드 표시
-          Text(
+          SelectableText(
             _inviteCode,
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
               color: AppColors.primary,
@@ -437,81 +409,66 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
-        // 6칸 코드 입력 필드
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(6, (index) {
-            return SizedBox(
-              width: 48,
-              child: TextField(
-                controller: _codeControllers[index],
-                focusNode: _focusNodes[index],
-                textAlign: TextAlign.center,
-                maxLength: 1,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-                decoration: InputDecoration(
-                  counterText: '',
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.divider),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.divider),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.primary, width: 2),
-                  ),
-                ),
-                onChanged: (value) => _onCodeChanged(index, value),
-                keyboardType: TextInputType.text,
-                textCapitalization: TextCapitalization.characters,
-              ),
-            );
-          }),
-        ),
-        const SizedBox(height: 32),
-        PrimaryButton(
-          text: AppLocalizations.of(context)!.sendConnectionRequest,
-          onPressed: _connectManually,
-        ),
-      ],
-    );
-  }
 
-  Widget _buildWaitingState() {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            AppLocalizations.of(context)!.waitingForConnection,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: AppColors.textPrimary),
+        // 단일 TextField 입력
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: TextField(
+            controller: _codeController,
+            focusNode: _focusNode,
             textAlign: TextAlign.center,
+            maxLength: 8,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 8, // 글자 간격
+            ),
+            decoration: InputDecoration(
+              counterText: '',
+              hintText: 'ABCD1234',
+              hintStyle: TextStyle(
+                color: AppColors.textSecondary.withValues(alpha: 0.3),
+                letterSpacing: 4,
+              ),
+              filled: true,
+              fillColor: AppColors.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.divider),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.divider),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.primary, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 24),
+            ),
+            onChanged: (value) {
+              if (value.length == 8) {
+                _connectManually();
+              }
+            },
+            keyboardType: TextInputType.text,
+            textCapitalization: TextCapitalization.characters,
+            autocorrect: false,
+            enableSuggestions: false,
           ),
-        ],
-      ),
+        ),
+
+        const SizedBox(height: 32),
+
+        if (_state == ConnectState.waiting) ...[
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+        ] else
+          PrimaryButton(
+            text: AppLocalizations.of(context)!.sendConnectionRequest,
+            onPressed: () => _connectManually(),
+          ),
+      ],
     );
   }
 
