@@ -113,6 +113,8 @@ class _UsTabState extends ConsumerState<UsTab> {
                       if (pickedFile != null) {
                         final croppedFile = await ImageCropper().cropImage(
                           sourcePath: pickedFile.path,
+                          maxWidth: 512,
+                          maxHeight: 512,
                           uiSettings: [
                             AndroidUiSettings(
                               toolbarTitle: '프로필 사진 자르기',
