@@ -79,10 +79,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Future<void> _checkAuthAndNavigate() async {
     final user = _authService.currentUser;
     if (user != null) {
-      // User Repository를 통해 초기화
-      final repository = ref.read(userRepositoryProvider);
-      await repository.initializeUser(user);
-      _navigateToNext();
+      // 자동 로그인 시도: 프로필 가져오기
+      // initializeUser(생성)가 아닌 getMyProfile(조회)만 수행
+      // 데이터가 없으면(삭제됨) null 반환됨
+
+      // Provider를 통해 Stream의 첫 번째 값(캐시 혹은 리모트)을 기다림
+      try {
+        final userModelFn = await ref.read(myProfileProvider.future);
+
+        if (userModelFn != null) {
+          _navigateToNext();
+          return;
+        }
+      } catch (e) {
+        // 에러 무시 (로그아웃 처리)
+      }
+
+      // 유저가 있지만 DB에 데이터가 없는 경우 (삭제된 계정)
+      // 로그아웃 처리하고 로그인 화면 유지
+      await _authService.signOut();
     }
   }
 
