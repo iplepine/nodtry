@@ -316,14 +316,14 @@ class _MeActionButton extends StatelessWidget {
 }
 
 /// 섹션 B: 너 (You)
-class _YouSection extends StatelessWidget {
+class _YouSection extends ConsumerWidget {
   final AppLocalizations l10n;
   final AsyncValue<List<ConnectedUser>> connectedAsync;
 
   const _YouSection({required this.l10n, required this.connectedAsync});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -365,7 +365,14 @@ class _YouSection extends StatelessWidget {
             if (people.isEmpty) return _buildEmptyState(context);
             return Column(
               children: people
-                  .map((person) => _PersonCard(person: person, l10n: l10n))
+                  .map(
+                    (person) => _PersonCard(
+                      person: person,
+                      l10n: l10n,
+                      onDisconnect: () =>
+                          _showDisconnectDialog(context, ref, person),
+                    ),
+                  )
                   .toList(),
             );
           },
@@ -379,6 +386,56 @@ class _YouSection extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _showDisconnectDialog(
+    BuildContext context,
+    WidgetRef ref,
+    ConnectedUser person,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('연결 해제'),
+        content: Text('${person.user.displayName ?? '상대방'}님과의 연결을 해제하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('해제', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ref
+            .read(disconnectConnectionUseCaseProvider)
+            .execute(person.user.uid);
+        // 목록 갱신 -> Stream이므로 자동 갱신되지만 connectedProfilesProvider는 FutureProvider라 invalidate 필요
+        // 사실 ConnectRepository가 변경되면 Stream은 반응하지만, connectedProfiles는 FutureProvider라서...
+        // Repository에서 status 변경을 감지하고 invalidate 해줘야 함?
+        // 아니면 여기서 수동으로 invalidate.
+        ref.invalidate(connectedProfilesProvider);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('연결이 해제되었습니다.')));
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('연결 해제 실패: $e')));
+        }
+      }
+    }
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -426,8 +483,13 @@ class _YouSection extends StatelessWidget {
 class _PersonCard extends StatelessWidget {
   final ConnectedUser person; // ConnectedUser 사용
   final AppLocalizations l10n;
+  final VoidCallback onDisconnect;
 
-  const _PersonCard({required this.person, required this.l10n});
+  const _PersonCard({
+    required this.person,
+    required this.l10n,
+    required this.onDisconnect,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -441,7 +503,7 @@ class _PersonCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // TODO: 상세 관계 화면 이동
+            // TODO: 상세 관계 화면 이동?
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
@@ -473,6 +535,17 @@ class _PersonCard extends StatelessWidget {
                           color: AppColors.textPrimary,
                         ),
                       ),
+                      if (person.user.statusMessage != null &&
+                          person.user.statusMessage!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          person.user.statusMessage!,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                       const SizedBox(height: 6),
                       Wrap(
                         spacing: 6,
@@ -505,7 +578,11 @@ class _PersonCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: AppColors.textDisabled),
+                IconButton(
+                  icon: const Icon(Icons.link_off, color: Colors.redAccent),
+                  onPressed: onDisconnect,
+                  tooltip: '연결 해제',
+                ),
               ],
             ),
           ),

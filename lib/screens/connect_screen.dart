@@ -135,11 +135,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     );
   }
 
-  void _shareCode(String code) {
-    // TODO: 공유 기능 구현
-    _copyCode(code);
-  }
-
   Future<void> _submitCode(String code) async {
     final myCode = ref.read(myProfileProvider).asData?.value?.inviteCode;
     if (code == myCode) {
@@ -192,18 +187,19 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       next.whenData((status) {
         if (status == ConnectionStatus.active &&
             _state != ConnectState.connected) {
-          // 연결 성공 시 목록 갱신
+          // 연결 성공 시 목록 갱신 및 토스트, 닫기
           ref.invalidate(connectedProfilesProvider);
-          setState(() {
-            _state = ConnectState.connected;
-          });
-        } else if (status != ConnectionStatus.active &&
-            _state == ConnectState.connected) {
-          // 연결 해제 시 목록 갱신
-          ref.invalidate(connectedProfilesProvider);
-          setState(() {
-            _state = ConnectState.initial;
-          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('연결되었습니다!'),
+              backgroundColor: AppColors.primary,
+            ),
+          );
+
+          if (mounted && Navigator.canPop(context)) {
+            Navigator.pop(context);
+          }
         }
       });
     });
