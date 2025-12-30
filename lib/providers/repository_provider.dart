@@ -13,6 +13,7 @@ import '../repositories/real_user_repository.dart';
 import '../usecases/update_profile_use_case.dart';
 import '../usecases/guest_login_use_case.dart';
 import '../usecases/get_my_profile_use_case.dart';
+import '../usecases/get_connected_profiles_use_case.dart';
 import '../services/auth_service.dart';
 import '../datasources/user_local_data_source.dart';
 
@@ -76,6 +77,15 @@ final updateProfileUseCaseProvider = Provider<UpdateProfileUseCase>((ref) {
 
 /// 현재 사용할 Repository 타입
 enum RepositoryType { mock, real }
+
+final getConnectedProfilesUseCaseProvider =
+    Provider<GetConnectedProfilesUseCase>((ref) {
+      return GetConnectedProfilesUseCase(
+        ref.watch(connectRepositoryProvider),
+        ref.watch(userRepositoryProvider),
+        ref.watch(authServiceProvider),
+      );
+    });
 
 /// Repository 타입 상태 관리 Provider
 class RepositoryTypeNotifier extends AsyncNotifier<RepositoryType> {

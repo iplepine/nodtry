@@ -1,3 +1,5 @@
+import '../models/relation_model.dart';
+
 /// 연결 상태
 enum ConnectionStatus {
   none, // 연결 없음
@@ -22,6 +24,11 @@ abstract class ConnectRepository {
 
   /// 내 초대 코드 조회
   Future<String?> getMyInviteCode();
+
+  /// 연결 목록 조회
+  ///
+  /// 나와 관련된 모든 활성/대기 연결을 조회합니다.
+  Future<List<RelationModel>> getConnections();
 
   /// 연결 상태 스트림
   ///

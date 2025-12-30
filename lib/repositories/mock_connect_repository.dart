@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import '../models/relation_model.dart';
 import 'connect_repository.dart';
 
 /// Mock 연결 데이터 저장소
@@ -58,6 +59,11 @@ class MockConnectRepository implements ConnectRepository {
   Future<String?> getMyInviteCode() async {
     await Future.delayed(const Duration(milliseconds: 200));
     return _myInviteCode;
+  }
+
+  @override
+  Future<List<RelationModel>> getConnections() async {
+    return []; // 일단 빈 리스트 반환
   }
 
   @override

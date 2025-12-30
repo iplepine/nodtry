@@ -1,9 +1,14 @@
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../models/relation_model.dart';
 import 'connect_repository.dart';
 
 /// Firestore 기반 실제 연결 데이터 저장소
 class RealConnectRepository implements ConnectRepository {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   // final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   // final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -28,6 +33,38 @@ class RealConnectRepository implements ConnectRepository {
     // TODO: implement getMyInviteCode
     // 내 정보에서 inviteCode 필드 조회
     return null;
+  }
+
+  @override
+  Future<List<RelationModel>> getConnections() async {
+    final user = _auth.currentUser;
+    if (user == null) return [];
+
+    try {
+      // 1. 내가 executor인 경우 (내가 지지받음)
+      final executorQuery = await _firestore
+          .collection('relations')
+          .where('executorId', isEqualTo: user.uid)
+          .get();
+
+      // 2. 내가 manager인 경우 (내가 응원함)
+      final managerQuery = await _firestore
+          .collection('relations')
+          .where('managerId', isEqualTo: user.uid)
+          .get();
+
+      final list = <RelationModel>[];
+      list.addAll(
+        executorQuery.docs.map((doc) => RelationModel.fromFirestore(doc)),
+      );
+      list.addAll(
+        managerQuery.docs.map((doc) => RelationModel.fromFirestore(doc)),
+      );
+
+      return list;
+    } catch (e) {
+      return [];
+    }
   }
 
   @override

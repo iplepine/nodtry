@@ -65,6 +65,51 @@ class RealUserRepository implements UserRepository {
   }
 
   @override
+  Future<List<UserModel>> getUsersByIds(List<String> uids) async {
+    if (uids.isEmpty) return [];
+
+    try {
+      // split into chunks of 10 if necessary (whereIn limit is 10 or 30?)
+      // Firestore fieldIn limit is 30.
+      final List<UserModel> users = [];
+
+      // 10개씩 끊어서 조회 (안전하게)
+      for (var i = 0; i < uids.length; i += 10) {
+        final end = (i + 10 < uids.length) ? i + 10 : uids.length;
+        final chunk = uids.sublist(i, end);
+
+        final snapshot = await _firestore
+            .collection('users')
+            .where(FieldPath.documentId, whereIn: chunk)
+            .get();
+
+        users.addAll(snapshot.docs.map((doc) => UserModel.fromFirestore(doc)));
+      }
+      return users;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  @override
+  Future<UserModel?> getUserByInviteCode(String code) async {
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .where('inviteCode', isEqualTo: code)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return UserModel.fromFirestore(snapshot.docs.first);
+      }
+    } catch (e) {
+      // Error
+    }
+    return null;
+  }
+
+  @override
   Future<void> updateProfile({
     String? name,
     String? statusMessage,

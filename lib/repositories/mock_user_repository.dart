@@ -31,6 +31,22 @@ class MockUserRepository implements UserRepository {
   }
 
   @override
+  Future<List<UserModel>> getUsersByIds(List<String> uids) async {
+    if (_mockUser != null) {
+      return [_mockUser!];
+    }
+    return [];
+  }
+
+  @override
+  Future<UserModel?> getUserByInviteCode(String code) async {
+    if (_mockUser != null && code == _mockUser!.inviteCode) {
+      return _mockUser;
+    }
+    return null;
+  }
+
+  @override
   Future<void> updateProfile({
     String? name,
     String? statusMessage,
