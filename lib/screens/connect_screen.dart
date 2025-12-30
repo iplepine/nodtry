@@ -36,8 +36,66 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   @override
   void initState() {
     super.initState();
-    // 연결 상태 모니터링
-    // 이 부분은 build() 내에서 ref.listen을 사용하는 것이 더 안전할 수 있음
+    // 화면 진입 시 클립보드 확인
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkClipboard();
+    });
+  }
+
+  Future<void> _checkClipboard() async {
+    // 연결 전 단계에서만 체크
+    if (_state == ConnectState.waiting || _state == ConnectState.connected) {
+      return;
+    }
+
+    final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = clipboardData?.text;
+
+    if (text != null && _isValidInviteCode(text)) {
+      if (!mounted) return;
+
+      // 사용자에게 붙여넣기 의사 묻기
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('초대 코드 감지'),
+            content: Text('클립보드에서 초대 코드($text)를 발견했습니다.\n붙여넣으시겠습니까?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _fillCode(text);
+                },
+                child: const Text('붙여넣기'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  bool _isValidInviteCode(String code) {
+    // 6자리 영문 대문자+숫자 체크
+    final regex = RegExp(r'^[A-Z0-9]{6}$');
+    return regex.hasMatch(code);
+  }
+
+  void _fillCode(String code) {
+    if (code.length != 6) return;
+
+    setState(() {
+      _state = ConnectState.codeEntered;
+    });
+
+    for (int i = 0; i < 6; i++) {
+      _codeControllers[i].text = code[i];
+    }
   }
 
   @override
