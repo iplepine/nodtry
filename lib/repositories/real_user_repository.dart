@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../models/user_model.dart';
 import 'user_repository.dart';
 
 class RealUserRepository implements UserRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   @override
   Future<void> initializeUser(User user) async {
@@ -127,12 +129,26 @@ class RealUserRepository implements UserRepository {
     }
     if (statusMessage != null) updates['statusMessage'] = statusMessage;
 
-    // 이미지 업로드는 Storage 설정 후 구현 필요
-    // if (image != null) {
-    //   final url = await _uploadImage(user.uid, image);
-    //   updates['profileImageUrl'] = url;
-    // }
+    if (image != null) {
+      final url = await _uploadImage(user.uid, image);
+      updates['photoURL'] = url;
+    }
 
     await _firestore.collection('users').doc(user.uid).update(updates);
+  }
+
+  Future<String> _uploadImage(String uid, File image) async {
+    final ref = _storage.ref().child('users/$uid/profile.jpg');
+    // 메타데이터 설정 (선택사항)
+    final metadata = SettableMetadata(
+      contentType: 'image/jpeg',
+      customMetadata: {'uid': uid},
+    );
+
+    // 업로드
+    await ref.putFile(image, metadata);
+
+    // 다운로드 URL 가져오기
+    return await ref.getDownloadURL();
   }
 }
