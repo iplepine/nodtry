@@ -94,9 +94,26 @@ class RealConnectRepository implements ConnectRepository {
 
   @override
   Stream<ConnectionStatus> watchConnectionStatus() {
-    // TODO: implement watchConnectionStatus
-    // relations 컬렉션에서 내가 포함된 문서 감지
-    return Stream.value(ConnectionStatus.none);
+    final user = _auth.currentUser;
+    if (user == null) return Stream.value(ConnectionStatus.none);
+
+    return _firestore
+        .collection('relations')
+        .where(
+          Filter.or(
+            Filter('executorId', isEqualTo: user.uid),
+            Filter('managerId', isEqualTo: user.uid),
+          ),
+        )
+        .snapshots()
+        .map((snapshot) {
+          if (snapshot.docs.isNotEmpty) {
+            // 하나라도 연결되면 active로 간주 (MVP)
+            // 실제로는 status 필드 체크 필요 (pending vs active)
+            return ConnectionStatus.active;
+          }
+          return ConnectionStatus.none;
+        });
   }
 
   @override

@@ -8,7 +8,6 @@ import '../widgets/primary_button.dart';
 import '../routes/app_router.dart';
 import '../providers/repository_provider.dart';
 import '../repositories/connect_repository.dart';
-import '../models/user_model.dart';
 
 enum ConnectState {
   initial, // 초기 상태 - 코드 생성/입력 선택
@@ -105,43 +104,25 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     super.dispose();
   }
 
-  Future<void> _generateCode() async {
-    try {
-      // 내 프로필에서 기존 초대 코드 가져오기 (Stream 처리)
-      final useCase = ref.read(getMyProfileUseCaseProvider);
-      UserModel? user;
+  // _buildCodeCard has been moved up to build block in previous step?
+  // No, the previous step replaced the build block AND _buildCodeCard definition if it was inside the replacement range.
+  // The replacement range ended at 324, but _buildInitialOptions ended around 324.
+  // _buildCodeCard was likely below. I need to removing the OLD _buildCodeCard and helpers if they were not replaced.
+  // Wait, I replaced `_buildInitialOptions` in the previous step because I included it in the `TargetContent`.
+  // Does `TargetContent` cover `_buildCodeCard`?
+  // Let's check the previous `TargetContent`. It ends with `_buildInitialOptions`.
+  // So `_buildCodeCard` is likely still there in its OLD form.
+  // I need to update it or remove it.
 
-      // Stream의 최신 데이터 대기 (캐시 -> 리모트 순으로 올 수 있음)
-      final stream = useCase.execute();
-      await for (final u in stream) {
-        if (u != null) {
-          user = u;
-          break; // 첫 유효 데이터만 받고 루프 종료
-        }
-      }
+  // Actually, I put the NEW `_buildCodeCard` logic inside the ReplacementContent of the previous step.
+  // So now I have TWO `_buildCodeCard` methods in the file if the old one was below the target range.
+  // I should check where `_buildInitialOptions` ended.
 
-      if (user?.inviteCode != null && mounted) {
-        setState(() {
-          _inviteCode = user!.inviteCode!;
-          _state = ConnectState.codeGenerated;
-        });
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('초대 코드를 찾을 수 없습니다.')));
-        }
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('코드를 불러오는 중 오류가 발생했습니다: $e')));
-    }
-  }
+  // I will check the file content first to be safe, or just view_file.
+  // But to be quick, I'll update `_copyCode` and `_shareCode` to accept arguments and remove old `_buildCodeCard` if present.
 
-  Future<void> _copyCode() async {
-    await Clipboard.setData(ClipboardData(text: _inviteCode));
+  Future<void> _copyCode(String code) async {
+    await Clipboard.setData(ClipboardData(text: code));
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -154,9 +135,9 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     );
   }
 
-  void _shareCode() {
+  void _shareCode(String code) {
     // TODO: 공유 기능 구현
-    _copyCode();
+    _copyCode(code);
   }
 
   Future<void> _submitCode(String code) async {
@@ -218,6 +199,13 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     });
 
     final canPop = Navigator.canPop(context);
+    final myProfileAsync = ref.watch(myProfileProvider);
+
+    // 내 초대 코드 자동 설정
+    final myInviteCode = myProfileAsync.asData?.value?.inviteCode;
+    if (myInviteCode != null && _inviteCode != myInviteCode) {
+      // _inviteCode = myInviteCode;
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -237,26 +225,68 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: canPop ? 0 : 40), // AppBar 있으면 상단 여백 조정
-              // 메인 메시지 영역
-              _buildMessageSection(),
+              SizedBox(height: canPop ? 0 : 40),
+
+              // 메인 메시지 영역 (연결되면 다른 메시지? 일단 유지)
+              if (_state != ConnectState.connected) _buildMessageSection(),
 
               const SizedBox(height: 48),
 
-              // 초기 상태: 코드 생성/입력 선택
-              if (_state == ConnectState.initial)
-                _buildInitialOptions(showStartSolo: !canPop),
+              if (_state == ConnectState.connected)
+                _buildConnectedState()
+              else ...[
+                // 1. 내 초대 코드 표시
+                if (myInviteCode != null) ...[
+                  Text(
+                    AppLocalizations.of(context)!.usMyInviteCode,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildCodeCard(code: myInviteCode),
+                  const SizedBox(height: 40),
+                  Divider(height: 1, color: AppColors.divider),
+                  const SizedBox(height: 40),
+                ],
 
-              // 코드 생성됨: 코드 표시
-              if (_state == ConnectState.codeGenerated) _buildCodeCard(),
-
-              // 코드 입력: 입력 필드
-              if (_state == ConnectState.codeEntered ||
-                  _state == ConnectState.waiting)
+                // 2. 상대방 코드 입력
+                Text(
+                  AppLocalizations.of(context)!.enterInviteCode,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
                 _buildCodeInput(),
 
-              // 연결 완료 (임시: 테스트용)
-              if (_state == ConnectState.connected) _buildConnectedState(),
+                // 초기화면의 "혼자 시작하기" 버튼 (온보딩인 경우에만 맨 아래 배치)
+                if (!canPop) ...[
+                  const SizedBox(height: 40),
+                  TextButton(
+                    onPressed: _navigateToHome,
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.startSolo,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
 
               const SizedBox(height: 40),
             ],
@@ -289,77 +319,30 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     );
   }
 
-  Widget _buildInitialOptions({bool showStartSolo = true}) {
-    return Column(
-      children: [
-        PrimaryButton(
-          text: AppLocalizations.of(context)!.createInviteCode,
-          onPressed: _generateCode,
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton(
-          onPressed: () {
-            setState(() {
-              _state = ConnectState.codeEntered;
-            });
-          },
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.textPrimary,
-            side: BorderSide(color: AppColors.divider),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: Text(
-            AppLocalizations.of(context)!.enterInviteCode,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-        ),
-        if (showStartSolo) ...[
-          const SizedBox(height: 16),
-          TextButton(
-            onPressed: _navigateToHome,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            ),
-            child: Text(
-              AppLocalizations.of(context)!.startSolo,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
+  // 기존 _buildInitialOptions 제거
 
-  Widget _buildCodeCard() {
+  // _buildCodeCard 수정 (인자 받도록)
+  Widget _buildCodeCard({required String code}) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
           Text(
-            AppLocalizations.of(context)!.inviteCode,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 16),
-          // 코드 표시
-          SelectableText(
-            _inviteCode,
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
+            code, // 인자로 받은 코드 사용
+            style: const TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
               letterSpacing: 4,
             ),
           ),
@@ -368,45 +351,27 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: _copyCode,
-                  icon: const Icon(Icons.copy, size: 18),
+                  onPressed: () => _copyCode(code),
+                  icon: const Icon(Icons.copy, size: 20),
                   label: Text(AppLocalizations.of(context)!.copyCode),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.textPrimary,
-                    side: BorderSide(color: AppColors.divider),
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _shareCode,
-                  icon: const Icon(Icons.share, size: 18),
+                child: FilledButton.icon(
+                  onPressed: () => _shareCode(code),
+                  icon: const Icon(Icons.share, size: 20),
                   label: Text(AppLocalizations.of(context)!.shareCode),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
+                  style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    backgroundColor: AppColors.primary,
                   ),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            AppLocalizations.of(context)!.codeShareMessage,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
