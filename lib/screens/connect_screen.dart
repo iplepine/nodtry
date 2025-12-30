@@ -241,23 +241,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
               if (_state == ConnectState.connected)
                 _buildConnectedState()
               else ...[
-                // 1. 내 초대 코드 표시
-                if (myInviteCode != null) ...[
-                  Text(
-                    AppLocalizations.of(context)!.usMyInviteCode,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildCodeCard(code: myInviteCode),
-                  const SizedBox(height: 40),
-                  Divider(height: 1, color: AppColors.divider),
-                  const SizedBox(height: 40),
-                ],
-
                 // 2. 상대방 코드 입력
                 Text(
                   AppLocalizations.of(context)!.enterInviteCode,
@@ -328,62 +311,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   // 기존 _buildInitialOptions 제거
 
   // _buildCodeCard 수정 (인자 받도록)
-  Widget _buildCodeCard({required String code}) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            code, // 인자로 받은 코드 사용
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 4,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _copyCode(code),
-                  icon: const Icon(Icons.copy, size: 20),
-                  label: Text(AppLocalizations.of(context)!.copyCode),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () => _shareCode(code),
-                  icon: const Icon(Icons.share, size: 20),
-                  label: Text(AppLocalizations.of(context)!.shareCode),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: AppColors.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildCodeInput() {
     return Column(
       children: [
