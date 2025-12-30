@@ -178,7 +178,7 @@ class DeveloperScreen extends ConsumerWidget {
   }
 
   Widget _buildRepositorySection(BuildContext context, WidgetRef ref) {
-    final currentType = ref.watch(repositoryTypeProvider);
+    final currentTypeAsync = ref.watch(repositoryTypeProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,35 +199,39 @@ class DeveloperScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.divider),
           ),
-          child: Column(
-            children: [
-              RadioListTile<RepositoryType>(
-                title: Text('Mock Data'),
-                subtitle: Text('사용자 정의 테스트 데이터를 사용합니다.'),
-                value: RepositoryType.mock,
-                groupValue: currentType,
-                onChanged: (value) {
-                  if (value != null) {
-                    ref.read(repositoryTypeProvider.notifier).setType(value);
-                  }
-                },
-                contentPadding: EdgeInsets.zero,
-                activeColor: AppColors.primary,
-              ),
-              RadioListTile<RepositoryType>(
-                title: Text('Real Data (Firestore)'),
-                subtitle: Text('실제 서버 데이터를 사용합니다.'),
-                value: RepositoryType.real,
-                groupValue: currentType,
-                onChanged: (value) {
-                  if (value != null) {
-                    ref.read(repositoryTypeProvider.notifier).setType(value);
-                  }
-                },
-                contentPadding: EdgeInsets.zero,
-                activeColor: AppColors.primary,
-              ),
-            ],
+          child: currentTypeAsync.when(
+            data: (type) => Column(
+              children: [
+                RadioListTile<RepositoryType>(
+                  title: Text('Mock Data'),
+                  subtitle: Text('사용자 정의 테스트 데이터를 사용합니다.'),
+                  value: RepositoryType.mock,
+                  groupValue: type,
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref.read(repositoryTypeProvider.notifier).setType(value);
+                    }
+                  },
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: AppColors.primary,
+                ),
+                RadioListTile<RepositoryType>(
+                  title: Text('Real Data (Firestore)'),
+                  subtitle: Text('실제 서버 데이터를 사용합니다.'),
+                  value: RepositoryType.real,
+                  groupValue: type,
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref.read(repositoryTypeProvider.notifier).setType(value);
+                    }
+                  },
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: AppColors.primary,
+                ),
+              ],
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, stack) => Text('Error loading settings: $err'),
           ),
         ),
       ],

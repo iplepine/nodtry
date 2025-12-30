@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../repositories/record_repository.dart';
 import '../repositories/mock_record_repository.dart';
 import '../repositories/real_record_repository.dart';
@@ -15,7 +16,10 @@ import '../usecases/update_profile_use_case.dart';
 
 /// UserRepository Provider
 final userRepositoryProvider = Provider<UserRepository>((ref) {
-  final type = ref.watch(repositoryTypeProvider);
+  final typeAsync = ref.watch(repositoryTypeProvider);
+  // 로딩 중이거나 에러 발생 시 기본값(Mock) 사용
+  final type = typeAsync.asData?.value ?? RepositoryType.mock;
+
   if (type == RepositoryType.real) {
     return RealUserRepository();
   }
@@ -38,43 +42,57 @@ final updateProfileUseCaseProvider = Provider<UpdateProfileUseCase>((ref) {
 enum RepositoryType { mock, real }
 
 /// Repository 타입 상태 관리 Provider
-/// Repository 타입 상태 관리 Notifier
-class RepositoryTypeNotifier extends Notifier<RepositoryType> {
+class RepositoryTypeNotifier extends AsyncNotifier<RepositoryType> {
+  static const _key = 'repository_type';
+
   @override
-  RepositoryType build() {
-    return RepositoryType.mock; // 기본값: Mock
+  Future<RepositoryType> build() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(_key);
+    if (value == 'real') {
+      return RepositoryType.real;
+    }
+    return RepositoryType.mock;
   }
 
-  void setType(RepositoryType type) {
-    state = type;
+  Future<void> setType(RepositoryType type) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _key,
+        type == RepositoryType.real ? 'real' : 'mock',
+      );
+      return type;
+    });
   }
 }
 
 /// Repository 타입 상태 관리 Provider
 final repositoryTypeProvider =
-    NotifierProvider<RepositoryTypeNotifier, RepositoryType>(() {
+    AsyncNotifierProvider<RepositoryTypeNotifier, RepositoryType>(() {
       return RepositoryTypeNotifier();
     });
 
 /// RecordRepository Provider
-///
-/// repositoryTypeProvider 상태에 따라 Mock 또는 Real 구현체를 반환합니다.
 final recordRepositoryProvider = Provider<RecordRepository>((ref) {
-  final type = ref.watch(repositoryTypeProvider);
+  final typeAsync = ref.watch(repositoryTypeProvider);
+  final type = typeAsync.asData?.value ?? RepositoryType.mock;
+
   if (type == RepositoryType.real) {
     return RealRecordRepository();
   }
-  // Default to Mock
   return MockRecordRepository();
 });
 
 /// ConnectRepository Provider
 final connectRepositoryProvider = Provider<ConnectRepository>((ref) {
-  final type = ref.watch(repositoryTypeProvider);
+  final typeAsync = ref.watch(repositoryTypeProvider);
+  final type = typeAsync.asData?.value ?? RepositoryType.mock;
+
   if (type == RepositoryType.real) {
     return RealConnectRepository();
   }
-  // Default to Mock
   return MockConnectRepository();
 });
 
