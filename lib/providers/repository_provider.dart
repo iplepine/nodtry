@@ -17,8 +17,8 @@ import '../usecases/update_profile_use_case.dart';
 /// UserRepository Provider
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   final typeAsync = ref.watch(repositoryTypeProvider);
-  // 로딩 중이거나 에러 발생 시 기본값(Mock) 사용
-  final type = typeAsync.asData?.value ?? RepositoryType.mock;
+  // 로딩 중이거나 에러 발생 시 기본값(Real) 사용 - 운영 환경 안전성 확보
+  final type = typeAsync.asData?.value ?? RepositoryType.real;
 
   if (type == RepositoryType.real) {
     return RealUserRepository();
@@ -49,10 +49,12 @@ class RepositoryTypeNotifier extends AsyncNotifier<RepositoryType> {
   Future<RepositoryType> build() async {
     final prefs = await SharedPreferences.getInstance();
     final value = prefs.getString(_key);
-    if (value == 'real') {
-      return RepositoryType.real;
+    // 개발 모드에서 명시적으로 'mock'으로 설정한 경우에만 Mock 사용
+    if (value == 'mock') {
+      return RepositoryType.mock;
     }
-    return RepositoryType.mock;
+    // 기본값은 Real (배포 시 안전을 위해)
+    return RepositoryType.real;
   }
 
   Future<void> setType(RepositoryType type) async {
@@ -77,7 +79,8 @@ final repositoryTypeProvider =
 /// RecordRepository Provider
 final recordRepositoryProvider = Provider<RecordRepository>((ref) {
   final typeAsync = ref.watch(repositoryTypeProvider);
-  final type = typeAsync.asData?.value ?? RepositoryType.mock;
+  // 기본값 Real
+  final type = typeAsync.asData?.value ?? RepositoryType.real;
 
   if (type == RepositoryType.real) {
     return RealRecordRepository();
@@ -88,7 +91,8 @@ final recordRepositoryProvider = Provider<RecordRepository>((ref) {
 /// ConnectRepository Provider
 final connectRepositoryProvider = Provider<ConnectRepository>((ref) {
   final typeAsync = ref.watch(repositoryTypeProvider);
-  final type = typeAsync.asData?.value ?? RepositoryType.mock;
+  // 기본값 Real
+  final type = typeAsync.asData?.value ?? RepositoryType.real;
 
   if (type == RepositoryType.real) {
     return RealConnectRepository();
