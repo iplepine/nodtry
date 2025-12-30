@@ -14,10 +14,35 @@ class RealConnectRepository implements ConnectRepository {
 
   @override
   Future<void> connectWithCode(String code) async {
-    // TODO: implement connectWithCode
-    // 1. 코드로 유저 검색 (users collection where inviteCode == code)
-    // 2. 해당 유저가 존재하면 relations 생성
-    throw UnimplementedError();
+    final me = _auth.currentUser;
+    if (me == null) throw Exception('Not authenticated');
+
+    // 1. 코드로 유저 검색
+    final userQuery = await _firestore
+        .collection('users')
+        .where('inviteCode', isEqualTo: code)
+        .limit(1)
+        .get();
+
+    if (userQuery.docs.isEmpty) {
+      throw Exception('User not found');
+    }
+
+    final targetUserDoc = userQuery.docs.first;
+    final targetUserId = targetUserDoc.id;
+
+    // 2. 이미 연결되어 있는지 확인 (옵션)
+    // (MVP에서는 일단 중복 체크 없이 생성하거나, 클라이언트에서 필터링)
+
+    // 3. Relations 생성
+    // 정책: 초대자(Target) = Manager, 참여자(Me) = Executor
+    await _firestore.collection('relations').add({
+      'managerId': targetUserId,
+      'executorId': me.uid,
+      'status': 'active', // MVP: 즉시 연결
+      'createdAt': FieldValue.serverTimestamp(),
+      'connectedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   @override
