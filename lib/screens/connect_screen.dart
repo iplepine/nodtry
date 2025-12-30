@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
 import '../routes/app_router.dart';
+import '../providers/repository_provider.dart';
+import '../repositories/connect_repository.dart';
 
 enum ConnectState {
   initial, // 초기 상태 - 코드 생성/입력 선택
@@ -14,14 +17,14 @@ enum ConnectState {
   connected, // 연결 완료
 }
 
-class ConnectScreen extends StatefulWidget {
+class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
 
   @override
-  State<ConnectScreen> createState() => _ConnectScreenState();
+  ConsumerState<ConnectScreen> createState() => _ConnectScreenState();
 }
 
-class _ConnectScreenState extends State<ConnectScreen> {
+class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   ConnectState _state = ConnectState.initial;
   String _inviteCode = '';
   final List<TextEditingController> _codeControllers = List.generate(
@@ -29,6 +32,13 @@ class _ConnectScreenState extends State<ConnectScreen> {
     (index) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
+
+  @override
+  void initState() {
+    super.initState();
+    // 연결 상태 모니터링
+    // 이 부분은 build() 내에서 ref.listen을 사용하는 것이 더 안전할 수 있음
+  }
 
   @override
   void dispose() {
@@ -41,22 +51,30 @@ class _ConnectScreenState extends State<ConnectScreen> {
     super.dispose();
   }
 
-  void _generateCode() {
-    // 6자리 코드 생성 (숫자/영문)
-    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    final random = DateTime.now().millisecondsSinceEpoch;
-    final code = List.generate(6, (index) {
-      return chars[(random + index) % chars.length];
-    }).join();
+  Future<void> _generateCode() async {
+    try {
+      final repository = ref.read(connectRepositoryProvider);
+      final code = await repository.generateInviteCode();
 
-    setState(() {
-      _inviteCode = code;
-      _state = ConnectState.codeGenerated;
-    });
+      if (mounted) {
+        setState(() {
+          _inviteCode = code;
+          _state = ConnectState.codeGenerated;
+        });
+      }
+    } catch (e) {
+      // TODO: 에러 처리
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('코드를 생성하는 중 오류가 발생했습니다.')));
+    }
   }
 
-  void _copyCode() {
-    Clipboard.setData(ClipboardData(text: _inviteCode));
+  Future<void> _copyCode() async {
+    await Clipboard.setData(ClipboardData(text: _inviteCode));
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(AppLocalizations.of(context)!.codeCopied),
@@ -79,31 +97,33 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
     // 모든 칸이 채워지면 연결 요청
     if (_codeControllers.every((controller) => controller.text.isNotEmpty)) {
-      final enteredCode = _codeControllers.map((c) => c.text).join();
-      _submitCode(enteredCode);
+      // 자동 제출하지 않음 (버튼 클릭 유도)
     }
   }
 
-  void _submitCode(String code) {
+  Future<void> _submitCode(String code) async {
     setState(() {
-      _state = ConnectState.codeEntered;
+      _state = ConnectState.codeEntered; // 입력 상태 유지
     });
 
-    // TODO: 서버에 연결 요청 전송
-    Future.delayed(const Duration(seconds: 1), () {
+    try {
+      final repository = ref.read(connectRepositoryProvider);
+
+      setState(() {
+        _state = ConnectState.waiting;
+      });
+
+      await repository.connectWithCode(code);
+    } catch (e) {
       if (mounted) {
         setState(() {
-          _state = ConnectState.waiting;
+          _state = ConnectState.codeEntered; // 다시 입력 대기
         });
-
-        // 임시: 연결 완료 시뮬레이션 (3초 후 홈 화면으로 이동)
-        Future.delayed(const Duration(seconds: 3), () {
-          if (mounted) {
-            _navigateToHome();
-          }
-        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('코드가 올바르지 않거나 연결에 실패했습니다.')));
       }
-    });
+    }
   }
 
   void _navigateToHome() {
@@ -119,6 +139,43 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 연결 상태 변경 감지하여 네비게이션 처리
+    ref.listen(connectionStatusStreamProvider, (previous, next) {
+      next.whenData((status) {
+        if (status == ConnectionStatus.active &&
+            _state != ConnectState.connected) {
+          setState(() {
+            _state = ConnectState.connected;
+          });
+        }
+      });
+    });
+
+    // Watch connection status stream (UI 업데이트용 - 현재는 _state로 관리되어 크게 필요 없으나 미래를 위해)
+    // final statusAsync = ref.watch(connectionStatusStreamProvider);
+
+    // Status에 따른 화면 전환 로직
+    // build 내에서 부수 효과(네비게이션 등)를 직접 일으키는 건 지양해야 함.
+    // 하지만 상태값(_state) 변경은 가능.
+
+    // statusAsync.whenData((status) {
+    //   if (status == ConnectionStatus.active &&
+    //       _state != ConnectState.connected) {
+    //     // 연결 완료
+    //     WidgetsBinding.instance.addPostFrameCallback((_) {
+    //       if (mounted) {
+    //         setState(() {
+    //           _state = ConnectState.connected;
+    //         });
+    //       }
+    //     });
+    //   } else if (status == ConnectionStatus.pending &&
+    //       _state != ConnectState.waiting) {
+    //     // 대기 중 (이미 _submitCode에서 설정했지만, 스트림 소스일 경우 동기화)
+    //     // 여기서는 UI 로컬 상태와 Provider 상태가 섞여 있어 조심해야 함.
+    //   }
+    // });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(

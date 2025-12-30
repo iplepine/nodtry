@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repositories/record_repository.dart';
 import '../repositories/mock_record_repository.dart';
 import '../repositories/real_record_repository.dart';
+import '../repositories/connect_repository.dart';
+import '../repositories/mock_connect_repository.dart';
+import '../repositories/real_connect_repository.dart';
 
 /// 현재 사용할 Repository 타입
 enum RepositoryType { mock, real }
@@ -37,6 +40,16 @@ final recordRepositoryProvider = Provider<RecordRepository>((ref) {
   return MockRecordRepository();
 });
 
+/// ConnectRepository Provider
+final connectRepositoryProvider = Provider<ConnectRepository>((ref) {
+  final type = ref.watch(repositoryTypeProvider);
+  if (type == RepositoryType.real) {
+    return RealConnectRepository();
+  }
+  // Default to Mock
+  return MockConnectRepository();
+});
+
 /// Mock Repository 제어용 Provider (타입 캐스팅 편의)
 final mockRecordRepositoryProvider = Provider<MockRecordRepository?>((ref) {
   final repository = ref.watch(recordRepositoryProvider);
@@ -44,4 +57,10 @@ final mockRecordRepositoryProvider = Provider<MockRecordRepository?>((ref) {
     return repository;
   }
   return null;
+});
+
+/// 연결 상태 스트림 Provider
+final connectionStatusStreamProvider = StreamProvider<ConnectionStatus>((ref) {
+  final repository = ref.watch(connectRepositoryProvider);
+  return repository.watchConnectionStatus();
 });
