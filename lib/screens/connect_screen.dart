@@ -96,6 +96,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     for (int i = 0; i < 6; i++) {
       _codeControllers[i].text = code[i];
     }
+
+    _connectManually();
   }
 
   @override
@@ -162,7 +164,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
 
     // 모든 칸이 채워지면 연결 요청
     if (_codeControllers.every((controller) => controller.text.isNotEmpty)) {
-      // 자동 제출하지 않음 (버튼 클릭 유도)
+      _connectManually();
     }
   }
 
