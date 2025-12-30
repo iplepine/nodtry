@@ -19,7 +19,9 @@ class RealUserRepository implements UserRepository {
         await userRef.set({
           'uid': user.uid,
           'email': user.email,
-          'displayName': user.displayName ?? '나',
+          'displayName': (user.displayName == null || user.displayName!.isEmpty)
+              ? '나'
+              : user.displayName,
           'photoURL': user.photoURL,
           'isAnonymous': user.isAnonymous,
           'inviteCode': _generateInviteCode(),

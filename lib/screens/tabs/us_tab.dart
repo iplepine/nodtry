@@ -46,7 +46,9 @@ class _UsTabState extends ConsumerState<UsTab> {
               profileAsync.when(
                 data: (user) => _MeSection(
                   l10n: l10n,
-                  name: user?.displayName ?? l10n.usDefaultNameMe,
+                  name: (user?.displayName?.isNotEmpty ?? false)
+                      ? user!.displayName!
+                      : l10n.usDefaultNameMe,
                   statusMessage: user?.statusMessage,
                   profileImage:
                       null, // TODO: user.profileImageUrl to File or NetworkImage logic
