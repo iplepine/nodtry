@@ -192,11 +192,15 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       next.whenData((status) {
         if (status == ConnectionStatus.active &&
             _state != ConnectState.connected) {
+          // 연결 성공 시 목록 갱신
+          ref.invalidate(connectedProfilesProvider);
           setState(() {
             _state = ConnectState.connected;
           });
         } else if (status != ConnectionStatus.active &&
             _state == ConnectState.connected) {
+          // 연결 해제 시 목록 갱신
+          ref.invalidate(connectedProfilesProvider);
           setState(() {
             _state = ConnectState.initial;
           });
