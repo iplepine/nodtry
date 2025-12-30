@@ -217,23 +217,35 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       });
     });
 
+    final canPop = Navigator.canPop(context);
+
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: canPop
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                onPressed: () => context.pop(),
+              ),
+            )
+          : null,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 40),
-
+              SizedBox(height: canPop ? 0 : 40), // AppBar 있으면 상단 여백 조정
               // 메인 메시지 영역
               _buildMessageSection(),
 
               const SizedBox(height: 48),
 
               // 초기 상태: 코드 생성/입력 선택
-              if (_state == ConnectState.initial) _buildInitialOptions(),
+              if (_state == ConnectState.initial)
+                _buildInitialOptions(showStartSolo: !canPop),
 
               // 코드 생성됨: 코드 표시
               if (_state == ConnectState.codeGenerated) _buildCodeCard(),
@@ -277,7 +289,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     );
   }
 
-  Widget _buildInitialOptions() {
+  Widget _buildInitialOptions({bool showStartSolo = true}) {
     return Column(
       children: [
         PrimaryButton(
@@ -304,22 +316,24 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ),
-        const SizedBox(height: 16),
-        TextButton(
-          onPressed: _navigateToHome,
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.textSecondary,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          ),
-          child: Text(
-            AppLocalizations.of(context)!.startSolo,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              decoration: TextDecoration.underline,
+        if (showStartSolo) ...[
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: _navigateToHome,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            ),
+            child: Text(
+              AppLocalizations.of(context)!.startSolo,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                decoration: TextDecoration.underline,
+              ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }
