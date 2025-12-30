@@ -14,8 +14,20 @@ import '../usecases/update_profile_use_case.dart';
 import '../usecases/guest_login_use_case.dart';
 import '../usecases/get_my_profile_use_case.dart';
 import '../services/auth_service.dart';
+import '../datasources/user_local_data_source.dart';
 
 // ... (ConnectRepository related imports and providers kept below)
+
+/// SharedPreferences Provider (Main에서 Override 필요)
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError();
+});
+
+/// UserLocalDataSource Provider
+final userLocalDataSourceProvider = Provider<UserLocalDataSource>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return UserLocalDataSource(prefs);
+});
 
 /// AuthService Provider
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -37,7 +49,8 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
 /// GetMyProfileUseCase Provider
 final getMyProfileUseCaseProvider = Provider<GetMyProfileUseCase>((ref) {
   final repository = ref.watch(userRepositoryProvider);
-  return GetMyProfileUseCase(repository);
+  final userLocalDataSource = ref.watch(userLocalDataSourceProvider);
+  return GetMyProfileUseCase(repository, userLocalDataSource);
 });
 
 /// My Profile Provider (Future)
@@ -50,13 +63,15 @@ final myProfileProvider = FutureProvider<UserModel?>((ref) async {
 final guestLoginUseCaseProvider = Provider<GuestLoginUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
-  return GuestLoginUseCase(authService, userRepository);
+  final userLocalDataSource = ref.watch(userLocalDataSourceProvider);
+  return GuestLoginUseCase(authService, userRepository, userLocalDataSource);
 });
 
 /// UpdateProfileUseCase Provider
 final updateProfileUseCaseProvider = Provider<UpdateProfileUseCase>((ref) {
   final repository = ref.watch(userRepositoryProvider);
-  return UpdateProfileUseCase(repository);
+  final userLocalDataSource = ref.watch(userLocalDataSourceProvider);
+  return UpdateProfileUseCase(repository, userLocalDataSource);
 });
 
 /// 현재 사용할 Repository 타입

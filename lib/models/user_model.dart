@@ -38,6 +38,20 @@ class UserModel {
     );
   }
 
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      uid: json['uid'],
+      displayName: json['displayName'],
+      email: json['email'],
+      profileImageUrl: json['profileImageUrl'],
+      statusMessage: json['statusMessage'],
+      inviteCode: json['inviteCode'],
+      isAnonymous: json['isAnonymous'] ?? false,
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+    );
+  }
+
   Map<String, dynamic> toFirestore() {
     return {
       if (displayName != null) 'displayName': displayName,
@@ -48,6 +62,20 @@ class UserModel {
       'isAnonymous': isAnonymous,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
+    };
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'uid': uid,
+      if (displayName != null) 'displayName': displayName,
+      if (email != null) 'email': email,
+      if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
+      if (statusMessage != null) 'statusMessage': statusMessage,
+      if (inviteCode != null) 'inviteCode': inviteCode,
+      'isAnonymous': isAnonymous,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
