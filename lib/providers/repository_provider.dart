@@ -7,6 +7,7 @@ import '../repositories/connect_repository.dart';
 import '../repositories/mock_connect_repository.dart';
 import '../repositories/real_connect_repository.dart';
 import '../models/user_model.dart';
+import '../models/connected_user.dart';
 import '../repositories/user_repository.dart';
 import '../repositories/mock_user_repository.dart';
 import '../repositories/real_user_repository.dart';
@@ -86,6 +87,12 @@ final getConnectedProfilesUseCaseProvider =
         ref.watch(authServiceProvider),
       );
     });
+
+/// 연결된 프로필 목록 Provider (Future)
+final connectedProfilesProvider = FutureProvider<List<ConnectedUser>>((ref) {
+  final useCase = ref.watch(getConnectedProfilesUseCaseProvider);
+  return useCase.execute();
+});
 
 /// Repository 타입 상태 관리 Provider
 class RepositoryTypeNotifier extends AsyncNotifier<RepositoryType> {

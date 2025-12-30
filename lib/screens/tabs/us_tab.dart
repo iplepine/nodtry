@@ -8,7 +8,8 @@ import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../routes/app_router.dart';
-import '../../providers/repository_provider.dart'; // Repository Provider Import
+import '../../providers/repository_provider.dart';
+import '../../models/connected_user.dart'; // ConnectedUser Import
 
 /// 우리 탭 - 안전 기지 & 연결 허브
 ///
@@ -25,13 +26,7 @@ class _UsTabState extends ConsumerState<UsTab> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final profileAsync = ref.watch(myProfileProvider);
-
-    // TODO: 실제 데이터 연동 (Relations)
-    final connectedPeople = <_ConnectedPerson>[
-      // 예시 데이터
-      // _ConnectedPerson(name: "지민", isSupported: true, isCheering: false),
-      // _ConnectedPerson(name: "현수", isSupported: true, isCheering: true),
-    ];
+    final connectedAsync = ref.watch(connectedProfilesProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -66,7 +61,8 @@ class _UsTabState extends ConsumerState<UsTab> {
               const SizedBox(height: 48),
 
               // 2. You Section
-              _YouSection(l10n: l10n, people: connectedPeople),
+              // 2. You Section
+              _YouSection(l10n: l10n, connectedAsync: connectedAsync),
             ],
           ),
         ),
@@ -484,9 +480,9 @@ class _MeActionButton extends StatelessWidget {
 /// 섹션 B: 너 (You)
 class _YouSection extends StatelessWidget {
   final AppLocalizations l10n;
-  final List<_ConnectedPerson> people;
+  final AsyncValue<List<ConnectedUser>> connectedAsync;
 
-  const _YouSection({required this.l10n, required this.people});
+  const _YouSection({required this.l10n, required this.connectedAsync});
 
   @override
   Widget build(BuildContext context) {
@@ -510,8 +506,7 @@ class _YouSection extends StatelessWidget {
               },
               borderRadius: BorderRadius.circular(20),
               child: Semantics(
-                label:
-                    l10n.usAddConnectionLabel, // "새 연결 추가" (Need to add to ARB)
+                label: l10n.usAddConnectionLabel,
                 button: true,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -527,10 +522,23 @@ class _YouSection extends StatelessWidget {
         ),
         const SizedBox(height: 20),
 
-        if (people.isEmpty)
-          _buildEmptyState(context)
-        else
-          ...people.map((person) => _PersonCard(person: person, l10n: l10n)),
+        connectedAsync.when(
+          data: (people) {
+            if (people.isEmpty) return _buildEmptyState(context);
+            return Column(
+              children: people
+                  .map((person) => _PersonCard(person: person, l10n: l10n))
+                  .toList(),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(
+            child: Text(
+              'Error loading connections',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -576,24 +584,9 @@ class _YouSection extends StatelessWidget {
   }
 }
 
-/// 관계 모델
-class _ConnectedPerson {
-  final String name;
-  final bool isSupported; // 지지받는 중 (They manage Me)
-  final bool isCheering; // 응원하는 중 (I manage Them)
-
-  _ConnectedPerson({
-    required this.name,
-    required this.isSupported,
-    required this.isCheering,
-  });
-
-  bool get isMutual => isSupported && isCheering;
-}
-
 /// 사람 카드
 class _PersonCard extends StatelessWidget {
-  final _ConnectedPerson person;
+  final ConnectedUser person; // ConnectedUser 사용
   final AppLocalizations l10n;
 
   const _PersonCard({required this.person, required this.l10n});
@@ -621,7 +614,9 @@ class _PersonCard extends StatelessWidget {
                   radius: 20,
                   backgroundColor: AppColors.secondary,
                   child: Text(
-                    person.name[0],
+                    (person.user.displayName?.isNotEmpty ?? false)
+                        ? person.user.displayName![0]
+                        : '?',
                     style: TextStyle(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.bold,
@@ -634,7 +629,7 @@ class _PersonCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        person.name,
+                        person.user.displayName ?? '이름 없음',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
