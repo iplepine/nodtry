@@ -10,7 +10,7 @@
   - `email` (string?): 이메일 (익명인 경우 null)
   - `profileImageUrl` (string?): 프로필 이미지 URL
   - `statusMessage` (string?): 상태 메시지
-  - `inviteCode` (string): 친구 초대 코드 (Unique, 8자리 난수)
+  - `inviteCode` (string): 친구 초대 코드 (Unique, 8자리 대문자 + 숫자)
   - `createdAt` (timestamp): 가입일
   - `updatedAt` (timestamp): 마지막 수정일
   - `isAnonymous` (boolean): 익명 계정 여부
