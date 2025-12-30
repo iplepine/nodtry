@@ -1,9 +1,16 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 import 'user_repository.dart';
 
 class MockUserRepository implements UserRepository {
   UserModel? _mockUser;
+
+  @override
+  Future<void> initializeUser(User user) async {
+    // Mock에서는 별도 초기화 로직 불필요 (생성자에서 이미 더미 설정됨) or 더미 업데이트
+    await Future.delayed(const Duration(milliseconds: 300));
+  }
 
   MockUserRepository() {
     // 초기 더미 데이터

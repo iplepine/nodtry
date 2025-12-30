@@ -1,7 +1,11 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 
 abstract class UserRepository {
+  /// 앱 시작/로그인 시 사용자 데이터 동기화 (없으면 생성)
+  Future<void> initializeUser(User user);
+
   /// 내 프로필 조회
   Future<UserModel?> getMyProfile();
 

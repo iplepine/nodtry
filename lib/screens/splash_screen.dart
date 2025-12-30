@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
 import '../routes/app_router.dart';
 import 'dart:io';
 import '../services/auth_service.dart';
-import '../services/database_service.dart';
+import '../providers/repository_provider.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
+  // ... (Animation controllers kept same)
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _messageSlideAnimation;
@@ -30,71 +32,41 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 2000), // 2초로 증가
+      duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
 
-    // 메시지 페이드 인 (더 부드럽게)
+    // ... (Animation definitions kept same - omitting for brevity as they are unchanged)
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(
-          0.0,
-          0.6,
-          curve: Curves.easeInOut,
-        ), // easeInOut으로 변경
+        curve: const Interval(0.0, 0.6, curve: Curves.easeInOut),
       ),
     );
-
-    // 메시지 위로 슬라이드 (더 부드러운 움직임)
     _messageSlideAnimation =
-        Tween<Offset>(
-          begin: const Offset(0, 0.2), // 이동 거리 줄임
-          end: Offset.zero,
-        ).animate(
+        Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _controller,
-            curve: const Interval(
-              0.0,
-              0.7,
-              curve: Curves.easeOutCubic,
-            ), // easeOutCubic으로 변경
+            curve: const Interval(0.0, 0.7, curve: Curves.easeOutCubic),
           ),
         );
-
-    // 버튼 아래에서 슬라이드 (더 부드러운 움직임)
     _buttonSlideAnimation =
-        Tween<Offset>(
-          begin: const Offset(0, 0.3), // 이동 거리 줄임
-          end: Offset.zero,
-        ).animate(
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _controller,
-            curve: const Interval(
-              0.5,
-              1.0,
-              curve: Curves.easeOutCubic,
-            ), // easeOutCubic으로 변경, 시작 지연
+            curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
           ),
         );
-
-    // 버튼 페이드 인 (더 부드럽게)
     _buttonFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(
-          0.5,
-          1.0,
-          curve: Curves.easeInOut,
-        ), // easeInOut으로 변경, 시작 지연
+        curve: const Interval(0.5, 1.0, curve: Curves.easeInOut),
       ),
     );
 
-    // 애니메이션 시작
     _controller.forward();
 
-    // 자동 로그인 시도 (임시로 2초 후 체크)
-    // TODO: 실제 자동 로그인 로직 구현
+    // 자동 로그인 시도
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         _checkAuthAndNavigate();
@@ -103,18 +75,14 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   final AuthService _authService = AuthService();
-  final DatabaseService _databaseService = DatabaseService();
 
   Future<void> _checkAuthAndNavigate() async {
-    // 이미 로그인되어 있으면 다음 화면으로 이동
     final user = _authService.currentUser;
     if (user != null) {
-      // 로그인 시 사용자 문서 확인/생성
-      await _databaseService.createUser(user);
+      // User Repository를 통해 초기화
+      final repository = ref.read(userRepositoryProvider);
+      await repository.initializeUser(user);
       _navigateToNext();
-    } else {
-      // 로그인 안 되어 있으면 로그인 화면 유지 (자동 로그인 실패)
-      // 아무것도 하지 않음 (로그인 버튼들이 보임)
     }
   }
 
@@ -127,7 +95,8 @@ class _SplashScreenState extends State<SplashScreen>
       if (Platform.isAndroid) {
         final result = await _authService.signInWithGoogle();
         if (result != null && mounted) {
-          await _databaseService.createUser(result.user!);
+          final repository = ref.read(userRepositoryProvider);
+          await repository.initializeUser(result.user!);
           _navigateToNext();
         }
       }
@@ -155,7 +124,8 @@ class _SplashScreenState extends State<SplashScreen>
     try {
       final result = await _authService.signInAnonymously();
       if (mounted) {
-        await _databaseService.createUser(result.user!);
+        final repository = ref.read(userRepositoryProvider);
+        await repository.initializeUser(result.user!);
         _navigateToNext();
       }
     } catch (e) {

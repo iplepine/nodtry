@@ -6,6 +6,9 @@ class DatabaseService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   /// 사용자 문서 생성 (없으면 생성, 있으면 무시)
+  ///
+  /// Deprecated: Use `UserRepository.initializeUser` instead.
+  @Deprecated('Use UserRepository.initializeUser instead')
   Future<void> createUser(User user) async {
     final userRef = _db.collection('users').doc(user.uid);
     final snapshot = await userRef.get();

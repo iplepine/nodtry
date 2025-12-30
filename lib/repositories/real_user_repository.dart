@@ -9,6 +9,44 @@ class RealUserRepository implements UserRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
+  Future<void> initializeUser(User user) async {
+    final userRef = _firestore.collection('users').doc(user.uid);
+
+    try {
+      final snapshot = await userRef.get();
+      if (!snapshot.exists) {
+        // 신규 유저 생성
+        await userRef.set({
+          'uid': user.uid,
+          'email': user.email,
+          'displayName': user.displayName ?? '나',
+          'photoURL': user.photoURL,
+          'isAnonymous': user.isAnonymous,
+          'inviteCode': _generateInviteCode(),
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      } else {
+        // 기존 유저: 마지막 접속일 등 업데이트 필요 시 여기에 추가
+      }
+    } catch (e) {
+      // TODO: 에러 처리
+      // print('initializeUser Error: $e');
+    }
+  }
+
+  String _generateInviteCode() {
+    // 6자리 영문 대문자 + 숫자 (UX상 6자리가 입력하기 편함)
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return String.fromCharCodes(
+      Iterable.generate(
+        6,
+        (_) => chars.codeUnitAt(DateTime.now().microsecond % chars.length),
+      ),
+    );
+  }
+
+  @override
   Future<UserModel?> getMyProfile() async {
     final user = _auth.currentUser;
     if (user == null) return null;
