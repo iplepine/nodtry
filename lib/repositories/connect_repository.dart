@@ -30,6 +30,9 @@ abstract class ConnectRepository {
   /// 나와 관련된 모든 활성/대기 연결을 조회합니다.
   Future<List<RelationModel>> getConnections();
 
+  /// 연결 해제
+  Future<void> disconnectByUser(String targetUserId);
+
   /// 연결 상태 스트림
   ///
   /// relations 컬렉션의 변화를 감지하여 연결 상태를 반환합니다.

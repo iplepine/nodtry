@@ -187,12 +187,18 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   @override
   Widget build(BuildContext context) {
     // 연결 상태 변경 감지하여 네비게이션 처리
+    // 연결 상태 변경 감지하여 네비게이션 처리
     ref.listen(connectionStatusStreamProvider, (previous, next) {
       next.whenData((status) {
         if (status == ConnectionStatus.active &&
             _state != ConnectState.connected) {
           setState(() {
             _state = ConnectState.connected;
+          });
+        } else if (status != ConnectionStatus.active &&
+            _state == ConnectState.connected) {
+          setState(() {
+            _state = ConnectState.initial;
           });
         }
       });
@@ -452,6 +458,64 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     );
   }
 
+  Future<void> _disconnect() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('연결 해제'),
+        content: const Text('정말로 연결을 끊으시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('해제', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        // 현재 연결된 모든 상대 끊기 (MVP: 가장 최근 혹은 전체)
+        // 여기서는 usecase에 targetId를 넘겨야 함.
+        // 상태를 보고 ConnectedUser를 가져와야 하는데, 일단 'users' collection을 조회할 필요 없이
+        // relations에서 찾아서 지우므로 target ID가 필요함.
+        // 하지만 UseCase는 ID를 요구함.
+        // ConnectRepository.disconnectByUser also needs ID.
+        // 현재 화면에서 connected 상대 ID를 알고 있나?
+        // 안다면 좋지만 모른다면?
+        // getConnections()를 호출해서 가져와야 함.
+
+        // 심플하게: Repository에게 "나와 연결된 모든 사람 끊어"라고 할 수도 있지만
+        // 일단 getConnections()로 찾자.
+
+        final connections = await ref
+            .read(connectRepositoryProvider)
+            .getConnections();
+        if (connections.isNotEmpty) {
+          final targetId =
+              connections.first.executorId ==
+                  ref.read(myProfileProvider).asData?.value?.uid
+              ? connections.first.managerId
+              : connections.first.executorId;
+
+          await ref.read(disconnectConnectionUseCaseProvider).execute(targetId);
+        } else {
+          // 이미 연결 없음?
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('연결 해제 실패: $e')));
+        }
+      }
+    }
+  }
+
   Widget _buildConnectedState() {
     return Container(
       padding: const EdgeInsets.all(32),
@@ -474,6 +538,17 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
           PrimaryButton(
             text: AppLocalizations.of(context)!.connectGoToHome,
             onPressed: _navigateToHome,
+          ),
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: _disconnect,
+            child: const Text(
+              '연결 끊기',
+              style: TextStyle(
+                color: Colors.red,
+                decoration: TextDecoration.underline,
+              ),
+            ),
           ),
         ],
       ),

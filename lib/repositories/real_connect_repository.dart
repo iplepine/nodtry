@@ -117,6 +117,33 @@ class RealConnectRepository implements ConnectRepository {
   }
 
   @override
+  Future<void> disconnectByUser(String targetUserId) async {
+    final me = _auth.currentUser;
+    if (me == null) throw Exception('Not authenticated');
+
+    // 나와 상대방이 연결된 문서 찾기 (executor or manager)
+    final query = await _firestore
+        .collection('relations')
+        .where(
+          Filter.or(
+            Filter.and(
+              Filter('executorId', isEqualTo: me.uid),
+              Filter('managerId', isEqualTo: targetUserId),
+            ),
+            Filter.and(
+              Filter('executorId', isEqualTo: targetUserId),
+              Filter('managerId', isEqualTo: me.uid),
+            ),
+          ),
+        )
+        .get();
+
+    for (final doc in query.docs) {
+      await doc.reference.delete();
+    }
+  }
+
+  @override
   Future<ConnectionStatus> getConnectionStatus() async {
     // TODO: Implement
     return ConnectionStatus.none;

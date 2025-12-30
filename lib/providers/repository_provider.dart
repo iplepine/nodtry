@@ -1,3 +1,4 @@
+import '../usecases/disconnect_connection_use_case.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../repositories/record_repository.dart';
@@ -167,3 +168,9 @@ final connectionStatusStreamProvider = StreamProvider<ConnectionStatus>((ref) {
   final repository = ref.watch(connectRepositoryProvider);
   return repository.watchConnectionStatus();
 });
+
+final disconnectConnectionUseCaseProvider =
+    Provider<DisconnectConnectionUseCase>((ref) {
+      final repository = ref.watch(connectRepositoryProvider);
+      return DisconnectConnectionUseCase(repository);
+    });

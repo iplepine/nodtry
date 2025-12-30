@@ -10,6 +10,7 @@ class MockConnectRepository implements ConnectRepository {
   String? _myInviteCode;
   ConnectionStatus _status = ConnectionStatus.none;
   final _statusController = StreamController<ConnectionStatus>.broadcast();
+  final List<RelationModel> _mockRelations = [];
 
   MockConnectRepository() {
     // 초기 상태 emit
@@ -70,6 +71,16 @@ class MockConnectRepository implements ConnectRepository {
   Stream<ConnectionStatus> watchConnectionStatus() async* {
     yield _status;
     yield* _statusController.stream;
+  }
+
+  @override
+  Future<void> disconnectByUser(String targetUserId) async {
+    // 목업: 해당 유저와의 관계 삭제 시뮬레이션
+    _mockRelations.removeWhere(
+      (r) =>
+          r.executorId == targetUserId && r.managerId == 'current_user_id' ||
+          r.managerId == targetUserId && r.executorId == 'current_user_id',
+    );
   }
 
   @override
