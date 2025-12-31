@@ -236,11 +236,7 @@ class HistoryCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(
-              Icons.thumb_up_outlined,
-              size: 16,
-              color: AppColors.textDisabled,
-            ),
+            Icon(Icons.more_horiz, size: 18, color: AppColors.textDisabled),
           ],
         ),
       ),
