@@ -84,19 +84,29 @@ class _UsTabState extends ConsumerState<UsTab> {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Text(
-                                            '계정 연결하고 기록 지키기',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.copyWith(
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                bottom: BorderSide(
                                                   color: const Color(
                                                     0xFFE65100,
                                                   ), // Darker Orange
-                                                  fontWeight: FontWeight.bold,
-                                                  decoration:
-                                                      TextDecoration.underline,
+                                                  width: 1.0,
                                                 ),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              '계정 연결하고 기록 지키기',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.copyWith(
+                                                    color: const Color(
+                                                      0xFFE65100,
+                                                    ), // Darker Orange
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                            ),
                                           ),
                                           const SizedBox(width: 4),
                                           const Icon(
