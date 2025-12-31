@@ -523,4 +523,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPlanCreationDesc => 'All steps in one screen';
+
+  @override
+  String get settingsDeveloper => 'Developer Menu';
+
+  @override
+  String get settingsDeveloperDesc => 'Debug menu';
+
+  @override
+  String get settingsAccount => 'Account';
+
+  @override
+  String get settingsDeleteAccount => 'Delete Account';
+
+  @override
+  String get settingsDeleteAccountDesc =>
+      'Permanently delete your account and data';
+
+  @override
+  String get settingsDeleteAccountDialogTitle => 'Delete Account';
+
+  @override
+  String get settingsDeleteAccountDialogContent =>
+      'Are you sure you want to delete your account? This action cannot be undone.';
+
+  @override
+  String get settingsCancel => 'Cancel';
+
+  @override
+  String get settingsDelete => 'Delete';
+
+  @override
+  String get settingsAccountDeletedSuccess => 'Account deleted successfully';
+
+  @override
+  String get settingsAuthServiceNotFound => 'Auth Service not found';
+
+  @override
+  String settingsDeleteAccountFailed(String error) {
+    return 'Failed to delete account: $error';
+  }
 }

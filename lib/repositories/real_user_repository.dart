@@ -14,27 +14,59 @@ class RealUserRepository implements UserRepository {
 
   @override
   Future<void> initializeUser(User user) async {
+    // 2. Determine Login Type
+    LoginType loginType = LoginType.guest;
+    if (!user.isAnonymous) {
+      if (user.providerData.any(
+        (userInfo) => userInfo.providerId == 'google.com',
+      )) {
+        loginType = LoginType.google;
+      } else if (user.providerData.any(
+        (userInfo) => userInfo.providerId == 'apple.com',
+      )) {
+        loginType = LoginType.apple;
+      }
+    }
+
+    // 3. (Optional) Check existing document and update if needed
+    // For now, we just overwrite/merge init data if needed or create if not exists
+    // But inviteCode should NOT change if exists.
+
     final userRef = _firestore.collection('users').doc(user.uid);
+    final userDoc = await userRef.get();
 
     try {
-      final snapshot = await userRef.get();
-      if (!snapshot.exists) {
-        // 신규 유저 생성
-        await userRef.set({
-          'uid': user.uid,
-          'email': user.email,
-          'displayName': (user.displayName == null || user.displayName!.isEmpty)
-              ? '나'
-              : user.displayName,
-          'profileImageUrl': user.photoURL,
-          'isAnonymous': user.isAnonymous,
-          'inviteCode': _generateInviteCode(),
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+      if (!userDoc.exists) {
+        // Create New
+        final inviteCode = _generateInviteCode();
+        final newUser = UserModel(
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName ?? '나', // Default name
+          profileImageUrl: user.photoURL,
+          loginType: loginType,
+          inviteCode: inviteCode,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        await userRef.set(newUser.toFirestore());
       } else {
+        // Update Existing (Sync LoginType if changed, e.g. Guest -> Google Link)
+        // Only update fields that might have changed on login
+        // e.g. loginType
+        final existingData = userDoc.data();
+        final currentLoginTypeName = existingData?['loginType'];
+
+        if (currentLoginTypeName != loginType.name) {
+          await userRef.update({
+            'loginType': loginType.name,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+
         // 기존 유저: 데이터 동기화 (Auth vs Firestore)
-        final data = snapshot.data();
+        final data = userDoc
+            .data(); // Use userDoc.data() instead of snapshot.data()
         if (data != null) {
           final updates = <String, dynamic>{};
 
@@ -167,7 +199,7 @@ class RealUserRepository implements UserRepository {
   Future<void> updateProfile({
     String? name,
     String? statusMessage,
-    File? image,
+    String? imagePath,
   }) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No authenticated user');
@@ -181,12 +213,31 @@ class RealUserRepository implements UserRepository {
     }
     if (statusMessage != null) updates['statusMessage'] = statusMessage;
 
-    if (image != null) {
-      final url = await _uploadImage(user.uid, image);
-      updates['profileImageUrl'] = url;
+    if (imagePath != null) {
+      final file = File(imagePath);
+      if (file.existsSync()) {
+        final url = await _uploadImage(user.uid, file);
+        updates['profileImageUrl'] = url;
+      }
     }
 
     await _firestore.collection('users').doc(user.uid).update(updates);
+  }
+
+  @override
+  Future<void> deleteUser(String uid) async {
+    try {
+      // 1. 유저 문서 삭제
+      await _firestore.collection('users').doc(uid).delete();
+
+      // 2. Storage의 프로필 이미지 삭제 (옵션, 로직 복잡하므로 MVP에서는 스킵 또는 필요시 구현)
+      // Storage는 폴더 삭제가 안되므로 파일 목록 가져와서 삭제해야 함.
+      // 여기서는 일단 DB 데이터만 삭제합니다.
+      debugPrint('[RealUserRepository] User $uid deleted from Firestore');
+    } catch (e) {
+      debugPrint('[RealUserRepository] deleteUser Error: $e');
+      rethrow;
+    }
   }
 
   Future<String> _uploadImage(String uid, File image) async {

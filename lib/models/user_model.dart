@@ -7,9 +7,11 @@ class UserModel {
   final String? profileImageUrl;
   final String? statusMessage;
   final String? inviteCode;
-  final bool isAnonymous;
+  final LoginType loginType;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  bool get isAnonymous => loginType == LoginType.guest;
 
   UserModel({
     required this.uid,
@@ -18,7 +20,7 @@ class UserModel {
     this.profileImageUrl,
     this.statusMessage,
     this.inviteCode,
-    this.isAnonymous = false,
+    this.loginType = LoginType.guest,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -32,7 +34,7 @@ class UserModel {
       profileImageUrl: data['profileImageUrl'],
       statusMessage: data['statusMessage'],
       inviteCode: data['inviteCode'],
-      isAnonymous: data['isAnonymous'] ?? false,
+      loginType: LoginType.values.byName(data['loginType'] ?? 'guest'),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
@@ -46,7 +48,7 @@ class UserModel {
       profileImageUrl: json['profileImageUrl'],
       statusMessage: json['statusMessage'],
       inviteCode: json['inviteCode'],
-      isAnonymous: json['isAnonymous'] ?? false,
+      loginType: LoginType.values.byName(json['loginType'] ?? 'guest'),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );
@@ -59,7 +61,7 @@ class UserModel {
       if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       if (statusMessage != null) 'statusMessage': statusMessage,
       if (inviteCode != null) 'inviteCode': inviteCode,
-      'isAnonymous': isAnonymous,
+      'loginType': loginType.name,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -73,7 +75,7 @@ class UserModel {
       if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       if (statusMessage != null) 'statusMessage': statusMessage,
       if (inviteCode != null) 'inviteCode': inviteCode,
-      'isAnonymous': isAnonymous,
+      'loginType': loginType.name,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -83,6 +85,7 @@ class UserModel {
     String? displayName,
     String? statusMessage,
     String? profileImageUrl,
+    LoginType? loginType,
     DateTime? updatedAt,
   }) {
     return UserModel(
@@ -92,9 +95,11 @@ class UserModel {
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       statusMessage: statusMessage ?? this.statusMessage,
       inviteCode: inviteCode,
-      isAnonymous: isAnonymous,
+      loginType: loginType ?? this.loginType,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
+
+enum LoginType { guest, google, apple }

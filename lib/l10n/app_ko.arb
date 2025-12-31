@@ -228,6 +228,18 @@
   "developerScreenSummaryDesc": "Screen 5: 계획 제안 요약",
   "settingsPlanCreation": "계획 생성",
   "settingsPlanCreationTitle": "새 약속 만들기",
-  "settingsPlanCreationDesc": "모든 단계를 한 화면에서"
+  "settingsPlanCreationDesc": "모든 단계를 한 화면에서",
+  "settingsDeveloper": "개발자 메뉴",
+  "settingsDeveloperDesc": "디버그 메뉴",
+  "settingsAccount": "계정 관리",
+  "settingsDeleteAccount": "회원 탈퇴",
+  "settingsDeleteAccountDesc": "계정과 모든 데이터를 영구적으로 삭제합니다",
+  "settingsDeleteAccountDialogTitle": "회원 탈퇴",
+  "settingsDeleteAccountDialogContent": "정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+  "settingsCancel": "취소",
+  "settingsDelete": "탈퇴",
+  "settingsAccountDeletedSuccess": "계정이 삭제되었습니다",
+  "settingsAuthServiceNotFound": "인증 서비스를 찾을 수 없습니다",
+  "settingsDeleteAccountFailed": "계정 삭제 실패: {error}"
 }
 

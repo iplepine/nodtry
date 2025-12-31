@@ -1,4 +1,3 @@
-import 'dart:io';
 import '../repositories/user_repository.dart';
 
 import '../datasources/user_local_data_source.dart';
@@ -12,13 +11,13 @@ class UpdateProfileUseCase {
   Future<void> execute({
     String? name,
     String? statusMessage,
-    File? image,
+    String? imagePath,
   }) async {
     // 1. 서버 업데이트
     await _repository.updateProfile(
       name: name,
       statusMessage: statusMessage,
-      image: image,
+      imagePath: imagePath,
     );
 
     // 2. 최신 데이터 조회 및 캐싱

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 
@@ -23,6 +22,9 @@ abstract class UserRepository {
   Future<void> updateProfile({
     String? name,
     String? statusMessage,
-    File? image,
+    String? imagePath,
   });
+
+  /// 회원 탈퇴 (데이터 삭제)
+  Future<void> deleteUser(String uid);
 }

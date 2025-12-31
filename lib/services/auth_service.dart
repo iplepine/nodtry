@@ -87,4 +87,23 @@ class AuthService {
       rethrow;
     }
   }
+
+  /// 회원 탈퇴 (계정 삭제)
+  Future<void> deleteAccount() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        // 구글 로그인 사용자의 경우 재인증 필요할 수 있음
+        // (민감한 작업 전 재인증 로직은 UseCase 레벨에서 처리 권장하지만, 편의상 여기서 호출 가능)
+        // 여기서는 단순 삭제 시도
+        if (_googleSignIn.currentUser != null) {
+          await _googleSignIn.disconnect();
+        }
+        await user.delete();
+      }
+    } catch (e) {
+      debugPrint("Error deleting account: $e");
+      rethrow;
+    }
+  }
 }

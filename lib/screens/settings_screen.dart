@@ -6,15 +6,18 @@ import '../l10n/app_localizations.dart';
 import '../providers/app_settings_provider.dart';
 import '../routes/app_router.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/repository_provider.dart';
+
 /// 설정 화면 - 언어 및 테마 변경
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   AppSettingsProvider? _settingsProvider;
 
   @override
@@ -138,7 +141,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // 개발자 옵션
               Text(
-                'Developer', // TODO: Add to ARB
+                l10n.settingsDeveloper,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -147,6 +150,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 16),
               _buildDeveloperOption(context),
+
+              const SizedBox(height: 32),
+
+              // 계정 관리
+              Text(
+                l10n.settingsAccount,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildWithdrawOption(context),
             ],
           ),
         ),
@@ -154,7 +171,104 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _buildWithdrawOption(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showWithdrawDialog(context),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider, width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.settingsDeleteAccount,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.error,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.settingsDeleteAccountDesc,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: AppColors.textDisabled),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showWithdrawDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.settingsDeleteAccountDialogTitle),
+        content: Text(l10n.settingsDeleteAccountDialogContent),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: Text(l10n.settingsCancel),
+          ),
+          TextButton(
+            onPressed: () => context.pop(true),
+            child: Text(
+              l10n.settingsDelete,
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      // TODO: 로딩 표시
+      try {
+        final withdrawUseCase = ref.read(withdrawUseCaseProvider);
+        await withdrawUseCase.execute();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.settingsAccountDeletedSuccess)),
+          );
+          // 앱 초기 화면으로 이동 (스플래시 -> 로그인)
+          context.go(AppRoutes.splash);
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.settingsDeleteAccountFailed(e.toString())),
+            ),
+          );
+        }
+      }
+    }
+  }
+
   Widget _buildDeveloperOption(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -177,7 +291,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Developer Options',
+                        l10n.settingsDeveloper,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -186,7 +300,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Debug menu for development',
+                        l10n.settingsDeveloperDesc,
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,

@@ -699,8 +699,58 @@
     "description": "Title for plan creation option"
   },
   "settingsPlanCreationDesc": "All steps in one screen",
-  "@settingsPlanCreationDesc": {
-    "description": "Description for unified plan creation screen"
+  "settingsDeveloper": "Developer Menu",
+  "@settingsDeveloper": {
+    "description": "Developer section title in settings"
+  },
+  "settingsDeveloperDesc": "Debug menu",
+  "@settingsDeveloperDesc": {
+    "description": "Description for developer menu"
+  },
+  "settingsAccount": "Account",
+  "@settingsAccount": {
+    "description": "Account section title in settings"
+  },
+  "settingsDeleteAccount": "Delete Account",
+  "@settingsDeleteAccount": {
+    "description": "Delete account button title"
+  },
+  "settingsDeleteAccountDesc": "Permanently delete your account and data",
+  "@settingsDeleteAccountDesc": {
+    "description": "Description for delete account option"
+  },
+  "settingsDeleteAccountDialogTitle": "Delete Account",
+  "@settingsDeleteAccountDialogTitle": {
+    "description": "Title for delete account confirmation dialog"
+  },
+  "settingsDeleteAccountDialogContent": "Are you sure you want to delete your account? This action cannot be undone.",
+  "@settingsDeleteAccountDialogContent": {
+    "description": "Content for delete account confirmation dialog"
+  },
+  "settingsCancel": "Cancel",
+  "@settingsCancel": {
+    "description": "Cancel button label"
+  },
+  "settingsDelete": "Delete",
+  "@settingsDelete": {
+    "description": "Delete button label"
+  },
+  "settingsAccountDeletedSuccess": "Account deleted successfully",
+  "@settingsAccountDeletedSuccess": {
+    "description": "Success message after account deletion"
+  },
+  "settingsAuthServiceNotFound": "Auth Service not found",
+  "@settingsAuthServiceNotFound": {
+    "description": "Error message when auth service is missing"
+  },
+  "settingsDeleteAccountFailed": "Failed to delete account: {error}",
+  "@settingsDeleteAccountFailed": {
+    "description": "Error message when account deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   }
 }
 

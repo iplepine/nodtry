@@ -19,7 +19,6 @@ class DatabaseService {
         'email': user.email,
         'displayName': user.displayName ?? '나', // 기본값
         'profileImageUrl': user.photoURL,
-        'isAnonymous': user.isAnonymous,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
         'inviteCode': _generateInviteCode(), // 초대 코드 생성

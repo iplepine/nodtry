@@ -820,7 +820,7 @@ class _EditProfileDialogContentState
         statusMessage: _statusController.text.isEmpty
             ? null
             : _statusController.text,
-        image: _tempProfileImage,
+        imagePath: _tempProfileImage?.path,
       );
 
       // Provider 새로고침 (Stream으로 자동 갱신되므로 불필요)

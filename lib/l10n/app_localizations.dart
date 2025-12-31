@@ -1064,11 +1064,83 @@ abstract class AppLocalizations {
   /// **'Create New Promise'**
   String get settingsPlanCreationTitle;
 
-  /// Description for unified plan creation screen
+  /// No description provided for @settingsPlanCreationDesc.
   ///
   /// In en, this message translates to:
   /// **'All steps in one screen'**
   String get settingsPlanCreationDesc;
+
+  /// Developer section title in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Developer Menu'**
+  String get settingsDeveloper;
+
+  /// Description for developer menu
+  ///
+  /// In en, this message translates to:
+  /// **'Debug menu'**
+  String get settingsDeveloperDesc;
+
+  /// Account section title in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get settingsAccount;
+
+  /// Delete account button title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get settingsDeleteAccount;
+
+  /// Description for delete account option
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete your account and data'**
+  String get settingsDeleteAccountDesc;
+
+  /// Title for delete account confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get settingsDeleteAccountDialogTitle;
+
+  /// Content for delete account confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete your account? This action cannot be undone.'**
+  String get settingsDeleteAccountDialogContent;
+
+  /// Cancel button label
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get settingsCancel;
+
+  /// Delete button label
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get settingsDelete;
+
+  /// Success message after account deletion
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted successfully'**
+  String get settingsAccountDeletedSuccess;
+
+  /// Error message when auth service is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Auth Service not found'**
+  String get settingsAuthServiceNotFound;
+
+  /// Error message when account deletion fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete account: {error}'**
+  String settingsDeleteAccountFailed(String error);
 }
 
 class _AppLocalizationsDelegate

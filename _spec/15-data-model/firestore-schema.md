@@ -13,7 +13,7 @@
   - `inviteCode` (string): 친구 초대 코드 (Unique, 8자리 대문자 + 숫자)
   - `createdAt` (timestamp): 가입일
   - `updatedAt` (timestamp): 마지막 수정일
-  - `isAnonymous` (boolean): 익명 계정 여부
+  - `loginType` (string): 로그인 타입 ('guest' | 'google' | 'apple') - Enum `LoginType`의 name 속성 저장
 
 ### `relations`
 사용자 간의 연결(Manage) 관계.

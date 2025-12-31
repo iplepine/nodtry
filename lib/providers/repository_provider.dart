@@ -15,8 +15,9 @@ import '../repositories/mock_user_repository.dart';
 import '../repositories/real_user_repository.dart';
 import '../usecases/update_profile_use_case.dart';
 import '../usecases/auto_login_use_case.dart';
-import '../usecases/link_with_google_use_case.dart';
-import '../usecases/login_with_google_use_case.dart';
+import '../usecases/auth/link_with_google_use_case.dart';
+import '../usecases/auth/login_with_google_use_case.dart';
+import '../usecases/auth/withdraw_use_case.dart';
 
 import '../usecases/guest_login_use_case.dart';
 import '../usecases/get_my_profile_use_case.dart';
@@ -200,4 +201,11 @@ final loginWithGoogleUseCaseProvider = Provider<LoginWithGoogleUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   return LoginWithGoogleUseCase(authService, userRepository);
+});
+
+final withdrawUseCaseProvider = Provider<WithdrawUseCase>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final userRepository = ref.watch(userRepositoryProvider);
+  final localDataSource = ref.watch(userLocalDataSourceProvider);
+  return WithdrawUseCase(authService, userRepository, localDataSource);
 });

@@ -511,4 +511,43 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsPlanCreationDesc => '모든 단계를 한 화면에서';
+
+  @override
+  String get settingsDeveloper => '개발자 메뉴';
+
+  @override
+  String get settingsDeveloperDesc => '디버그 메뉴';
+
+  @override
+  String get settingsAccount => '계정 관리';
+
+  @override
+  String get settingsDeleteAccount => '회원 탈퇴';
+
+  @override
+  String get settingsDeleteAccountDesc => '계정과 모든 데이터를 영구적으로 삭제합니다';
+
+  @override
+  String get settingsDeleteAccountDialogTitle => '회원 탈퇴';
+
+  @override
+  String get settingsDeleteAccountDialogContent =>
+      '정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
+
+  @override
+  String get settingsCancel => '취소';
+
+  @override
+  String get settingsDelete => '탈퇴';
+
+  @override
+  String get settingsAccountDeletedSuccess => '계정이 삭제되었습니다';
+
+  @override
+  String get settingsAuthServiceNotFound => '인증 서비스를 찾을 수 없습니다';
+
+  @override
+  String settingsDeleteAccountFailed(String error) {
+    return '계정 삭제 실패: $error';
+  }
 }
