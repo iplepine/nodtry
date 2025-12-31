@@ -261,7 +261,7 @@ class _NowTabState extends ConsumerState<NowTab>
                       if (secondaryExecutorCards.isNotEmpty) ...[
                         ...secondaryExecutorCards.map(
                           (state) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.only(bottom: 8),
                             child: FadeTransition(
                               opacity: _secondaryFadeAnimation,
                               child: Align(
@@ -565,10 +565,10 @@ class _SecondaryExecutorCard extends StatelessWidget {
     String? statusMessage;
     switch (model.state) {
       case HomeCardState.waitingForCheck:
-        statusMessage = '${l10n.homeSentWaiting}\n${l10n.homeWaitingForCheck}';
+        statusMessage = '${l10n.homeSentWaiting} · ${l10n.homeWaitingForCheck}';
         break;
       case HomeCardState.checked:
-        statusMessage = '${l10n.homeChecked}\n${l10n.homeThankYou}';
+        statusMessage = '${l10n.homeChecked} · ${l10n.homeThankYou}';
         break;
       case HomeCardState.quietDay:
         statusMessage = l10n.nowQuietRest;
