@@ -6,7 +6,7 @@ import '../theme/app_theme_enum.dart';
 class AppSettingsProvider extends ChangeNotifier {
   // 현재 테마
   AppThemeType _currentTheme = AppThemeType.smokyPlum;
-  
+
   // 현재 언어
   Locale _currentLocale = const Locale('ko', '');
 
@@ -35,11 +35,7 @@ class AppSettingsProvider extends ChangeNotifier {
 class AppSettings extends InheritedWidget {
   final AppSettingsProvider provider;
 
-  const AppSettings({
-    super.key,
-    required this.provider,
-    required super.child,
-  });
+  const AppSettings({super.key, required this.provider, required super.child});
 
   static AppSettingsProvider of(BuildContext context) {
     final widget = context.dependOnInheritedWidgetOfExactType<AppSettings>();
@@ -54,4 +50,3 @@ class AppSettings extends InheritedWidget {
     return provider != oldWidget.provider;
   }
 }
-

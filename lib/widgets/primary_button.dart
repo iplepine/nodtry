@@ -19,27 +19,28 @@ class PrimaryButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary, // Smoky Plum
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.secondary, // Pale Stone
-          disabledForegroundColor: AppColors.textDisabled, // 비활성 텍스트
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12), // Soft radius (8~12dp)
-          ),
-        ).copyWith(
-          // Pressed state: Deep Plum
-          overlayColor: WidgetStateProperty.resolveWith<Color?>(
-            (Set<WidgetState> states) {
-              if (states.contains(WidgetState.pressed)) {
-                return AppColors.primaryPressed; // Deep Plum (#5A4658)
-              }
-              return null;
-            },
-          ),
-        ),
+        style:
+            ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary, // Smoky Plum
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: AppColors.secondary, // Pale Stone
+              disabledForegroundColor: AppColors.textDisabled, // 비활성 텍스트
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12), // Soft radius (8~12dp)
+              ),
+            ).copyWith(
+              // Pressed state: Deep Plum
+              overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                Set<WidgetState> states,
+              ) {
+                if (states.contains(WidgetState.pressed)) {
+                  return AppColors.primaryPressed; // Deep Plum (#5A4658)
+                }
+                return null;
+              }),
+            ),
         child: isLoading
             ? const SizedBox(
                 width: 20,

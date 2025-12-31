@@ -1,87 +1,79 @@
-/// 시간 표현 유틸리티
-/// 
-/// 스펙: '지금' 탭에서는 날짜 대신 상대적 시간 표현만 사용
-/// - D-2, D-1
-/// - 3시간 남음, 30분 남음
-/// - 곧 다가와요
 class TimeFormatter {
-  /// Duration을 상대적 시간 문자열로 변환
-  /// 
-  /// 예시:
-  /// - "3시간 남음"
-  /// - "30분 남음"
-  /// - "곧 다가와요" (1시간 미만)
-  static String formatTimeRemaining(Duration remaining) {
-    if (remaining.inDays > 0) {
-      return '${remaining.inDays}일 남음';
-    } else if (remaining.inHours > 0) {
-      return '${remaining.inHours}시간 남음';
-    } else if (remaining.inMinutes > 0) {
-      return '${remaining.inMinutes}분 남음';
-    } else {
-      return '곧 다가와요';
-    }
-  }
+  /// Time Chip용 시간 포맷팅
+  ///
+  /// - 오늘 내:
+  ///   - 1분 이내: "지금!"
+  ///   - 5분 이내: "방금 전"
+  ///   - 지나간 시간: "N분 지남" or "N시간 지남"
+  ///   - 다가올 시간: "N분 전" or "N시간 전"
+  /// - 일주일 내: "내일", "모레", "3일 뒤"...
+  /// - 일주일 후: "다음주 X요일", "M월 D일"
+  static String formatForTimeChip(
+    DateTime scheduledTime, {
+    DateTime? baseTime,
+  }) {
+    final now = baseTime ?? DateTime.now();
+    final diff = scheduledTime.difference(now);
+    final isPast = diff.isNegative;
+    final absDiff = diff.abs();
 
-  /// 과거 시간을 상대적 시간 문자열로 변환
-  /// 
-  /// 예시:
-  /// - "3시간 전"
-  /// - "30분 전"
-  /// - "어제"
-  /// - "2일 전"
-  static String formatTimePast(Duration past) {
-    final days = past.inDays;
-    final hours = past.inHours;
-    final minutes = past.inMinutes;
-    
-    if (days > 0) {
-      if (days == 1) {
-        return '어제';
-      } else {
-        return '$days일 전';
+    // 1. 오늘 내 (같은 날짜)
+    if (_isSameDay(now, scheduledTime)) {
+      if (absDiff.inMinutes < 1) {
+        return '지금!';
       }
-    } else if (hours > 0) {
-      return '$hours시간 전';
-    } else if (minutes > 0) {
-      return '$minutes분 전';
-    } else {
-      return '방금 전';
+      if (isPast) {
+        if (absDiff.inMinutes < 5) return '방금 전';
+        if (absDiff.inMinutes < 60) return '${absDiff.inMinutes}분 지남';
+        return '${absDiff.inHours}시간 지남';
+      } else {
+        // 미래
+        if (absDiff.inMinutes < 60) return '${absDiff.inMinutes}분 전';
+        return '${absDiff.inHours}시간 전';
+      }
     }
-  }
 
-  /// 날짜 차이를 D-X 형식으로 변환
-  /// 
-  /// 예시:
-  /// - "D-2"
-  /// - "D-1"
-  static String formatDaysRemaining(DateTime targetDate) {
-    final now = DateTime.now();
-    final difference = targetDate.difference(now);
-    final days = difference.inDays;
-    
-    if (days < 0) {
-      return 'D+${-days}';
-    } else if (days == 0) {
-      return '오늘';
-    } else {
-      return 'D-$days';
+    // 2. 과거 날짜 (어제 등)
+    if (isPast) {
+      final days = now
+          .difference(
+            DateTime(
+              scheduledTime.year,
+              scheduledTime.month,
+              scheduledTime.day,
+            ),
+          )
+          .inDays;
+      if (days == 1) return '어제';
+      return '${days}일 지남';
     }
+
+    // 3. 미래 날짜
+    final days = DateTime(
+      scheduledTime.year,
+      scheduledTime.month,
+      scheduledTime.day,
+    ).difference(DateTime(now.year, now.month, now.day)).inDays;
+
+    if (days == 1) return '내일';
+    if (days == 2) return '모레';
+    if (days <= 7) return '$days일 뒤';
+
+    // 4. 일주일 이상
+    if (days <= 14) {
+      return '다음주 ${_getWeekdayName(scheduledTime.weekday)}';
+    }
+
+    // 5. 그 외 (절대 날짜)
+    return '${scheduledTime.month}월 ${scheduledTime.day}일';
   }
 
-  /// 다음 행동까지의 시간을 포맷팅
-  /// 
-  /// 스펙: "다음 행동까지 3시간 남았어요"
-  static String formatNextActionTime(Duration remaining) {
-    return formatTimeRemaining(remaining);
+  static bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  /// 다음 일정까지의 일수를 포맷팅
-  /// 
-  /// 스펙: "다음 일정까지 D-2예요"
-  static String formatNextScheduleDays(DateTime targetDate) {
-    final days = formatDaysRemaining(targetDate);
-    return days.startsWith('D-') ? days : 'D-0';
+  static String _getWeekdayName(int weekday) {
+    const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    return weekdays[weekday - 1];
   }
 }
-

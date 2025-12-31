@@ -4,30 +4,26 @@ import 'package:flutter/material.dart';
 enum TimeChipType {
   /// NOW: 즉시 인지해야 할 상태
   now,
-  
+
   /// UPCOMING: 가까운 미래 행동
   upcoming,
-  
+
   /// SOON: 시간 계산이 애매한 임박 상태
   soon,
-  
+
   /// PAST: 지난 시간 (과거 행동)
   past,
 }
 
 /// Time Chip 위젯
-/// 
+///
 /// 스펙: 시간은 메시지가 아니라 상태(state)다
 /// 상태는 칩(chip)으로 표현한다
 class TimeChip extends StatelessWidget {
   final String text;
   final TimeChipType type;
 
-  const TimeChip({
-    super.key,
-    required this.text,
-    required this.type,
-  });
+  const TimeChip({super.key, required this.text, required this.type});
 
   @override
   Widget build(BuildContext context) {
@@ -80,4 +76,3 @@ class TimeChip extends StatelessWidget {
     }
   }
 }
-

@@ -5,6 +5,8 @@ import '../theme/app_colors.dart';
 import '../routes/app_router.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/repository_provider.dart';
+import '../repositories/mock_record_repository.dart';
+import '../providers/home_provider.dart';
 
 /// 개발자 화면 - 모든 화면으로 이동할 수 있는 디버그 화면
 class DeveloperScreen extends ConsumerWidget {
@@ -228,6 +230,58 @@ class DeveloperScreen extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   activeColor: AppColors.primary,
                 ),
+                if (type == RepositoryType.mock) ...[
+                  Divider(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Mock Scenarios',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: MockScenario.values.map((scenario) {
+                            return ActionChip(
+                              label: Text(
+                                scenario.name.replaceAll('reportNeeded_', ''),
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              padding: EdgeInsets.zero,
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () {
+                                final repo = ref.read(recordRepositoryProvider);
+                                if (repo is MockRecordRepository) {
+                                  repo.setScenario(scenario);
+                                  ref.invalidate(homeCardStateProvider);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Scenario set to ${scenario.name}',
+                                      ),
+                                      duration: const Duration(
+                                        milliseconds: 500,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ],
             ),
             loading: () => const Center(child: CircularProgressIndicator()),

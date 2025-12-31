@@ -9,6 +9,7 @@ import '../../widgets/plan_rail.dart';
 import '../../models/home_state.dart';
 import '../../routes/app_router.dart';
 import '../../providers/home_provider.dart';
+import '../../utils/time_formatter.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 class NowTab extends ConsumerStatefulWidget {
@@ -21,11 +22,11 @@ class NowTab extends ConsumerStatefulWidget {
 class _NowTabState extends ConsumerState<NowTab>
     with SingleTickerProviderStateMixin {
   // 실천자 영역
-  HomeCardState? _primaryExecutorCard;
-  List<HomeCardState> _secondaryExecutorCards = [];
+  HomeCardModel? _primaryExecutorCard;
+  List<HomeCardModel> _secondaryExecutorCards = [];
 
   // 관리자 영역
-  HomeCardState? _managerQuickCard;
+  HomeCardModel? _managerQuickCard;
   String? _managerQuickCardPartnerName; // 관리 대상 이름
 
   late AnimationController _animationController;
@@ -69,34 +70,35 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   // 데이터 로드 및 상태 계산 로직 (Riverpod watch 결과를 기반으로 처리)
-  void _updateStateFromProvider(List<HomeCardState> possibleStates) {
+  // 데이터 로드 및 상태 계산 로직 (Riverpod watch 결과를 기반으로 처리)
+  void _updateStateFromProvider(List<HomeCardModel> possibleModels) {
     // 리스트 복사
-    final states = List<HomeCardState>.from(possibleStates);
+    final models = List<HomeCardModel>.from(possibleModels);
 
     // 실제 데이터가 없을 경우(신규 유저) planNeeded 상태 추가
-    if (states.isEmpty) {
-      states.add(HomeCardState.planNeeded);
+    if (models.isEmpty) {
+      models.add(const HomeCardModel(state: HomeCardState.planNeeded));
     }
 
     // Step 1: Primary Executor Card 선택
     final primaryExecutorCard = HomeCardStatePriority.selectPrimaryExecutorCard(
-      states,
+      models,
     );
 
     // Step 2: Secondary Executor Cards 선택 (최대 3개)
     final secondaryExecutorCards =
         HomeCardStatePriority.selectSecondaryExecutorCards(
-          states,
+          models,
           primaryExecutorCard,
         );
 
     // Step 3: Manager Quick Card 선택
     final managerQuickCard = HomeCardStatePriority.selectManagerQuickCard(
-      states,
+      models,
     );
 
-    // TODO: 실제 데이터에서 관리 대상 이름 가져오기
-    final managerPartnerName = managerQuickCard != null ? '민지' : null;
+    // TODO: 실제 데이터에서 관리 대상 이름 가져오기 (Model에 포함됨)
+    final managerPartnerName = managerQuickCard?.partnerName;
 
     if (mounted) {
       setState(() {
@@ -116,7 +118,9 @@ class _NowTabState extends ConsumerState<NowTab>
     // 상태 전이: reportNeeded → waitingForCheck
     setState(() {
       _primaryExecutorCard = null;
-      _secondaryExecutorCards = [HomeCardState.waitingForCheck];
+      _secondaryExecutorCards = [
+        const HomeCardModel(state: HomeCardState.waitingForCheck),
+      ];
     });
   }
 
@@ -131,7 +135,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// Plan Rail 상태 결정
   PlanRailState _getPlanRailState() {
-    if (_primaryExecutorCard == HomeCardState.planNeeded ||
+    if (_primaryExecutorCard?.state == HomeCardState.planNeeded ||
         _primaryExecutorCard == null) {
       return PlanRailState.noPlan;
     }
@@ -146,57 +150,79 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   /// Time Chip 텍스트 가져오기
-  String? _getTimeChipText(HomeCardState state) {
-    // TODO: 실제 데이터에서 시간 정보 가져오기
+  String? _getTimeChipText(HomeCardModel model) {
+    // 1. Plan 내 Items 중 오늘에 해당하는 첫 번째 아이템 시간(notificationTime) 찾기?
+    //    이미 RealRecordRepository에서 필터링해서 가져왔다고 가정.
+    //    HomeCardModel에 plan이 있고, 그 plan.items 중 오늘 해당되는 게 있다면?
+    if (model.plan != null && model.plan!.items.isNotEmpty) {
+      // Find the item for current weekday
+      // But RealRecordRepository filtered plan items.
+      // Assuming plan.items contains only relevant items or we iterate.
+      for (var item in model.plan!.items) {
+        if (item.notificationTime != null &&
+            item.notificationTime!.type != 'none') {
+          // Create DateTime for today with HH:mm
+          final now = DateTime.now();
+          final scheduledTime = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            item.notificationTime!.hour,
+            item.notificationTime!.minute,
+          );
+          return TimeFormatter.formatForTimeChip(scheduledTime);
+        }
+      }
+    }
     return null;
   }
 
   /// Time Chip 타입 가져오기
-  TimeChipType? _getTimeChipType(HomeCardState state) {
-    if (_getTimeChipText(state) == null) return null;
+  TimeChipType? _getTimeChipType(HomeCardModel model) {
+    final text = _getTimeChipText(model);
+    if (text == null) return null;
 
-    final text = _getTimeChipText(state)!;
-    if (text == '지금') {
+    if (text == '지금!') {
+      // TimeFormatter returns '지금!'
       return TimeChipType.now;
-    } else if (text == '곧') {
-      return TimeChipType.soon;
-    } else if (text.contains('전') || text == '어제' || text == '방금 전') {
-      return TimeChipType.past;
+    } else if (text == '방금 전') {
+      return TimeChipType.past; // or now? Spec says '1분 전' -> 지금. '5분' -> 방금 전.
+    } else if (text.contains('지남') || text == '어제' || text.endsWith('전')) {
+      // 'N시간 전' (미래) vs 'N시간 지남' (과거)
+      // TimeFormatter distinguishes: '지남' for past, '전' for future (oops in logic?)
+      // Wait, TimeFormatter: 'N분 지남' (Past), 'N분 전' (Future)
+      if (text.contains('지남') || text == '어제') return TimeChipType.past;
+      if (text.contains('전')) return TimeChipType.upcoming; // Future
+      return TimeChipType.upcoming;
     } else {
       return TimeChipType.upcoming;
     }
   }
 
   /// Manager Quick Card용 Time Chip 텍스트
-  String? _getManagerTimeChipText(HomeCardState state) {
-    return null;
+  String? _getManagerTimeChipText(HomeCardModel model) {
+    return _getTimeChipText(model); // Use standard time chip logic for now
   }
 
   /// Manager Quick Card용 Time Chip 타입
-  TimeChipType? _getManagerTimeChipType(HomeCardState state) {
-    if (_getManagerTimeChipText(state) == null) return null;
-    final text = _getManagerTimeChipText(state)!;
-    if (text == '지금') return TimeChipType.now;
-    if (text == '곧') return TimeChipType.soon;
-    if (text.contains('전') || text == '어제') return TimeChipType.past;
-    return TimeChipType.upcoming;
+  TimeChipType? _getManagerTimeChipType(HomeCardModel model) {
+    return _getTimeChipType(model);
   }
 
   /// Secondary Executor Card용 Time Chip 텍스트
-  String? _getSecondaryTimeChipText(HomeCardState state) {
-    return null;
+  String? _getSecondaryTimeChipText(HomeCardModel model) {
+    // Reuse primary logic
+    return _getTimeChipText(model);
   }
 
   /// Secondary Executor Card용 Time Chip 타입
-  TimeChipType? _getSecondaryTimeChipType(HomeCardState state) {
-    if (_getSecondaryTimeChipText(state) == null) return null;
-    final text = _getSecondaryTimeChipText(state)!;
-    if (text.contains('전') || text == '어제') return TimeChipType.past;
-    return TimeChipType.upcoming;
+  TimeChipType? _getSecondaryTimeChipType(HomeCardModel model) {
+    return _getTimeChipType(model);
   }
 
   /// 기록의 시선 텍스트 생성
-  String? _getRecordGazeText(HomeCardState state) {
+  String? _getRecordGazeText(HomeCardModel model) {
+    // TODO: 히스토리 기반 칭찬/독려 메시지
     return null;
   }
 
@@ -258,7 +284,7 @@ class _NowTabState extends ConsumerState<NowTab>
                           child: ScaleTransition(
                             scale: _primaryScaleAnimation,
                             child: _PrimaryExecutorCard(
-                              state: _primaryExecutorCard!,
+                              model: _primaryExecutorCard!,
                               onDidIt: _handleDidIt,
                               onCreatePlan: _handleCreatePlan,
                               timeChipText: _getTimeChipText(
@@ -290,7 +316,7 @@ class _NowTabState extends ConsumerState<NowTab>
                             child: FadeTransition(
                               opacity: _secondaryFadeAnimation,
                               child: _SecondaryExecutorCard(
-                                state: state,
+                                model: state,
                                 timeChipText: _getSecondaryTimeChipText(state),
                                 timeChipType: _getSecondaryTimeChipType(state),
                               ),
@@ -304,7 +330,7 @@ class _NowTabState extends ConsumerState<NowTab>
                         FadeTransition(
                           opacity: _managerFadeAnimation,
                           child: _ManagerQuickCard(
-                            state: _managerQuickCard!,
+                            model: _managerQuickCard!,
                             partnerName: _managerQuickCardPartnerName,
                             onCheckIt: _handleCheckIt,
                             timeChipText: _getManagerTimeChipText(
@@ -333,7 +359,7 @@ class _NowTabState extends ConsumerState<NowTab>
 }
 
 class _PrimaryExecutorCard extends StatelessWidget {
-  final HomeCardState state;
+  final HomeCardModel model;
   final VoidCallback? onDidIt;
   final VoidCallback? onCreatePlan;
   final String? timeChipText;
@@ -341,7 +367,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final String? recordGazeText;
 
   const _PrimaryExecutorCard({
-    required this.state,
+    required this.model,
     this.onDidIt,
     this.onCreatePlan,
     this.timeChipText,
@@ -391,15 +417,21 @@ class _PrimaryExecutorCard extends StatelessWidget {
 
   Widget _buildMessage(BuildContext context, AppLocalizations l10n) {
     String message;
-    switch (state) {
-      case HomeCardState.reportNeeded:
-        message = l10n.homeNowTask;
-        break;
-      case HomeCardState.planNeeded:
-        message = l10n.nowNoPlan;
-        break;
-      default:
-        message = '';
+    // model.plan 데이터가 있으면 사용
+    if (model.plan != null && model.plan!.items.isNotEmpty) {
+      message = model.plan!.items.first.title; // MVP: 첫 번째 아이템 타이틀
+      // TODO: 여러 줄 지원 or 상세
+    } else {
+      switch (model.state) {
+        case HomeCardState.reportNeeded:
+          message = l10n.homeNowTask;
+          break;
+        case HomeCardState.planNeeded:
+          message = l10n.nowNoPlan;
+          break;
+        default:
+          message = '';
+      }
     }
     return Text(
       message,
@@ -416,10 +448,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
     VoidCallback? onPressed;
     String buttonText;
 
-    if (state == HomeCardState.reportNeeded) {
+    if (model.state == HomeCardState.reportNeeded) {
       buttonText = l10n.homeDidIt;
       onPressed = onDidIt;
-    } else if (state == HomeCardState.planNeeded) {
+    } else if (model.state == HomeCardState.planNeeded) {
       buttonText = l10n.nowCreatePlan;
       onPressed = onCreatePlan;
     } else {
@@ -461,12 +493,12 @@ class _PrimaryExecutorCard extends StatelessWidget {
 }
 
 class _SecondaryExecutorCard extends StatelessWidget {
-  final HomeCardState state;
+  final HomeCardModel model;
   final String? timeChipText;
   final TimeChipType? timeChipType;
 
   const _SecondaryExecutorCard({
-    required this.state,
+    required this.model,
     this.timeChipText,
     this.timeChipType,
   });
@@ -500,7 +532,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
 
   Widget _buildMessage(BuildContext context, AppLocalizations l10n) {
     String message;
-    switch (state) {
+    switch (model.state) {
       case HomeCardState.waitingForCheck:
         message = '${l10n.homeSentWaiting}\n${l10n.homeWaitingForCheck}';
         break;
@@ -525,14 +557,14 @@ class _SecondaryExecutorCard extends StatelessWidget {
 }
 
 class _ManagerQuickCard extends StatelessWidget {
-  final HomeCardState state;
+  final HomeCardModel model;
   final String? partnerName;
   final VoidCallback? onCheckIt;
   final String? timeChipText;
   final TimeChipType? timeChipType;
 
   const _ManagerQuickCard({
-    required this.state,
+    required this.model,
     this.partnerName,
     this.onCheckIt,
     this.timeChipText,

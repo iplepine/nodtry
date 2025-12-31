@@ -14,14 +14,14 @@ class AppTheme {
   static ThemeData _buildTheme(AppThemeType themeType) {
     // 테마 타입에 따라 직접 색상 가져오기
     final colors = _getColorsForTheme(themeType);
-    
+
     // Material Design 3 ColorScheme 생성
     // seed color를 기반으로 전체 색상 팔레트 자동 생성
     final baseColorScheme = ColorScheme.fromSeed(
       seedColor: colors.primary,
       brightness: Brightness.light,
     );
-    
+
     // 디자인 스펙에 맞게 커스텀 색상으로 오버라이드
     // Material Design 3: background는 deprecated, surface 사용
     final colorScheme = baseColorScheme.copyWith(
@@ -36,7 +36,7 @@ class AppTheme {
       error: baseColorScheme.error, // Material 3 기본 에러 색상 사용
       onError: baseColorScheme.onError,
     );
-    
+
     final themeData = ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
@@ -87,25 +87,17 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12), // Soft radius (8~12dp)
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ),
       cardTheme: CardThemeData(
         color: colors.surface, // Soft Stone
         elevation: 0, // 그림자 ❌
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
-      dividerTheme: DividerThemeData(
-        color: colors.divider,
-        thickness: 1,
-      ),
+      dividerTheme: DividerThemeData(color: colors.divider, thickness: 1),
     );
-    
+
     return themeData;
   }
 
@@ -150,7 +142,7 @@ class AppTheme {
       seedColor: AppColors.primary,
       brightness: Brightness.dark,
     );
-    
+
     final darkColorScheme = baseDarkColorScheme.copyWith(
       primary: AppColors.primary,
       secondary: AppColors.secondary,
@@ -161,7 +153,7 @@ class AppTheme {
       error: baseDarkColorScheme.error,
       onError: baseDarkColorScheme.onError,
     );
-    
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: darkColorScheme,
