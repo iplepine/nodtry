@@ -28,81 +28,113 @@ class RealUserRepository implements UserRepository {
       }
     }
 
-    // 3. (Optional) Check existing document and update if needed
-    // For now, we just overwrite/merge init data if needed or create if not exists
-    // But inviteCode should NOT change if exists.
-
     final userRef = _firestore.collection('users').doc(user.uid);
-    final userDoc = await userRef.get();
+    // Force fetch from server to check existence accurately
+    // If offline, this might fail, but for account creation/init, we usually need online.
+    // Or we use try-catch on 'get' to fallback?
+    // Let's stick to default get() for offline support, but handle Update failure.
+    DocumentSnapshot<Map<String, dynamic>> userDoc;
+    try {
+      userDoc = await userRef.get();
+    } catch (e) {
+      // If get fails (e.g. permission), try proceeding as if new?
+      // No, rethrow.
+      debugPrint('[RealUserRepository] Failed to get user doc: $e');
+      rethrow;
+    }
 
     try {
       if (!userDoc.exists) {
-        // Create New
-        final inviteCode = _generateInviteCode();
-        final newUser = UserModel(
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName ?? '나', // Default name
-          profileImageUrl: user.photoURL,
-          loginType: loginType,
-          inviteCode: inviteCode,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-        await userRef.set(newUser.toFirestore());
+        await _createNewUser(userRef, user, loginType);
       } else {
-        // Update Existing (Sync LoginType if changed, e.g. Guest -> Google Link)
-        // Only update fields that might have changed on login
-        // e.g. loginType
-        final existingData = userDoc.data();
-        final currentLoginTypeName = existingData?['loginType'];
-
-        if (currentLoginTypeName != loginType.name) {
-          await userRef.update({
-            'loginType': loginType.name,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-        }
-
-        // 기존 유저: 데이터 동기화 (Auth vs Firestore)
-        final data = userDoc
-            .data(); // Use userDoc.data() instead of snapshot.data()
-        if (data != null) {
-          final updates = <String, dynamic>{};
-
-          // 1. 익명 여부 동기화 (계정 연동 시 변경됨)
-          if (data['isAnonymous'] != user.isAnonymous) {
-            updates['isAnonymous'] = user.isAnonymous;
-          }
-
-          // 2. 이메일 동기화 (계정 연동 시 추가됨)
-          if (data['email'] != user.email && user.email != null) {
-            updates['email'] = user.email;
-          }
-
-          // 3. 프로필 이미지 동기화 (없을 때만 Auth 프로필 사용)
-          //    사용자가 이미 이미지를 설정했으면 덮어쓰지 않음
-          if ((data['profileImageUrl'] == null ||
-                  data['profileImageUrl'].isEmpty) &&
-              user.photoURL != null) {
-            updates['profileImageUrl'] = user.photoURL;
-          }
-
-          // 4. InviteCode 백필
-          if (data['inviteCode'] == null) {
-            updates['inviteCode'] = _generateInviteCode();
-          }
-
-          // 업데이트할 항목이 있으면 실행
-          if (updates.isNotEmpty) {
-            debugPrint('User 데이터 동기화 수행: $updates');
-            await userRef.update(updates);
+        // Update Existing
+        try {
+          await _updateExistingUser(userRef, userDoc, user, loginType);
+        } catch (e) {
+          // If update fails because doc is missing (race condition or cache mismatch), try creating
+          if (e is FirebaseException && e.code == 'not-found') {
+            debugPrint(
+              '[RealUserRepository] User found in cache but missing on server. Re-creating.',
+            );
+            await _createNewUser(userRef, user, loginType);
+          } else {
+            rethrow;
           }
         }
       }
     } catch (e) {
-      // TODO: 에러 처리
       debugPrint('initializeUser Error: $e');
+      rethrow; // Vital to rethrow so caller knows init failed
+    }
+  }
+
+  Future<void> _createNewUser(
+    DocumentReference userRef,
+    User user,
+    LoginType loginType,
+  ) async {
+    final inviteCode = _generateInviteCode();
+    final newUser = UserModel(
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName ?? '나', // Default name
+      profileImageUrl: user.photoURL,
+      loginType: loginType,
+      inviteCode: inviteCode,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    await userRef.set(newUser.toFirestore());
+  }
+
+  Future<void> _updateExistingUser(
+    DocumentReference userRef,
+    DocumentSnapshot<Map<String, dynamic>> userDoc,
+    User user,
+    LoginType loginType,
+  ) async {
+    final existingData = userDoc.data();
+    final currentLoginTypeName = existingData?['loginType'];
+
+    if (currentLoginTypeName != loginType.name) {
+      await userRef.update({
+        'loginType': loginType.name,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    }
+
+    // 기존 유저: 데이터 동기화 (Auth vs Firestore)
+    final data = userDoc.data();
+    if (data != null) {
+      final updates = <String, dynamic>{};
+
+      // 1. 익명 여부 동기화
+      if (data['isAnonymous'] != user.isAnonymous) {
+        updates['isAnonymous'] = user.isAnonymous;
+      }
+
+      // 2. 이메일 동기화
+      if (data['email'] != user.email && user.email != null) {
+        updates['email'] = user.email;
+      }
+
+      // 3. 프로필 이미지 동기화
+      if ((data['profileImageUrl'] == null ||
+              data['profileImageUrl'].isEmpty) &&
+          user.photoURL != null) {
+        updates['profileImageUrl'] = user.photoURL;
+      }
+
+      // 4. InviteCode 백필
+      if (data['inviteCode'] == null) {
+        updates['inviteCode'] = _generateInviteCode();
+      }
+
+      // 업데이트할 항목이 있으면 실행
+      if (updates.isNotEmpty) {
+        debugPrint('User 데이터 동기화 수행: $updates');
+        await userRef.update(updates);
+      }
     }
   }
 
