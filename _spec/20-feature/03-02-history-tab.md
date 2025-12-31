@@ -73,10 +73,10 @@
 
 ### 3.2 Empty State (기록 없음)
 기록이 없는 경우, **상태 안내 + 행동 유도** 메시지를 표시한다.
-- **문구 예시 (토글별):**
-    - **모두:** "아직 두 분의 기록이 없어요. 첫 약속을 만들어보세요!"
-    - **내 실천:** "아직 내가 완료한 약속이 없어요."
-    - **파트너의 실천:** "파트너가 아직 기록을 남기지 않았어요."
+- **문구 예시 (토글별 - L10n 적용):**
+    - **모두:** `historyEmptyMeTitle` ("아직 두 분의 기록이 없어요") / `historyEmptyMeSubtitle` ("첫 약속을 만들어보세요!")
+    - **내 실천:** `historyEmptyMeTitle` / `historyEmptyMeSubtitle`
+    - **파트너의 실천:** `historyEmptyPartnerTitle` / `historyEmptyPartnerSubtitle`
 
 ---
 
