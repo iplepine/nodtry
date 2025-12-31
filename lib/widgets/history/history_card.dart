@@ -94,7 +94,7 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
         Align(
           alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
           child: FractionallySizedBox(
-            widthFactor: 0.92, // 카드(85%)보다 살짝 넓게 잡아 경계를 넘나들게 함
+            widthFactor: 0.88, // 카드(85%)에 더 가깝게 밀착 (이전 0.92)
             child: Align(
               alignment: isMine ? Alignment.centerLeft : Alignment.centerRight,
               child: isMine
