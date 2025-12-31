@@ -23,13 +23,14 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
   Widget build(BuildContext context) {
     final isMine = widget.item.isMine('me'); // TODO: Pass real UID
 
-    return Align(
-      alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
-      child: FractionallySizedBox(
-        widthFactor: 0.85,
-        child: Column(
-          children: [
-            GestureDetector(
+    return Column(
+      children: [
+        // 카드 본체 (85% 너비 및 역할별 정렬)
+        Align(
+          alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+          child: FractionallySizedBox(
+            widthFactor: 0.85,
+            child: GestureDetector(
               onTap: (!isMine && !widget.item.isVerifiedByMe)
                   ? () => setState(() => _isMenuOpen = !_isMenuOpen)
                   : null,
@@ -86,18 +87,18 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
                 ),
               ),
             ),
-            const SizedBox(height: 12), // 의도적인 여백 (카드와 반응 분리)
-            // 외부 반응 영역 (역할 기준 고정 정렬 & 안쪽 모서리 앵커링)
-            Align(
-              alignment: isMine ? Alignment.centerLeft : Alignment.centerRight,
-              child: isMine
-                  ? _buildMyActionVerification(context) // 파트너의 반응은 왼쪽 끝
-                  : _buildPartnerActionVerification(context), // 나의 반응은 오른쪽 끝
-            ),
-            const SizedBox(height: 24), // 카드 간 간격
-          ],
+          ),
         ),
-      ),
+        const SizedBox(height: 12), // 의도적인 여백 (카드와 반응 분리)
+        // 외부 반응 영역 (역할 기준 화면 양 끝 밀착 정렬)
+        Align(
+          alignment: isMine ? Alignment.centerLeft : Alignment.centerRight,
+          child: isMine
+              ? _buildMyActionVerification(context) // 파트너의 반응은 왼쪽 끝
+              : _buildPartnerActionVerification(context), // 나의 반응은 오른쪽 끝
+        ),
+        const SizedBox(height: 24), // 카드 간 간격
+      ],
     );
   }
 
