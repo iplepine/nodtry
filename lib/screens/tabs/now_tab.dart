@@ -172,11 +172,15 @@ class _NowTabState extends ConsumerState<NowTab>
           );
 
           // Vague Time 적용
-          final vagueTime = TimeFormatter.formatForVagueTime(scheduledTime);
+          final l10n = AppLocalizations.of(context)!;
+          final vagueTime = TimeFormatter.formatForVagueTime(
+            l10n,
+            scheduledTime,
+          );
 
           if (model.state == HomeCardState.reportNeeded) {
             // "점심쯤 · 아직 할 수 있어요"
-            return '$vagueTime · ${AppLocalizations.of(context)!.timeChipStillActionable}';
+            return '$vagueTime · ${l10n.timeChipStillActionable}';
           }
           return vagueTime; // "점심쯤"
         }
@@ -194,10 +198,12 @@ class _NowTabState extends ConsumerState<NowTab>
     final text = _getTimeChipText(model);
     if (text == null) return null;
 
-    if (text == '지금!') {
-      // TimeFormatter returns '지금!'
+    final l10n = AppLocalizations.of(context)!;
+    if (text == l10n.timeChipNow) {
+      // TimeFormatter returns localised 'Now!'
       return TimeChipType.now;
-    } else if (text == '방금 전') {
+    } else if (text == l10n.timeChipJustNow) {
+      // TimeFormatter returns localised 'Just now'
       return TimeChipType.past; // or now? Spec says '1분 전' -> 지금. '5분' -> 방금 전.
     } else if (text.contains('지남') || text == '어제' || text.endsWith('전')) {
       // 'N시간 전' (미래) vs 'N시간 지남' (과거)

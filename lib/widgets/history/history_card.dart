@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/history_provider.dart';
 import '../../providers/repository_provider.dart';
+import '../../utils/time_formatter.dart';
 
 /// 기록 카드 (Spec 3.1)
 class HistoryCard extends ConsumerStatefulWidget {
@@ -335,9 +336,9 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
   }
 
   String _formatDate(BuildContext context, DateTime date) {
-    // MVP: Simple format MM.DD (Weekday)
-    // In real app, use intl package
-    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-    return '${date.month}.${date.day} (${weekdays[date.weekday - 1]})';
+    final l10n = AppLocalizations.of(context)!;
+    final weekday = TimeFormatter.getWeekdayName(l10n, date.weekday);
+    final dateStr = l10n.timeChipDate(date.month, date.day);
+    return '$dateStr ($weekday)';
   }
 }

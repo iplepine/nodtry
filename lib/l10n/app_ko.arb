@@ -266,6 +266,94 @@
   "nowStatusActuallyDone": "사실 했어요",
   "nowLateCompletion": "뒤늦게라도 완료!",
   "nowLateJustInTime": "조금 늦게 했어요",
-  "nowWithinToday": "오늘 안에 했어요"
+  "nowWithinToday": "오늘 안에 했어요",
+
+  "timeChipNow": "지금!",
+  "timeChipJustNow": "방금 전",
+  "timeChipMinutesAgo": "{minutes}분 지남",
+  "@timeChipMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipHoursAgo": "{hours}시간 지남",
+  "@timeChipHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipMinutesLeft": "{minutes}분 전",
+  "@timeChipMinutesLeft": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipHoursLeft": "{hours}시간 전",
+  "@timeChipHoursLeft": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipYesterday": "어제",
+  "timeChipDaysAgo": "{days}일 지남",
+  "@timeChipDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipTomorrow": "내일",
+  "timeChipDayAfterTomorrow": "모레",
+  "timeChipDaysLeft": "{days}일 뒤",
+  "@timeChipDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipNextWeek": "다음주 {weekday}",
+  "@timeChipNextWeek": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "timeChipDate": "{month}월 {day}일",
+  "@timeChipDate": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+
+  "vagueTimeMorning": "아침에",
+  "vagueTimeLunch": "점심쯤",
+  "vagueTimeAfternoon": "오후에",
+  "vagueTimeEvening": "저녁에",
+  "vagueTimeNight": "밤에",
+  "vagueTimeLateNight": "새벽에",
+
+  "weekdayMon": "월",
+  "weekdayTue": "화",
+  "weekdayWed": "수",
+  "weekdayThu": "목",
+  "weekdayFri": "금",
+  "weekdaySat": "토",
+  "weekdaySun": "일"
 }
 

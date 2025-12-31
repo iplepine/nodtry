@@ -1,14 +1,9 @@
+import '../l10n/app_localizations.dart';
+
 class TimeFormatter {
   /// Time Chip용 시간 포맷팅
-  ///
-  /// - 오늘 내:
-  ///   - 1분 이내: "지금!"
-  ///   - 5분 이내: "방금 전"
-  ///   - 지나간 시간: "N분 지남" or "N시간 지남"
-  ///   - 다가올 시간: "N분 전" or "N시간 전"
-  /// - 일주일 내: "내일", "모레", "3일 뒤"...
-  /// - 일주일 후: "다음주 X요일", "M월 D일"
   static String formatForTimeChip(
+    AppLocalizations l10n,
     DateTime scheduledTime, {
     DateTime? baseTime,
   }) {
@@ -20,16 +15,20 @@ class TimeFormatter {
     // 1. 오늘 내 (같은 날짜)
     if (_isSameDay(now, scheduledTime)) {
       if (absDiff.inMinutes < 1) {
-        return '지금!';
+        return l10n.timeChipNow;
       }
       if (isPast) {
-        if (absDiff.inMinutes < 5) return '방금 전';
-        if (absDiff.inMinutes < 60) return '${absDiff.inMinutes}분 지남';
-        return '${absDiff.inHours}시간 지남';
+        if (absDiff.inMinutes < 5) return l10n.timeChipJustNow;
+        if (absDiff.inMinutes < 60) {
+          return l10n.timeChipMinutesAgo(absDiff.inMinutes);
+        }
+        return l10n.timeChipHoursAgo(absDiff.inHours);
       } else {
         // 미래
-        if (absDiff.inMinutes < 60) return '${absDiff.inMinutes}분 전';
-        return '${absDiff.inHours}시간 전';
+        if (absDiff.inMinutes < 60) {
+          return l10n.timeChipMinutesLeft(absDiff.inMinutes);
+        }
+        return l10n.timeChipHoursLeft(absDiff.inHours);
       }
     }
 
@@ -44,8 +43,8 @@ class TimeFormatter {
             ),
           )
           .inDays;
-      if (days == 1) return '어제';
-      return '${days}일 지남';
+      if (days == 1) return l10n.timeChipYesterday;
+      return l10n.timeChipDaysAgo(days);
     }
 
     // 3. 미래 날짜
@@ -55,35 +54,38 @@ class TimeFormatter {
       scheduledTime.day,
     ).difference(DateTime(now.year, now.month, now.day)).inDays;
 
-    if (days == 1) return '내일';
-    if (days == 2) return '모레';
-    if (days <= 7) return '$days일 뒤';
+    if (days == 1) return l10n.timeChipTomorrow;
+    if (days == 2) return l10n.timeChipDayAfterTomorrow;
+    if (days <= 7) return l10n.timeChipDaysLeft(days);
 
     // 4. 일주일 이상
     if (days <= 14) {
-      return '다음주 ${_getWeekdayName(scheduledTime.weekday)}';
+      return l10n.timeChipNextWeek(getWeekdayName(l10n, scheduledTime.weekday));
     }
 
     // 5. 그 외 (절대 날짜)
-    return '${scheduledTime.month}월 ${scheduledTime.day}일';
+    return l10n.timeChipDate(scheduledTime.month, scheduledTime.day);
   }
 
   /// Vague Time 포맷팅 (아침에, 점심쯤, 저녁에 등)
-  static String formatForVagueTime(DateTime scheduledTime) {
+  static String formatForVagueTime(
+    AppLocalizations l10n,
+    DateTime scheduledTime,
+  ) {
     final hour = scheduledTime.hour;
 
     if (hour >= 5 && hour < 11) {
-      return '아침에';
+      return l10n.vagueTimeMorning;
     } else if (hour >= 11 && hour < 14) {
-      return '점심쯤';
+      return l10n.vagueTimeLunch;
     } else if (hour >= 14 && hour < 17) {
-      return '오후에';
+      return l10n.vagueTimeAfternoon;
     } else if (hour >= 17 && hour < 21) {
-      return '저녁에';
+      return l10n.vagueTimeEvening;
     } else if (hour >= 21 && hour < 24) {
-      return '밤에';
+      return l10n.vagueTimeNight;
     } else {
-      return '새벽에'; // 00 ~ 05
+      return l10n.vagueTimeLateNight; // 00 ~ 05
     }
   }
 
@@ -100,8 +102,24 @@ class TimeFormatter {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  static String _getWeekdayName(int weekday) {
-    const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-    return weekdays[weekday - 1];
+  static String getWeekdayName(AppLocalizations l10n, int weekday) {
+    switch (weekday) {
+      case 1:
+        return l10n.weekdayMon;
+      case 2:
+        return l10n.weekdayTue;
+      case 3:
+        return l10n.weekdayWed;
+      case 4:
+        return l10n.weekdayThu;
+      case 5:
+        return l10n.weekdayFri;
+      case 6:
+        return l10n.weekdaySat;
+      case 7:
+        return l10n.weekdaySun;
+      default:
+        return '';
+    }
   }
 }

@@ -641,4 +641,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nowWithinToday => 'Done within today';
+
+  @override
+  String get timeChipNow => 'Now!';
+
+  @override
+  String get timeChipJustNow => 'Just now';
+
+  @override
+  String timeChipMinutesAgo(int minutes) {
+    return '${minutes}m ago';
+  }
+
+  @override
+  String timeChipHoursAgo(int hours) {
+    return '${hours}h ago';
+  }
+
+  @override
+  String timeChipMinutesLeft(int minutes) {
+    return '${minutes}m left';
+  }
+
+  @override
+  String timeChipHoursLeft(int hours) {
+    return '${hours}h left';
+  }
+
+  @override
+  String get timeChipYesterday => 'Yesterday';
+
+  @override
+  String timeChipDaysAgo(int days) {
+    return '${days}d ago';
+  }
+
+  @override
+  String get timeChipTomorrow => 'Tomorrow';
+
+  @override
+  String get timeChipDayAfterTomorrow => 'Day after tomorrow';
+
+  @override
+  String timeChipDaysLeft(int days) {
+    return '${days}d left';
+  }
+
+  @override
+  String timeChipNextWeek(String weekday) {
+    return 'Next $weekday';
+  }
+
+  @override
+  String timeChipDate(int month, int day) {
+    return '$month/$day';
+  }
+
+  @override
+  String get vagueTimeMorning => 'In the morning';
+
+  @override
+  String get vagueTimeLunch => 'Around lunch';
+
+  @override
+  String get vagueTimeAfternoon => 'In the afternoon';
+
+  @override
+  String get vagueTimeEvening => 'In the evening';
+
+  @override
+  String get vagueTimeNight => 'At night';
+
+  @override
+  String get vagueTimeLateNight => 'Late night';
+
+  @override
+  String get weekdayMon => 'Mon';
+
+  @override
+  String get weekdayTue => 'Tue';
+
+  @override
+  String get weekdayWed => 'Wed';
+
+  @override
+  String get weekdayThu => 'Thu';
+
+  @override
+  String get weekdayFri => 'Fri';
+
+  @override
+  String get weekdaySat => 'Sat';
+
+  @override
+  String get weekdaySun => 'Sun';
 }

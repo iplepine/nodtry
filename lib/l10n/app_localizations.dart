@@ -1297,6 +1297,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done within today'**
   String get nowWithinToday;
+
+  /// No description provided for @timeChipNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now!'**
+  String get timeChipNow;
+
+  /// No description provided for @timeChipJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get timeChipJustNow;
+
+  /// No description provided for @timeChipMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m ago'**
+  String timeChipMinutesAgo(int minutes);
+
+  /// No description provided for @timeChipHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h ago'**
+  String timeChipHoursAgo(int hours);
+
+  /// No description provided for @timeChipMinutesLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m left'**
+  String timeChipMinutesLeft(int minutes);
+
+  /// No description provided for @timeChipHoursLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h left'**
+  String timeChipHoursLeft(int hours);
+
+  /// No description provided for @timeChipYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get timeChipYesterday;
+
+  /// No description provided for @timeChipDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d ago'**
+  String timeChipDaysAgo(int days);
+
+  /// No description provided for @timeChipTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get timeChipTomorrow;
+
+  /// No description provided for @timeChipDayAfterTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Day after tomorrow'**
+  String get timeChipDayAfterTomorrow;
+
+  /// No description provided for @timeChipDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d left'**
+  String timeChipDaysLeft(int days);
+
+  /// No description provided for @timeChipNextWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Next {weekday}'**
+  String timeChipNextWeek(String weekday);
+
+  /// No description provided for @timeChipDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}/{day}'**
+  String timeChipDate(int month, int day);
+
+  /// No description provided for @vagueTimeMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'In the morning'**
+  String get vagueTimeMorning;
+
+  /// No description provided for @vagueTimeLunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Around lunch'**
+  String get vagueTimeLunch;
+
+  /// No description provided for @vagueTimeAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'In the afternoon'**
+  String get vagueTimeAfternoon;
+
+  /// No description provided for @vagueTimeEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'In the evening'**
+  String get vagueTimeEvening;
+
+  /// No description provided for @vagueTimeNight.
+  ///
+  /// In en, this message translates to:
+  /// **'At night'**
+  String get vagueTimeNight;
+
+  /// No description provided for @vagueTimeLateNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Late night'**
+  String get vagueTimeLateNight;
+
+  /// No description provided for @weekdayMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get weekdayMon;
+
+  /// No description provided for @weekdayTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get weekdayTue;
+
+  /// No description provided for @weekdayWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get weekdayWed;
+
+  /// No description provided for @weekdayThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get weekdayThu;
+
+  /// No description provided for @weekdayFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get weekdayFri;
+
+  /// No description provided for @weekdaySat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get weekdaySat;
+
+  /// No description provided for @weekdaySun.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get weekdaySun;
 }
 
 class _AppLocalizationsDelegate

@@ -790,6 +790,94 @@
   "nowStatusActuallyDone": "Actually did it",
   "nowLateCompletion": "Completed even if late!",
   "nowLateJustInTime": "Did it a bit late",
-  "nowWithinToday": "Done within today"
+  "nowWithinToday": "Done within today",
+
+  "timeChipNow": "Now!",
+  "timeChipJustNow": "Just now",
+  "timeChipMinutesAgo": "{minutes}m ago",
+  "@timeChipMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipHoursAgo": "{hours}h ago",
+  "@timeChipHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipMinutesLeft": "{minutes}m left",
+  "@timeChipMinutesLeft": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipHoursLeft": "{hours}h left",
+  "@timeChipHoursLeft": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipYesterday": "Yesterday",
+  "timeChipDaysAgo": "{days}d ago",
+  "@timeChipDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipTomorrow": "Tomorrow",
+  "timeChipDayAfterTomorrow": "Day after tomorrow",
+  "timeChipDaysLeft": "{days}d left",
+  "@timeChipDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "timeChipNextWeek": "Next {weekday}",
+  "@timeChipNextWeek": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "timeChipDate": "{month}/{day}",
+  "@timeChipDate": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+
+  "vagueTimeMorning": "In the morning",
+  "vagueTimeLunch": "Around lunch",
+  "vagueTimeAfternoon": "In the afternoon",
+  "vagueTimeEvening": "In the evening",
+  "vagueTimeNight": "At night",
+  "vagueTimeLateNight": "Late night",
+
+  "weekdayMon": "Mon",
+  "weekdayTue": "Tue",
+  "weekdayWed": "Wed",
+  "weekdayThu": "Thu",
+  "weekdayFri": "Fri",
+  "weekdaySat": "Sat",
+  "weekdaySun": "Sun"
 }
 

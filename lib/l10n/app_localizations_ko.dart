@@ -628,4 +628,98 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nowWithinToday => '오늘 안에 했어요';
+
+  @override
+  String get timeChipNow => '지금!';
+
+  @override
+  String get timeChipJustNow => '방금 전';
+
+  @override
+  String timeChipMinutesAgo(int minutes) {
+    return '$minutes분 지남';
+  }
+
+  @override
+  String timeChipHoursAgo(int hours) {
+    return '$hours시간 지남';
+  }
+
+  @override
+  String timeChipMinutesLeft(int minutes) {
+    return '$minutes분 전';
+  }
+
+  @override
+  String timeChipHoursLeft(int hours) {
+    return '$hours시간 전';
+  }
+
+  @override
+  String get timeChipYesterday => '어제';
+
+  @override
+  String timeChipDaysAgo(int days) {
+    return '$days일 지남';
+  }
+
+  @override
+  String get timeChipTomorrow => '내일';
+
+  @override
+  String get timeChipDayAfterTomorrow => '모레';
+
+  @override
+  String timeChipDaysLeft(int days) {
+    return '$days일 뒤';
+  }
+
+  @override
+  String timeChipNextWeek(String weekday) {
+    return '다음주 $weekday';
+  }
+
+  @override
+  String timeChipDate(int month, int day) {
+    return '$month월 $day일';
+  }
+
+  @override
+  String get vagueTimeMorning => '아침에';
+
+  @override
+  String get vagueTimeLunch => '점심쯤';
+
+  @override
+  String get vagueTimeAfternoon => '오후에';
+
+  @override
+  String get vagueTimeEvening => '저녁에';
+
+  @override
+  String get vagueTimeNight => '밤에';
+
+  @override
+  String get vagueTimeLateNight => '새벽에';
+
+  @override
+  String get weekdayMon => '월';
+
+  @override
+  String get weekdayTue => '화';
+
+  @override
+  String get weekdayWed => '수';
+
+  @override
+  String get weekdayThu => '목';
+
+  @override
+  String get weekdayFri => '금';
+
+  @override
+  String get weekdaySat => '토';
+
+  @override
+  String get weekdaySun => '일';
 }
