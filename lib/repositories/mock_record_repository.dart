@@ -28,6 +28,26 @@ class MockRecordRepository implements RecordRepository {
         createdAt: DateTime.now(),
       ),
     ),
+    HomeCardModel(
+      state: HomeCardState.reportNeeded,
+      plan: Plan(
+        userId: 'me',
+        startDate: DateTime.now().subtract(const Duration(days: 2)),
+        endDate: DateTime.now().add(const Duration(days: 5)),
+        state: PlanState.active,
+        items: [
+          PlanItem(
+            title: '점심 후 10분 명상',
+            days: [1, 2, 3, 4, 5, 6, 7],
+            count: 7,
+            notificationTime: NotificationTime.custom(13, 0),
+          ),
+        ],
+        createdAt: DateTime.now(),
+      ),
+    ),
+    const HomeCardModel(state: HomeCardState.waitingForCheck),
+    const HomeCardModel(state: HomeCardState.checked),
     const HomeCardModel(state: HomeCardState.planNeeded),
   ];
 
