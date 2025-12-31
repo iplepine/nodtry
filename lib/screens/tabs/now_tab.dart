@@ -21,14 +21,6 @@ class NowTab extends ConsumerStatefulWidget {
 
 class _NowTabState extends ConsumerState<NowTab>
     with SingleTickerProviderStateMixin {
-  // 실천자 영역
-  HomeCardModel? _primaryExecutorCard;
-  List<HomeCardModel> _secondaryExecutorCards = [];
-
-  // 관리자 영역
-  HomeCardModel? _managerQuickCard;
-  String? _managerQuickCardPartnerName; // 관리 대상 이름
-
   late AnimationController _animationController;
   late Animation<double> _primaryFadeAnimation;
   late Animation<double> _primaryScaleAnimation;
@@ -71,57 +63,16 @@ class _NowTabState extends ConsumerState<NowTab>
 
   // 데이터 로드 및 상태 계산 로직 (Riverpod watch 결과를 기반으로 처리)
   // 데이터 로드 및 상태 계산 로직 (Riverpod watch 결과를 기반으로 처리)
-  void _updateStateFromProvider(List<HomeCardModel> possibleModels) {
-    // 리스트 복사
-    final models = List<HomeCardModel>.from(possibleModels);
-
-    // 실제 데이터가 없을 경우(신규 유저) planNeeded 상태 추가
-    if (models.isEmpty) {
-      models.add(const HomeCardModel(state: HomeCardState.planNeeded));
-    }
-
-    // Step 1: Primary Executor Card 선택
-    final primaryExecutorCard = HomeCardStatePriority.selectPrimaryExecutorCard(
-      models,
-    );
-
-    // Step 2: Secondary Executor Cards 선택 (최대 3개)
-    final secondaryExecutorCards =
-        HomeCardStatePriority.selectSecondaryExecutorCards(
-          models,
-          primaryExecutorCard,
-        );
-
-    // Step 3: Manager Quick Card 선택
-    final managerQuickCard = HomeCardStatePriority.selectManagerQuickCard(
-      models,
-    );
-
-    // TODO: 실제 데이터에서 관리 대상 이름 가져오기 (Model에 포함됨)
-    final managerPartnerName = managerQuickCard?.partnerName;
-
+  // 데이터 변경 감지 시 애니메이션 처리
+  void _onDataLoaded() {
     if (mounted) {
-      setState(() {
-        _primaryExecutorCard = primaryExecutorCard;
-        _secondaryExecutorCards = secondaryExecutorCards;
-        _managerQuickCard = managerQuickCard;
-        _managerQuickCardPartnerName = managerPartnerName;
-      });
-
-      // 애니메이션 시작 (처음부터 다시 재생)
       _animationController.forward(from: 0.0);
     }
   }
 
   void _handleDidIt() {
-    // TODO: 수행 보고 생성 로직
-    // 상태 전이: reportNeeded → waitingForCheck
-    setState(() {
-      _primaryExecutorCard = null;
-      _secondaryExecutorCards = [
-        const HomeCardModel(state: HomeCardState.waitingForCheck),
-      ];
-    });
+    // TODO: 수행 보고 생성 로직 (리포지토리 호출)
+    // 리포지토리 호출 후 ref.invalidate(homeCardStateProvider)를 호출하여 UI를 갱신해야 함
   }
 
   void _handleCheckIt() {
@@ -134,12 +85,10 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   /// Plan Rail 상태 결정
-  PlanRailState _getPlanRailState() {
-    if (_primaryExecutorCard?.state == HomeCardState.planNeeded ||
-        _primaryExecutorCard == null) {
+  PlanRailState _getPlanRailState(HomeCardModel? primaryCard) {
+    if (primaryCard?.state == HomeCardState.planNeeded || primaryCard == null) {
       return PlanRailState.noPlan;
     }
-    // TODO: pendingApproval 상태 확인
     return PlanRailState.activePlan;
   }
 
@@ -236,28 +185,36 @@ class _NowTabState extends ConsumerState<NowTab>
     // Provider 구독
     final homeStateAsync = ref.watch(homeCardStateProvider);
 
-    // 데이터 변경 감지하여 UI 업데이트
+    // 데이터 변경 감지하여 애니메이션만 트리거
     ref.listen(homeCardStateProvider, (previous, next) {
-      next.whenData((states) {
-        _updateStateFromProvider(states);
-      });
+      if (next.hasValue) {
+        _onDataLoaded();
+      }
     });
 
     return homeStateAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),
-      data: (states) {
-        // 데이터가 로드되었을 때, 로컬 상태가 아직 초기화 안되었다면 업데이트
-        if (_primaryExecutorCard == null) {
-          // build 중 setState 방지를 위해 post frame callback 사용
-          // 단, 무한 루프 방지 필요 (상태가 이미 설정되었는지 확인)
-          // 여기서는 _primaryExecutorCard가 null일 때만 호출하므로 어느정도 안전
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _updateStateFromProvider(states);
-          });
+      data: (rawModels) {
+        final models = List<HomeCardModel>.from(rawModels);
+        if (models.isEmpty) {
+          models.add(const HomeCardModel(state: HomeCardState.planNeeded));
         }
 
-        final planRailState = _getPlanRailState();
+        // 상태 계산 (매 빌드마다 수행하거나, 필요 시 Provider에서 미리 계산하는 것이 좋음)
+        final primaryExecutorCard =
+            HomeCardStatePriority.selectPrimaryExecutorCard(models);
+        final secondaryExecutorCards =
+            HomeCardStatePriority.selectSecondaryExecutorCards(
+              models,
+              primaryExecutorCard,
+            );
+        final managerQuickCard = HomeCardStatePriority.selectManagerQuickCard(
+          models,
+        );
+        final managerPartnerName = managerQuickCard?.partnerName;
+
+        final planRailState = _getPlanRailState(primaryExecutorCard);
         final planSummary = _getPlanSummary();
 
         return Column(
@@ -283,23 +240,23 @@ class _NowTabState extends ConsumerState<NowTab>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Executor Area
-                      if (_primaryExecutorCard != null) ...[
+                      if (primaryExecutorCard != null) ...[
                         FadeTransition(
                           opacity: _primaryFadeAnimation,
                           child: ScaleTransition(
                             scale: _primaryScaleAnimation,
                             child: _PrimaryExecutorCard(
-                              model: _primaryExecutorCard!,
+                              model: primaryExecutorCard,
                               onDidIt: _handleDidIt,
                               onCreatePlan: _handleCreatePlan,
                               timeChipText: _getTimeChipText(
-                                _primaryExecutorCard!,
+                                primaryExecutorCard,
                               ),
                               timeChipType: _getTimeChipType(
-                                _primaryExecutorCard!,
+                                primaryExecutorCard,
                               ),
                               recordGazeText: _getRecordGazeText(
-                                _primaryExecutorCard!,
+                                primaryExecutorCard,
                               ),
                             ),
                           ),
@@ -314,8 +271,8 @@ class _NowTabState extends ConsumerState<NowTab>
                           onNewPlanTap: _handleCreatePlan,
                         ),
                       // Secondary Executor Cards
-                      if (_secondaryExecutorCards.isNotEmpty) ...[
-                        ..._secondaryExecutorCards.map(
+                      if (secondaryExecutorCards.isNotEmpty) ...[
+                        ...secondaryExecutorCards.map(
                           (state) => Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: FadeTransition(
@@ -331,18 +288,18 @@ class _NowTabState extends ConsumerState<NowTab>
                         const SizedBox(height: 24),
                       ],
                       // Manager Area
-                      if (_managerQuickCard != null) ...[
+                      if (managerQuickCard != null) ...[
                         FadeTransition(
                           opacity: _managerFadeAnimation,
                           child: _ManagerQuickCard(
-                            model: _managerQuickCard!,
-                            partnerName: _managerQuickCardPartnerName,
+                            model: managerQuickCard,
+                            partnerName: managerPartnerName,
                             onCheckIt: _handleCheckIt,
                             timeChipText: _getManagerTimeChipText(
-                              _managerQuickCard!,
+                              managerQuickCard,
                             ),
                             timeChipType: _getManagerTimeChipType(
-                              _managerQuickCard!,
+                              managerQuickCard,
                             ),
                           ),
                         ),

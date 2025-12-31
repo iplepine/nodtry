@@ -112,6 +112,38 @@ class MockRecordRepository implements RecordRepository {
           const HomeCardModel(state: HomeCardState.checked),
         ];
         break;
+      case MockScenario.pastUncompleted:
+        _mockHomeCardModels = [
+          HomeCardModel(
+            state: HomeCardState.pastUncompleted,
+            plan: _createMockPlan(DateTime.now().hour - 1, 0, '이미 지남'),
+          ),
+        ];
+        break;
+      case MockScenario.multiPlanSelection:
+        _mockHomeCardModels = [
+          HomeCardModel(
+            state: HomeCardState.pastUncompleted,
+            plan: _createMockPlan(DateTime.now().hour - 1, 0, '1시간 전 약속'),
+          ),
+          HomeCardModel(
+            state: HomeCardState.reportNeeded,
+            plan: _createMockPlan(
+              DateTime.now().hour + 1,
+              0,
+              '1시간 뒤 약속 (Primary)',
+            ),
+          ),
+          HomeCardModel(
+            state: HomeCardState.reportNeeded,
+            plan: _createMockPlan(
+              DateTime.now().hour + 3,
+              0,
+              '3시간 뒤 약속 (Secondary 대기)',
+            ),
+          ),
+        ];
+        break;
     }
   }
 
@@ -148,4 +180,6 @@ enum MockScenario {
   reportNeeded_Night,
   waitingForCheck,
   checked,
+  pastUncompleted,
+  multiPlanSelection,
 }
