@@ -1,136 +1,111 @@
+# IfTogether – 지금 탭 통합 카드 & 시간 계층 스펙
+## Executor-First · Primary-Secondary · Time-as-State
+
+## 0. 문서 목적
+
+이 문서는 IfTogether 앱의 **지금 탭**에서
+
+- 사용자가 **지금 인지해야 할 단 하나의 행동**
+- 곧 이어질 **다음 맥락**
+- 실천자(Executor)와 관리자(Manager)의 **에너지 흐름 우선순위**
+- 날짜가 아닌 **상태로서의 시간 표현(Time Chip)**
+
+을 정의하는 **단일 기준 문서(Single Source of Truth)**다.
 
 ---
 
-### 5.2 Manager Pending Card
+## 1. 지금 탭의 시간 개념
 
-#### 목적
-관리 대기 상태 안내 (정보용)
+### 1.1 지금 ≠ 오늘
 
-#### 규칙
-- 버튼 없음
-- 클릭 없음
+‘지금’은 날짜 개념이 아니다.
 
-#### 예시
-- “○○의 확인을 기다리고 있어요”
+> 지금이란  
+> 현재 시점에서  
+> 사용자가 가장 먼저 인지해야 할  
+> 가장 임박한 행동 또는 상태다.
 
----
+### 1.2 지금 탭에 포함 가능한 시간 범위
+- 오늘 남아 있는 행동
+- 오늘이 끝난 경우, 가장 가까운 다음 행동  
+  (내일 / 모레 / 특정 시각까지 남은 시간)
 
-## 6. 카드 타입별 배치 규칙
+### 1.3 시간 표현 원칙
+- 날짜 사용 금지
+- 상대적 시간 표현만 허용
 
-### Primary Card 가능 타입
-- Action Card (실천 필요)
-- Response Card (확인 필요)
-- Plan Needed Card (계획 없음)
-
-### Secondary Card 전용
-- Waiting Card
-- Acknowledged Card
-- Quiet Card
-
-> 동일 타입 중복 노출 ❌
+허용: `D-1`, `3시간 남음`, `곧`  
+금지: `2025.01.03`, `월요일`, `오늘`
 
 ---
 
-## 7. Primary Card 선택 로직
+## 2. 카드 계층 구조
 
-### 7.1 시간 기준
-1. 오늘 미완료 실천 행동
-2. 오늘 확인이 필요한 관리자 행동
-3. 가까운 미래 행동 (D-1, 시간 단위)
-4. 아무 것도 없을 경우 Quiet 상태
+```
+[ Executor Area ]
+ ├─ Now Primary Card (1)
+ ├─ Now Secondary Cards (0~3)
 
-### 7.2 타입 우선순위
-1. Response Card
-2. Action Card
-3. Plan Needed Card
-
----
-
-## 8. Quiet 상태 정의
-
-아래 조건을 **모두 만족**할 때만 표시:
-
-- 미완료 실천 행동 없음
-- 확인 필요 관리자 행동 없음
-- 가까운 미래 행동 없음
-
-#### 문구 예시
-- “지금은 잠시 쉬어도 돼요”
-- “당분간 신경 쓸 일은 없어요”
+[ Manager Area ]
+ ├─ Manager Quick Card (0~1)
+ └─ Manager Pending Card (0~1)
+```
 
 ---
 
-## 9. Time Chip 스펙 (시간 = 상태)
+## 3. Executor Area (실천자 영역)
 
-### 9.1 정의
-> 시간은 메시지가 아니다  
-> 시간은 **상태(state)**다
+### 3.1 Now Primary Card
+- 지금 당장 필요한 행동 1개
+- 버튼 허용
+- 가장 큰 카드
 
----
-
-### 9.2 기본 형태
-- Shape: Pill
-- Padding: 6~10 (Horizontal)
-- Radius: Full
-- 클릭 불가
+### 3.2 Now Secondary Cards
+- 다음 맥락 미리보기
+- 버튼/클릭 없음
+- 최대 3개
 
 ---
 
-### 9.3 타입
+## 4. Manager Area (관리자 영역)
 
-#### NOW
-- 문구: `지금`
-- Background: Warm Coral `#F28B82`
+### 4.1 Manager Quick Card
+- 즉시 처리할 확인 행동
+- 작은 카드 + 버튼 1개
 
-#### UPCOMING
-- 문구: `D-1`, `3시간 남음`
-- Background: Light Sand (80%)
-
-#### SOON
-- 문구: `곧`
-- Background: Light Sand (60%)
+### 4.2 Manager Pending Card
+- 대기 상태 안내
+- 정보용
 
 ---
 
-### 9.4 위치 규칙
-- Executor Card: 카드 내부 상단
-- Manager Card: 프로필 아이콘 근처
+## 5. 카드 선택 로직 요약
+
+1. 미완료 실천 행동
+2. 확인 필요한 관리자 행동
+3. 가까운 미래 행동
+4. Quiet 상태
 
 ---
 
-## 10. 디자인 & 애니메이션
+## 6. Time Chip 스펙
 
-### 크기
-- Primary: Large / Padding 24 / Radius 16
-- Secondary & Manager: Small / Padding 12~16 / Radius 12
-
-### 애니메이션
-- Primary 전환: Fade + Scale (200ms)
-- Secondary 전환: Fade (150ms)
+- 시간은 메시지가 아니라 상태
+- Pill 형태, 클릭 불가
+- NOW / UPCOMING / SOON 타입
 
 ---
 
-## 11. 금지 규칙 (중요)
+## 7. 금지 규칙
 
 - Primary Card 2개 이상 ❌
-- Secondary Card 버튼 ❌
-- Secondary Card 클릭 ❌
-- 관리자 카드가 실천자 카드보다 강조 ❌
-- 날짜/요일 사용 ❌
-- 카운트다운 실시간 감소 ❌
+- 날짜/요일 노출 ❌
+- Secondary 카드 버튼 ❌
 
 ---
 
-## 12. 지금 탭 최종 정의
+## 8. 최종 정의
 
-> **지금 탭은  
-> 지금 당장 필요한 행동 하나를 크게 보여주고,  
-> 조금 뒤에 신경 쓰면 될 것들을 작게 곁들여 보여주는 화면이다.**
-
----
-
-## 13. Time Chip 최종 정의
-
-> **지금 탭에서  
-> 시간은 읽는 정보가 아니라,  
-> 보는 순간 느껴지는 상태다.**
+> 지금 탭은  
+> 지금 당장 필요한 행동 하나를 중심에 두고  
+> 나머지는 배경으로 정리하는 화면이다.

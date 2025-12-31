@@ -15,8 +15,6 @@ class AutoLoginUseCase {
     this._userLocalDataSource,
   );
 
-  /// 자동 로그인 시도
-  /// 로그인 성공 시 UserModel 반환, 실패 하거나 타임아웃 시 Exception/null
   Future<UserModel?> execute() async {
     final user = _authService.currentUser;
     if (user == null) {
@@ -24,8 +22,9 @@ class AutoLoginUseCase {
     }
 
     try {
-      // 1. Firestore에서 유저 정보 직접 확인 (단발성)
-      final userModel = await _userRepository.getMyProfile();
+      // 1. 유저 존재 여부 확인
+      //    (삭제된 계정인지 확인하기 위함)
+      var userModel = await _userRepository.getMyProfile();
 
       if (userModel == null) {
         // Auth에는 있지만 DB에 없는 경우 -> 서버에서 삭제된 계정으로 간주
@@ -37,20 +36,27 @@ class AutoLoginUseCase {
         return null;
       }
 
-      // 2. 유저 정보가 있으면 로컬 캐시 갱신 및 반환
-      await _userLocalDataSource.saveUser(userModel);
+      // 2. 데이터 동기화 및 백필 (InviteCode 등)
+      //    이미 존재하는 유저임이 확인되었으므로 안심하고 업데이트 수행
+      await _userRepository.initializeUser(user);
+
+      // 3. 최신 데이터 다시 조회 (동기화된 필드 반영)
+      //    initializeUser는 반환값이 없으므로 다시 조회해야 함
+      userModel = await _userRepository.getMyProfile();
+
+      if (userModel != null) {
+        // 4. 로컬 캐시 갱신
+        await _userLocalDataSource.saveUser(userModel);
+      }
+
       return userModel;
     } catch (e) {
       debugPrint('[AutoLoginUseCase] Error checking user: $e');
-      // 네트워크 에러 등은 일단 패스하고, 로컬 캐시라도 있으면 반환?
-      // 아니면 재시도 유도. 여기선 에러 시 로그아웃 보단 null 반환이 안전할수도.
-      // 기존 로직 유지: 에러 시 익명이면 세션 유지, 아니면 로그아웃
       if (user.isAnonymous) {
         debugPrint(
           "AutoLogin failed due to error ($e), but keeping Guest session.",
         );
       } else {
-        // 일반 유저(구글 등)는 로그아웃 하여 재로그인 유도
         await _authService.signOut();
       }
       rethrow;
