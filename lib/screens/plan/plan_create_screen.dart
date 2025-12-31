@@ -143,6 +143,19 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
       ref.invalidate(homeCardStateProvider);
 
       if (mounted) {
+        // 알림 설정 (로컬 알림) - Pop 하기 전에 수행 (Context 유효성 확보)
+        if (_selectedDays.isNotEmpty || _notificationTime.type != 'none') {
+          // 권한 요청 (이미 허용되었으면 무시됨)
+          await NotificationService().requestPermissions();
+          await NotificationService().schedulePlanReminder(
+            planId: plan.createdAt.millisecondsSinceEpoch ~/ 1000,
+            title: planItem.title,
+            hour: _notificationTime.hour,
+            minute: _notificationTime.minute,
+            days: planItem.days,
+          );
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("계획 제안이 완료되었습니다.\n상대방과 대화해보세요!"),
@@ -158,25 +171,11 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
         ).showSnackBar(SnackBar(content: Text("저장 중 오류가 발생했습니다: $e")));
       }
     }
-
-    // 알림 설정 (로컬 알림 유지)
-    if (_selectedDays.isNotEmpty || _notificationTime.type != 'none') {
-      await NotificationService().requestPermissions();
-      await NotificationService().schedulePlanReminder(
-        planId: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        title: planItem.title,
-        hour: _notificationTime.hour,
-        minute: _notificationTime.minute,
-        days: planItem.days,
-      );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final isKeyboardVisible = bottomInset > 0;
 
     return PopScope(
       canPop: _currentStep == 1,
@@ -214,46 +213,47 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 24),
-              child: isKeyboardVisible
-                  ? GestureDetector(
-                      onTap: _nextPage,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          _currentStep == _totalSteps
-                              ? l10n.planSummarySend
-                              : "다음",
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+              child: GestureDetector(
+                onTap: () {
+                  if (_currentStep == 1 &&
+                      _actionController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("어떤 약속을 할지 알려주세요!"),
+                        duration: Duration(seconds: 1),
                       ),
-                    )
-                  : Row(
-                      children: List.generate(_totalSteps, (index) {
-                        final isActive = index < _currentStep;
-                        return Container(
-                          margin: const EdgeInsets.only(left: 4),
-                          width: isActive ? 12 : 6,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? AppColors.primary
-                                : AppColors.divider,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        );
-                      }),
+                    );
+                    return;
+                  }
+                  _nextPage();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        (_currentStep == 1 &&
+                            _actionController.text.trim().isEmpty)
+                        ? AppColors.textDisabled.withValues(alpha: 0.2)
+                        : AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    _currentStep == _totalSteps ? l10n.planSummarySend : "다음",
+                    style: TextStyle(
+                      color:
+                          (_currentStep == 1 &&
+                              _actionController.text.trim().isEmpty)
+                          ? AppColors.textDisabled
+                          : AppColors.primary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -315,7 +315,6 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                   ],
                 ),
               ),
-              if (!isKeyboardVisible) _buildBottomBar(l10n),
             ],
           ),
         ),
@@ -326,50 +325,6 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
   Widget _buildStepContainer({required Widget child}) {
     return SingleChildScrollView(
       child: Padding(padding: const EdgeInsets.all(24.0), child: child),
-    );
-  }
-
-  Widget _buildBottomBar(AppLocalizations l10n) {
-    String buttonText = "다음";
-    if (_currentStep == _totalSteps) {
-      buttonText = l10n.planSummarySend;
-    }
-
-    bool isButtonEnabled = true;
-    if (_currentStep == 1 && _actionController.text.trim().isEmpty) {
-      isButtonEnabled = false;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.divider, width: 1.0)),
-      ),
-      child: SafeArea(
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: AppColors.textDisabled.withValues(
-                alpha: 0.3,
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
-            ),
-            onPressed: isButtonEnabled ? _nextPage : null,
-            child: Text(
-              buttonText,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
