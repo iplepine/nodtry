@@ -782,6 +782,9 @@
   "historyFilterPartner": "Partner's Action",
   "historyMyActionVerified": "Partner saw it",
   "historyPartnerActionVerified": "Saw it",
-  "historyPartnerActionWaiting": "Please check"
+  "historyPartnerActionWaiting": "Not seen yet",
+  "historyActionSawIt": "Saw it 👍",
+  "historyActionCheer": "Cheering you 💜",
+  "historyActionSkip": "Just skip"
 }
 

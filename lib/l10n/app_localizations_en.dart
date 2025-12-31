@@ -616,5 +616,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyPartnerActionVerified => 'Saw it';
 
   @override
-  String get historyPartnerActionWaiting => 'Please check';
+  String get historyPartnerActionWaiting => 'Not seen yet';
+
+  @override
+  String get historyActionSawIt => 'Saw it 👍';
+
+  @override
+  String get historyActionCheer => 'Cheering you 💜';
+
+  @override
+  String get historyActionSkip => 'Just skip';
 }

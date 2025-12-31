@@ -7,14 +7,21 @@ import '../../providers/history_provider.dart';
 import '../../providers/repository_provider.dart';
 
 /// 기록 카드 (Spec 3.1)
-class HistoryCard extends ConsumerWidget {
+class HistoryCard extends ConsumerStatefulWidget {
   final HistoryItem item;
 
   const HistoryCard({super.key, required this.item});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isMine = item.isMine('me'); // TODO: Pass real UID
+  ConsumerState<HistoryCard> createState() => _HistoryCardState();
+}
+
+class _HistoryCardState extends ConsumerState<HistoryCard> {
+  bool _isMenuOpen = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isMine = widget.item.isMine('me'); // TODO: Pass real UID
 
     return Align(
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
@@ -46,7 +53,7 @@ class HistoryCard extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          _formatDate(context, item.date),
+                          _formatDate(context, widget.item.date),
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: AppColors.textSecondary,
@@ -60,7 +67,7 @@ class HistoryCard extends ConsumerWidget {
 
                     // Middle: Title
                     Text(
-                      item.title,
+                      widget.item.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w600,
@@ -74,15 +81,12 @@ class HistoryCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12), // 의도적인 여백 (카드와 반응 분리)
-            // 외부 반응 영역 (Align을 통해 극단적으로 정렬)
+            // 외부 반응 영역 (역할 기준 고정 정렬 & 안쪽 모서리 앵커링)
             Align(
               alignment: isMine ? Alignment.centerLeft : Alignment.centerRight,
               child: isMine
                   ? _buildMyActionVerification(context) // 파트너의 반응은 왼쪽 끝
-                  : _buildPartnerActionVerification(
-                      context,
-                      ref,
-                    ), // 나의 반응은 오른쪽 끝
+                  : _buildPartnerActionVerification(context), // 나의 반응은 오른쪽 끝
             ),
             const SizedBox(height: 24), // 카드 간 간격
           ],
@@ -98,13 +102,13 @@ class HistoryCard extends ConsumerWidget {
     String label;
 
     // 실천 상태에 따른 라벨링 (배지)
-    switch (item.status) {
+    switch (widget.item.status) {
       case HistoryStatus.done:
       case HistoryStatus.actuallyDone:
       case HistoryStatus.verified: // '확인됐어요' 배지는 제거하고 '했어'로 통합
         color = const Color(0xFF6B8E23); // Olive Green
         icon = Icons.check_circle_outline;
-        label = item.status == HistoryStatus.actuallyDone
+        label = widget.item.status == HistoryStatus.actuallyDone
             ? l10n.reconcileActuallyDone
             : l10n.homeDidIt;
         break;
@@ -145,7 +149,7 @@ class HistoryCard extends ConsumerWidget {
   }
 
   Widget _buildCommentSection(BuildContext context) {
-    if (item.comment == null) return const SizedBox.shrink();
+    if (widget.item.comment == null) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +162,7 @@ class HistoryCard extends ConsumerWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            item.comment!,
+            widget.item.comment!,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSecondary,
               fontSize: 13,
@@ -172,7 +176,7 @@ class HistoryCard extends ConsumerWidget {
 
   /// [내 실천] 카드 하단: 파트너의 확인 여부 표시
   Widget _buildMyActionVerification(BuildContext context) {
-    if (!item.isVerifiedByPartner) return const SizedBox.shrink();
+    if (!widget.item.isVerifiedByPartner) return const SizedBox.shrink();
 
     final l10n = AppLocalizations.of(context)!;
     return Row(
@@ -197,13 +201,13 @@ class HistoryCard extends ConsumerWidget {
     );
   }
 
-  /// [파트너의 실천] 카드 하단: 나의 확인 여부 표시 및 액션
-  Widget _buildPartnerActionVerification(BuildContext context, WidgetRef ref) {
+  Widget _buildPartnerActionVerification(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    if (item.isVerifiedByMe) {
+    if (widget.item.isVerifiedByMe) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.end, // 나의 반응은 오른쪽 (내가 보낸 것)
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             l10n.historyPartnerActionVerified,
@@ -219,46 +223,88 @@ class HistoryCard extends ConsumerWidget {
       );
     }
 
-    return InkWell(
-      onTap: () async {
-        await ref.read(recordRepositoryProvider).verifyHistoryItem(item.id);
-        ref.invalidate(historyItemsProvider);
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('확인되었습니다.')));
-        }
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    if (_isMenuOpen) {
+      return Container(
+        padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.08), // 조금 더 명확하게
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.15),
-            width: 1,
-          ),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(color: AppColors.background),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              l10n.historyPartnerActionWaiting,
-              style: TextStyle(
-                color: AppColors.primary, // 주어지는 주어 생략 정책에 따라 텍스트 강조
-                fontSize: 12,
-                fontWeight: FontWeight.w700, // 더 강조된 버튼 텍스트
-              ),
-            ),
-            const SizedBox(width: 6),
-            Icon(
-              Icons.check_circle_outline, // 더 명확한 '확인' 유도 아이콘
-              size: 14,
+            _buildActionButton(
+              label: l10n.historyActionSawIt,
+              onTap: () async {
+                await ref
+                    .read(recordRepositoryProvider)
+                    .verifyHistoryItem(widget.item.id);
+                ref.invalidate(historyItemsProvider);
+                if (mounted) setState(() => _isMenuOpen = false);
+              },
               color: AppColors.primary,
             ),
+            _buildActionButton(
+              label: l10n.historyActionCheer,
+              onTap: () {
+                // TODO: Implement Cheer action in repository if needed
+                if (mounted) setState(() => _isMenuOpen = false);
+              },
+              color: Colors.purple,
+            ),
+            _buildActionButton(
+              label: l10n.historyActionSkip,
+              onTap: () {
+                if (mounted) setState(() => _isMenuOpen = false);
+              },
+              color: AppColors.textSecondary,
+            ),
           ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () => setState(() => _isMenuOpen = true),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Text(
+          l10n.historyPartnerActionWaiting,
+          style: TextStyle(
+            color: AppColors.textDisabled.withValues(alpha: 0.6), // 아주 연하게
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

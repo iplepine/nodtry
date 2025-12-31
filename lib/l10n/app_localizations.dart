@@ -1247,8 +1247,26 @@ abstract class AppLocalizations {
   /// No description provided for @historyPartnerActionWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Please check'**
+  /// **'Not seen yet'**
   String get historyPartnerActionWaiting;
+
+  /// No description provided for @historyActionSawIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Saw it 👍'**
+  String get historyActionSawIt;
+
+  /// No description provided for @historyActionCheer.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheering you 💜'**
+  String get historyActionCheer;
+
+  /// No description provided for @historyActionSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Just skip'**
+  String get historyActionSkip;
 }
 
 class _AppLocalizationsDelegate
