@@ -28,6 +28,13 @@
   "homeQuietDay": "지금은 잠시 쉬어도 돼요",
   "homeChecked": "확인됐어요",
   "homeThankYou": "고마워요",
+  "timePassedActorMessage": "아직 전달된 기록이 없어요",
+  "timePassedManagerMessage": "아직 전달된 말이 없어요",
+  "timePassedActorSubMessage": "지금부터 해도 괜찮아요",
+  "timePassedManagerSubMessage": "오늘은 조용히 지나가고 있어요",
+  "pastUncompletedMessage": "조금 전에 예정되어 있었어요",
+  "pastUncompletedSubMessage": "앞선 약속이 있었어요",
+  "pastUncompletedTimeChip": "조금 전",
   "homeContextWeek": "{total}주 중 · {week}주차",
   "@homeContextWeek": {
     "placeholders": {

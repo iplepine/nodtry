@@ -266,6 +266,48 @@ abstract class AppLocalizations {
   /// **'Thank you'**
   String get homeThankYou;
 
+  /// Message for actor when time has passed but within grace period
+  ///
+  /// In en, this message translates to:
+  /// **'No record delivered yet'**
+  String get timePassedActorMessage;
+
+  /// Message for manager when actor hasn't reported yet
+  ///
+  /// In en, this message translates to:
+  /// **'No words delivered yet'**
+  String get timePassedManagerMessage;
+
+  /// Sub-message for actor when time has passed
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s okay to start now'**
+  String get timePassedActorSubMessage;
+
+  /// Sub-message for manager when actor hasn't reported yet
+  ///
+  /// In en, this message translates to:
+  /// **'The day is passing quietly'**
+  String get timePassedManagerSubMessage;
+
+  /// Message for past uncompleted task in Secondary card
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled a little while ago'**
+  String get pastUncompletedMessage;
+
+  /// Sub-message for past uncompleted task
+  ///
+  /// In en, this message translates to:
+  /// **'There was a previous promise'**
+  String get pastUncompletedSubMessage;
+
+  /// Time chip text for past uncompleted tasks
+  ///
+  /// In en, this message translates to:
+  /// **'Just before'**
+  String get pastUncompletedTimeChip;
+
   /// Week context information
   ///
   /// In en, this message translates to:

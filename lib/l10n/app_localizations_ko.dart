@@ -93,6 +93,27 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeThankYou => '고마워요';
 
   @override
+  String get timePassedActorMessage => '아직 전달된 기록이 없어요';
+
+  @override
+  String get timePassedManagerMessage => '아직 전달된 말이 없어요';
+
+  @override
+  String get timePassedActorSubMessage => '지금부터 해도 괜찮아요';
+
+  @override
+  String get timePassedManagerSubMessage => '오늘은 조용히 지나가고 있어요';
+
+  @override
+  String get pastUncompletedMessage => '조금 전에 예정되어 있었어요';
+
+  @override
+  String get pastUncompletedSubMessage => '앞선 약속이 있었어요';
+
+  @override
+  String get pastUncompletedTimeChip => '조금 전';
+
+  @override
   String homeContextWeek(int week, int total) {
     return '$total주 중 · $week주차';
   }

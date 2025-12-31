@@ -151,9 +151,10 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// Time Chip 텍스트 가져오기
   String? _getTimeChipText(HomeCardModel model) {
-    // 1. Plan 내 Items 중 오늘에 해당하는 첫 번째 아이템 시간(notificationTime) 찾기?
-    //    이미 RealRecordRepository에서 필터링해서 가져왔다고 가정.
-    //    HomeCardModel에 plan이 있고, 그 plan.items 중 오늘 해당되는 게 있다면?
+    if (model.state == HomeCardState.pastUncompleted) {
+      return AppLocalizations.of(context)!.pastUncompletedTimeChip;
+    }
+
     if (model.plan != null && model.plan!.items.isNotEmpty) {
       // Find the item for current weekday
       // But RealRecordRepository filtered plan items.
@@ -179,6 +180,10 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// Time Chip 타입 가져오기
   TimeChipType? _getTimeChipType(HomeCardModel model) {
+    if (model.state == HomeCardState.pastUncompleted) {
+      return TimeChipType.past;
+    }
+
     final text = _getTimeChipText(model);
     if (text == null) return null;
 
@@ -420,11 +425,13 @@ class _PrimaryExecutorCard extends StatelessWidget {
     // model.plan 데이터가 있으면 사용
     if (model.plan != null && model.plan!.items.isNotEmpty) {
       message = model.plan!.items.first.title; // MVP: 첫 번째 아이템 타이틀
-      // TODO: 여러 줄 지원 or 상세
     } else {
       switch (model.state) {
         case HomeCardState.reportNeeded:
           message = l10n.homeNowTask;
+          break;
+        case HomeCardState.pastUncompleted:
+          message = l10n.timePassedActorMessage;
           break;
         case HomeCardState.planNeeded:
           message = l10n.nowNoPlan;
@@ -541,6 +548,9 @@ class _SecondaryExecutorCard extends StatelessWidget {
         break;
       case HomeCardState.quietDay:
         message = l10n.nowQuietRest;
+        break;
+      case HomeCardState.pastUncompleted:
+        message = l10n.pastUncompletedMessage;
         break;
       default:
         message = '';

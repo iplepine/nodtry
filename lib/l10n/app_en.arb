@@ -112,6 +112,34 @@
   "@homeThankYou": {
     "description": "Thank you message after check"
   },
+  "timePassedActorMessage": "No record delivered yet",
+  "@timePassedActorMessage": {
+    "description": "Message for actor when time has passed but within grace period"
+  },
+  "timePassedManagerMessage": "No words delivered yet",
+  "@timePassedManagerMessage": {
+    "description": "Message for manager when actor hasn't reported yet"
+  },
+  "timePassedActorSubMessage": "It's okay to start now",
+  "@timePassedActorSubMessage": {
+    "description": "Sub-message for actor when time has passed"
+  },
+  "timePassedManagerSubMessage": "The day is passing quietly",
+  "@timePassedManagerSubMessage": {
+    "description": "Sub-message for manager when actor hasn't reported yet"
+  },
+  "pastUncompletedMessage": "Scheduled a little while ago",
+  "@pastUncompletedMessage": {
+    "description": "Message for past uncompleted task in Secondary card"
+  },
+  "pastUncompletedSubMessage": "There was a previous promise",
+  "@pastUncompletedSubMessage": {
+    "description": "Sub-message for past uncompleted task"
+  },
+  "pastUncompletedTimeChip": "Just before",
+  "@pastUncompletedTimeChip": {
+    "description": "Time chip text for past uncompleted tasks"
+  },
   "homeContextWeek": "{week} of {total} weeks",
   "@homeContextWeek": {
     "description": "Week context information",

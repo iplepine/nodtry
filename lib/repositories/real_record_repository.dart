@@ -22,77 +22,114 @@ class RealRecordRepository implements RecordRepository {
       final snapshot = await _firestore
           .collection('plans')
           .where('userId', isEqualTo: user.uid)
-          //.where('state', isEqualTo: 'active') // Index required? Start with client filter if small
           .get();
 
       final plans = snapshot.docs
           .map((doc) => Plan.fromMap(doc.data(), doc.id))
-          .where((p) => p.state == PlanState.active)
+          .where(
+            (p) =>
+                p.state == PlanState.active ||
+                p.state == PlanState.pendingApproval,
+          )
           .toList();
 
       if (plans.isEmpty) {
         return [const HomeCardModel(state: HomeCardState.planNeeded)];
       }
 
-      final models = <HomeCardModel>[];
       final now = DateTime.now();
       final todayWeekday = now.weekday; // 1=Mon, 7=Sun
+      final nowInMinutes = now.hour * 60 + now.minute;
+
+      // 1. 오늘 해야 할 모든 아이템 수집
+      final List<({Plan plan, PlanItem item, int timeInMin})> allTodayItems =
+          [];
 
       for (var plan in plans) {
-        // Date Validity Check
-        // StartDate: 00:00:00 of the day
-        // EndDate: 23:59:59 of the day (usually, or next day 00:00:00)
-        // Let's assume startDate and endDate are exact boundaries.
         if (now.isBefore(plan.startDate) || now.isAfter(plan.endDate)) {
           continue;
         }
 
-        // Find items scheduled for today
-        // TODO: Check if already completed (Action query)
-
-        // Filter items for today
         final todayItems = plan.items
             .where((item) => item.days.contains(todayWeekday))
             .toList();
 
-        if (todayItems.isNotEmpty) {
-          // For MVP, create card for the Plan.
-          // Ideally we should differentiate items.
-          // Ensure the plan passed to UI has the specific item title?
-          // or just pass the whole plan and let UI decide?
-          // UI shows "Plan Title"? or "Item Title"?
-          // If UI uses plan.items[0].title, we might need to filter items in the passed plan.
+        for (var item in todayItems) {
+          final time = item.notificationTime;
+          // 알림 시간이 없으면 당일 23:59로 처리
+          final timeInMin = time != null
+              ? (time.hour * 60 + time.minute)
+              : (23 * 60 + 59);
 
-          final planForToday = Plan(
-            id: plan.id,
-            userId: plan.userId,
-            managerId: plan.managerId,
-            startDate: plan.startDate,
-            endDate: plan.endDate,
-            state: plan.state,
-            items: todayItems, // Only today's items
-            createdAt: plan.createdAt,
-          );
-
-          models.add(
-            HomeCardModel(
-              state: HomeCardState.reportNeeded,
-              plan: planForToday,
-            ),
-          );
+          allTodayItems.add((plan: plan, item: item, timeInMin: timeInMin));
         }
       }
 
-      if (models.isEmpty) {
-        // Plans exist but nothing for today -> Quiet Day
+      if (allTodayItems.isEmpty) {
         return [const HomeCardModel(state: HomeCardState.quietDay)];
       }
 
-      return models;
+      // 2. 시간 순 정렬
+      allTodayItems.sort((a, b) => a.timeInMin.compareTo(b.timeInMin));
+
+      // 3. 상태 결정
+      // TODO: 실제 완료 여부(Actions 컬렉션) 연동 필요. 현재는 모두 미완료로 가정.
+
+      final upcomingItems = allTodayItems
+          .where((i) => i.timeInMin >= nowInMinutes)
+          .toList();
+      final pastItems = allTodayItems
+          .where((i) => i.timeInMin < nowInMinutes)
+          .toList();
+
+      final List<HomeCardModel> finalModels = [];
+
+      // Primary: 현재 이후 가장 가까운 것 1개
+      if (upcomingItems.isNotEmpty) {
+        final primary = upcomingItems.first;
+        finalModels.add(
+          HomeCardModel(
+            state: HomeCardState.reportNeeded,
+            plan: _createSingleItemPlan(primary.plan, primary.item),
+          ),
+        );
+      }
+
+      // Secondary: 지나간 것들 (격하된 계획) - 최대 3개, 최근 것 우선(역순 정렬)
+      final sortedPastItems = pastItems.reversed.take(3).toList();
+      for (var past in sortedPastItems) {
+        finalModels.add(
+          HomeCardModel(
+            state: HomeCardState.pastUncompleted,
+            plan: _createSingleItemPlan(past.plan, past.item),
+          ),
+        );
+      }
+
+      // 만약 Primary도 없고 지남(Secondary)도 없으면 Quiet Day
+      if (finalModels.isEmpty) {
+        return [const HomeCardModel(state: HomeCardState.quietDay)];
+      }
+
+      return finalModels;
     } catch (e) {
       debugPrint('[RealRecordRepository] Error fetching home cards: $e');
       return [const HomeCardModel(state: HomeCardState.planNeeded)];
     }
+  }
+
+  /// 특정 아이템 하나만 포함된 임시 Plan 객체 생성 (UI 노출용)
+  Plan _createSingleItemPlan(Plan original, PlanItem item) {
+    return Plan(
+      id: original.id,
+      userId: original.userId,
+      managerId: original.managerId,
+      startDate: original.startDate,
+      endDate: original.endDate,
+      state: original.state,
+      items: [item],
+      createdAt: original.createdAt,
+    );
   }
 
   @override

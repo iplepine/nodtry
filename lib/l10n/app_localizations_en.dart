@@ -95,6 +95,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeThankYou => 'Thank you';
 
   @override
+  String get timePassedActorMessage => 'No record delivered yet';
+
+  @override
+  String get timePassedManagerMessage => 'No words delivered yet';
+
+  @override
+  String get timePassedActorSubMessage => 'It\'s okay to start now';
+
+  @override
+  String get timePassedManagerSubMessage => 'The day is passing quietly';
+
+  @override
+  String get pastUncompletedMessage => 'Scheduled a little while ago';
+
+  @override
+  String get pastUncompletedSubMessage => 'There was a previous promise';
+
+  @override
+  String get pastUncompletedTimeChip => 'Just before';
+
+  @override
   String homeContextWeek(int week, int total) {
     return '$week of $total weeks';
   }

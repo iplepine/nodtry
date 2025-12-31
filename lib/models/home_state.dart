@@ -19,6 +19,9 @@ enum HomeCardState {
 
   /// Type F: Plan Needed Card (계획 없음)
   planNeeded,
+
+  /// Type G: Past Uncompleted Card (지나간 미완료 계획)
+  pastUncompleted,
 }
 
 /// 카드 계층 타입
@@ -49,6 +52,7 @@ extension HomeCardStatePriority on HomeCardState {
       case HomeCardState.waitingForCheck:
       case HomeCardState.checked:
       case HomeCardState.quietDay:
+      case HomeCardState.pastUncompleted:
         return CardRole.executor;
       case HomeCardState.checkNeeded:
         return CardRole.manager;
@@ -72,12 +76,14 @@ extension HomeCardStatePriority on HomeCardState {
   /// 실천자 Secondary Card로만 올 수 있는 타입
   int get executorSecondaryPriority {
     switch (this) {
+      case HomeCardState.pastUncompleted:
+        return 1; // 지나간 계획을 가장 먼저 보여줌
       case HomeCardState.waitingForCheck:
-        return 1;
-      case HomeCardState.checked:
         return 2;
-      case HomeCardState.quietDay:
+      case HomeCardState.checked:
         return 3;
+      case HomeCardState.quietDay:
+        return 4;
       default:
         return 999; // Secondary Executor Card로 올 수 없음
     }

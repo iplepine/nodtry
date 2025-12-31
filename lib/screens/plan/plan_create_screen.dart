@@ -118,7 +118,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
     final planItem = PlanItem(
       title: _actionController.text,
       count: _selectedFrequency ?? 3,
-      days: _selectedDays.toList(),
+      days: _selectedDays.map((d) => d + 1).toList(), // UI(0~6) -> Model(1~7)
       notificationTime: _notificationTime,
     );
 
