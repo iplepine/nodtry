@@ -209,7 +209,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get headerPlanEnded => '4주가 끝났어요';
 
   @override
-  String get nowNoPlan => '이번 달 계획이 아직 없어요';
+  String get nowNoPlan => '이번 달, 어떤 약속을 해볼까요?';
 
   @override
   String get nowCreatePlan => '계획 짜기';
@@ -613,4 +613,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get historyActionSkip => '그냥 넘기기';
+
+  @override
+  String get timeChipStillActionable => '아직 할 수 있어요';
+
+  @override
+  String get timeChipPassed => '지나갔어요';
 }

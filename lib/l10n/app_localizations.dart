@@ -485,7 +485,7 @@ abstract class AppLocalizations {
   /// Message when there's no active plan
   ///
   /// In en, this message translates to:
-  /// **'No plan for this month yet'**
+  /// **'What promises shall we make this month?'**
   String get nowNoPlan;
 
   /// Button to create a new plan
@@ -1267,6 +1267,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Just skip'**
   String get historyActionSkip;
+
+  /// No description provided for @timeChipStillActionable.
+  ///
+  /// In en, this message translates to:
+  /// **'Still actionable'**
+  String get timeChipStillActionable;
+
+  /// No description provided for @timeChipPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed'**
+  String get timeChipPassed;
 }
 
 class _AppLocalizationsDelegate

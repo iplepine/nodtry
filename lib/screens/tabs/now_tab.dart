@@ -245,24 +245,30 @@ class _NowTabState extends ConsumerState<NowTab>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Executor Area
+                      // Executor Area (Primary Action)
                       if (primaryExecutorCard != null) ...[
                         FadeTransition(
                           opacity: _primaryFadeAnimation,
                           child: ScaleTransition(
                             scale: _primaryScaleAnimation,
-                            child: _PrimaryExecutorCard(
-                              model: primaryExecutorCard,
-                              onDidIt: _handleDidIt,
-                              onCreatePlan: _handleCreatePlan,
-                              timeChipText: _getTimeChipText(
-                                primaryExecutorCard,
-                              ),
-                              timeChipType: _getTimeChipType(
-                                primaryExecutorCard,
-                              ),
-                              recordGazeText: _getRecordGazeText(
-                                primaryExecutorCard,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: FractionallySizedBox(
+                                widthFactor: 0.9,
+                                child: _PrimaryExecutorCard(
+                                  model: primaryExecutorCard,
+                                  onDidIt: _handleDidIt,
+                                  onCreatePlan: _handleCreatePlan,
+                                  timeChipText: _getTimeChipText(
+                                    primaryExecutorCard,
+                                  ),
+                                  timeChipType: _getTimeChipType(
+                                    primaryExecutorCard,
+                                  ),
+                                  recordGazeText: _getRecordGazeText(
+                                    primaryExecutorCard,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -276,40 +282,56 @@ class _NowTabState extends ConsumerState<NowTab>
                           planSummary: planSummary,
                           onNewPlanTap: _handleCreatePlan,
                         ),
-                      // Secondary Executor Cards
+                      // Secondary Executor Cards (My Contexts)
                       if (secondaryExecutorCards.isNotEmpty) ...[
                         ...secondaryExecutorCards.map(
                           (state) => Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: FadeTransition(
                               opacity: _secondaryFadeAnimation,
-                              child: _SecondaryExecutorCard(
-                                model: state,
-                                timeChipText: _getSecondaryTimeChipText(state),
-                                timeChipType: _getSecondaryTimeChipType(state),
-                                onReconcile: () {
-                                  // 데이터 갱신
-                                  ref.invalidate(homeCardStateProvider);
-                                },
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: FractionallySizedBox(
+                                  widthFactor: 0.85,
+                                  child: _SecondaryExecutorCard(
+                                    model: state,
+                                    timeChipText: _getSecondaryTimeChipText(
+                                      state,
+                                    ),
+                                    timeChipType: _getSecondaryTimeChipType(
+                                      state,
+                                    ),
+                                    onReconcile: () {
+                                      // 데이터 갱신
+                                      ref.invalidate(homeCardStateProvider);
+                                    },
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 24),
                       ],
-                      // Manager Area
+                      // Manager Area (Partner's Requests)
                       if (managerQuickCard != null) ...[
                         FadeTransition(
                           opacity: _managerFadeAnimation,
-                          child: _ManagerQuickCard(
-                            model: managerQuickCard,
-                            partnerName: managerPartnerName,
-                            onCheckIt: _handleCheckIt,
-                            timeChipText: _getManagerTimeChipText(
-                              managerQuickCard,
-                            ),
-                            timeChipType: _getManagerTimeChipType(
-                              managerQuickCard,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: FractionallySizedBox(
+                              widthFactor: 0.88,
+                              child: _ManagerQuickCard(
+                                model: managerQuickCard,
+                                partnerName: managerPartnerName,
+                                onCheckIt: _handleCheckIt,
+                                timeChipText: _getManagerTimeChipText(
+                                  managerQuickCard,
+                                ),
+                                timeChipType: _getManagerTimeChipType(
+                                  managerQuickCard,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -631,11 +653,11 @@ class _ManagerQuickCard extends StatelessWidget {
                 if (partnerName != null) ...[
                   CircleAvatar(
                     radius: 14,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    child: Icon(
+                    backgroundColor: AppColors.primary, // 파트너의 액션임을 강조
+                    child: const Icon(
                       Icons.person,
                       size: 16,
-                      color: AppColors.primary,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(width: 12),
