@@ -75,4 +75,10 @@ class MockRecordRepository implements RecordRepository {
   void setMockHomeCardStates(List<HomeCardState> states) {
     _mockHomeCardStates = states;
   }
+
+  @override
+  Future<void> deletePlansByUserId(String uid) async {
+    // Mock: 딜레이만
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
 }

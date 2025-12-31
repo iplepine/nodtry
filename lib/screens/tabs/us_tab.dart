@@ -198,7 +198,6 @@ class _MeSection extends StatelessWidget {
   final AppLocalizations l10n;
   final String name;
   final String? statusMessage;
-  final File? profileImage;
   final String? profileImageUrl;
   final String? inviteCode;
   final VoidCallback onEditProfile;
@@ -207,7 +206,6 @@ class _MeSection extends StatelessWidget {
     required this.l10n,
     required this.name,
     this.statusMessage,
-    this.profileImage,
     this.profileImageUrl,
     this.inviteCode,
     required this.onEditProfile,
@@ -216,9 +214,7 @@ class _MeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ImageProvider? imageProvider;
-    if (profileImage != null) {
-      imageProvider = FileImage(profileImage!);
-    } else if (profileImageUrl != null && profileImageUrl!.isNotEmpty) {
+    if (profileImageUrl != null && profileImageUrl!.isNotEmpty) {
       imageProvider = NetworkImage(profileImageUrl!);
     }
 

@@ -148,4 +148,29 @@ class RealConnectRepository implements ConnectRepository {
     // TODO: Implement
     return ConnectionStatus.none;
   }
+
+  @override
+  Future<void> deleteAllRelationsByUserId(String uid) async {
+    try {
+      final query = await _firestore
+          .collection('relations')
+          .where(
+            Filter.or(
+              Filter('executorId', isEqualTo: uid),
+              Filter('managerId', isEqualTo: uid),
+            ),
+          )
+          .get();
+
+      final batch = _firestore.batch();
+      for (final doc in query.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+      // debugPrint('[RealConnectRepository] Deleted ${query.size} relations for user $uid');
+    } catch (e) {
+      // debugPrint('[RealConnectRepository] Error deleting relations: $e');
+      rethrow;
+    }
+  }
 }

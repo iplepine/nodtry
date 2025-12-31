@@ -48,4 +48,26 @@ class RealRecordRepository implements RecordRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> deletePlansByUserId(String uid) async {
+    try {
+      final plans = await _firestore
+          .collection('plans')
+          .where('userId', isEqualTo: uid)
+          .get();
+
+      final batch = _firestore.batch();
+      for (var doc in plans.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+      debugPrint(
+        '[RealRecordRepository] Deleted ${plans.size} plans for user $uid',
+      );
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error deleting plans: $e');
+      rethrow;
+    }
+  }
 }

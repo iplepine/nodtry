@@ -207,5 +207,13 @@ final withdrawUseCaseProvider = Provider<WithdrawUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final localDataSource = ref.watch(userLocalDataSourceProvider);
-  return WithdrawUseCase(authService, userRepository, localDataSource);
+  final recordRepository = ref.watch(recordRepositoryProvider);
+  final connectRepository = ref.watch(connectRepositoryProvider);
+  return WithdrawUseCase(
+    authService,
+    userRepository,
+    localDataSource,
+    recordRepository,
+    connectRepository,
+  );
 });

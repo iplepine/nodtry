@@ -40,4 +40,7 @@ abstract class ConnectRepository {
 
   /// 현재 연결 상태 조회 (단발성)
   Future<ConnectionStatus> getConnectionStatus();
+
+  /// 특정 유저의 모든 연결(Relations)을 삭제합니다. (회원 탈퇴 처리용)
+  Future<void> deleteAllRelationsByUserId(String uid);
 }

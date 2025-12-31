@@ -88,4 +88,10 @@ class MockConnectRepository implements ConnectRepository {
     await Future.delayed(const Duration(milliseconds: 200));
     return _status;
   }
+
+  @override
+  Future<void> deleteAllRelationsByUserId(String uid) async {
+    // Mock: 딜레이만
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
 }

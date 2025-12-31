@@ -14,4 +14,7 @@ abstract class RecordRepository {
 
   /// 새로운 계획을 생성합니다.
   Future<void> createPlan(Plan plan);
+
+  /// 특정 유저의 모든 계획을 삭제합니다. (회원 탈퇴 처리용)
+  Future<void> deletePlansByUserId(String uid);
 }
