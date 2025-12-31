@@ -187,8 +187,9 @@ final createNewPlanUseCaseProvider = Provider<CreateNewPlanUseCase>((ref) {
 });
 final autoLoginUseCaseProvider = Provider<AutoLoginUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
-  final getMyProfileUseCase = ref.watch(getMyProfileUseCaseProvider);
-  return AutoLoginUseCase(authService, getMyProfileUseCase);
+  final userRepository = ref.watch(userRepositoryProvider);
+  final userLocalDataSource = ref.watch(userLocalDataSourceProvider);
+  return AutoLoginUseCase(authService, userRepository, userLocalDataSource);
 });
 
 final linkWithGoogleUseCaseProvider = Provider<LinkWithGoogleUseCase>((ref) {
