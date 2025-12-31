@@ -217,7 +217,7 @@ class _NowTabState extends ConsumerState<NowTab>
       error: (err, stack) => Center(child: Text('Error: $err')),
       data: (states) {
         // 데이터가 로드되었을 때, 로컬 상태가 아직 초기화 안되었다면 업데이트
-        if (_primaryExecutorCard == null && states.isNotEmpty) {
+        if (_primaryExecutorCard == null) {
           // build 중 setState 방지를 위해 post frame callback 사용
           // 단, 무한 루프 방지 필요 (상태가 이미 설정되었는지 확인)
           // 여기서는 _primaryExecutorCard가 null일 때만 호출하므로 어느정도 안전

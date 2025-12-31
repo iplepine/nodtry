@@ -5,7 +5,7 @@ class UserModel {
   final String? displayName;
   final String? email;
   final String? profileImageUrl;
-  final String? statusMessage; // 상태 메시지
+  final String? statusMessage;
   final String? inviteCode;
   final bool isAnonymous;
   final DateTime createdAt;

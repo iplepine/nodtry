@@ -18,7 +18,7 @@ class DatabaseService {
         'uid': user.uid,
         'email': user.email,
         'displayName': user.displayName ?? '나', // 기본값
-        'photoURL': user.photoURL,
+        'profileImageUrl': user.photoURL,
         'isAnonymous': user.isAnonymous,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),

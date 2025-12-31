@@ -47,19 +47,26 @@ class MockUserRepository implements UserRepository {
   }
 
   @override
+  Stream<UserModel?> watchMyProfile() {
+    // Mock에서는 단순히 현재 Mock 유저를 한 번 방출하는 Stream 반환
+    // 실제 앱처럼 동작하려면 StreamController 등을 써야 하지만,
+    // 간단한 테스트용으로는 현재 상태를 리턴.
+    return Stream.value(_mockUser);
+  }
+
+  @override
   Future<void> updateProfile({
     String? name,
     String? statusMessage,
     File? image,
   }) async {
-    await Future.delayed(const Duration(seconds: 1)); // 저장 지연 시뮬레이션
-
+    await Future.delayed(const Duration(milliseconds: 500));
+    // Ensure _mockUser is not null before calling copyWith
     if (_mockUser == null) return;
-
     _mockUser = _mockUser!.copyWith(
-      displayName: name ?? _mockUser!.displayName,
-      statusMessage: statusMessage ?? _mockUser!.statusMessage,
-      // 이미지는 로컬 mock에서 파일 경로 저장 혹은 무시 (여기선 무시)
+      displayName: name,
+      statusMessage: statusMessage,
+      // 이미지는 Mock이라 별도 처리 안함 (필요시 로컬 경로 할당 등)
       updatedAt: DateTime.now(),
     );
   }

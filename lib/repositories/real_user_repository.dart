@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'dart:io';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -24,29 +26,60 @@ class RealUserRepository implements UserRepository {
           'displayName': (user.displayName == null || user.displayName!.isEmpty)
               ? '나'
               : user.displayName,
-          'photoURL': user.photoURL,
+          'profileImageUrl': user.photoURL,
           'isAnonymous': user.isAnonymous,
           'inviteCode': _generateInviteCode(),
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
       } else {
-        // 기존 유저: 마지막 접속일 등 업데이트 필요 시 여기에 추가
+        // 기존 유저: 데이터 동기화 (Auth vs Firestore)
+        final data = snapshot.data();
+        if (data != null) {
+          final updates = <String, dynamic>{};
+
+          // 1. 익명 여부 동기화 (계정 연동 시 변경됨)
+          if (data['isAnonymous'] != user.isAnonymous) {
+            updates['isAnonymous'] = user.isAnonymous;
+          }
+
+          // 2. 이메일 동기화 (계정 연동 시 추가됨)
+          if (data['email'] != user.email && user.email != null) {
+            updates['email'] = user.email;
+          }
+
+          // 3. 프로필 이미지 동기화 (없을 때만 Auth 프로필 사용)
+          //    사용자가 이미 이미지를 설정했으면 덮어쓰지 않음
+          if ((data['profileImageUrl'] == null ||
+                  data['profileImageUrl'].isEmpty) &&
+              user.photoURL != null) {
+            updates['profileImageUrl'] = user.photoURL;
+          }
+
+          // 4. InviteCode 백필
+          if (data['inviteCode'] == null) {
+            updates['inviteCode'] = _generateInviteCode();
+          }
+
+          // 업데이트할 항목이 있으면 실행
+          if (updates.isNotEmpty) {
+            debugPrint('User 데이터 동기화 수행: $updates');
+            await userRef.update(updates);
+          }
+        }
       }
     } catch (e) {
       // TODO: 에러 처리
-      // print('initializeUser Error: $e');
+      debugPrint('initializeUser Error: $e');
     }
   }
 
   String _generateInviteCode() {
     // 8자리 영문 대문자 + 숫자 (스펙 준수)
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final rnd = Random();
     return String.fromCharCodes(
-      Iterable.generate(
-        8,
-        (_) => chars.codeUnitAt(DateTime.now().microsecond % chars.length),
-      ),
+      Iterable.generate(8, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))),
     );
   }
 
@@ -64,6 +97,25 @@ class RealUserRepository implements UserRepository {
       // TODO: 에러 핸들링
     }
     return null;
+  }
+
+  @override
+  Stream<UserModel?> watchMyProfile() {
+    final user = _auth.currentUser;
+    if (user == null) return Stream.value(null);
+
+    return _firestore
+        .collection('users')
+        .doc(user.uid)
+        .snapshots()
+        .map((doc) {
+          if (!doc.exists) return null;
+          return UserModel.fromFirestore(doc);
+        })
+        .handleError((error) {
+          debugPrint('watchMyProfile Error: $error');
+          return null;
+        });
   }
 
   @override
@@ -131,24 +183,54 @@ class RealUserRepository implements UserRepository {
 
     if (image != null) {
       final url = await _uploadImage(user.uid, image);
-      updates['photoURL'] = url;
+      updates['profileImageUrl'] = url;
     }
 
     await _firestore.collection('users').doc(user.uid).update(updates);
   }
 
   Future<String> _uploadImage(String uid, File image) async {
-    final ref = _storage.ref().child('users/$uid/profile.jpg');
-    // 메타데이터 설정 (선택사항)
-    final metadata = SettableMetadata(
-      contentType: 'image/jpeg',
-      customMetadata: {'uid': uid},
-    );
+    try {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final ref = _storage.ref().child('users/$uid/profile_$timestamp.jpg');
+      // 메타데이터 설정 (선택사항)
+      final metadata = SettableMetadata(
+        contentType: 'image/jpeg',
+        customMetadata: {'uid': uid},
+      );
 
-    // 업로드
-    await ref.putFile(image, metadata);
+      debugPrint('[RealUserRepository] uploading image to ${ref.fullPath}...');
+      debugPrint(
+        '[RealUserRepository] Source file: ${image.path}, exists: ${image.existsSync()}',
+      );
 
-    // 다운로드 URL 가져오기
-    return await ref.getDownloadURL();
+      // 업로드
+      final task = ref.putFile(image, metadata);
+
+      // 진행률 모니터링 (옵션)
+      task.snapshotEvents.listen((TaskSnapshot snapshot) {
+        debugPrint(
+          '[RealUserRepository] Upload progress: ${snapshot.bytesTransferred}/${snapshot.totalBytes}',
+        );
+      });
+
+      await task;
+      final snapshot = task.snapshot;
+      debugPrint(
+        '[RealUserRepository] Upload task finished. State: ${snapshot.state}',
+      );
+
+      if (snapshot.state == TaskState.success) {
+        // 다운로드 URL 가져오기
+        final url = await ref.getDownloadURL();
+        debugPrint('[RealUserRepository] Download URL retrieved: $url');
+        return url;
+      } else {
+        throw Exception('Image upload failed with state: ${snapshot.state}');
+      }
+    } catch (e) {
+      debugPrint('[RealUserRepository] _uploadImage Error: $e');
+      rethrow;
+    }
   }
 }

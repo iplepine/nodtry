@@ -9,6 +9,9 @@ abstract class UserRepository {
   /// 내 프로필 조회
   Future<UserModel?> getMyProfile();
 
+  /// 내 프로필 실시간 감지 (Stream)
+  Stream<UserModel?> watchMyProfile();
+
   /// 여러 사용자 프로필 조회 (Batch)
   Future<List<UserModel>> getUsersByIds(List<String> uids);
 

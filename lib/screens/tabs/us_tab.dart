@@ -120,7 +120,7 @@ class _UsTabState extends ConsumerState<UsTab> {
                             ? user!.displayName!
                             : l10n.usDefaultNameMe,
                         statusMessage: user?.statusMessage,
-                        profileImage: null, // TODO: user.profileImageUrl logic
+                        profileImageUrl: user?.profileImageUrl,
                         onEditProfile: () => _showEditProfileDialog(
                           context,
                           user?.displayName ?? l10n.usDefaultNameMe,
@@ -199,6 +199,7 @@ class _MeSection extends StatelessWidget {
   final String name;
   final String? statusMessage;
   final File? profileImage;
+  final String? profileImageUrl;
   final String? inviteCode;
   final VoidCallback onEditProfile;
 
@@ -207,12 +208,20 @@ class _MeSection extends StatelessWidget {
     required this.name,
     this.statusMessage,
     this.profileImage,
+    this.profileImageUrl,
     this.inviteCode,
     required this.onEditProfile,
   });
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider? imageProvider;
+    if (profileImage != null) {
+      imageProvider = FileImage(profileImage!);
+    } else if (profileImageUrl != null && profileImageUrl!.isNotEmpty) {
+      imageProvider = NetworkImage(profileImageUrl!);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -264,14 +273,14 @@ class _MeSection extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
-                      image: profileImage != null
+                      image: imageProvider != null
                           ? DecorationImage(
-                              image: FileImage(profileImage!),
+                              image: imageProvider,
                               fit: BoxFit.cover,
                             )
                           : null,
                     ),
-                    child: profileImage == null
+                    child: imageProvider == null
                         ? Icon(Icons.person, size: 32, color: AppColors.primary)
                         : null,
                   ),
@@ -763,6 +772,7 @@ class _EditProfileDialogContentState
 
   Future<void> _pickImage() async {
     try {
+      // 2. 이미지 선택
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
@@ -794,7 +804,7 @@ class _EditProfileDialogContentState
         }
       }
     } catch (e) {
-      // 이미지 선택 에러 (무시하거나 토스트)
+      debugPrint('이미지 선택 에러: $e');
     }
   }
 
@@ -813,8 +823,8 @@ class _EditProfileDialogContentState
         image: _tempProfileImage,
       );
 
-      // Provider 새로고침
-      ref.invalidate(myProfileProvider);
+      // Provider 새로고침 (Stream으로 자동 갱신되므로 불필요)
+      // ref.invalidate(myProfileProvider);
 
       if (mounted) {
         Navigator.pop(context);

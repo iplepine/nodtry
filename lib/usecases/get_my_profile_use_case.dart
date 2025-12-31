@@ -9,41 +9,22 @@ class GetMyProfileUseCase {
   GetMyProfileUseCase(this._userRepository, this._userLocalDataSource);
 
   Stream<UserModel?> execute() async* {
-    // 1. 로컬 캐시 확인 및 즉시 반환 (Fast Check)
-    final cachedUser = _userLocalDataSource.getUser();
+    // 1. 캐시된 데이터 먼저 방출 (빠른 UI 응답)
+    final cachedUser = await _userLocalDataSource.getUser();
     if (cachedUser != null) {
       yield cachedUser;
     }
 
-    // 2. 서버 데이터 확인 (Back-end Check)
-    try {
-      final remoteUser = await _userRepository.getMyProfile();
-
-      if (remoteUser != null) {
-        // 서버에 데이터가 존재하면 로컬 캐시 갱신
-        await _userLocalDataSource.saveUser(remoteUser);
-        yield remoteUser;
-      } else {
-        // 캐시에는 있었으나 서버에는 없는 경우 (삭제된 계정 등) -> 캐시 삭제
-        if (cachedUser != null) {
-          await _userLocalDataSource.clearUser();
-          yield null; // 로그아웃 처리 유도
-        } else {
-          // 캐시도 없고 서버도 없음
-          yield null;
-        }
+    // 2. Repository의 실시간 스트림(watchMyProfile) 연결
+    //    데이터가 올 때마다 캐시도 갱신
+    yield* _userRepository.watchMyProfile().map((user) {
+      if (user != null) {
+        // 비동기로 캐시 업데이트 (await 안함)
+        // Fire-and-forget 방식으로 처리하거나, 동기화를 보장하고 싶으면 asyncMap을 써야 함.
+        // 여기선 단순 캐싱 목적이므로 비동기 호출만 함.
+        _userLocalDataSource.saveUser(user);
       }
-    } catch (e) {
-      // 네트워크 에러 등으로 서버 조회 실패 시, 캐시가 있었으면 그 상태 유지
-      // 에러를 던져야 할까? UI에서 스낵바 등을 띄우려면 rethrow 하거나 Error 상태 yield
-      // 일단은 캐시 데이터만으로 유지
-      if (cachedUser == null) {
-        // 캐시도 없고 에러남 -> 에러 전파??
-        // Stream 에러 처리는 복잡하므로 여기선 로그 남기고 종료
-        // yield* Stream.error(e);
-        yield null;
-      }
-      // 캐시가 있으면 아무것도 안함 (캐시된 데이터가 최신이라 믿음)
-    }
+      return user;
+    });
   }
 }
