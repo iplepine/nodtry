@@ -7,8 +7,10 @@ import '../../widgets/quiet_header.dart';
 import '../../widgets/time_chip.dart';
 import '../../widgets/plan_rail.dart';
 import '../../models/home_state.dart';
+import '../../models/history_item.dart';
 import '../../routes/app_router.dart';
 import '../../providers/home_provider.dart';
+import '../../providers/repository_provider.dart';
 import '../../utils/time_formatter.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
@@ -281,6 +283,10 @@ class _NowTabState extends ConsumerState<NowTab>
                                 model: state,
                                 timeChipText: _getSecondaryTimeChipText(state),
                                 timeChipType: _getSecondaryTimeChipType(state),
+                                onReconcile: () {
+                                  // 데이터 갱신
+                                  ref.invalidate(homeCardStateProvider);
+                                },
                               ),
                             ),
                           ),
@@ -487,10 +493,13 @@ class _SecondaryExecutorCard extends StatelessWidget {
   final String? timeChipText;
   final TimeChipType? timeChipType;
 
+  final VoidCallback? onReconcile;
+
   const _SecondaryExecutorCard({
     required this.model,
     this.timeChipText,
     this.timeChipType,
+    this.onReconcile,
   });
 
   @override
@@ -506,11 +515,20 @@ class _SecondaryExecutorCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           children: [
-            if (timeChipText != null && timeChipType != null)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [TimeChip(text: timeChipText!, type: timeChipType!)],
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (model.state == HomeCardState.pastUncompleted)
+                  _ReconcileMenu(
+                    planId: model.plan?.id ?? '',
+                    onSuccess: onReconcile,
+                  )
+                else
+                  const SizedBox.shrink(),
+                if (timeChipText != null && timeChipType != null)
+                  TimeChip(text: timeChipText!, type: timeChipType!),
+              ],
+            ),
             if (timeChipText != null && timeChipType != null)
               const SizedBox(height: 8),
             _buildMessage(context, l10n),
@@ -699,6 +717,64 @@ class _ContextFooter extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+class _ReconcileMenu extends ConsumerWidget {
+  final String planId;
+  final VoidCallback? onSuccess;
+
+  const _ReconcileMenu({required this.planId, this.onSuccess});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return PopupMenuButton<HistoryStatus>(
+      icon: Icon(Icons.more_vert, size: 20, color: AppColors.textSecondary),
+      tooltip: l10n.reconcileTitle,
+      onSelected: (status) async {
+        await ref.read(recordRepositoryProvider).reconcilePlan(planId, status);
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.reconcileDoneMessage)));
+          onSuccess?.call();
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: HistoryStatus.actuallyDone,
+          child: Row(
+            children: [
+              const Icon(Icons.check_circle_outline, size: 18),
+              const SizedBox(width: 8),
+              Text(l10n.reconcileActuallyDone),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: HistoryStatus.rested,
+          child: Row(
+            children: [
+              const Icon(Icons.bedtime_outlined, size: 18),
+              const SizedBox(width: 8),
+              Text(l10n.reconcileTookRest),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: HistoryStatus.skipped,
+          child: Row(
+            children: [
+              const Icon(Icons.arrow_forward_outlined, size: 18),
+              const SizedBox(width: 8),
+              Text(l10n.reconcileSkip),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

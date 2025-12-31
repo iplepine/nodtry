@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/history_item.dart';
 import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/history_provider.dart';
+import '../../providers/repository_provider.dart';
 
-class HistoryCard extends StatelessWidget {
+/// 기록 카드 (Spec 3.1)
+class HistoryCard extends ConsumerWidget {
   final HistoryItem item;
 
   const HistoryCard({super.key, required this.item});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -50,11 +54,8 @@ class HistoryCard extends StatelessWidget {
               ),
             ),
 
-            // Bottom: Comment & Verifier
-            if (item.comment != null || item.verifierName != null) ...[
-              const SizedBox(height: 16),
-              _buildFooter(context),
-            ],
+            // Bottom: Footer (Verification & Comments)
+            _buildFooter(context, ref),
           ],
         ),
       ),
@@ -67,22 +68,30 @@ class HistoryCard extends StatelessWidget {
     IconData icon;
     String label;
 
+    // 실천 상태에 따른 라벨링 (배지)
     switch (item.status) {
       case HistoryStatus.done:
-        color = AppColors
-            .success; // TODO: Define success color in AppColors if missing, usually green or primary variant
+      case HistoryStatus.actuallyDone:
+        color = const Color(0xFF6B8E23); // Olive Green
         icon = Icons.check_circle_outline;
-        label = l10n.homeDidIt; // "했어"
+        label = item.status == HistoryStatus.actuallyDone
+            ? l10n.reconcileActuallyDone
+            : l10n.homeDidIt;
+        break;
+      case HistoryStatus.rested:
+        color = AppColors.secondary;
+        icon = Icons.bedtime_outlined;
+        label = l10n.reconcileTookRest;
         break;
       case HistoryStatus.verified:
         color = AppColors.primary;
         icon = Icons.verified;
-        label = l10n.homeChecked; // "확인됐어요"
+        label = l10n.homeChecked;
         break;
       case HistoryStatus.skipped:
         color = AppColors.textDisabled;
         icon = Icons.hourglass_empty;
-        label = "이번엔 못 했어"; // TODO: Add to l10n if needed
+        label = l10n.reconcileSkip;
         break;
     }
 
@@ -116,48 +125,22 @@ class HistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.background, // Slightly different bg for contrast
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          if (item.verifierName != null) ...[
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.secondary.withValues(alpha: 0.3),
-                image: item.verifierImageUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(
-                          item.verifierImageUrl!,
-                        ), // TODO: CacheNetworkImage
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: item.verifierImageUrl == null
-                  ? Center(
-                      child: Text(
-                        item.verifierName![0],
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    )
-                  : null,
+  Widget _buildFooter(BuildContext context, WidgetRef ref) {
+    final isMine = item.isMine('me'); // TODO: Pass real UID
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (item.comment != null) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 8),
-          ],
-          Expanded(
             child: Text(
-              item.comment ?? '',
+              item.comment!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AppColors.textSecondary,
                 fontSize: 13,
@@ -165,6 +148,94 @@ class HistoryCard extends StatelessWidget {
             ),
           ),
         ],
+        const SizedBox(height: 12),
+        if (isMine)
+          _buildMyActionVerification(context)
+        else
+          _buildPartnerActionVerification(context, ref),
+      ],
+    );
+  }
+
+  /// [내 실천] 카드 하단: 파트너의 확인 여부 표시
+  Widget _buildMyActionVerification(BuildContext context) {
+    if (!item.isVerifiedByPartner) return const SizedBox.shrink();
+
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      children: [
+        Icon(
+          Icons.thumb_up,
+          size: 14,
+          color: AppColors.primary.withValues(alpha: 0.6),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          l10n.historyMyActionVerified,
+          style: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// [파트너의 실천] 카드 하단: 나의 확인 여부 표시 및 액션
+  Widget _buildPartnerActionVerification(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (item.isVerifiedByMe) {
+      return Row(
+        children: [
+          Icon(Icons.thumb_up, size: 14, color: AppColors.primary),
+          const SizedBox(width: 6),
+          Text(
+            l10n.historyPartnerActionVerified,
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return InkWell(
+      onTap: () async {
+        await ref.read(recordRepositoryProvider).verifyHistoryItem(item.id);
+        // 프로바이더 갱신 (리스트 새로고침)
+        ref.invalidate(historyItemsProvider);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('확인되었습니다.')));
+        }
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Icon(
+              Icons.thumb_up_outlined,
+              size: 16,
+              color: AppColors.textDisabled,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              l10n.historyPartnerActionWaiting,
+              style: TextStyle(
+                color: AppColors.textDisabled,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

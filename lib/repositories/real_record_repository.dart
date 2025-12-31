@@ -186,4 +186,15 @@ class RealRecordRepository implements RecordRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> reconcilePlan(String planId, HistoryStatus status) async {
+    // TODO: Firestore에서 해당 계획의 상태를 업데이트하고 히스토리에 기록
+    // 48시간 제한 로직 포함 필요
+  }
+
+  @override
+  Future<void> verifyHistoryItem(String historyId) async {
+    // TODO: Firestore에서 해당 히스토리 항목의 isVerifiedByMe 필드를 true로 업데이트
+  }
 }

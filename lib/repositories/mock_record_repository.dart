@@ -11,8 +11,58 @@ class MockRecordRepository implements RecordRepository {
   // 개발자 화면에서 이 값을 변경하여 다양한 시나리오 테스트 가능
   List<HomeCardModel> _mockHomeCardModels = [
     const HomeCardModel(state: HomeCardState.planNeeded),
-    // HomeCardModel(state: HomeCardState.reportNeeded, plan: ...),
   ];
+
+  List<HistoryItem> _mockHistoryItems = [];
+
+  MockRecordRepository() {
+    _mockHistoryItems = _buildInitialMockHistory();
+  }
+
+  List<HistoryItem> _buildInitialMockHistory() {
+    return [
+      HistoryItem(
+        id: '1',
+        date: DateTime.now().subtract(const Duration(days: 1)), // 어제
+        title: '책 30분 읽기',
+        status: HistoryStatus.verified,
+        executorId: 'partner',
+        isVerifiedByMe: true,
+        comment: '어제도 고마워요. 덕분에 책 읽는 시간이 생겼어요.',
+        partnerName: '지민',
+        partnerImageUrl:
+            'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+      ),
+      HistoryItem(
+        id: '2',
+        date: DateTime.now().subtract(const Duration(days: 2)), // 2일 전
+        title: '매일 스쿼트 50회',
+        status: HistoryStatus.actuallyDone,
+        executorId: 'me',
+        isVerifiedByPartner: true,
+        comment: '뒤늦게라도 완료!',
+      ),
+      HistoryItem(
+        id: '3',
+        date: DateTime.now().subtract(const Duration(days: 3)), // 3일 전
+        title: '책 30분 읽기',
+        status: HistoryStatus.done,
+        executorId: 'partner',
+        isVerifiedByMe: false, // 아직 확인 안 함
+        partnerName: '지민',
+        partnerImageUrl:
+            'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+      ),
+      HistoryItem(
+        id: '4',
+        date: DateTime.now().subtract(const Duration(days: 4)), // 4일 전
+        title: '영양제 챙겨 먹기',
+        status: HistoryStatus.rested,
+        executorId: 'me',
+        comment: '오늘은 컨디션 난조로 쉬어갔어요.',
+      ),
+    ];
+  }
 
   @override
   Future<List<HomeCardModel>> getHomeCardStates() async {
@@ -24,41 +74,7 @@ class MockRecordRepository implements RecordRepository {
   @override
   Future<List<HistoryItem>> getHistoryItems() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    return [
-      HistoryItem(
-        date: DateTime.now().subtract(const Duration(days: 1)), // 어제
-        title: '책 30분 읽기',
-        status: HistoryStatus.verified,
-        comment: '어제도 고마워요. 덕분에 책 읽는 시간이 생겼어요.',
-        verifierName: '지민',
-        verifierImageUrl:
-            'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
-      ),
-      HistoryItem(
-        date: DateTime.now().subtract(const Duration(days: 2)), // 2일 전
-        title: '책 30분 읽기',
-        status: HistoryStatus.done,
-        comment: '오늘은 조금 늦었지만 완료!',
-      ),
-      HistoryItem(
-        date: DateTime.now().subtract(const Duration(days: 3)), // 3일 전
-        title: '책 30분 읽기',
-        status: HistoryStatus.skipped,
-        comment: '이번엔 못 했어',
-        verifierName: '지민',
-        verifierImageUrl:
-            'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
-      ),
-      HistoryItem(
-        date: DateTime.now().subtract(const Duration(days: 4)), // 4일 전
-        title: '책 30분 읽기',
-        status: HistoryStatus.verified,
-        comment: '꾸준히 하는 모습 멋져요',
-        verifierName: '지수',
-        verifierImageUrl:
-            'https://api.dicebear.com/7.x/avataaars/png?seed=Jisoo',
-      ),
-    ];
+    return _mockHistoryItems;
   }
 
   @override
@@ -169,6 +185,34 @@ class MockRecordRepository implements RecordRepository {
   Future<void> deletePlansByUserId(String uid) async {
     // Mock: 딜레이만
     await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  @override
+  Future<void> reconcilePlan(String planId, HistoryStatus status) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    // 선택된 항목을 목록에서 제거하거나 상태를 변경함
+    _mockHomeCardModels.removeWhere((m) => m.plan?.id == planId);
+  }
+
+  @override
+  Future<void> verifyHistoryItem(String historyId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final index = _mockHistoryItems.indexWhere((item) => item.id == historyId);
+    if (index != -1) {
+      final item = _mockHistoryItems[index];
+      _mockHistoryItems[index] = HistoryItem(
+        id: item.id,
+        date: item.date,
+        title: item.title,
+        status: item.status,
+        executorId: item.executorId,
+        isVerifiedByMe: true, // 내가 확인함
+        isVerifiedByPartner: item.isVerifiedByPartner,
+        comment: item.comment,
+        partnerName: item.partnerName,
+        partnerImageUrl: item.partnerImageUrl,
+      );
+    }
   }
 }
 

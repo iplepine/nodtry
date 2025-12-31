@@ -581,7 +581,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAuthServiceNotFound => 'Auth Service not found';
 
   @override
-  String settingsDeleteAccountFailed(String error) {
+  String settingsDeleteAccountFailed(Object error) {
     return 'Failed to delete account: $error';
   }
+
+  @override
+  String get reconcileTitle => 'Reconcile';
+
+  @override
+  String get reconcileActuallyDone => 'Actually did it';
+
+  @override
+  String get reconcileTookRest => 'Took a break today';
+
+  @override
+  String get reconcileSkip => 'Skip';
+
+  @override
+  String get reconcileDoneMessage => 'Record has been reconciled.';
+
+  @override
+  String get historyFilterAll => 'All';
+
+  @override
+  String get historyFilterMe => 'My Action';
+
+  @override
+  String get historyFilterPartner => 'Partner\'s Action';
+
+  @override
+  String get historyMyActionVerified => 'Verified by partner';
+
+  @override
+  String get historyPartnerActionVerified => 'I verified it';
+
+  @override
+  String get historyPartnerActionWaiting => 'Not verified yet';
 }

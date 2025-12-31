@@ -247,6 +247,17 @@
   "settingsDelete": "탈퇴",
   "settingsAccountDeletedSuccess": "계정이 삭제되었습니다",
   "settingsAuthServiceNotFound": "인증 서비스를 찾을 수 없습니다",
-  "settingsDeleteAccountFailed": "계정 삭제 실패: {error}"
+  "settingsDeleteAccountFailed": "계정 삭제 실패: {error}",
+  "reconcileTitle": "정리하기",
+  "reconcileActuallyDone": "사실 했어요",
+  "reconcileTookRest": "오늘은 쉬어갔어요",
+  "reconcileSkip": "넘어갈게요",
+  "reconcileDoneMessage": "기록이 정리되었습니다.",
+  "historyFilterAll": "모두",
+  "historyFilterMe": "내 실천",
+  "historyFilterPartner": "파트너의 실천",
+  "historyMyActionVerified": "파트너가 확인함",
+  "historyPartnerActionVerified": "내가 확인했어요",
+  "historyPartnerActionWaiting": "아직 확인하지 않았어요"
 }
 

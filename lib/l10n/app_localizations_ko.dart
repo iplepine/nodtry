@@ -568,7 +568,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAuthServiceNotFound => '인증 서비스를 찾을 수 없습니다';
 
   @override
-  String settingsDeleteAccountFailed(String error) {
+  String settingsDeleteAccountFailed(Object error) {
     return '계정 삭제 실패: $error';
   }
+
+  @override
+  String get reconcileTitle => '정리하기';
+
+  @override
+  String get reconcileActuallyDone => '사실 했어요';
+
+  @override
+  String get reconcileTookRest => '오늘은 쉬어갔어요';
+
+  @override
+  String get reconcileSkip => '넘어갈게요';
+
+  @override
+  String get reconcileDoneMessage => '기록이 정리되었습니다.';
+
+  @override
+  String get historyFilterAll => '모두';
+
+  @override
+  String get historyFilterMe => '내 실천';
+
+  @override
+  String get historyFilterPartner => '파트너의 실천';
+
+  @override
+  String get historyMyActionVerified => '파트너가 확인함';
+
+  @override
+  String get historyPartnerActionVerified => '내가 확인했어요';
+
+  @override
+  String get historyPartnerActionWaiting => '아직 확인하지 않았어요';
 }

@@ -772,13 +772,16 @@
     "description": "Error message when auth service is missing"
   },
   "settingsDeleteAccountFailed": "Failed to delete account: {error}",
-  "@settingsDeleteAccountFailed": {
-    "description": "Error message when account deletion fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  }
+  "reconcileTitle": "Reconcile",
+  "reconcileActuallyDone": "Actually did it",
+  "reconcileTookRest": "Took a break today",
+  "reconcileSkip": "Skip",
+  "reconcileDoneMessage": "Record has been reconciled.",
+  "historyFilterAll": "All",
+  "historyFilterMe": "My Action",
+  "historyFilterPartner": "Partner's Action",
+  "historyMyActionVerified": "Verified by partner",
+  "historyPartnerActionVerified": "I verified it",
+  "historyPartnerActionWaiting": "Not verified yet"
 }
 

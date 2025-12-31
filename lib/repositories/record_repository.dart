@@ -17,4 +17,10 @@ abstract class RecordRepository {
 
   /// 특정 유저의 모든 계획을 삭제합니다. (회원 탈퇴 처리용)
   Future<void> deletePlansByUserId(String uid);
+
+  /// 사후 정리 (Reconcile)
+  Future<void> reconcilePlan(String planId, HistoryStatus status);
+
+  /// 파트너의 실천 기록 확인 처리
+  Future<void> verifyHistoryItem(String historyId);
 }

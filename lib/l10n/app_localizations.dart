@@ -1178,11 +1178,77 @@ abstract class AppLocalizations {
   /// **'Auth Service not found'**
   String get settingsAuthServiceNotFound;
 
-  /// Error message when account deletion fails
+  /// No description provided for @settingsDeleteAccountFailed.
   ///
   /// In en, this message translates to:
   /// **'Failed to delete account: {error}'**
-  String settingsDeleteAccountFailed(String error);
+  String settingsDeleteAccountFailed(Object error);
+
+  /// No description provided for @reconcileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile'**
+  String get reconcileTitle;
+
+  /// No description provided for @reconcileActuallyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Actually did it'**
+  String get reconcileActuallyDone;
+
+  /// No description provided for @reconcileTookRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Took a break today'**
+  String get reconcileTookRest;
+
+  /// No description provided for @reconcileSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get reconcileSkip;
+
+  /// No description provided for @reconcileDoneMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Record has been reconciled.'**
+  String get reconcileDoneMessage;
+
+  /// No description provided for @historyFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get historyFilterAll;
+
+  /// No description provided for @historyFilterMe.
+  ///
+  /// In en, this message translates to:
+  /// **'My Action'**
+  String get historyFilterMe;
+
+  /// No description provided for @historyFilterPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner\'s Action'**
+  String get historyFilterPartner;
+
+  /// No description provided for @historyMyActionVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified by partner'**
+  String get historyMyActionVerified;
+
+  /// No description provided for @historyPartnerActionVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'I verified it'**
+  String get historyPartnerActionVerified;
+
+  /// No description provided for @historyPartnerActionWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Not verified yet'**
+  String get historyPartnerActionWaiting;
 }
 
 class _AppLocalizationsDelegate
