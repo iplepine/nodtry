@@ -32,7 +32,7 @@ class _NowTabState extends ConsumerState<NowTab>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
 
@@ -41,8 +41,8 @@ class _NowTabState extends ConsumerState<NowTab>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
-    _primaryScaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    _primaryScaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
     );
 
     // Secondary Card 애니메이션: Fade
@@ -194,12 +194,18 @@ class _NowTabState extends ConsumerState<NowTab>
     // Provider 구독
     final homeStateAsync = ref.watch(homeCardStateProvider);
 
-    // 데이터 변경 감지하여 애니메이션만 트리거
+    // 데이터 변경 감지하여 애니메이션 트리거
     ref.listen(homeCardStateProvider, (previous, next) {
-      if (next.hasValue) {
+      if (next.hasValue && previous != next) {
         _onDataLoaded();
       }
     });
+
+    // 첫 진입 시에도 실행되도록 보장
+    if (_animationController.status == AnimationStatus.dismissed &&
+        homeStateAsync.hasValue) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onDataLoaded());
+    }
 
     return homeStateAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -254,7 +260,10 @@ class _NowTabState extends ConsumerState<NowTab>
                             child: SlideTransition(
                               position:
                                   Tween<Offset>(
-                                    begin: const Offset(0, 0.1), // 시작/사라질 때 아래로
+                                    begin: const Offset(
+                                      0,
+                                      0.15,
+                                    ), // 시작/사라질 때 더 아래로
                                     end: Offset.zero, // 정상 위치
                                   ).animate(
                                     CurvedAnimation(
