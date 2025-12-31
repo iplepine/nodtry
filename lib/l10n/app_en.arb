@@ -219,6 +219,43 @@
     "description": "Us tab - Badge: They support Me"
   },
   "usBadgeCheering": "Cheering",
+  "usGuestWarningMessage": "If you change phone or delete app/data, you may lose records.",
+  "usGuestWarningAction": "Link Account to Keep Records",
+  "usLinkSuccess": "Google account linked successfully!",
+  "usLinkError": "Account linking failed: {error}",
+  "@usLinkError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "usLoadError": "Error loading connections",
+  "usNoInviteCode": "No Code",
+  "usNoName": "No Name",
+  "usUnknownUser": "Unknown User",
+  "usDisconnectDialogTitle": "Disconnect",
+  "usDisconnectDialogContent": "Disconnect from {name}?",
+  "@usDisconnectDialogContent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "usDisconnectConfirm": "Disconnect",
+  "usDisconnectSuccess": "Disconnected successfully.",
+  "usDisconnectError": "Disconnection failed: {error}",
+  "@usDisconnectError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "usDisconnectTooltip": "Disconnect",
+  "usCropImageTitle": "Crop Profile Image",
+  "cancel": "Cancel",
   "@usBadgeCheering": {
     "description": "Us tab - Badge: I cheer Them"
   },

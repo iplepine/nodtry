@@ -404,6 +404,102 @@ abstract class AppLocalizations {
   /// **'Cheering'**
   String get usBadgeCheering;
 
+  /// No description provided for @usGuestWarningMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'If you change phone or delete app/data, you may lose records.'**
+  String get usGuestWarningMessage;
+
+  /// No description provided for @usGuestWarningAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Account to Keep Records'**
+  String get usGuestWarningAction;
+
+  /// No description provided for @usLinkSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Google account linked successfully!'**
+  String get usLinkSuccess;
+
+  /// No description provided for @usLinkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Account linking failed: {error}'**
+  String usLinkError(String error);
+
+  /// No description provided for @usLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading connections'**
+  String get usLoadError;
+
+  /// No description provided for @usNoInviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'No Code'**
+  String get usNoInviteCode;
+
+  /// No description provided for @usNoName.
+  ///
+  /// In en, this message translates to:
+  /// **'No Name'**
+  String get usNoName;
+
+  /// No description provided for @usUnknownUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown User'**
+  String get usUnknownUser;
+
+  /// No description provided for @usDisconnectDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get usDisconnectDialogTitle;
+
+  /// No description provided for @usDisconnectDialogContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect from {name}?'**
+  String usDisconnectDialogContent(String name);
+
+  /// No description provided for @usDisconnectConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get usDisconnectConfirm;
+
+  /// No description provided for @usDisconnectSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected successfully.'**
+  String get usDisconnectSuccess;
+
+  /// No description provided for @usDisconnectError.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnection failed: {error}'**
+  String usDisconnectError(String error);
+
+  /// No description provided for @usDisconnectTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get usDisconnectTooltip;
+
+  /// No description provided for @usCropImageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop Profile Image'**
+  String get usCropImageTitle;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
   /// Us tab - Profile edit image label
   ///
   /// In en, this message translates to:

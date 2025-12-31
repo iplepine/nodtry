@@ -168,6 +168,60 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usBadgeCheering => '응원하는 중';
 
   @override
+  String get usGuestWarningMessage => '휴대폰을 바꾸거나 앱/데이터를 삭제하면 기록을 잃을 수 있어요.';
+
+  @override
+  String get usGuestWarningAction => '계정 연결하고 기록 지키기';
+
+  @override
+  String get usLinkSuccess => '구글 계정이 성공적으로 연결되었습니다!';
+
+  @override
+  String usLinkError(String error) {
+    return '계정 연결 실패: $error';
+  }
+
+  @override
+  String get usLoadError => '연결 정보를 불러오는 중 오류가 발생했습니다.';
+
+  @override
+  String get usNoInviteCode => '코드 없음';
+
+  @override
+  String get usNoName => '이름 없음';
+
+  @override
+  String get usUnknownUser => '상대방';
+
+  @override
+  String get usDisconnectDialogTitle => '연결 해제';
+
+  @override
+  String usDisconnectDialogContent(String name) {
+    return '$name님과의 연결을 해제하시겠습니까?';
+  }
+
+  @override
+  String get usDisconnectConfirm => '해제';
+
+  @override
+  String get usDisconnectSuccess => '연결이 해제되었습니다.';
+
+  @override
+  String usDisconnectError(String error) {
+    return '연결 해제 실패: $error';
+  }
+
+  @override
+  String get usDisconnectTooltip => '연결 해제';
+
+  @override
+  String get usCropImageTitle => '프로필 사진 자르기';
+
+  @override
+  String get cancel => '취소';
+
+  @override
   String get usProfileEditImageLabel => '프로필 사진 변경';
 
   @override

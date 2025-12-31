@@ -78,6 +78,43 @@
   "usProfileEditImageLabel": "프로필 사진 변경",
   "usAddConnectionLabel": "새 연결 추가",
   "usBadgeMutual": "함께하는 중",
+  "usGuestWarningMessage": "휴대폰을 바꾸거나 앱/데이터를 삭제하면 기록을 잃을 수 있어요.",
+  "usGuestWarningAction": "계정 연결하고 기록 지키기",
+  "usLinkSuccess": "구글 계정이 성공적으로 연결되었습니다!",
+  "usLinkError": "계정 연결 실패: {error}",
+  "@usLinkError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "usLoadError": "연결 정보를 불러오는 중 오류가 발생했습니다.",
+  "usNoInviteCode": "코드 없음",
+  "usNoName": "이름 없음",
+  "usUnknownUser": "상대방",
+  "usDisconnectDialogTitle": "연결 해제",
+  "usDisconnectDialogContent": "{name}님과의 연결을 해제하시겠습니까?",
+  "@usDisconnectDialogContent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "usDisconnectConfirm": "해제",
+  "usDisconnectSuccess": "연결이 해제되었습니다.",
+  "usDisconnectError": "연결 해제 실패: {error}",
+  "@usDisconnectError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "usDisconnectTooltip": "연결 해제",
+  "usCropImageTitle": "프로필 사진 자르기",
+  "cancel": "취소",
   "usEmptyMatesTitle": "아직 연결된 메이트가 없어요",
   "usEmptyMatesSubtitle": "초대 코드를 보내서 서로의 안전 기지가 되어주세요",
   "headerWeekProgress": "{total}주 중 · {week}주차",

@@ -68,7 +68,7 @@ class _UsTabState extends ConsumerState<UsTab> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '휴대폰을 바꾸거나 앱/데이터를 삭제하면 기록을 잃을 수 있어요.',
+                                      l10n.usGuestWarningMessage,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium
@@ -96,7 +96,7 @@ class _UsTabState extends ConsumerState<UsTab> {
                                               ),
                                             ),
                                             child: Text(
-                                              '계정 연결하고 기록 지키기',
+                                              l10n.usGuestWarningAction,
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .bodyMedium
@@ -142,7 +142,7 @@ class _UsTabState extends ConsumerState<UsTab> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Text('Error: $err'),
+                error: (err, stack) => Text('${l10n.usLoadError}: $err'),
               ),
 
               const SizedBox(height: 48),
@@ -187,17 +187,21 @@ class _UsTabState extends ConsumerState<UsTab> {
       final credential = await useCase.execute();
 
       if (credential != null && mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('구글 계정이 성공적으로 연결되었습니다!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.usLinkSuccess)),
+        );
         // Provider 갱신을 통해 UI 업데이트 (isAnonymous가 false가 됨)
         ref.invalidate(myProfileProvider);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('계정 연결 실패: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.usLinkError(e.toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -355,7 +359,7 @@ class _MeSection extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      inviteCode ?? '코드 없음',
+                      inviteCode ?? l10n.usNoInviteCode,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -493,7 +497,7 @@ class _YouSection extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) => Center(
             child: Text(
-              'Error loading connections',
+              l10n.usLoadError,
               style: TextStyle(color: AppColors.error),
             ),
           ),
@@ -507,20 +511,27 @@ class _YouSection extends ConsumerWidget {
     WidgetRef ref,
     ConnectedUser person,
   ) async {
-    // final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('연결 해제'),
-        content: Text('${person.user.displayName ?? '상대방'}님과의 연결을 해제하시겠습니까?'),
+        title: Text(l10n.usDisconnectDialogTitle),
+        content: Text(
+          l10n.usDisconnectDialogContent(
+            person.user.displayName ?? l10n.usUnknownUser,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('해제', style: TextStyle(color: Colors.red)),
+            child: Text(
+              l10n.usDisconnectConfirm,
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -540,13 +551,13 @@ class _YouSection extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('연결이 해제되었습니다.')));
+          ).showSnackBar(SnackBar(content: Text(l10n.usDisconnectSuccess)));
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('연결 해제 실패: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.usDisconnectError(e.toString()))),
+          );
         }
       }
     }
@@ -643,7 +654,7 @@ class _PersonCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        person.user.displayName ?? '이름 없음',
+                        person.user.displayName ?? l10n.usNoName,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -695,7 +706,7 @@ class _PersonCard extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.link_off, color: Colors.redAccent),
                   onPressed: onDisconnect,
-                  tooltip: '연결 해제',
+                  tooltip: l10n.usDisconnectTooltip,
                 ),
               ],
             ),
@@ -789,14 +800,14 @@ class _EditProfileDialogContentState
           maxHeight: 512,
           uiSettings: [
             AndroidUiSettings(
-              toolbarTitle: '프로필 사진 자르기',
+              toolbarTitle: widget.l10n.usCropImageTitle,
               toolbarColor: AppColors.primary,
               toolbarWidgetColor: Colors.white,
               initAspectRatio: CropAspectRatioPreset.square,
               lockAspectRatio: true,
             ),
             IOSUiSettings(
-              title: '프로필 사진 자르기',
+              title: widget.l10n.usCropImageTitle,
               aspectRatioLockEnabled: true,
               resetAspectRatioEnabled: false,
             ),

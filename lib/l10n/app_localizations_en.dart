@@ -170,6 +170,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usBadgeCheering => 'Cheering';
 
   @override
+  String get usGuestWarningMessage =>
+      'If you change phone or delete app/data, you may lose records.';
+
+  @override
+  String get usGuestWarningAction => 'Link Account to Keep Records';
+
+  @override
+  String get usLinkSuccess => 'Google account linked successfully!';
+
+  @override
+  String usLinkError(String error) {
+    return 'Account linking failed: $error';
+  }
+
+  @override
+  String get usLoadError => 'Error loading connections';
+
+  @override
+  String get usNoInviteCode => 'No Code';
+
+  @override
+  String get usNoName => 'No Name';
+
+  @override
+  String get usUnknownUser => 'Unknown User';
+
+  @override
+  String get usDisconnectDialogTitle => 'Disconnect';
+
+  @override
+  String usDisconnectDialogContent(String name) {
+    return 'Disconnect from $name?';
+  }
+
+  @override
+  String get usDisconnectConfirm => 'Disconnect';
+
+  @override
+  String get usDisconnectSuccess => 'Disconnected successfully.';
+
+  @override
+  String usDisconnectError(String error) {
+    return 'Disconnection failed: $error';
+  }
+
+  @override
+  String get usDisconnectTooltip => 'Disconnect';
+
+  @override
+  String get usCropImageTitle => 'Crop Profile Image';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
   String get usProfileEditImageLabel => 'Change profile picture';
 
   @override
