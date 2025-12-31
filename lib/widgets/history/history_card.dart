@@ -31,7 +31,7 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
           children: [
             GestureDetector(
               onTap: (!isMine && !widget.item.isVerifiedByMe)
-                  ? () => setState(() => _isMenuOpen = true)
+                  ? () => setState(() => _isMenuOpen = !_isMenuOpen)
                   : null,
               child: Container(
                 decoration: BoxDecoration(
