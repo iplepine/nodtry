@@ -93,7 +93,7 @@
   },
   "headerNoPlan": "아직 계획이 없어요",
   "headerPlanEnded": "4주가 끝났어요",
-  "nowNoPlan": "이번 달 계획이 아직 없어요",
+  "nowNoPlan": "이번 달, 어떤 약속을 해볼까요?",
   "nowCreatePlan": "계획 짜기",
   "nowNextActionIn": "다음 행동까지 {time} 남았어요",
   "@nowNextActionIn": {
@@ -261,6 +261,8 @@
   "historyPartnerActionWaiting": "아직 안 봤어요",
   "historyActionSawIt": "봤어요 👍",
   "historyActionCheer": "응원할게 💜",
-  "historyActionSkip": "그냥 넘기기"
+  "historyActionSkip": "그냥 넘기기",
+  "timeChipStillActionable": "아직 할 수 있어요",
+  "timeChipPassed": "지나갔어요"
 }
 

@@ -103,7 +103,7 @@ class _NowTabState extends ConsumerState<NowTab>
   /// Time Chip 텍스트 가져오기
   String? _getTimeChipText(HomeCardModel model) {
     if (model.state == HomeCardState.pastUncompleted) {
-      return AppLocalizations.of(context)!.pastUncompletedTimeChip;
+      return '${AppLocalizations.of(context)!.pastUncompletedTimeChip} · ${AppLocalizations.of(context)!.timeChipPassed}';
     }
 
     if (model.plan != null && model.plan!.items.isNotEmpty) {
@@ -122,7 +122,11 @@ class _NowTabState extends ConsumerState<NowTab>
             item.notificationTime!.hour,
             item.notificationTime!.minute,
           );
-          return TimeFormatter.formatForTimeChip(scheduledTime);
+          final baseTime = TimeFormatter.formatForTimeChip(scheduledTime);
+          if (model.state == HomeCardState.reportNeeded) {
+            return '$baseTime · ${AppLocalizations.of(context)!.timeChipStillActionable}';
+          }
+          return baseTime;
         }
       }
     }
@@ -732,7 +736,11 @@ class _ReconcileMenu extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return PopupMenuButton<HistoryStatus>(
-      icon: Icon(Icons.more_vert, size: 20, color: AppColors.textSecondary),
+      icon: Icon(
+        Icons.more_vert,
+        size: 20,
+        color: AppColors.textSecondary.withValues(alpha: 0.5),
+      ),
       tooltip: l10n.reconcileTitle,
       onSelected: (status) async {
         await ref.read(recordRepositoryProvider).reconcilePlan(planId, status);

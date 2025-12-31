@@ -282,7 +282,7 @@
   "@headerPlanEnded": {
     "description": "Message when plan period ended"
   },
-  "nowNoPlan": "No plan for this month yet",
+  "nowNoPlan": "What promises shall we make this month?",
   "@nowNoPlan": {
     "description": "Message when there's no active plan"
   },
@@ -785,6 +785,8 @@
   "historyPartnerActionWaiting": "Not seen yet",
   "historyActionSawIt": "Saw it 👍",
   "historyActionCheer": "Cheering you 💜",
-  "historyActionSkip": "Just skip"
+  "historyActionSkip": "Just skip",
+  "timeChipStillActionable": "Still actionable",
+  "timeChipPassed": "Passed"
 }
 
