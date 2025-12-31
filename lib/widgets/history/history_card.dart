@@ -21,9 +21,6 @@ class HistoryCard extends ConsumerWidget {
       child: FractionallySizedBox(
         widthFactor: 0.85,
         child: Column(
-          crossAxisAlignment: isMine
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
           children: [
             Container(
               decoration: BoxDecoration(
@@ -70,19 +67,24 @@ class HistoryCard extends ConsumerWidget {
                       ),
                     ),
 
-                    // Bottom: Comment (Footer)
+                    // Bottom: Comment (Section)
                     _buildCommentSection(context),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 8),
-            // 외부 반응 영역 (따봉/말줄임표)
-            if (isMine)
-              _buildMyActionVerification(context)
-            else
-              _buildPartnerActionVerification(context, ref),
-            const SizedBox(height: 16), // 카드 간 간격
+            const SizedBox(height: 12), // 의도적인 여백 (카드와 반응 분리)
+            // 외부 반응 영역 (Align을 통해 극단적으로 정렬)
+            Align(
+              alignment: isMine ? Alignment.centerLeft : Alignment.centerRight,
+              child: isMine
+                  ? _buildMyActionVerification(context) // 파트너의 반응은 왼쪽 끝
+                  : _buildPartnerActionVerification(
+                      context,
+                      ref,
+                    ), // 나의 반응은 오른쪽 끝
+            ),
+            const SizedBox(height: 24), // 카드 간 간격
           ],
         ),
       ),
@@ -174,7 +176,7 @@ class HistoryCard extends ConsumerWidget {
 
     final l10n = AppLocalizations.of(context)!;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start, // 파트너의 반응은 왼쪽 (상대가 보낸 것)
+      mainAxisAlignment: MainAxisAlignment.start, // 파트너의 반응은 왼쪽 끝 (상대가 보낸 것)
       children: [
         Icon(
           Icons.thumb_up,
@@ -185,7 +187,7 @@ class HistoryCard extends ConsumerWidget {
         Text(
           l10n.historyMyActionVerified,
           style: TextStyle(
-            color: AppColors.textSecondary,
+            color: AppColors.textSecondary.withValues(alpha: 0.8),
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
