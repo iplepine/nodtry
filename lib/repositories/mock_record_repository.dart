@@ -10,6 +10,24 @@ class MockRecordRepository implements RecordRepository {
   // 테스트용 상태 설정
   // 개발자 화면에서 이 값을 변경하여 다양한 시나리오 테스트 가능
   List<HomeCardModel> _mockHomeCardModels = [
+    HomeCardModel(
+      state: HomeCardState.pastUncompleted,
+      plan: Plan(
+        userId: 'me',
+        startDate: DateTime.now().subtract(const Duration(days: 1)),
+        endDate: DateTime.now().add(const Duration(days: 1)),
+        state: PlanState.active,
+        items: [
+          PlanItem(
+            title: '아침 영양제 챙겨먹기',
+            days: [1, 2, 3, 4, 5, 6, 7],
+            count: 7,
+            notificationTime: NotificationTime.custom(8, 0),
+          ),
+        ],
+        createdAt: DateTime.now(),
+      ),
+    ),
     const HomeCardModel(state: HomeCardState.planNeeded),
   ];
 
@@ -67,7 +85,15 @@ class MockRecordRepository implements RecordRepository {
         title: '물 2L 마시기',
         status: HistoryStatus.skipped,
         executorId: 'me',
-        comment: '아쉽게도 시간이 지나버렸어요.',
+        comment: '시간이 초과되어 자동으로 넘겨졌어요.',
+      ),
+      HistoryItem(
+        id: '6',
+        date: DateTime.now().subtract(const Duration(hours: 12)), // 반나절 전
+        title: '스트레칭 하기',
+        status: HistoryStatus.skipped,
+        executorId: 'me',
+        // 코멘트 없음 (완전히 대응 안 한 상태 시뮬레이션)
       ),
     ];
   }
