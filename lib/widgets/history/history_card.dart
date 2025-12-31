@@ -29,54 +29,60 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
         widthFactor: 0.85,
         child: Column(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(20),
-                  topRight: const Radius.circular(20),
-                  bottomLeft: Radius.circular(isMine ? 20 : 4),
-                  bottomRight: Radius.circular(isMine ? 4 : 20),
+            GestureDetector(
+              onTap: (!isMine && !widget.item.isVerifiedByMe)
+                  ? () => setState(() => _isMenuOpen = true)
+                  : null,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(20),
+                    topRight: const Radius.circular(20),
+                    bottomLeft: Radius.circular(isMine ? 20 : 4),
+                    bottomRight: Radius.circular(isMine ? 4 : 20),
+                  ),
+                  border: Border.all(
+                    color: AppColors.surface.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
                 ),
-                border: Border.all(
-                  color: AppColors.surface.withValues(alpha: 0.5),
-                  width: 1,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Top: Date & Status
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _formatDate(context, widget.item.date),
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                        ),
-                        _buildStatusBadge(context),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Middle: Title
-                    Text(
-                      widget.item.title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Top: Date & Status
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _formatDate(context, widget.item.date),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                          _buildStatusBadge(context),
+                        ],
                       ),
-                    ),
+                      const SizedBox(height: 12),
 
-                    // Bottom: Comment (Section)
-                    _buildCommentSection(context),
-                  ],
+                      // Middle: Title
+                      Text(
+                        widget.item.title,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+
+                      // Bottom: Comment (Section)
+                      _buildCommentSection(context),
+                    ],
+                  ),
                 ),
               ),
             ),
