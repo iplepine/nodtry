@@ -625,9 +625,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyActionCheer => 'Cheering you 💜';
 
   @override
-  String get historyActionSkip => 'Just skip';
-
-  @override
   String get timeChipStillActionable => 'Still actionable';
 
   @override

@@ -1262,12 +1262,6 @@ abstract class AppLocalizations {
   /// **'Cheering you 💜'**
   String get historyActionCheer;
 
-  /// No description provided for @historyActionSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Just skip'**
-  String get historyActionSkip;
-
   /// No description provided for @timeChipStillActionable.
   ///
   /// In en, this message translates to:

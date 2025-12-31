@@ -83,6 +83,10 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
 
                       // Bottom: Comment (Section)
                       _buildCommentSection(context),
+
+                      // Waiting Status (Inside Card)
+                      if (!isMine && !widget.item.isVerifiedByMe)
+                        _buildWaitingStatus(context),
                     ],
                   ),
                 ),
@@ -90,7 +94,7 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
             ),
           ),
         ),
-        const SizedBox(height: 12), // 의도적인 여백 (카드와 반응 분리)
+        const SizedBox(height: 8), // 의도적인 여백 (카드와 반응 분리)
         // 외부 반응 영역 (카드를 살짝 벗어난 위치에 앵커링)
         Align(
           alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
@@ -193,6 +197,27 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
     );
   }
 
+  Widget _buildWaitingStatus(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            l10n.historyPartnerActionWaiting,
+            style: TextStyle(
+              color: AppColors.textDisabled,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// [내 실천] 카드 하단: 파트너의 확인 여부 표시
   Widget _buildMyActionVerification(BuildContext context) {
     if (!widget.item.isVerifiedByPartner) return const SizedBox.shrink();
@@ -279,32 +304,12 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
               },
               color: Colors.purple,
             ),
-            _buildActionButton(
-              label: l10n.historyActionSkip,
-              onTap: () {
-                if (mounted) setState(() => _isMenuOpen = false);
-              },
-              color: AppColors.textSecondary,
-            ),
           ],
         ),
       );
     }
 
-    return GestureDetector(
-      onTap: () => setState(() => _isMenuOpen = true),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Text(
-          l10n.historyPartnerActionWaiting,
-          style: TextStyle(
-            color: AppColors.textDisabled.withValues(alpha: 0.6), // 아주 연하게
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   Widget _buildActionButton({

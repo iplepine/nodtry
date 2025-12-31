@@ -603,16 +603,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get historyPartnerActionVerified => '봤어요';
 
   @override
-  String get historyPartnerActionWaiting => '아직 안 봤어요';
+  String get historyPartnerActionWaiting => '아직 안 봤어요...';
 
   @override
   String get historyActionSawIt => '봤어요 👍';
 
   @override
   String get historyActionCheer => '응원할게 💜';
-
-  @override
-  String get historyActionSkip => '그냥 넘기기';
 
   @override
   String get timeChipStillActionable => '아직 할 수 있어요';
