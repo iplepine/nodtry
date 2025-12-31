@@ -1235,19 +1235,19 @@ abstract class AppLocalizations {
   /// No description provided for @historyMyActionVerified.
   ///
   /// In en, this message translates to:
-  /// **'Verified by partner'**
+  /// **'Partner saw it'**
   String get historyMyActionVerified;
 
   /// No description provided for @historyPartnerActionVerified.
   ///
   /// In en, this message translates to:
-  /// **'I verified it'**
+  /// **'Saw it'**
   String get historyPartnerActionVerified;
 
   /// No description provided for @historyPartnerActionWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Not verified yet'**
+  /// **'Not seen yet'**
   String get historyPartnerActionWaiting;
 }
 

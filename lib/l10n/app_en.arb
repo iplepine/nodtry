@@ -780,8 +780,8 @@
   "historyFilterAll": "All",
   "historyFilterMe": "My Action",
   "historyFilterPartner": "Partner's Action",
-  "historyMyActionVerified": "Verified by partner",
-  "historyPartnerActionVerified": "I verified it",
-  "historyPartnerActionWaiting": "Not verified yet"
+  "historyMyActionVerified": "Partner saw it",
+  "historyPartnerActionVerified": "Saw it",
+  "historyPartnerActionWaiting": "Not seen yet"
 }
 

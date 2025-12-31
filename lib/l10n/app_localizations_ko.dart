@@ -597,11 +597,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get historyFilterPartner => '파트너의 실천';
 
   @override
-  String get historyMyActionVerified => '파트너가 확인함';
+  String get historyMyActionVerified => '파트너가 봤어요';
 
   @override
-  String get historyPartnerActionVerified => '내가 확인했어요';
+  String get historyPartnerActionVerified => '봤어요';
 
   @override
-  String get historyPartnerActionWaiting => '아직 확인하지 않았어요';
+  String get historyPartnerActionWaiting => '아직 안 봤어요';
 }

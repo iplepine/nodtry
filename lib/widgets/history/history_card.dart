@@ -14,49 +14,62 @@ class HistoryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.surface.withValues(alpha: 0.5), // Subtle border
-          width: 1,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top: Date & Status
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final isMine = item.isMine('me'); // TODO: Pass real UID
+
+    return Align(
+      alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+      child: FractionallySizedBox(
+        widthFactor: 0.85, // 카드가 너무 꽉 차지 않게 하여 정렬이 보이도록 함
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(20),
+              topRight: const Radius.circular(20),
+              bottomLeft: Radius.circular(isMine ? 20 : 4), // 파트너는 왼쪽 아래 뾰족하게
+              bottomRight: Radius.circular(isMine ? 4 : 20), // 나는 오른쪽 아래 뾰족하게
+            ),
+            border: Border.all(
+              color: AppColors.surface.withValues(alpha: 0.5),
+              width: 1,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Top: Date & Status
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _formatDate(context, item.date),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    _buildStatusBadge(context),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Middle: Title
                 Text(
-                  _formatDate(context, item.date),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
+                  item.title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                _buildStatusBadge(context),
+
+                // Bottom: Footer (Verification & Comments)
+                _buildFooter(context, ref),
               ],
             ),
-            const SizedBox(height: 12),
-
-            // Middle: Title
-            Text(
-              item.title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-
-            // Bottom: Footer (Verification & Comments)
-            _buildFooter(context, ref),
-          ],
+          ),
         ),
       ),
     );
@@ -72,6 +85,7 @@ class HistoryCard extends ConsumerWidget {
     switch (item.status) {
       case HistoryStatus.done:
       case HistoryStatus.actuallyDone:
+      case HistoryStatus.verified: // '확인됐어요' 배지는 제거하고 '했어'로 통합
         color = const Color(0xFF6B8E23); // Olive Green
         icon = Icons.check_circle_outline;
         label = item.status == HistoryStatus.actuallyDone
@@ -83,22 +97,11 @@ class HistoryCard extends ConsumerWidget {
         icon = Icons.bedtime_outlined;
         label = l10n.reconcileTookRest;
         break;
-      case HistoryStatus.verified:
-        color = AppColors.primary;
-        icon = Icons.verified;
-        label = l10n.homeChecked;
-        break;
       case HistoryStatus.skipped:
         color = AppColors.textDisabled;
         icon = Icons.hourglass_empty;
         label = l10n.reconcileSkip;
         break;
-    }
-
-    // Fallback for success color if not defined (using primary for now or a custom green)
-    if (item.status == HistoryStatus.done) {
-      // 임시: 성공 색상은 웜톤 내에서 긍정적 색상 사용
-      color = const Color(0xFF6B8E23); // Olive Green example
     }
 
     return Container(
@@ -134,9 +137,9 @@ class HistoryCard extends ConsumerWidget {
         if (item.comment != null) ...[
           const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: AppColors.background.withValues(alpha: 0.4), // 더 연하게 처리
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -144,11 +147,12 @@ class HistoryCard extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AppColors.textSecondary,
                 fontSize: 13,
+                height: 1.4,
               ),
             ),
           ),
         ],
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         if (isMine)
           _buildMyActionVerification(context)
         else
@@ -163,6 +167,7 @@ class HistoryCard extends ConsumerWidget {
 
     final l10n = AppLocalizations.of(context)!;
     return Row(
+      mainAxisAlignment: MainAxisAlignment.start, // 파트너의 반응은 왼쪽 (상대가 보낸 것)
       children: [
         Icon(
           Icons.thumb_up,
@@ -188,9 +193,8 @@ class HistoryCard extends ConsumerWidget {
 
     if (item.isVerifiedByMe) {
       return Row(
+        mainAxisAlignment: MainAxisAlignment.end, // 나의 반응은 오른쪽 (내가 보낸 것)
         children: [
-          Icon(Icons.thumb_up, size: 14, color: AppColors.primary),
-          const SizedBox(width: 6),
           Text(
             l10n.historyPartnerActionVerified,
             style: TextStyle(
@@ -199,6 +203,8 @@ class HistoryCard extends ConsumerWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
+          const SizedBox(width: 6),
+          Icon(Icons.thumb_up, size: 14, color: AppColors.primary),
         ],
       );
     }
@@ -219,13 +225,8 @@ class HistoryCard extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.end, // 미확인 시에도 액션 버튼은 오른쪽에 배치
           children: [
-            Icon(
-              Icons.thumb_up_outlined,
-              size: 16,
-              color: AppColors.textDisabled,
-            ),
-            const SizedBox(width: 8),
             Text(
               l10n.historyPartnerActionWaiting,
               style: TextStyle(
@@ -233,6 +234,12 @@ class HistoryCard extends ConsumerWidget {
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.thumb_up_outlined,
+              size: 16,
+              color: AppColors.textDisabled,
             ),
           ],
         ),

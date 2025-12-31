@@ -610,11 +610,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyFilterPartner => 'Partner\'s Action';
 
   @override
-  String get historyMyActionVerified => 'Verified by partner';
+  String get historyMyActionVerified => 'Partner saw it';
 
   @override
-  String get historyPartnerActionVerified => 'I verified it';
+  String get historyPartnerActionVerified => 'Saw it';
 
   @override
-  String get historyPartnerActionWaiting => 'Not verified yet';
+  String get historyPartnerActionWaiting => 'Not seen yet';
 }
