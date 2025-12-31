@@ -230,22 +230,34 @@ class HistoryCard extends ConsumerWidget {
           ).showSnackBar(const SnackBar(content: Text('확인되었습니다.')));
         }
       },
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.05), // 아주 은은한 강조
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.end, // 미확인 시에도 액션 버튼은 오른쪽에 배치
+          mainAxisSize: MainAxisSize.min, // 텍스트 길이에 맞춤
           children: [
             Text(
               l10n.historyPartnerActionWaiting,
               style: TextStyle(
-                color: AppColors.textDisabled,
+                color: AppColors.primary.withValues(alpha: 0.7), // 조금 더 명확한 색상
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(width: 8),
-            Icon(Icons.more_horiz, size: 18, color: AppColors.textDisabled),
+            const SizedBox(width: 6),
+            Icon(
+              Icons.more_horiz,
+              size: 16,
+              color: AppColors.primary.withValues(alpha: 0.6),
+            ),
           ],
         ),
       ),
