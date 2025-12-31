@@ -378,33 +378,59 @@ class _PrimaryExecutorCard extends StatelessWidget {
   }
 
   Widget _buildMessage(BuildContext context, AppLocalizations l10n) {
-    String message;
-    // model.plan 데이터가 있으면 사용
-    if (model.plan != null && model.plan!.items.isNotEmpty) {
-      message = model.plan!.items.first.title; // MVP: 첫 번째 아이템 타이틀
-    } else {
-      switch (model.state) {
-        case HomeCardState.reportNeeded:
-          message = l10n.homeNowTask;
-          break;
-        case HomeCardState.pastUncompleted:
-          message = l10n.timePassedActorMessage;
-          break;
-        case HomeCardState.planNeeded:
-          message = l10n.nowNoPlan;
-          break;
-        default:
-          message = '';
-      }
+    final title = model.plan?.items.firstOrNull?.title;
+    final List<Widget> children = [];
+
+    if (title != null) {
+      children.add(
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            height: 1.5,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
     }
-    return Text(
-      message,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-        color: AppColors.textPrimary,
-        height: 1.5,
-      ),
-      textAlign: TextAlign.center,
-    );
+
+    String? statusMessage;
+    switch (model.state) {
+      case HomeCardState.reportNeeded:
+        statusMessage = l10n.homeNowTask;
+        break;
+      case HomeCardState.pastUncompleted:
+        statusMessage = l10n.timePassedActorMessage;
+        break;
+      case HomeCardState.planNeeded:
+        statusMessage = l10n.nowNoPlan;
+        break;
+      default:
+        break;
+    }
+
+    if (statusMessage != null) {
+      if (children.isNotEmpty) children.add(const SizedBox(height: 8));
+      children.add(
+        Text(
+          statusMessage,
+          style:
+              (title != null
+                      ? Theme.of(context).textTheme.bodyMedium
+                      : Theme.of(context).textTheme.titleLarge)
+                  ?.copyWith(
+                    color: title != null
+                        ? AppColors.textSecondary
+                        : AppColors.textPrimary,
+                    height: 1.5,
+                  ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return Column(mainAxisSize: MainAxisSize.min, children: children);
   }
 
   Widget _buildButton(BuildContext context, AppLocalizations l10n) {
@@ -495,31 +521,58 @@ class _SecondaryExecutorCard extends StatelessWidget {
   }
 
   Widget _buildMessage(BuildContext context, AppLocalizations l10n) {
-    String message;
+    final title = model.plan?.items.firstOrNull?.title;
+    final List<Widget> children = [];
+
+    if (title != null) {
+      children.add(
+        Text(
+          title,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+            height: 1.4,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    String? statusMessage;
     switch (model.state) {
       case HomeCardState.waitingForCheck:
-        message = '${l10n.homeSentWaiting}\n${l10n.homeWaitingForCheck}';
+        statusMessage = '${l10n.homeSentWaiting}\n${l10n.homeWaitingForCheck}';
         break;
       case HomeCardState.checked:
-        message = '${l10n.homeChecked}\n${l10n.homeThankYou}';
+        statusMessage = '${l10n.homeChecked}\n${l10n.homeThankYou}';
         break;
       case HomeCardState.quietDay:
-        message = l10n.nowQuietRest;
+        statusMessage = l10n.nowQuietRest;
         break;
       case HomeCardState.pastUncompleted:
-        message = l10n.pastUncompletedMessage;
+        statusMessage = l10n.pastUncompletedMessage;
         break;
       default:
-        message = '';
+        break;
     }
-    return Text(
-      message,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        color: AppColors.textPrimary,
-        height: 1.4,
-      ),
-      textAlign: TextAlign.center,
-    );
+
+    if (statusMessage != null) {
+      if (children.isNotEmpty) children.add(const SizedBox(height: 4));
+      children.add(
+        Text(
+          statusMessage,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: title != null
+                ? AppColors.textSecondary
+                : AppColors.textPrimary,
+            height: 1.4,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return Column(mainAxisSize: MainAxisSize.min, children: children);
   }
 }
 
