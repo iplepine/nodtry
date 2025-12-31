@@ -33,8 +33,8 @@ class QuietHeader extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
+        left: 20,
+        right: 20,
         top: statusBarHeight + 12,
         bottom: 12,
       ),

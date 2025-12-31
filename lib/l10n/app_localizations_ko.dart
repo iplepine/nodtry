@@ -78,7 +78,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeCheckIt => '확인하기';
 
   @override
-  String get homeSentWaiting => '전달했어요';
+  String get homeSentWaiting => '실천 내역을 보냈어요';
 
   @override
   String get homeWaitingForCheck => '확인을 기다리고 있어요';

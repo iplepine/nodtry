@@ -219,8 +219,8 @@ class _NowTabState extends ConsumerState<NowTab>
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Padding(
                   padding: EdgeInsets.only(
-                    left: 24,
-                    right: 24,
+                    left: 20,
+                    right: 20,
                     top: 24,
                     bottom: MediaQuery.of(context).padding.bottom + 80,
                   ),
@@ -234,7 +234,7 @@ class _NowTabState extends ConsumerState<NowTab>
                           child: ScaleTransition(
                             scale: _primaryScaleAnimation,
                             child: Align(
-                              alignment: Alignment.center,
+                              alignment: Alignment.centerRight,
                               child: FractionallySizedBox(
                                 widthFactor: 0.9,
                                 child: _PrimaryExecutorCard(
@@ -356,10 +356,11 @@ class _PrimaryExecutorCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (timeChipText != null && timeChipType != null)
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [TimeChip(text: timeChipText!, type: timeChipType!)],
               ),
             if (timeChipText != null && timeChipType != null)
@@ -373,7 +374,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
                   color: AppColors.textSecondary,
                   fontSize: 12,
                 ),
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
               ),
             ],
             const SizedBox(height: 24),
@@ -397,7 +398,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
             fontWeight: FontWeight.bold,
             height: 1.5,
           ),
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.left,
         ),
       );
     }
@@ -432,12 +433,16 @@ class _PrimaryExecutorCard extends StatelessWidget {
                         : AppColors.textPrimary,
                     height: 1.5,
                   ),
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.left,
         ),
       );
     }
 
-    return Column(mainAxisSize: MainAxisSize.min, children: children);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
+    );
   }
 
   Widget _buildButton(BuildContext context, AppLocalizations l10n) {
@@ -552,7 +557,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
             fontWeight: FontWeight.w600,
             height: 1.4,
           ),
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.left,
         ),
       );
     }
@@ -586,12 +591,16 @@ class _SecondaryExecutorCard extends StatelessWidget {
                 : AppColors.textPrimary,
             height: 1.4,
           ),
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.left,
         ),
       );
     }
 
-    return Column(mainAxisSize: MainAxisSize.min, children: children);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
+    );
   }
 }
 

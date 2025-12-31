@@ -92,7 +92,7 @@
   "@homeCheckIt": {
     "description": "Button to check verification"
   },
-  "homeSentWaiting": "Sent",
+  "homeSentWaiting": "I sent my work",
   "@homeSentWaiting": {
     "description": "Message when report is sent and waiting"
   },

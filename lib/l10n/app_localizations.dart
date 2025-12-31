@@ -239,7 +239,7 @@ abstract class AppLocalizations {
   /// Message when report is sent and waiting
   ///
   /// In en, this message translates to:
-  /// **'Sent'**
+  /// **'I sent my work'**
   String get homeSentWaiting;
 
   /// Message while waiting for partner's check

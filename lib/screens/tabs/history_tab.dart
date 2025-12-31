@@ -75,7 +75,7 @@ class HistoryTab extends ConsumerWidget {
     AppLocalizations l10n,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         height: 48,
         decoration: BoxDecoration(
@@ -201,7 +201,7 @@ class HistoryTab extends ConsumerWidget {
 
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(24, 0, 24, 24 + bottomPadding),
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 24 + bottomPadding),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];

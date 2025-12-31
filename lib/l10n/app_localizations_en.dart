@@ -80,7 +80,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeCheckIt => 'Check it';
 
   @override
-  String get homeSentWaiting => 'Sent';
+  String get homeSentWaiting => 'I sent my work';
 
   @override
   String get homeWaitingForCheck => 'Waiting for confirmation';
