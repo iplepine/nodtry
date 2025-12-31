@@ -19,57 +19,71 @@ class HistoryCard extends ConsumerWidget {
     return Align(
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
       child: FractionallySizedBox(
-        widthFactor: 0.85, // 카드가 너무 꽉 차지 않게 하여 정렬이 보이도록 함
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(20),
-              topRight: const Radius.circular(20),
-              bottomLeft: Radius.circular(isMine ? 20 : 4), // 파트너는 왼쪽 아래 뾰족하게
-              bottomRight: Radius.circular(isMine ? 4 : 20), // 나는 오른쪽 아래 뾰족하게
-            ),
-            border: Border.all(
-              color: AppColors.surface.withValues(alpha: 0.5),
-              width: 1,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top: Date & Status
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        widthFactor: 0.85,
+        child: Column(
+          crossAxisAlignment: isMine
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(20),
+                  topRight: const Radius.circular(20),
+                  bottomLeft: Radius.circular(isMine ? 20 : 4),
+                  bottomRight: Radius.circular(isMine ? 4 : 20),
+                ),
+                border: Border.all(
+                  color: AppColors.surface.withValues(alpha: 0.5),
+                  width: 1,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Top: Date & Status
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _formatDate(context, item.date),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                        _buildStatusBadge(context),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Middle: Title
                     Text(
-                      _formatDate(context, item.date),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
+                      item.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    _buildStatusBadge(context),
+
+                    // Bottom: Comment (Footer)
+                    _buildCommentSection(context),
                   ],
                 ),
-                const SizedBox(height: 12),
-
-                // Middle: Title
-                Text(
-                  item.title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-
-                // Bottom: Footer (Verification & Comments)
-                _buildFooter(context, ref),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(height: 8),
+            // 외부 반응 영역 (따봉/말줄임표)
+            if (isMine)
+              _buildMyActionVerification(context)
+            else
+              _buildPartnerActionVerification(context, ref),
+            const SizedBox(height: 16), // 카드 간 간격
+          ],
         ),
       ),
     );
@@ -128,35 +142,28 @@ class HistoryCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildFooter(BuildContext context, WidgetRef ref) {
-    final isMine = item.isMine('me'); // TODO: Pass real UID
+  Widget _buildCommentSection(BuildContext context) {
+    if (item.comment == null) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (item.comment != null) ...[
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: AppColors.background.withValues(alpha: 0.4), // 더 연하게 처리
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              item.comment!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-                fontSize: 13,
-                height: 1.4,
-              ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.background.withValues(alpha: 0.4), // 더 연하게 처리
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            item.comment!,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+              height: 1.4,
             ),
           ),
-        ],
-        const SizedBox(height: 14),
-        if (isMine)
-          _buildMyActionVerification(context)
-        else
-          _buildPartnerActionVerification(context, ref),
+        ),
       ],
     );
   }
