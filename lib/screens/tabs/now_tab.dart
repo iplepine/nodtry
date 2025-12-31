@@ -5,7 +5,6 @@ import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/quiet_header.dart';
 import '../../widgets/time_chip.dart';
-import '../../widgets/plan_rail.dart';
 import '../../models/home_state.dart';
 import '../../models/history_item.dart';
 import '../../routes/app_router.dart';
@@ -84,20 +83,6 @@ class _NowTabState extends ConsumerState<NowTab>
   void _handleCreatePlan() {
     // 계획 생성 플로우 진입
     context.push(AppRoutes.planCreate);
-  }
-
-  /// Plan Rail 상태 결정
-  PlanRailState _getPlanRailState(HomeCardModel? primaryCard) {
-    if (primaryCard?.state == HomeCardState.planNeeded || primaryCard == null) {
-      return PlanRailState.noPlan;
-    }
-    return PlanRailState.activePlan;
-  }
-
-  /// Plan Rail 요약 텍스트 생성
-  String? _getPlanSummary() {
-    // TODO: 실제 데이터에서 계획 정보 가져오기
-    return null;
   }
 
   /// Time Chip 텍스트 가져오기
@@ -220,9 +205,6 @@ class _NowTabState extends ConsumerState<NowTab>
         );
         final managerPartnerName = managerQuickCard?.partnerName;
 
-        final planRailState = _getPlanRailState(primaryExecutorCard);
-        final planSummary = _getPlanSummary();
-
         return Column(
           children: [
             // 헤더
@@ -275,13 +257,6 @@ class _NowTabState extends ConsumerState<NowTab>
                         ),
                         const SizedBox(height: 16),
                       ],
-                      // Plan Rail
-                      if (planRailState != PlanRailState.noPlan)
-                        PlanRail(
-                          state: planRailState,
-                          planSummary: planSummary,
-                          onNewPlanTap: _handleCreatePlan,
-                        ),
                       // Secondary Executor Cards (My Contexts)
                       if (secondaryExecutorCards.isNotEmpty) ...[
                         ...secondaryExecutorCards.map(
