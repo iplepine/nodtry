@@ -5,56 +5,34 @@ import 'record_repository.dart';
 
 /// Mock 데이터 저장소 구현체
 class MockRecordRepository implements RecordRepository {
-  // 테스트용 상태 설정
-  // 개발자 화면에서 이 값을 변경하여 다양한 시나리오 테스트 가능
-  // 테스트용 상태 설정
-  // 개발자 화면에서 이 값을 변경하여 다양한 시나리오 테스트 가능
-  List<HomeCardModel> _mockHomeCardModels = [
-    HomeCardModel(
-      state: HomeCardState.pastUncompleted,
-      plan: Plan(
-        userId: 'me',
-        startDate: DateTime.now().subtract(const Duration(days: 1)),
-        endDate: DateTime.now().add(const Duration(days: 1)),
-        state: PlanState.active,
-        items: [
-          PlanItem(
-            title: '아침 영양제 챙겨먹기',
-            days: [1, 2, 3, 4, 5, 6, 7],
-            count: 7,
-            notificationTime: NotificationTime.custom(8, 0),
-          ),
-        ],
-        createdAt: DateTime.now(),
-      ),
-    ),
-    HomeCardModel(
-      state: HomeCardState.reportNeeded,
-      plan: Plan(
-        userId: 'me',
-        startDate: DateTime.now().subtract(const Duration(days: 2)),
-        endDate: DateTime.now().add(const Duration(days: 5)),
-        state: PlanState.active,
-        items: [
-          PlanItem(
-            title: '점심 후 10분 명상',
-            days: [1, 2, 3, 4, 5, 6, 7],
-            count: 7,
-            notificationTime: NotificationTime.custom(13, 0),
-          ),
-        ],
-        createdAt: DateTime.now(),
-      ),
-    ),
-    const HomeCardModel(state: HomeCardState.waitingForCheck),
-    const HomeCardModel(state: HomeCardState.checked),
-    const HomeCardModel(state: HomeCardState.planNeeded),
-  ];
-
+  List<HomeCardModel> _mockHomeCardModels = [];
   List<HistoryItem> _mockHistoryItems = [];
 
   MockRecordRepository() {
+    _mockHomeCardModels = _buildInitialMockModels();
     _mockHistoryItems = _buildInitialMockHistory();
+  }
+
+  List<HomeCardModel> _buildInitialMockModels() {
+    return [
+      HomeCardModel(
+        state: HomeCardState.pastUncompleted,
+        plan: _createMockPlan(8, 0, '아침 영양제 챙겨먹기'),
+      ),
+      HomeCardModel(
+        state: HomeCardState.reportNeeded,
+        plan: _createMockPlan(13, 0, '점심 후 10분 명상'),
+      ),
+      HomeCardModel(
+        state: HomeCardState.waitingForCheck,
+        plan: _createMockPlan(10, 0, '책 30분 읽기'),
+      ),
+      HomeCardModel(
+        state: HomeCardState.checked,
+        plan: _createMockPlan(21, 0, '하루 회고록 쓰기'),
+      ),
+      const HomeCardModel(state: HomeCardState.planNeeded),
+    ];
   }
 
   List<HistoryItem> _buildInitialMockHistory() {
@@ -137,8 +115,8 @@ class MockRecordRepository implements RecordRepository {
     await Future.delayed(const Duration(seconds: 1));
     // 상태를 Active로 변경 시뮬레이션
     _mockHomeCardModels = [
-      const HomeCardModel(state: HomeCardState.reportNeeded),
-    ]; // 계획 생기면 ReportNeeded 상태로?
+      HomeCardModel(state: HomeCardState.reportNeeded, plan: plan),
+    ];
   }
 
   // Mock 전용 메서드: 복잡한 상태 시나리오 설정
@@ -174,12 +152,18 @@ class MockRecordRepository implements RecordRepository {
         break;
       case MockScenario.waitingForCheck:
         _mockHomeCardModels = [
-          const HomeCardModel(state: HomeCardState.waitingForCheck),
+          HomeCardModel(
+            state: HomeCardState.waitingForCheck,
+            plan: _createMockPlan(10, 0, '책 30분 읽기'),
+          ),
         ];
         break;
       case MockScenario.checked:
         _mockHomeCardModels = [
-          const HomeCardModel(state: HomeCardState.checked),
+          HomeCardModel(
+            state: HomeCardState.checked,
+            plan: _createMockPlan(21, 0, '하루 회고록 쓰기'),
+          ),
         ];
         break;
       case MockScenario.pastUncompleted:
@@ -219,6 +203,7 @@ class MockRecordRepository implements RecordRepository {
 
   Plan _createMockPlan(int hour, int minute, String title) {
     return Plan(
+      id: 'mock_plan_${hour}_${minute}',
       userId: 'mock_user',
       startDate: DateTime.now().subtract(const Duration(days: 7)),
       endDate: DateTime.now().add(const Duration(days: 7)),

@@ -643,7 +643,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              title,
+              title.isNotEmpty ? title : '지나간 약속',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
