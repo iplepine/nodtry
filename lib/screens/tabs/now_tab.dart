@@ -104,19 +104,18 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   /// Time Chip 텍스트 가져오기
-  String? _getTimeChipText(HomeCardModel model) {
+
+  /// 정확한 시간 텍스트 가져오기 (롱 프레스용)
+  String? _getExactTimeText(HomeCardModel model) {
     if (model.state == HomeCardState.pastUncompleted) {
-      return '${AppLocalizations.of(context)!.pastUncompletedTimeChip} · ${AppLocalizations.of(context)!.timeChipPassed}';
+      // 과거 미완료의 경우 정확한 시간보다는 상태가 중요하므로 null 반환 또는 별도 처리
+      return null;
     }
 
     if (model.plan != null && model.plan!.items.isNotEmpty) {
-      // Find the item for current weekday
-      // But RealRecordRepository filtered plan items.
-      // Assuming plan.items contains only relevant items or we iterate.
       for (var item in model.plan!.items) {
         if (item.notificationTime != null &&
             item.notificationTime!.type != 'none') {
-          // Create DateTime for today with HH:mm
           final now = DateTime.now();
           final scheduledTime = DateTime(
             now.year,
@@ -125,11 +124,61 @@ class _NowTabState extends ConsumerState<NowTab>
             item.notificationTime!.hour,
             item.notificationTime!.minute,
           );
-          final baseTime = TimeFormatter.formatForTimeChip(scheduledTime);
-          if (model.state == HomeCardState.reportNeeded) {
-            return '$baseTime · ${AppLocalizations.of(context)!.timeChipStillActionable}';
+
+          final exactTime = TimeFormatter.formatExactTime(scheduledTime);
+          final diff = scheduledTime.difference(now);
+          final absDiff = diff.abs();
+
+          String suffix;
+          if (diff.isNegative) {
+            if (absDiff.inMinutes < 60) {
+              suffix = '${absDiff.inMinutes}분 전 알림'; // "22:47 · 30분 전 알림"
+            } else {
+              suffix = '${absDiff.inHours}시간 전 알림';
+            }
+          } else {
+            if (absDiff.inMinutes < 60) {
+              suffix = '${absDiff.inMinutes}분 후 알림';
+            } else {
+              suffix = '${absDiff.inHours}시간 후 알림';
+            }
           }
-          return baseTime;
+
+          return '$exactTime · $suffix';
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Time Chip 텍스트 가져오기 (Vague Time 적용)
+  String? _getTimeChipText(HomeCardModel model) {
+    if (model.state == HomeCardState.pastUncompleted) {
+      return '${AppLocalizations.of(context)!.pastUncompletedTimeChip} · ${AppLocalizations.of(context)!.timeChipPassed}';
+      // "조금 전 · 지나갔어요" (기존 유지)
+    }
+
+    if (model.plan != null && model.plan!.items.isNotEmpty) {
+      for (var item in model.plan!.items) {
+        if (item.notificationTime != null &&
+            item.notificationTime!.type != 'none') {
+          final now = DateTime.now();
+          final scheduledTime = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            item.notificationTime!.hour,
+            item.notificationTime!.minute,
+          );
+
+          // Vague Time 적용
+          final vagueTime = TimeFormatter.formatForVagueTime(scheduledTime);
+
+          if (model.state == HomeCardState.reportNeeded) {
+            // "점심쯤 · 아직 할 수 있어요"
+            return '$vagueTime · ${AppLocalizations.of(context)!.timeChipStillActionable}';
+          }
+          return vagueTime; // "점심쯤"
         }
       }
     }
@@ -288,6 +337,9 @@ class _NowTabState extends ConsumerState<NowTab>
                                     recordGazeText: _getRecordGazeText(
                                       primaryExecutorCard,
                                     ),
+                                    exactTimeText: _getExactTimeText(
+                                      primaryExecutorCard,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -319,6 +371,7 @@ class _NowTabState extends ConsumerState<NowTab>
                                       // 데이터 갱신
                                       ref.invalidate(homeCardStateProvider);
                                     },
+                                    exactTimeText: _getExactTimeText(state),
                                   ),
                                 ),
                               ),
@@ -343,6 +396,9 @@ class _NowTabState extends ConsumerState<NowTab>
                                   managerQuickCard,
                                 ),
                                 timeChipType: _getManagerTimeChipType(
+                                  managerQuickCard,
+                                ),
+                                exactTimeText: _getExactTimeText(
                                   managerQuickCard,
                                 ),
                               ),
@@ -373,6 +429,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? recordGazeText;
+  final String? exactTimeText;
 
   const _PrimaryExecutorCard({
     required this.model,
@@ -381,6 +438,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     this.timeChipText,
     this.timeChipType,
     this.recordGazeText,
+    this.exactTimeText,
   });
 
   @override
@@ -391,16 +449,32 @@ class _PrimaryExecutorCard extends StatelessWidget {
       elevation: 1,
       margin: EdgeInsets.zero,
       color: AppColors.surface.withValues(alpha: 0.7),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(4),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (timeChipText != null && timeChipType != null)
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: [TimeChip(text: timeChipText!, type: timeChipType!)],
+                children: [
+                  if (exactTimeText != null)
+                    Tooltip(
+                      message: exactTimeText!,
+                      triggerMode: TooltipTriggerMode.longPress,
+                      child: TimeChip(text: timeChipText!, type: timeChipType!),
+                    )
+                  else
+                    TimeChip(text: timeChipText!, type: timeChipType!),
+                ],
               ),
             if (timeChipText != null && timeChipType != null)
               const SizedBox(height: 12),
@@ -416,7 +490,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 textAlign: TextAlign.left,
               ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             _buildButton(context, l10n),
           ],
         ),
@@ -537,6 +611,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
   final HomeCardModel model;
   final String? timeChipText;
   final TimeChipType? timeChipType;
+  final String? exactTimeText;
 
   final VoidCallback? onReconcile;
 
@@ -545,6 +620,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
     this.timeChipText,
     this.timeChipType,
     this.onReconcile,
+    this.exactTimeText,
   });
 
   @override
@@ -560,9 +636,16 @@ class _SecondaryExecutorCard extends StatelessWidget {
       elevation: 0,
       margin: EdgeInsets.zero,
       color: AppColors.surface.withValues(alpha: 0.7),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(4),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             Row(
@@ -575,8 +658,16 @@ class _SecondaryExecutorCard extends StatelessWidget {
                   )
                 else
                   const SizedBox.shrink(),
-                if (timeChipText != null && timeChipType != null)
-                  TimeChip(text: timeChipText!, type: timeChipType!),
+                if (timeChipText != null && timeChipType != null) ...[
+                  if (exactTimeText != null)
+                    Tooltip(
+                      message: exactTimeText!,
+                      triggerMode: TooltipTriggerMode.longPress,
+                      child: TimeChip(text: timeChipText!, type: timeChipType!),
+                    )
+                  else
+                    TimeChip(text: timeChipText!, type: timeChipType!),
+                ],
               ],
             ),
             if (timeChipText != null && timeChipType != null)
@@ -593,7 +684,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
     final now = DateTime.now();
     final dateStr = '${now.month}.${now.day} (${_getWeekdayStr(now.weekday)})';
 
-    // 긍정 메시지 중 하나 선택 (실제로는 기록 데이터에서 가져와야 함)
+    // 긍정 메시지 중 하나 선택
     final messages = [
       l10n.nowLateCompletion,
       l10n.nowLateJustInTime,
@@ -604,15 +695,22 @@ class _SecondaryExecutorCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: AppColors.surface.withValues(alpha: 0.5), // 살짝 더 연하게
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: AppColors.surface.withValues(alpha: 0.5),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(4),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   dateStr,
@@ -621,21 +719,22 @@ class _SecondaryExecutorCard extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
+                    horizontal: 10,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     l10n.nowStatusActuallyDone,
                     style: TextStyle(
                       color: AppColors.primary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -644,19 +743,31 @@ class _SecondaryExecutorCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title.isNotEmpty ? title : '지나간 약속',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 12),
-            const Divider(height: 1, thickness: 0.5),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-                fontStyle: FontStyle.italic,
+            // 작은 말풍선 스타일 (Low Intensity)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.background.withValues(alpha: 0.3),
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(10),
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                  topLeft: Radius.circular(2),
+                ),
+              ),
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                  height: 1.4,
+                ),
               ),
             ),
           ],
@@ -752,6 +863,7 @@ class _ManagerQuickCard extends StatelessWidget {
   final VoidCallback? onCheckIt;
   final String? timeChipText;
   final TimeChipType? timeChipType;
+  final String? exactTimeText;
 
   const _ManagerQuickCard({
     required this.model,
@@ -759,6 +871,7 @@ class _ManagerQuickCard extends StatelessWidget {
     this.onCheckIt,
     this.timeChipText,
     this.timeChipType,
+    this.exactTimeText,
   });
 
   @override
@@ -769,9 +882,16 @@ class _ManagerQuickCard extends StatelessWidget {
       elevation: 0,
       margin: EdgeInsets.zero,
       color: AppColors.surface.withValues(alpha: 0.6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+          bottomLeft: Radius.circular(4),
+          bottomRight: Radius.circular(20),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             Row(
@@ -800,7 +920,14 @@ class _ManagerQuickCard extends StatelessWidget {
                 ),
                 if (timeChipText != null && timeChipType != null) ...[
                   const SizedBox(width: 8),
-                  TimeChip(text: timeChipText!, type: timeChipType!),
+                  if (exactTimeText != null)
+                    Tooltip(
+                      message: exactTimeText!,
+                      triggerMode: TooltipTriggerMode.longPress,
+                      child: TimeChip(text: timeChipText!, type: timeChipType!),
+                    )
+                  else
+                    TimeChip(text: timeChipText!, type: timeChipType!),
                 ],
               ],
             ),

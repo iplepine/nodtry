@@ -68,6 +68,34 @@ class TimeFormatter {
     return '${scheduledTime.month}월 ${scheduledTime.day}일';
   }
 
+  /// Vague Time 포맷팅 (아침에, 점심쯤, 저녁에 등)
+  static String formatForVagueTime(DateTime scheduledTime) {
+    final hour = scheduledTime.hour;
+
+    if (hour >= 5 && hour < 11) {
+      return '아침에';
+    } else if (hour >= 11 && hour < 14) {
+      return '점심쯤';
+    } else if (hour >= 14 && hour < 17) {
+      return '오후에';
+    } else if (hour >= 17 && hour < 21) {
+      return '저녁에';
+    } else if (hour >= 21 && hour < 24) {
+      return '밤에';
+    } else {
+      return '새벽에'; // 00 ~ 05
+    }
+  }
+
+  /// 정확한 시간 포맷팅 (HH:mm)
+  static String formatExactTime(DateTime scheduledTime) {
+    final hour = scheduledTime.hour;
+    final minute = scheduledTime.minute;
+    final hourStr = hour.toString().padLeft(2, '0');
+    final minuteStr = minute.toString().padLeft(2, '0');
+    return '$hourStr:$minuteStr';
+  }
+
   static bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }

@@ -53,18 +53,19 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Top: Date & Status
+                      // Top: Date (Left) & Status (Right)
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             _formatDate(context, widget.item.date),
-                            style: Theme.of(context).textTheme.bodyMedium
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: AppColors.textSecondary,
                                   fontWeight: FontWeight.w500,
                                 ),
                           ),
+                          const Spacer(),
                           _buildStatusBadge(context),
                         ],
                       ),
@@ -167,19 +168,24 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: AppColors.background.withValues(alpha: 0.4), // 더 연하게 처리
-            borderRadius: BorderRadius.circular(12),
+            color: AppColors.background.withValues(alpha: 0.5),
+            borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(12),
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
+              topLeft: Radius.circular(4),
+            ),
           ),
           child: Text(
             widget.item.comment!,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontSize: 13,
-              height: 1.4,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textPrimary.withValues(alpha: 0.9),
+              fontSize: 14,
+              height: 1.5,
             ),
           ),
         ),
