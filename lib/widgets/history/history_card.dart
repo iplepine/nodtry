@@ -177,6 +177,7 @@ class HistoryCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.start, // 파트너의 반응은 왼쪽 끝 (상대가 보낸 것)
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           Icons.thumb_up,
@@ -221,7 +222,6 @@ class HistoryCard extends ConsumerWidget {
     return InkWell(
       onTap: () async {
         await ref.read(recordRepositoryProvider).verifyHistoryItem(item.id);
-        // 프로바이더 갱신 (리스트 새로고침)
         ref.invalidate(historyItemsProvider);
 
         if (context.mounted) {
@@ -232,31 +232,31 @@ class HistoryCard extends ConsumerWidget {
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.05), // 아주 은은한 강조
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.primary.withValues(alpha: 0.08), // 조금 더 명확하게
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.1),
+            color: AppColors.primary.withValues(alpha: 0.15),
             width: 1,
           ),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min, // 텍스트 길이에 맞춤
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               l10n.historyPartnerActionWaiting,
               style: TextStyle(
-                color: AppColors.primary.withValues(alpha: 0.7), // 조금 더 명확한 색상
+                color: AppColors.primary, // 주어지는 주어 생략 정책에 따라 텍스트 강조
                 fontSize: 12,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700, // 더 강조된 버튼 텍스트
               ),
             ),
             const SizedBox(width: 6),
             Icon(
-              Icons.more_horiz,
-              size: 16,
-              color: AppColors.primary.withValues(alpha: 0.6),
+              Icons.check_circle_outline, // 더 명확한 '확인' 유도 아이콘
+              size: 14,
+              color: AppColors.primary,
             ),
           ],
         ),

@@ -1247,7 +1247,7 @@ abstract class AppLocalizations {
   /// No description provided for @historyPartnerActionWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Not seen yet'**
+  /// **'Please check'**
   String get historyPartnerActionWaiting;
 }
 
