@@ -1279,6 +1279,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Passed'**
   String get timeChipPassed;
+
+  /// No description provided for @nowStatusActuallyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Actually did it'**
+  String get nowStatusActuallyDone;
+
+  /// No description provided for @nowLateCompletion.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed even if late!'**
+  String get nowLateCompletion;
+
+  /// No description provided for @nowLateJustInTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Did it a bit late'**
+  String get nowLateJustInTime;
+
+  /// No description provided for @nowWithinToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Done within today'**
+  String get nowWithinToday;
 }
 
 class _AppLocalizationsDelegate

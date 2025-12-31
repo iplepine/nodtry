@@ -263,6 +263,10 @@
   "historyActionCheer": "응원할게 💜",
   "historyActionSkip": "그냥 넘기기",
   "timeChipStillActionable": "아직 할 수 있어요",
-  "timeChipPassed": "지나갔어요"
+  "timeChipPassed": "지나갔어요",
+  "nowStatusActuallyDone": "사실 했어요",
+  "nowLateCompletion": "뒤늦게라도 완료!",
+  "nowLateJustInTime": "조금 늦게 했어요",
+  "nowWithinToday": "오늘 안에 했어요"
 }
 

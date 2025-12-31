@@ -787,6 +787,10 @@
   "historyActionCheer": "Cheering you 💜",
   "historyActionSkip": "Just skip",
   "timeChipStillActionable": "Still actionable",
-  "timeChipPassed": "Passed"
+  "timeChipPassed": "Passed",
+  "nowStatusActuallyDone": "Actually did it",
+  "nowLateCompletion": "Completed even if late!",
+  "nowLateJustInTime": "Did it a bit late",
+  "nowWithinToday": "Done within today"
 }
 

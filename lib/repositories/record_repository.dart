@@ -23,4 +23,7 @@ abstract class RecordRepository {
 
   /// 파트너의 실천 기록 확인 처리
   Future<void> verifyHistoryItem(String historyId);
+
+  /// 실천 완료 보고 (했어)
+  Future<void> reportCompletion(String planId);
 }

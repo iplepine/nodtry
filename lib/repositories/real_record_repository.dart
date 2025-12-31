@@ -197,4 +197,9 @@ class RealRecordRepository implements RecordRepository {
   Future<void> verifyHistoryItem(String historyId) async {
     // TODO: Firestore에서 해당 히스토리 항목의 isVerifiedByMe 필드를 true로 업데이트
   }
+
+  @override
+  Future<void> reportCompletion(String planId) async {
+    // TODO: Firestore에 실천 기록 생성 및 계획 상태 업데이트
+  }
 }

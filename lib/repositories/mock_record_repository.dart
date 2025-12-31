@@ -268,6 +268,20 @@ class MockRecordRepository implements RecordRepository {
       );
     }
   }
+
+  @override
+  Future<void> reportCompletion(String planId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final index = _mockHomeCardModels.indexWhere((m) => m.plan?.id == planId);
+    if (index != -1) {
+      final model = _mockHomeCardModels[index];
+      _mockHomeCardModels[index] = HomeCardModel(
+        state: HomeCardState.checked,
+        plan: model.plan,
+        partnerName: model.partnerName,
+      );
+    }
+  }
 }
 
 enum MockScenario {

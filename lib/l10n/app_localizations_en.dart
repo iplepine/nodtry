@@ -632,4 +632,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timeChipPassed => 'Passed';
+
+  @override
+  String get nowStatusActuallyDone => 'Actually did it';
+
+  @override
+  String get nowLateCompletion => 'Completed even if late!';
+
+  @override
+  String get nowLateJustInTime => 'Did it a bit late';
+
+  @override
+  String get nowWithinToday => 'Done within today';
 }

@@ -619,4 +619,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get timeChipPassed => '지나갔어요';
+
+  @override
+  String get nowStatusActuallyDone => '사실 했어요';
+
+  @override
+  String get nowLateCompletion => '뒤늦게라도 완료!';
+
+  @override
+  String get nowLateJustInTime => '조금 늦게 했어요';
+
+  @override
+  String get nowWithinToday => '오늘 안에 했어요';
 }
