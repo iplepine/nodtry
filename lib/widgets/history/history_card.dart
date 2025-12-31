@@ -90,12 +90,18 @@ class _HistoryCardState extends ConsumerState<HistoryCard> {
           ),
         ),
         const SizedBox(height: 12), // 의도적인 여백 (카드와 반응 분리)
-        // 외부 반응 영역 (역할 기준 화면 양 끝 밀착 정렬)
+        // 외부 반응 영역 (카드를 살짝 벗어난 위치에 앵커링)
         Align(
-          alignment: isMine ? Alignment.centerLeft : Alignment.centerRight,
-          child: isMine
-              ? _buildMyActionVerification(context) // 파트너의 반응은 왼쪽 끝
-              : _buildPartnerActionVerification(context), // 나의 반응은 오른쪽 끝
+          alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+          child: FractionallySizedBox(
+            widthFactor: 0.92, // 카드(85%)보다 살짝 넓게 잡아 경계를 넘나들게 함
+            child: Align(
+              alignment: isMine ? Alignment.centerLeft : Alignment.centerRight,
+              child: isMine
+                  ? _buildMyActionVerification(context) // 파트너의 반응은 왼쪽
+                  : _buildPartnerActionVerification(context), // 나의 반응은 오른쪽
+            ),
+          ),
         ),
         const SizedBox(height: 24), // 카드 간 간격
       ],
