@@ -254,8 +254,8 @@ class _NowTabState extends ConsumerState<NowTab>
                             child: SlideTransition(
                               position:
                                   Tween<Offset>(
-                                    begin: Offset.zero,
-                                    end: const Offset(0, 0.2), // 살짝 아래로 이동
+                                    begin: const Offset(0, 0.1), // 시작/사라질 때 아래로
+                                    end: Offset.zero, // 정상 위치
                                   ).animate(
                                     CurvedAnimation(
                                       parent: _animationController,
