@@ -61,6 +61,14 @@ class MockRecordRepository implements RecordRepository {
         executorId: 'me',
         comment: '오늘은 컨디션 난조로 쉬어갔어요.',
       ),
+      HistoryItem(
+        id: '5',
+        date: DateTime.now().subtract(const Duration(hours: 5)), // 5시간 전
+        title: '물 2L 마시기',
+        status: HistoryStatus.skipped,
+        executorId: 'me',
+        comment: '아쉽게도 시간이 지나버렸어요.',
+      ),
     ];
   }
 
