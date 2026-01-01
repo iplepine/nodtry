@@ -102,4 +102,4 @@ class UserModel {
   }
 }
 
-enum LoginType { guest, google, apple }
+enum LoginType { guest, google, apple, email }

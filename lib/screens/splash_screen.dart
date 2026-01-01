@@ -148,6 +148,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     try {
       await ref.read(guestLoginUseCaseProvider).execute();
 
+      // 프로필 데이터 갱신 (UsTab에서 isAnonymous 상태 즉시 반영 위함)
+      ref.invalidate(myProfileProvider);
+
       if (mounted) {
         _navigateToNext();
       }

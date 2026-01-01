@@ -25,6 +25,10 @@ class RealUserRepository implements UserRepository {
         (userInfo) => userInfo.providerId == 'apple.com',
       )) {
         loginType = LoginType.apple;
+      } else if (user.providerData.any(
+        (userInfo) => userInfo.providerId == 'password',
+      )) {
+        loginType = LoginType.email;
       }
     }
 
