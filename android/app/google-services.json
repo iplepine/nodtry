@@ -29,6 +29,13 @@
             {
               "client_id": "39831135432-isvt1eo7d81qicirr7dquj7ntppaims0.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "39831135432-6gr4710ej4qtj317cjipn9ghg439l05h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mindgardener.mindGardener"
+              }
             }
           ]
         }

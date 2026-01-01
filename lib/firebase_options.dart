@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -50,19 +44,42 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAL85FHpbXzm1Q4iH9yGH156NQubi1mFrY',
-    appId: '1:175020407210:android:87bbf4c4743a5e7ee313d3',
-    messagingSenderId: '175020407210',
-    projectId: 'iftogether-a6f7c',
-    storageBucket: 'iftogether-a6f7c.firebasestorage.app',
+    apiKey: 'AIzaSyDCKYLMe1_GcJB1aMW6ulTzZLrmDWcyhY4',
+    appId: '1:39831135432:android:12ae5b8ebf8138b003f1fd',
+    messagingSenderId: '39831135432',
+    projectId: 'nod-try',
+    storageBucket: 'nod-try.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAkvUNKgXSiRQNIcdXUFJbOWEQqoAiCOHM',
-    appId: '1:175020407210:ios:6280703318845feee313d3',
-    messagingSenderId: '175020407210',
-    projectId: 'iftogether-a6f7c',
-    storageBucket: 'iftogether-a6f7c.firebasestorage.app',
+    apiKey: 'AIzaSyA_oa1AVis46MEUEFCzbCtY02Z1FJVnhgY',
+    appId: '1:39831135432:ios:689fb8a2e7413ad303f1fd',
+    messagingSenderId: '39831135432',
+    projectId: 'nod-try',
+    storageBucket: 'nod-try.firebasestorage.app',
+    iosClientId:
+        '39831135432-sbq2shm7qj0893b5a8o9nb76pv16mdpa.apps.googleusercontent.com',
+    iosBundleId: 'com.devho.nodtry.app',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyB1IcuLktEeIrMZiNGIzpJnx8iJK6sJDgA',
+    appId: '1:39831135432:web:788f6255cf75219503f1fd',
+    messagingSenderId: '39831135432',
+    projectId: 'nod-try',
+    authDomain: 'nod-try.firebaseapp.com',
+    storageBucket: 'nod-try.firebasestorage.app',
+    measurementId: 'G-N8VXK87PYJ',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyA_oa1AVis46MEUEFCzbCtY02Z1FJVnhgY',
+    appId: '1:39831135432:ios:95e15365da684b6703f1fd',
+    messagingSenderId: '39831135432',
+    projectId: 'nod-try',
+    storageBucket: 'nod-try.firebasestorage.app',
+    iosClientId:
+        '39831135432-6gr4710ej4qtj317cjipn9ghg439l05h.apps.googleusercontent.com',
     iosBundleId: 'com.mindgardener.mindGardener',
   );
 }
