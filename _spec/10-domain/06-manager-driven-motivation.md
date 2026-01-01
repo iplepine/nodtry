@@ -1,11 +1,11 @@
-# IfTogether – 관리자 관리형 동기부여 UX 원칙 문서
+# nod-try – 관리자 관리형 동기부여 UX 원칙 문서
 ## Manager-Driven Structure, Executor-Driven Action
 
 ---
 
 ## 0. 문서 목적
 
-이 문서는 IfTogether 앱이
+이 문서는 nod-try 앱이
 - "관리자가 관리하는 구조"를 유지하면서도
 - 실행자의 반발 없이 행동을 유도하기 위해
 
@@ -18,7 +18,7 @@
 
 ## 1. 핵심 결론 (한 문장)
 
-**IfTogether는 관리자가 관리하지만,  
+**nod-try는 관리자가 관리하지만,  
 '오늘 해라'는 관리자가 아니라 앱이 말한다.**
 
 ---

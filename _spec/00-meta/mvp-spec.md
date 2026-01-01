@@ -1,14 +1,14 @@
-# IfTogether – 행동 설계 기반 스펙 (MVP)
+# nod-try – 행동 설계 기반 스펙 (MVP)
 ## 실행자–관리자 역할 분리를 통한 습관 형성
 
 ---
 
 ## 0. 문서 목적
 
-이 문서는 IfTogether MVP의 **행동 설계 원칙과 역할 분리 규칙**을 정의한다.
+이 문서는 nod-try MVP의 **행동 설계 원칙과 역할 분리 규칙**을 정의한다.
 
-IfTogether는 일정 관리 앱이 아니다.  
-IfTogether는 **관계 기반 책임(Accountability) 설계 시스템**이다.
+nod-try는 일정 관리 앱이 아니다.  
+nod-try는 **관계 기반 책임(Accountability) 설계 시스템**이다.
 
 핵심 설계 철학:
 > **행동(Execution)과 판단(Judgment)을 분리한다.**
@@ -272,7 +272,7 @@ IfTogether는 **관계 기반 책임(Accountability) 설계 시스템**이다.
 
 ## 9. 한 문장 요약
 
-> **IfTogether는  
+> **nod-try는  
 > 의지를 강화하지 않고,  
 > 책임을 재설계하는 서비스다.**
 

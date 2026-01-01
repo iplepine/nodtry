@@ -1,11 +1,11 @@
-# IfTogether – 혼자서도 완결, 함께하면 더 좋은 경험
+# nod-try – 혼자서도 완결, 함께하면 더 좋은 경험
 ## Solo-First, Manager-Optional Design Principle
 
 ---
 
 ## 0. 문서 목적
 
-이 문서는 IfTogether의 **핵심 UX 원칙**을 재정의한다.
+이 문서는 nod-try의 **핵심 UX 원칙**을 재정의한다.
 
 **기존 가정:**
 - 관리자가 있어야 앱을 쓸 수 있다

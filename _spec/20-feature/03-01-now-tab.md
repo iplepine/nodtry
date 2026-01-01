@@ -1,9 +1,9 @@
-# IfTogether – 지금 탭 통합 카드 & 시간 계층 스펙
+# nod-try – 지금 탭 통합 카드 & 시간 계층 스펙
 ## Executor-First · Primary-Secondary · Time-as-State
 
 ## 0. 문서 목적
 
-이 문서는 IfTogether 앱의 **지금 탭**에서
+이 문서는 nod-try 앱의 **지금 탭**에서
 
 - 사용자가 **지금 인지해야 할 단 하나의 행동**
 - 곧 이어질 **다음 맥락**

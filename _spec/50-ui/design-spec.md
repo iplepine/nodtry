@@ -1,11 +1,11 @@
-# IfTogether – 디자인 컨셉 & 컬러 스펙 (MVP)
+# nod-try – 디자인 컨셉 & 컬러 스펙 (MVP)
 ## Warm Accountability Design System
 
 ---
 
 ## 0. 디자인 목표
 
-IfTogether의 디자인은 사용자를 통제하거나 평가하지 않는다.  
+nod-try의 디자인은 사용자를 통제하거나 평가하지 않는다.  
 대신 **믿고 맡기며, 조용히 응원하는 관계의 톤**을 전달한다.
 
 이 앱은:
@@ -46,7 +46,7 @@ IfTogether의 디자인은 사용자를 통제하거나 평가하지 않는다.
 
 ## 3. 멀티 테마 컬러 시스템 (Multi-Theme Color System)
 
-> IfTogether는 여러 테마 팔레트를 지원합니다.  
+> nod-try는 여러 테마 팔레트를 지원합니다.  
 > 사용자가 상황에 맞는 테마를 선택할 수 있습니다.
 
 ---
