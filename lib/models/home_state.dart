@@ -1,27 +1,28 @@
 import 'plan_model.dart';
 
 /// 홈 화면 Now Card 상태 모델
+/// 홈 화면 Now Card 상태 모델
 enum HomeCardState {
-  /// Type A: Action Card (보고 필요)
-  reportNeeded,
+  /// Type 1: Now Action Card (지금 가장 가까운 시일 내 실천해야 할 항목)
+  nowAction,
 
-  /// Type B: Response Card (확인 필요)
-  checkNeeded,
-
-  /// Type C: Waiting Card (확인 대기)
-  waitingForCheck,
-
-  /// Type D: Quiet Card (지금 할 일 없음)
-  quietDay,
-
-  /// Type E: Acknowledged Card (확인 완료)
-  checked,
-
-  /// Type F: Plan Needed Card (계획 없음)
+  /// Type 2-1: Plan Needed Card (한 달 내 계획이 없는 경우)
   planNeeded,
 
-  /// Type G: Past Uncompleted Card (지나간 미완료 계획)
-  pastUncompleted,
+  /// Type 2-2 A: Today Done (오늘 다 했어요)
+  todayDone,
+
+  /// Type 2-2 B: Relaxed Day (오늘은 여유로운 날이에요)
+  relaxedDay,
+
+  /// Type 3: Partner Plan Share (상대방의 계획 제안/공유)
+  partnerPlanShare,
+
+  /// Type 4: Partner Action Share (상대방의 실천 공유 + 피드백)
+  partnerActionShare,
+
+  /// Type 5: Overdue Self Action (시간이 지나버린 내 실천)
+  overdueSelfAction,
 }
 
 /// 카드 계층 타입
@@ -47,45 +48,41 @@ extension HomeCardStatePriority on HomeCardState {
   /// 카드 역할 반환
   CardRole? get role {
     switch (this) {
-      case HomeCardState.reportNeeded:
+      case HomeCardState.nowAction:
       case HomeCardState.planNeeded:
-      case HomeCardState.waitingForCheck:
-      case HomeCardState.checked:
-      case HomeCardState.quietDay:
-      case HomeCardState.pastUncompleted:
+      case HomeCardState.todayDone:
+      case HomeCardState.relaxedDay:
+      case HomeCardState.overdueSelfAction:
         return CardRole.executor;
-      case HomeCardState.checkNeeded:
+      case HomeCardState.partnerPlanShare:
+      case HomeCardState.partnerActionShare:
         return CardRole.manager;
     }
   }
 
   /// Primary Executor Card 우선순위 (낮을수록 높은 우선순위)
-  /// 실천자 Primary Card로 올 수 있는 타입만
   int get executorPrimaryPriority {
     switch (this) {
-      case HomeCardState.reportNeeded:
-        return 1; // 최우선
+      case HomeCardState.nowAction:
+        return 1; // 1순위: 지금 실천
+      case HomeCardState.overdueSelfAction:
+        return 2; // 2순위: 지났지만 아직 안 한 것 (Type 5)
       case HomeCardState.planNeeded:
-        return 2;
+        return 3; // 3순위: 계획 필요
       default:
-        return 999; // Primary Executor Card로 올 수 없음
+        return 999;
     }
   }
 
-  /// Secondary Executor Card 우선순위 (낮을수록 높은 우선순위)
-  /// 실천자 Secondary Card로만 올 수 있는 타입
+  /// Secondary Executor Card 우선순위
   int get executorSecondaryPriority {
     switch (this) {
-      case HomeCardState.pastUncompleted:
-        return 1; // 지나간 계획을 가장 먼저 보여줌
-      case HomeCardState.waitingForCheck:
+      case HomeCardState.todayDone:
+        return 1;
+      case HomeCardState.relaxedDay:
         return 2;
-      case HomeCardState.checked:
-        return 3;
-      case HomeCardState.quietDay:
-        return 4;
       default:
-        return 999; // Secondary Executor Card로 올 수 없음
+        return 999;
     }
   }
 
@@ -101,7 +98,8 @@ extension HomeCardStatePriority on HomeCardState {
 
   /// 이 상태가 Manager Quick Card로 올 수 있는지
   bool get canBeManagerQuick {
-    return this == HomeCardState.checkNeeded || this == HomeCardState.checked;
+    return this == HomeCardState.partnerPlanShare ||
+        this == HomeCardState.partnerActionShare;
   }
 
   /// Primary Executor Card 선택
@@ -160,12 +158,14 @@ class HomeCardModel {
   final Plan? plan;
   final String? partnerName;
   final String? partnerImageUrl;
+  final String? headerMessage;
 
   const HomeCardModel({
     required this.state,
     this.plan,
     this.partnerName,
     this.partnerImageUrl,
+    this.headerMessage,
   });
 
   @override
@@ -174,8 +174,10 @@ class HomeCardModel {
       other is HomeCardModel &&
           runtimeType == other.runtimeType &&
           state == other.state &&
-          plan?.id == other.plan?.id;
+          plan?.id == other.plan?.id &&
+          headerMessage == other.headerMessage;
 
   @override
-  int get hashCode => state.hashCode ^ (plan?.id).hashCode;
+  int get hashCode =>
+      state.hashCode ^ (plan?.id).hashCode ^ headerMessage.hashCode;
 }

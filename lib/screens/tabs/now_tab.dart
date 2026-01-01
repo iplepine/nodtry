@@ -101,7 +101,7 @@ class _NowTabState extends ConsumerState<NowTab>
         .value
         ?.firstWhere(
           (m) => m.state.canBeManagerQuick,
-          orElse: () => const HomeCardModel(state: HomeCardState.quietDay),
+          orElse: () => const HomeCardModel(state: HomeCardState.relaxedDay),
         ); // Dummy fallback
 
     if (managerCard?.plan?.id == null) return;
@@ -127,9 +127,10 @@ class _NowTabState extends ConsumerState<NowTab>
   /// Time Chip 텍스트 가져오기
 
   /// 정확한 시간 텍스트 가져오기 (롱 프레스용)
+  /// 정확한 시간 텍스트 가져오기 (롱 프레스용)
   String? _getExactTimeText(HomeCardModel model) {
-    if (model.state == HomeCardState.pastUncompleted) {
-      // 과거 미완료의 경우 정확한 시간보다는 상태가 중요하므로 null 반환 또는 별도 처리
+    if (model.state == HomeCardState.overdueSelfAction) {
+      // 과거 미완료(Type 5)의 경우 정확한 시간보다는 상태가 중요하므로 null 반환 또는 별도 처리
       return null;
     }
 
@@ -174,7 +175,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// Time Chip 텍스트 가져오기 (Vague Time 적용)
   String? _getTimeChipText(HomeCardModel model) {
-    if (model.state == HomeCardState.pastUncompleted) {
+    if (model.state == HomeCardState.overdueSelfAction) {
       return '${AppLocalizations.of(context)!.pastUncompletedTimeChip} · ${AppLocalizations.of(context)!.timeChipPassed}';
       // "조금 전 · 지나갔어요" (기존 유지)
     }
@@ -199,7 +200,7 @@ class _NowTabState extends ConsumerState<NowTab>
             scheduledTime,
           );
 
-          if (model.state == HomeCardState.reportNeeded) {
+          if (model.state == HomeCardState.nowAction) {
             // "점심쯤 · 아직 할 수 있어요"
             return '$vagueTime · ${l10n.timeChipStillActionable}';
           }
@@ -212,7 +213,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// Time Chip 타입 가져오기
   TimeChipType? _getTimeChipType(HomeCardModel model) {
-    if (model.state == HomeCardState.pastUncompleted) {
+    if (model.state == HomeCardState.overdueSelfAction) {
       return TimeChipType.past;
     }
 
@@ -221,17 +222,12 @@ class _NowTabState extends ConsumerState<NowTab>
 
     final l10n = AppLocalizations.of(context)!;
     if (text == l10n.timeChipNow) {
-      // TimeFormatter returns localised 'Now!'
       return TimeChipType.now;
     } else if (text == l10n.timeChipJustNow) {
-      // TimeFormatter returns localised 'Just now'
-      return TimeChipType.past; // or now? Spec says '1분 전' -> 지금. '5분' -> 방금 전.
+      return TimeChipType.past;
     } else if (text.contains('지남') || text == '어제' || text.endsWith('전')) {
-      // 'N시간 전' (미래) vs 'N시간 지남' (과거)
-      // TimeFormatter distinguishes: '지남' for past, '전' for future (oops in logic?)
-      // Wait, TimeFormatter: 'N분 지남' (Past), 'N분 전' (Future)
       if (text.contains('지남') || text == '어제') return TimeChipType.past;
-      if (text.contains('전')) return TimeChipType.upcoming; // Future
+      if (text.contains('전')) return TimeChipType.upcoming;
       return TimeChipType.upcoming;
     } else {
       return TimeChipType.upcoming;
@@ -240,7 +236,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// Manager Quick Card용 Time Chip 텍스트
   String? _getManagerTimeChipText(HomeCardModel model) {
-    return _getTimeChipText(model); // Use standard time chip logic for now
+    return _getTimeChipText(model);
   }
 
   /// Manager Quick Card용 Time Chip 타입
@@ -250,7 +246,6 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// Secondary Executor Card용 Time Chip 텍스트
   String? _getSecondaryTimeChipText(HomeCardModel model) {
-    // Reuse primary logic
     return _getTimeChipText(model);
   }
 
@@ -575,13 +570,13 @@ class _PrimaryExecutorCard extends StatelessWidget {
 
     String? statusMessage;
     switch (model.state) {
-      case HomeCardState.reportNeeded:
+      case HomeCardState.nowAction: // Type 1: 지금 실천
         statusMessage = l10n.homeNowTask;
         break;
-      case HomeCardState.pastUncompleted:
+      case HomeCardState.overdueSelfAction: // Type 5: 지난 실천 (부드러운 톤)
         statusMessage = l10n.timePassedActorMessage;
         break;
-      case HomeCardState.planNeeded:
+      case HomeCardState.planNeeded: // Type 2-1: 계획 필요
         statusMessage = l10n.nowNoPlan;
         break;
       default:
@@ -620,7 +615,11 @@ class _PrimaryExecutorCard extends StatelessWidget {
     VoidCallback? onPressed;
     String buttonText;
 
-    if (model.state == HomeCardState.reportNeeded) {
+    if (model.state == HomeCardState.nowAction) {
+      buttonText = l10n.homeDidIt;
+      onPressed = onDidIt;
+    } else if (model.state == HomeCardState.overdueSelfAction) {
+      // Type 5: "해도 괜찮아요" 뉘앙스 - "했어" 버튼 제공하되, "넘어가기"도 제공해야 함 (여기선 메인 액션만)
       buttonText = l10n.homeDidIt;
       onPressed = onDidIt;
     } else if (model.state == HomeCardState.planNeeded) {
@@ -685,7 +684,8 @@ class _SecondaryExecutorCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     // Checked 상태인 경우 다른 레이아웃 적용
-    if (model.state == HomeCardState.checked) {
+    // Checked 상태인 경우 다른 레이아웃 적용
+    if (model.state == HomeCardState.todayDone) {
       return _buildCheckedCard(context, l10n);
     }
 
@@ -708,7 +708,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (model.state == HomeCardState.pastUncompleted)
+                if (model.state == HomeCardState.overdueSelfAction)
                   _ReconcileMenu(
                     planId: model.plan?.id ?? '',
                     onSuccess: onReconcile,
@@ -874,16 +874,13 @@ class _SecondaryExecutorCard extends StatelessWidget {
 
     String? statusMessage;
     switch (model.state) {
-      case HomeCardState.waitingForCheck:
-        statusMessage = '${l10n.homeSentWaiting} · ${l10n.homeWaitingForCheck}';
-        break;
-      case HomeCardState.checked:
+      case HomeCardState.partnerActionShare:
         statusMessage = '${l10n.homeChecked} · ${l10n.homeThankYou}';
         break;
-      case HomeCardState.quietDay:
+      case HomeCardState.relaxedDay:
         statusMessage = l10n.nowQuietRest;
         break;
-      case HomeCardState.pastUncompleted:
+      case HomeCardState.overdueSelfAction:
         statusMessage = l10n.pastUncompletedMessage;
         break;
       default:
@@ -972,9 +969,15 @@ class _ManagerQuickCard extends StatelessWidget {
                 ],
                 Expanded(
                   child: Text(
-                    model.state == HomeCardState.checked
-                        ? '함께하는 중' // TODO: l10n
-                        : l10n.homeReceivedMessage,
+                    model.state == HomeCardState.partnerActionShare &&
+                            model.headerMessage == '함께하는 중'
+                        ? '함께하는 중'
+                        : (model.headerMessage ?? l10n.homeReceivedMessage),
+                    // If partnerActionShare generally means "Action happened", header depends on who did what
+                    // but for Type 4 (Partner Action Share), the header is usually "Completed!" or similar.
+                    // The 'Checked' state logic was: if Checked -> "Together".
+                    // Now, if I *responded* to Partner Action Share, it might transition to "Together".
+                    // For now, I'll rely on headerMessage being set to '함께하는 중' by the Repo/UI interaction.
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textPrimary,
                       height: 1.4,
@@ -1033,45 +1036,51 @@ class _ManagerQuickCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
             ],
-            // Button (Only for checkNeeded)
-            if (model.state == HomeCardState.checkNeeded) ...[
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: onCheckIt,
-                  style:
-                      ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 16,
+            // Button (Only for partnerActionShare/partnerPlanShare that needs action)
+            // Type 4: 피드백(응원) 버튼. Type 3: 제안(확인) 버튼.
+            if (model.state == HomeCardState.partnerActionShare ||
+                model.state == HomeCardState.partnerPlanShare) ...[
+              // 이미 반응했는지 여부를 state로 구분하거나 headerMessage로 구분?
+              // Mock logic: after CheckIt -> headerMessage becomes "함께하는 중".
+              if (model.headerMessage != '함께하는 중') ...[
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onCheckIt,
+                    style:
+                        ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ).copyWith(
+                          overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                            (states) {
+                              if (states.contains(WidgetState.pressed)) {
+                                return AppColors.primaryPressed;
+                              }
+                              return null;
+                            },
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ).copyWith(
-                        overlayColor: WidgetStateProperty.resolveWith<Color?>((
-                          states,
-                        ) {
-                          if (states.contains(WidgetState.pressed)) {
-                            return AppColors.primaryPressed;
-                          }
-                          return null;
-                        }),
+                    child: Text(
+                      l10n.homeCheckIt,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
-                  child: Text(
-                    l10n.homeCheckIt,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
           ],
         ),

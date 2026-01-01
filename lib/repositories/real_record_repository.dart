@@ -66,7 +66,7 @@ class RealRecordRepository implements RecordRepository {
       }
 
       if (allTodayItems.isEmpty) {
-        return [const HomeCardModel(state: HomeCardState.quietDay)];
+        return [const HomeCardModel(state: HomeCardState.relaxedDay)];
       }
 
       // 2. 시간 순 정렬
@@ -89,7 +89,7 @@ class RealRecordRepository implements RecordRepository {
         final primary = upcomingItems.first;
         finalModels.add(
           HomeCardModel(
-            state: HomeCardState.reportNeeded,
+            state: HomeCardState.nowAction, // Was reportNeeded
             plan: _createSingleItemPlan(primary.plan, primary.item),
           ),
         );
@@ -100,7 +100,7 @@ class RealRecordRepository implements RecordRepository {
       for (var past in sortedPastItems) {
         finalModels.add(
           HomeCardModel(
-            state: HomeCardState.pastUncompleted,
+            state: HomeCardState.overdueSelfAction, // Was pastUncompleted
             plan: _createSingleItemPlan(past.plan, past.item),
           ),
         );
@@ -108,7 +108,9 @@ class RealRecordRepository implements RecordRepository {
 
       // 만약 Primary도 없고 지남(Secondary)도 없으면 Quiet Day
       if (finalModels.isEmpty) {
-        return [const HomeCardModel(state: HomeCardState.quietDay)];
+        return [
+          const HomeCardModel(state: HomeCardState.relaxedDay),
+        ]; // Was quietDay
       }
 
       return finalModels;

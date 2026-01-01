@@ -16,19 +16,33 @@ class MockRecordRepository implements RecordRepository {
   List<HomeCardModel> _buildInitialMockModels() {
     return [
       HomeCardModel(
-        state: HomeCardState.pastUncompleted,
+        state: HomeCardState.overdueSelfAction,
         plan: _createMockPlan(8, 0, '아침 영양제 챙겨먹기'),
       ),
       HomeCardModel(
-        state: HomeCardState.reportNeeded,
+        state: HomeCardState.nowAction,
         plan: _createMockPlan(13, 0, '점심 후 10분 명상'),
       ),
       HomeCardModel(
-        state: HomeCardState.waitingForCheck,
+        state: HomeCardState.partnerPlanShare,
         plan: _createMockPlan(10, 0, '책 30분 읽기'),
       ),
       HomeCardModel(
-        state: HomeCardState.checkNeeded,
+        state: HomeCardState.partnerActionShare,
+        plan: _createMockPlan(
+          20,
+          0,
+          '책 30분 읽기',
+          description: '자기 전 마음의 양식 쌓기',
+          days: [1, 2, 3, 4, 5],
+        ),
+        partnerName: '지민',
+        partnerImageUrl:
+            'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+        headerMessage: '오늘도 완료했어요!',
+      ),
+      HomeCardModel(
+        state: HomeCardState.partnerPlanShare,
         plan: _createMockPlan(
           22,
           0,
@@ -39,10 +53,12 @@ class MockRecordRepository implements RecordRepository {
         partnerName: '지민',
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+        headerMessage: '이런 약속을 제안했어요',
       ),
       HomeCardModel(
-        state: HomeCardState.checked,
+        state: HomeCardState.partnerActionShare,
         plan: _createMockPlan(21, 0, '하루 회고록 쓰기'),
+        headerMessage: '함께하는 중',
       ),
       const HomeCardModel(state: HomeCardState.planNeeded),
     ];
@@ -128,7 +144,7 @@ class MockRecordRepository implements RecordRepository {
     await Future.delayed(const Duration(seconds: 1));
     // 상태를 Active로 변경 시뮬레이션
     _mockHomeCardModels = [
-      HomeCardModel(state: HomeCardState.reportNeeded, plan: plan),
+      HomeCardModel(state: HomeCardState.nowAction, plan: plan),
     ];
   }
 
@@ -140,49 +156,56 @@ class MockRecordRepository implements RecordRepository {
           const HomeCardModel(state: HomeCardState.planNeeded),
         ];
         break;
-      case MockScenario.quietDay:
+      case MockScenario.relaxedDay:
         _mockHomeCardModels = [
-          const HomeCardModel(state: HomeCardState.quietDay),
+          const HomeCardModel(state: HomeCardState.relaxedDay),
         ];
         break;
-      case MockScenario.reportNeeded_Morning:
+      case MockScenario.nowActionMorning:
         final plan = _createMockPlan(8, 0, '아침 조깅');
         _mockHomeCardModels = [
-          HomeCardModel(state: HomeCardState.reportNeeded, plan: plan),
+          HomeCardModel(state: HomeCardState.nowAction, plan: plan),
         ];
         break;
-      case MockScenario.reportNeeded_Afternoon:
+      case MockScenario.nowActionAfternoon:
         final plan = _createMockPlan(14, 0, '오후 독서');
         _mockHomeCardModels = [
-          HomeCardModel(state: HomeCardState.reportNeeded, plan: plan),
+          HomeCardModel(state: HomeCardState.nowAction, plan: plan),
         ];
         break;
-      case MockScenario.reportNeeded_Night:
+      case MockScenario.nowActionNight:
         final plan = _createMockPlan(23, 0, '밤 명상');
         _mockHomeCardModels = [
-          HomeCardModel(state: HomeCardState.reportNeeded, plan: plan),
+          HomeCardModel(state: HomeCardState.nowAction, plan: plan),
         ];
         break;
-      case MockScenario.waitingForCheck:
+      case MockScenario.partnerPlanShare:
         _mockHomeCardModels = [
           HomeCardModel(
-            state: HomeCardState.waitingForCheck,
+            state: HomeCardState.partnerPlanShare,
             plan: _createMockPlan(10, 0, '책 30분 읽기'),
+            partnerName: '지민',
+            partnerImageUrl:
+                'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
           ),
         ];
         break;
-      case MockScenario.checked:
+      case MockScenario.partnerActionShare:
         _mockHomeCardModels = [
           HomeCardModel(
-            state: HomeCardState.checked,
+            state: HomeCardState.partnerActionShare,
             plan: _createMockPlan(21, 0, '하루 회고록 쓰기'),
+            partnerName: '지민',
+            partnerImageUrl:
+                'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+            headerMessage: '오늘도 완료했어요!',
           ),
         ];
         break;
-      case MockScenario.pastUncompleted:
+      case MockScenario.overdueSelfAction:
         _mockHomeCardModels = [
           HomeCardModel(
-            state: HomeCardState.pastUncompleted,
+            state: HomeCardState.overdueSelfAction,
             plan: _createMockPlan(DateTime.now().hour - 1, 0, '이미 지남'),
           ),
         ];
@@ -190,11 +213,11 @@ class MockRecordRepository implements RecordRepository {
       case MockScenario.multiPlanSelection:
         _mockHomeCardModels = [
           HomeCardModel(
-            state: HomeCardState.pastUncompleted,
+            state: HomeCardState.overdueSelfAction,
             plan: _createMockPlan(DateTime.now().hour - 1, 0, '1시간 전 약속'),
           ),
           HomeCardModel(
-            state: HomeCardState.reportNeeded,
+            state: HomeCardState.nowAction,
             plan: _createMockPlan(
               DateTime.now().hour + 1,
               0,
@@ -202,13 +225,18 @@ class MockRecordRepository implements RecordRepository {
             ),
           ),
           HomeCardModel(
-            state: HomeCardState.reportNeeded,
+            state: HomeCardState.nowAction,
             plan: _createMockPlan(
               DateTime.now().hour + 3,
               0,
               '3시간 뒤 약속 (Secondary 대기)',
             ),
           ),
+        ];
+        break;
+      case MockScenario.todayDone:
+        _mockHomeCardModels = [
+          const HomeCardModel(state: HomeCardState.todayDone),
         ];
         break;
     }
@@ -283,10 +311,11 @@ class MockRecordRepository implements RecordRepository {
     if (index != -1) {
       final model = _mockHomeCardModels[index];
       _mockHomeCardModels[index] = HomeCardModel(
-        state: HomeCardState.checked,
+        state: HomeCardState.partnerActionShare, // Checked -> Type 4
         plan: model.plan,
         partnerName: model.partnerName,
         partnerImageUrl: model.partnerImageUrl,
+        headerMessage: '함께하는 중', // Completion implies 'Together' or similar
       );
     }
   }
@@ -294,12 +323,13 @@ class MockRecordRepository implements RecordRepository {
 
 enum MockScenario {
   planNeeded,
-  quietDay,
-  reportNeeded_Morning,
-  reportNeeded_Afternoon,
-  reportNeeded_Night,
-  waitingForCheck,
-  checked,
-  pastUncompleted,
+  relaxedDay,
+  todayDone,
+  nowActionMorning,
+  nowActionAfternoon,
+  nowActionNight,
+  partnerPlanShare,
+  partnerActionShare,
+  overdueSelfAction,
   multiPlanSelection,
 }
