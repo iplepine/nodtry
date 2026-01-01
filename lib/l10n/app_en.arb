@@ -84,11 +84,11 @@
   "@homeDidIt": {
     "description": "Button to report completion"
   },
-  "homeReceivedMessage": "You have a message",
+  "homeReceivedMessage": "I'll do this",
   "@homeReceivedMessage": {
     "description": "Message when there's a verification needed"
   },
-  "homeCheckIt": "Check it",
+  "homeCheckIt": "Nod & Try",
   "@homeCheckIt": {
     "description": "Button to check verification"
   },

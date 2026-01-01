@@ -74,10 +74,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeDidIt => 'Did it';
 
   @override
-  String get homeReceivedMessage => 'You have a message';
+  String get homeReceivedMessage => 'I\'ll do this';
 
   @override
-  String get homeCheckIt => 'Check it';
+  String get homeCheckIt => 'Nod & Try';
 
   @override
   String get homeSentWaiting => 'I sent my work';

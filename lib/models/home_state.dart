@@ -101,7 +101,7 @@ extension HomeCardStatePriority on HomeCardState {
 
   /// 이 상태가 Manager Quick Card로 올 수 있는지
   bool get canBeManagerQuick {
-    return this == HomeCardState.checkNeeded;
+    return this == HomeCardState.checkNeeded || this == HomeCardState.checked;
   }
 
   /// Primary Executor Card 선택
@@ -159,8 +159,14 @@ class HomeCardModel {
   final HomeCardState state;
   final Plan? plan;
   final String? partnerName;
+  final String? partnerImageUrl;
 
-  const HomeCardModel({required this.state, this.plan, this.partnerName});
+  const HomeCardModel({
+    required this.state,
+    this.plan,
+    this.partnerName,
+    this.partnerImageUrl,
+  });
 
   @override
   bool operator ==(Object other) =>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../models/plan_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
@@ -94,8 +95,28 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
-  void _handleCheckIt() {
-    // TODO: 확인/검증 화면으로 이동
+  Future<void> _handleCheckIt() async {
+    final managerCard = ref
+        .read(homeCardStateProvider)
+        .value
+        ?.firstWhere(
+          (m) => m.state.canBeManagerQuick,
+          orElse: () => const HomeCardModel(state: HomeCardState.quietDay),
+        ); // Dummy fallback
+
+    if (managerCard?.plan?.id == null) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('시작을 응원해요!'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    await ref
+        .read(recordRepositoryProvider)
+        .reportCompletion(managerCard!.plan!.id!);
+    ref.invalidate(homeCardStateProvider);
   }
 
   void _handleCreatePlan() {
@@ -250,8 +271,38 @@ class _NowTabState extends ConsumerState<NowTab>
     final homeStateAsync = ref.watch(homeCardStateProvider);
 
     // 데이터 변경 감지하여 애니메이션 트리거
+    // 데이터 변경 감지하여 애니메이션 트리거 (카드 ID가 변경된 경우에만)
     ref.listen(homeCardStateProvider, (previous, next) {
-      if (next.hasValue && previous != next) {
+      if (!next.hasValue) return;
+
+      if (previous?.value == null) {
+        _onDataLoaded();
+        return;
+      }
+
+      final prevModels = previous!.value!;
+      final nextModels = next.value!;
+
+      // Manager Card 변경 여부 확인
+      final prevManager = HomeCardStatePriority.selectManagerQuickCard(
+        prevModels,
+      );
+      final nextManager = HomeCardStatePriority.selectManagerQuickCard(
+        nextModels,
+      );
+      final managerChanged = prevManager?.plan?.id != nextManager?.plan?.id;
+
+      // Primary Card 변경 여부 확인
+      final prevPrimary = HomeCardStatePriority.selectPrimaryExecutorCard(
+        prevModels,
+      );
+      final nextPrimary = HomeCardStatePriority.selectPrimaryExecutorCard(
+        nextModels,
+      );
+      final primaryChanged = prevPrimary?.plan?.id != nextPrimary?.plan?.id;
+
+      // 카드의 식별자가 변경되었을 때만 애니메이션 재시작
+      if (managerChanged || primaryChanged) {
         _onDataLoaded();
       }
     });
@@ -905,21 +956,29 @@ class _ManagerQuickCard extends StatelessWidget {
                 if (partnerName != null) ...[
                   CircleAvatar(
                     radius: 14,
-                    backgroundColor: AppColors.primary, // 파트너의 액션임을 강조
-                    child: const Icon(
-                      Icons.person,
-                      size: 16,
-                      color: Colors.white,
-                    ),
+                    backgroundColor: AppColors.primary,
+                    backgroundImage: model.partnerImageUrl != null
+                        ? NetworkImage(model.partnerImageUrl!)
+                        : null,
+                    child: model.partnerImageUrl == null
+                        ? const Icon(
+                            Icons.person,
+                            size: 16,
+                            color: Colors.white,
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 12),
                 ],
                 Expanded(
                   child: Text(
-                    l10n.homeReceivedMessage,
+                    model.state == HomeCardState.checked
+                        ? '함께하는 중' // TODO: l10n
+                        : l10n.homeReceivedMessage,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textPrimary,
                       height: 1.4,
+                      fontSize: 16,
                     ),
                     textAlign: TextAlign.left,
                   ),
@@ -938,44 +997,117 @@ class _ManagerQuickCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onCheckIt,
-                style:
-                    ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ).copyWith(
-                      overlayColor: WidgetStateProperty.resolveWith<Color?>((
-                        states,
-                      ) {
-                        if (states.contains(WidgetState.pressed)) {
-                          return AppColors.primaryPressed;
-                        }
-                        return null;
-                      }),
-                    ),
+            // Title
+            if (model.plan?.items.firstOrNull?.title != null) ...[
+              SizedBox(
+                width: double.infinity,
                 child: Text(
-                  l10n.homeCheckIt,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                  model.plan!.items.firstOrNull!.title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
+            // Scale & Period
+            if (model.plan != null)
+              _buildPlanDetails(context, model.plan!, l10n),
+            const SizedBox(height: 8),
+            // Description
+            if (model.plan?.items.firstOrNull?.description != null) ...[
+              SizedBox(
+                width: double.infinity,
+                child: Text(
+                  model.plan!.items.firstOrNull!.description!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    height: 1.4,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            // Button (Only for checkNeeded)
+            if (model.state == HomeCardState.checkNeeded) ...[
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onCheckIt,
+                  style:
+                      ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ).copyWith(
+                        overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                          states,
+                        ) {
+                          if (states.contains(WidgetState.pressed)) {
+                            return AppColors.primaryPressed;
+                          }
+                          return null;
+                        }),
+                      ),
+                  child: Text(
+                    l10n.homeCheckIt,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlanDetails(
+    BuildContext context,
+    Plan plan,
+    AppLocalizations l10n,
+  ) {
+    if (plan.items.isEmpty) return const SizedBox.shrink();
+    final item = plan.items.first;
+
+    // Period: 10.01 - 10.28
+    final start = plan.startDate;
+    final end = plan.endDate;
+    final periodStr = '${start.month}.${start.day} - ${end.month}.${end.day}';
+
+    // Days: Mon, Wed, Fri
+    final daysStr = item.days.length == 7
+        ? '매일' // TODO: l10n
+        : item.days
+              .map((d) => TimeFormatter.getWeekdayName(l10n, d))
+              .join(', ');
+
+    return SizedBox(
+      width: double.infinity,
+      child: Text(
+        '$periodStr · $daysStr',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: AppColors.textSecondary,
+          fontSize: 14, // Increased
+        ),
+        textAlign: TextAlign.left,
       ),
     );
   }

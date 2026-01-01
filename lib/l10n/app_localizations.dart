@@ -227,13 +227,13 @@ abstract class AppLocalizations {
   /// Message when there's a verification needed
   ///
   /// In en, this message translates to:
-  /// **'You have a message'**
+  /// **'I\'ll do this'**
   String get homeReceivedMessage;
 
   /// Button to check verification
   ///
   /// In en, this message translates to:
-  /// **'Check it'**
+  /// **'Nod & Try'**
   String get homeCheckIt;
 
   /// Message when report is sent and waiting

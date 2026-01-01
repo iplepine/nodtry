@@ -96,12 +96,14 @@ class PlanItem {
   final List<int> days; // 1=Mon, 7=Sun
   final int count;
   final NotificationTime? notificationTime;
+  final String? description;
 
   PlanItem({
     required this.title,
     required this.days,
     required this.count,
     this.notificationTime,
+    this.description,
   });
 
   Map<String, dynamic> toMap() {
@@ -111,6 +113,7 @@ class PlanItem {
       'count': count,
       if (notificationTime != null)
         'notificationTime': notificationTime!.toMap(),
+      if (description != null) 'description': description,
     };
   }
 
@@ -122,6 +125,7 @@ class PlanItem {
       notificationTime: map['notificationTime'] != null
           ? NotificationTime.fromMap(map['notificationTime'])
           : null,
+      description: map['description'],
     );
   }
 }

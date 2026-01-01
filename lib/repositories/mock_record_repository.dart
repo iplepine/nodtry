@@ -28,6 +28,19 @@ class MockRecordRepository implements RecordRepository {
         plan: _createMockPlan(10, 0, '책 30분 읽기'),
       ),
       HomeCardModel(
+        state: HomeCardState.checkNeeded,
+        plan: _createMockPlan(
+          22,
+          0,
+          '밤 산책하기',
+          description: '하루를 마무리하며 가볍게 동네 한 바퀴',
+          days: [1, 3, 5],
+        ),
+        partnerName: '지민',
+        partnerImageUrl:
+            'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+      ),
+      HomeCardModel(
         state: HomeCardState.checked,
         plan: _createMockPlan(21, 0, '하루 회고록 쓰기'),
       ),
@@ -201,19 +214,28 @@ class MockRecordRepository implements RecordRepository {
     }
   }
 
-  Plan _createMockPlan(int hour, int minute, String title) {
+  Plan _createMockPlan(
+    int hour,
+    int minute,
+    String title, {
+    String? description,
+    List<int>? days,
+  }) {
     return Plan(
-      id: 'mock_plan_${hour}_${minute}',
+      id: 'mock_plan_${hour}_$minute',
       userId: 'mock_user',
       startDate: DateTime.now().subtract(const Duration(days: 7)),
-      endDate: DateTime.now().add(const Duration(days: 7)),
+      endDate: DateTime.now().add(
+        const Duration(days: 21),
+      ), // Total 28 days (4 weeks)
       state: PlanState.active,
       items: [
         PlanItem(
           title: title,
-          days: [1, 2, 3, 4, 5, 6, 7],
-          count: 7,
+          days: days ?? [1, 2, 3, 4, 5, 6, 7],
+          count: days?.length ?? 7,
           notificationTime: NotificationTime.custom(hour, minute),
+          description: description,
         ),
       ],
       createdAt: DateTime.now(),
@@ -264,6 +286,7 @@ class MockRecordRepository implements RecordRepository {
         state: HomeCardState.checked,
         plan: model.plan,
         partnerName: model.partnerName,
+        partnerImageUrl: model.partnerImageUrl,
       );
     }
   }

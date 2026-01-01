@@ -72,10 +72,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeDidIt => '했어';
 
   @override
-  String get homeReceivedMessage => '전달받은 말이 있어요';
+  String get homeReceivedMessage => '이렇게 할게요';
 
   @override
-  String get homeCheckIt => '확인하기';
+  String get homeCheckIt => '그래, 해봐';
 
   @override
   String get homeSentWaiting => '실천 내역을 보냈어요';
