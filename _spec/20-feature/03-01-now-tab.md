@@ -73,6 +73,7 @@
 - 아직 내가 반응(확인)하지 않음
 
 ### 4.2 표시 내용
+- **상대방 프로필**: 파트너의 프로필 이미지와 이름 표시(필수)
 - 상대 실천 요약
 - 시간
 - 상태 (했어 / 넘어갔어 등)
@@ -104,3 +105,9 @@
 
 ### 5.4 성격
 - Type 1과 형제지만, 압박감을 제거한 부드러운 톤
+
+---
+
+## 6. UI Guidelines (Visual Refinements)
+- **Action Button**: `ElevatedButton`의 Vertical Padding을 줄여(12px) 날렵한 느낌 유지.
+- **Partner Profile**: 파트너 컨텍스트 카드(Type 4) 및 관련 Secondary Card에는 반드시 파트너 프로필 이미지를 노출하여 '누구의 소식'인지 명확히 인지시킴.

@@ -638,7 +638,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
               backgroundColor: AppColors.primary,
               foregroundColor: buttonTextColor,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -708,13 +708,32 @@ class _SecondaryExecutorCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (model.state == HomeCardState.overdueSelfAction)
-                  _ReconcileMenu(
-                    planId: model.plan?.id ?? '',
-                    onSuccess: onReconcile,
-                  )
-                else
-                  const SizedBox.shrink(),
+                Row(
+                  children: [
+                    if (model.partnerName != null) ...[
+                      CircleAvatar(
+                        radius: 12,
+                        backgroundColor: AppColors.primary,
+                        backgroundImage: model.partnerImageUrl != null
+                            ? NetworkImage(model.partnerImageUrl!)
+                            : null,
+                        child: model.partnerImageUrl == null
+                            ? const Icon(
+                                Icons.person,
+                                size: 14,
+                                color: Colors.white,
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    if (model.state == HomeCardState.overdueSelfAction)
+                      _ReconcileMenu(
+                        planId: model.plan?.id ?? '',
+                        onSuccess: onReconcile,
+                      ),
+                  ],
+                ),
                 if (timeChipText != null && timeChipType != null) ...[
                   if (exactTimeText != null)
                     Tooltip(
@@ -1055,7 +1074,7 @@ class _ManagerQuickCard extends StatelessWidget {
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
-                            vertical: 16,
+                            vertical: 12,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
