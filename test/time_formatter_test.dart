@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mind_gardener/utils/time_formatter.dart';
-import 'package:mind_gardener/l10n/app_localizations.dart';
+import 'package:nod_try/utils/time_formatter.dart';
+import 'package:nod_try/l10n/app_localizations.dart';
 
 void main() {
   group('TimeFormatter', () {

@@ -7,7 +7,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mind_gardener/main.dart';
+import 'package:nod_try/main.dart';
 
 void main() {
   testWidgets('App launches with splash screen', (WidgetTester tester) async {

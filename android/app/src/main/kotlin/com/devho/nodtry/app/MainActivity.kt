@@ -1,4 +1,4 @@
-package com.mind__gardener.mind_gardener
+package com.devho.nodtry.app
 
 import io.flutter.embedding.android.FlutterActivity
 
