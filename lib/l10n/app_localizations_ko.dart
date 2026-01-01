@@ -616,6 +616,45 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsDelete => '탈퇴';
 
   @override
+  String get loginWithEmail => '이메일로 계속하기';
+
+  @override
+  String get email => '이메일';
+
+  @override
+  String get password => '비밀번호';
+
+  @override
+  String get login => '로그인';
+
+  @override
+  String get signUp => '회원가입';
+
+  @override
+  String get emailStartMessage => '이메일로 시작하기';
+
+  @override
+  String get passwordHint => '비밀번호를 입력해주세요';
+
+  @override
+  String get emailHint => '이메일을 입력해주세요';
+
+  @override
+  String get invalidEmail => '유효한 이메일 형식이 아닙니다';
+
+  @override
+  String get weakPassword => '비밀번호는 6자 이상이어야 합니다';
+
+  @override
+  String get accountExistsWithDifferentCredential => '이미 가입된 이메일입니다.';
+
+  @override
+  String get userNotFound => '가입되지 않은 이메일입니다.';
+
+  @override
+  String get wrongPassword => '비밀번호가 일치하지 않습니다.';
+
+  @override
   String get settingsAccountDeletedSuccess => '계정이 삭제되었습니다';
 
   @override

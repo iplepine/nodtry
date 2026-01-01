@@ -277,77 +277,92 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                     isLoading: _isGoogleLoading,
                                   ),
                                   const SizedBox(height: 12),
-                                ],
 
-                                // 게스트 로그인 (둘러보기) - OutlinedButton 스타일 적용
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: OutlinedButton(
-                                    onPressed: _isGuestLoading
-                                        ? null
-                                        : _handleGuestLogin,
-                                    style: OutlinedButton.styleFrom(
-                                      side: BorderSide(
-                                        color: AppColors.secondary,
+                                  // 이메일 로그인 버튼
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: OutlinedButton(
+                                      onPressed: () {
+                                        context.push(AppRoutes.emailLogin);
+                                      },
+                                      style: OutlinedButton.styleFrom(
+                                        side: BorderSide(
+                                          color: AppColors.primary,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 24,
+                                          vertical: 16,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
                                       ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 24,
-                                        vertical: 16,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                      child: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.loginWithEmail,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.primary,
+                                        ),
                                       ),
                                     ),
-                                    child: _isGuestLoading
-                                        ? SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                    AppColors.textSecondary,
-                                                  ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+
+                                // 게스트 로그인 (둘러보기) - 커스텀 밑줄 (Border)
+                                TextButton(
+                                  onPressed: _isGuestLoading
+                                      ? null
+                                      : _handleGuestLogin,
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.textSecondary,
+                                    // 버튼 자체의 터치 영역 유지를 위해 패딩 등은 기본값 유지
+                                  ),
+                                  child: _isGuestLoading
+                                      ? SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  AppColors.textSecondary,
+                                                ),
+                                          ),
+                                        )
+                                      : Container(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 0,
+                                          ), // 텍스트와 밑줄 사이 간격
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                              bottom: BorderSide(
+                                                color: AppColors.textSecondary,
+                                                width: 1.0, // 밑줄 두께
+                                              ),
                                             ),
-                                          )
-                                        : Text(
+                                          ),
+                                          child: Text(
                                             AppLocalizations.of(
                                               context,
                                             )!.loginGuest,
                                             style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
                                               color: AppColors.textSecondary,
+                                              // 텍스트 자체 밑줄 제거
+                                              decoration: TextDecoration.none,
                                             ),
                                           ),
-                                  ),
+                                        ),
                                 ),
 
                                 const SizedBox(height: 24),
-                                // 개발자 화면으로 이동
-                                OutlinedButton(
-                                  onPressed: () {
-                                    context.go(AppRoutes.developer);
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: AppColors.textSecondary,
-                                    side: BorderSide(color: AppColors.divider),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 12,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    '🛠️ 개발자 화면',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
                               ],
                             ),
                           ),

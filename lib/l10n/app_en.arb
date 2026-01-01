@@ -800,6 +800,58 @@
   "@settingsDelete": {
     "description": "Delete button label"
   },
+  "loginWithEmail": "Continue with Email",
+  "@loginWithEmail": {
+    "description": "Email login button text"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password label"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  "signUp": "Sign Up",
+  "@signUp": {
+    "description": "Sign up button text"
+  },
+  "emailStartMessage": "Start with Email",
+  "@emailStartMessage": {
+    "description": "Headline for email login screen"
+  },
+  "passwordHint": "Enter your password",
+  "@passwordHint": {
+    "description": "Hint text for password input"
+  },
+  "emailHint": "Enter your email",
+  "@emailHint": {
+    "description": "Hint text for email input"
+  },
+  "invalidEmail": "Invalid email format",
+  "@invalidEmail": {
+    "description": "Error message for invalid email"
+  },
+  "weakPassword": "Password must be at least 6 characters",
+  "@weakPassword": {
+    "description": "Error message for weak password"
+  },
+  "accountExistsWithDifferentCredential": "Account already exists with a different credential",
+  "@accountExistsWithDifferentCredential": {
+    "description": "Error message for existing account"
+  },
+  "userNotFound": "No user found for that email.",
+  "@userNotFound": {
+    "description": "Error message for user not found"
+  },
+  "wrongPassword": "Wrong password provided for that user.",
+  "@wrongPassword": {
+    "description": "Error message for wrong password"
+  },
   "settingsAccountDeletedSuccess": "Account deleted successfully",
   "@settingsAccountDeletedSuccess": {
     "description": "Success message after account deletion"

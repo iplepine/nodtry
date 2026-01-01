@@ -630,6 +630,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDelete => 'Delete';
 
   @override
+  String get loginWithEmail => 'Continue with Email';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get signUp => 'Sign Up';
+
+  @override
+  String get emailStartMessage => 'Start with Email';
+
+  @override
+  String get passwordHint => 'Enter your password';
+
+  @override
+  String get emailHint => 'Enter your email';
+
+  @override
+  String get invalidEmail => 'Invalid email format';
+
+  @override
+  String get weakPassword => 'Password must be at least 6 characters';
+
+  @override
+  String get accountExistsWithDifferentCredential =>
+      'Account already exists with a different credential';
+
+  @override
+  String get userNotFound => 'No user found for that email.';
+
+  @override
+  String get wrongPassword => 'Wrong password provided for that user.';
+
+  @override
   String get settingsAccountDeletedSuccess => 'Account deleted successfully';
 
   @override

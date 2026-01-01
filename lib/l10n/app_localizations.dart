@@ -1262,6 +1262,84 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get settingsDelete;
 
+  /// Email login button text
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Email'**
+  String get loginWithEmail;
+
+  /// Email label
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// Password label
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// Login button text
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
+
+  /// Sign up button text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get signUp;
+
+  /// Headline for email login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Start with Email'**
+  String get emailStartMessage;
+
+  /// Hint text for password input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get passwordHint;
+
+  /// Hint text for email input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get emailHint;
+
+  /// Error message for invalid email
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email format'**
+  String get invalidEmail;
+
+  /// Error message for weak password
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get weakPassword;
+
+  /// Error message for existing account
+  ///
+  /// In en, this message translates to:
+  /// **'Account already exists with a different credential'**
+  String get accountExistsWithDifferentCredential;
+
+  /// Error message for user not found
+  ///
+  /// In en, this message translates to:
+  /// **'No user found for that email.'**
+  String get userNotFound;
+
+  /// Error message for wrong password
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password provided for that user.'**
+  String get wrongPassword;
+
   /// Success message after account deletion
   ///
   /// In en, this message translates to:

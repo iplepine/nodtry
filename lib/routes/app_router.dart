@@ -5,6 +5,7 @@ import '../screens/home_screen.dart';
 import '../screens/developer_screen.dart';
 import '../screens/plan/plan_create_screen.dart';
 import '../screens/settings_screen.dart';
+import '../screens/login/email_login_screen.dart';
 
 /// 앱 라우팅 경로 상수
 class AppRoutes {
@@ -18,6 +19,9 @@ class AppRoutes {
 
   // 계획 생성 플로우
   static const String planCreate = '/plan/create';
+
+  // 로그인
+  static const String emailLogin = '/login/email';
 
   // 딥링크 경로
   static const String deepLinkSplash = '/splash';
@@ -70,5 +74,10 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const PlanCreateScreen(),
     ),
     // 계획 생성 플로우 (기존 단계별 화면 - 하위 호환성 유지)
+    GoRoute(
+      path: AppRoutes.emailLogin,
+      name: 'email-login',
+      builder: (context, state) => const EmailLoginScreen(),
+    ),
   ],
 );

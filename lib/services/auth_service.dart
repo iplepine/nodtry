@@ -47,6 +47,38 @@ class AuthService {
     }
   }
 
+  /// 이메일 회원가입
+  Future<UserCredential> signUpWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      return await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      debugPrint("Error signing up with email: $e");
+      rethrow;
+    }
+  }
+
+  /// 이메일 로그인
+  Future<UserCredential> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      return await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      debugPrint("Error signing in with email: $e");
+      rethrow;
+    }
+  }
+
   /// 로그아웃
   Future<void> signOut() async {
     try {
