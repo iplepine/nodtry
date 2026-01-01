@@ -2,18 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>39831135432-sbq2shm7qj0893b5a8o9nb76pv16mdpa.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.39831135432-sbq2shm7qj0893b5a8o9nb76pv16mdpa</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAkvUNKgXSiRQNIcdXUFJbOWEQqoAiCOHM</string>
+	<string>AIzaSyA_oa1AVis46MEUEFCzbCtY02Z1FJVnhgY</string>
 	<key>GCM_SENDER_ID</key>
-	<string>175020407210</string>
+	<string>39831135432</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.mindgardener.mindGardener</string>
+	<string>com.devho.nodtry.app</string>
 	<key>PROJECT_ID</key>
-	<string>iftogether-a6f7c</string>
+	<string>nod-try</string>
 	<key>STORAGE_BUCKET</key>
-	<string>iftogether-a6f7c.firebasestorage.app</string>
+	<string>nod-try.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:175020407210:ios:6280703318845feee313d3</string>
+	<string>1:39831135432:ios:689fb8a2e7413ad303f1fd</string>
 </dict>
 </plist>

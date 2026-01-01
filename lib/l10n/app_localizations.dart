@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// The application title
   ///
   /// In en, this message translates to:
-  /// **'Nod, Try'**
+  /// **'Nod & Try'**
   String get appTitle;
 
   /// Tagline shown on splash screen

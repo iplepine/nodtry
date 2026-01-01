@@ -1,49 +1,34 @@
 {
   "project_info": {
-    "project_number": "175020407210",
-    "project_id": "iftogether-a6f7c",
-    "storage_bucket": "iftogether-a6f7c.firebasestorage.app"
+    "project_number": "39831135432",
+    "project_id": "nod-try",
+    "storage_bucket": "nod-try.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:175020407210:android:87bbf4c4743a5e7ee313d3",
+        "mobilesdk_app_id": "1:39831135432:android:12ae5b8ebf8138b003f1fd",
         "android_client_info": {
-          "package_name": "com.mind__gardener.mind_gardener"
+          "package_name": "com.devho.nodtry.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "175020407210-2ff7r5loetqon07374se8br017cr15vj.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.mind__gardener.mind_gardener",
-            "certificate_hash": "a18ccfa8f2c14ed2ab229de3499dbffb0aeed057"
-          }
-        },
-        {
-          "client_id": "175020407210-il7kqk02s1eh9p6n91bki7vl08jfv0g4.apps.googleusercontent.com",
+          "client_id": "39831135432-isvt1eo7d81qicirr7dquj7ntppaims0.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAL85FHpbXzm1Q4iH9yGH156NQubi1mFrY"
+          "current_key": "AIzaSyDCKYLMe1_GcJB1aMW6ulTzZLrmDWcyhY4"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "175020407210-il7kqk02s1eh9p6n91bki7vl08jfv0g4.apps.googleusercontent.com",
+              "client_id": "39831135432-isvt1eo7d81qicirr7dquj7ntppaims0.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "175020407210-a7uef32fvrl71sk05001e485a8cbrnmk.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.mindgardener.mindGardener"
-              }
             }
           ]
         }
