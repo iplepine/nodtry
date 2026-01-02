@@ -55,7 +55,7 @@ class HistoryCard extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
+                      color: Colors.black.withOpacity(0.03),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -63,7 +63,7 @@ class HistoryCard extends StatelessWidget {
                   // Highlight reconcilable items slightly??
                   border: canReconcile
                       ? Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.3),
+                          color: AppColors.primary.withOpacity(0.3),
                           width: 1,
                         )
                       : null,
@@ -219,35 +219,35 @@ class HistoryCard extends StatelessWidget {
       case HistoryStatus.done:
         return _StatusDisplayInfo(
           text: '했어',
-          color: AppColors.primary.withValues(alpha: 0.1),
+          color: AppColors.primary.withOpacity(0.1),
           textColor: AppColors.primary,
           icon: Icons.check,
         );
       case HistoryStatus.actuallyDone:
         return _StatusDisplayInfo(
           text: '사실 했어요', // Reconciled
-          color: AppColors.secondary.withValues(alpha: 0.1),
+          color: AppColors.secondary.withOpacity(0.1),
           textColor: AppColors.secondary,
           icon: Icons.check_circle_outline,
         );
       case HistoryStatus.rested:
         return _StatusDisplayInfo(
           text: '쉬어갔어요',
-          color: Colors.grey.withValues(alpha: 0.1),
+          color: Colors.grey.withOpacity(0.1),
           textColor: AppColors.textSecondary,
           icon: Icons.hotel, // Bed icon
         );
       case HistoryStatus.skipped:
         return _StatusDisplayInfo(
           text: '지나갔어요',
-          color: Colors.orange.withValues(alpha: 0.1),
+          color: Colors.orange.withOpacity(0.1),
           textColor: Colors.orange,
           icon: Icons.remove_circle_outline,
         );
       case HistoryStatus.verified:
         return _StatusDisplayInfo(
           text: '확인됨',
-          color: AppColors.primary.withValues(alpha: 0.1),
+          color: AppColors.primary.withOpacity(0.1),
           textColor: AppColors.primary,
           icon: Icons.verified,
         );

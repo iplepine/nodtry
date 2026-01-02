@@ -44,65 +44,38 @@ void main() async {
   );
 }
 
-class OnMyBehalfApp extends StatefulWidget {
+class OnMyBehalfApp extends ConsumerWidget {
   const OnMyBehalfApp({super.key});
 
   @override
-  State<OnMyBehalfApp> createState() => _OnMyBehalfAppState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settingsState = ref.watch(appSettingsProvider);
+    final settingsNotifier = ref.read(appSettingsProvider.notifier);
 
-class _OnMyBehalfAppState extends State<OnMyBehalfApp> {
-  final AppSettingsProvider _settingsProvider = AppSettingsProvider();
+    // 현재 테마에 따라 ThemeData 가져오기
+    final themeData = settingsState.currentTheme == AppThemeType.smokyPlum
+        ? AppTheme.smokyPlumTheme
+        : AppTheme.deepOliveTheme;
 
-  @override
-  void initState() {
-    super.initState();
-    _settingsProvider.addListener(_onSettingsChanged);
-  }
-
-  @override
-  void dispose() {
-    _settingsProvider.removeListener(_onSettingsChanged);
-    _settingsProvider.dispose();
-    super.dispose();
-  }
-
-  void _onSettingsChanged() {
-    setState(() {
-      // 테마나 언어가 변경되면 앱을 다시 빌드
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return AppSettings(
-      provider: _settingsProvider,
-      child: Builder(
-        builder: (context) {
-          // 현재 테마에 따라 ThemeData 가져오기
-          final themeData =
-              _settingsProvider.currentTheme == AppThemeType.smokyPlum
-              ? AppTheme.smokyPlumTheme
-              : AppTheme.deepOliveTheme;
-
-          return MaterialApp.router(
-            title: 'IfTogether',
-            debugShowCheckedModeBanner: false,
-            theme: themeData,
-            locale: _settingsProvider.currentLocale,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en', ''), // English
-              Locale('ko', ''), // Korean
-            ],
-            routerConfig: appRouter,
-          );
-        },
+      state: settingsState,
+      notifier: settingsNotifier,
+      child: MaterialApp.router(
+        title: 'IfTogether',
+        debugShowCheckedModeBanner: false,
+        theme: themeData,
+        locale: settingsState.currentLocale,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', ''), // English
+          Locale('ko', ''), // Korean
+        ],
+        routerConfig: appRouter,
       ),
     );
   }

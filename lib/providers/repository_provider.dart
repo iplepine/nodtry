@@ -1,5 +1,4 @@
-import '../usecases/disconnect_connection_use_case.dart';
-import '../usecases/create_new_plan_use_case.dart';
+import '../features/plan/domain/usecases/create_new_plan_use_case.dart';
 import '../features/now/domain/usecases/get_now_cards_use_case.dart';
 import '../features/history/domain/usecases/get_history_use_case.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,14 +15,15 @@ import '../repositories/user_repository.dart';
 import '../repositories/mock_user_repository.dart';
 import '../repositories/real_user_repository.dart';
 import '../usecases/update_profile_use_case.dart';
-import '../usecases/auto_login_use_case.dart';
-import '../usecases/auth/link_with_google_use_case.dart';
-import '../usecases/auth/login_with_google_use_case.dart';
-import '../usecases/auth/withdraw_use_case.dart';
+import '../features/auth/domain/usecases/auto_login_use_case.dart';
+import '../features/auth/domain/usecases/link_with_google_use_case.dart';
+import '../features/auth/domain/usecases/login_with_google_use_case.dart';
+import '../features/auth/domain/usecases/withdraw_use_case.dart';
 
-import '../usecases/guest_login_use_case.dart';
+import '../features/auth/domain/usecases/guest_login_use_case.dart';
 import '../usecases/get_my_profile_use_case.dart';
 import '../usecases/get_connected_profiles_use_case.dart';
+import '../usecases/disconnect_connection_use_case.dart';
 import '../services/auth_service.dart';
 import '../datasources/user_local_data_source.dart';
 

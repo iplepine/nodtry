@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../theme/app_colors.dart';
+import 'package:nod_try/theme/app_colors.dart';
 
 class PlanStepHeader extends StatelessWidget {
   final int currentStep;
@@ -40,7 +40,7 @@ class PlanStepHeader extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../theme/app_colors.dart';
+import 'package:nod_try/theme/app_colors.dart';
 import 'dart:io';
 import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -261,7 +261,7 @@ class _MeSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
+                color: Colors.black.withOpacity(0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -276,7 +276,7 @@ class _MeSection extends StatelessWidget {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.primary.withOpacity(0.1),
                       shape: BoxShape.circle,
                       image: imageProvider != null
                           ? DecorationImage(
@@ -715,9 +715,7 @@ class _PersonCard extends StatelessWidget {
                             if (person.isCheering)
                               _RelationshipBadge(
                                 text: l10n.usBadgeCheering,
-                                color: AppColors.primary.withValues(
-                                  alpha: 0.15,
-                                ),
+                                color: AppColors.primary.withOpacity(0.15),
                                 textColor: AppColors.primary,
                               ),
                           ],
@@ -908,7 +906,7 @@ class _EditProfileDialogContentState
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.primary.withOpacity(0.1),
                       shape: BoxShape.circle,
                       image: _tempProfileImage != null
                           ? DecorationImage(
@@ -1060,7 +1058,7 @@ class _ActivePlanListSection extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.surface.withValues(alpha: 0.5),
+                  color: AppColors.surface.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.divider),
                 ),

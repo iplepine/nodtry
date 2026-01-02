@@ -541,7 +541,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     return Card(
       elevation: 1,
       margin: EdgeInsets.zero,
-      color: AppColors.surface.withValues(alpha: 0.7),
+      color: AppColors.surface.withOpacity(0.7),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -763,7 +763,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: AppColors.surface.withValues(alpha: 0.7),
+      color: AppColors.surface.withOpacity(0.7),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -842,7 +842,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: AppColors.surface.withValues(alpha: 0.5),
+      color: AppColors.surface.withOpacity(0.5),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -873,7 +873,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -900,7 +900,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.background.withValues(alpha: 0.3),
+                color: AppColors.background.withOpacity(0.3),
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(10),
                   bottomLeft: Radius.circular(10),
@@ -1025,7 +1025,7 @@ class _ManagerQuickCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: AppColors.surface.withValues(alpha: 0.6),
+      color: AppColors.surface.withOpacity(0.6),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -1243,7 +1243,7 @@ class _ReconcileMenu extends ConsumerWidget {
       icon: Icon(
         Icons.more_vert,
         size: 20,
-        color: AppColors.textSecondary.withValues(alpha: 0.5),
+        color: AppColors.textSecondary.withOpacity(0.5),
       ),
       tooltip: l10n.reconcileTitle,
       onSelected: (status) async {

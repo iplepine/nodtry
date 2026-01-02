@@ -2,17 +2,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../theme/app_colors.dart';
-import '../../l10n/app_localizations.dart';
-import '../../models/plan_model.dart';
-import '../../services/notification_service.dart';
-import '../../providers/repository_provider.dart';
-import '../../providers/home_provider.dart';
+import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../models/plan_model.dart';
+import '../../../../services/notification_service.dart';
+// No repository_provider or home_provider needed here if only using the viewModel state
 
-import 'widgets/plan_action_step.dart';
-import 'widgets/plan_frequency_step.dart';
-import 'widgets/plan_description_step.dart';
-import 'widgets/plan_day_selection_step.dart';
+import '../widgets/plan_action_step.dart';
+import '../widgets/plan_frequency_step.dart';
+import '../widgets/plan_description_step.dart';
+import '../widgets/plan_day_selection_step.dart';
+
+import '../plan_create_state.dart';
+import '../viewmodel/plan_create_viewmodel.dart';
 
 /// 통합 계획 생성 화면 (Wizard 방식)
 class PlanCreateScreen extends ConsumerStatefulWidget {
@@ -25,38 +27,38 @@ class PlanCreateScreen extends ConsumerStatefulWidget {
 class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
   // Page Controller
   final PageController _pageController = PageController();
-  int _currentStep = 1;
-  static const int _totalSteps = 4;
 
   // Step 1: 행동
-  final TextEditingController _actionController = TextEditingController();
+  late TextEditingController _actionController;
   final FocusNode _actionFocus = FocusNode();
 
-  // Step 2: 빈도
-  int? _selectedFrequency;
-
   // Step 3: 설명 (선택)
-  final TextEditingController _descriptionController = TextEditingController();
+  late TextEditingController _descriptionController;
   final FocusNode _descriptionFocus = FocusNode();
-
-  // Step 4: 요일 (선택)
-  final Set<int> _selectedDays = {}; // 0=월요일, 6=일요일
-
-  // Step 5: 알림 시간 (선택 - 기본값: 저녁)
-  NotificationTime _notificationTime = NotificationTime.preset('dinner');
 
   @override
   void initState() {
     super.initState();
-    _selectedFrequency = 3; // 기본값: 주 3회
+    _actionController = TextEditingController();
+    _descriptionController = TextEditingController();
+
+    _actionController.addListener(() {
+      ref
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(UpdateActionIntent(_actionController.text));
+    });
+    _descriptionController.addListener(() {
+      ref
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(UpdateDescriptionIntent(_descriptionController.text));
+    });
+
     NotificationService().init();
-    _actionController.addListener(_onActionChanged);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
-    _actionController.removeListener(_onActionChanged);
     _actionController.dispose();
     _descriptionController.dispose();
     _actionFocus.dispose();
@@ -64,13 +66,9 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
     super.dispose();
   }
 
-  void _onActionChanged() {
-    setState(() {});
-  }
-
-  void _nextPage() {
-    if (_currentStep < _totalSteps) {
-      if (_currentStep == 1 && _actionController.text.trim().isEmpty) {
+  void _nextPage(int currentStep) {
+    if (currentStep < 4) {
+      if (currentStep == 1 && _actionController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("어떤 약속을 할지 알려주세요!"),
@@ -80,6 +78,9 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
         return;
       }
       FocusManager.instance.primaryFocus?.unfocus();
+      ref
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(const NextStepIntent());
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -89,9 +90,12 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
     }
   }
 
-  void _prevPage() {
-    if (_currentStep > 1) {
+  void _prevPage(int currentStep) {
+    if (currentStep > 1) {
       FocusManager.instance.primaryFocus?.unfocus();
+      ref
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(const PrevStepIntent());
       _pageController.previousPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -102,60 +106,12 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
   }
 
   Future<void> _savePlan() async {
-    if (_actionController.text.trim().isEmpty) return;
-
-    // 현재 사용자 ID 가져오기
-    final userState = ref.read(myProfileProvider);
-    final userId = userState.asData?.value?.uid;
-
-    if (userId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("사용자 정보를 찾을 수 없습니다.")));
-      return;
-    }
-
-    final planItem = PlanItem(
-      title: _actionController.text,
-      count: _selectedFrequency ?? 3,
-      days: _selectedDays.map((d) => d + 1).toList(), // UI(0~6) -> Model(1~7)
-      notificationTime: _notificationTime,
-    );
-
-    final plan = Plan(
-      userId: userId,
-      startDate: DateTime.now(),
-      endDate: DateTime.now().add(const Duration(days: 30)), // 기본 30일?
-      state: PlanState.pendingApproval,
-      items: [planItem],
-      createdAt: DateTime.now(),
-    );
-
-    debugPrint(
-      '[PlanCreateScreen] UseCase execution started. Plan UserId: ${plan.userId}',
-    );
     try {
-      // UseCase를 통해 저장
-      await ref.read(createNewPlanUseCaseProvider).execute(plan);
-      debugPrint('[PlanCreateScreen] UseCase execution finished.');
-
-      // Provider 갱신 (Now Tab 업데이트)
-      ref.invalidate(homeCardStateProvider);
+      await ref
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(const SavePlanIntent());
 
       if (mounted) {
-        // 알림 설정 (로컬 알림) - Pop 하기 전에 수행 (Context 유효성 확보)
-        if (_selectedDays.isNotEmpty || _notificationTime.type != 'none') {
-          // 권한 요청 (이미 허용되었으면 무시됨)
-          await NotificationService().requestPermissions();
-          await NotificationService().schedulePlanReminder(
-            planId: plan.createdAt.millisecondsSinceEpoch ~/ 1000,
-            title: planItem.title,
-            hour: _notificationTime.hour,
-            minute: _notificationTime.minute,
-            days: planItem.days,
-          );
-        }
-
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("계획 제안이 완료되었습니다.\n상대방과 대화해보세요!"),
@@ -176,13 +132,18 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final planCreateState =
+        ref.watch(planCreateViewModelProvider).value ??
+        PlanCreateState(notificationTime: NotificationTime.preset('dinner'));
+    final currentStep = planCreateState.currentStep;
+    const totalSteps = 4;
 
     return PopScope(
-      canPop: _currentStep == 1,
+      canPop: currentStep == 1,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (_currentStep > 1) {
-          _prevPage();
+        if (currentStep > 1) {
+          _prevPage(currentStep);
         }
       },
       child: Scaffold(
@@ -194,8 +155,8 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
             onPressed: () {
-              if (_currentStep > 1) {
-                _prevPage();
+              if (currentStep > 1) {
+                _prevPage(currentStep);
               } else {
                 context.pop();
               }
@@ -203,7 +164,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
           ),
           titleSpacing: 0,
           title: Text(
-            "약속 준비 중 · $_currentStep/$_totalSteps",
+            "약속 준비 중 · $currentStep/$totalSteps",
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 16,
@@ -215,7 +176,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
               padding: const EdgeInsets.only(right: 24),
               child: GestureDetector(
                 onTap: () {
-                  if (_currentStep == 1 &&
+                  if (currentStep == 1 &&
                       _actionController.text.trim().isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -225,7 +186,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                     );
                     return;
                   }
-                  _nextPage();
+                  _nextPage(currentStep);
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -234,17 +195,17 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                   ),
                   decoration: BoxDecoration(
                     color:
-                        (_currentStep == 1 &&
+                        (currentStep == 1 &&
                             _actionController.text.trim().isEmpty)
-                        ? AppColors.textDisabled.withValues(alpha: 0.2)
-                        : AppColors.primary.withValues(alpha: 0.1),
+                        ? AppColors.textDisabled.withOpacity(0.2)
+                        : AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    _currentStep == _totalSteps ? l10n.planSummarySend : "다음",
+                    currentStep == totalSteps ? l10n.planSummarySend : "다음",
                     style: TextStyle(
                       color:
-                          (_currentStep == 1 &&
+                          (currentStep == 1 &&
                               _actionController.text.trim().isEmpty)
                           ? AppColors.textDisabled
                           : AppColors.primary,
@@ -264,11 +225,6 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                 child: PageView(
                   controller: _pageController,
                   physics: const NeverScrollableScrollPhysics(),
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentStep = index + 1;
-                    });
-                  },
                   children: [
                     _buildStepContainer(
                       child: PlanActionStep(
@@ -278,11 +234,11 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                     ),
                     _buildStepContainer(
                       child: PlanFrequencyStep(
-                        selectedFrequency: _selectedFrequency,
+                        selectedFrequency: planCreateState.selectedFrequency,
                         onFrequencySelected: (value) {
-                          setState(() {
-                            _selectedFrequency = value;
-                          });
+                          ref
+                              .read(planCreateViewModelProvider.notifier)
+                              .dispatch(UpdateFrequencyIntent(value));
                         },
                       ),
                     ),
@@ -294,21 +250,17 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                     ),
                     _buildStepContainer(
                       child: PlanDaySelectionStep(
-                        selectedDays: _selectedDays,
+                        selectedDays: planCreateState.selectedDays,
                         onDayToggle: (dayIndex) {
-                          setState(() {
-                            if (_selectedDays.contains(dayIndex)) {
-                              _selectedDays.remove(dayIndex);
-                            } else {
-                              _selectedDays.add(dayIndex);
-                            }
-                          });
+                          ref
+                              .read(planCreateViewModelProvider.notifier)
+                              .dispatch(ToggleDayIntent(dayIndex));
                         },
-                        notificationTime: _notificationTime,
+                        notificationTime: planCreateState.notificationTime,
                         onTimeChanged: (newTime) {
-                          setState(() {
-                            _notificationTime = newTime;
-                          });
+                          ref
+                              .read(planCreateViewModelProvider.notifier)
+                              .dispatch(UpdateNotificationTimeIntent(newTime));
                         },
                       ),
                     ),

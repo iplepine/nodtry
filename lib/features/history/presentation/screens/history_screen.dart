@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../theme/app_colors.dart';
+import 'package:nod_try/theme/app_colors.dart';
 import '../../../../widgets/quiet_header.dart';
 import '../../../../models/history_item.dart';
 import '../../../../widgets/history/history_card.dart';
@@ -155,7 +155,7 @@ class HistoryScreen extends ConsumerWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.outline.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.outline.withOpacity(0.3)),
         ),
         child: Row(
           children: [
@@ -206,7 +206,7 @@ class HistoryScreen extends ConsumerWidget {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
-import '../models/user_model.dart';
-import '../services/auth_service.dart';
-import '../repositories/user_repository.dart';
-import '../datasources/user_local_data_source.dart';
+import '../../../../models/user_model.dart';
+import '../../../../services/auth_service.dart';
+import '../../../../repositories/user_repository.dart';
+import '../../../../datasources/user_local_data_source.dart';
 
 class AutoLoginUseCase {
   final AuthService _authService;

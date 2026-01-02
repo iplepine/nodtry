@@ -38,10 +38,10 @@ class PlanCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
+          border: Border.all(color: AppColors.outline.withOpacity(0.5)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
+              color: Colors.black.withOpacity(0.02),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -57,7 +57,7 @@ class PlanCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: AppColors.primary.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -141,7 +141,7 @@ class PlanCard extends StatelessWidget {
             // Progress Placeholder (Mock Data for Visual)
             // if (plan.state == PlanState.active) ...[
             //   const SizedBox(height: 12),
-            //   Divider(height: 1, color: AppColors.divider.withValues(alpha: 0.5)),
+            //   Divider(height: 1, color: AppColors.divider.withOpacity(0.5)),
             //   const SizedBox(height: 12),
             //   Row(
             //     children: [
@@ -179,31 +179,31 @@ class PlanCard extends StatelessWidget {
       case PlanState.active:
         return {
           'text': '진행 중',
-          'color': AppColors.primary.withValues(alpha: 0.1),
+          'color': AppColors.primary.withOpacity(0.1),
           'textColor': AppColors.primary,
         };
       case PlanState.draft:
         return {
           'text': '작성 중',
-          'color': AppColors.textDisabled.withValues(alpha: 0.2),
+          'color': AppColors.textDisabled.withOpacity(0.2),
           'textColor': AppColors.textSecondary,
         };
       case PlanState.pendingApproval:
         return {
           'text': '수락 대기',
-          'color': Color(0xFFFF9800).withValues(alpha: 0.1), // Orange
+          'color': Color(0xFFFF9800).withOpacity(0.1), // Orange
           'textColor': Color(0xFFEF6C00),
         };
       case PlanState.rejected:
         return {
           'text': '거절됨',
-          'color': Color(0xFFF44336).withValues(alpha: 0.1), // Red
+          'color': Color(0xFFF44336).withOpacity(0.1), // Red
           'textColor': Color(0xFFD32F2F),
         };
       case PlanState.completed:
         return {
           'text': '종료됨',
-          'color': AppColors.textSecondary.withValues(alpha: 0.1),
+          'color': AppColors.textSecondary.withOpacity(0.1),
           'textColor': AppColors.textSecondary,
         };
     }

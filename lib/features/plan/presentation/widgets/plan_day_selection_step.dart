@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../theme/app_colors.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../../models/plan_model.dart';
+import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../models/plan_model.dart';
 
 class PlanDaySelectionStep extends StatelessWidget {
   final Set<int> selectedDays;
@@ -106,7 +106,7 @@ class PlanDaySelectionStep extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.1)
+                ? AppColors.primary.withOpacity(0.1)
                 : AppColors.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
@@ -146,7 +146,7 @@ class PlanDaySelectionStep extends StatelessWidget {
           onTimeChanged(NotificationTime.preset(value));
         }
       },
-      selectedColor: AppColors.primary.withValues(alpha: 0.1),
+      selectedColor: AppColors.primary.withOpacity(0.1),
       backgroundColor: AppColors.surface,
       labelStyle: TextStyle(
         color: isSelected ? AppColors.primary : AppColors.textPrimary,
@@ -181,7 +181,7 @@ class PlanDaySelectionStep extends StatelessWidget {
           }
         }
       },
-      selectedColor: AppColors.primary.withValues(alpha: 0.1),
+      selectedColor: AppColors.primary.withOpacity(0.1),
       backgroundColor: AppColors.surface,
       labelStyle: TextStyle(
         color: isCustom ? AppColors.primary : AppColors.textPrimary,

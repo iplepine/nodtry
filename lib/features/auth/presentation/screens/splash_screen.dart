@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../l10n/app_localizations.dart';
-import '../theme/app_colors.dart';
-import '../widgets/primary_button.dart';
-import '../routes/app_router.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../routes/app_router.dart';
+// Removed unused AuthService import
+import '../../../../theme/app_colors.dart';
+import '../../../../widgets/primary_button.dart';
 import 'dart:io';
-import '../services/auth_service.dart';
-import '../providers/repository_provider.dart';
+
+import '../../../../providers/repository_provider.dart';
+
+import '../auth_state.dart';
+import '../viewmodel/auth_viewmodel.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -18,16 +22,11 @@ class SplashScreen extends ConsumerStatefulWidget {
 
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
-  // ... (Animation controllers kept same)
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _messageSlideAnimation;
   late Animation<Offset> _buttonSlideAnimation;
   late Animation<double> _buttonFadeAnimation;
-
-  bool _isAutoLoggingIn = false;
-  bool _isGoogleLoading = false;
-  bool _isGuestLoading = false;
 
   @override
   void initState() {
@@ -37,7 +36,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       vsync: this,
     );
 
-    // ... (Animations omitted, assume same) ...
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -68,111 +66,24 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _controller.forward();
 
     // 시작하자마자 체크
-    _checkAuthAndNavigate();
-  }
-
-  final AuthService _authService = AuthService();
-
-  Future<void> _checkAuthAndNavigate() async {
-    final user = _authService.currentUser;
-    if (user != null) {
-      if (mounted) {
-        setState(() {
-          _isAutoLoggingIn = true;
-        });
-      }
-
-      try {
-        // AutoLoginUseCase 실행 (5초 타임아웃 및 로그아웃 처리 포함됨)
-        final userModel = await ref.read(autoLoginUseCaseProvider).execute();
-
-        if (userModel != null) {
-          _navigateToNext();
-          return;
-        }
-      } catch (e) {
-        debugPrint('Auto login failed: $e');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('자동 로그인 실패: $e'),
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          _isAutoLoggingIn = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _handleGoogleLogin() async {
-    setState(() {
-      _isGoogleLoading = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(authViewModelProvider.notifier)
+          .dispatch(const CheckAuthIntent());
     });
-
-    try {
-      if (Platform.isAndroid) {
-        final useCase = ref.read(loginWithGoogleUseCaseProvider);
-        final result = await useCase.execute();
-
-        if (result != null && mounted) {
-          _navigateToNext();
-        }
-      }
-    } catch (e) {
-      debugPrint('Google login failed: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isGoogleLoading = false;
-        });
-      }
-    }
   }
 
-  Future<void> _handleGuestLogin() async {
-    setState(() {
-      _isGuestLoading = true;
-    });
+  void _handleGoogleLogin() {
+    ref
+        .read(authViewModelProvider.notifier)
+        .dispatch(const LoginWithGoogleIntent());
+  }
 
-    try {
-      await ref.read(guestLoginUseCaseProvider).execute();
-
-      // 프로필 데이터 갱신 (UsTab에서 isAnonymous 상태 즉시 반영 위함)
-      ref.invalidate(myProfileProvider);
-
-      if (mounted) {
-        _navigateToNext();
-      }
-    } catch (e) {
-      debugPrint('Guest login failed: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isGuestLoading = false;
-        });
-      }
-    }
+  void _handleGuestLogin() {
+    ref.read(authViewModelProvider.notifier).dispatch(const LoginGuestIntent());
   }
 
   void _navigateToNext() {
-    // TODO: 커플 연결 여부 확인 후 적절한 화면으로 이동
-    // 로그인/스플래시 -> 홈 or 연결 화면
     context.go(AppRoutes.home);
   }
 
@@ -184,6 +95,29 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final authState =
+        ref.watch(authViewModelProvider).value ?? const AuthState();
+
+    // Listen to profile updates for navigation
+    ref.listen(myProfileProvider, (prev, next) {
+      if (next is AsyncData && next.value != null) {
+        _navigateToNext();
+      }
+    });
+
+    // Listen to errors
+    ref.listen(authViewModelProvider, (prev, next) {
+      if (next is AsyncError ||
+          (next is AsyncData && next.value?.errorMessage != null)) {
+        final error = next is AsyncError
+            ? next.error.toString()
+            : next.value?.errorMessage;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('로그인 실패: $error')));
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -234,22 +168,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               const Spacer(flex: 1),
 
               // 로그인 버튼 영역 (아래에서 애니메이션)
-              // 로그인 버튼 영역 (아래에서 애니메이션)
               SizedBox(
-                height: 240, // 높이 조정 (280 -> 240)
-                width: double.infinity, // 전체 너비 사용
+                height: 240,
+                width: double.infinity,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   transitionBuilder:
                       (Widget child, Animation<double> animation) {
                         return FadeTransition(opacity: animation, child: child);
                       },
-                  child: _isAutoLoggingIn
+                  child: authState.isAutoLoggingIn
                       ? Column(
                           key: const ValueKey('loading'),
                           mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment:
-                              CrossAxisAlignment.center, // 중앙 정렬
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             const CircularProgressIndicator(),
                             const SizedBox(height: 16),
@@ -267,8 +199,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           child: FadeTransition(
                             opacity: _buttonFadeAnimation,
                             child: Column(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.center, // 중앙 정렬
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 // Android에서만 구글 로그인 버튼 표시
                                 if (Platform.isAndroid) ...[
@@ -277,7 +208,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                       context,
                                     )!.loginWithGoogle,
                                     onPressed: _handleGoogleLogin,
-                                    isLoading: _isGoogleLoading,
+                                    isLoading: authState.isGoogleLoading,
                                   ),
                                   const SizedBox(height: 12),
 
@@ -319,14 +250,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
                                 // 게스트 로그인 (둘러보기) - 커스텀 밑줄 (Border)
                                 TextButton(
-                                  onPressed: _isGuestLoading
+                                  onPressed: authState.isGuestLoading
                                       ? null
                                       : _handleGuestLogin,
                                   style: TextButton.styleFrom(
                                     foregroundColor: AppColors.textSecondary,
-                                    // 버튼 자체의 터치 영역 유지를 위해 패딩 등은 기본값 유지
                                   ),
-                                  child: _isGuestLoading
+                                  child: authState.isGuestLoading
                                       ? SizedBox(
                                           width: 20,
                                           height: 20,
@@ -341,12 +271,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                       : Container(
                                           padding: const EdgeInsets.only(
                                             bottom: 0,
-                                          ), // 텍스트와 밑줄 사이 간격
+                                          ),
                                           decoration: BoxDecoration(
                                             border: Border(
                                               bottom: BorderSide(
                                                 color: AppColors.textSecondary,
-                                                width: 1.0, // 밑줄 두께
+                                                width: 1.0,
                                               ),
                                             ),
                                           ),
@@ -358,7 +288,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                               fontSize: 14,
                                               fontWeight: FontWeight.w400,
                                               color: AppColors.textSecondary,
-                                              // 텍스트 자체 밑줄 제거
                                               decoration: TextDecoration.none,
                                             ),
                                           ),

@@ -1,5 +1,5 @@
-import '../models/plan_model.dart';
-import '../repositories/record_repository.dart';
+import '../../../../models/plan_model.dart';
+import '../../../../repositories/record_repository.dart';
 
 class CreateNewPlanUseCase {
   final RecordRepository _recordRepository;

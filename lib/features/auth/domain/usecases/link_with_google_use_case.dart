@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../repositories/user_repository.dart';
-import '../../services/auth_service.dart';
+import '../../../../repositories/user_repository.dart';
+import '../../../../services/auth_service.dart';
 
 class LinkWithGoogleUseCase {
   final AuthService _authService;

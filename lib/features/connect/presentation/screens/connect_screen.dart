@@ -2,20 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../l10n/app_localizations.dart';
-import '../theme/app_colors.dart';
-import '../widgets/primary_button.dart';
-import '../routes/app_router.dart';
-import '../providers/repository_provider.dart';
-import '../repositories/connect_repository.dart';
-
-enum ConnectState {
-  initial, // 초기 상태 - 코드 생성/입력 선택
-  codeGenerated, // 코드 생성됨 (초대자)
-  codeEntered, // 코드 입력됨 (참여자)
-  waiting, // 연결 대기 중
-  connected, // 연결 완료
-}
+import '../connect_state.dart';
+import '../viewmodel/connect_viewmodel.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../theme/app_colors.dart';
+import '../../../../widgets/primary_button.dart';
+import '../../../../routes/app_router.dart';
+import '../../../../providers/repository_provider.dart';
+// removed unused connect_repository import
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -25,8 +19,6 @@ class ConnectScreen extends ConsumerStatefulWidget {
 }
 
 class _ConnectScreenState extends ConsumerState<ConnectScreen> {
-  ConnectState _state = ConnectState.initial;
-  String _inviteCode = '';
   final TextEditingController _codeController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
@@ -40,14 +32,16 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   }
 
   Future<void> _checkClipboard() async {
-    // 연결 전 단계에서만 체크
-    if (_state == ConnectState.waiting || _state == ConnectState.connected) {
+    final connectState = ref.read(connectViewModelProvider).value;
+    if (connectState == null ||
+        connectState.flowState == ConnectFlowState.waiting ||
+        connectState.flowState == ConnectFlowState.connected) {
       return;
     }
 
     final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
     final text = clipboardData?.text;
-    final myCode = ref.read(myProfileProvider).asData?.value?.inviteCode;
+    final myCode = ref.read(myProfileProvider).value?.inviteCode;
 
     if (text != null && _isValidInviteCode(text)) {
       if (text == myCode) return; // 내 코드면 무시
@@ -88,12 +82,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
 
   void _fillCode(String code) {
     if (code.length != 8) return;
-
-    setState(() {
-      _state = ConnectState.codeEntered;
-      _codeController.text = code;
-    });
-
+    _codeController.text = code;
     _connectManually();
   }
 
@@ -121,39 +110,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   // I will check the file content first to be safe, or just view_file.
   // But to be quick, I'll update `_copyCode` and `_shareCode` to accept arguments and remove old `_buildCodeCard` if present.
 
-  Future<void> _submitCode(String code) async {
-    final myCode = ref.read(myProfileProvider).asData?.value?.inviteCode;
-    if (code == myCode) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('본인의 초대 코드는 사용할 수 없습니다.')));
-      return;
-    }
-
-    setState(() {
-      _state = ConnectState.codeEntered; // 입력 상태 유지
-    });
-
-    try {
-      final repository = ref.read(connectRepositoryProvider);
-
-      setState(() {
-        _state = ConnectState.waiting;
-      });
-
-      await repository.connectWithCode(code);
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _state = ConnectState.codeEntered; // 다시 입력 대기
-        });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('코드가 올바르지 않거나 연결에 실패했습니다.')));
-      }
-    }
-  }
-
   void _navigateToHome() {
     context.go(AppRoutes.home);
   }
@@ -161,43 +117,31 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   void _connectManually() {
     final code = _codeController.text;
     if (code.length == 8) {
-      _submitCode(code);
+      ref
+          .read(connectViewModelProvider.notifier)
+          .dispatch(SubmitInviteCodeIntent(code));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 연결 상태 변경 감지하여 네비게이션 처리
-    // 연결 상태 변경 감지하여 네비게이션 처리
-    ref.listen(connectionStatusStreamProvider, (previous, next) {
-      next.whenData((status) {
-        if (status == ConnectionStatus.active &&
-            _state != ConnectState.connected) {
-          // 연결 성공 시 목록 갱신 및 토스트, 닫기
-          ref.invalidate(connectedProfilesProvider);
+    final connectState =
+        ref.watch(connectViewModelProvider).value ?? const ConnectState();
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('연결되었습니다!'),
-              backgroundColor: AppColors.primary,
-            ),
-          );
-
-          if (mounted && Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
-        }
-      });
+    // 연결 상태 변경 감지하여 네비게이션 처리
+    ref.listen(connectViewModelProvider, (previous, next) {
+      if (next.value?.flowState == ConnectFlowState.connected &&
+          previous?.value?.flowState != ConnectFlowState.connected) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('연결되었습니다!'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
     });
 
     final canPop = Navigator.canPop(context);
-    final myProfileAsync = ref.watch(myProfileProvider);
-
-    // 내 초대 코드 자동 설정
-    final myInviteCode = myProfileAsync.asData?.value?.inviteCode;
-    if (myInviteCode != null && _inviteCode != myInviteCode) {
-      // _inviteCode = myInviteCode;
-    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -219,12 +163,13 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
             children: [
               SizedBox(height: canPop ? 0 : 40),
 
-              // 메인 메시지 영역 (연결되면 다른 메시지? 일단 유지)
-              if (_state != ConnectState.connected) _buildMessageSection(),
+              // 메인 메시지 영역
+              if (connectState.flowState != ConnectFlowState.connected)
+                _buildMessageSection(),
 
               const SizedBox(height: 48),
 
-              if (_state == ConnectState.connected)
+              if (connectState.flowState == ConnectFlowState.connected)
                 _buildConnectedState()
               else ...[
                 // 2. 상대방 코드 입력
@@ -237,7 +182,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
-                _buildCodeInput(),
+                _buildCodeInput(connectState),
 
                 // 초기화면의 "혼자 시작하기" 버튼 (온보딩인 경우에만 맨 아래 배치)
                 if (!canPop) ...[
@@ -297,7 +242,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   // 기존 _buildInitialOptions 제거
 
   // _buildCodeCard 수정 (인자 받도록)
-  Widget _buildCodeInput() {
+  Widget _buildCodeInput(ConnectState state) {
     return Column(
       children: [
         Text(
@@ -326,7 +271,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
               counterText: '',
               hintText: 'ABCD1234',
               hintStyle: TextStyle(
-                color: AppColors.textSecondary.withValues(alpha: 0.3),
+                color: AppColors.textSecondary.withOpacity(0.3),
                 letterSpacing: 4,
               ),
               filled: true,
@@ -359,14 +304,25 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
 
         const SizedBox(height: 32),
 
-        if (_state == ConnectState.waiting) ...[
+        if (state.flowState == ConnectFlowState.waiting) ...[
           const CircularProgressIndicator(),
           const SizedBox(height: 16),
-        ] else
+        ] else ...[
+          if (state.errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Text(
+                state.errorMessage!,
+                style: TextStyle(color: AppColors.error, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+            ),
           PrimaryButton(
             text: AppLocalizations.of(context)!.sendConnectionRequest,
             onPressed: () => _connectManually(),
+            isLoading: state.isProcessing,
           ),
+        ],
       ],
     );
   }
@@ -391,41 +347,9 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     );
 
     if (confirmed == true) {
-      try {
-        // 현재 연결된 모든 상대 끊기 (MVP: 가장 최근 혹은 전체)
-        // 여기서는 usecase에 targetId를 넘겨야 함.
-        // 상태를 보고 ConnectedUser를 가져와야 하는데, 일단 'users' collection을 조회할 필요 없이
-        // relations에서 찾아서 지우므로 target ID가 필요함.
-        // 하지만 UseCase는 ID를 요구함.
-        // ConnectRepository.disconnectByUser also needs ID.
-        // 현재 화면에서 connected 상대 ID를 알고 있나?
-        // 안다면 좋지만 모른다면?
-        // getConnections()를 호출해서 가져와야 함.
-
-        // 심플하게: Repository에게 "나와 연결된 모든 사람 끊어"라고 할 수도 있지만
-        // 일단 getConnections()로 찾자.
-
-        final connections = await ref
-            .read(connectRepositoryProvider)
-            .getConnections();
-        if (connections.isNotEmpty) {
-          final targetId =
-              connections.first.executorId ==
-                  ref.read(myProfileProvider).asData?.value?.uid
-              ? connections.first.managerId
-              : connections.first.executorId;
-
-          await ref.read(disconnectConnectionUseCaseProvider).execute(targetId);
-        } else {
-          // 이미 연결 없음?
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('연결 해제 실패: $e')));
-        }
-      }
+      ref
+          .read(connectViewModelProvider.notifier)
+          .dispatch(const DisconnectPartnerIntent());
     }
   }
 

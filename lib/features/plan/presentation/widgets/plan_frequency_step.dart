@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../theme/app_colors.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class FrequencyOption {
   final int value;
@@ -87,7 +87,7 @@ class PlanFrequencyStep extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.1)
+                ? AppColors.primary.withOpacity(0.1)
                 : AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(

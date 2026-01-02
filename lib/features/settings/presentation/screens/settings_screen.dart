@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_theme_enum.dart';
-import '../l10n/app_localizations.dart';
-import '../providers/app_settings_provider.dart';
-import '../routes/app_router.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/repository_provider.dart';
+
+import '../settings_state.dart';
+import '../viewmodel/settings_viewmodel.dart';
+import '../../../../theme/app_colors.dart';
+import '../../../../theme/app_theme_enum.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../routes/app_router.dart';
+// removed unused repository_provider import
 
 /// 설정 화면 - 언어 및 테마 변경
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -18,35 +19,36 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  AppSettingsProvider? _settingsProvider;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final newProvider = AppSettings.of(context);
-    if (_settingsProvider != newProvider) {
-      _settingsProvider?.removeListener(_onSettingsChanged);
-      _settingsProvider = newProvider;
-      _settingsProvider?.addListener(_onSettingsChanged);
-    }
-  }
-
-  @override
-  void dispose() {
-    _settingsProvider?.removeListener(_onSettingsChanged);
-    super.dispose();
-  }
-
-  void _onSettingsChanged() {
-    setState(() {
-      // 설정이 변경되면 화면을 다시 빌드
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final settingsProvider = AppSettings.of(context);
+    final settingsState =
+        ref.watch(settingsViewModelProvider).value ??
+        SettingsState(
+          currentLocale: const Locale('ko', ''),
+          currentTheme: AppThemeType.smokyPlum,
+        );
+
+    // 연결 끊기 성공 시 토스트 처리 등 (Listen)
+    ref.listen(settingsViewModelProvider, (previous, next) {
+      if (previous?.value?.isWithdrawing == true &&
+          next.value?.isWithdrawing == false) {
+        if (next.value?.errorMessage == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.settingsAccountDeletedSuccess)),
+          );
+          context.go(AppRoutes.splash);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.settingsDeleteAccountFailed(next.value!.errorMessage!),
+              ),
+            ),
+          );
+        }
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -86,16 +88,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 context,
                 l10n.settingsLanguageKorean,
                 const Locale('ko', ''),
-                settingsProvider.currentLocale,
-                () => settingsProvider.setLocale(const Locale('ko', '')),
+                settingsState.currentLocale,
+                () => ref
+                    .read(settingsViewModelProvider.notifier)
+                    .dispatch(const ChangeLocaleIntent(Locale('ko', ''))),
               ),
               const SizedBox(height: 12),
               _buildLanguageOption(
                 context,
                 l10n.settingsLanguageEnglish,
                 const Locale('en', ''),
-                settingsProvider.currentLocale,
-                () => settingsProvider.setLocale(const Locale('en', '')),
+                settingsState.currentLocale,
+                () => ref
+                    .read(settingsViewModelProvider.notifier)
+                    .dispatch(const ChangeLocaleIntent(Locale('en', ''))),
               ),
               const SizedBox(height: 32),
 
@@ -113,16 +119,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 context,
                 l10n.settingsThemeSmokyPlum,
                 AppThemeType.smokyPlum,
-                settingsProvider.currentTheme,
-                () => settingsProvider.setTheme(AppThemeType.smokyPlum),
+                settingsState.currentTheme,
+                () => ref
+                    .read(settingsViewModelProvider.notifier)
+                    .dispatch(const ChangeThemeIntent(AppThemeType.smokyPlum)),
               ),
               const SizedBox(height: 12),
               _buildThemeOption(
                 context,
                 l10n.settingsThemeDeepOlive,
                 AppThemeType.deepOlive,
-                settingsProvider.currentTheme,
-                () => settingsProvider.setTheme(AppThemeType.deepOlive),
+                settingsState.currentTheme,
+                () => ref
+                    .read(settingsViewModelProvider.notifier)
+                    .dispatch(const ChangeThemeIntent(AppThemeType.deepOlive)),
               ),
               const SizedBox(height: 32),
 
@@ -244,26 +254,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
 
     if (confirmed == true && context.mounted) {
-      // TODO: 로딩 표시
-      try {
-        final withdrawUseCase = ref.read(withdrawUseCaseProvider);
-        await withdrawUseCase.execute();
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.settingsAccountDeletedSuccess)),
-          );
-          // 앱 초기 화면으로 이동 (스플래시 -> 로그인)
-          context.go(AppRoutes.splash);
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.settingsDeleteAccountFailed(e.toString())),
-            ),
-          );
-        }
-      }
+      ref
+          .read(settingsViewModelProvider.notifier)
+          .dispatch(const WithdrawAccountIntent());
     }
   }
 
@@ -385,7 +378,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Container(
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.1)
+                ? AppColors.primary.withOpacity(0.1)
                 : AppColors.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
@@ -434,7 +427,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Container(
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.1)
+                ? AppColors.primary.withOpacity(0.1)
                 : AppColors.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(

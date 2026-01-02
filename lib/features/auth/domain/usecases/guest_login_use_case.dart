@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import '../repositories/user_repository.dart';
-import '../services/auth_service.dart';
-import '../datasources/user_local_data_source.dart';
+import '../../../../repositories/user_repository.dart';
+import '../../../../services/auth_service.dart';
+import '../../../../datasources/user_local_data_source.dart';
 
 class GuestLoginUseCase {
   final AuthService _authService;

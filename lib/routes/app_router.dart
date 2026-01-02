@@ -1,11 +1,11 @@
 import 'package:go_router/go_router.dart';
-import '../screens/splash_screen.dart';
-import '../screens/connect_screen.dart';
+import '../features/auth/presentation/screens/splash_screen.dart';
+import '../features/connect/presentation/screens/connect_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/developer_screen.dart';
-import '../screens/plan/plan_create_screen.dart';
-import '../screens/settings_screen.dart';
-import '../screens/login/email_login_screen.dart';
+import '../features/plan/presentation/screens/plan_create_screen.dart';
+import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/auth/presentation/screens/email_login_screen.dart';
 
 /// 앱 라우팅 경로 상수
 class AppRoutes {

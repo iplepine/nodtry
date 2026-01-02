@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../l10n/app_localizations.dart';
-import '../../routes/app_router.dart';
-import '../../services/auth_service.dart';
-import '../../theme/app_colors.dart';
-import '../../widgets/primary_button.dart';
+// removed unused firebase_auth import
+import '../../../../l10n/app_localizations.dart';
+import '../../../../routes/app_router.dart';
+import '../../../../theme/app_colors.dart';
+import '../../../../widgets/primary_button.dart';
+import '../../../../providers/repository_provider.dart';
+import '../auth_state.dart';
+import '../viewmodel/auth_viewmodel.dart';
 
 class EmailLoginScreen extends ConsumerStatefulWidget {
   const EmailLoginScreen({super.key});
@@ -19,11 +21,8 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
 
   bool _isLoginMode = true; // true: Login, false: SignUp
-  bool _isLoading = false;
-  String? _errorMessage;
 
   @override
   void dispose() {
@@ -35,70 +34,41 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      if (_isLoginMode) {
-        await _authService.signInWithEmailAndPassword(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-        );
-      } else {
-        await _authService.signUpWithEmailAndPassword(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-        );
-      }
-
-      if (mounted) {
-        // 성공 시 홈으로 이동 (스플래시에서직 자동 이동 로직이 있으나 여기서 명시적 이동)
-        // 상황에 따라 ConnectScreen 등으로 이동할 수도 있음 - AppRouter 로직 따름
-        context.go(AppRoutes.home);
-      }
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorMessage = _mapFirebaseError(e, context);
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    if (_isLoginMode) {
+      ref
+          .read(authViewModelProvider.notifier)
+          .dispatch(
+            LoginWithEmailIntent(
+              email: _emailController.text.trim(),
+              password: _passwordController.text.trim(),
+            ),
+          );
+    } else {
+      ref
+          .read(authViewModelProvider.notifier)
+          .dispatch(
+            SignUpWithEmailIntent(
+              email: _emailController.text.trim(),
+              password: _passwordController.text.trim(),
+            ),
+          );
     }
   }
 
-  String _mapFirebaseError(FirebaseAuthException e, BuildContext context) {
-    switch (e.code) {
-      case 'invalid-email':
-        return AppLocalizations.of(context)!.invalidEmail;
-      case 'user-disabled':
-        return '사용 중지된 계정입니다.';
-      case 'user-not-found':
-        return AppLocalizations.of(context)!.userNotFound;
-      case 'wrong-password':
-        return AppLocalizations.of(context)!.wrongPassword;
-      case 'email-already-in-use':
-        return AppLocalizations.of(
-          context,
-        )!.accountExistsWithDifferentCredential;
-      case 'weak-password':
-        return AppLocalizations.of(context)!.weakPassword;
-      default:
-        return '오류가 발생했습니다: ${e.message}';
-    }
-  }
+  // _mapFirebaseError removed as it is now handled in AuthViewModel or not used directly here.
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final authState =
+        ref.watch(authViewModelProvider).value ?? const AuthState();
+
+    // Listen to profile updates for navigation
+    ref.listen(myProfileProvider, (prev, next) {
+      if (next is AsyncData && next.value != null) {
+        context.go(AppRoutes.home);
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -181,11 +151,11 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                 const SizedBox(height: 24),
 
                 // Error Message
-                if (_errorMessage != null)
+                if (authState.errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: Text(
-                      _errorMessage!,
+                      authState.errorMessage!,
                       style: const TextStyle(color: Colors.red, fontSize: 14),
                       textAlign: TextAlign.center,
                     ),
@@ -195,7 +165,7 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                 PrimaryButton(
                   text: _isLoginMode ? l10n.login : l10n.signUp,
                   onPressed: _submit,
-                  isLoading: _isLoading,
+                  isLoading: authState.isEmailLoading,
                 ),
                 const SizedBox(height: 24),
 
@@ -204,7 +174,9 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                   onPressed: () {
                     setState(() {
                       _isLoginMode = !_isLoginMode;
-                      _errorMessage = null;
+                      ref
+                          .read(authViewModelProvider.notifier)
+                          .dispatch(const ClearErrorIntent());
                       _formKey.currentState?.reset();
                     });
                   },
