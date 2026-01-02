@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$HistoryState {
 
- List<HistoryItem> get items; HistoryFilterType get currentFilter; bool get isLoading;
+ List<HistoryItem> get activeItems; List<PlanSummary> get finishedPlanSummaries; bool get isLoading;
 /// Create a copy of HistoryState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $HistoryStateCopyWith<HistoryState> get copyWith => _$HistoryStateCopyWithImpl<H
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HistoryState&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.currentFilter, currentFilter) || other.currentFilter == currentFilter)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HistoryState&&const DeepCollectionEquality().equals(other.activeItems, activeItems)&&const DeepCollectionEquality().equals(other.finishedPlanSummaries, finishedPlanSummaries)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items),currentFilter,isLoading);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(activeItems),const DeepCollectionEquality().hash(finishedPlanSummaries),isLoading);
 
 @override
 String toString() {
-  return 'HistoryState(items: $items, currentFilter: $currentFilter, isLoading: $isLoading)';
+  return 'HistoryState(activeItems: $activeItems, finishedPlanSummaries: $finishedPlanSummaries, isLoading: $isLoading)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $HistoryStateCopyWith<$Res>  {
   factory $HistoryStateCopyWith(HistoryState value, $Res Function(HistoryState) _then) = _$HistoryStateCopyWithImpl;
 @useResult
 $Res call({
- List<HistoryItem> items, HistoryFilterType currentFilter, bool isLoading
+ List<HistoryItem> activeItems, List<PlanSummary> finishedPlanSummaries, bool isLoading
 });
 
 
@@ -62,11 +62,11 @@ class _$HistoryStateCopyWithImpl<$Res>
 
 /// Create a copy of HistoryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? currentFilter = null,Object? isLoading = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? activeItems = null,Object? finishedPlanSummaries = null,Object? isLoading = null,}) {
   return _then(_self.copyWith(
-items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
-as List<HistoryItem>,currentFilter: null == currentFilter ? _self.currentFilter : currentFilter // ignore: cast_nullable_to_non_nullable
-as HistoryFilterType,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+activeItems: null == activeItems ? _self.activeItems : activeItems // ignore: cast_nullable_to_non_nullable
+as List<HistoryItem>,finishedPlanSummaries: null == finishedPlanSummaries ? _self.finishedPlanSummaries : finishedPlanSummaries // ignore: cast_nullable_to_non_nullable
+as List<PlanSummary>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -152,10 +152,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HistoryItem> items,  HistoryFilterType currentFilter,  bool isLoading)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HistoryItem> activeItems,  List<PlanSummary> finishedPlanSummaries,  bool isLoading)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HistoryState() when $default != null:
-return $default(_that.items,_that.currentFilter,_that.isLoading);case _:
+return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading);case _:
   return orElse();
 
 }
@@ -173,10 +173,10 @@ return $default(_that.items,_that.currentFilter,_that.isLoading);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HistoryItem> items,  HistoryFilterType currentFilter,  bool isLoading)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HistoryItem> activeItems,  List<PlanSummary> finishedPlanSummaries,  bool isLoading)  $default,) {final _that = this;
 switch (_that) {
 case _HistoryState():
-return $default(_that.items,_that.currentFilter,_that.isLoading);case _:
+return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -193,10 +193,10 @@ return $default(_that.items,_that.currentFilter,_that.isLoading);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HistoryItem> items,  HistoryFilterType currentFilter,  bool isLoading)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HistoryItem> activeItems,  List<PlanSummary> finishedPlanSummaries,  bool isLoading)?  $default,) {final _that = this;
 switch (_that) {
 case _HistoryState() when $default != null:
-return $default(_that.items,_that.currentFilter,_that.isLoading);case _:
+return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading);case _:
   return null;
 
 }
@@ -208,17 +208,23 @@ return $default(_that.items,_that.currentFilter,_that.isLoading);case _:
 
 
 class _HistoryState extends HistoryState {
-  const _HistoryState({final  List<HistoryItem> items = const [], this.currentFilter = HistoryFilterType.all, this.isLoading = false}): _items = items,super._();
+  const _HistoryState({final  List<HistoryItem> activeItems = const [], final  List<PlanSummary> finishedPlanSummaries = const [], this.isLoading = false}): _activeItems = activeItems,_finishedPlanSummaries = finishedPlanSummaries,super._();
   
 
- final  List<HistoryItem> _items;
-@override@JsonKey() List<HistoryItem> get items {
-  if (_items is EqualUnmodifiableListView) return _items;
+ final  List<HistoryItem> _activeItems;
+@override@JsonKey() List<HistoryItem> get activeItems {
+  if (_activeItems is EqualUnmodifiableListView) return _activeItems;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_items);
+  return EqualUnmodifiableListView(_activeItems);
 }
 
-@override@JsonKey() final  HistoryFilterType currentFilter;
+ final  List<PlanSummary> _finishedPlanSummaries;
+@override@JsonKey() List<PlanSummary> get finishedPlanSummaries {
+  if (_finishedPlanSummaries is EqualUnmodifiableListView) return _finishedPlanSummaries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_finishedPlanSummaries);
+}
+
 @override@JsonKey() final  bool isLoading;
 
 /// Create a copy of HistoryState
@@ -231,16 +237,16 @@ _$HistoryStateCopyWith<_HistoryState> get copyWith => __$HistoryStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HistoryState&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.currentFilter, currentFilter) || other.currentFilter == currentFilter)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HistoryState&&const DeepCollectionEquality().equals(other._activeItems, _activeItems)&&const DeepCollectionEquality().equals(other._finishedPlanSummaries, _finishedPlanSummaries)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),currentFilter,isLoading);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_activeItems),const DeepCollectionEquality().hash(_finishedPlanSummaries),isLoading);
 
 @override
 String toString() {
-  return 'HistoryState(items: $items, currentFilter: $currentFilter, isLoading: $isLoading)';
+  return 'HistoryState(activeItems: $activeItems, finishedPlanSummaries: $finishedPlanSummaries, isLoading: $isLoading)';
 }
 
 
@@ -251,7 +257,7 @@ abstract mixin class _$HistoryStateCopyWith<$Res> implements $HistoryStateCopyWi
   factory _$HistoryStateCopyWith(_HistoryState value, $Res Function(_HistoryState) _then) = __$HistoryStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<HistoryItem> items, HistoryFilterType currentFilter, bool isLoading
+ List<HistoryItem> activeItems, List<PlanSummary> finishedPlanSummaries, bool isLoading
 });
 
 
@@ -268,11 +274,11 @@ class __$HistoryStateCopyWithImpl<$Res>
 
 /// Create a copy of HistoryState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? items = null,Object? currentFilter = null,Object? isLoading = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? activeItems = null,Object? finishedPlanSummaries = null,Object? isLoading = null,}) {
   return _then(_HistoryState(
-items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
-as List<HistoryItem>,currentFilter: null == currentFilter ? _self.currentFilter : currentFilter // ignore: cast_nullable_to_non_nullable
-as HistoryFilterType,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+activeItems: null == activeItems ? _self._activeItems : activeItems // ignore: cast_nullable_to_non_nullable
+as List<HistoryItem>,finishedPlanSummaries: null == finishedPlanSummaries ? _self._finishedPlanSummaries : finishedPlanSummaries // ignore: cast_nullable_to_non_nullable
+as List<PlanSummary>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -324,12 +330,11 @@ extension HistoryIntentPatterns on HistoryIntent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RefreshIntent value)?  refresh,TResult Function( SetFilterIntent value)?  setFilter,TResult Function( ReconcileIntent value)?  reconcile,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RefreshIntent value)?  refresh,TResult Function( ReconcileIntent value)?  reconcile,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
-return refresh(_that);case SetFilterIntent() when setFilter != null:
-return setFilter(_that);case ReconcileIntent() when reconcile != null:
+return refresh(_that);case ReconcileIntent() when reconcile != null:
 return reconcile(_that);case _:
   return orElse();
 
@@ -348,12 +353,11 @@ return reconcile(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RefreshIntent value)  refresh,required TResult Function( SetFilterIntent value)  setFilter,required TResult Function( ReconcileIntent value)  reconcile,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RefreshIntent value)  refresh,required TResult Function( ReconcileIntent value)  reconcile,}){
 final _that = this;
 switch (_that) {
 case RefreshIntent():
-return refresh(_that);case SetFilterIntent():
-return setFilter(_that);case ReconcileIntent():
+return refresh(_that);case ReconcileIntent():
 return reconcile(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -371,12 +375,11 @@ return reconcile(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RefreshIntent value)?  refresh,TResult? Function( SetFilterIntent value)?  setFilter,TResult? Function( ReconcileIntent value)?  reconcile,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RefreshIntent value)?  refresh,TResult? Function( ReconcileIntent value)?  reconcile,}){
 final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
-return refresh(_that);case SetFilterIntent() when setFilter != null:
-return setFilter(_that);case ReconcileIntent() when reconcile != null:
+return refresh(_that);case ReconcileIntent() when reconcile != null:
 return reconcile(_that);case _:
   return null;
 
@@ -394,11 +397,10 @@ return reconcile(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  refresh,TResult Function( HistoryFilterType filter)?  setFilter,TResult Function( String historyId,  HistoryStatus status)?  reconcile,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  refresh,TResult Function( String historyId,  HistoryStatus status)?  reconcile,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
-return refresh();case SetFilterIntent() when setFilter != null:
-return setFilter(_that.filter);case ReconcileIntent() when reconcile != null:
+return refresh();case ReconcileIntent() when reconcile != null:
 return reconcile(_that.historyId,_that.status);case _:
   return orElse();
 
@@ -417,11 +419,10 @@ return reconcile(_that.historyId,_that.status);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  refresh,required TResult Function( HistoryFilterType filter)  setFilter,required TResult Function( String historyId,  HistoryStatus status)  reconcile,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  refresh,required TResult Function( String historyId,  HistoryStatus status)  reconcile,}) {final _that = this;
 switch (_that) {
 case RefreshIntent():
-return refresh();case SetFilterIntent():
-return setFilter(_that.filter);case ReconcileIntent():
+return refresh();case ReconcileIntent():
 return reconcile(_that.historyId,_that.status);case _:
   throw StateError('Unexpected subclass');
 
@@ -439,11 +440,10 @@ return reconcile(_that.historyId,_that.status);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  refresh,TResult? Function( HistoryFilterType filter)?  setFilter,TResult? Function( String historyId,  HistoryStatus status)?  reconcile,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  refresh,TResult? Function( String historyId,  HistoryStatus status)?  reconcile,}) {final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
-return refresh();case SetFilterIntent() when setFilter != null:
-return setFilter(_that.filter);case ReconcileIntent() when reconcile != null:
+return refresh();case ReconcileIntent() when reconcile != null:
 return reconcile(_that.historyId,_that.status);case _:
   return null;
 
@@ -483,72 +483,6 @@ String toString() {
 
 
 
-
-/// @nodoc
-
-
-class SetFilterIntent implements HistoryIntent {
-  const SetFilterIntent(this.filter);
-  
-
- final  HistoryFilterType filter;
-
-/// Create a copy of HistoryIntent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$SetFilterIntentCopyWith<SetFilterIntent> get copyWith => _$SetFilterIntentCopyWithImpl<SetFilterIntent>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SetFilterIntent&&(identical(other.filter, filter) || other.filter == filter));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,filter);
-
-@override
-String toString() {
-  return 'HistoryIntent.setFilter(filter: $filter)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $SetFilterIntentCopyWith<$Res> implements $HistoryIntentCopyWith<$Res> {
-  factory $SetFilterIntentCopyWith(SetFilterIntent value, $Res Function(SetFilterIntent) _then) = _$SetFilterIntentCopyWithImpl;
-@useResult
-$Res call({
- HistoryFilterType filter
-});
-
-
-
-
-}
-/// @nodoc
-class _$SetFilterIntentCopyWithImpl<$Res>
-    implements $SetFilterIntentCopyWith<$Res> {
-  _$SetFilterIntentCopyWithImpl(this._self, this._then);
-
-  final SetFilterIntent _self;
-  final $Res Function(SetFilterIntent) _then;
-
-/// Create a copy of HistoryIntent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? filter = null,}) {
-  return _then(SetFilterIntent(
-null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
-as HistoryFilterType,
-  ));
-}
-
-
-}
 
 /// @nodoc
 

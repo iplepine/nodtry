@@ -3,13 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nod_try/features/history/presentation/history_viewmodel.dart';
 import 'package:nod_try/features/history/presentation/history_state.dart';
 import 'package:nod_try/models/history_item.dart';
+import 'package:nod_try/models/plan_model.dart';
 import 'package:nod_try/providers/repository_provider.dart';
 import 'package:nod_try/repositories/record_repository.dart';
 
 // Manual Mock
 class MockRecordRepository extends Fake implements RecordRepository {
   List<HistoryItem> mockItems = [];
+  List<Plan> mockPlans = [];
   int getHistoryItemsCallCount = 0;
+  int getPlansCallCount = 0;
 
   String? lastReconciledId;
   HistoryStatus? lastReconciledStatus;
@@ -19,6 +22,12 @@ class MockRecordRepository extends Fake implements RecordRepository {
   Future<List<HistoryItem>> getHistoryItems() async {
     getHistoryItemsCallCount++;
     return mockItems;
+  }
+
+  @override
+  Future<List<Plan>> getPlansByUserId(String userId) async {
+    getPlansCallCount++;
+    return mockPlans;
   }
 
   @override
@@ -38,24 +47,36 @@ void main() {
 
   final itemMe = HistoryItem(
     id: '1',
+    planId: 'plan_1',
     date: DateTime.now(),
     title: 'My Action',
     status: HistoryStatus.done,
-    executorId: 'me', // Assuming 'me' logic in VM
+    executorId: 'me',
   );
 
   final itemPartner = HistoryItem(
     id: '2',
+    planId: 'plan_2',
     date: DateTime.now(),
     title: 'Partner Action',
     status: HistoryStatus.done,
     executorId: 'partner',
   );
 
+  final activePlan = Plan(
+    id: 'plan_1',
+    userId: 'me',
+    startDate: DateTime.now().subtract(const Duration(days: 7)),
+    endDate: DateTime.now().add(const Duration(days: 7)),
+    state: PlanState.active,
+    items: [],
+    createdAt: DateTime.now(),
+  );
+
   setUp(() {
     mockRecordRepository = MockRecordRepository();
-    // Default items
     mockRecordRepository.mockItems = [itemMe, itemPartner];
+    mockRecordRepository.mockPlans = [activePlan];
 
     container = ProviderContainer(
       overrides: [
@@ -68,56 +89,24 @@ void main() {
     container.dispose();
   });
 
-  test('Initial state should load all items', () async {
+  test('Initial state should load active items', () async {
     // Act
     container.listen(historyViewModelProvider, (_, __) {});
     final result = await container.read(historyViewModelProvider.future);
 
     // Assert
-    expect(result.items.length, 2);
+    // activePlanId에 해당하는 itemMe만 포함되어야 함 (VM logic)
+    expect(result.activeItems.length, 1);
+    expect(result.activeItems.first.id, '1');
     expect(mockRecordRepository.getHistoryItemsCallCount, 1);
-  });
-
-  test('setFilter(me) should filter only my items', () async {
-    // Arrange
-    await container.read(historyViewModelProvider.future); // Initial load
-
-    // Act
-    await container
-        .read(historyViewModelProvider.notifier)
-        .dispatch(const HistoryIntent.setFilter(HistoryFilterType.me));
-    final result = await container.read(historyViewModelProvider.future);
-
-    // Assert
-    expect(result.items.length, 1);
-    expect(result.items.first.executorId, 'me');
-    // Implementation calls `_fetchState` again
-    expect(mockRecordRepository.getHistoryItemsCallCount, 2);
-  });
-
-  test('setFilter(partner) should filter only partner items', () async {
-    // Arrange
-    await container.read(historyViewModelProvider.future);
-
-    // Act
-    await container
-        .read(historyViewModelProvider.notifier)
-        .dispatch(const HistoryIntent.setFilter(HistoryFilterType.partner));
-    final result = await container.read(historyViewModelProvider.future);
-
-    // Assert
-    expect(result.items.length, 1);
-    expect(result.items.first.executorId, 'partner');
+    expect(mockRecordRepository.getPlansCallCount, 1);
   });
 
   test('reconcile should call repository and refresh', () async {
     // Arrange
-    container.listen(
-      historyViewModelProvider,
-      (_, __) {},
-    ); // Keep alive and listen
+    container.listen(historyViewModelProvider, (_, __) {});
     await container.read(historyViewModelProvider.future);
-    mockRecordRepository.getHistoryItemsCallCount = 0; // Reset
+    mockRecordRepository.getHistoryItemsCallCount = 0;
 
     // Act
     await container
@@ -137,7 +126,6 @@ void main() {
       HistoryStatus.actuallyDone,
     );
 
-    // Should trigger refresh (invalidateSelf)
     expect(mockRecordRepository.getHistoryItemsCallCount, greaterThan(0));
   });
 }

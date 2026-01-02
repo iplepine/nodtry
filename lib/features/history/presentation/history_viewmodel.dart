@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'history_state.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../models/history_item.dart';
+import '../../../models/plan_model.dart';
+import '../../../models/plan_summary.dart';
 
 class HistoryViewModel extends AsyncNotifier<HistoryState> {
   @override
@@ -14,31 +16,59 @@ class HistoryViewModel extends AsyncNotifier<HistoryState> {
     final useCase = ref.read(getHistoryUseCaseProvider);
     final allItems = await useCase.execute();
 
-    // Default filter from current state if exists, otherwise .all
-    final filter = state.value?.currentFilter ?? HistoryFilterType.all;
-
     // Profile for identifying 'me'
     final myProfile = ref.read(myProfileProvider).value;
     final myUid = myProfile?.uid ?? 'me';
 
-    List<HistoryItem> filtered;
-    switch (filter) {
-      case HistoryFilterType.all:
-        filtered = allItems;
-        break;
-      case HistoryFilterType.me:
-        filtered = allItems.where((item) => item.executorId == myUid).toList();
-        break;
-      case HistoryFilterType.partner:
-        filtered = allItems.where((item) => item.executorId != myUid).toList();
-        break;
+    // Fetch all plans to distinguish active vs completed
+    final recordRepo = ref.read(recordRepositoryProvider);
+    final myPlans = await recordRepo.getPlansByUserId(myUid);
+
+    // Assuming we also want to see partner's finished plans or shared plans
+    // In this app, plans are usually shared (managerId/userId pair)
+    // For now, let's treat all fetched plans as relevant
+    final activePlanIds = myPlans
+        .where((p) => p.state == PlanState.active)
+        .map((p) => p.id)
+        .toSet();
+
+    final activeItems = allItems.where((item) {
+      if (item.planId != null) {
+        return activePlanIds.contains(item.planId);
+      }
+      // Fallback: If no planId, use date range of active plans if needed
+      // but ideally all new items should have planId.
+      return true; // Temporary
+    }).toList();
+
+    activeItems.sort((a, b) => b.date.compareTo(a.date));
+
+    // Build summaries for completed plans
+    final finishedPlanSummaries = <PlanSummary>[];
+    final completedPlans = myPlans.where((p) => p.state == PlanState.completed);
+
+    for (var plan in completedPlans) {
+      final myCount = allItems.where((item) {
+        return item.planId == plan.id &&
+            item.executorId == myUid &&
+            (item.status == HistoryStatus.done ||
+                item.status == HistoryStatus.actuallyDone);
+      }).length;
+
+      finishedPlanSummaries.add(
+        PlanSummary(
+          planId: plan.id ?? '',
+          title: plan.items.isNotEmpty ? plan.items.first.title : '제목 없음',
+          startDate: plan.startDate,
+          endDate: plan.endDate,
+          myCount: myCount,
+        ),
+      );
     }
 
-    filtered.sort((a, b) => b.date.compareTo(a.date));
-
     return HistoryState(
-      items: filtered,
-      currentFilter: filter,
+      activeItems: activeItems,
+      finishedPlanSummaries: finishedPlanSummaries,
       isLoading: false,
     );
   }
@@ -49,25 +79,12 @@ class HistoryViewModel extends AsyncNotifier<HistoryState> {
     try {
       if (intent is RefreshIntent) {
         state = await AsyncValue.guard(() => _fetchState());
-      } else if (intent is SetFilterIntent) {
-        // Update filter in state immediately for UI responsiveness if needed,
-        // but here we let _fetchState handle it.
-        // We need to store the intended filter somewhere or pass it.
-        // Let's refine _fetchState to take a filter or use a private variable.
-        await _changeFilter(intent.filter);
       } else if (intent is ReconcileIntent) {
         await _reconcile(intent.historyId, intent.status);
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
-  }
-
-  Future<void> _changeFilter(HistoryFilterType filter) async {
-    state = AsyncValue.data(
-      state.value!.copyWith(currentFilter: filter, isLoading: true),
-    );
-    state = await AsyncValue.guard(() => _fetchState());
   }
 
   Future<void> _reconcile(String historyId, HistoryStatus status) async {

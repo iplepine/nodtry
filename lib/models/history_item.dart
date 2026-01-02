@@ -18,6 +18,7 @@ enum HistoryStatus {
 
 class HistoryItem {
   final String id; // 기록 고유 ID
+  final String? planId; // 연관된 계획 ID
   final DateTime date;
   final String title;
   final HistoryStatus status;
@@ -30,6 +31,7 @@ class HistoryItem {
 
   const HistoryItem({
     required this.id,
+    this.planId,
     required this.date,
     required this.title,
     required this.status,

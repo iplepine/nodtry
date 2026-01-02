@@ -20,22 +20,22 @@ class MockRecordRepository implements RecordRepository {
     return [
       HomeCardModel(
         state: HomeCardState.overdueSelfAction,
-        plan: _createMockPlan(8, 0, '아침 영양제 챙겨먹기'),
+        plan: _createMockPlan(hour: 8, minute: 0, title: '아침 영양제 챙겨먹기'),
       ),
       HomeCardModel(
         state: HomeCardState.nowAction,
-        plan: _createMockPlan(13, 0, '점심 후 10분 명상'),
+        plan: _createMockPlan(hour: 13, minute: 0, title: '점심 후 10분 명상'),
       ),
       HomeCardModel(
         state: HomeCardState.partnerPlanShare,
-        plan: _createMockPlan(10, 0, '책 30분 읽기'),
+        plan: _createMockPlan(hour: 10, minute: 0, title: '책 30분 읽기'),
       ),
       HomeCardModel(
         state: HomeCardState.partnerActionShare,
         plan: _createMockPlan(
-          20,
-          0,
-          '책 30분 읽기',
+          hour: 20,
+          minute: 0,
+          title: '책 30분 읽기',
           description: '자기 전 마음의 양식 쌓기',
           days: [1, 2, 3, 4, 5],
         ),
@@ -47,9 +47,9 @@ class MockRecordRepository implements RecordRepository {
       HomeCardModel(
         state: HomeCardState.partnerPlanShare,
         plan: _createMockPlan(
-          22,
-          0,
-          '밤 산책하기',
+          hour: 22,
+          minute: 0,
+          title: '밤 산책하기',
           description: '하루를 마무리하며 가볍게 동네 한 바퀴',
           days: [1, 3, 5],
         ),
@@ -60,7 +60,7 @@ class MockRecordRepository implements RecordRepository {
       ),
       HomeCardModel(
         state: HomeCardState.partnerActionShare,
-        plan: _createMockPlan(21, 0, '하루 회고록 쓰기'),
+        plan: _createMockPlan(hour: 21, minute: 0, title: '하루 회고록 쓰기'),
         headerMessage: '함께하는 중',
       ),
       const HomeCardModel(state: HomeCardState.planNeeded),
@@ -71,6 +71,7 @@ class MockRecordRepository implements RecordRepository {
     return [
       HistoryItem(
         id: '1',
+        planId: 'mock_plan_book',
         date: DateTime.now().subtract(const Duration(days: 1)), // 어제
         title: '책 30분 읽기',
         status: HistoryStatus.verified,
@@ -83,6 +84,7 @@ class MockRecordRepository implements RecordRepository {
       ),
       HistoryItem(
         id: '2',
+        planId: 'mock_plan_squat',
         date: DateTime.now().subtract(const Duration(days: 2)), // 2일 전
         title: '매일 스쿼트 50회',
         status: HistoryStatus.actuallyDone,
@@ -92,6 +94,7 @@ class MockRecordRepository implements RecordRepository {
       ),
       HistoryItem(
         id: '3',
+        planId: 'mock_plan_book',
         date: DateTime.now().subtract(const Duration(days: 3)), // 3일 전
         title: '책 30분 읽기',
         status: HistoryStatus.done,
@@ -103,27 +106,12 @@ class MockRecordRepository implements RecordRepository {
       ),
       HistoryItem(
         id: '4',
+        planId: 'mock_plan_vitamin',
         date: DateTime.now().subtract(const Duration(days: 4)), // 4일 전
         title: '영양제 챙겨 먹기',
         status: HistoryStatus.rested,
         executorId: 'me',
         comment: '오늘은 컨디션 난조로 쉬어갔어요.',
-      ),
-      HistoryItem(
-        id: '5',
-        date: DateTime.now().subtract(const Duration(hours: 5)), // 5시간 전
-        title: '물 2L 마시기',
-        status: HistoryStatus.skipped,
-        executorId: 'me',
-        comment: '시간이 초과되어 자동으로 넘겨졌어요.',
-      ),
-      HistoryItem(
-        id: '6',
-        date: DateTime.now().subtract(const Duration(hours: 12)), // 반나절 전
-        title: '스트레칭 하기',
-        status: HistoryStatus.skipped,
-        executorId: 'me',
-        // 코멘트 없음 (완전히 대응 안 한 상태 시뮬레이션)
       ),
     ];
   }
@@ -138,32 +126,35 @@ class MockRecordRepository implements RecordRepository {
   List<Plan> _buildInitialMockPlans() {
     return [
       _createMockPlan(
-        21,
-        0,
-        '하루 회고록 쓰기',
+        id: 'mock_plan_book',
+        hour: 21,
+        minute: 0,
+        title: '책 30분 읽기',
         description: '매일 밤 하루를 정리해요',
         days: [1, 2, 3, 4, 5],
       ),
       _createMockPlan(
-        13,
-        0,
-        '점심 후 10분 명상',
+        id: 'mock_plan_squat',
+        hour: 13,
+        minute: 0,
+        title: '매일 스쿼트 50회',
         description: '오후 집중력을 위해',
         days: [1, 3, 5],
+        state: PlanState.completed,
       ),
       _createMockPlan(
-        8,
-        0,
-        '아침 영양제 챙겨먹기',
+        id: 'mock_plan_vitamin',
+        hour: 8,
+        minute: 0,
+        title: '영양제 챙겨먹기',
         description: '건강이 최고',
         days: [1, 2, 3, 4, 5, 6, 7],
       ),
     ].map((p) {
-      // 일부는 partner, 일부는 me (mock)
-      if (p.items.first.title.contains('회고록')) {
+      if (p.id == 'mock_plan_book') {
         return p.copyWith(userId: 'partner');
       }
-      return p.copyWith(userId: 'me'); // Assume 'me' is the default mock ID
+      return p.copyWith(userId: 'me');
     }).toList();
   }
 
@@ -210,19 +201,19 @@ class MockRecordRepository implements RecordRepository {
         ];
         break;
       case MockScenario.nowActionMorning:
-        final plan = _createMockPlan(8, 0, '아침 조깅');
+        final plan = _createMockPlan(hour: 8, minute: 0, title: '아침 조깅');
         _mockHomeCardModels = [
           HomeCardModel(state: HomeCardState.nowAction, plan: plan),
         ];
         break;
       case MockScenario.nowActionAfternoon:
-        final plan = _createMockPlan(14, 0, '오후 독서');
+        final plan = _createMockPlan(hour: 14, minute: 0, title: '오후 독서');
         _mockHomeCardModels = [
           HomeCardModel(state: HomeCardState.nowAction, plan: plan),
         ];
         break;
       case MockScenario.nowActionNight:
-        final plan = _createMockPlan(23, 0, '밤 명상');
+        final plan = _createMockPlan(hour: 23, minute: 0, title: '밤 명상');
         _mockHomeCardModels = [
           HomeCardModel(state: HomeCardState.nowAction, plan: plan),
         ];
@@ -231,7 +222,7 @@ class MockRecordRepository implements RecordRepository {
         _mockHomeCardModels = [
           HomeCardModel(
             state: HomeCardState.partnerPlanShare,
-            plan: _createMockPlan(10, 0, '책 30분 읽기'),
+            plan: _createMockPlan(hour: 10, minute: 0, title: '책 30분 읽기'),
             partnerName: '지민',
             partnerImageUrl:
                 'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
@@ -242,7 +233,7 @@ class MockRecordRepository implements RecordRepository {
         _mockHomeCardModels = [
           HomeCardModel(
             state: HomeCardState.partnerActionShare,
-            plan: _createMockPlan(21, 0, '하루 회고록 쓰기'),
+            plan: _createMockPlan(hour: 21, minute: 0, title: '하루 회고록 쓰기'),
             partnerName: '지민',
             partnerImageUrl:
                 'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
@@ -254,7 +245,11 @@ class MockRecordRepository implements RecordRepository {
         _mockHomeCardModels = [
           HomeCardModel(
             state: HomeCardState.overdueSelfAction,
-            plan: _createMockPlan(DateTime.now().hour - 1, 0, '이미 지남'),
+            plan: _createMockPlan(
+              hour: DateTime.now().hour - 1,
+              minute: 0,
+              title: '이미 지남',
+            ),
           ),
         ];
         break;
@@ -262,22 +257,26 @@ class MockRecordRepository implements RecordRepository {
         _mockHomeCardModels = [
           HomeCardModel(
             state: HomeCardState.overdueSelfAction,
-            plan: _createMockPlan(DateTime.now().hour - 1, 0, '1시간 전 약속'),
-          ),
-          HomeCardModel(
-            state: HomeCardState.nowAction,
             plan: _createMockPlan(
-              DateTime.now().hour + 1,
-              0,
-              '1시간 뒤 약속 (Primary)',
+              hour: DateTime.now().hour - 1,
+              minute: 0,
+              title: '1시간 전 약속',
             ),
           ),
           HomeCardModel(
             state: HomeCardState.nowAction,
             plan: _createMockPlan(
-              DateTime.now().hour + 3,
-              0,
-              '3시간 뒤 약속 (Secondary 대기)',
+              hour: DateTime.now().hour + 1,
+              minute: 0,
+              title: '1시간 뒤 약속 (Primary)',
+            ),
+          ),
+          HomeCardModel(
+            state: HomeCardState.nowAction,
+            plan: _createMockPlan(
+              hour: DateTime.now().hour + 3,
+              minute: 0,
+              title: '3시간 뒤 약속 (Secondary 대기)',
             ),
           ),
         ];
@@ -288,12 +287,12 @@ class MockRecordRepository implements RecordRepository {
         ];
         break;
       case MockScenario.partnerActionShareWithNowAction:
-        final plan = _createMockPlan(15, 0, '오후 미팅 준비');
+        final plan = _createMockPlan(hour: 15, minute: 0, title: '오후 미팅 준비');
         _mockHomeCardModels = [
           HomeCardModel(state: HomeCardState.nowAction, plan: plan),
           HomeCardModel(
             state: HomeCardState.partnerActionShare,
-            plan: _createMockPlan(21, 0, '하루 회고록 쓰기'),
+            plan: _createMockPlan(hour: 21, minute: 0, title: '하루 회고록 쓰기'),
             partnerName: '지민',
             partnerImageUrl:
                 'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
@@ -302,12 +301,12 @@ class MockRecordRepository implements RecordRepository {
         ];
         break;
       case MockScenario.partnerPlanShareWithNowAction:
-        final plan = _createMockPlan(18, 0, '저녁 식사 준비');
+        final plan = _createMockPlan(hour: 18, minute: 0, title: '저녁 식사 준비');
         _mockHomeCardModels = [
           HomeCardModel(state: HomeCardState.nowAction, plan: plan),
           HomeCardModel(
             state: HomeCardState.partnerPlanShare,
-            plan: _createMockPlan(22, 0, '밤 산책하기'),
+            plan: _createMockPlan(hour: 22, minute: 0, title: '밤 산책하기'),
             partnerName: '지민',
             partnerImageUrl:
                 'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
@@ -322,16 +321,16 @@ class MockRecordRepository implements RecordRepository {
           HomeCardModel(
             state: HomeCardState.nowAction,
             plan: _createMockPlan(
-              8,
-              0,
-              '아침 영양제 챙겨먹기',
+              hour: 8,
+              minute: 0,
+              title: '아침 영양제 챙겨먹기',
               description: '공복에 유산균 포함',
             ),
           ),
           // 2. Partner Action Share (Done)
           HomeCardModel(
             state: HomeCardState.partnerActionShare,
-            plan: _createMockPlan(7, 30, '아침 조깅'),
+            plan: _createMockPlan(hour: 7, minute: 30, title: '아침 조깅'),
             partnerName: '지민',
             partnerImageUrl:
                 'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
@@ -340,17 +339,21 @@ class MockRecordRepository implements RecordRepository {
           // 3. Now Action (Lunch)
           HomeCardModel(
             state: HomeCardState.nowAction,
-            plan: _createMockPlan(12, 30, '점심 후 10분 명상'),
+            plan: _createMockPlan(hour: 12, minute: 30, title: '점심 후 10분 명상'),
           ),
           // 4. Overdue Action
           HomeCardModel(
             state: HomeCardState.overdueSelfAction,
-            plan: _createMockPlan(DateTime.now().hour - 2, 0, '물 500ml 마시기'),
+            plan: _createMockPlan(
+              hour: DateTime.now().hour - 2,
+              minute: 0,
+              title: '물 500ml 마시기',
+            ),
           ),
           // 5. Partner Plan Share
           HomeCardModel(
             state: HomeCardState.partnerPlanShare,
-            plan: _createMockPlan(20, 0, '주말 영화 예매하기'),
+            plan: _createMockPlan(hour: 20, minute: 0, title: '주말 영화 예매하기'),
             partnerName: '지민',
             partnerImageUrl:
                 'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
@@ -359,7 +362,7 @@ class MockRecordRepository implements RecordRepository {
           // 6. Now Action (Night)
           HomeCardModel(
             state: HomeCardState.nowAction,
-            plan: _createMockPlan(22, 0, '자기 전 스트레칭'),
+            plan: _createMockPlan(hour: 22, minute: 0, title: '자기 전 스트레칭'),
           ),
           // 7. Today Done List
           const HomeCardModel(state: HomeCardState.todayDone),
@@ -395,21 +398,23 @@ class MockRecordRepository implements RecordRepository {
     }
   }
 
-  Plan _createMockPlan(
-    int hour,
-    int minute,
-    String title, {
+  Plan _createMockPlan({
+    String? id,
+    required int hour,
+    required int minute,
+    required String title,
     String? description,
     List<int>? days,
+    PlanState state = PlanState.active,
   }) {
     return Plan(
-      id: 'mock_plan_${hour}_$minute',
+      id: id ?? 'mock_plan_${hour}_$minute',
       userId: 'mock_user',
       startDate: DateTime.now().subtract(const Duration(days: 7)),
       endDate: DateTime.now().add(
         const Duration(days: 21),
       ), // Total 28 days (4 weeks)
-      state: PlanState.active,
+      state: state,
       items: [
         PlanItem(
           title: title,
@@ -444,6 +449,7 @@ class MockRecordRepository implements RecordRepository {
       final item = _mockHistoryItems[index];
       _mockHistoryItems[index] = HistoryItem(
         id: item.id,
+        planId: item.planId,
         date: item.date,
         title: item.title,
         status: item.status,
@@ -484,6 +490,7 @@ class MockRecordRepository implements RecordRepository {
       final item = _mockHistoryItems[index];
       _mockHistoryItems[index] = HistoryItem(
         id: item.id,
+        planId: item.planId,
         date: item.date,
         title: item.title,
         status: status, // Update Status
