@@ -10,7 +10,7 @@ class GetMyProfileUseCase {
 
   Stream<UserModel?> execute() async* {
     // 1. 캐시된 데이터 먼저 방출 (빠른 UI 응답)
-    final cachedUser = await _userLocalDataSource.getUser();
+    final cachedUser = _userLocalDataSource.getUser();
     if (cachedUser != null) {
       yield cachedUser;
     }
@@ -26,5 +26,9 @@ class GetMyProfileUseCase {
       }
       return user;
     });
+  }
+
+  Future<UserModel?> getCachedProfile() async {
+    return _userLocalDataSource.getUser();
   }
 }

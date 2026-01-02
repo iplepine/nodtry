@@ -206,12 +206,6 @@ class PlanCard extends StatelessWidget {
           'color': AppColors.textSecondary.withValues(alpha: 0.1),
           'textColor': AppColors.textSecondary,
         };
-      default:
-        return {
-          'text': '알 수 없음',
-          'color': AppColors.textDisabled,
-          'textColor': Colors.white,
-        };
     }
   }
 }

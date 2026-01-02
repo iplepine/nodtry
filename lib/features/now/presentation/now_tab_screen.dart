@@ -314,7 +314,7 @@ class _NowTabState extends ConsumerState<NowTab>
     return homeStateAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),
-      data: (uiState) {
+      data: (NowTabState uiState) {
         // 상태 사용
         final primaryExecutorCard = uiState.primaryCard;
         final secondaryExecutorCards = uiState.secondaryCards;

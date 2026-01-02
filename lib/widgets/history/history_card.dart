@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/history_item.dart';
 import '../../theme/app_colors.dart';
-import '../../l10n/app_localizations.dart';
 
 class HistoryCard extends StatelessWidget {
   final HistoryItem item;
