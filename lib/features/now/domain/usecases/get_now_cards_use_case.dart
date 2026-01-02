@@ -1,5 +1,5 @@
-import '../../models/home_state.dart';
-import '../../repositories/record_repository.dart';
+import '../../../../models/home_state.dart';
+import '../../../../repositories/record_repository.dart';
 
 class GetNowCardsUseCase {
   final RecordRepository _recordRepository;

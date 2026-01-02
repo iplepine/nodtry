@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../models/home_state.dart';
+import '../../../models/home_state.dart';
 
 part 'now_tab_state.freezed.dart';
 

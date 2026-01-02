@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'now_tab_intent.dart';
-import '../../providers/repository_provider.dart';
+import '../../../providers/repository_provider.dart';
 import 'now_tab_state.dart';
 
 /// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel

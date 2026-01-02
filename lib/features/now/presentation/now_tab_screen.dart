@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import '../../models/plan_model.dart';
+import '../../../models/plan_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../l10n/app_localizations.dart';
-import '../../theme/app_colors.dart';
-import '../../widgets/quiet_header.dart';
-import '../../widgets/time_chip.dart';
-import '../../models/home_state.dart';
-import '../../models/history_item.dart';
-
-import '../../routes/app_router.dart';
-import '../../providers/repository_provider.dart';
-import '../../utils/time_formatter.dart';
-import '../../repositories/mock_record_repository.dart'; // For Debugging Scenarios
+import '../../../l10n/app_localizations.dart';
+import '../../../theme/app_colors.dart';
+import '../../../widgets/quiet_header.dart';
+import '../../../widgets/time_chip.dart';
+import '../../../models/home_state.dart';
+import '../../../models/history_item.dart';
+import 'now_tab_state.dart';
+import '../../../routes/app_router.dart';
+import '../../../providers/repository_provider.dart';
+import '../../../utils/time_formatter.dart';
+import '../../../repositories/mock_record_repository.dart'; // For Debugging Scenarios
 import 'now_tab_viewmodel.dart';
 import 'now_tab_intent.dart';
 
