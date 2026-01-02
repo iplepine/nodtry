@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:nod_try/viewmodels/now_tab_viewmodel.dart';
-import 'package:nod_try/intents/now_tab_intent.dart';
+import 'package:nod_try/features/now/now_tab_viewmodel.dart';
+import 'package:nod_try/features/now/now_tab_intent.dart';
 import 'package:nod_try/models/home_state.dart';
-import 'package:nod_try/models/now_tab_ui_state.dart';
+
 import 'package:nod_try/providers/repository_provider.dart';
 import 'package:nod_try/repositories/record_repository.dart';
-import 'package:nod_try/usecases/get_now_cards_use_case.dart';
+import 'package:nod_try/features/now/get_now_cards_use_case.dart';
 
 // Manual Mocks
 class MockRecordRepository extends Fake implements RecordRepository {

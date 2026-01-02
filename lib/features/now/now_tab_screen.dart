@@ -8,13 +8,13 @@ import '../../widgets/quiet_header.dart';
 import '../../widgets/time_chip.dart';
 import '../../models/home_state.dart';
 import '../../models/history_item.dart';
-import '../../models/now_tab_ui_state.dart';
+
 import '../../routes/app_router.dart';
 import '../../providers/repository_provider.dart';
 import '../../utils/time_formatter.dart';
 import '../../repositories/mock_record_repository.dart'; // For Debugging Scenarios
-import '../../viewmodels/now_tab_viewmodel.dart';
-import '../../intents/now_tab_intent.dart';
+import 'now_tab_viewmodel.dart';
+import 'now_tab_intent.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 class NowTab extends ConsumerStatefulWidget {

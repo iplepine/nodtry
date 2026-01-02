@@ -1,14 +1,14 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'home_state.dart';
+import '../../models/home_state.dart';
 
-part 'now_tab_ui_state.freezed.dart';
+part 'now_tab_state.freezed.dart';
 
 /// Now Tab의 전체 UI 상태
 @freezed
-abstract class NowTabUiState with _$NowTabUiState {
-  const NowTabUiState._();
+abstract class NowTabState with _$NowTabState {
+  const NowTabState._();
 
-  const factory NowTabUiState({
+  const factory NowTabState({
     /// 전체 카드 리스트 (Raw Data)
     required List<HomeCardModel> allCards,
 
@@ -20,10 +20,10 @@ abstract class NowTabUiState with _$NowTabUiState {
 
     /// 관리자/파트너 카드 (좌측 정렬)
     HomeCardModel? managerCard,
-  }) = _NowTabUiState;
+  }) = _NowTabState;
 
   /// HomeCardModel 리스트로부터 UI State 생성
-  factory NowTabUiState.fromModels(List<HomeCardModel> models) {
+  factory NowTabState.fromModels(List<HomeCardModel> models) {
     // 1. 빈 리스트 처리
     final List<HomeCardModel> processedModels = List.from(models);
     if (processedModels.isEmpty) {
@@ -46,7 +46,7 @@ abstract class NowTabUiState with _$NowTabUiState {
       processedModels,
     );
 
-    return NowTabUiState(
+    return NowTabState(
       allCards: processedModels,
       primaryCard: primary,
       secondaryCards: secondaries,

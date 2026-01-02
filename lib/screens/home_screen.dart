@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
-import 'tabs/now_tab.dart';
+import '../features/now/now_tab_screen.dart';
 import 'tabs/history_tab.dart';
 import 'tabs/us_tab.dart';
 

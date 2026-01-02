@@ -1,24 +1,23 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/home_state.dart';
-import '../intents/now_tab_intent.dart';
-import '../providers/repository_provider.dart';
-import '../models/now_tab_ui_state.dart';
+import 'now_tab_intent.dart';
+import '../../providers/repository_provider.dart';
+import 'now_tab_state.dart';
 
 /// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel
 /// MVI 패턴의 'Model' (State Holder) 역할
-class NowTabViewModel extends AsyncNotifier<NowTabUiState> {
+class NowTabViewModel extends AsyncNotifier<NowTabState> {
   @override
-  FutureOr<NowTabUiState> build() async {
+  FutureOr<NowTabState> build() async {
     // 초기 데이터 로드
     return _fetchState();
   }
 
   /// 데이터 로드 및 State 변환
-  Future<NowTabUiState> _fetchState() async {
+  Future<NowTabState> _fetchState() async {
     final useCase = ref.read(getNowCardsUseCaseProvider);
     final models = await useCase.execute();
-    return NowTabUiState.fromModels(models);
+    return NowTabState.fromModels(models);
   }
 
   /// 사용자 의도(Intent) 처리
@@ -74,6 +73,6 @@ class NowTabViewModel extends AsyncNotifier<NowTabUiState> {
 
 /// ViewModel Provider 정의
 final nowTabViewModelProvider =
-    AsyncNotifierProvider<NowTabViewModel, NowTabUiState>(
+    AsyncNotifierProvider<NowTabViewModel, NowTabState>(
       () => NowTabViewModel(),
     );

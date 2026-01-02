@@ -1,6 +1,6 @@
 import '../usecases/disconnect_connection_use_case.dart';
 import '../usecases/create_new_plan_use_case.dart';
-import '../usecases/get_now_cards_use_case.dart';
+import '../features/now/get_now_cards_use_case.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../repositories/record_repository.dart';
