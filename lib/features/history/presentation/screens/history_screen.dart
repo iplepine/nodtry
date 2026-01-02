@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:nod_try/theme/app_colors.dart';
@@ -9,6 +10,7 @@ import '../../../../widgets/history/plan_summary_card.dart';
 import '../../../../providers/repository_provider.dart'; // for myProfileProvider
 import '../history_state.dart';
 import '../history_viewmodel.dart';
+import '../history_fake_states.dart';
 import 'package:intl/intl.dart';
 
 /// 기록 탭 (History Tab)
@@ -23,55 +25,64 @@ class HistoryScreen extends ConsumerWidget {
     final myProfileAsync = ref.watch(myProfileProvider);
     final myUid = myProfileAsync.value?.uid ?? 'me';
 
-    return Column(
-      children: [
-        // 헤더
-        QuietHeader(
-          partnerName: null,
-          periodState: HeaderPeriodState.inProgress,
-          onSettingsTap: null,
-        ),
-
-        const SizedBox(height: 8),
-
-        // 기록 리스트
-        Expanded(
-          child: historyStateAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, stack) => Center(child: Text('Error: $err')),
-            data: (state) {
-              if (state.activeItems.isEmpty &&
-                  state.finishedPlanSummaries.isEmpty) {
-                return _buildEmptyState(context, l10n);
-              }
-
-              return CustomScrollView(
-                slivers: [
-                  // 1. 진행 중인 약속 섹션
-                  if (state.activeItems.isNotEmpty) ...[
-                    _buildSectionHeader(context, '진행 중인 약속'),
-                    ..._buildGroupedActiveItems(state.activeItems, myUid, ref),
-                  ],
-
-                  // 2. 종료된 약속 섹션
-                  if (state.finishedPlanSummaries.isNotEmpty) ...[
-                    _buildSectionHeader(context, '종료된 약속'),
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final summary = state.finishedPlanSummaries[index];
-                        return PlanSummaryCard(summary: summary);
-                      }, childCount: state.finishedPlanSummaries.length),
-                    ),
-                  ],
-
-                  // 하단 여백 (탭바 공간 확보)
-                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
-                ],
-              );
-            },
+    return GestureDetector(
+      onLongPress: kDebugMode
+          ? () => _showFakeStateSelector(context, ref)
+          : null,
+      child: Column(
+        children: [
+          // 헤더
+          QuietHeader(
+            partnerName: null,
+            periodState: HeaderPeriodState.inProgress,
+            onSettingsTap: null,
           ),
-        ),
-      ],
+
+          const SizedBox(height: 8),
+
+          // 기록 리스트
+          Expanded(
+            child: historyStateAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(child: Text('Error: $err')),
+              data: (state) {
+                if (state.activeItems.isEmpty &&
+                    state.finishedPlanSummaries.isEmpty) {
+                  return _buildEmptyState(context, l10n);
+                }
+
+                return CustomScrollView(
+                  slivers: [
+                    // 1. 진행 중인 약속 섹션
+                    if (state.activeItems.isNotEmpty) ...[
+                      _buildSectionHeader(context, '진행 중인 약속'),
+                      ..._buildGroupedActiveItems(
+                        state.activeItems,
+                        myUid,
+                        ref,
+                      ),
+                    ],
+
+                    // 2. 종료된 약속 섹션
+                    if (state.finishedPlanSummaries.isNotEmpty) ...[
+                      _buildSectionHeader(context, '종료된 약속'),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final summary = state.finishedPlanSummaries[index];
+                          return PlanSummaryCard(summary: summary);
+                        }, childCount: state.finishedPlanSummaries.length),
+                      ),
+                    ],
+
+                    // 하단 여백 (탭바 공간 확보)
+                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -252,6 +263,99 @@ class HistoryScreen extends ConsumerWidget {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
+    );
+  }
+
+  void _showFakeStateSelector(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.all(24),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.bug_report, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Debug: FakeState 선택',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: HistoryFakeStates.all.entries.map((entry) {
+                    return ListTile(
+                      title: Text(entry.key),
+                      subtitle: Text(
+                        'Active: ${entry.value.activeItems.length}, '
+                        'Finished: ${entry.value.finishedPlanSummaries.length}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textDisabled,
+                        ),
+                      ),
+                      onTap: () {
+                        ref
+                            .read(historyViewModelProvider.notifier)
+                            .setFakeState(entry.value);
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('✅ 적용됨: ${entry.key}'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ref.invalidate(historyViewModelProvider);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('🔄 실제 데이터로 복구됨'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColors.primary),
+                  ),
+                  icon: Icon(Icons.refresh, color: AppColors.primary),
+                  label: Text(
+                    '실제 데이터로 복구',
+                    style: TextStyle(color: AppColors.primary),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

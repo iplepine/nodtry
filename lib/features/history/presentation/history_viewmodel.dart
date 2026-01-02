@@ -94,6 +94,11 @@ class HistoryViewModel extends AsyncNotifier<HistoryState> {
     ref.invalidateSelf();
     await future;
   }
+
+  /// 디버그용: FakeState를 직접 주입
+  void setFakeState(HistoryState fakeState) {
+    state = AsyncValue.data(fakeState);
+  }
 }
 
 final historyViewModelProvider =
