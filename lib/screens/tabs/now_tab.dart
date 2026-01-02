@@ -9,10 +9,11 @@ import '../../widgets/time_chip.dart';
 import '../../models/home_state.dart';
 import '../../models/history_item.dart';
 import '../../routes/app_router.dart';
-import '../../providers/home_provider.dart';
 import '../../providers/repository_provider.dart';
 import '../../utils/time_formatter.dart';
 import '../../repositories/mock_record_repository.dart'; // For Debugging Scenarios
+import '../../viewmodels/now_tab_viewmodel.dart';
+import '../../intents/now_tab_intent.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 class NowTab extends ConsumerStatefulWidget {
@@ -64,8 +65,6 @@ class _NowTabState extends ConsumerState<NowTab>
     super.dispose();
   }
 
-  // 데이터 로드 및 상태 계산 로직 (Riverpod watch 결과를 기반으로 처리)
-  // 데이터 로드 및 상태 계산 로직 (Riverpod watch 결과를 기반으로 처리)
   // 데이터 변경 감지 시 애니메이션 처리
   void _onDataLoaded() {
     if (mounted) {
@@ -75,7 +74,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
   Future<void> _handleDidIt() async {
     final primaryCard = ref
-        .read(homeCardStateProvider)
+        .read(nowTabViewModelProvider)
         .value
         ?.firstWhere((m) => m.state.canBeExecutorPrimary);
     if (primaryCard?.plan?.id == null) return;
@@ -83,22 +82,20 @@ class _NowTabState extends ConsumerState<NowTab>
     // 1. Shrink animation
     await _animationController.reverse();
 
-    // 2. Report to repository
+    // 2. Dispatch Intent to ViewModel
     try {
       await ref
-          .read(recordRepositoryProvider)
-          .reportCompletion(primaryCard!.plan!.id!);
-      // 3. Refresh data
-      ref.invalidate(homeCardStateProvider);
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(CompletePlanIntent(primaryCard!.plan!.id!));
     } catch (e) {
       // Error handling (restore animation if failed)
-      _animationController.forward();
+      if (mounted) _animationController.forward();
     }
   }
 
   Future<void> _handleCheckIt() async {
     final managerCard = ref
-        .read(homeCardStateProvider)
+        .read(nowTabViewModelProvider)
         .value
         ?.firstWhere(
           (m) => m.state.canBeManagerQuick,
@@ -107,17 +104,19 @@ class _NowTabState extends ConsumerState<NowTab>
 
     if (managerCard?.plan?.id == null) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('시작을 응원해요!'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('시작을 응원해요!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
 
+    // Dispatch Intent
     await ref
-        .read(recordRepositoryProvider)
-        .reportCompletion(managerCard!.plan!.id!);
-    ref.invalidate(homeCardStateProvider);
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(CheckPartnerActionIntent(managerCard!.plan!.id!));
   }
 
   void _handleCreatePlan() {
@@ -127,7 +126,6 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// Time Chip 텍스트 가져오기
 
-  /// 정확한 시간 텍스트 가져오기 (롱 프레스용)
   /// 정확한 시간 텍스트 가져오기 (롱 프레스용)
   String? _getExactTimeText(HomeCardModel model) {
     if (model.state == HomeCardState.overdueSelfAction) {
@@ -264,11 +262,10 @@ class _NowTabState extends ConsumerState<NowTab>
   @override
   Widget build(BuildContext context) {
     // Provider 구독
-    final homeStateAsync = ref.watch(homeCardStateProvider);
+    final homeStateAsync = ref.watch(nowTabViewModelProvider);
 
     // 데이터 변경 감지하여 애니메이션 트리거
-    // 데이터 변경 감지하여 애니메이션 트리거 (카드 ID가 변경된 경우에만)
-    ref.listen(homeCardStateProvider, (previous, next) {
+    ref.listen(nowTabViewModelProvider, (previous, next) {
       if (!next.hasValue) return;
 
       if (previous?.value == null) {
@@ -318,7 +315,7 @@ class _NowTabState extends ConsumerState<NowTab>
           models.add(const HomeCardModel(state: HomeCardState.planNeeded));
         }
 
-        // 상태 계산 (매 빌드마다 수행하거나, 필요 시 Provider에서 미리 계산하는 것이 좋음)
+        // 상태 계산
         final primaryExecutorCard =
             HomeCardStatePriority.selectPrimaryExecutorCard(models);
         final secondaryExecutorCards =
@@ -423,8 +420,12 @@ class _NowTabState extends ConsumerState<NowTab>
                                           state,
                                         ),
                                         onReconcile: () {
-                                          // 데이터 갱신
-                                          ref.invalidate(homeCardStateProvider);
+                                          ref
+                                              .read(
+                                                nowTabViewModelProvider
+                                                    .notifier,
+                                              )
+                                              .dispatch(const RefreshIntent());
                                         },
                                         exactTimeText: _getExactTimeText(state),
                                       ),
@@ -504,7 +505,9 @@ class _NowTabState extends ConsumerState<NowTab>
                 final repo =
                     ref.read(recordRepositoryProvider) as MockRecordRepository;
                 repo.setScenario(scenario);
-                ref.invalidate(homeCardStateProvider);
+                ref
+                    .read(nowTabViewModelProvider.notifier)
+                    .dispatch(const RefreshIntent());
                 Navigator.pop(context);
               },
               child: Text(scenario.name),
@@ -515,7 +518,6 @@ class _NowTabState extends ConsumerState<NowTab>
     );
   }
 }
-// Existing _PrimaryExecutorCard...
 
 class _PrimaryExecutorCard extends StatelessWidget {
   final HomeCardModel model;
@@ -726,7 +728,6 @@ class _SecondaryExecutorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // Checked 상태인 경우 다른 레이아웃 적용
     // Checked 상태인 경우 다른 레이아웃 적용
     if (model.state == HomeCardState.todayDone) {
       return _buildCheckedCard(context, l10n);
@@ -1035,11 +1036,6 @@ class _ManagerQuickCard extends StatelessWidget {
                             model.headerMessage == '함께하는 중'
                         ? '함께하는 중'
                         : (model.headerMessage ?? l10n.homeReceivedMessage),
-                    // If partnerActionShare generally means "Action happened", header depends on who did what
-                    // but for Type 4 (Partner Action Share), the header is usually "Completed!" or similar.
-                    // The 'Checked' state logic was: if Checked -> "Together".
-                    // Now, if I *responded* to Partner Action Share, it might transition to "Together".
-                    // For now, I'll rely on headerMessage being set to '함께하는 중' by the Repo/UI interaction.
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textPrimary,
                       height: 1.4,
@@ -1099,11 +1095,8 @@ class _ManagerQuickCard extends StatelessWidget {
               const SizedBox(height: 8),
             ],
             // Button (Only for partnerActionShare/partnerPlanShare that needs action)
-            // Type 4: 피드백(응원) 버튼. Type 3: 제안(확인) 버튼.
             if (model.state == HomeCardState.partnerActionShare ||
                 model.state == HomeCardState.partnerPlanShare) ...[
-              // 이미 반응했는지 여부를 state로 구분하거나 headerMessage로 구분?
-              // Mock logic: after CheckIt -> headerMessage becomes "함께하는 중".
               if (model.headerMessage != '함께하는 중') ...[
                 const SizedBox(height: 20),
                 SizedBox(

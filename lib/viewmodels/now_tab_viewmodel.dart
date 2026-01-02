@@ -1,0 +1,69 @@
+import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/home_state.dart';
+import '../intents/now_tab_intent.dart';
+import '../providers/repository_provider.dart';
+
+/// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel
+/// MVI 패턴의 'Model' (State Holder) 역할
+class NowTabViewModel extends AsyncNotifier<List<HomeCardModel>> {
+  @override
+  FutureOr<List<HomeCardModel>> build() async {
+    // 초기 데이터 로드
+    return _fetchData();
+  }
+
+  /// 데이터 로드 (Use Case 활용)
+  Future<List<HomeCardModel>> _fetchData() async {
+    final useCase = ref.read(getNowCardsUseCaseProvider);
+    return useCase.execute();
+  }
+
+  /// 사용자 의도(Intent) 처리
+  Future<void> dispatch(NowTabIntent intent) async {
+    // 현재 상태가 로딩 중이거나 에러인 경우 처리 불가 (또는 큐잉)
+    if (!state.hasValue) return;
+
+    // Optimistic Update를 위해 현재 값 보존 (필요 시)
+    // final previousState = state.value;
+
+    try {
+      if (intent is CompletePlanIntent) {
+        await _completePlan(intent.planId);
+      } else if (intent is CheckPartnerActionIntent) {
+        await _checkPartnerAction(intent.planId);
+      } else if (intent is RefreshIntent) {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => _fetchData());
+      }
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<void> _completePlan(String planId) async {
+    // 1. Repository 호출
+    await ref.read(recordRepositoryProvider).reportCompletion(planId);
+
+    // 2. 데이터 갱신 (Invalidate하여 다시 로드)
+    //    Optimistic Update를 구현하려면 여기서 state를 직접 수정할 수도 있음
+    ref.invalidateSelf();
+    await future; // 재로딩 대기
+  }
+
+  Future<void> _checkPartnerAction(String planId) async {
+    // 1. Repository 호출 (여기선 reportCompletion을 공유해서 사용 중인 것으로 보임 -> 확인 필요)
+    //    기존 로직: recordRepositoryProvider.reportCompletion(planId)
+    await ref.read(recordRepositoryProvider).reportCompletion(planId);
+
+    // 2. 데이터 갱신
+    ref.invalidateSelf();
+    await future;
+  }
+}
+
+/// ViewModel Provider 정의
+final nowTabViewModelProvider =
+    AsyncNotifierProvider<NowTabViewModel, List<HomeCardModel>>(
+      () => NowTabViewModel(),
+    );

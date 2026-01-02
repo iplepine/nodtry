@@ -315,6 +315,56 @@ class MockRecordRepository implements RecordRepository {
           ),
         ];
         break;
+      case MockScenario.richContent:
+        // Demo scenario with many cards
+        _mockHomeCardModels = [
+          // 1. Primary Now Action (Morning)
+          HomeCardModel(
+            state: HomeCardState.nowAction,
+            plan: _createMockPlan(
+              8,
+              0,
+              '아침 영양제 챙겨먹기',
+              description: '공복에 유산균 포함',
+            ),
+          ),
+          // 2. Partner Action Share (Done)
+          HomeCardModel(
+            state: HomeCardState.partnerActionShare,
+            plan: _createMockPlan(7, 30, '아침 조깅'),
+            partnerName: '지민',
+            partnerImageUrl:
+                'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+            headerMessage: '오늘도 완료했어요!',
+          ),
+          // 3. Now Action (Lunch)
+          HomeCardModel(
+            state: HomeCardState.nowAction,
+            plan: _createMockPlan(12, 30, '점심 후 10분 명상'),
+          ),
+          // 4. Overdue Action
+          HomeCardModel(
+            state: HomeCardState.overdueSelfAction,
+            plan: _createMockPlan(DateTime.now().hour - 2, 0, '물 500ml 마시기'),
+          ),
+          // 5. Partner Plan Share
+          HomeCardModel(
+            state: HomeCardState.partnerPlanShare,
+            plan: _createMockPlan(20, 0, '주말 영화 예매하기'),
+            partnerName: '지민',
+            partnerImageUrl:
+                'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+            headerMessage: '이런 약속을 제안했어요',
+          ),
+          // 6. Now Action (Night)
+          HomeCardModel(
+            state: HomeCardState.nowAction,
+            plan: _createMockPlan(22, 0, '자기 전 스트레칭'),
+          ),
+          // 7. Today Done List
+          const HomeCardModel(state: HomeCardState.todayDone),
+        ];
+        break;
     }
 
     // Sync _mockPlans with _mockHomeCardModels for test consistency
@@ -437,4 +487,5 @@ enum MockScenario {
   multiPlanSelection,
   partnerActionShareWithNowAction,
   partnerPlanShareWithNowAction,
+  richContent,
 }
