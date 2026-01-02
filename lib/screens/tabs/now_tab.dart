@@ -12,6 +12,7 @@ import '../../routes/app_router.dart';
 import '../../providers/home_provider.dart';
 import '../../providers/repository_provider.dart';
 import '../../utils/time_formatter.dart';
+import '../../repositories/mock_record_repository.dart'; // For Debugging Scenarios
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 class NowTab extends ConsumerStatefulWidget {
@@ -330,149 +331,191 @@ class _NowTabState extends ConsumerState<NowTab>
         );
         final managerPartnerName = managerQuickCard?.partnerName;
 
-        return Column(
+        return Stack(
           children: [
-            // 헤더
-            QuietHeader(
-              partnerName: null,
-              periodState: HeaderPeriodState.inProgress,
-              onSettingsTap: null,
-            ),
-            // Now Card
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: 20,
-                    right: 20,
-                    top: 24,
-                    bottom: MediaQuery.of(context).padding.bottom + 80,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Executor Area (Primary Action)
-                      if (primaryExecutorCard != null) ...[
-                        FadeTransition(
-                          opacity: _primaryFadeAnimation,
-                          child: ScaleTransition(
-                            scale: _primaryScaleAnimation,
-                            child: SlideTransition(
-                              position:
-                                  Tween<Offset>(
-                                    begin: const Offset(
-                                      0,
-                                      0.15,
-                                    ), // 시작/사라질 때 더 아래로
-                                    end: Offset.zero, // 정상 위치
-                                  ).animate(
-                                    CurvedAnimation(
-                                      parent: _animationController,
-                                      curve: Curves.easeIn,
+            Column(
+              children: [
+                // 헤더
+                QuietHeader(
+                  partnerName: null,
+                  periodState: HeaderPeriodState.inProgress,
+                  onSettingsTap: null,
+                ),
+                // Now Card
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: 20,
+                        right: 20,
+                        top: 24,
+                        bottom: MediaQuery.of(context).padding.bottom + 80,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Executor Area (Primary Action)
+                          if (primaryExecutorCard != null) ...[
+                            FadeTransition(
+                              opacity: _primaryFadeAnimation,
+                              child: ScaleTransition(
+                                scale: _primaryScaleAnimation,
+                                child: SlideTransition(
+                                  position:
+                                      Tween<Offset>(
+                                        begin: const Offset(
+                                          0,
+                                          0.15,
+                                        ), // 시작/사라질 때 더 아래로
+                                        end: Offset.zero, // 정상 위치
+                                      ).animate(
+                                        CurvedAnimation(
+                                          parent: _animationController,
+                                          curve: Curves.easeIn,
+                                        ),
+                                      ),
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: FractionallySizedBox(
+                                      widthFactor: 0.9,
+                                      child: _PrimaryExecutorCard(
+                                        model: primaryExecutorCard,
+                                        onDidIt: _handleDidIt,
+                                        onCreatePlan: _handleCreatePlan,
+                                        timeChipText: _getTimeChipText(
+                                          primaryExecutorCard,
+                                        ),
+                                        timeChipType: _getTimeChipType(
+                                          primaryExecutorCard,
+                                        ),
+                                        recordGazeText: _getRecordGazeText(
+                                          primaryExecutorCard,
+                                        ),
+                                        exactTimeText: _getExactTimeText(
+                                          primaryExecutorCard,
+                                        ),
+                                      ),
                                     ),
                                   ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          // Secondary Executor Cards (My Contexts)
+                          if (secondaryExecutorCards.isNotEmpty) ...[
+                            ...secondaryExecutorCards.map(
+                              (state) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: FadeTransition(
+                                  opacity: _secondaryFadeAnimation,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: FractionallySizedBox(
+                                      widthFactor: 0.85,
+                                      child: _SecondaryExecutorCard(
+                                        model: state,
+                                        timeChipText: _getSecondaryTimeChipText(
+                                          state,
+                                        ),
+                                        timeChipType: _getSecondaryTimeChipType(
+                                          state,
+                                        ),
+                                        onReconcile: () {
+                                          // 데이터 갱신
+                                          ref.invalidate(homeCardStateProvider);
+                                        },
+                                        exactTimeText: _getExactTimeText(state),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                          // Manager Area (Partner's Requests)
+                          if (managerQuickCard != null) ...[
+                            FadeTransition(
+                              opacity: _managerFadeAnimation,
                               child: Align(
-                                alignment: Alignment.centerRight,
+                                alignment: Alignment.centerLeft,
                                 child: FractionallySizedBox(
-                                  widthFactor: 0.9,
-                                  child: _PrimaryExecutorCard(
-                                    model: primaryExecutorCard,
-                                    onDidIt: _handleDidIt,
-                                    onCreatePlan: _handleCreatePlan,
-                                    timeChipText: _getTimeChipText(
-                                      primaryExecutorCard,
+                                  widthFactor: 0.88,
+                                  child: _ManagerQuickCard(
+                                    model: managerQuickCard,
+                                    partnerName: managerPartnerName,
+                                    onCheckIt: _handleCheckIt,
+                                    timeChipText: _getManagerTimeChipText(
+                                      managerQuickCard,
                                     ),
-                                    timeChipType: _getTimeChipType(
-                                      primaryExecutorCard,
-                                    ),
-                                    recordGazeText: _getRecordGazeText(
-                                      primaryExecutorCard,
+                                    timeChipType: _getManagerTimeChipType(
+                                      managerQuickCard,
                                     ),
                                     exactTimeText: _getExactTimeText(
-                                      primaryExecutorCard,
+                                      managerQuickCard,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                      // Secondary Executor Cards (My Contexts)
-                      if (secondaryExecutorCards.isNotEmpty) ...[
-                        ...secondaryExecutorCards.map(
-                          (state) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: FadeTransition(
-                              opacity: _secondaryFadeAnimation,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: FractionallySizedBox(
-                                  widthFactor: 0.85,
-                                  child: _SecondaryExecutorCard(
-                                    model: state,
-                                    timeChipText: _getSecondaryTimeChipText(
-                                      state,
-                                    ),
-                                    timeChipType: _getSecondaryTimeChipType(
-                                      state,
-                                    ),
-                                    onReconcile: () {
-                                      // 데이터 갱신
-                                      ref.invalidate(homeCardStateProvider);
-                                    },
-                                    exactTimeText: _getExactTimeText(state),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                      // Manager Area (Partner's Requests)
-                      if (managerQuickCard != null) ...[
-                        FadeTransition(
-                          opacity: _managerFadeAnimation,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: FractionallySizedBox(
-                              widthFactor: 0.88,
-                              child: _ManagerQuickCard(
-                                model: managerQuickCard,
-                                partnerName: managerPartnerName,
-                                onCheckIt: _handleCheckIt,
-                                timeChipText: _getManagerTimeChipText(
-                                  managerQuickCard,
-                                ),
-                                timeChipType: _getManagerTimeChipType(
-                                  managerQuickCard,
-                                ),
-                                exactTimeText: _getExactTimeText(
-                                  managerQuickCard,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                      // Footer
-                      const _ContextFooter(),
-                      const SizedBox(height: 24),
-                    ],
+                            const SizedBox(height: 16),
+                          ],
+                          // Footer
+                          const _ContextFooter(),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
+            // Mock Scenario Toggle Button (Debug Only)
+            if (ref.read(recordRepositoryProvider) is MockRecordRepository)
+              Positioned(
+                bottom: 16,
+                right: 16,
+                child: FloatingActionButton(
+                  mini: true,
+                  backgroundColor: AppColors.primary,
+                  child: const Icon(Icons.bug_report, size: 20),
+                  onPressed: () {
+                    _showScenarioDialog(context, ref);
+                  },
+                ),
+              ),
           ],
         );
       },
     );
   }
+
+  void _showScenarioDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: const Text('Select Mock Scenario'),
+          children: MockScenario.values.map((scenario) {
+            return SimpleDialogOption(
+              onPressed: () {
+                final repo =
+                    ref.read(recordRepositoryProvider) as MockRecordRepository;
+                repo.setScenario(scenario);
+                ref.invalidate(homeCardStateProvider);
+                Navigator.pop(context);
+              },
+              child: Text(scenario.name),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
 }
+// Existing _PrimaryExecutorCard...
 
 class _PrimaryExecutorCard extends StatelessWidget {
   final HomeCardModel model;

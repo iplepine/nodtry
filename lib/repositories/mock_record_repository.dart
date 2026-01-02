@@ -239,6 +239,34 @@ class MockRecordRepository implements RecordRepository {
           const HomeCardModel(state: HomeCardState.todayDone),
         ];
         break;
+      case MockScenario.partnerActionShareWithNowAction:
+        final plan = _createMockPlan(15, 0, '오후 미팅 준비');
+        _mockHomeCardModels = [
+          HomeCardModel(state: HomeCardState.nowAction, plan: plan),
+          HomeCardModel(
+            state: HomeCardState.partnerActionShare,
+            plan: _createMockPlan(21, 0, '하루 회고록 쓰기'),
+            partnerName: '지민',
+            partnerImageUrl:
+                'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+            headerMessage: '오늘도 완료했어요!',
+          ),
+        ];
+        break;
+      case MockScenario.partnerPlanShareWithNowAction:
+        final plan = _createMockPlan(18, 0, '저녁 식사 준비');
+        _mockHomeCardModels = [
+          HomeCardModel(state: HomeCardState.nowAction, plan: plan),
+          HomeCardModel(
+            state: HomeCardState.partnerPlanShare,
+            plan: _createMockPlan(22, 0, '밤 산책하기'),
+            partnerName: '지민',
+            partnerImageUrl:
+                'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+            headerMessage: '이런 약속을 제안했어요',
+          ),
+        ];
+        break;
     }
   }
 
@@ -332,4 +360,6 @@ enum MockScenario {
   partnerActionShare,
   overdueSelfAction,
   multiPlanSelection,
+  partnerActionShareWithNowAction,
+  partnerPlanShareWithNowAction,
 }
