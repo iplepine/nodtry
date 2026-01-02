@@ -43,3 +43,19 @@ class CheckPartnerActionIntent extends NowTabIntent {
 class RefreshIntent extends NowTabIntent {
   const RefreshIntent();
 }
+
+/// 계획 건너뛰기 (오늘은 쉴게요)
+class SkipPlanIntent extends NowTabIntent {
+  final String planId;
+  const SkipPlanIntent(this.planId);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SkipPlanIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId;
+
+  @override
+  int get hashCode => planId.hashCode;
+}

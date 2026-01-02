@@ -236,4 +236,9 @@ class RealRecordRepository implements RecordRepository {
   ) async {
     // TODO: Firestore에서 해당 HistoryItem 업데이트
   }
+
+  @override
+  Future<void> reportSkip(String planId) async {
+    // TODO: Firestore에 건너뛰기 기록 생성 및 계획 상태 업데이트
+  }
 }

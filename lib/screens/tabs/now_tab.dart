@@ -119,6 +119,28 @@ class _NowTabState extends ConsumerState<NowTab>
         .dispatch(CheckPartnerActionIntent(managerCard!.plan!.id!));
   }
 
+  Future<void> _handleSkip() async {
+    final primaryCard = ref
+        .read(nowTabViewModelProvider)
+        .value
+        ?.firstWhere((m) => m.state.canBeExecutorPrimary);
+    if (primaryCard?.plan?.id == null) return;
+
+    // 1. Shrink animation (optional, maybe fade out?)
+    // For Skip, maybe just standard refresh or specific animation.
+    // Let's reuse reverse animation for consistency.
+    await _animationController.reverse();
+
+    // 2. Dispatch Intent
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(SkipPlanIntent(primaryCard!.plan!.id!));
+    } catch (e) {
+      if (mounted) _animationController.forward();
+    }
+  }
+
   void _handleCreatePlan() {
     // 계획 생성 플로우 진입
     context.push(AppRoutes.planCreate);
@@ -379,6 +401,7 @@ class _NowTabState extends ConsumerState<NowTab>
                                       child: _PrimaryExecutorCard(
                                         model: primaryExecutorCard,
                                         onDidIt: _handleDidIt,
+                                        onSkip: _handleSkip,
                                         onCreatePlan: _handleCreatePlan,
                                         timeChipText: _getTimeChipText(
                                           primaryExecutorCard,
@@ -522,6 +545,7 @@ class _NowTabState extends ConsumerState<NowTab>
 class _PrimaryExecutorCard extends StatelessWidget {
   final HomeCardModel model;
   final VoidCallback? onDidIt;
+  final VoidCallback? onSkip;
   final VoidCallback? onCreatePlan;
   final String? timeChipText;
   final TimeChipType? timeChipType;
@@ -531,6 +555,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   const _PrimaryExecutorCard({
     required this.model,
     this.onDidIt,
+    this.onSkip,
     this.onCreatePlan,
     this.timeChipText,
     this.timeChipType,
@@ -674,36 +699,67 @@ class _PrimaryExecutorCard extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style:
-            ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: buttonTextColor,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: onPressed,
+            style:
+                ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: buttonTextColor,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ).copyWith(
+                  overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                    states,
+                  ) {
+                    if (states.contains(WidgetState.pressed)) {
+                      return AppColors.primaryPressed;
+                    }
+                    return null;
+                  }),
+                ),
+            child: Text(
+              buttonText,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: buttonTextColor,
               ),
-            ).copyWith(
-              overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
-                if (states.contains(WidgetState.pressed)) {
-                  return AppColors.primaryPressed;
-                }
-                return null;
-              }),
             ),
-        child: Text(
-          buttonText,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: buttonTextColor,
           ),
         ),
-      ),
+        if ((model.state == HomeCardState.nowAction ||
+                model.state == HomeCardState.overdueSelfAction) &&
+            onSkip != null) ...[
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: onSkip,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            child: Text(
+              '오늘은 쉴게요', // TODO: L10n.homeSkipTask
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                decoration: TextDecoration.underline,
+                decorationColor: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

@@ -35,6 +35,8 @@ class NowTabViewModel extends AsyncNotifier<List<HomeCardModel>> {
       } else if (intent is RefreshIntent) {
         state = const AsyncValue.loading();
         state = await AsyncValue.guard(() => _fetchData());
+      } else if (intent is SkipPlanIntent) {
+        await _skipPlan(intent.planId);
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -57,6 +59,12 @@ class NowTabViewModel extends AsyncNotifier<List<HomeCardModel>> {
     await ref.read(recordRepositoryProvider).reportCompletion(planId);
 
     // 2. 데이터 갱신
+    ref.invalidateSelf();
+    await future;
+  }
+
+  Future<void> _skipPlan(String planId) async {
+    await ref.read(recordRepositoryProvider).reportSkip(planId);
     ref.invalidateSelf();
     await future;
   }

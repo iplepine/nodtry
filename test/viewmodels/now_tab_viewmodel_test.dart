@@ -11,11 +11,19 @@ import 'package:nod_try/usecases/get_now_cards_use_case.dart';
 class MockRecordRepository extends Fake implements RecordRepository {
   int reportCompletionCallCount = 0;
   String? lastReportedPlanId;
+  int reportSkipCallCount = 0;
+  String? lastSkippedPlanId;
 
   @override
   Future<void> reportCompletion(String planId) async {
     reportCompletionCallCount++;
     lastReportedPlanId = planId;
+  }
+
+  @override
+  Future<void> reportSkip(String planId) async {
+    reportSkipCallCount++;
+    lastSkippedPlanId = planId;
   }
 }
 
@@ -122,5 +130,24 @@ void main() {
 
     // Assert
     expect(mockGetNowCardsUseCase.executeCallCount, 1);
+  });
+  test('SkipPlanIntent should call repository and refresh', () async {
+    // Arrange
+    mockGetNowCardsUseCase.returnValues = [];
+
+    // Initial load
+    await container.read(nowTabViewModelProvider.future);
+    mockGetNowCardsUseCase.executeCallCount = 0;
+    mockRecordRepository.reportSkipCallCount = 0;
+
+    // Act
+    await container
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(const SkipPlanIntent('plan-skip-123'));
+
+    // Assert
+    expect(mockRecordRepository.reportSkipCallCount, 1);
+    expect(mockRecordRepository.lastSkippedPlanId, 'plan-skip-123');
+    expect(mockGetNowCardsUseCase.executeCallCount, greaterThan(0));
   });
 }

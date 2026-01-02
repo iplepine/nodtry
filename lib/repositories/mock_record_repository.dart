@@ -498,6 +498,24 @@ class MockRecordRepository implements RecordRepository {
       );
     }
   }
+
+  @override
+  Future<void> reportSkip(String planId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    _mockHomeCardModels.removeWhere((m) => m.plan?.id == planId);
+
+    // If empty after removal, add todayDone or relaxedDay?
+    // For now, let's leave it empty so ViewModel/UI handles it or Repository checks.
+    // Actually getHomeCardStates returns _mockHomeCardModels.
+    // If empty, 'PlanNeeded' or 'RelaxedDay' logic is usually inside getHomeCardStates logic in real repo.
+    // In Mock, we should probably ensure it's not just empty list if we want to show 'Done'.
+
+    if (_mockHomeCardModels.isEmpty) {
+      _mockHomeCardModels.add(
+        const HomeCardModel(state: HomeCardState.todayDone),
+      );
+    }
+  }
 }
 
 enum MockScenario {

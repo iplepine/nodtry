@@ -9,10 +9,21 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:nod_try/main.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nod_try/providers/repository_provider.dart';
+import 'package:nod_try/repositories/mock_record_repository.dart';
+
 void main() {
   testWidgets('App launches with splash screen', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const OnMyBehalfApp());
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          recordRepositoryProvider.overrideWithValue(MockRecordRepository()),
+        ],
+        child: const OnMyBehalfApp(),
+      ),
+    );
 
     // Verify that splash screen is displayed
     expect(find.text('혼자서 지키지 못했던 계획을, 함께'), findsOneWidget);
