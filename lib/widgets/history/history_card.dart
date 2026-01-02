@@ -1,344 +1,293 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/history_item.dart';
 import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
-import '../../providers/history_provider.dart';
-import '../../providers/repository_provider.dart';
-import '../../utils/time_formatter.dart';
 
-/// 기록 카드 (Spec 3.1)
-class HistoryCard extends ConsumerStatefulWidget {
+class HistoryCard extends StatelessWidget {
   final HistoryItem item;
+  final bool isMe;
+  final VoidCallback? onReconcile;
 
-  const HistoryCard({super.key, required this.item});
-
-  @override
-  ConsumerState<HistoryCard> createState() => _HistoryCardState();
-}
-
-class _HistoryCardState extends ConsumerState<HistoryCard> {
-  bool _isMenuOpen = false;
+  const HistoryCard({
+    super.key,
+    required this.item,
+    required this.isMe,
+    this.onReconcile,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isMine = widget.item.isMine('me'); // TODO: Pass real UID
+    // Mirror Layout: My cards aligned right, Partner cards aligned left
+    final alignment = isMe ? MainAxisAlignment.end : MainAxisAlignment.start;
+    final bgColor = isMe
+        ? AppColors.surface
+        : Colors.white; // Minimal differentiation or use same
 
-    return Column(
-      children: [
-        // 카드 본체 (85% 너비 및 역할별 정렬)
-        Align(
-          alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
-          child: FractionallySizedBox(
-            widthFactor: 0.85,
+    // Status Logic
+    final statusInfo = _getStatusInfo(item.status);
+    final canReconcile = isMe && item.status == HistoryStatus.skipped;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Row(
+        mainAxisAlignment: alignment,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Partner Avatar (Left)
+          if (!isMe) ...[
+            _Avatar(imageUrl: item.partnerImageUrl, name: item.partnerName),
+            const SizedBox(width: 12),
+          ],
+
+          // Card Content
+          Flexible(
             child: GestureDetector(
-              onTap: (!isMine && !widget.item.isVerifiedByMe)
-                  ? () => setState(() => _isMenuOpen = !_isMenuOpen)
-                  : null,
+              onTap: canReconcile ? onReconcile : null,
               child: Container(
+                constraints: const BoxConstraints(maxWidth: 280),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: bgColor,
                   borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(20),
-                    topRight: const Radius.circular(20),
-                    bottomLeft: Radius.circular(isMine ? 20 : 4),
-                    bottomRight: Radius.circular(isMine ? 4 : 20),
+                    topLeft: const Radius.circular(16),
+                    topRight: const Radius.circular(16),
+                    bottomLeft: Radius.circular(isMe ? 16 : 4),
+                    bottomRight: Radius.circular(isMe ? 4 : 16),
                   ),
-                  border: Border.all(
-                    color: AppColors.surface.withValues(alpha: 0.5),
-                    width: 1,
-                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                  // Highlight reconcilable items slightly??
+                  border: canReconcile
+                      ? Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          width: 1,
+                        )
+                      : null,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Top: Date (Left) & Status (Right)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            _formatDate(context, widget.item.date),
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header: Date & Status
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _formatDate(item.date),
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
                           ),
-                          const Spacer(),
-                          _buildStatusBadge(context),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusInfo.color,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                statusInfo.icon,
+                                size: 12,
+                                color: statusInfo.textColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                statusInfo.text,
+                                style: TextStyle(
+                                  color: statusInfo.textColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Title
+                    Text(
+                      item.title,
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+
+                    // Comment (if any)
+                    if (item.comment != null && item.comment!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        item.comment!,
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+
+                    // Verification Badge
+                    // My Item: Verified by Partner
+                    if (isMe && item.isVerifiedByPartner) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.thumb_up_alt_rounded,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "파트너가 확인했어요", // TODO: L10n
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-
-                      // Middle: Title
-                      Text(
-                        widget.item.title,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-
-                      // Bottom: Comment (Section)
-                      _buildCommentSection(context),
-
-                      // Waiting Status (Inside Card)
-                      if (!isMine && !widget.item.isVerifiedByMe)
-                        _buildWaitingStatus(context),
                     ],
-                  ),
+                    // Partner Item: Verified by Me
+                    if (!isMe && item.isVerifiedByMe) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            size: 14,
+                            color: AppColors.secondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "내가 확인했어요", // TODO: L10n
+                            style: TextStyle(
+                              color: AppColors.secondary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+
+                    // Reconcile Hint
+                    if (canReconcile) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        "탭해서 상태 변경하기",
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 8), // 의도적인 여백 (카드와 반응 분리)
-        // 외부 반응 영역 (카드를 살짝 벗어난 위치에 앵커링)
-        Align(
-          alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
-          child: FractionallySizedBox(
-            widthFactor: 0.88, // 카드(85%)에 더 가깝게 밀착 (이전 0.92)
-            child: Align(
-              alignment: isMine ? Alignment.centerLeft : Alignment.centerRight,
-              child: isMine
-                  ? _buildMyActionVerification(context) // 파트너의 반응은 왼쪽
-                  : _buildPartnerActionVerification(context), // 나의 반응은 오른쪽
-            ),
-          ),
-        ),
-        const SizedBox(height: 24), // 카드 간 간격
-      ],
+
+          // Me Avatar (Right) - Optional, usually Me doesn't show avatar in chat UI, but maybe consistent here?
+          // Spec says "Mirror Layout" but usually "Me" is just bubbled right without avatar.
+          // Let's hide avatar for Me for now to follow standard chat/timeline conventions.
+        ],
+      ),
     );
   }
 
-  Widget _buildStatusBadge(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    Color color;
-    IconData icon;
-    String label;
+  String _formatDate(DateTime date) {
+    // Setup simple date format
+    return "${date.month}/${date.day}";
+  }
 
-    // 실천 상태에 따른 라벨링 (배지)
-    switch (widget.item.status) {
+  _StatusDisplayInfo _getStatusInfo(HistoryStatus status) {
+    switch (status) {
       case HistoryStatus.done:
+        return _StatusDisplayInfo(
+          text: '했어',
+          color: AppColors.primary.withValues(alpha: 0.1),
+          textColor: AppColors.primary,
+          icon: Icons.check,
+        );
       case HistoryStatus.actuallyDone:
-      case HistoryStatus.verified: // '확인됐어요' 배지는 제거하고 '했어'로 통합
-        color = const Color(0xFF6B8E23); // Olive Green
-        icon = Icons.check_circle_outline;
-        label = widget.item.status == HistoryStatus.actuallyDone
-            ? l10n.reconcileActuallyDone
-            : l10n.homeDidIt;
-        break;
+        return _StatusDisplayInfo(
+          text: '사실 했어요', // Reconciled
+          color: AppColors.secondary.withValues(alpha: 0.1),
+          textColor: AppColors.secondary,
+          icon: Icons.check_circle_outline,
+        );
       case HistoryStatus.rested:
-        color = AppColors.secondary;
-        icon = Icons.bedtime_outlined;
-        label = l10n.reconcileTookRest;
-        break;
+        return _StatusDisplayInfo(
+          text: '쉬어갔어요',
+          color: Colors.grey.withValues(alpha: 0.1),
+          textColor: AppColors.textSecondary,
+          icon: Icons.hotel, // Bed icon
+        );
       case HistoryStatus.skipped:
-        color = AppColors.textDisabled;
-        icon = Icons.hourglass_empty;
-        label = l10n.reconcileSkip;
-        break;
+        return _StatusDisplayInfo(
+          text: '지나갔어요',
+          color: Colors.orange.withValues(alpha: 0.1),
+          textColor: Colors.orange,
+          icon: Icons.remove_circle_outline,
+        );
+      case HistoryStatus.verified:
+        return _StatusDisplayInfo(
+          text: '확인됨',
+          color: AppColors.primary.withValues(alpha: 0.1),
+          textColor: AppColors.primary,
+          icon: Icons.verified,
+        );
     }
+  }
+}
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
+class _StatusDisplayInfo {
+  final String text;
+  final Color color;
+  final Color textColor;
+  final IconData icon;
+
+  _StatusDisplayInfo({
+    required this.text,
+    required this.color,
+    required this.textColor,
+    required this.icon,
+  });
+}
+
+class _Avatar extends StatelessWidget {
+  final String? imageUrl;
+  final String? name;
+
+  const _Avatar({this.imageUrl, this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: 18,
+      backgroundImage: imageUrl != null ? NetworkImage(imageUrl!) : null,
+      backgroundColor: AppColors.surface,
+      child: imageUrl == null
+          ? Text(
+              name?.isNotEmpty == true ? name![0] : '?',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            )
+          : null,
     );
-  }
-
-  Widget _buildCommentSection(BuildContext context) {
-    if (widget.item.comment == null) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: AppColors.background.withValues(alpha: 0.5),
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(12),
-              bottomLeft: Radius.circular(12),
-              bottomRight: Radius.circular(12),
-              topLeft: Radius.circular(4),
-            ),
-          ),
-          child: Text(
-            widget.item.comment!,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textPrimary.withValues(alpha: 0.9),
-              fontSize: 14,
-              height: 1.5,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWaitingStatus(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            l10n.historyPartnerActionWaiting,
-            style: TextStyle(
-              color: AppColors.textDisabled,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// [내 실천] 카드 하단: 파트너의 확인 여부 표시
-  Widget _buildMyActionVerification(BuildContext context) {
-    if (!widget.item.isVerifiedByPartner) return const SizedBox.shrink();
-
-    final l10n = AppLocalizations.of(context)!;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start, // 파트너의 반응은 왼쪽 끝 (상대가 보낸 것)
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          Icons.thumb_up,
-          size: 14,
-          color: AppColors.primary.withValues(alpha: 0.6),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          l10n.historyMyActionVerified,
-          style: TextStyle(
-            color: AppColors.textSecondary.withValues(alpha: 0.8),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPartnerActionVerification(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    if (widget.item.isVerifiedByMe) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.end, // 나의 반응은 오른쪽 (내가 보낸 것)
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            l10n.historyPartnerActionVerified,
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Icon(Icons.thumb_up, size: 14, color: AppColors.primary),
-        ],
-      );
-    }
-
-    if (_isMenuOpen) {
-      return Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(color: AppColors.background),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildActionButton(
-              label: l10n.historyActionSawIt,
-              onTap: () async {
-                await ref
-                    .read(recordRepositoryProvider)
-                    .verifyHistoryItem(widget.item.id);
-                ref.invalidate(historyItemsProvider);
-                if (mounted) setState(() => _isMenuOpen = false);
-              },
-              color: AppColors.primary,
-            ),
-            _buildActionButton(
-              label: l10n.historyActionCheer,
-              onTap: () {
-                // TODO: Implement Cheer action in repository if needed
-                if (mounted) setState(() => _isMenuOpen = false);
-              },
-              color: Colors.purple,
-            ),
-          ],
-        ),
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildActionButton({
-    required String label,
-    required VoidCallback onTap,
-    required Color color,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(BuildContext context, DateTime date) {
-    final l10n = AppLocalizations.of(context)!;
-    final weekday = TimeFormatter.getWeekdayName(l10n, date.weekday);
-    final dateStr = l10n.timeChipDate(date.month, date.day);
-    return '$dateStr ($weekday)';
   }
 }

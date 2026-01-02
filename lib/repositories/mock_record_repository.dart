@@ -472,6 +472,32 @@ class MockRecordRepository implements RecordRepository {
       );
     }
   }
+
+  @override
+  Future<void> reconcileHistoryItem(
+    String historyId,
+    HistoryStatus status,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final index = _mockHistoryItems.indexWhere((item) => item.id == historyId);
+    if (index != -1) {
+      final item = _mockHistoryItems[index];
+      _mockHistoryItems[index] = HistoryItem(
+        id: item.id,
+        date: item.date,
+        title: item.title,
+        status: status, // Update Status
+        executorId: item.executorId,
+        isVerifiedByMe: item.isVerifiedByMe,
+        isVerifiedByPartner: item.isVerifiedByPartner,
+        comment: status == HistoryStatus.actuallyDone
+            ? '사실 완료했어요'
+            : (status == HistoryStatus.rested ? '쉬어갔어요' : item.comment),
+        partnerName: item.partnerName,
+        partnerImageUrl: item.partnerImageUrl,
+      );
+    }
+  }
 }
 
 enum MockScenario {

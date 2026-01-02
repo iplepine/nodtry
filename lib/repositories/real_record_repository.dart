@@ -228,4 +228,12 @@ class RealRecordRepository implements RecordRepository {
   Future<void> reportCompletion(String planId) async {
     // TODO: Firestore에 실천 기록 생성 및 계획 상태 업데이트
   }
+
+  @override
+  Future<void> reconcileHistoryItem(
+    String historyId,
+    HistoryStatus status,
+  ) async {
+    // TODO: Firestore에서 해당 HistoryItem 업데이트
+  }
 }

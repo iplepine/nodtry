@@ -29,4 +29,7 @@ abstract class RecordRepository {
 
   /// 실천 완료 보고 (했어)
   Future<void> reportCompletion(String planId);
+
+  /// 과거 기록 소명 (HistoryItem 수정)
+  Future<void> reconcileHistoryItem(String historyId, HistoryStatus status);
 }
