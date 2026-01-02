@@ -8,6 +8,7 @@ import '../../widgets/quiet_header.dart';
 import '../../widgets/time_chip.dart';
 import '../../models/home_state.dart';
 import '../../models/history_item.dart';
+import '../../models/now_tab_ui_state.dart';
 import '../../routes/app_router.dart';
 import '../../providers/repository_provider.dart';
 import '../../utils/time_formatter.dart';
@@ -73,10 +74,7 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   Future<void> _handleDidIt() async {
-    final primaryCard = ref
-        .read(nowTabViewModelProvider)
-        .value
-        ?.firstWhere((m) => m.state.canBeExecutorPrimary);
+    final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
     if (primaryCard?.plan?.id == null) return;
 
     // 1. Shrink animation
@@ -94,13 +92,9 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   Future<void> _handleCheckIt() async {
-    final managerCard = ref
-        .read(nowTabViewModelProvider)
-        .value
-        ?.firstWhere(
-          (m) => m.state.canBeManagerQuick,
-          orElse: () => const HomeCardModel(state: HomeCardState.relaxedDay),
-        ); // Dummy fallback
+    final managerCard = ref.read(nowTabViewModelProvider).value?.managerCard;
+    // orElse: () => const HomeCardModel(state: HomeCardState.relaxedDay), removed as null check below covers
+    // If we want a fallback or if managerCard is nullable, the null check below handles it.
 
     if (managerCard?.plan?.id == null) return;
 
@@ -120,10 +114,7 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   Future<void> _handleSkip() async {
-    final primaryCard = ref
-        .read(nowTabViewModelProvider)
-        .value
-        ?.firstWhere((m) => m.state.canBeExecutorPrimary);
+    final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
     if (primaryCard?.plan?.id == null) return;
 
     // 1. Shrink animation (optional, maybe fade out?)
@@ -295,26 +286,18 @@ class _NowTabState extends ConsumerState<NowTab>
         return;
       }
 
-      final prevModels = previous!.value!;
-      final nextModels = next.value!;
+      final prevUiState = previous!.value!;
+      final nextUiState = next.value!;
 
       // Manager Card 변경 여부 확인
-      final prevManager = HomeCardStatePriority.selectManagerQuickCard(
-        prevModels,
-      );
-      final nextManager = HomeCardStatePriority.selectManagerQuickCard(
-        nextModels,
-      );
-      final managerChanged = prevManager?.plan?.id != nextManager?.plan?.id;
+      final managerChanged =
+          prevUiState.managerCard?.plan?.id !=
+          nextUiState.managerCard?.plan?.id;
 
       // Primary Card 변경 여부 확인
-      final prevPrimary = HomeCardStatePriority.selectPrimaryExecutorCard(
-        prevModels,
-      );
-      final nextPrimary = HomeCardStatePriority.selectPrimaryExecutorCard(
-        nextModels,
-      );
-      final primaryChanged = prevPrimary?.plan?.id != nextPrimary?.plan?.id;
+      final primaryChanged =
+          prevUiState.primaryCard?.plan?.id !=
+          nextUiState.primaryCard?.plan?.id;
 
       // 카드의 식별자가 변경되었을 때만 애니메이션 재시작
       if (managerChanged || primaryChanged) {
@@ -331,23 +314,11 @@ class _NowTabState extends ConsumerState<NowTab>
     return homeStateAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),
-      data: (rawModels) {
-        final models = List<HomeCardModel>.from(rawModels);
-        if (models.isEmpty) {
-          models.add(const HomeCardModel(state: HomeCardState.planNeeded));
-        }
-
-        // 상태 계산
-        final primaryExecutorCard =
-            HomeCardStatePriority.selectPrimaryExecutorCard(models);
-        final secondaryExecutorCards =
-            HomeCardStatePriority.selectSecondaryExecutorCards(
-              models,
-              primaryExecutorCard,
-            );
-        final managerQuickCard = HomeCardStatePriority.selectManagerQuickCard(
-          models,
-        );
+      data: (uiState) {
+        // 상태 사용
+        final primaryExecutorCard = uiState.primaryCard;
+        final secondaryExecutorCards = uiState.secondaryCards;
+        final managerQuickCard = uiState.managerCard;
         final managerPartnerName = managerQuickCard?.partnerName;
 
         return Stack(

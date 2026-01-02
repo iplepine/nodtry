@@ -3,20 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/home_state.dart';
 import '../intents/now_tab_intent.dart';
 import '../providers/repository_provider.dart';
+import '../models/now_tab_ui_state.dart';
 
 /// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel
 /// MVI 패턴의 'Model' (State Holder) 역할
-class NowTabViewModel extends AsyncNotifier<List<HomeCardModel>> {
+class NowTabViewModel extends AsyncNotifier<NowTabUiState> {
   @override
-  FutureOr<List<HomeCardModel>> build() async {
+  FutureOr<NowTabUiState> build() async {
     // 초기 데이터 로드
-    return _fetchData();
+    return _fetchState();
   }
 
-  /// 데이터 로드 (Use Case 활용)
-  Future<List<HomeCardModel>> _fetchData() async {
+  /// 데이터 로드 및 State 변환
+  Future<NowTabUiState> _fetchState() async {
     final useCase = ref.read(getNowCardsUseCaseProvider);
-    return useCase.execute();
+    final models = await useCase.execute();
+    return NowTabUiState.fromModels(models);
   }
 
   /// 사용자 의도(Intent) 처리
@@ -34,7 +36,7 @@ class NowTabViewModel extends AsyncNotifier<List<HomeCardModel>> {
         await _checkPartnerAction(intent.planId);
       } else if (intent is RefreshIntent) {
         state = const AsyncValue.loading();
-        state = await AsyncValue.guard(() => _fetchData());
+        state = await AsyncValue.guard(() => _fetchState());
       } else if (intent is SkipPlanIntent) {
         await _skipPlan(intent.planId);
       }
@@ -72,6 +74,6 @@ class NowTabViewModel extends AsyncNotifier<List<HomeCardModel>> {
 
 /// ViewModel Provider 정의
 final nowTabViewModelProvider =
-    AsyncNotifierProvider<NowTabViewModel, List<HomeCardModel>>(
+    AsyncNotifierProvider<NowTabViewModel, NowTabUiState>(
       () => NowTabViewModel(),
     );
