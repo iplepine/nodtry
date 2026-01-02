@@ -10,6 +10,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../routes/app_router.dart';
 import '../../providers/repository_provider.dart';
 import '../../models/connected_user.dart'; // ConnectedUser Import
+import '../../widgets/plan/plan_card.dart'; // PlanCard Import
+import '../../providers/plan_list_provider.dart'; // PlanListProvider Import
 
 /// 우리 탭 - 안전 기지 & 연결 허브
 ///
@@ -138,6 +140,15 @@ class _UsTabState extends ConsumerState<UsTab> {
                         ),
                         inviteCode: user?.inviteCode,
                       ),
+
+                      if (user != null) ...[
+                        const SizedBox(height: 24),
+                        _ActivePlanListSection(
+                          userId: user.uid,
+                          title: "나의 약속", // TODO: L10n
+                          isMe: true,
+                        ),
+                      ],
                     ],
                   );
                 },
@@ -455,25 +466,34 @@ class _YouSection extends ConsumerWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            // 새 연결 추가 버튼
-            InkWell(
-              onTap: () {
-                context.push(AppRoutes.connect);
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Semantics(
-                label: l10n.usAddConnectionLabel,
-                button: true,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.add_circle,
-                    color: AppColors.primary,
-                    size: 28,
+            // 새 연결 추가 버튼 (헤더에서 제거)
+            /*
+            connectedAsync.when(
+              data: (people) {
+                if (people.isEmpty) return const SizedBox.shrink();
+                return InkWell(
+                  onTap: () {
+                    context.push(AppRoutes.connect);
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Semantics(
+                    label: l10n.usAddConnectionLabel,
+                    button: true,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(
+                        Icons.add_circle,
+                        color: AppColors.primary,
+                        size: 28,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
             ),
+            */
           ],
         ),
         const SizedBox(height: 20),
@@ -482,16 +502,52 @@ class _YouSection extends ConsumerWidget {
           data: (people) {
             if (people.isEmpty) return _buildEmptyState(context);
             return Column(
-              children: people
-                  .map(
-                    (person) => _PersonCard(
-                      person: person,
-                      l10n: l10n,
-                      onDisconnect: () =>
-                          _showDisconnectDialog(context, ref, person),
+              children: [
+                ...people
+                    .map(
+                      (person) => Column(
+                        children: [
+                          _PersonCard(
+                            person: person,
+                            l10n: l10n,
+                            onDisconnect: () =>
+                                _showDisconnectDialog(context, ref, person),
+                          ),
+                          // 파트너 계획 리스트 추가
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 1,
+                              right: 1,
+                              bottom: 24,
+                            ),
+                            child: _ActivePlanListSection(
+                              userId: person.user.uid,
+                              title:
+                                  "${person.user.displayName ?? '전우'}님의 약속", // TODO: L10n
+                              isMe: false,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    .toList(),
+                // Footer: 언제든 연결 추가 가능
+                const SizedBox(height: 8),
+                Center(
+                  child: TextButton(
+                    onPressed: () => _showPremiumLimitBottomSheet(context),
+                    child: Text(
+                      "연결은 언제든 추가할 수 있어요", // TODO: L10n
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        decoration: TextDecoration.underline,
+                        fontSize: 13,
+                      ),
                     ),
-                  )
-                  .toList(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -568,7 +624,6 @@ class _YouSection extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: AppColors.divider,
@@ -598,8 +653,103 @@ class _YouSection extends ConsumerWidget {
             ).textTheme.bodySmall?.copyWith(color: AppColors.textDisabled),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 24),
+          // 초대하기 버튼
+          TextButton.icon(
+            onPressed: () => context.push(AppRoutes.connect),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            icon: const Icon(Icons.send, size: 18),
+            label: Text(
+              l10n.usAddConnectionLabel, // "연결 추가" or "초대하기"
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
         ],
       ),
+    );
+  }
+
+  void _showPremiumLimitBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 48),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "지금은 둘만의 공간이에요", // TODO: L10n
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                "IfTogether는\n둘이 서로의 안전 기지가 되는 관계를\n기본으로 설계했어요.\n\n가족이나 여러 사람과 함께 쓰려면\n프리미엄이 필요해요.", // TODO: L10n
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.6,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 48),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // TODO: Premium Screen Navigation
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text("준비 중입니다.")));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    "프리미엄 알아보기", // TODO: L10n
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  "나중에 할게요", // TODO: L10n
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -796,8 +946,10 @@ class _EditProfileDialogContentState
       if (pickedFile != null) {
         final croppedFile = await ImageCropper().cropImage(
           sourcePath: pickedFile.path,
+
           maxWidth: 512,
           maxHeight: 512,
+
           uiSettings: [
             AndroidUiSettings(
               toolbarTitle: widget.l10n.usCropImageTitle,
@@ -975,6 +1127,111 @@ class _EditProfileDialogContentState
             onPressed: _save,
             child: Text("저장", style: TextStyle(color: AppColors.primary)),
           ),
+      ],
+    );
+  }
+}
+
+class _ActivePlanListSection extends ConsumerWidget {
+  final String userId;
+  final String title;
+  final bool isMe;
+
+  const _ActivePlanListSection({
+    required this.userId,
+    required this.title,
+    this.isMe = false,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plansAsync = ref.watch(activePlansProvider(userId));
+    // final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            if (isMe)
+              InkWell(
+                onTap: () => context.push(AppRoutes.planCreate),
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.add_circle,
+                    color: AppColors.primary,
+                    size: 24,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // List
+        plansAsync.when(
+          data: (plans) {
+            if (plans.isEmpty) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppColors.surface.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.divider),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      isMe ? "아직 등록된 약속이 없어요" : "파트너가 진행 중인 약속이 없어요",
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (isMe) ...[
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => context.push(AppRoutes.planCreate),
+                        child: Text("새 약속 만들기"),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            }
+            return Column(
+              children: plans
+                  .map(
+                    (plan) => PlanCard(
+                      plan: plan,
+                      onTap: () {
+                        // TODO: Plan Detail
+                      },
+                    ),
+                  )
+                  .toList(),
+            );
+          },
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+          error: (err, stack) => Text('Error: $err'),
+        ),
       ],
     );
   }

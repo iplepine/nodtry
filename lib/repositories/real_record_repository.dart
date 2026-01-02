@@ -120,6 +120,30 @@ class RealRecordRepository implements RecordRepository {
     }
   }
 
+  @override
+  Future<List<Plan>> getPlansByUserId(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('plans')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => Plan.fromMap(doc.data(), doc.id))
+          .where(
+            (p) =>
+                p.state == PlanState.active ||
+                p.state == PlanState.pendingApproval,
+          )
+          .toList();
+    } catch (e) {
+      debugPrint(
+        '[RealRecordRepository] Error fetching plans for user $userId: $e',
+      );
+      return [];
+    }
+  }
+
   /// 특정 아이템 하나만 포함된 임시 Plan 객체 생성 (UI 노출용)
   Plan _createSingleItemPlan(Plan original, PlanItem item) {
     return Plan(

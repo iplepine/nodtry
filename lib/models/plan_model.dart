@@ -61,6 +61,28 @@ class Plan {
     required this.createdAt,
   });
 
+  Plan copyWith({
+    String? id,
+    String? userId,
+    String? managerId,
+    DateTime? startDate,
+    DateTime? endDate,
+    PlanState? state,
+    List<PlanItem>? items,
+    DateTime? createdAt,
+  }) {
+    return Plan(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      managerId: managerId ?? this.managerId,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      state: state ?? this.state,
+      items: items ?? this.items,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'userId': userId,

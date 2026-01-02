@@ -8,9 +8,12 @@ class MockRecordRepository implements RecordRepository {
   List<HomeCardModel> _mockHomeCardModels = [];
   List<HistoryItem> _mockHistoryItems = [];
 
+  List<Plan> _mockPlans = [];
+
   MockRecordRepository() {
     _mockHomeCardModels = _buildInitialMockModels();
     _mockHistoryItems = _buildInitialMockHistory();
+    _mockPlans = _buildInitialMockPlans();
   }
 
   List<HomeCardModel> _buildInitialMockModels() {
@@ -132,6 +135,50 @@ class MockRecordRepository implements RecordRepository {
     return _mockHomeCardModels;
   }
 
+  List<Plan> _buildInitialMockPlans() {
+    return [
+      _createMockPlan(
+        21,
+        0,
+        '하루 회고록 쓰기',
+        description: '매일 밤 하루를 정리해요',
+        days: [1, 2, 3, 4, 5],
+      ),
+      _createMockPlan(
+        13,
+        0,
+        '점심 후 10분 명상',
+        description: '오후 집중력을 위해',
+        days: [1, 3, 5],
+      ),
+      _createMockPlan(
+        8,
+        0,
+        '아침 영양제 챙겨먹기',
+        description: '건강이 최고',
+        days: [1, 2, 3, 4, 5, 6, 7],
+      ),
+    ].map((p) {
+      // 일부는 partner, 일부는 me (mock)
+      if (p.items.first.title.contains('회고록')) {
+        return p.copyWith(userId: 'partner');
+      }
+      return p.copyWith(userId: 'me'); // Assume 'me' is the default mock ID
+    }).toList();
+  }
+
+  @override
+  Future<List<Plan>> getPlansByUserId(String userId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    // Mock Logic: userId가 'me'이면 내 것, 아니면 파트너 것 반환
+    // 실제 앱에서는 userId로 정확히 필터링
+    if (userId == 'me') {
+      return _mockPlans.where((p) => p.userId == 'me').toList();
+    } else {
+      return _mockPlans.where((p) => p.userId != 'me').toList();
+    }
+  }
+
   @override
   Future<List<HistoryItem>> getHistoryItems() async {
     await Future.delayed(const Duration(milliseconds: 500));
@@ -142,6 +189,7 @@ class MockRecordRepository implements RecordRepository {
   Future<void> createPlan(Plan plan) async {
     // Mock: 1초 딜레이 후 성공
     await Future.delayed(const Duration(seconds: 1));
+    _mockPlans.add(plan); // 리스트에 추가
     // 상태를 Active로 변경 시뮬레이션
     _mockHomeCardModels = [
       HomeCardModel(state: HomeCardState.nowAction, plan: plan),
@@ -267,6 +315,33 @@ class MockRecordRepository implements RecordRepository {
           ),
         ];
         break;
+    }
+
+    // Sync _mockPlans with _mockHomeCardModels for test consistency
+    // 시나리오가 변경되면 Us 탭의 목록도 해당 계획들로 갱신됨
+    if (scenario == MockScenario.planNeeded) {
+      _mockPlans = [];
+    } else {
+      _mockPlans = [];
+      for (var model in _mockHomeCardModels) {
+        if (model.plan != null) {
+          final uid =
+              model.partnerName != null || model.state.name.contains('partner')
+              ? 'partner'
+              : 'me';
+
+          // 이미 리스트에 있는지 확인 (ID 중복 가이드)
+          if (!_mockPlans.any((p) => p.id == model.plan!.id)) {
+            _mockPlans.add(model.plan!.copyWith(userId: uid));
+          }
+        }
+      }
+      // If relaxedDay (no active items but maybe plans exist?), we might want to keep some?
+      // For now, simple sync: relaxedDay = empty plans (or we can add dummy plans if needed)
+      if (scenario == MockScenario.relaxedDay && _mockPlans.isEmpty) {
+        // Add a dummy plan that is not for today?
+        // For simplicity, leave it empty.
+      }
     }
   }
 
