@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../features/now/presentation/now_tab_screen.dart';
-import 'tabs/history_tab.dart';
-import 'tabs/us_tab.dart';
+import '../features/history/presentation/screens/history_screen.dart';
+import '../features/us/presentation/screens/us_screen.dart';
 
 /// 홈 화면 - 하단 탭 구조
 ///
@@ -57,7 +57,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       extendBodyBehindAppBar: false,
       body: IndexedStack(
         index: _currentIndex,
-        children: const [NowTab(), HistoryTab(), UsTab()],
+        children: const [NowTab(), HistoryScreen(), UsScreen()],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

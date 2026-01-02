@@ -1,34 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Riverpod Import
-import '../../l10n/app_localizations.dart';
-import '../../theme/app_colors.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../theme/app_colors.dart';
 import 'dart:io';
 import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../routes/app_router.dart';
-import '../../providers/repository_provider.dart';
-import '../../models/connected_user.dart'; // ConnectedUser Import
-import '../../widgets/plan/plan_card.dart'; // PlanCard Import
-import '../../providers/plan_list_provider.dart'; // PlanListProvider Import
+import '../../../../routes/app_router.dart';
+import '../../../../providers/repository_provider.dart';
+import '../../../../models/connected_user.dart';
+import '../../../../widgets/plan/plan_card.dart';
+import '../../../../providers/plan_list_provider.dart';
+import '../us_state.dart';
+import '../us_viewmodel.dart';
 
 /// 우리 탭 - 안전 기지 & 연결 허브
 ///
 /// "나(Me)"와 "너(You)"의 관계를 관리하는 공간
-class UsTab extends ConsumerStatefulWidget {
-  const UsTab({super.key});
+class UsScreen extends ConsumerStatefulWidget {
+  const UsScreen({super.key});
 
   @override
-  ConsumerState<UsTab> createState() => _UsTabState();
+  ConsumerState<UsScreen> createState() => _UsScreenState();
 }
 
-class _UsTabState extends ConsumerState<UsTab> {
+class _UsScreenState extends ConsumerState<UsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final profileAsync = ref.watch(myProfileProvider);
-    final connectedAsync = ref.watch(connectedProfilesProvider);
+    final usStateAsync = ref.watch(usViewModelProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -40,8 +41,9 @@ class _UsTabState extends ConsumerState<UsTab> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Me Section
-              profileAsync.when(
-                data: (user) {
+              usStateAsync.when(
+                data: (state) {
+                  final user = state.myProfile;
                   return Column(
                     children: [
                       // 게스트 경고 메시지 (익명 유저인 경우)
@@ -81,16 +83,19 @@ class _UsTabState extends ConsumerState<UsTab> {
                                     ),
                                     const SizedBox(height: 8),
                                     InkWell(
-                                      onTap: () =>
-                                          _linkGoogleAccount(context, ref),
+                                      onTap: () => ref
+                                          .read(usViewModelProvider.notifier)
+                                          .dispatch(
+                                            const UsIntent.linkGoogle(),
+                                          ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Container(
-                                            decoration: BoxDecoration(
+                                            decoration: const BoxDecoration(
                                               border: Border(
                                                 bottom: BorderSide(
-                                                  color: const Color(
+                                                  color: Color(
                                                     0xFFE65100,
                                                   ), // Darker Orange
                                                   width: 1.0,
@@ -159,8 +164,13 @@ class _UsTabState extends ConsumerState<UsTab> {
               const SizedBox(height: 48),
 
               // 2. You Section
-              // 2. You Section
-              _YouSection(l10n: l10n, connectedAsync: connectedAsync),
+              usStateAsync.maybeWhen(
+                data: (state) => _YouSection(
+                  l10n: l10n,
+                  connectedProfiles: state.connectedProfiles,
+                ),
+                orElse: () => const SizedBox.shrink(),
+              ),
             ],
           ),
         ),
@@ -189,32 +199,6 @@ class _UsTabState extends ConsumerState<UsTab> {
         },
       ),
     );
-  }
-
-  Future<void> _linkGoogleAccount(BuildContext context, WidgetRef ref) async {
-    try {
-      // TODO: 로딩 표시 추가 (전체 화면 오버레이 또는 버튼 로딩)
-      final useCase = ref.read(linkWithGoogleUseCaseProvider);
-      final credential = await useCase.execute();
-
-      if (credential != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.usLinkSuccess)),
-        );
-        // Provider 갱신을 통해 UI 업데이트 (isAnonymous가 false가 됨)
-        ref.invalidate(myProfileProvider);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.usLinkError(e.toString()),
-            ),
-          ),
-        );
-      }
-    }
   }
 }
 
@@ -447,9 +431,9 @@ class _MeActionButton extends StatelessWidget {
 /// 섹션 B: 너 (You)
 class _YouSection extends ConsumerWidget {
   final AppLocalizations l10n;
-  final AsyncValue<List<ConnectedUser>> connectedAsync;
+  final List<ConnectedUser> connectedProfiles;
 
-  const _YouSection({required this.l10n, required this.connectedAsync});
+  const _YouSection({required this.l10n, required this.connectedProfiles});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -498,66 +482,32 @@ class _YouSection extends ConsumerWidget {
         ),
         const SizedBox(height: 20),
 
-        connectedAsync.when(
-          data: (people) {
-            if (people.isEmpty) return _buildEmptyState(context);
-            return Column(
+        if (connectedProfiles.isEmpty)
+          _buildEmptyState(context)
+        else
+          ...connectedProfiles.map(
+            (person) => Column(
               children: [
-                ...people
-                    .map(
-                      (person) => Column(
-                        children: [
-                          _PersonCard(
-                            person: person,
-                            l10n: l10n,
-                            onDisconnect: () =>
-                                _showDisconnectDialog(context, ref, person),
-                          ),
-                          // 파트너 계획 리스트 추가
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 1,
-                              right: 1,
-                              bottom: 24,
-                            ),
-                            child: _ActivePlanListSection(
-                              userId: person.user.uid,
-                              title:
-                                  "${person.user.displayName ?? '전우'}님의 약속", // TODO: L10n
-                              isMe: false,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                    .toList(),
-                // Footer: 언제든 연결 추가 가능
-                const SizedBox(height: 8),
-                Center(
-                  child: TextButton(
-                    onPressed: () => _showPremiumLimitBottomSheet(context),
-                    child: Text(
-                      "연결은 언제든 추가할 수 있어요", // TODO: L10n
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        decoration: TextDecoration.underline,
-                        fontSize: 13,
-                      ),
-                    ),
+                _PersonCard(
+                  person: person,
+                  l10n: l10n,
+                  onDisconnect: () =>
+                      _showDisconnectDialog(context, ref, person),
+                ),
+                // 파트너 계획 리스트 추가
+                Padding(
+                  padding: const EdgeInsets.only(left: 1, right: 1, bottom: 24),
+                  child: _ActivePlanListSection(
+                    userId: person.user.uid,
+                    title:
+                        "${person.user.displayName ?? '전우'}님의 약속", // TODO: L10n
+                    isMe: false,
                   ),
                 ),
-                const SizedBox(height: 24),
               ],
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(
-            child: Text(
-              l10n.usLoadError,
-              style: TextStyle(color: AppColors.error),
             ),
           ),
-        ),
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -673,83 +623,6 @@ class _YouSection extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _showPremiumLimitBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 32, 24, 48),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "지금은 둘만의 공간이에요", // TODO: L10n
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                "IfTogether는\n둘이 서로의 안전 기지가 되는 관계를\n기본으로 설계했어요.\n\n가족이나 여러 사람과 함께 쓰려면\n프리미엄이 필요해요.", // TODO: L10n
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.6,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Premium Screen Navigation
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text("준비 중입니다.")));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    "프리미엄 알아보기", // TODO: L10n
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  "나중에 할게요", // TODO: L10n
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

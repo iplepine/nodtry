@@ -1,6 +1,7 @@
 import '../usecases/disconnect_connection_use_case.dart';
 import '../usecases/create_new_plan_use_case.dart';
 import '../features/now/domain/usecases/get_now_cards_use_case.dart';
+import '../features/history/domain/usecases/get_history_use_case.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../repositories/record_repository.dart';
@@ -221,6 +222,9 @@ final withdrawUseCaseProvider = Provider<WithdrawUseCase>((ref) {
 });
 
 final getNowCardsUseCaseProvider = Provider<GetNowCardsUseCase>((ref) {
-  final repository = ref.watch(recordRepositoryProvider);
-  return GetNowCardsUseCase(repository);
+  return GetNowCardsUseCase(ref.watch(recordRepositoryProvider));
+});
+
+final getHistoryUseCaseProvider = Provider<GetHistoryUseCase>((ref) {
+  return GetHistoryUseCase(ref.watch(recordRepositoryProvider));
 });
