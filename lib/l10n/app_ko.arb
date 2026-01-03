@@ -157,6 +157,7 @@
   "nowPartnerDidIt": "나 했어요!",
   "nowActionPass": "그냥 넘기기",
   "nowActionSkipToday": "오늘은 넘어가자",
+  "nowAddMorePlan": "다른 약속도 만들어볼까요?",
   "recordGazeWeekCount": "이번 주 약속 중 {count}번째",
   "@recordGazeWeekCount": {
     "placeholders": {

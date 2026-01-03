@@ -864,6 +864,35 @@ class _PrimaryExecutorCard extends StatelessWidget {
     } else if (model.state == HomeCardState.emptyPlan) {
       buttonText = l10n.nowCreatePlan;
       onPressed = onCreatePlan;
+    } else if (model.state == HomeCardState.todayComplete ||
+        model.state == HomeCardState.todayEmpty) {
+      // "작은 버튼" 요청: TextButton으로 구현
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton(
+          onPressed: onCreatePlan,
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.textSecondary,
+            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.nowAddMorePlan,
+                style: const TextStyle(
+                  fontSize: 14,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.arrow_forward_ios, size: 10),
+            ],
+          ),
+        ),
+      );
     } else {
       return const SizedBox.shrink();
     }
