@@ -5,8 +5,6 @@ import '../theme/app_colors.dart';
 import '../routes/app_router.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/repository_provider.dart';
-import '../repositories/mock_record_repository.dart';
-import '../providers/home_provider.dart';
 
 /// 개발자 화면 - 모든 화면으로 이동할 수 있는 디버그 화면
 class DeveloperScreen extends ConsumerWidget {
@@ -237,45 +235,32 @@ class DeveloperScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Mock Scenarios',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '디버그 상태 확인',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: MockScenario.values.map((scenario) {
-                            return ActionChip(
-                              label: Text(
-                                scenario.name.replaceAll('reportNeeded_', ''),
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                              padding: EdgeInsets.zero,
-                              visualDensity: VisualDensity.compact,
-                              onPressed: () {
-                                final repo = ref.read(recordRepositoryProvider);
-                                if (repo is MockRecordRepository) {
-                                  repo.setScenario(scenario);
-                                  ref.invalidate(homeCardStateProvider);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Scenario set to ${scenario.name}',
-                                      ),
-                                      duration: const Duration(
-                                        milliseconds: 500,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                            );
-                          }).toList(),
+                        Text(
+                          'Now Tab의 플로팅 액션 버튼(버그 아이콘)을 사용하여 다양한 UI 상태를 테스트할 수 있습니다.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                            height: 1.4,
+                          ),
                         ),
                       ],
                     ),

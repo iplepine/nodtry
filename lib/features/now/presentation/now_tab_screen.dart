@@ -469,19 +469,25 @@ class _NowTabState extends ConsumerState<NowTab>
               ],
             ),
             // Debug Fake State Toggle Button (Debug Only)
-            if (kDebugMode)
-              Positioned(
-                bottom: 16,
-                right: 16,
-                child: FloatingActionButton(
-                  mini: true,
-                  backgroundColor: AppColors.primary,
-                  child: const Icon(Icons.bug_report, size: 20),
-                  onPressed: () {
-                    _showFakeStateSelector(context, ref);
-                  },
-                ),
-              ),
+            // 릴리스 모드가 아닐 때 표시
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: () {
+                bool showDebug = false;
+                assert(showDebug = true);
+                return showDebug
+                    ? FloatingActionButton(
+                        mini: true,
+                        backgroundColor: AppColors.primary,
+                        child: const Icon(Icons.bug_report, size: 20),
+                        onPressed: () {
+                          _showFakeStateSelector(context, ref);
+                        },
+                      )
+                    : const SizedBox.shrink();
+              }(),
+            ),
           ],
         );
       },
