@@ -8,10 +8,8 @@ import '../../../theme/app_colors.dart';
 import '../../../widgets/quiet_header.dart';
 import '../../../widgets/time_chip.dart';
 import '../../../models/home_state.dart';
-import '../../../models/history_item.dart';
 import 'now_tab_state.dart';
 import '../../../routes/app_router.dart';
-import '../../../providers/repository_provider.dart';
 import '../../../utils/time_formatter.dart';
 import 'now_tab_viewmodel.dart';
 import 'now_tab_intent.dart';
@@ -114,6 +112,26 @@ class _NowTabState extends ConsumerState<NowTab>
         .dispatch(CheckPartnerActionIntent(managerCard!.plan!.id!));
   }
 
+  Future<void> _handleCheer() async {
+    // TODO: 응원하기 API 호출. 현재는 확인하기와 동일하게 처리
+    await _handleCheckIt();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.homeThankYou)),
+      );
+    }
+  }
+
+  Future<void> _handlePass() async {
+    // TODO: 넘기기 API 호출
+    ref.invalidate(nowTabViewModelProvider);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.nowActionPass)),
+      );
+    }
+  }
+
   Future<void> _handleSkip() async {
     final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
     if (primaryCard?.plan?.id == null) return;
@@ -142,7 +160,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// 정확한 시간 텍스트 가져오기 (롱 프레스용)
   String? _getExactTimeText(HomeCardModel model) {
-    if (model.state == HomeCardState.overdueSelfAction) {
+    if (model.state == HomeCardState.overdue) {
       // 과거 미완료(Type 5)의 경우 정확한 시간보다는 상태가 중요하므로 null 반환 또는 별도 처리
       return null;
     }
@@ -188,7 +206,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// Time Chip 텍스트 가져오기 (Vague Time 적용)
   String? _getTimeChipText(HomeCardModel model) {
-    if (model.state == HomeCardState.overdueSelfAction) {
+    if (model.state == HomeCardState.overdue) {
       return '${AppLocalizations.of(context)!.pastUncompletedTimeChip} · ${AppLocalizations.of(context)!.timeChipPassed}';
       // "조금 전 · 지나갔어요" (기존 유지)
     }
@@ -198,10 +216,18 @@ class _NowTabState extends ConsumerState<NowTab>
         if (item.notificationTime != null &&
             item.notificationTime!.type != 'none') {
           final now = DateTime.now();
+          // Use plan start date if it's in the future, otherwise assume today/relevant date
+          // This is a simple heuristic for the 'Upcoming' debug scenario.
+          // Ideally HomeCardModel should carry the target date.
+          DateTime dateBase = now;
+          if (model.plan != null && model.plan!.startDate.isAfter(now)) {
+            dateBase = model.plan!.startDate;
+          }
+
           final scheduledTime = DateTime(
-            now.year,
-            now.month,
-            now.day,
+            dateBase.year,
+            dateBase.month,
+            dateBase.day,
             item.notificationTime!.hour,
             item.notificationTime!.minute,
           );
@@ -214,8 +240,17 @@ class _NowTabState extends ConsumerState<NowTab>
           );
 
           if (model.state == HomeCardState.nowAction) {
-            // "점심쯤 · 아직 할 수 있어요"
-            return '$vagueTime · ${l10n.timeChipStillActionable}';
+            // "점심쯤 · 아직 할 수 있어요" - Only show suffix if it is Today AND time has passed
+            final isToday =
+                dateBase.year == now.year &&
+                dateBase.month == now.month &&
+                dateBase.day == now.day;
+            final isPast = now.isAfter(scheduledTime);
+
+            if (isToday && isPast) {
+              return '$vagueTime · ${l10n.timeChipStillActionable}';
+            }
+            return vagueTime;
           }
           return vagueTime; // "점심쯤"
         }
@@ -226,7 +261,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
   /// Time Chip 타입 가져오기
   TimeChipType? _getTimeChipType(HomeCardModel model) {
-    if (model.state == HomeCardState.overdueSelfAction) {
+    if (model.state == HomeCardState.overdue) {
       return TimeChipType.past;
     }
 
@@ -443,6 +478,8 @@ class _NowTabState extends ConsumerState<NowTab>
                                     model: managerQuickCard,
                                     partnerName: managerPartnerName,
                                     onCheckIt: _handleCheckIt,
+                                    onCheer: _handleCheer, // Placeholder
+                                    onPass: _handlePass, // Placeholder
                                     timeChipText: _getManagerTimeChipText(
                                       managerQuickCard,
                                     ),
@@ -666,6 +703,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     final title = model.plan?.items.firstOrNull?.title;
     final List<Widget> children = [];
 
+    // Title (if applicable)
     if (title != null) {
       children.add(
         Text(
@@ -678,21 +716,53 @@ class _PrimaryExecutorCard extends StatelessWidget {
           textAlign: TextAlign.left,
         ),
       );
+
+      // Description
+      final description = model.plan?.items.firstOrNull?.description;
+      if (description != null && description.isNotEmpty) {
+        children.add(const SizedBox(height: 4));
+        children.add(
+          Text(
+            description,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.left,
+          ),
+        );
+      }
     }
 
-    String? statusMessage;
-    switch (model.state) {
-      case HomeCardState.nowAction: // Type 1: 지금 실천
-        statusMessage = l10n.homeNowTask;
-        break;
-      case HomeCardState.overdueSelfAction: // Type 5: 지난 실천 (부드러운 톤)
-        statusMessage = l10n.timePassedActorMessage;
-        break;
-      case HomeCardState.planNeeded: // Type 2-1: 계획 필요
-        statusMessage = l10n.nowNoPlan;
-        break;
-      default:
-        break;
+    String? statusMessage = model.headerMessage;
+    String? subMessage; // Added for Type 2-1, 2-2 A/B, etc.
+
+    if (statusMessage == null) {
+      switch (model.state) {
+        case HomeCardState.nowAction: // Type 1: 지금 실천
+          // statusMessage = l10n.homeNowTask; // Removed per user request
+          break;
+        case HomeCardState.overdue: // Type 5: 지난 실천
+          // statusMessage = l10n.timePassedActorMessage; // Removed per user request
+          // subMessage = l10n.timePassedActorSubMessage;
+          break;
+        case HomeCardState.emptyPlan: // Type 2-1: 계획 필요
+          statusMessage = l10n.nowNoPlan;
+          subMessage = l10n.nowNoPlanSubtitle;
+          break;
+        case HomeCardState.todayComplete: // Type 2-2 A: 오늘 완료
+          statusMessage = l10n.nowTodayDone;
+          // Sub-message for next promise can be handled via upcoming schedule if available
+          break;
+        case HomeCardState.todayEmpty: // Type 2-2 B: 여유로운 날
+          statusMessage = l10n.nowQuietRest;
+          break;
+        case HomeCardState.nextAction: // Type 1-3: 다음 일정
+          // Next Action usually uses headerMessage or defaults to nothing special
+          break;
+        default:
+          break;
+      }
     }
 
     if (statusMessage != null) {
@@ -715,6 +785,21 @@ class _PrimaryExecutorCard extends StatelessWidget {
       );
     }
 
+    // Render Sub-message if exists (e.g. for Plan Needed)
+    if (subMessage != null) {
+      children.add(const SizedBox(height: 4));
+      children.add(
+        Text(
+          subMessage,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSecondary,
+            height: 1.5,
+          ),
+          textAlign: TextAlign.left,
+        ),
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -730,11 +815,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
     if (model.state == HomeCardState.nowAction) {
       buttonText = l10n.homeDidIt;
       onPressed = onDidIt;
-    } else if (model.state == HomeCardState.overdueSelfAction) {
-      // Type 5: "해도 괜찮아요" 뉘앙스 - "했어" 버튼 제공하되, "넘어가기"도 제공해야 함 (여기선 메인 액션만)
+    } else if (model.state == HomeCardState.overdue) {
       buttonText = l10n.homeDidIt;
       onPressed = onDidIt;
-    } else if (model.state == HomeCardState.planNeeded) {
+    } else if (model.state == HomeCardState.emptyPlan) {
       buttonText = l10n.nowCreatePlan;
       onPressed = onCreatePlan;
     } else {
@@ -780,27 +864,23 @@ class _PrimaryExecutorCard extends StatelessWidget {
             ),
           ),
         ),
-        if ((model.state == HomeCardState.nowAction ||
-                model.state == HomeCardState.overdueSelfAction) &&
-            onSkip != null) ...[
-          const SizedBox(height: 8),
+        if (model.state == HomeCardState.overdue && onSkip != null)
           TextButton(
             onPressed: onSkip,
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              minimumSize: const Size(double.infinity, 32),
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
-              '오늘은 쉴게요', // TODO: L10n.homeSkipTask
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              l10n.nowActionSkipToday,
+              style: const TextStyle(
+                fontSize: 13,
                 decoration: TextDecoration.underline,
-                decorationColor: AppColors.textSecondary,
               ),
             ),
           ),
-        ],
       ],
     );
   }
@@ -827,7 +907,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     // Checked 상태인 경우 다른 레이아웃 적용
-    if (model.state == HomeCardState.todayDone) {
+    if (model.state == HomeCardState.todayComplete) {
       return _buildCheckedCard(context, l10n);
     }
 
@@ -846,6 +926,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, // Fixed: Left alignment
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -869,11 +950,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                     ],
-                    if (model.state == HomeCardState.overdueSelfAction)
-                      _ReconcileMenu(
-                        planId: model.plan?.id ?? '',
-                        onSuccess: onReconcile,
-                      ),
+                    // Removed _ReconcileMenu per user request
                   ],
                 ),
                 if (timeChipText != null && timeChipType != null) ...[
@@ -1019,6 +1096,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
     final title = model.plan?.items.firstOrNull?.title;
     final List<Widget> children = [];
 
+    // Title
     if (title != null) {
       children.add(
         Text(
@@ -1031,18 +1109,77 @@ class _SecondaryExecutorCard extends StatelessWidget {
           textAlign: TextAlign.left,
         ),
       );
+
+      // Description
+      final description = model.plan?.items.firstOrNull?.description;
+      if (description != null && description.isNotEmpty) {
+        children.add(const SizedBox(height: 4));
+        children.add(
+          Text(
+            description,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.left,
+          ),
+        );
+      }
     }
 
     String? statusMessage;
+    // Secondary card doesn't usually use subMessage but for consistency can add if needed.
+    // However, specs target mostly primary card.
+
+    if (model.state == HomeCardState.partnerAction) {
+      // "000님이 아침 약 챙겨먹기를... 했어요"
+      // final action = ...
+      // For now, simpler text construction
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: AppColors.textPrimary,
+                height: 1.4,
+              ),
+              children: [
+                TextSpan(
+                  text: title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const TextSpan(text: '를\n'),
+                // TODO: action type based suffix
+                TextSpan(
+                  text: l10n.nowPartnerDidIt,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          // Description
+          if (model.plan?.items.firstOrNull?.description != null)
+            Text(
+              model.plan!.items.firstOrNull!.description!,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            ),
+        ],
+      );
+    }
+
     switch (model.state) {
-      case HomeCardState.partnerActionShare:
+      case HomeCardState.partnerAction:
         statusMessage = '${l10n.homeChecked} · ${l10n.homeThankYou}';
         break;
-      case HomeCardState.relaxedDay:
+      case HomeCardState.todayEmpty:
         statusMessage = l10n.nowQuietRest;
         break;
-      case HomeCardState.overdueSelfAction:
-        statusMessage = l10n.pastUncompletedMessage;
+      case HomeCardState.overdue:
+        // statusMessage = l10n.timePassedActorMessage;
         break;
       default:
         break;
@@ -1076,6 +1213,8 @@ class _ManagerQuickCard extends StatelessWidget {
   final HomeCardModel model;
   final String? partnerName;
   final VoidCallback? onCheckIt;
+  final VoidCallback? onCheer;
+  final VoidCallback? onPass;
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? exactTimeText;
@@ -1084,6 +1223,8 @@ class _ManagerQuickCard extends StatelessWidget {
     required this.model,
     this.partnerName,
     this.onCheckIt,
+    this.onCheer,
+    this.onPass,
     this.timeChipText,
     this.timeChipType,
     this.exactTimeText,
@@ -1092,6 +1233,25 @@ class _ManagerQuickCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    String headerText;
+    if (model.state == HomeCardState.partnerAction) {
+      headerText = l10n.nowPartnerDidIt;
+    } else if (model.state == HomeCardState.partnerPlanCreate ||
+        model.state == HomeCardState.partnerPlanModify) {
+      // Type 3: "이런 약속을 제안했어요" or "약속을 조금 조정하고 있어요"
+      // We can distinguish based on headerMessage if available or default to proposed
+      // Or assuming default is proposed (Type 3-A)
+      if (model.headerMessage == '조정 중' ||
+          model.headerMessage == '같이 맞춰보는 중이에요') {
+        // Example logic
+        headerText = l10n.nowPartnerAdjusting;
+      } else {
+        headerText = l10n.nowPartnerProposed;
+      }
+    } else {
+      headerText = model.headerMessage ?? l10n.homeReceivedMessage;
+    }
 
     return Card(
       elevation: 0,
@@ -1130,10 +1290,7 @@ class _ManagerQuickCard extends StatelessWidget {
                 ],
                 Expanded(
                   child: Text(
-                    model.state == HomeCardState.partnerActionShare &&
-                            model.headerMessage == '함께하는 중'
-                        ? '함께하는 중'
-                        : (model.headerMessage ?? l10n.homeReceivedMessage),
+                    headerText,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textPrimary,
                       height: 1.4,
@@ -1193,8 +1350,8 @@ class _ManagerQuickCard extends StatelessWidget {
               const SizedBox(height: 8),
             ],
             // Button (Only for partnerActionShare/partnerPlanShare that needs action)
-            if (model.state == HomeCardState.partnerActionShare ||
-                model.state == HomeCardState.partnerPlanShare) ...[
+            if (model.state == HomeCardState.partnerPlanCreate ||
+                model.state == HomeCardState.partnerPlanModify) ...[
               if (model.headerMessage != '함께하는 중') ...[
                 const SizedBox(height: 20),
                 SizedBox(
@@ -1234,6 +1391,55 @@ class _ManagerQuickCard extends StatelessWidget {
                   ),
                 ),
               ],
+            ] else if (model.state == HomeCardState.partnerAction) ...[
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: onCheckIt,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.homeChecked,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: onCheer, // TODO: Implement cheer logic
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        foregroundColor: AppColors.primary,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.homeThankYou,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ],
         ),
@@ -1300,64 +1506,4 @@ class _ContextFooter extends StatelessWidget {
   }
 }
 
-class _ReconcileMenu extends ConsumerWidget {
-  final String planId;
-  final VoidCallback? onSuccess;
-
-  const _ReconcileMenu({required this.planId, this.onSuccess});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return PopupMenuButton<HistoryStatus>(
-      icon: Icon(
-        Icons.more_vert,
-        size: 20,
-        color: AppColors.textSecondary.withOpacity(0.5),
-      ),
-      tooltip: l10n.reconcileTitle,
-      onSelected: (status) async {
-        await ref.read(recordRepositoryProvider).reconcilePlan(planId, status);
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.reconcileDoneMessage)));
-          onSuccess?.call();
-        }
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: HistoryStatus.actuallyDone,
-          child: Row(
-            children: [
-              const Icon(Icons.check_circle_outline, size: 18),
-              const SizedBox(width: 8),
-              Text(l10n.reconcileActuallyDone),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: HistoryStatus.rested,
-          child: Row(
-            children: [
-              const Icon(Icons.bedtime_outlined, size: 18),
-              const SizedBox(width: 8),
-              Text(l10n.reconcileTookRest),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: HistoryStatus.skipped,
-          child: Row(
-            children: [
-              const Icon(Icons.arrow_forward_outlined, size: 18),
-              const SizedBox(width: 8),
-              Text(l10n.reconcileSkip),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
+// _ReconcileMenu removed per user request (was unused after UI updates)
