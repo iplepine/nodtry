@@ -66,7 +66,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get waitingForConnection => '상대가 연결을 확인 중이에요';
 
   @override
-  String get homeNowTask => '지금 해볼 수 있어요';
+  String get homeNowTask => '지금 할 약속이 있어요';
 
   @override
   String get homeDidIt => '했어';
@@ -84,31 +84,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeWaitingForCheck => '확인을 기다리고 있어요';
 
   @override
-  String get homeQuietDay => '지금은 잠시 쉬어도 돼요';
+  String get homeQuietDay => '오늘은 여유로운 날이에요';
 
   @override
-  String get homeChecked => '확인됐어요';
+  String get homeChecked => '그래';
 
   @override
-  String get homeThankYou => '고마워요';
+  String get homeThankYou => '응원해요 💜';
 
   @override
-  String get timePassedActorMessage => '아직 전달된 기록이 없어요';
+  String get timePassedActorMessage => '조금 늦었지만 괜찮아요';
 
   @override
   String get timePassedManagerMessage => '아직 전달된 말이 없어요';
 
   @override
-  String get timePassedActorSubMessage => '지금부터 해도 괜찮아요';
+  String get timePassedActorSubMessage => '지금 선택해도 돼요';
 
   @override
   String get timePassedManagerSubMessage => '오늘은 조용히 지나가고 있어요';
 
   @override
-  String get pastUncompletedMessage => '조금 전에 예정되어 있었어요';
+  String get pastUncompletedMessage => '조금 늦었지만 괜찮아요';
 
   @override
-  String get pastUncompletedSubMessage => '앞선 약속이 있었어요';
+  String get pastUncompletedSubMessage => '지금 선택해도 돼요';
 
   @override
   String get pastUncompletedTimeChip => '조금 전';
@@ -263,10 +263,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get headerPlanEnded => '4주가 끝났어요';
 
   @override
-  String get nowNoPlan => '이번 달, 어떤 약속을 해볼까요?';
+  String get nowNoPlan => '지금은 약속이 없어요';
 
   @override
-  String get nowCreatePlan => '계획 짜기';
+  String get nowCreatePlan => '+ 새 약속 정하기';
 
   @override
   String nowNextActionIn(String time) {
@@ -279,10 +279,31 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get nowQuietRest => '지금은 잠시 쉬어도 돼요';
+  String get nowQuietRest => '오늘은 여유로운 날이에요';
 
   @override
   String get nowQuietNoAction => '당분간 신경 쓸 일은 없어요';
+
+  @override
+  String get nowNoPlanSubtitle => '한 가지 약속만 정해볼까요?';
+
+  @override
+  String get nowTodayDone => '오늘은 다 챙겼어요 🙌';
+
+  @override
+  String get nowPartnerProposed => '이런 약속을 제안했어요';
+
+  @override
+  String get nowPartnerAdjusting => '약속을 조금 조정하고 있어요';
+
+  @override
+  String get nowPartnerDidIt => '나 했어요!';
+
+  @override
+  String get nowActionPass => '그냥 넘기기';
+
+  @override
+  String get nowActionSkipToday => '오늘은 넘어가자';
 
   @override
   String recordGazeWeekCount(int count) {

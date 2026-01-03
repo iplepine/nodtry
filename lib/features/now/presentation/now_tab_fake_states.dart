@@ -9,7 +9,7 @@ class NowTabFakeStates {
     allCards: const [HomeCardModel(state: HomeCardState.emptyPlan)],
     primaryCard: const HomeCardModel(state: HomeCardState.emptyPlan),
     secondaryCards: const [],
-    managerCard: null,
+    managerCards: const [],
   );
 
   /// 2. 지금 실천 (Now Action) - 가장 일반적인 케이스
@@ -69,7 +69,7 @@ class NowTabFakeStates {
         ),
       ),
       secondaryCards: const [],
-      managerCard: null,
+      managerCards: const [],
     );
   }
 
@@ -104,8 +104,7 @@ class NowTabFakeStates {
       ),
       secondaryCards: [
         HomeCardModel(
-          state: HomeCardState
-              .nowAction, // "Still Actionable" for today's past task
+          state: HomeCardState.overdue,
           plan: Plan(
             userId: 'test_user',
             startDate: now.subtract(const Duration(days: 7)),
@@ -128,35 +127,139 @@ class NowTabFakeStates {
             ],
           ),
         ),
-      ],
-      managerCard: HomeCardModel(
-        state: HomeCardState.partnerAction,
-        headerMessage: '나 했어요!',
-        plan: Plan(
-          userId: 'partner_user',
-          startDate: now,
-          endDate: now.add(const Duration(days: 7)),
-          state: PlanState.active,
-          createdAt: now,
-          items: [
-            PlanItem(
-              title: '저녁 샐러드 먹기',
-              description: '가볍게 먹으니까 속이 편해요',
-              days: [1, 2, 3, 4, 5, 6, 7],
-              count: 7,
-              notificationTime: NotificationTime(
-                type: 'specific',
-                value: '19:00',
-                hour: 19,
-                minute: 0,
+        HomeCardModel(
+          state: HomeCardState.nextAction, // Future action
+          headerMessage: '내일 일정',
+          plan: Plan(
+            userId: 'test_user',
+            startDate: now.add(const Duration(days: 1)),
+            endDate: now.add(const Duration(days: 8)),
+            state: PlanState.active,
+            createdAt: now,
+            items: [
+              PlanItem(
+                title: '조깅 하기',
+                description: '아침 30분 가볍게 뛰기',
+                days: [1, 2, 3, 4, 5, 6, 7],
+                count: 7,
+                notificationTime: NotificationTime(
+                  type: 'specific',
+                  value: '07:00',
+                  hour: 7,
+                  minute: 0,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        partnerName: '지민',
-        partnerImageUrl:
-            'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
-      ),
+      ],
+      managerCards: [
+        HomeCardModel(
+          state: HomeCardState.partnerPlanCreate,
+          headerMessage: '이런 약속을 제안했어요',
+          plan: Plan(
+            userId: 'partner_user',
+            startDate: now,
+            endDate: now.add(const Duration(days: 7)),
+            state: PlanState.active,
+            createdAt: now,
+            items: [
+              PlanItem(
+                title: '주말 등산',
+                description: '관악산 어때요?',
+                days: [6, 7],
+                count: 2,
+                notificationTime: NotificationTime(
+                  type: 'specific',
+                  value: '09:00',
+                  hour: 9,
+                  minute: 0,
+                ),
+              ),
+            ],
+          ),
+          partnerName: '지민',
+          partnerImageUrl:
+              'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+        ),
+        HomeCardModel(
+          state: HomeCardState.partnerPlanModify,
+          headerMessage: '이번엔 이렇게 하기로 했어요',
+          plan: Plan(
+            userId: 'partner_user',
+            startDate: now,
+            endDate: now.add(const Duration(days: 7)),
+            state: PlanState.active,
+            createdAt: now,
+            items: [
+              PlanItem(
+                title: '저녁 독서',
+                description: '30분만 읽기 (수정됨)',
+                days: [1, 2, 3, 4, 5],
+                count: 5,
+                notificationTime: NotificationTime(
+                  type: 'specific',
+                  value: '22:00',
+                  hour: 22,
+                  minute: 0,
+                ),
+              ),
+            ],
+          ),
+          partnerName: '지민',
+          partnerImageUrl:
+              'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+          previousPlan: Plan(
+            userId: 'partner_user',
+            startDate: now,
+            endDate: now.add(const Duration(days: 7)),
+            state: PlanState.active,
+            createdAt: now,
+            items: [
+              PlanItem(
+                title: '저녁 독서 하기',
+                description: '1시간 동안 읽기',
+                days: [1, 2, 3, 4, 5],
+                count: 5,
+                notificationTime: NotificationTime(
+                  type: 'specific',
+                  value: '22:00',
+                  hour: 22,
+                  minute: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+        HomeCardModel(
+          state: HomeCardState.partnerAction,
+          headerMessage: '나 했어요!',
+          plan: Plan(
+            userId: 'partner_user',
+            startDate: now,
+            endDate: now.add(const Duration(days: 7)),
+            state: PlanState.active,
+            createdAt: now,
+            items: [
+              PlanItem(
+                title: '저녁 샐러드 먹기',
+                description: '가볍게 먹으니까 속이 편해요',
+                days: [1, 2, 3, 4, 5, 6, 7],
+                count: 7,
+                notificationTime: NotificationTime(
+                  type: 'specific',
+                  value: '19:00',
+                  hour: 19,
+                  minute: 0,
+                ),
+              ),
+            ],
+          ),
+          partnerName: '지민',
+          partnerImageUrl:
+              'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+        ),
+      ],
     );
   }
 
@@ -194,7 +297,7 @@ class NowTabFakeStates {
           ),
         ),
       ],
-      managerCard: null,
+      managerCards: const [],
     );
   }
 
@@ -205,34 +308,36 @@ class NowTabFakeStates {
       allCards: [],
       primaryCard: const HomeCardModel(state: HomeCardState.todayEmpty),
       secondaryCards: [],
-      managerCard: HomeCardModel(
-        state: HomeCardState.partnerPlanCreate,
-        headerMessage: '같이 맞춰보는 중이에요',
-        plan: Plan(
-          userId: 'partner_user',
-          startDate: now,
-          endDate: now.add(const Duration(days: 7)),
-          state: PlanState.active,
-          createdAt: now,
-          items: [
-            PlanItem(
-              title: '주말 클라이밍',
-              description: '같이 하면 더 재밌을 것 같아서!',
-              days: [6, 7],
-              count: 2,
-              notificationTime: NotificationTime(
-                type: 'specific',
-                value: '10:00',
-                hour: 10,
-                minute: 0,
+      managerCards: [
+        HomeCardModel(
+          state: HomeCardState.partnerPlanCreate,
+          headerMessage: '같이 맞춰보는 중이에요',
+          plan: Plan(
+            userId: 'partner_user',
+            startDate: now,
+            endDate: now.add(const Duration(days: 7)),
+            state: PlanState.active,
+            createdAt: now,
+            items: [
+              PlanItem(
+                title: '주말 클라이밍',
+                description: '같이 하면 더 재밌을 것 같아서!',
+                days: [6, 7],
+                count: 2,
+                notificationTime: NotificationTime(
+                  type: 'specific',
+                  value: '10:00',
+                  hour: 10,
+                  minute: 0,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          partnerName: '지민',
+          partnerImageUrl:
+              'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
         ),
-        partnerName: '지민',
-        partnerImageUrl:
-            'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
-      ),
+      ],
     );
   }
 

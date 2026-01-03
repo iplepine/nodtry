@@ -25,64 +25,82 @@ class HistoryScreen extends ConsumerWidget {
     final myProfileAsync = ref.watch(myProfileProvider);
     final myUid = myProfileAsync.value?.uid ?? 'me';
 
-    return GestureDetector(
-      onLongPress: kDebugMode
-          ? () => _showFakeStateSelector(context, ref)
-          : null,
-      child: Column(
-        children: [
-          // 헤더
-          QuietHeader(
-            partnerName: null,
-            periodState: HeaderPeriodState.inProgress,
-            onSettingsTap: null,
-          ),
+    return Stack(
+      children: [
+        Column(
+          children: [
+            // 헤더
+            QuietHeader(
+              partnerName: null,
+              periodState: HeaderPeriodState.inProgress,
+              onSettingsTap: null,
+            ),
 
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-          // 기록 리스트
-          Expanded(
-            child: historyStateAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('Error: $err')),
-              data: (state) {
-                if (state.activeItems.isEmpty &&
-                    state.finishedPlanSummaries.isEmpty) {
-                  return _buildEmptyState(context, l10n);
-                }
+            // 기록 리스트
+            Expanded(
+              child: historyStateAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(child: Text('Error: $err')),
+                data: (state) {
+                  if (state.activeItems.isEmpty &&
+                      state.finishedPlanSummaries.isEmpty) {
+                    return _buildEmptyState(context, l10n);
+                  }
 
-                return CustomScrollView(
-                  slivers: [
-                    // 1. 진행 중인 약속 섹션
-                    if (state.activeItems.isNotEmpty) ...[
-                      _buildSectionHeader(context, '진행 중인 약속'),
-                      ..._buildGroupedActiveItems(
-                        state.activeItems,
-                        myUid,
-                        ref,
-                      ),
+                  return CustomScrollView(
+                    slivers: [
+                      // 1. 진행 중인 약속 섹션
+                      if (state.activeItems.isNotEmpty) ...[
+                        _buildSectionHeader(context, '진행 중인 약속'),
+                        ..._buildGroupedActiveItems(
+                          state.activeItems,
+                          myUid,
+                          ref,
+                        ),
+                      ],
+
+                      // 2. 종료된 약속 섹션
+                      if (state.finishedPlanSummaries.isNotEmpty) ...[
+                        _buildSectionHeader(context, '종료된 약속'),
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final summary = state.finishedPlanSummaries[index];
+                            return PlanSummaryCard(summary: summary);
+                          }, childCount: state.finishedPlanSummaries.length),
+                        ),
+                      ],
+
+                      // 하단 여백 (탭바 공간 확보)
+                      const SliverToBoxAdapter(child: SizedBox(height: 100)),
                     ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
 
-                    // 2. 종료된 약속 섹션
-                    if (state.finishedPlanSummaries.isNotEmpty) ...[
-                      _buildSectionHeader(context, '종료된 약속'),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final summary = state.finishedPlanSummaries[index];
-                          return PlanSummaryCard(summary: summary);
-                        }, childCount: state.finishedPlanSummaries.length),
-                      ),
-                    ],
-
-                    // 하단 여백 (탭바 공간 확보)
-                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
-                  ],
-                );
+        // Debug Fake State Toggle Button (Debug Only)
+        if (kDebugMode)
+          Positioned(
+            bottom: 120, // Raised to avoid bottom nav overlap
+            right: 16,
+            child: FloatingActionButton(
+              mini: true,
+              heroTag: 'history_debug_fab', // Unique tag to avoid conflicts
+              backgroundColor: AppColors.primary,
+              child: const Icon(Icons.bug_report, size: 20),
+              onPressed: () {
+                _showFakeStateSelector(context, ref);
               },
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 

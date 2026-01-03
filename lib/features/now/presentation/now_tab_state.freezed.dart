@@ -17,8 +17,8 @@ mixin _$NowTabState {
 /// 전체 카드 리스트 (Raw Data)
  List<HomeCardModel> get allCards;/// 메인 실행 카드 (가장 큰 카드)
  HomeCardModel? get primaryCard;/// 서브 실행 카드 리스트 (우측 정렬 작은 카드들)
- List<HomeCardModel> get secondaryCards;/// 관리자/파트너 카드 (좌측 정렬)
- HomeCardModel? get managerCard;
+ List<HomeCardModel> get secondaryCards;/// 관리자/파트너 카드 리스트 (좌측 정렬)
+ List<HomeCardModel> get managerCards;
 /// Create a copy of NowTabState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +29,16 @@ $NowTabStateCopyWith<NowTabState> get copyWith => _$NowTabStateCopyWithImpl<NowT
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NowTabState&&const DeepCollectionEquality().equals(other.allCards, allCards)&&(identical(other.primaryCard, primaryCard) || other.primaryCard == primaryCard)&&const DeepCollectionEquality().equals(other.secondaryCards, secondaryCards)&&(identical(other.managerCard, managerCard) || other.managerCard == managerCard));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NowTabState&&const DeepCollectionEquality().equals(other.allCards, allCards)&&(identical(other.primaryCard, primaryCard) || other.primaryCard == primaryCard)&&const DeepCollectionEquality().equals(other.secondaryCards, secondaryCards)&&const DeepCollectionEquality().equals(other.managerCards, managerCards));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(allCards),primaryCard,const DeepCollectionEquality().hash(secondaryCards),managerCard);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(allCards),primaryCard,const DeepCollectionEquality().hash(secondaryCards),const DeepCollectionEquality().hash(managerCards));
 
 @override
 String toString() {
-  return 'NowTabState(allCards: $allCards, primaryCard: $primaryCard, secondaryCards: $secondaryCards, managerCard: $managerCard)';
+  return 'NowTabState(allCards: $allCards, primaryCard: $primaryCard, secondaryCards: $secondaryCards, managerCards: $managerCards)';
 }
 
 
@@ -49,7 +49,7 @@ abstract mixin class $NowTabStateCopyWith<$Res>  {
   factory $NowTabStateCopyWith(NowTabState value, $Res Function(NowTabState) _then) = _$NowTabStateCopyWithImpl;
 @useResult
 $Res call({
- List<HomeCardModel> allCards, HomeCardModel? primaryCard, List<HomeCardModel> secondaryCards, HomeCardModel? managerCard
+ List<HomeCardModel> allCards, HomeCardModel? primaryCard, List<HomeCardModel> secondaryCards, List<HomeCardModel> managerCards
 });
 
 
@@ -66,13 +66,13 @@ class _$NowTabStateCopyWithImpl<$Res>
 
 /// Create a copy of NowTabState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? allCards = null,Object? primaryCard = freezed,Object? secondaryCards = null,Object? managerCard = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? allCards = null,Object? primaryCard = freezed,Object? secondaryCards = null,Object? managerCards = null,}) {
   return _then(_self.copyWith(
 allCards: null == allCards ? _self.allCards : allCards // ignore: cast_nullable_to_non_nullable
 as List<HomeCardModel>,primaryCard: freezed == primaryCard ? _self.primaryCard : primaryCard // ignore: cast_nullable_to_non_nullable
 as HomeCardModel?,secondaryCards: null == secondaryCards ? _self.secondaryCards : secondaryCards // ignore: cast_nullable_to_non_nullable
-as List<HomeCardModel>,managerCard: freezed == managerCard ? _self.managerCard : managerCard // ignore: cast_nullable_to_non_nullable
-as HomeCardModel?,
+as List<HomeCardModel>,managerCards: null == managerCards ? _self.managerCards : managerCards // ignore: cast_nullable_to_non_nullable
+as List<HomeCardModel>,
   ));
 }
 
@@ -157,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> secondaryCards,  HomeCardModel? managerCard)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> secondaryCards,  List<HomeCardModel> managerCards)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NowTabState() when $default != null:
-return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.managerCard);case _:
+return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.managerCards);case _:
   return orElse();
 
 }
@@ -178,10 +178,10 @@ return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.mana
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> secondaryCards,  HomeCardModel? managerCard)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> secondaryCards,  List<HomeCardModel> managerCards)  $default,) {final _that = this;
 switch (_that) {
 case _NowTabState():
-return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.managerCard);case _:
+return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.managerCards);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +198,10 @@ return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.mana
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> secondaryCards,  HomeCardModel? managerCard)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> secondaryCards,  List<HomeCardModel> managerCards)?  $default,) {final _that = this;
 switch (_that) {
 case _NowTabState() when $default != null:
-return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.managerCard);case _:
+return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.managerCards);case _:
   return null;
 
 }
@@ -213,7 +213,7 @@ return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.mana
 
 
 class _NowTabState extends NowTabState {
-  const _NowTabState({required final  List<HomeCardModel> allCards, this.primaryCard, final  List<HomeCardModel> secondaryCards = const [], this.managerCard}): _allCards = allCards,_secondaryCards = secondaryCards,super._();
+  const _NowTabState({required final  List<HomeCardModel> allCards, this.primaryCard, final  List<HomeCardModel> secondaryCards = const [], final  List<HomeCardModel> managerCards = const []}): _allCards = allCards,_secondaryCards = secondaryCards,_managerCards = managerCards,super._();
   
 
 /// 전체 카드 리스트 (Raw Data)
@@ -236,8 +236,15 @@ class _NowTabState extends NowTabState {
   return EqualUnmodifiableListView(_secondaryCards);
 }
 
-/// 관리자/파트너 카드 (좌측 정렬)
-@override final  HomeCardModel? managerCard;
+/// 관리자/파트너 카드 리스트 (좌측 정렬)
+ final  List<HomeCardModel> _managerCards;
+/// 관리자/파트너 카드 리스트 (좌측 정렬)
+@override@JsonKey() List<HomeCardModel> get managerCards {
+  if (_managerCards is EqualUnmodifiableListView) return _managerCards;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_managerCards);
+}
+
 
 /// Create a copy of NowTabState
 /// with the given fields replaced by the non-null parameter values.
@@ -249,16 +256,16 @@ _$NowTabStateCopyWith<_NowTabState> get copyWith => __$NowTabStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NowTabState&&const DeepCollectionEquality().equals(other._allCards, _allCards)&&(identical(other.primaryCard, primaryCard) || other.primaryCard == primaryCard)&&const DeepCollectionEquality().equals(other._secondaryCards, _secondaryCards)&&(identical(other.managerCard, managerCard) || other.managerCard == managerCard));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NowTabState&&const DeepCollectionEquality().equals(other._allCards, _allCards)&&(identical(other.primaryCard, primaryCard) || other.primaryCard == primaryCard)&&const DeepCollectionEquality().equals(other._secondaryCards, _secondaryCards)&&const DeepCollectionEquality().equals(other._managerCards, _managerCards));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_allCards),primaryCard,const DeepCollectionEquality().hash(_secondaryCards),managerCard);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_allCards),primaryCard,const DeepCollectionEquality().hash(_secondaryCards),const DeepCollectionEquality().hash(_managerCards));
 
 @override
 String toString() {
-  return 'NowTabState(allCards: $allCards, primaryCard: $primaryCard, secondaryCards: $secondaryCards, managerCard: $managerCard)';
+  return 'NowTabState(allCards: $allCards, primaryCard: $primaryCard, secondaryCards: $secondaryCards, managerCards: $managerCards)';
 }
 
 
@@ -269,7 +276,7 @@ abstract mixin class _$NowTabStateCopyWith<$Res> implements $NowTabStateCopyWith
   factory _$NowTabStateCopyWith(_NowTabState value, $Res Function(_NowTabState) _then) = __$NowTabStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<HomeCardModel> allCards, HomeCardModel? primaryCard, List<HomeCardModel> secondaryCards, HomeCardModel? managerCard
+ List<HomeCardModel> allCards, HomeCardModel? primaryCard, List<HomeCardModel> secondaryCards, List<HomeCardModel> managerCards
 });
 
 
@@ -286,13 +293,13 @@ class __$NowTabStateCopyWithImpl<$Res>
 
 /// Create a copy of NowTabState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? allCards = null,Object? primaryCard = freezed,Object? secondaryCards = null,Object? managerCard = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? allCards = null,Object? primaryCard = freezed,Object? secondaryCards = null,Object? managerCards = null,}) {
   return _then(_NowTabState(
 allCards: null == allCards ? _self._allCards : allCards // ignore: cast_nullable_to_non_nullable
 as List<HomeCardModel>,primaryCard: freezed == primaryCard ? _self.primaryCard : primaryCard // ignore: cast_nullable_to_non_nullable
 as HomeCardModel?,secondaryCards: null == secondaryCards ? _self._secondaryCards : secondaryCards // ignore: cast_nullable_to_non_nullable
-as List<HomeCardModel>,managerCard: freezed == managerCard ? _self.managerCard : managerCard // ignore: cast_nullable_to_non_nullable
-as HomeCardModel?,
+as List<HomeCardModel>,managerCards: null == managerCards ? _self._managerCards : managerCards // ignore: cast_nullable_to_non_nullable
+as List<HomeCardModel>,
   ));
 }
 

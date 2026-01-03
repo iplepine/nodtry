@@ -89,7 +89,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuietDay => 'You can rest for a while now';
 
   @override
-  String get homeChecked => 'Checked';
+  String get homeChecked => 'Okay';
 
   @override
   String get homeThankYou => 'Thank you';
@@ -287,6 +287,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nowQuietNoAction => 'No need to worry for a while';
+
+  @override
+  String get nowNoPlanSubtitle => 'Shall we make just one promise?';
+
+  @override
+  String get nowTodayDone => 'Took care of everything today 🙌';
+
+  @override
+  String get nowPartnerProposed => 'Proposed this promise';
+
+  @override
+  String get nowPartnerAdjusting => 'Adjusting the promise a bit';
+
+  @override
+  String get nowPartnerDidIt => 'I did it!';
+
+  @override
+  String get nowActionPass => 'Just skip';
+
+  @override
+  String get nowActionSkipToday => 'Let\'s skip today';
 
   @override
   String recordGazeWeekCount(int count) {

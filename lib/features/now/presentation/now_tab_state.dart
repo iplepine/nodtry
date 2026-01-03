@@ -18,8 +18,8 @@ abstract class NowTabState with _$NowTabState {
     /// 서브 실행 카드 리스트 (우측 정렬 작은 카드들)
     @Default([]) List<HomeCardModel> secondaryCards,
 
-    /// 관리자/파트너 카드 (좌측 정렬)
-    HomeCardModel? managerCard,
+    /// 관리자/파트너 카드 리스트 (좌측 정렬)
+    @Default([]) List<HomeCardModel> managerCards,
   }) = _NowTabState;
 
   /// HomeCardModel 리스트로부터 UI State 생성
@@ -41,16 +41,14 @@ abstract class NowTabState with _$NowTabState {
       primary,
     );
 
-    // 4. Manager Quick Card 선정
-    final manager = HomeCardStatePriority.selectManagerQuickCard(
-      processedModels,
-    );
+    // 4. Manager Cards 선정 (다수 가능)
+    final managers = HomeCardStatePriority.selectManagerCards(processedModels);
 
     return NowTabState(
       allCards: processedModels,
       primaryCard: primary,
       secondaryCards: secondaries,
-      managerCard: manager,
+      managerCards: managers,
     );
   }
 }

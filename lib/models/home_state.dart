@@ -157,12 +157,10 @@ extension HomeCardStatePriority on HomeCardState {
     return secondaryModels.take(3).toList();
   }
 
-  /// Manager Quick Card 선택
-  static HomeCardModel? selectManagerQuickCard(List<HomeCardModel> models) {
-    final managerModels = models.where((m) => m.state.canBeYours).toList();
-    if (managerModels.isEmpty) return null;
-
-    return managerModels.first;
+  /// Manager Cards 선택 (다수 가능)
+  static List<HomeCardModel> selectManagerCards(List<HomeCardModel> models) {
+    // role이 yours인 모든 카드를 반환
+    return models.where((m) => m.state.canBeYours).toList();
   }
 }
 
@@ -173,12 +171,15 @@ class HomeCardModel {
   final String? partnerImageUrl;
   final String? headerMessage;
 
+  final Plan? previousPlan;
+
   const HomeCardModel({
     required this.state,
     this.plan,
     this.partnerName,
     this.partnerImageUrl,
     this.headerMessage,
+    this.previousPlan,
   });
 
   @override
@@ -188,9 +189,13 @@ class HomeCardModel {
           runtimeType == other.runtimeType &&
           state == other.state &&
           plan?.id == other.plan?.id &&
-          headerMessage == other.headerMessage;
+          headerMessage == other.headerMessage &&
+          previousPlan?.id == other.previousPlan?.id;
 
   @override
   int get hashCode =>
-      state.hashCode ^ (plan?.id).hashCode ^ headerMessage.hashCode;
+      state.hashCode ^
+      (plan?.id).hashCode ^
+      headerMessage.hashCode ^
+      (previousPlan?.id).hashCode;
 }

@@ -257,7 +257,7 @@ abstract class AppLocalizations {
   /// Message when report is checked
   ///
   /// In en, this message translates to:
-  /// **'Checked'**
+  /// **'Okay'**
   String get homeChecked;
 
   /// Thank you message after check
@@ -613,6 +613,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No need to worry for a while'**
   String get nowQuietNoAction;
+
+  /// Subtitle when there's no plan
+  ///
+  /// In en, this message translates to:
+  /// **'Shall we make just one promise?'**
+  String get nowNoPlanSubtitle;
+
+  /// Message when all tasks are done
+  ///
+  /// In en, this message translates to:
+  /// **'Took care of everything today 🙌'**
+  String get nowTodayDone;
+
+  /// Partner plan share - proposed
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed this promise'**
+  String get nowPartnerProposed;
+
+  /// Partner plan share - adjusting
+  ///
+  /// In en, this message translates to:
+  /// **'Adjusting the promise a bit'**
+  String get nowPartnerAdjusting;
+
+  /// Partner action share - confirmed
+  ///
+  /// In en, this message translates to:
+  /// **'I did it!'**
+  String get nowPartnerDidIt;
+
+  /// Action to skip partner feedback
+  ///
+  /// In en, this message translates to:
+  /// **'Just skip'**
+  String get nowActionPass;
+
+  /// Action to skip today's task
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s skip today'**
+  String get nowActionSkipToday;
 
   /// Record gaze - showing count in current week
   ///

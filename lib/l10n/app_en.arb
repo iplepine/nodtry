@@ -104,7 +104,7 @@
   "@homeQuietDay": {
     "description": "Message when there's nothing to do"
   },
-  "homeChecked": "Checked",
+  "homeChecked": "Okay",
   "@homeChecked": {
     "description": "Message when report is checked"
   },
@@ -352,6 +352,34 @@
   "nowQuietNoAction": "No need to worry for a while",
   "@nowQuietNoAction": {
     "description": "Quiet state message - no action needed"
+  },
+  "nowNoPlanSubtitle": "Shall we make just one promise?",
+  "@nowNoPlanSubtitle": {
+    "description": "Subtitle when there's no plan"
+  },
+  "nowTodayDone": "Took care of everything today 🙌",
+  "@nowTodayDone": {
+    "description": "Message when all tasks are done"
+  },
+  "nowPartnerProposed": "Proposed this promise",
+  "@nowPartnerProposed": {
+    "description": "Partner plan share - proposed"
+  },
+  "nowPartnerAdjusting": "Adjusting the promise a bit",
+  "@nowPartnerAdjusting": {
+    "description": "Partner plan share - adjusting"
+  },
+  "nowPartnerDidIt": "I did it!",
+  "@nowPartnerDidIt": {
+    "description": "Partner action share - confirmed"
+  },
+  "nowActionPass": "Just skip",
+  "@nowActionPass": {
+    "description": "Action to skip partner feedback"
+  },
+  "nowActionSkipToday": "Let's skip today",
+  "@nowActionSkipToday": {
+    "description": "Action to skip today's task"
   },
   "recordGazeWeekCount": "{count}th promise this week",
   "@recordGazeWeekCount": {

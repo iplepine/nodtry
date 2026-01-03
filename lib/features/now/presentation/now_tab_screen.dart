@@ -90,12 +90,8 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
-  Future<void> _handleCheckIt() async {
-    final managerCard = ref.read(nowTabViewModelProvider).value?.managerCard;
-    // orElse: () => const HomeCardModel(state: HomeCardState.relaxedDay), removed as null check below covers
-    // If we want a fallback or if managerCard is nullable, the null check below handles it.
-
-    if (managerCard?.plan?.id == null) return;
+  Future<void> _handleCheckIt(HomeCardModel managerCard) async {
+    if (managerCard.plan?.id == null) return;
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -109,12 +105,12 @@ class _NowTabState extends ConsumerState<NowTab>
     // Dispatch Intent
     await ref
         .read(nowTabViewModelProvider.notifier)
-        .dispatch(CheckPartnerActionIntent(managerCard!.plan!.id!));
+        .dispatch(CheckPartnerActionIntent(managerCard.plan!.id!));
   }
 
-  Future<void> _handleCheer() async {
+  Future<void> _handleCheer(HomeCardModel managerCard) async {
     // TODO: 응원하기 API 호출. 현재는 확인하기와 동일하게 처리
-    await _handleCheckIt();
+    await _handleCheckIt(managerCard);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.homeThankYou)),
@@ -239,20 +235,36 @@ class _NowTabState extends ConsumerState<NowTab>
             scheduledTime,
           );
 
+          // 날짜 비교 (오늘/내일/그외)
+          final today = DateTime(now.year, now.month, now.day);
+          final scheduledDate = DateTime(
+            scheduledTime.year,
+            scheduledTime.month,
+            scheduledTime.day,
+          );
+          final diffDays = scheduledDate.difference(today).inDays;
+
+          String displayText = vagueTime;
+          if (diffDays == 1) {
+            displayText = '${l10n.timeChipTomorrow} $vagueTime';
+          } else if (diffDays > 1) {
+            displayText =
+                '${scheduledTime.month}.${scheduledTime.day} $vagueTime';
+          }
+
           if (model.state == HomeCardState.nowAction) {
-            // "점심쯤 · 아직 할 수 있어요" - Only show suffix if it is Today AND time has passed
-            final isToday =
-                dateBase.year == now.year &&
-                dateBase.month == now.month &&
-                dateBase.day == now.day;
+            final isToday = diffDays == 0;
             final isPast = now.isAfter(scheduledTime);
 
-            if (isToday && isPast) {
-              return '$vagueTime · ${l10n.timeChipStillActionable}';
+            // 30분 정도는 제시간으로 간주 (30분 초과 시에만 '아직 할 수 있어요' 표시)
+            if (isToday &&
+                isPast &&
+                now.difference(scheduledTime).inMinutes > 30) {
+              return '$displayText · ${l10n.timeChipStillActionable}';
             }
-            return vagueTime;
+            return displayText;
           }
-          return vagueTime; // "점심쯤"
+          return displayText; // "내일 아침에" or "점심쯤"
         }
       }
     }
@@ -325,10 +337,12 @@ class _NowTabState extends ConsumerState<NowTab>
       final prevUiState = previous!.value!;
       final nextUiState = next.value!;
 
-      // Manager Card 변경 여부 확인
+      // Manager Card 변경 여부 확인 (리스트 비교)
+      final prevManagerId = prevUiState.managerCards.firstOrNull?.plan?.id;
+      final nextManagerId = nextUiState.managerCards.firstOrNull?.plan?.id;
       final managerChanged =
-          prevUiState.managerCard?.plan?.id !=
-          nextUiState.managerCard?.plan?.id;
+          prevUiState.managerCards.length != nextUiState.managerCards.length ||
+          prevManagerId != nextManagerId;
 
       // Primary Card 변경 여부 확인
       final primaryChanged =
@@ -354,8 +368,7 @@ class _NowTabState extends ConsumerState<NowTab>
         // 상태 사용
         final primaryExecutorCard = uiState.primaryCard;
         final secondaryExecutorCards = uiState.secondaryCards;
-        final managerQuickCard = uiState.managerCard;
-        final managerPartnerName = managerQuickCard?.partnerName;
+        final managerCards = uiState.managerCards;
 
         return Stack(
           children: [
@@ -467,33 +480,35 @@ class _NowTabState extends ConsumerState<NowTab>
                             const SizedBox(height: 24),
                           ],
                           // Manager Area (Partner's Requests)
-                          if (managerQuickCard != null) ...[
-                            FadeTransition(
-                              opacity: _managerFadeAnimation,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: FractionallySizedBox(
-                                  widthFactor: 0.88,
-                                  child: _ManagerQuickCard(
-                                    model: managerQuickCard,
-                                    partnerName: managerPartnerName,
-                                    onCheckIt: _handleCheckIt,
-                                    onCheer: _handleCheer, // Placeholder
-                                    onPass: _handlePass, // Placeholder
-                                    timeChipText: _getManagerTimeChipText(
-                                      managerQuickCard,
-                                    ),
-                                    timeChipType: _getManagerTimeChipType(
-                                      managerQuickCard,
-                                    ),
-                                    exactTimeText: _getExactTimeText(
-                                      managerQuickCard,
+                          if (managerCards.isNotEmpty) ...[
+                            ...managerCards.map((card) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: FadeTransition(
+                                  opacity: _managerFadeAnimation,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: FractionallySizedBox(
+                                      widthFactor: 0.88,
+                                      child: _ManagerQuickCard(
+                                        model: card,
+                                        partnerName: card.partnerName,
+                                        onCheckIt: () => _handleCheckIt(card),
+                                        onCheer: () => _handleCheer(card),
+                                        onPass: _handlePass,
+                                        timeChipText: _getManagerTimeChipText(
+                                          card,
+                                        ),
+                                        timeChipType: _getManagerTimeChipType(
+                                          card,
+                                        ),
+                                        exactTimeText: _getExactTimeText(card),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
+                              );
+                            }),
                           ],
                           // Footer
                           const _ContextFooter(),
@@ -567,7 +582,7 @@ class _NowTabState extends ConsumerState<NowTab>
                       subtitle: Text(
                         'Primary: ${entry.value.primaryCard != null ? "O" : "X"}, '
                         'Secondary: ${entry.value.secondaryCards.length}, '
-                        'Manager: ${entry.value.managerCard != null ? "O" : "X"}',
+                        'Manager: ${entry.value.managerCards.length}',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textDisabled,
@@ -664,18 +679,18 @@ class _PrimaryExecutorCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (timeChipText != null && timeChipType != null)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  if (exactTimeText != null)
-                    Tooltip(
-                      message: exactTimeText!,
-                      triggerMode: TooltipTriggerMode.longPress,
-                      child: TimeChip(text: timeChipText!, type: timeChipType!),
-                    )
-                  else
-                    TimeChip(text: timeChipText!, type: timeChipType!),
-                ],
+              Align(
+                alignment: Alignment.centerRight,
+                child: exactTimeText != null
+                    ? Tooltip(
+                        message: exactTimeText!,
+                        triggerMode: TooltipTriggerMode.longPress,
+                        child: TimeChip(
+                          text: timeChipText!,
+                          type: timeChipType!,
+                        ),
+                      )
+                    : TimeChip(text: timeChipText!, type: timeChipType!),
               ),
             if (timeChipText != null && timeChipType != null)
               const SizedBox(height: 12),
@@ -1313,18 +1328,19 @@ class _ManagerQuickCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            // Title
+            // Title (Diff Aware)
             if (model.plan?.items.firstOrNull?.title != null) ...[
               SizedBox(
                 width: double.infinity,
-                child: Text(
-                  model.plan!.items.firstOrNull!.title,
+                child: _buildDiffText(
+                  context,
+                  current: model.plan!.items.firstOrNull!.title,
+                  previous: model.previousPlan?.items.firstOrNull?.title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),
-                  textAlign: TextAlign.left,
                 ),
               ),
               const SizedBox(height: 4),
@@ -1333,18 +1349,19 @@ class _ManagerQuickCard extends StatelessWidget {
             if (model.plan != null)
               _buildPlanDetails(context, model.plan!, l10n),
             const SizedBox(height: 8),
-            // Description
+            // Description (Diff Aware)
             if (model.plan?.items.firstOrNull?.description != null) ...[
               SizedBox(
                 width: double.infinity,
-                child: Text(
-                  model.plan!.items.firstOrNull!.description!,
+                child: _buildDiffText(
+                  context,
+                  current: model.plan!.items.firstOrNull!.description,
+                  previous: model.previousPlan?.items.firstOrNull?.description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textPrimary,
                     height: 1.4,
                     fontSize: 16,
                   ),
-                  textAlign: TextAlign.left,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1421,7 +1438,9 @@ class _ManagerQuickCard extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: onCheer, // TODO: Implement cheer logic
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        backgroundColor: AppColors.primary.withValues(
+                          alpha: 0.1,
+                        ),
                         foregroundColor: AppColors.primary,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1444,6 +1463,37 @@ class _ManagerQuickCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDiffText(
+    BuildContext context, {
+    required String? current,
+    required String? previous,
+    required TextStyle? style,
+  }) {
+    // 변경된 내용이 없거나 previous가 없으면 현재 내용만 표시
+    if (previous == null || current == previous) {
+      return Text(current ?? '', style: style, textAlign: TextAlign.left);
+    }
+
+    // 변경된 내용이 있으면 취소선(Before) -> Normal(After) 표시
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          previous,
+          style: style?.copyWith(
+            decoration: TextDecoration.lineThrough,
+            color: AppColors.textSecondary.withValues(alpha: 0.7),
+            // 취소선 스타일 조정 (선택 사항)
+            decorationColor: AppColors.textSecondary,
+          ),
+          textAlign: TextAlign.left,
+        ),
+        // 약간의 간격? 원한다면 추가. 현재 요구사항엔 명시 없음.
+        Text(current ?? '', style: style, textAlign: TextAlign.left),
+      ],
     );
   }
 

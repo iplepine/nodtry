@@ -66,7 +66,7 @@ void main() {
       allCards: [],
       primaryCard: const HomeCardModel(state: HomeCardState.todayEmpty),
       secondaryCards: [],
-      managerCard: null,
+      managerCards: const [],
     );
     mockGetNowCardsUseCase.returnValues = [state.primaryCard!];
     final expectedCards = mockGetNowCardsUseCase.returnValues;
