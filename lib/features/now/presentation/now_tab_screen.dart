@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../../../models/plan_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,9 +13,9 @@ import 'now_tab_state.dart';
 import '../../../routes/app_router.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../utils/time_formatter.dart';
-import '../../../repositories/mock_record_repository.dart'; // For Debugging Scenarios
 import 'now_tab_viewmodel.dart';
 import 'now_tab_intent.dart';
+import 'now_tab_fake_states.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 class NowTab extends ConsumerStatefulWidget {
@@ -467,8 +468,8 @@ class _NowTabState extends ConsumerState<NowTab>
                 ),
               ],
             ),
-            // Mock Scenario Toggle Button (Debug Only)
-            if (ref.read(recordRepositoryProvider) is MockRecordRepository)
+            // Debug Fake State Toggle Button (Debug Only)
+            if (kDebugMode)
               Positioned(
                 bottom: 16,
                 right: 16,
@@ -477,7 +478,7 @@ class _NowTabState extends ConsumerState<NowTab>
                   backgroundColor: AppColors.primary,
                   child: const Icon(Icons.bug_report, size: 20),
                   onPressed: () {
-                    _showScenarioDialog(context, ref);
+                    _showFakeStateSelector(context, ref);
                   },
                 ),
               ),
@@ -487,26 +488,95 @@ class _NowTabState extends ConsumerState<NowTab>
     );
   }
 
-  void _showScenarioDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
+  void _showFakeStateSelector(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) {
-        return SimpleDialog(
-          title: const Text('Select Mock Scenario'),
-          children: MockScenario.values.map((scenario) {
-            return SimpleDialogOption(
-              onPressed: () {
-                final repo =
-                    ref.read(recordRepositoryProvider) as MockRecordRepository;
-                repo.setScenario(scenario);
-                ref
-                    .read(nowTabViewModelProvider.notifier)
-                    .dispatch(const RefreshIntent());
-                Navigator.pop(context);
-              },
-              child: Text(scenario.name),
-            );
-          }).toList(),
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.all(24),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.bug_report, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Debug: FakeState 선택',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: NowTabFakeStates.all.entries.map((entry) {
+                    return ListTile(
+                      title: Text(entry.key),
+                      subtitle: Text(
+                        'Primary: ${entry.value.primaryCard != null ? "O" : "X"}, '
+                        'Secondary: ${entry.value.secondaryCards.length}, '
+                        'Manager: ${entry.value.managerCard != null ? "O" : "X"}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textDisabled,
+                        ),
+                      ),
+                      onTap: () {
+                        ref
+                            .read(nowTabViewModelProvider.notifier)
+                            .setFakeState(entry.value);
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('✅ 적용됨: ${entry.key}'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ref.invalidate(nowTabViewModelProvider);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('🔄 실제 데이터로 복구됨'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColors.primary),
+                  ),
+                  icon: Icon(Icons.refresh, color: AppColors.primary),
+                  label: Text(
+                    '실제 데이터로 복구',
+                    style: TextStyle(color: AppColors.primary),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

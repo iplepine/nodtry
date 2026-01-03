@@ -69,6 +69,12 @@ class NowTabViewModel extends AsyncNotifier<NowTabState> {
     ref.invalidateSelf();
     await future;
   }
+
+  /// 디버그 전용: Fake State 주입
+  /// 디버그 모드에서 다양한 UI 상태를 테스트하기 위해 사용
+  void setFakeState(NowTabState fakeState) {
+    state = AsyncValue.data(fakeState);
+  }
 }
 
 /// ViewModel Provider 정의
