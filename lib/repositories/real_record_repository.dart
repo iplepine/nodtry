@@ -15,7 +15,7 @@ class RealRecordRepository implements RecordRepository {
   Future<List<HomeCardModel>> getHomeCardStates() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return [const HomeCardModel(state: HomeCardState.planNeeded)];
+      return [const HomeCardModel(state: HomeCardState.emptyPlan)];
     }
 
     try {
@@ -34,7 +34,7 @@ class RealRecordRepository implements RecordRepository {
           .toList();
 
       if (plans.isEmpty) {
-        return [const HomeCardModel(state: HomeCardState.planNeeded)];
+        return [const HomeCardModel(state: HomeCardState.emptyPlan)];
       }
 
       final now = DateTime.now();
@@ -66,7 +66,7 @@ class RealRecordRepository implements RecordRepository {
       }
 
       if (allTodayItems.isEmpty) {
-        return [const HomeCardModel(state: HomeCardState.relaxedDay)];
+        return [const HomeCardModel(state: HomeCardState.todayEmpty)];
       }
 
       // 2. 시간 순 정렬
@@ -100,7 +100,7 @@ class RealRecordRepository implements RecordRepository {
       for (var past in sortedPastItems) {
         finalModels.add(
           HomeCardModel(
-            state: HomeCardState.overdueSelfAction, // Was pastUncompleted
+            state: HomeCardState.overdue, // Was pastUncompleted
             plan: _createSingleItemPlan(past.plan, past.item),
           ),
         );
@@ -109,14 +109,14 @@ class RealRecordRepository implements RecordRepository {
       // 만약 Primary도 없고 지남(Secondary)도 없으면 Quiet Day
       if (finalModels.isEmpty) {
         return [
-          const HomeCardModel(state: HomeCardState.relaxedDay),
+          const HomeCardModel(state: HomeCardState.todayEmpty),
         ]; // Was quietDay
       }
 
       return finalModels;
     } catch (e) {
       debugPrint('[RealRecordRepository] Error fetching home cards: $e');
-      return [const HomeCardModel(state: HomeCardState.planNeeded)];
+      return [const HomeCardModel(state: HomeCardState.emptyPlan)];
     }
   }
 

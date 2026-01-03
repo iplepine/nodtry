@@ -19,7 +19,7 @@ class MockRecordRepository implements RecordRepository {
   List<HomeCardModel> _buildInitialMockModels() {
     return [
       HomeCardModel(
-        state: HomeCardState.overdueSelfAction,
+        state: HomeCardState.overdue,
         plan: _createMockPlan(hour: 8, minute: 0, title: '아침 영양제 챙겨먹기'),
       ),
       HomeCardModel(
@@ -27,11 +27,11 @@ class MockRecordRepository implements RecordRepository {
         plan: _createMockPlan(hour: 13, minute: 0, title: '점심 후 10분 명상'),
       ),
       HomeCardModel(
-        state: HomeCardState.partnerPlanShare,
+        state: HomeCardState.partnerPlanCreate,
         plan: _createMockPlan(hour: 10, minute: 0, title: '책 30분 읽기'),
       ),
       HomeCardModel(
-        state: HomeCardState.partnerActionShare,
+        state: HomeCardState.partnerAction,
         plan: _createMockPlan(
           hour: 20,
           minute: 0,
@@ -45,7 +45,7 @@ class MockRecordRepository implements RecordRepository {
         headerMessage: '오늘도 완료했어요!',
       ),
       HomeCardModel(
-        state: HomeCardState.partnerPlanShare,
+        state: HomeCardState.partnerPlanCreate,
         plan: _createMockPlan(
           hour: 22,
           minute: 0,
@@ -59,11 +59,11 @@ class MockRecordRepository implements RecordRepository {
         headerMessage: '이런 약속을 제안했어요',
       ),
       HomeCardModel(
-        state: HomeCardState.partnerActionShare,
+        state: HomeCardState.partnerAction,
         plan: _createMockPlan(hour: 21, minute: 0, title: '하루 회고록 쓰기'),
         headerMessage: '함께하는 중',
       ),
-      const HomeCardModel(state: HomeCardState.planNeeded),
+      const HomeCardModel(state: HomeCardState.emptyPlan),
     ];
   }
 
@@ -259,7 +259,7 @@ class MockRecordRepository implements RecordRepository {
     if (index != -1) {
       final model = _mockHomeCardModels[index];
       _mockHomeCardModels[index] = HomeCardModel(
-        state: HomeCardState.partnerActionShare, // Checked -> Type 4
+        state: HomeCardState.partnerAction, // Checked -> Type 4
         plan: model.plan,
         partnerName: model.partnerName,
         partnerImageUrl: model.partnerImageUrl,
@@ -308,7 +308,7 @@ class MockRecordRepository implements RecordRepository {
 
     if (_mockHomeCardModels.isEmpty) {
       _mockHomeCardModels.add(
-        const HomeCardModel(state: HomeCardState.todayDone),
+        const HomeCardModel(state: HomeCardState.todayComplete),
       );
     }
   }

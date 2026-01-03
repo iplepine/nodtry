@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nod_try/features/now/presentation/now_tab_viewmodel.dart';
 import 'package:nod_try/features/now/presentation/now_tab_intent.dart';
 import 'package:nod_try/models/home_state.dart';
+import 'package:nod_try/features/now/presentation/now_tab_state.dart';
 
 import 'package:nod_try/providers/repository_provider.dart';
 import 'package:nod_try/repositories/record_repository.dart';
@@ -61,10 +62,14 @@ void main() {
 
   test('Initial state should be loading then data', () async {
     // Arrange
-    final expectedCards = [
-      const HomeCardModel(state: HomeCardState.relaxedDay),
-    ];
-    mockGetNowCardsUseCase.returnValues = expectedCards;
+    final state = NowTabState(
+      allCards: [],
+      primaryCard: const HomeCardModel(state: HomeCardState.todayEmpty),
+      secondaryCards: [],
+      managerCard: null,
+    );
+    mockGetNowCardsUseCase.returnValues = [state.primaryCard!];
+    final expectedCards = mockGetNowCardsUseCase.returnValues;
 
     // Act
     final sub = container.listen(nowTabViewModelProvider, (_, __) {});

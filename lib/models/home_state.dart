@@ -2,27 +2,36 @@ import 'plan_model.dart';
 
 /// 홈 화면 Now Card 상태 모델
 /// 홈 화면 Now Card 상태 모델
+/// 홈 화면 Now Card 상태 모델
 enum HomeCardState {
-  /// Type 1: Now Action Card (지금 가장 가까운 시일 내 실천해야 할 항목)
+  // --- Mine (나의 활동) ---
+  /// Type 1: Now Action (지금 실천)
   nowAction,
 
-  /// Type 2-1: Plan Needed Card (한 달 내 계획이 없는 경우)
-  planNeeded,
+  /// Type 1-2: Empty Plan (계획 없음 - CTA)
+  emptyPlan,
 
-  /// Type 2-2 A: Today Done (오늘 다 했어요)
-  todayDone,
+  /// Type 1-3: Next Action (다음 일정 안내)
+  nextAction,
 
-  /// Type 2-2 B: Relaxed Day (오늘은 여유로운 날이에요)
-  relaxedDay,
+  /// Type 1-4: Today Empty (오늘 일정 없음 - 여유)
+  todayEmpty,
 
-  /// Type 3: Partner Plan Share (상대방의 계획 제안/공유)
-  partnerPlanShare,
+  /// Type 1-5: Today Complete (오늘 완료)
+  todayComplete,
 
-  /// Type 4: Partner Action Share (상대방의 실천 공유 + 피드백)
-  partnerActionShare,
+  /// Type 1-6: Overdue (기한 지남)
+  overdue,
 
-  /// Type 5: Overdue Self Action (시간이 지나버린 내 실천)
-  overdueSelfAction,
+  // --- Yours (너의 활동) ---
+  /// Type 2-1: Partner Plan Create (계획 제안)
+  partnerPlanCreate,
+
+  /// Type 2-2: Partner Plan Modify (계획 수정)
+  partnerPlanModify,
+
+  /// Type 2-3: Partner Action (실천 피드백)
+  partnerAction,
 }
 
 /// 카드 계층 타입
@@ -36,84 +45,92 @@ enum CardTier {
 
 /// 카드 역할 타입
 enum CardRole {
-  /// 실천자 카드: 내가 해야 할 행동
-  executor,
+  /// Mine: 나의 행동 (Executor)
+  mine,
 
-  /// 관리자 카드: 내가 확인해야 할 행동
-  manager,
+  /// Yours: 너의 행동 (Manager/Response)
+  yours,
 }
 
 /// 상태 우선순위 및 계층 규칙
 extension HomeCardStatePriority on HomeCardState {
   /// 카드 역할 반환
-  CardRole? get role {
+  CardRole get role {
     switch (this) {
       case HomeCardState.nowAction:
-      case HomeCardState.planNeeded:
-      case HomeCardState.todayDone:
-      case HomeCardState.relaxedDay:
-      case HomeCardState.overdueSelfAction:
-        return CardRole.executor;
-      case HomeCardState.partnerPlanShare:
-      case HomeCardState.partnerActionShare:
-        return CardRole.manager;
+      case HomeCardState.emptyPlan:
+      case HomeCardState.nextAction:
+      case HomeCardState.todayEmpty:
+      case HomeCardState.todayComplete:
+      case HomeCardState.overdue:
+        return CardRole.mine;
+      case HomeCardState.partnerPlanCreate:
+      case HomeCardState.partnerPlanModify:
+      case HomeCardState.partnerAction:
+        return CardRole.yours;
     }
   }
 
-  /// Primary Executor Card 우선순위 (낮을수록 높은 우선순위)
-  int get executorPrimaryPriority {
+  /// Primary Executor Card (Mine Primary) 우선순위
+  /// 낮을수록 높은 우선순위
+  int get minePrimaryPriority {
     switch (this) {
       case HomeCardState.nowAction:
         return 1; // 1순위: 지금 실천
-      case HomeCardState.overdueSelfAction:
-        return 2; // 2순위: 지났지만 아직 안 한 것 (Type 5)
-      case HomeCardState.planNeeded:
-        return 3; // 3순위: 계획 필요
+      case HomeCardState.overdue:
+        return 2; // 2순위: 지남
+      case HomeCardState.emptyPlan:
+        return 3; // 3순위: 계획 없음 (CTA)
+      case HomeCardState.todayEmpty:
+        return 4; // 4순위: 여유 (오늘 일정 없음)
+      case HomeCardState.todayComplete:
+        return 5; // 5순위: 오늘 완료
+      // nextAction은 보통 Secondary로 보여주지만, Primary가 될 수도 있음
       default:
         return 999;
     }
   }
 
-  /// Secondary Executor Card 우선순위
-  int get executorSecondaryPriority {
+  /// Secondary Executor Cards (Mine Secondary) 우선순위
+  int get mineSecondaryPriority {
     switch (this) {
-      case HomeCardState.todayDone:
-        return 1;
-      case HomeCardState.relaxedDay:
+      case HomeCardState.nextAction:
+        return 1; // 다음 일정
+      case HomeCardState.todayEmpty:
         return 2;
+      case HomeCardState.todayComplete:
+        return 3;
       default:
+        // nowAction 등은 이미 Primary에 떴다면 중복 제외되어야 함
         return 999;
     }
   }
 
-  /// 이 상태가 Primary Executor Card로 올 수 있는지
-  bool get canBeExecutorPrimary {
-    return executorPrimaryPriority < 999;
+  /// 이 상태가 Mine Primary Card로 올 수 있는지
+  bool get canBeMinePrimary {
+    return minePrimaryPriority < 999;
   }
 
-  /// 이 상태가 Secondary Executor Card로만 올 수 있는지
-  bool get canBeExecutorSecondary {
-    return executorSecondaryPriority < 999;
+  /// 이 상태가 Mine Secondary Card로 올 수 있는지
+  bool get canBeMineSecondary {
+    return mineSecondaryPriority < 999;
   }
 
-  /// 이 상태가 Manager Quick Card로 올 수 있는지
-  bool get canBeManagerQuick {
-    return this == HomeCardState.partnerPlanShare ||
-        this == HomeCardState.partnerActionShare;
+  /// 이 상태가 Yours Card (Manager Quick Card)로 올 수 있는지
+  bool get canBeYours {
+    return role == CardRole.yours;
   }
 
-  /// Primary Executor Card 선택
   /// Primary Executor Card 선택
   static HomeCardModel? selectPrimaryExecutorCard(List<HomeCardModel> models) {
     final primaryModels = models
-        .where((m) => m.state.canBeExecutorPrimary)
+        .where((m) => m.state.canBeMinePrimary)
         .toList();
     if (primaryModels.isEmpty) return null;
 
     primaryModels.sort(
-      (a, b) => a.state.executorPrimaryPriority.compareTo(
-        b.state.executorPrimaryPriority,
-      ),
+      (a, b) =>
+          a.state.minePrimaryPriority.compareTo(b.state.minePrimaryPriority),
     );
     return primaryModels.first;
   }
@@ -125,16 +142,14 @@ extension HomeCardStatePriority on HomeCardState {
   ) {
     // Primary Executor Card와 중복 제거
     final secondaryModels = models
-        .where(
-          (m) => m.state.canBeExecutorSecondary && m != primaryExecutorCard,
-        )
+        .where((m) => m.state.canBeMineSecondary && m != primaryExecutorCard)
         .toList();
 
     if (secondaryModels.isEmpty) return [];
 
     secondaryModels.sort(
-      (a, b) => a.state.executorSecondaryPriority.compareTo(
-        b.state.executorSecondaryPriority,
+      (a, b) => a.state.mineSecondaryPriority.compareTo(
+        b.state.mineSecondaryPriority,
       ),
     );
 
@@ -144,12 +159,10 @@ extension HomeCardStatePriority on HomeCardState {
 
   /// Manager Quick Card 선택
   static HomeCardModel? selectManagerQuickCard(List<HomeCardModel> models) {
-    final managerModels = models
-        .where((m) => m.state.canBeManagerQuick)
-        .toList();
+    final managerModels = models.where((m) => m.state.canBeYours).toList();
     if (managerModels.isEmpty) return null;
 
-    return managerModels.first; // checkNeeded는 하나만 있을 수 있음
+    return managerModels.first;
   }
 }
 

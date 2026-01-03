@@ -27,7 +27,7 @@ abstract class NowTabState with _$NowTabState {
     // 1. 빈 리스트 처리
     final List<HomeCardModel> processedModels = List.from(models);
     if (processedModels.isEmpty) {
-      processedModels.add(const HomeCardModel(state: HomeCardState.planNeeded));
+      processedModels.add(const HomeCardModel(state: HomeCardState.emptyPlan));
     }
 
     // 2. Primary Card 선정
