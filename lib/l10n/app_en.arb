@@ -381,6 +381,10 @@
   "@nowActionSkipToday": {
     "description": "Action to skip today's task"
   },
+  "nowAddMorePlan": "Shall we make another promise?",
+  "@nowAddMorePlan": {
+    "description": "Button to add more plans in TodayComplete/TodayEmpty state"
+  },
   "recordGazeWeekCount": "{count}th promise this week",
   "@recordGazeWeekCount": {
     "description": "Record gaze - showing count in current week",
@@ -908,7 +912,6 @@
   "nowLateCompletion": "Completed even if late!",
   "nowLateJustInTime": "Did it a bit late",
   "nowWithinToday": "Done within today",
-
   "timeChipNow": "Now!",
   "timeChipJustNow": "Just now",
   "timeChipMinutesAgo": "{minutes}m ago",
@@ -981,14 +984,12 @@
       }
     }
   },
-
   "vagueTimeMorning": "In the morning",
   "vagueTimeLunch": "Around lunch",
   "vagueTimeAfternoon": "In the afternoon",
   "vagueTimeEvening": "In the evening",
   "vagueTimeNight": "At night",
   "vagueTimeLateNight": "Late night",
-
   "weekdayMon": "Mon",
   "weekdayTue": "Tue",
   "weekdayWed": "Wed",
@@ -997,4 +998,3 @@
   "weekdaySat": "Sat",
   "weekdaySun": "Sun"
 }
-
