@@ -468,10 +468,11 @@ class _NowTabState extends ConsumerState<NowTab>
                 ),
               ],
             ),
+
             // Debug Fake State Toggle Button (Debug Only)
             if (kDebugMode)
               Positioned(
-                bottom: 16,
+                bottom: 120, // Raised to avoid bottom nav overlap
                 right: 16,
                 child: FloatingActionButton(
                   mini: true,
