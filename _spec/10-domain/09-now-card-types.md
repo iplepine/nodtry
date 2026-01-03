@@ -81,7 +81,7 @@
 - **표시 내용**: 파트너 프로필, 제안된 계획 요약
 - **성격**: 인지 및 확인 (Manager Role)
 
-### 2-2. PlanModify (계획 수정) - 아직 기능 미구현 
+### 2-2. PlanModify (계획 수정)
 **파트너가 약속 내용 변경을 요청하거나 거절함**
 
 - **메시지**: "이번엔 이렇게 하기로 했어요", "조금 조정 중이에요"
@@ -103,3 +103,37 @@
 - **Action Button**: `ElevatedButton`의 Vertical Padding을 줄여(12px) 날렵한 느낌 유지.
 - **Partner Profile**: Yours 그룹(Type 2-x)의 카드에는 반드시 파트너 프로필 이미지를 노출하여 '누구의 소식'인지 명확히 인지시킴.
 - **Alignment**: 모든 텍스트와 콘텐츠는 **좌측 정렬(Left Align)**을 기본으로 하여 일관성 유지.
+
+---
+
+## 4. 카드 노출 및 우선순위 정책 (Display Policy)
+
+### 4-1. Mine Area (나의 활동)
+**Primary Slot(1개) + Secondary Slot(n개)** 구조를 가지며, 다음 우선순위와 구성 규칙을 따른다.
+
+**1. Primary Slot 우선순위**
+1.  **NowAction** (지금 실천)
+2.  **Overdue** (기한 지남)
+3.  **TodayComplete / TodayEmpty** (오늘 완료/없음)
+4.  **EmptyPlan** (계획 없음)
+
+**2. 가능한 카드 구성 (Scenarios)**
+Mine 영역은 다음 4가지 경우의 수로만 구성된다.
+
+*   **Case 0: EmptyPlan**
+    *   Primary: `EmptyPlan`
+    *   Secondary: 없음
+*   **Case 1: NowAction + Overdue**
+    *   Primary: `NowAction`
+    *   Secondary: `Overdue`
+    *   *(NextAction은 이 경우 노출하지 않음)*
+*   **Case 2: Overdue + NextAction**
+    *   Primary: `Overdue` (NowAction이 없을 때 승격됨)
+    *   Secondary: `NextAction`
+*   **Case 3: TodayComplete/TodayEmpty + NextAction**
+    *   Primary: `TodayComplete` 또는 `TodayEmpty`
+    *   Secondary: `NextAction`
+
+### 4-2. Yours Area (너의 활동)
+*   **구성**: 파트너의 요청/알림이 있는 만큼 **여러 개 노출 가능**.
+*   **순서**: 중요도(Response > Decision) 또는 시간순 정렬.

@@ -59,3 +59,37 @@ class SkipPlanIntent extends NowTabIntent {
   @override
   int get hashCode => planId.hashCode;
 }
+
+/// 파트너 응원하기 (고마워요 + 리액션)
+class CheerPartnerActionIntent extends NowTabIntent {
+  final String planId;
+  final String reactionType; // 'fire', 'heart', 'thumbs_up', 'muscle'
+  const CheerPartnerActionIntent(this.planId, this.reactionType);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CheerPartnerActionIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId &&
+          reactionType == other.reactionType;
+
+  @override
+  int get hashCode => planId.hashCode ^ reactionType.hashCode;
+}
+
+/// 계획 넘기기 (카드 넘기기)
+class PassPlanIntent extends NowTabIntent {
+  final String planId;
+  const PassPlanIntent(this.planId);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PassPlanIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId;
+
+  @override
+  int get hashCode => planId.hashCode;
+}

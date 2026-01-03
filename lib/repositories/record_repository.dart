@@ -30,8 +30,15 @@ abstract class RecordRepository {
   /// 실천 완료 보고 (했어)
   Future<void> reportCompletion(String planId);
 
-  /// 실천 건너뛰기 보고 (오늘은 쉴게요)
+  /// 파트너 응원하기 (고마워요)
+  /// reactionType: 'fire', 'heart', 'thumbs_up', 'muscle' 등
+  Future<void> cheerPartner(String planId, String reactionType);
+
+  /// 실천 건너뛰기 보고 (오늘은 쉴게요) / 카드 넘기기
   Future<void> reportSkip(String planId);
+
+  /// 계획 넘기기 (카드 넘기기 - secondary etc)
+  Future<void> passPlan(String planId);
 
   /// 과거 기록 소명 (HistoryItem 수정)
   Future<void> reconcileHistoryItem(String historyId, HistoryStatus status);

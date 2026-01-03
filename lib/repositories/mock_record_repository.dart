@@ -312,4 +312,18 @@ class MockRecordRepository implements RecordRepository {
       );
     }
   }
+
+  @override
+  Future<void> cheerPartner(String planId, String reactionType) async {
+    // ignore: avoid_print
+    print('Mock: Partner cheered for plan $planId with reaction $reactionType');
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  @override
+  Future<void> passPlan(String planId) async {
+    // ignore: avoid_print
+    print('Mock: Plan passed for $planId');
+    await Future.delayed(const Duration(milliseconds: 300));
+  }
 }

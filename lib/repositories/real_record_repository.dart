@@ -241,4 +241,14 @@ class RealRecordRepository implements RecordRepository {
   Future<void> reportSkip(String planId) async {
     // TODO: Firestore에 건너뛰기 기록 생성 및 계획 상태 업데이트
   }
+
+  @override
+  Future<void> cheerPartner(String planId, String reactionType) async {
+    // TODO: Firestore에 응원 기록 생성
+  }
+
+  @override
+  Future<void> passPlan(String planId) async {
+    // TODO: Firestore에 계획 넘기기 처리
+  }
 }

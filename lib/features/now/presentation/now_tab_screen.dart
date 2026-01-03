@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../../../models/plan_model.dart';
@@ -109,23 +110,50 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   Future<void> _handleCheer(HomeCardModel managerCard) async {
-    // TODO: 응원하기 API 호출. 현재는 확인하기와 동일하게 처리
-    await _handleCheckIt(managerCard);
+    if (managerCard.plan?.id == null) return;
+
+    // 1. Random Reaction Selection
+    final reactions = [
+      ('fire', '열정적인 응원을 보냈어요! 🔥'),
+      ('heart', '사랑을 담아 응원했어요! ❤️'),
+      ('thumbs_up', '멋지다고 전했어요! 👍'),
+      ('muscle', '힘내라고 응원했어요! 💪'),
+    ];
+    final random = Random();
+    final selected = reactions[random.nextInt(reactions.length)];
+    final reactionType = selected.$1;
+    final reactionMessage = selected.$2;
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.homeThankYou)),
+        SnackBar(
+          content: Text(reactionMessage),
+          duration: const Duration(seconds: 2),
+        ),
       );
     }
+
+    // 2. Dispatch Intent with Reaction Type
+    await ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(
+          CheerPartnerActionIntent(managerCard.plan!.id!, reactionType),
+        );
   }
 
-  Future<void> _handlePass() async {
-    // TODO: 넘기기 API 호출
-    ref.invalidate(nowTabViewModelProvider);
+  Future<void> _handlePass(HomeCardModel managerCard) async {
+    if (managerCard.plan?.id == null) return;
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.nowActionPass)),
       );
     }
+
+    // Dispatch Pass Intent
+    await ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(PassPlanIntent(managerCard.plan!.id!));
   }
 
   Future<void> _handleSkip() async {
@@ -495,7 +523,7 @@ class _NowTabState extends ConsumerState<NowTab>
                                         partnerName: card.partnerName,
                                         onCheckIt: () => _handleCheckIt(card),
                                         onCheer: () => _handleCheer(card),
-                                        onPass: _handlePass,
+                                        onPass: () => _handlePass(card),
                                         timeChipText: _getManagerTimeChipText(
                                           card,
                                         ),
@@ -879,7 +907,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
             ),
           ),
         ),
-        if (model.state == HomeCardState.overdue && onSkip != null)
+        if (model.state == HomeCardState.overdue && onSkip != null) ...[
+          const SizedBox(height: 12),
           TextButton(
             onPressed: onSkip,
             style: TextButton.styleFrom(
@@ -896,6 +925,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
               ),
             ),
           ),
+        ],
       ],
     );
   }
@@ -1505,10 +1535,14 @@ class _ManagerQuickCard extends StatelessWidget {
     if (plan.items.isEmpty) return const SizedBox.shrink();
     final item = plan.items.first;
 
-    // Period: 10.01 - 10.28
+    // Period: 10.01(Mon) - 10.28(Sun)
     final start = plan.startDate;
     final end = plan.endDate;
-    final periodStr = '${start.month}.${start.day} - ${end.month}.${end.day}';
+
+    String getWeekday(DateTime d) =>
+        TimeFormatter.getWeekdayName(l10n, d.weekday);
+    final periodStr =
+        '${start.month}.${start.day}(${getWeekday(start)}) - ${end.month}.${end.day}(${getWeekday(end)})';
 
     // Days: Mon, Wed, Fri
     final daysStr = item.days.length == 7

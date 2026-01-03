@@ -288,7 +288,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowNoPlanSubtitle => '한 가지 약속만 정해볼까요?';
 
   @override
-  String get nowTodayDone => '오늘은 다 챙겼어요 🙌';
+  String get nowTodayDone => '오늘 약속은 다 챙겼어요 🙌';
 
   @override
   String get nowPartnerProposed => '이런 약속을 제안했어요';

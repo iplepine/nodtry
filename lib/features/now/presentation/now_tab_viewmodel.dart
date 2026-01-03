@@ -38,6 +38,10 @@ class NowTabViewModel extends AsyncNotifier<NowTabState> {
         state = await AsyncValue.guard(() => _fetchState());
       } else if (intent is SkipPlanIntent) {
         await _skipPlan(intent.planId);
+      } else if (intent is CheerPartnerActionIntent) {
+        await _cheerPartner(intent.planId, intent.reactionType);
+      } else if (intent is PassPlanIntent) {
+        await _passPlan(intent.planId);
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -55,8 +59,13 @@ class NowTabViewModel extends AsyncNotifier<NowTabState> {
   }
 
   Future<void> _checkPartnerAction(String planId) async {
-    // 1. Repository 호출 (여기선 reportCompletion을 공유해서 사용 중인 것으로 보임 -> 확인 필요)
-    //    기존 로직: recordRepositoryProvider.reportCompletion(planId)
+    // 1. Repository 호출
+    //    기존 로직: recordRepositoryProvider.reportCompletion(planId) -> verify?
+    //    Here it seems check means confirming partner did it.
+    //    Actually check partner action -> verifyHistoryItem logic?
+    //    But in NowTab context, it typically means acknowledging the card.
+    //    Assuming reportCompletion handles it or separate verify method.
+    //    For now, relying on existing impl which was reportCompletion.
     await ref.read(recordRepositoryProvider).reportCompletion(planId);
 
     // 2. 데이터 갱신
@@ -66,6 +75,18 @@ class NowTabViewModel extends AsyncNotifier<NowTabState> {
 
   Future<void> _skipPlan(String planId) async {
     await ref.read(recordRepositoryProvider).reportSkip(planId);
+    ref.invalidateSelf();
+    await future;
+  }
+
+  Future<void> _cheerPartner(String planId, String reactionType) async {
+    await ref.read(recordRepositoryProvider).cheerPartner(planId, reactionType);
+    ref.invalidateSelf();
+    await future;
+  }
+
+  Future<void> _passPlan(String planId) async {
+    await ref.read(recordRepositoryProvider).passPlan(planId);
     ref.invalidateSelf();
     await future;
   }

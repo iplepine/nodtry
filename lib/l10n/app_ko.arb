@@ -151,13 +151,12 @@
   },
   "nowQuietRest": "오늘은 여유로운 날이에요",
   "nowQuietNoAction": "당분간 신경 쓸 일은 없어요",
-  "nowTodayDone": "오늘은 다 챙겼어요 🙌",
+  "nowTodayDone": "오늘 약속은 다 챙겼어요 🙌",
   "nowPartnerProposed": "이런 약속을 제안했어요",
   "nowPartnerAdjusting": "약속을 조금 조정하고 있어요",
   "nowPartnerDidIt": "나 했어요!",
   "nowActionPass": "그냥 넘기기",
   "nowActionSkipToday": "오늘은 넘어가자",
-
   "recordGazeWeekCount": "이번 주 약속 중 {count}번째",
   "@recordGazeWeekCount": {
     "placeholders": {
@@ -312,7 +311,6 @@
   "nowLateCompletion": "뒤늦게라도 완료!",
   "nowLateJustInTime": "조금 늦게 했어요",
   "nowWithinToday": "오늘 안에 했어요",
-
   "timeChipNow": "지금!",
   "timeChipJustNow": "방금 전",
   "timeChipMinutesAgo": "{minutes}분 지남",
@@ -385,14 +383,12 @@
       }
     }
   },
-
   "vagueTimeMorning": "아침에",
   "vagueTimeLunch": "점심쯤",
   "vagueTimeAfternoon": "오후에",
   "vagueTimeEvening": "저녁에",
   "vagueTimeNight": "밤에",
   "vagueTimeLateNight": "새벽에",
-
   "weekdayMon": "월",
   "weekdayTue": "화",
   "weekdayWed": "수",
@@ -414,4 +410,3 @@
   "userNotFound": "가입되지 않은 이메일입니다.",
   "wrongPassword": "비밀번호가 일치하지 않습니다."
 }
-

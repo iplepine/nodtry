@@ -78,14 +78,12 @@ extension HomeCardStatePriority on HomeCardState {
       case HomeCardState.nowAction:
         return 1; // 1순위: 지금 실천
       case HomeCardState.overdue:
-        return 2; // 2순위: 지남
-      case HomeCardState.emptyPlan:
-        return 3; // 3순위: 계획 없음 (CTA)
-      case HomeCardState.todayEmpty:
-        return 4; // 4순위: 여유 (오늘 일정 없음)
+        return 2; // 2순위: 지남 (NowAction 없을 때)
       case HomeCardState.todayComplete:
-        return 5; // 5순위: 오늘 완료
-      // nextAction은 보통 Secondary로 보여주지만, Primary가 될 수도 있음
+      case HomeCardState.todayEmpty:
+        return 3; // 3순위: 오늘 완료/없음
+      case HomeCardState.emptyPlan:
+        return 4; // 4순위: 계획 없음 (CTA)
       default:
         return 999;
     }
@@ -94,14 +92,11 @@ extension HomeCardStatePriority on HomeCardState {
   /// Secondary Executor Cards (Mine Secondary) 우선순위
   int get mineSecondaryPriority {
     switch (this) {
+      case HomeCardState.overdue:
+        return 1; // Overdue가 Secondary로 올 때 (Primary가 NowAction일 때)
       case HomeCardState.nextAction:
-        return 1; // 다음 일정
-      case HomeCardState.todayEmpty:
-        return 2;
-      case HomeCardState.todayComplete:
-        return 3;
+        return 2; // NextAction
       default:
-        // nowAction 등은 이미 Primary에 떴다면 중복 제외되어야 함
         return 999;
     }
   }
@@ -135,25 +130,56 @@ extension HomeCardStatePriority on HomeCardState {
     return primaryModels.first;
   }
 
-  /// Secondary Executor Cards 선택 (최대 3개)
+  /// Secondary Executor Cards 선택 (엄격한 시나리오 적용)
   static List<HomeCardModel> selectSecondaryExecutorCards(
     List<HomeCardModel> models,
     HomeCardModel? primaryExecutorCard,
   ) {
-    // Primary Executor Card와 중복 제거
+    if (primaryExecutorCard == null) return [];
+
+    final primaryState = primaryExecutorCard.state;
+    List<HomeCardState> allowedSecondaryStates = [];
+
+    // 시나리오별 허용되는 Secondary 상태 정의
+    switch (primaryState) {
+      case HomeCardState.nowAction:
+        // Case 1: NowAction + Overdue
+        allowedSecondaryStates = [HomeCardState.overdue];
+        break;
+      case HomeCardState.overdue:
+        // Case 2: Overdue + NextAction
+        allowedSecondaryStates = [HomeCardState.nextAction];
+        break;
+      case HomeCardState.todayComplete:
+      case HomeCardState.todayEmpty:
+        // Case 3: Today* + NextAction
+        allowedSecondaryStates = [HomeCardState.nextAction];
+        break;
+      case HomeCardState.emptyPlan:
+      // Case 0: EmptyPlan -> No Secondary
+      default:
+        return [];
+    }
+
+    // 조건에 맞는 카드 필터링
     final secondaryModels = models
-        .where((m) => m.state.canBeMineSecondary && m != primaryExecutorCard)
+        .where(
+          (m) =>
+              allowedSecondaryStates.contains(m.state) &&
+              m != primaryExecutorCard,
+        )
         .toList();
 
     if (secondaryModels.isEmpty) return [];
 
+    // 정렬 (Secondary Priority 기준)
     secondaryModels.sort(
       (a, b) => a.state.mineSecondaryPriority.compareTo(
         b.state.mineSecondaryPriority,
       ),
     );
 
-    // 최대 3개까지
+    // 최대 3개까지 노출
     return secondaryModels.take(3).toList();
   }
 
