@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -136,30 +137,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               const SizedBox(height: 32),
 
-              // 계획 생성
-              Text(
-                l10n.settingsPlanCreation,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              if (kDebugMode) ...[
+                // 개발자 옵션
+                Text(
+                  l10n.settingsDeveloper,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _buildPlanCreationOption(context, l10n),
-              const SizedBox(height: 32),
-
-              // 개발자 옵션
-              Text(
-                l10n.settingsDeveloper,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildDeveloperOption(context),
+                const SizedBox(height: 16),
+                _buildDeveloperOption(context),
+                const SizedBox(height: 32),
+              ],
 
               const SizedBox(height: 32),
 
@@ -294,56 +285,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 4),
                       Text(
                         l10n.settingsDeveloperDesc,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right, color: AppColors.textDisabled),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlanCreationOption(BuildContext context, AppLocalizations l10n) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          context.push('/plan/create');
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.divider, width: 1),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.settingsPlanCreationTitle,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.settingsPlanCreationDesc,
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,

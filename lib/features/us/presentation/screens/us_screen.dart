@@ -1034,19 +1034,23 @@ class _ActivePlanListSection extends ConsumerWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            if (isMe)
-              InkWell(
-                onTap: () => context.push(AppRoutes.planCreate),
-                borderRadius: BorderRadius.circular(20),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.add_circle,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                ),
-              ),
+            plansAsync.maybeWhen(
+              data: (plans) => (isMe && plans.isNotEmpty)
+                  ? InkWell(
+                      onTap: () => context.push(AppRoutes.planCreate),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.add_circle,
+                          color: AppColors.primary,
+                          size: 24,
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+              orElse: () => const SizedBox.shrink(),
+            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -1064,6 +1068,7 @@ class _ActivePlanListSection extends ConsumerWidget {
                   border: Border.all(color: AppColors.divider),
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       isMe ? "아직 등록된 약속이 없어요" : "파트너가 진행 중인 약속이 없어요",
@@ -1073,10 +1078,43 @@ class _ActivePlanListSection extends ConsumerWidget {
                       ),
                     ),
                     if (isMe) ...[
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () => context.push(AppRoutes.planCreate),
-                        child: Text("새 약속 만들기"),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () => context.push(AppRoutes.planCreate),
+                          style:
+                              ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ).copyWith(
+                                overlayColor:
+                                    WidgetStateProperty.resolveWith<Color?>((
+                                      states,
+                                    ) {
+                                      if (states.contains(
+                                        WidgetState.pressed,
+                                      )) {
+                                        return AppColors.primaryPressed;
+                                      }
+                                      return null;
+                                    }),
+                              ),
+                          child: const Text(
+                            "+ 새 약속 정하기",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ],
