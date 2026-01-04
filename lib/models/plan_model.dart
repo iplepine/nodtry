@@ -50,6 +50,7 @@ class Plan {
   final List<PlanItem> items;
   final DateTime createdAt;
   final List<DateTime> completedDates;
+  final List<DateTime> verifiedDates;
 
   Plan({
     this.id,
@@ -61,6 +62,7 @@ class Plan {
     required this.items,
     required this.createdAt,
     this.completedDates = const [],
+    this.verifiedDates = const [],
   });
 
   Plan copyWith({
@@ -73,6 +75,7 @@ class Plan {
     List<PlanItem>? items,
     DateTime? createdAt,
     List<DateTime>? completedDates,
+    List<DateTime>? verifiedDates,
   }) {
     return Plan(
       id: id ?? this.id,
@@ -84,6 +87,7 @@ class Plan {
       items: items ?? this.items,
       createdAt: createdAt ?? this.createdAt,
       completedDates: completedDates ?? this.completedDates,
+      verifiedDates: verifiedDates ?? this.verifiedDates,
     );
   }
 
@@ -99,6 +103,7 @@ class Plan {
       'completedDates': completedDates
           .map((d) => Timestamp.fromDate(d))
           .toList(),
+      'verifiedDates': verifiedDates.map((d) => Timestamp.fromDate(d)).toList(),
     };
   }
 
@@ -118,6 +123,11 @@ class Plan {
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       completedDates:
           (map['completedDates'] as List<dynamic>?)
+              ?.map((d) => (d as Timestamp).toDate())
+              .toList() ??
+          [],
+      verifiedDates:
+          (map['verifiedDates'] as List<dynamic>?)
               ?.map((d) => (d as Timestamp).toDate())
               .toList() ??
           [],

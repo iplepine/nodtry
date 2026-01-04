@@ -309,6 +309,7 @@ class MockRecordRepository implements RecordRepository {
         ),
       ],
       createdAt: DateTime.now(),
+      verifiedDates: const [],
     );
   }
 

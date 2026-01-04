@@ -20,12 +20,17 @@ class RealRecordRepository implements RecordRepository {
       ]);
     }
 
-    // Firestore `snapshots()` for offline-first updates
+    // Watch plans where I am either the Executor (userId) or the Manager (managerId)
     return _firestore
         .collection('plans')
-        .where('userId', isEqualTo: user.uid)
+        .where(
+          Filter.or(
+            Filter('userId', isEqualTo: user.uid),
+            Filter('managerId', isEqualTo: user.uid),
+          ),
+        )
         .snapshots()
-        .map(_mapSnapshotToModels)
+        .map((snapshot) => _mapSnapshotToModels(snapshot, user.uid))
         .handleError((error) {
           debugPrint('[RealRecordRepository] Error in stream: $error');
           return [const HomeCardModel(state: HomeCardState.emptyPlan)];
@@ -33,7 +38,10 @@ class RealRecordRepository implements RecordRepository {
   }
 
   /// Helper to convert Firestore snapshot to HomeCardModels
-  List<HomeCardModel> _mapSnapshotToModels(QuerySnapshot snapshot) {
+  List<HomeCardModel> _mapSnapshotToModels(
+    QuerySnapshot snapshot,
+    String myUid,
+  ) {
     try {
       final plans = snapshot.docs
           .map(
@@ -49,7 +57,7 @@ class RealRecordRepository implements RecordRepository {
       if (plans.isEmpty) {
         return [const HomeCardModel(state: HomeCardState.emptyPlan)];
       }
-      return _processPlans(plans);
+      return _processPlans(plans, myUid);
     } catch (e) {
       debugPrint('[RealRecordRepository] Error mapping snapshot: $e');
       return [const HomeCardModel(state: HomeCardState.emptyPlan)];
@@ -57,21 +65,51 @@ class RealRecordRepository implements RecordRepository {
   }
 
   /// Extracted logic for processing plans into cards
-  List<HomeCardModel> _processPlans(List<Plan> plans) {
+  List<HomeCardModel> _processPlans(List<Plan> plans, String myUid) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final todayWeekday = now.weekday; // 1=Mon, 7=Sun
     final nowInMinutes = now.hour * 60 + now.minute;
 
-    // 1. 오늘 해야 할 모든 아이템 수집
+    final List<HomeCardModel> finalModels = [];
+
+    // --- Part 1: Partner Actions (Manager Role) ---
+    // 파트너가 완료(completedDates)했으나 내가 아직 확인(verifiedDates)하지 않은 항목
+    final managerPlans = plans.where((p) => p.managerId == myUid);
+    for (var plan in managerPlans) {
+      final hasCompletedToday = plan.completedDates.any(
+        (d) =>
+            d.year == today.year &&
+            d.month == today.month &&
+            d.day == today.day,
+      );
+      final hasVerifiedToday = plan.verifiedDates.any(
+        (d) =>
+            d.year == today.year &&
+            d.month == today.month &&
+            d.day == today.day,
+      );
+
+      if (hasCompletedToday && !hasVerifiedToday) {
+        finalModels.add(
+          HomeCardModel(
+            state: HomeCardState.partnerAction,
+            plan: plan,
+            headerMessage: '전달받은 말이 있어요',
+          ),
+        );
+      }
+    }
+
+    // --- Part 2: My Actions (Executor Role) ---
+    final myPlans = plans.where((p) => p.userId == myUid);
     final List<({Plan plan, PlanItem item, int timeInMin})> allTodayItems = [];
 
-    for (var plan in plans) {
+    for (var plan in myPlans) {
       if (now.isBefore(plan.startDate) || now.isAfter(plan.endDate)) {
         continue;
       }
 
-      // Check if completed for today (ignore time component)
       final isCompletedToday = plan.completedDates.any(
         (d) =>
             d.year == today.year &&
@@ -89,7 +127,6 @@ class RealRecordRepository implements RecordRepository {
 
       for (var item in todayItems) {
         final time = item.notificationTime;
-        // 알림 시간이 없으면 당일 23:59로 처리
         final timeInMin = time != null
             ? (time.hour * 60 + time.minute)
             : (23 * 60 + 59);
@@ -98,48 +135,51 @@ class RealRecordRepository implements RecordRepository {
       }
     }
 
-    if (allTodayItems.isEmpty) {
-      return [const HomeCardModel(state: HomeCardState.todayComplete)];
+    // My Actions Processing
+    if (allTodayItems.isNotEmpty) {
+      allTodayItems.sort((a, b) => a.timeInMin.compareTo(b.timeInMin));
+
+      final upcomingItems = allTodayItems
+          .where((i) => i.timeInMin >= nowInMinutes)
+          .toList();
+      final pastItems = allTodayItems
+          .where((i) => i.timeInMin < nowInMinutes)
+          .toList();
+
+      // Primary: 현재 이후 가장 가까운 것 1개
+      if (upcomingItems.isNotEmpty) {
+        final primary = upcomingItems.first;
+        finalModels.add(
+          HomeCardModel(
+            state: HomeCardState.nowAction,
+            plan: _createSingleItemPlan(primary.plan, primary.item),
+          ),
+        );
+      }
+
+      // Secondary: 지나간 것들 (최대 3개)
+      final sortedPastItems = pastItems.reversed.take(3).toList();
+      for (var past in sortedPastItems) {
+        finalModels.add(
+          HomeCardModel(
+            state: HomeCardState.overdue,
+            plan: _createSingleItemPlan(past.plan, past.item),
+          ),
+        );
+      }
     }
 
-    // 2. 시간 순 정렬
-    allTodayItems.sort((a, b) => a.timeInMin.compareTo(b.timeInMin));
-
-    // 3. 상태 결정
-    final upcomingItems = allTodayItems
-        .where((i) => i.timeInMin >= nowInMinutes)
-        .toList();
-    final pastItems = allTodayItems
-        .where((i) => i.timeInMin < nowInMinutes)
-        .toList();
-
-    final List<HomeCardModel> finalModels = [];
-
-    // Primary: 현재 이후 가장 가까운 것 1개
-    if (upcomingItems.isNotEmpty) {
-      final primary = upcomingItems.first;
-      finalModels.add(
-        HomeCardModel(
-          state: HomeCardState.nowAction, // Was reportNeeded
-          plan: _createSingleItemPlan(primary.plan, primary.item),
-        ),
-      );
-    }
-
-    // Secondary: 지나간 것들 (격하된 계획) - 최대 3개, 최근 것 우선(역순 정렬)
-    final sortedPastItems = pastItems.reversed.take(3).toList();
-    for (var past in sortedPastItems) {
-      finalModels.add(
-        HomeCardModel(
-          state: HomeCardState.overdue, // Was pastUncompleted
-          plan: _createSingleItemPlan(past.plan, past.item),
-        ),
-      );
-    }
-
-    // 만약 Primary도 없고 지남(Secondary)도 없으면 Quiet Day
+    // --- Part 3: Fallback States ---
     if (finalModels.isEmpty) {
-      return [const HomeCardModel(state: HomeCardState.todayEmpty)];
+      if (myPlans.any(
+        (p) => p.items.any((it) => it.days.contains(todayWeekday)),
+      )) {
+        // 오늘 일정이 있었는데 모두 완료한 경우
+        return [const HomeCardModel(state: HomeCardState.todayComplete)];
+      } else {
+        // 오늘 아예 실천할 일정이 없는 경우
+        return [const HomeCardModel(state: HomeCardState.todayEmpty)];
+      }
     }
 
     return finalModels;
@@ -171,7 +211,7 @@ class RealRecordRepository implements RecordRepository {
         return [const HomeCardModel(state: HomeCardState.emptyPlan)];
       }
 
-      return _processPlans(plans);
+      return _processPlans(plans, user.uid);
     } catch (e) {
       debugPrint('[RealRecordRepository] Error fetching home cards: $e');
       return [const HomeCardModel(state: HomeCardState.emptyPlan)];
@@ -450,10 +490,28 @@ class RealRecordRepository implements RecordRepository {
     if (user == null) return;
 
     try {
+      // 1. Update actions collection
       await _firestore.collection('actions').doc(historyId).update({
         'verifiedBy': user.uid,
         'verifiedAt': FieldValue.serverTimestamp(),
       });
+
+      // 2. Synchronize verifiedDates in plans collection for real-time Home Card sync
+      final historyDoc = await _firestore
+          .collection('actions')
+          .doc(historyId)
+          .get();
+      if (historyDoc.exists) {
+        final data = historyDoc.data();
+        final planId = data?['planId'] as String?;
+        final date = (data?['date'] as Timestamp?)?.toDate();
+
+        if (planId != null && date != null) {
+          await _firestore.collection('plans').doc(planId).update({
+            'verifiedDates': FieldValue.arrayUnion([Timestamp.fromDate(date)]),
+          });
+        }
+      }
     } catch (e) {
       debugPrint('[RealRecordRepository] Error verifying history item: $e');
       rethrow;
