@@ -58,4 +58,7 @@ abstract class RecordRepository {
 
   /// 과거 기록 소명 (HistoryItem 수정)
   Future<void> reconcileHistoryItem(String historyId, HistoryStatus status);
+
+  /// 기존의 모든 활성 계획에 대해 매니저를 일괄 할당합니다.
+  Future<void> assignManagerToActivePlans(String managerId);
 }

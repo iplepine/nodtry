@@ -103,10 +103,15 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         description: prevState.description, // Ensure description is saved
       );
 
+      // 연결된 파트너 확인 (매니저 자동 지정)
+      final connectedProfiles = ref.read(connectedProfilesProvider).value;
+      final managerId = connectedProfiles?.firstOrNull?.user.uid;
+
       // Create new plan object
       final plan = Plan(
         id: prevState.existingPlanId, // Preserves ID if editing
         userId: userId,
+        managerId: managerId, // 파트너가 있다면 매니저로 지정
         startDate: DateTime.now(),
         endDate: DateTime.now().add(const Duration(days: 30)),
         state:

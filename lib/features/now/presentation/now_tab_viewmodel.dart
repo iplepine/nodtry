@@ -16,7 +16,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   /// 데이터 스트림 로드 및 State 변환
   Stream<NowTabState> _fetchStateStream() {
-    final useCase = ref.read(getNowCardsUseCaseProvider);
+    final useCase = ref.watch(getNowCardsUseCaseProvider);
     return useCase.executeStream().map((models) {
       return NowTabState.fromModels(models);
     });

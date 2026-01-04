@@ -740,4 +740,38 @@ class RealRecordRepository implements RecordRepository {
     // Using reportSkip implementation for consistency
     await reportSkip(planId);
   }
+
+  @override
+  Future<void> assignManagerToActivePlans(String managerId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final querySnapshot = await _firestore
+          .collection('plans')
+          .where('userId', isEqualTo: user.uid)
+          .where(
+            'state',
+            whereIn: ['active', 'pending_approval'],
+          ) // Filter by active states
+          .get();
+
+      final batch = _firestore.batch();
+      for (final doc in querySnapshot.docs) {
+        // 이미 매니저가 있는 경우는 건너뛰거나, 덮어쓸지 정책 결정 필요.
+        // 여기서는 '매니저가 없는 경우'에만 할당하는 것으로 소급 적용.
+        final data = doc.data();
+        if (data['managerId'] == null ||
+            (data['managerId'] as String).isEmpty) {
+          batch.update(doc.reference, {'managerId': managerId});
+        }
+      }
+      await batch.commit();
+    } catch (e) {
+      debugPrint(
+        '[RealRecordRepository] Error assigning manager to active plans: $e',
+      );
+      rethrow;
+    }
+  }
 }

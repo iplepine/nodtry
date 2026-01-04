@@ -34,7 +34,7 @@ class MockConnectRepository implements ConnectRepository {
   }
 
   @override
-  Future<void> connectWithCode(String code) async {
+  Future<String> connectWithCode(String code) async {
     await Future.delayed(const Duration(milliseconds: 1000));
 
     if (code == 'ERROR') {
@@ -54,6 +54,8 @@ class MockConnectRepository implements ConnectRepository {
       _status = ConnectionStatus.active;
       _statusController.add(_status);
     });
+
+    return 'mock_manager_id_123';
   }
 
   @override

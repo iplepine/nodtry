@@ -66,7 +66,13 @@ class ConnectViewModel extends AsyncNotifier<ConnectState> {
 
     try {
       final repository = ref.read(connectRepositoryProvider);
-      await repository.connectWithCode(code);
+      final managerId = await repository.connectWithCode(code);
+
+      // 기존 활성 계획들에 대해서도 매니저 소급 적용
+      await ref
+          .read(recordRepositoryProvider)
+          .assignManagerToActivePlans(managerId);
+
       state = AsyncValue.data(state.value!.copyWith(isProcessing: false));
     } catch (e) {
       state = AsyncValue.data(

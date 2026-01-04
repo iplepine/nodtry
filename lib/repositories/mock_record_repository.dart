@@ -493,4 +493,19 @@ class MockRecordRepository implements RecordRepository {
     // Mock passing logic
     _notifyStream();
   }
+
+  @override
+  Future<void> assignManagerToActivePlans(String managerId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    for (var plan in _mockPlans) {
+      if (plan.userId == 'me' &&
+          (plan.managerId == null || plan.managerId!.isEmpty) &&
+          (plan.state == PlanState.active ||
+              plan.state == PlanState.pendingApproval)) {
+        // Mock update: Create new instance with managerId
+        final index = _mockPlans.indexOf(plan);
+        _mockPlans[index] = plan.copyWith(managerId: managerId);
+      }
+    }
+  }
 }

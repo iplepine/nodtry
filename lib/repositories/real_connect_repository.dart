@@ -14,7 +14,7 @@ class RealConnectRepository implements ConnectRepository {
   // final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
-  Future<void> connectWithCode(String code) async {
+  Future<String> connectWithCode(String code) async {
     final me = _auth.currentUser;
     if (me == null) throw Exception('Not authenticated');
 
@@ -44,6 +44,8 @@ class RealConnectRepository implements ConnectRepository {
       'createdAt': FieldValue.serverTimestamp(),
       'connectedAt': FieldValue.serverTimestamp(),
     });
+
+    return targetUserId;
   }
 
   @override
