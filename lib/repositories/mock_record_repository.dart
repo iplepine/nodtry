@@ -190,6 +190,31 @@ class MockRecordRepository implements RecordRepository {
     _streamController.add(_mockHomeCardModels);
   }
 
+  final _plansStreamController = StreamController<List<Plan>>.broadcast();
+
+  void _notifyPlansStream() {
+    _plansStreamController.add(_mockPlans);
+  }
+
+  @override
+  Stream<List<Plan>> getPlansByUserIdStream(String userId) {
+    // Initial emission
+    Future.microtask(() {
+      final filtered = userId == 'me'
+          ? _mockPlans.where((p) => p.userId == 'me').toList()
+          : _mockPlans.where((p) => p.userId != 'me').toList();
+      _plansStreamController.add(filtered);
+    });
+
+    return _plansStreamController.stream.map((plans) {
+      if (userId == 'me') {
+        return plans.where((p) => p.userId == 'me').toList();
+      } else {
+        return plans.where((p) => p.userId != 'me').toList();
+      }
+    });
+  }
+
   @override
   Future<void> createPlan(Plan plan) async {
     // Mock: 1초 딜레이 후 성공
@@ -205,6 +230,7 @@ class MockRecordRepository implements RecordRepository {
       HomeCardModel(state: HomeCardState.nowAction, plan: newPlan),
     ];
     _notifyStream();
+    _notifyPlansStream();
   }
 
   @override
@@ -219,6 +245,13 @@ class MockRecordRepository implements RecordRepository {
       );
       _notifyStream();
     }
+
+    // Update plan in _mockPlans list
+    final planIndex = _mockPlans.indexWhere((p) => p.id == plan.id);
+    if (planIndex != -1) {
+      _mockPlans[planIndex] = plan;
+      _notifyPlansStream();
+    }
   }
 
   @override
@@ -231,6 +264,9 @@ class MockRecordRepository implements RecordRepository {
       );
     }
     _notifyStream();
+
+    _mockPlans.removeWhere((p) => p.id == planId);
+    _notifyPlansStream();
   }
 
   Plan _createMockPlan({
@@ -270,6 +306,14 @@ class MockRecordRepository implements RecordRepository {
     // For completeness, updates could be simulated here too
     _mockHomeCardModels = [const HomeCardModel(state: HomeCardState.emptyPlan)];
     _notifyStream();
+
+    // Remove all plans for user (simulated)
+    if (uid == 'me') {
+      _mockPlans.removeWhere((p) => p.userId == 'me');
+    } else {
+      _mockPlans.removeWhere((p) => p.userId != 'me');
+    }
+    _notifyPlansStream();
   }
 
   @override

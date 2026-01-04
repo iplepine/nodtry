@@ -202,6 +202,30 @@ class RealRecordRepository implements RecordRepository {
     }
   }
 
+  @override
+  Stream<List<Plan>> getPlansByUserIdStream(String userId) {
+    return _firestore
+        .collection('plans')
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => Plan.fromMap(doc.data(), doc.id))
+              .where(
+                (p) =>
+                    p.state == PlanState.active ||
+                    p.state == PlanState.pendingApproval,
+              )
+              .toList();
+        })
+        .handleError((error) {
+          debugPrint(
+            '[RealRecordRepository] Error in plans stream for user $userId: $error',
+          );
+          return <Plan>[];
+        });
+  }
+
   /// 특정 아이템 하나만 포함된 임시 Plan 객체 생성 (UI 노출용)
   Plan _createSingleItemPlan(Plan original, PlanItem item) {
     return Plan(

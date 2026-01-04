@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,17 +55,18 @@ void main() {
     ) async {
       final mockUser = createMockUser();
       final mockPlans = [createMockPlan(id: 'p1', title: '내 계획 1')];
+      final profileController = StreamController<UserModel?>();
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            myProfileProvider.overrideWith((ref) => Stream.value(mockUser)),
+            myProfileProvider.overrideWith((ref) => profileController.stream),
             // Mocking connection to empty for this test
             connectedProfilesProvider.overrideWith((ref) => Future.value([])),
             // Mocking active plans for 'me'
             activePlansProvider(
               'me',
-            ).overrideWith((ref) => Future.value(mockPlans)),
+            ).overrideWith((ref) => Stream.value(mockPlans)),
           ],
           child: MaterialApp(
             localizationsDelegates: const [
@@ -81,18 +83,25 @@ void main() {
         ),
       );
 
-      // Wait for Futures/Streams
+      // Initial pump - ViewModel builds, initial read is null (loading)
+      await tester.pump();
+
+      // Emit profile data
+      profileController.add(mockUser);
+
+      // Allow listener to fire and state to update
       await tester.pumpAndSettle();
 
       // Check if "나" (DisplayName) is visible
       expect(find.text('나'), findsWidgets);
 
-      // Check "나의 약속" title (from L10n or hardcoded, assuming hardcoded "나의 약속" for now based on implementation)
-      // Note: Implementation uses hardcoded "나의 약속" currently marked as TODO: L10n
+      // Check "나의 약속" title
       expect(find.text('나의 약속'), findsOneWidget);
 
       // Check Plan Title
       expect(find.text('내 계획 1'), findsOneWidget);
+
+      await profileController.close();
     });
 
     testWidgets('Renders "You" section empty state correctly', (
@@ -105,7 +114,7 @@ void main() {
           overrides: [
             myProfileProvider.overrideWith((ref) => Stream.value(mockUser)),
             connectedProfilesProvider.overrideWith((ref) => Future.value([])),
-            activePlansProvider('me').overrideWith((ref) => Future.value([])),
+            activePlansProvider('me').overrideWith((ref) => Stream.value([])),
           ],
           child: MaterialApp(
             localizationsDelegates: const [
@@ -145,18 +154,20 @@ void main() {
       final partnerPlans = [
         createMockPlan(id: 'p2', title: '파트너 계획 1', userId: 'partner'),
       ];
+      final connectedCompleter = Completer<List<ConnectedUser>>();
+      final profileController = StreamController<UserModel?>();
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            myProfileProvider.overrideWith((ref) => Stream.value(mockUser)),
+            myProfileProvider.overrideWith((ref) => profileController.stream),
             connectedProfilesProvider.overrideWith(
-              (ref) => Future.value([connectedPartner]),
+              (ref) => connectedCompleter.future,
             ),
-            activePlansProvider('me').overrideWith((ref) => Future.value([])),
+            activePlansProvider('me').overrideWith((ref) => Stream.value([])),
             activePlansProvider(
               'partner',
-            ).overrideWith((ref) => Future.value(partnerPlans)),
+            ).overrideWith((ref) => Stream.value(partnerPlans)),
           ],
           child: MaterialApp(
             localizationsDelegates: const [
@@ -172,6 +183,15 @@ void main() {
           ),
         ),
       );
+
+      // Initialize
+      await tester.pump();
+
+      // Emit Data
+      profileController.add(mockUser);
+      await tester.pumpAndSettle();
+
+      connectedCompleter.complete([connectedPartner]);
 
       await tester.pumpAndSettle();
 

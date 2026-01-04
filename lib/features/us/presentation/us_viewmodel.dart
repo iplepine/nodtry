@@ -8,14 +8,14 @@ class UsViewModel extends AsyncNotifier<UsState> {
   FutureOr<UsState> build() async {
     // Listen to profile updates
     ref.listen(myProfileProvider, (prev, next) {
-      if (next is AsyncData) {
+      if (next is AsyncData && state.hasValue) {
         state = AsyncValue.data(state.value!.copyWith(myProfile: next.value));
       }
     });
 
     // Listen to connected profiles
     ref.listen(connectedProfilesProvider, (prev, next) {
-      if (next is AsyncData) {
+      if (next is AsyncData && state.hasValue) {
         state = AsyncValue.data(
           state.value!.copyWith(connectedProfiles: next.value ?? []),
         );
