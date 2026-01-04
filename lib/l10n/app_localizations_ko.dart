@@ -615,6 +615,32 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsDeveloper => '개발자 메뉴';
 
   @override
+  String get historyPartnerVerified => '파트너가 확인했어요';
+
+  @override
+  String get historyMeVerified => '내가 확인했어요';
+
+  @override
+  String get frequencyEveryday => '매일';
+
+  @override
+  String get planNotificationTimeOptional => '알림 시간 (선택)';
+
+  @override
+  String get usMyPlanTitle => '나의 약속';
+
+  @override
+  String usPartnerPlanTitle(String name) {
+    return '$name님의 약속';
+  }
+
+  @override
+  String get vagueTimeDinner => '저녁';
+
+  @override
+  String get vagueTimeBedtime => '자기 전';
+
+  @override
   String get settingsDeveloperDesc => '디버그 메뉴';
 
   @override

@@ -1588,7 +1588,7 @@ class _ManagerQuickCard extends StatelessWidget {
 
     // Days: Mon, Wed, Fri
     final daysStr = item.days.length == 7
-        ? '매일' // TODO: l10n
+        ? l10n.frequencyEveryday
         : item.days
               .map((d) => TimeFormatter.getWeekdayName(l10n, d))
               .join(', ');

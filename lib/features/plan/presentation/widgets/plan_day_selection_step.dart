@@ -58,7 +58,7 @@ class PlanDaySelectionStep extends StatelessWidget {
         ),
         const SizedBox(height: 48),
         Text(
-          "알림 시간 (선택)", // TODO: l10n
+          l10n.planNotificationTimeOptional,
           style: TextStyle(
             fontSize: 18, // Slightly smaller than main title
             fontWeight: FontWeight.bold,
@@ -67,7 +67,7 @@ class PlanDaySelectionStep extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          "제 시간에 못 해도 괜찮아요. 오늘 안에만 하면 돼요.", // Warm copy
+          "제 시간에 못 해도 괜찮아요. 오늘 안에만 하면 돼요.", // Warm copy - Keep hardcoded for now or add new key? Sticking to plan.
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 16),
@@ -75,13 +75,33 @@ class PlanDaySelectionStep extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildNotificationChip(context, l10n, 'morning', "아침"),
+              _buildNotificationChip(
+                context,
+                l10n,
+                'morning',
+                l10n.vagueTimeMorning,
+              ),
               const SizedBox(width: 8),
-              _buildNotificationChip(context, l10n, 'lunch', "점심"),
+              _buildNotificationChip(
+                context,
+                l10n,
+                'lunch',
+                l10n.vagueTimeLunch,
+              ),
               const SizedBox(width: 8),
-              _buildNotificationChip(context, l10n, 'dinner', "저녁"),
+              _buildNotificationChip(
+                context,
+                l10n,
+                'dinner',
+                l10n.vagueTimeDinner,
+              ),
               const SizedBox(width: 8),
-              _buildNotificationChip(context, l10n, 'bedtime', "자기 전"),
+              _buildNotificationChip(
+                context,
+                l10n,
+                'bedtime',
+                l10n.vagueTimeBedtime,
+              ),
               const SizedBox(width: 8),
               _buildCustomTimeChip(context, l10n),
             ],

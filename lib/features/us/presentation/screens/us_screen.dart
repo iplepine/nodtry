@@ -150,7 +150,7 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                         const SizedBox(height: 24),
                         _ActivePlanListSection(
                           userId: user.uid,
-                          title: "나의 약속", // TODO: L10n
+                          title: l10n.usMyPlanTitle,
                           isMe: true,
                         ),
                       ],
@@ -499,8 +499,9 @@ class _YouSection extends ConsumerWidget {
                   padding: const EdgeInsets.only(left: 1, right: 1, bottom: 24),
                   child: _ActivePlanListSection(
                     userId: person.user.uid,
-                    title:
-                        "${person.user.displayName ?? '전우'}님의 약속", // TODO: L10n
+                    title: l10n.usPartnerPlanTitle(
+                      person.user.displayName ?? l10n.usUnknownUser,
+                    ),
                     isMe: false,
                   ),
                 ),

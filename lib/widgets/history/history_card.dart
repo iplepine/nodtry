@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/history_item.dart';
 import '../../theme/app_colors.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HistoryCard extends StatelessWidget {
   final HistoryItem item;
@@ -23,7 +24,7 @@ class HistoryCard extends StatelessWidget {
         : Colors.white; // Minimal differentiation or use same
 
     // Status Logic
-    final statusInfo = _getStatusInfo(item.status);
+    final statusInfo = _getStatusInfo(context, item.status);
     final canReconcile = isMe && item.status == HistoryStatus.skipped;
 
     return Padding(
@@ -150,7 +151,9 @@ class HistoryCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            "파트너가 확인했어요", // TODO: L10n
+                            AppLocalizations.of(
+                              context,
+                            )!.historyPartnerVerified,
                             style: TextStyle(
                               color: AppColors.primary,
                               fontSize: 12,
@@ -172,7 +175,7 @@ class HistoryCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            "내가 확인했어요", // TODO: L10n
+                            AppLocalizations.of(context)!.historyMeVerified,
                             style: TextStyle(
                               color: AppColors.secondary,
                               fontSize: 12,
@@ -187,7 +190,7 @@ class HistoryCard extends StatelessWidget {
                     if (canReconcile) ...[
                       const SizedBox(height: 12),
                       Text(
-                        "탭해서 상태 변경하기",
+                        "탭해서 상태 변경하기", // TODO: L10n if needed or keep implicit
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,
@@ -214,39 +217,42 @@ class HistoryCard extends StatelessWidget {
     return "${date.month}/${date.day}";
   }
 
-  _StatusDisplayInfo _getStatusInfo(HistoryStatus status) {
+  _StatusDisplayInfo _getStatusInfo(
+    BuildContext context,
+    HistoryStatus status,
+  ) {
     switch (status) {
       case HistoryStatus.done:
         return _StatusDisplayInfo(
-          text: '했어',
+          text: AppLocalizations.of(context)!.homeDidIt,
           color: AppColors.primary.withOpacity(0.1),
           textColor: AppColors.primary,
           icon: Icons.check,
         );
       case HistoryStatus.actuallyDone:
         return _StatusDisplayInfo(
-          text: '사실 했어요', // Reconciled
+          text: AppLocalizations.of(context)!.nowStatusActuallyDone,
           color: AppColors.secondary.withOpacity(0.1),
           textColor: AppColors.secondary,
           icon: Icons.check_circle_outline,
         );
       case HistoryStatus.rested:
         return _StatusDisplayInfo(
-          text: '쉬어갔어요',
+          text: AppLocalizations.of(context)!.reconcileTookRest,
           color: Colors.grey.withOpacity(0.1),
           textColor: AppColors.textSecondary,
           icon: Icons.hotel, // Bed icon
         );
       case HistoryStatus.skipped:
         return _StatusDisplayInfo(
-          text: '지나갔어요',
+          text: AppLocalizations.of(context)!.timeChipPassed,
           color: Colors.orange.withOpacity(0.1),
           textColor: Colors.orange,
           icon: Icons.remove_circle_outline,
         );
       case HistoryStatus.verified:
         return _StatusDisplayInfo(
-          text: '확인됨',
+          text: AppLocalizations.of(context)!.homeChecked,
           color: AppColors.primary.withOpacity(0.1),
           textColor: AppColors.primary,
           icon: Icons.verified,

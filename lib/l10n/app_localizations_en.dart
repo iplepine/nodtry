@@ -628,6 +628,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDeveloper => 'Developer Menu';
 
   @override
+  String get historyPartnerVerified => 'Partner verified';
+
+  @override
+  String get historyMeVerified => 'I verified';
+
+  @override
+  String get frequencyEveryday => 'Everyday';
+
+  @override
+  String get planNotificationTimeOptional => 'Notification time (Optional)';
+
+  @override
+  String get usMyPlanTitle => 'My Promise';
+
+  @override
+  String usPartnerPlanTitle(String name) {
+    return '$name\'s Promise';
+  }
+
+  @override
+  String get vagueTimeDinner => 'Dinner';
+
+  @override
+  String get vagueTimeBedtime => 'Bedtime';
+
+  @override
   String get settingsDeveloperDesc => 'Debug menu';
 
   @override

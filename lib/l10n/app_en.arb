@@ -798,7 +798,44 @@
   "settingsPlanCreationDesc": "All steps in one screen",
   "settingsDeveloper": "Developer Menu",
   "@settingsDeveloper": {
-    "description": "Developer section title in settings"
+    "description": "Developer menu label"
+  },
+  "historyPartnerVerified": "Partner verified",
+  "@historyPartnerVerified": {
+    "description": "History card label when partner verified"
+  },
+  "historyMeVerified": "I verified",
+  "@historyMeVerified": {
+    "description": "History card label when I verified"
+  },
+  "frequencyEveryday": "Everyday",
+  "@frequencyEveryday": {
+    "description": "Frequency label for everyday"
+  },
+  "planNotificationTimeOptional": "Notification time (Optional)",
+  "@planNotificationTimeOptional": {
+    "description": "Label for optional notification time"
+  },
+  "usMyPlanTitle": "My Promise",
+  "@usMyPlanTitle": {
+    "description": "Title for my plan section"
+  },
+  "usPartnerPlanTitle": "{name}'s Promise",
+  "@usPartnerPlanTitle": {
+    "description": "Title for partner plan section",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "vagueTimeDinner": "Dinner",
+  "@vagueTimeDinner": {
+    "description": "Vague time label for dinner"
+  },
+  "vagueTimeBedtime": "Bedtime",
+  "@vagueTimeBedtime": {
+    "description": "Vague time label for bedtime"
   },
   "settingsDeveloperDesc": "Debug menu",
   "@settingsDeveloperDesc": {

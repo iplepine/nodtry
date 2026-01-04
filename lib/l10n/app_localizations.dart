@@ -1256,11 +1256,59 @@ abstract class AppLocalizations {
   /// **'All steps in one screen'**
   String get settingsPlanCreationDesc;
 
-  /// Developer section title in settings
+  /// Developer menu label
   ///
   /// In en, this message translates to:
   /// **'Developer Menu'**
   String get settingsDeveloper;
+
+  /// History card label when partner verified
+  ///
+  /// In en, this message translates to:
+  /// **'Partner verified'**
+  String get historyPartnerVerified;
+
+  /// History card label when I verified
+  ///
+  /// In en, this message translates to:
+  /// **'I verified'**
+  String get historyMeVerified;
+
+  /// Frequency label for everyday
+  ///
+  /// In en, this message translates to:
+  /// **'Everyday'**
+  String get frequencyEveryday;
+
+  /// Label for optional notification time
+  ///
+  /// In en, this message translates to:
+  /// **'Notification time (Optional)'**
+  String get planNotificationTimeOptional;
+
+  /// Title for my plan section
+  ///
+  /// In en, this message translates to:
+  /// **'My Promise'**
+  String get usMyPlanTitle;
+
+  /// Title for partner plan section
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s Promise'**
+  String usPartnerPlanTitle(String name);
+
+  /// Vague time label for dinner
+  ///
+  /// In en, this message translates to:
+  /// **'Dinner'**
+  String get vagueTimeDinner;
+
+  /// Vague time label for bedtime
+  ///
+  /// In en, this message translates to:
+  /// **'Bedtime'**
+  String get vagueTimeBedtime;
 
   /// Description for developer menu
   ///

@@ -409,5 +409,20 @@
   "weakPassword": "비밀번호는 6자 이상이어야 합니다",
   "accountExistsWithDifferentCredential": "이미 가입된 이메일입니다.",
   "userNotFound": "가입되지 않은 이메일입니다.",
-  "wrongPassword": "비밀번호가 일치하지 않습니다."
+  "wrongPassword": "비밀번호가 일치하지 않습니다.",
+  "historyPartnerVerified": "파트너가 확인했어요",
+  "historyMeVerified": "내가 확인했어요",
+  "frequencyEveryday": "매일",
+  "planNotificationTimeOptional": "알림 시간 (선택)",
+  "usMyPlanTitle": "나의 약속",
+  "usPartnerPlanTitle": "{name}님의 약속",
+  "@usPartnerPlanTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "vagueTimeDinner": "저녁",
+  "vagueTimeBedtime": "자기 전"
 }
