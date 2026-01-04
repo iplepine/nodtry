@@ -9,4 +9,8 @@ class GetHistoryUseCase {
   Future<List<HistoryItem>> execute() async {
     return _repository.getHistoryItems();
   }
+
+  Stream<List<HistoryItem>> executeStream() {
+    return _repository.getHistoryItemsStream();
+  }
 }

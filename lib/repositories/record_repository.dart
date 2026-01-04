@@ -16,6 +16,9 @@ abstract class RecordRepository {
   /// '기록' 탭의 히스토리 아이템 목록을 가져옵니다.
   Future<List<HistoryItem>> getHistoryItems();
 
+  /// '기록' 탭의 히스토리 아이템 목록을 스트림으로 가져옵니다. (Offline-First)
+  Stream<List<HistoryItem>> getHistoryItemsStream();
+
   /// 특정 유저의 활성 계획 목록을 가져옵니다.
   Future<List<Plan>> getPlansByUserId(String userId);
 

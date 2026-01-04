@@ -6,71 +6,74 @@ import '../../../models/history_item.dart';
 import '../../../models/plan_model.dart';
 import '../../../models/plan_summary.dart';
 
-class HistoryViewModel extends AsyncNotifier<HistoryState> {
+class HistoryViewModel extends StreamNotifier<HistoryState> {
   @override
-  FutureOr<HistoryState> build() async {
-    return _fetchState();
+  Stream<HistoryState> build() {
+    return _fetchStateStream();
   }
 
-  Future<HistoryState> _fetchState() async {
-    final useCase = ref.read(getHistoryUseCaseProvider);
-    final allItems = await useCase.execute();
+  Stream<HistoryState> _fetchStateStream() {
+    final historyUseCase = ref.watch(getHistoryUseCaseProvider);
+    final profile = ref.watch(myProfileProvider).value;
+    final myUid = profile?.uid ?? 'me';
+    final recordRepo = ref.watch(recordRepositoryProvider);
 
-    // Profile for identifying 'me'
-    final myProfile = ref.read(myProfileProvider).value;
-    final myUid = myProfile?.uid ?? 'me';
+    // 1. Get History Stream
+    final historyStream = historyUseCase.executeStream();
 
-    // Fetch all plans to distinguish active vs completed
-    final recordRepo = ref.read(recordRepositoryProvider);
-    final myPlans = await recordRepo.getPlansByUserId(myUid);
+    // Combine streams
+    // Note: This is a simple combination. For production, consider using RxDart's CombineLatest.
+    // or separate providers that this one watches.
+    // Here we use nested streams/mapping for simplicity without extra dependencies.
+    return historyStream.asyncMap((allItems) async {
+      // Since plans are also a stream, we fetch the current list of plans.
+      // In a more reactive way, this should also rebuild when plans change.
+      final myPlans = await recordRepo.getPlansByUserId(myUid);
 
-    // Assuming we also want to see partner's finished plans or shared plans
-    // In this app, plans are usually shared (managerId/userId pair)
-    // For now, let's treat all fetched plans as relevant
-    final activePlanIds = myPlans
-        .where((p) => p.state == PlanState.active)
-        .map((p) => p.id)
-        .toSet();
+      final activePlanIds = myPlans
+          .where((p) => p.state == PlanState.active)
+          .map((p) => p.id)
+          .toSet();
 
-    final activeItems = allItems.where((item) {
-      if (item.planId != null) {
-        return activePlanIds.contains(item.planId);
-      }
-      // Fallback: If no planId, use date range of active plans if needed
-      // but ideally all new items should have planId.
-      return true; // Temporary
-    }).toList();
+      final activeItems = allItems.where((item) {
+        if (item.planId != null) {
+          return activePlanIds.contains(item.planId);
+        }
+        return true;
+      }).toList();
 
-    activeItems.sort((a, b) => b.date.compareTo(a.date));
+      activeItems.sort((a, b) => b.date.compareTo(a.date));
 
-    // Build summaries for completed plans
-    final finishedPlanSummaries = <PlanSummary>[];
-    final completedPlans = myPlans.where((p) => p.state == PlanState.completed);
-
-    for (var plan in completedPlans) {
-      final myCount = allItems.where((item) {
-        return item.planId == plan.id &&
-            item.executorId == myUid &&
-            (item.status == HistoryStatus.done ||
-                item.status == HistoryStatus.actuallyDone);
-      }).length;
-
-      finishedPlanSummaries.add(
-        PlanSummary(
-          planId: plan.id ?? '',
-          title: plan.items.isNotEmpty ? plan.items.first.title : '제목 없음',
-          startDate: plan.startDate,
-          endDate: plan.endDate,
-          myCount: myCount,
-        ),
+      final finishedPlanSummaries = <PlanSummary>[];
+      final completedPlans = myPlans.where(
+        (p) => p.state == PlanState.completed,
       );
-    }
 
-    return HistoryState(
-      activeItems: activeItems,
-      finishedPlanSummaries: finishedPlanSummaries,
-      isLoading: false,
-    );
+      for (var plan in completedPlans) {
+        final myCount = allItems.where((item) {
+          return item.planId == plan.id &&
+              item.executorId == myUid &&
+              (item.status == HistoryStatus.done ||
+                  item.status == HistoryStatus.actuallyDone);
+        }).length;
+
+        finishedPlanSummaries.add(
+          PlanSummary(
+            planId: plan.id ?? '',
+            title: plan.items.isNotEmpty ? plan.items.first.title : '제목 없음',
+            startDate: plan.startDate,
+            endDate: plan.endDate,
+            myCount: myCount,
+          ),
+        );
+      }
+
+      return HistoryState(
+        activeItems: activeItems,
+        finishedPlanSummaries: finishedPlanSummaries,
+        isLoading: false,
+      );
+    });
   }
 
   Future<void> dispatch(HistoryIntent intent) async {
@@ -78,7 +81,7 @@ class HistoryViewModel extends AsyncNotifier<HistoryState> {
 
     try {
       if (intent is RefreshIntent) {
-        state = await AsyncValue.guard(() => _fetchState());
+        ref.invalidateSelf();
       } else if (intent is ReconcileIntent) {
         await _reconcile(intent.historyId, intent.status);
       }
@@ -91,8 +94,8 @@ class HistoryViewModel extends AsyncNotifier<HistoryState> {
     await ref
         .read(recordRepositoryProvider)
         .reconcileHistoryItem(historyId, status);
+    // Stream handles updates automatically, but we can invalidate if we want immediate fresh build
     ref.invalidateSelf();
-    await future;
   }
 
   /// 디버그용: FakeState를 직접 주입
@@ -102,6 +105,6 @@ class HistoryViewModel extends AsyncNotifier<HistoryState> {
 }
 
 final historyViewModelProvider =
-    AsyncNotifierProvider<HistoryViewModel, HistoryState>(
+    StreamNotifierProvider<HistoryViewModel, HistoryState>(
       () => HistoryViewModel(),
     );

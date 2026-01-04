@@ -263,6 +263,27 @@ class RealRecordRepository implements RecordRepository {
   }
 
   @override
+  Stream<List<HistoryItem>> getHistoryItemsStream() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return Stream.value([]);
+
+    return _firestore
+        .collection('actions')
+        .where('userId', isEqualTo: user.uid)
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => HistoryItem.fromMap(doc.data(), doc.id))
+              .toList();
+        })
+        .handleError((error) {
+          debugPrint('[RealRecordRepository] Error in history stream: $error');
+          return <HistoryItem>[];
+        });
+  }
+
+  @override
   Future<void> createPlan(Plan plan) async {
     debugPrint(
       '[RealRecordRepository] createPlan called. Plan: ${plan.toMap()}',

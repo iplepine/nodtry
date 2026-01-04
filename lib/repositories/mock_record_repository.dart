@@ -178,6 +178,8 @@ class MockRecordRepository implements RecordRepository {
   }
 
   final _streamController = StreamController<List<HomeCardModel>>.broadcast();
+  final _historyStreamController =
+      StreamController<List<HistoryItem>>.broadcast();
 
   @override
   Stream<List<HomeCardModel>> getHomeCardStatesStream() {
@@ -186,8 +188,19 @@ class MockRecordRepository implements RecordRepository {
     return _streamController.stream;
   }
 
+  @override
+  Stream<List<HistoryItem>> getHistoryItemsStream() {
+    // 초기값 전달
+    Future.microtask(() => _historyStreamController.add(_mockHistoryItems));
+    return _historyStreamController.stream;
+  }
+
   void _notifyStream() {
     _streamController.add(_mockHomeCardModels);
+  }
+
+  void _notifyHistoryStream() {
+    _historyStreamController.add(_mockHistoryItems);
   }
 
   final _plansStreamController = StreamController<List<Plan>>.broadcast();
@@ -375,6 +388,28 @@ class MockRecordRepository implements RecordRepository {
         );
       }
       _notifyStream();
+
+      // 히스토리에 추가
+      _mockHistoryItems.insert(
+        0,
+        HistoryItem(
+          id: 'mock_h_${DateTime.now().millisecondsSinceEpoch}',
+          planId: planId,
+          date: DateTime.now(),
+          title: model.plan?.items.firstOrNull?.title ?? '계획 완료',
+          status:
+              (model.state == HomeCardState.nowAction ||
+                  model.state == HomeCardState.overdue)
+              ? HistoryStatus.done
+              : HistoryStatus.actuallyDone,
+          executorId:
+              (model.state == HomeCardState.nowAction ||
+                  model.state == HomeCardState.overdue)
+              ? 'me'
+              : 'partner',
+        ),
+      );
+      _notifyHistoryStream();
     }
   }
 
@@ -405,6 +440,7 @@ class MockRecordRepository implements RecordRepository {
         partnerName: item.partnerName,
         partnerImageUrl: item.partnerImageUrl,
       );
+      _notifyHistoryStream();
     }
   }
 
@@ -419,6 +455,20 @@ class MockRecordRepository implements RecordRepository {
       );
     }
     _notifyStream();
+
+    // 히스토리에 추가 (Skip)
+    _mockHistoryItems.insert(
+      0,
+      HistoryItem(
+        id: 'mock_h_skip_${DateTime.now().millisecondsSinceEpoch}',
+        planId: planId,
+        date: DateTime.now(),
+        title: '계획 건너뜀',
+        status: HistoryStatus.skipped,
+        executorId: 'me',
+      ),
+    );
+    _notifyHistoryStream();
   }
 
   @override
