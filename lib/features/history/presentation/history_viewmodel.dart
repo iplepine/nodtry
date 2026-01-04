@@ -14,8 +14,15 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
 
   Stream<HistoryState> _fetchStateStream() {
     final historyUseCase = ref.watch(getHistoryUseCaseProvider);
-    final profile = ref.watch(myProfileProvider).value;
-    final myUid = profile?.uid ?? 'me';
+    final profileAsync = ref.watch(myProfileProvider);
+    final profile = profileAsync.value;
+
+    // If profile is not loaded yet, wait to avoid querying with mock 'me' ID
+    if (profile == null) {
+      return Stream.value(const HistoryState(isLoading: true));
+    }
+
+    final myUid = profile.uid;
 
     // Watch partner UID for full sync
     final connectedUsers = ref.watch(connectedProfilesProvider).value ?? [];
@@ -40,19 +47,8 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         allPlans.addAll(partnerPlans);
       }
 
-      final activePlanIds = allPlans
-          .where((p) => p.state == PlanState.active)
-          .map((p) => p.id)
-          .toSet();
-
-      // Show items related to active plans (or generic items)
-      final activeItems = allItems.where((item) {
-        if (item.planId != null) {
-          return activePlanIds.contains(item.planId);
-        }
-        return true;
-      }).toList();
-
+      // Show all items (removing PlanState.active restriction to ensure all recordings are visible)
+      final activeItems = List<HistoryItem>.from(allItems);
       activeItems.sort((a, b) => b.date.compareTo(a.date));
 
       // 3. Prepare summaries for completed plans

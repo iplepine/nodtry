@@ -553,6 +553,7 @@ class RealRecordRepository implements RecordRepository {
       await _firestore.collection('plans').doc(planId).update({
         'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
       });
+      debugPrint('[RealRecordRepository] Plan updated successfully');
 
       // 2. Add to actions collection
       // Need Plan Title for denormalization (Optional but recommended)
@@ -561,7 +562,7 @@ class RealRecordRepository implements RecordRepository {
       final planTitle =
           (planData?['items'] as List?)?.firstOrNull?['title'] ?? '알 수 없는 계획';
 
-      await _firestore.collection('actions').add({
+      final actionRef = await _firestore.collection('actions').add({
         'userId': user.uid,
         'planId': planId,
         'date': Timestamp.fromDate(now),
@@ -569,8 +570,11 @@ class RealRecordRepository implements RecordRepository {
         'title': planTitle,
         'createdAt': FieldValue.serverTimestamp(),
       });
+      debugPrint(
+        '[RealRecordRepository] Action added with ID: ${actionRef.id}',
+      );
     } catch (e) {
-      debugPrint('[RealRecordRepository] Error reporting completion: $e');
+      debugPrint('[RealRecordRepository] !!! Error reporting completion: $e');
       rethrow;
     }
   }
