@@ -54,9 +54,8 @@ class RealRecordRepository implements RecordRepository {
           )
           .toList();
 
-      if (plans.isEmpty) {
-        return [const HomeCardModel(state: HomeCardState.emptyPlan)];
-      }
+      // Even if plans is empty, we should process to ensure logic consistency (e.g. EmptyPlan generation)
+      // and to allow future extensibility.
       return _processPlans(plans, myUid);
     } catch (e) {
       debugPrint('[RealRecordRepository] Error mapping snapshot: $e');
@@ -71,10 +70,10 @@ class RealRecordRepository implements RecordRepository {
     final todayWeekday = now.weekday; // 1=Mon, 7=Sun
     final nowInMinutes = now.hour * 60 + now.minute;
 
-    final List<HomeCardModel> finalModels = [];
+    final List<HomeCardModel> mineCards = [];
+    final List<HomeCardModel> yoursCards = [];
 
-    // --- Part 1: Partner Actions (Manager Role) ---
-    // 파트너가 완료(completedDates)했으나 내가 아직 확인(verifiedDates)하지 않은 항목
+    // --- Part 1: Partner Actions (Manager Role) -> Yours ---
     final managerPlans = plans.where((p) => p.managerId == myUid);
     for (var plan in managerPlans) {
       final hasCompletedToday = plan.completedDates.any(
@@ -91,7 +90,7 @@ class RealRecordRepository implements RecordRepository {
       );
 
       if (hasCompletedToday && !hasVerifiedToday) {
-        finalModels.add(
+        yoursCards.add(
           HomeCardModel(
             state: HomeCardState.partnerAction,
             plan: plan,
@@ -100,9 +99,8 @@ class RealRecordRepository implements RecordRepository {
         );
       }
 
-      // --- New: Partner Plan Proposal/Modification ---
       if (plan.state == PlanState.pendingApproval) {
-        finalModels.add(
+        yoursCards.add(
           HomeCardModel(
             state: HomeCardState.partnerPlanCreate, // 계획 제안
             plan: plan,
@@ -112,9 +110,10 @@ class RealRecordRepository implements RecordRepository {
       }
     }
 
-    // --- Part 2: My Actions (Executor Role) ---
+    // --- Part 2: My Actions (Executor Role) -> Mine ---
     final myPlans = plans.where((p) => p.userId == myUid);
     final List<({Plan plan, PlanItem item, int timeInMin})> allTodayItems = [];
+    bool hasAnyPlanToday = false;
 
     for (var plan in myPlans) {
       if (now.isBefore(plan.startDate) || now.isAfter(plan.endDate)) {
@@ -128,13 +127,17 @@ class RealRecordRepository implements RecordRepository {
             d.day == today.day,
       );
 
-      if (isCompletedToday) {
-        continue;
-      }
-
       final todayItems = plan.items
           .where((item) => item.days.contains(todayWeekday))
           .toList();
+
+      if (todayItems.isNotEmpty) {
+        hasAnyPlanToday = true;
+      }
+
+      if (isCompletedToday) {
+        continue;
+      }
 
       for (var item in todayItems) {
         final time = item.notificationTime;
@@ -160,7 +163,7 @@ class RealRecordRepository implements RecordRepository {
       // Primary: 현재 이후 가장 가까운 것 1개
       if (upcomingItems.isNotEmpty) {
         final primary = upcomingItems.first;
-        finalModels.add(
+        mineCards.add(
           HomeCardModel(
             state: HomeCardState.nowAction,
             plan: _createSingleItemPlan(primary.plan, primary.item),
@@ -171,7 +174,7 @@ class RealRecordRepository implements RecordRepository {
       // Secondary: 지나간 것들 (최대 3개)
       final sortedPastItems = pastItems.reversed.take(3).toList();
       for (var past in sortedPastItems) {
-        finalModels.add(
+        mineCards.add(
           HomeCardModel(
             state: HomeCardState.overdue,
             plan: _createSingleItemPlan(past.plan, past.item),
@@ -180,20 +183,22 @@ class RealRecordRepository implements RecordRepository {
       }
     }
 
-    // --- Part 3: Fallback States ---
-    if (finalModels.isEmpty) {
-      if (myPlans.any(
-        (p) => p.items.any((it) => it.days.contains(todayWeekday)),
-      )) {
-        // 오늘 일정이 있었는데 모두 완료한 경우
-        return [const HomeCardModel(state: HomeCardState.todayComplete)];
+    // Fallback States for Mine
+    if (mineCards.isEmpty) {
+      if (myPlans.isEmpty) {
+        // 아예 계획이 없음 -> EmptyPlan (CTA)
+        mineCards.add(const HomeCardModel(state: HomeCardState.emptyPlan));
+      } else if (hasAnyPlanToday) {
+        // 오늘 계획은 있었는데 모두 완료함 -> TodayComplete
+        mineCards.add(const HomeCardModel(state: HomeCardState.todayComplete));
       } else {
-        // 오늘 아예 실천할 일정이 없는 경우
-        return [const HomeCardModel(state: HomeCardState.todayEmpty)];
+        // 오늘 해당되는 요일의 계획이 없음 -> TodayEmpty
+        mineCards.add(const HomeCardModel(state: HomeCardState.todayEmpty));
       }
     }
 
-    return finalModels;
+    // Merge: Mine + Yours
+    return [...mineCards, ...yoursCards];
   }
 
   @override
