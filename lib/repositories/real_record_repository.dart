@@ -99,6 +99,17 @@ class RealRecordRepository implements RecordRepository {
           ),
         );
       }
+
+      // --- New: Partner Plan Proposal/Modification ---
+      if (plan.state == PlanState.pendingApproval) {
+        finalModels.add(
+          HomeCardModel(
+            state: HomeCardState.partnerPlanCreate, // 계획 제안
+            plan: plan,
+            headerMessage: '새로운 계획 제안이 있어요',
+          ),
+        );
+      }
     }
 
     // --- Part 2: My Actions (Executor Role) ---
@@ -303,18 +314,29 @@ class RealRecordRepository implements RecordRepository {
   }
 
   @override
-  Stream<List<HistoryItem>> getHistoryItemsStream() {
+  Stream<List<HistoryItem>> getHistoryItemsStream({List<String>? userIds}) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return Stream.value([]);
 
-    return _firestore
-        .collection('actions')
-        .where('userId', isEqualTo: user.uid)
+    Query query = _firestore.collection('actions');
+
+    if (userIds != null && userIds.isNotEmpty) {
+      query = query.where('userId', whereIn: userIds);
+    } else {
+      query = query.where('userId', isEqualTo: user.uid);
+    }
+
+    return query
         .orderBy('date', descending: true)
         .snapshots()
         .map((snapshot) {
           return snapshot.docs
-              .map((doc) => HistoryItem.fromMap(doc.data(), doc.id))
+              .map(
+                (doc) => HistoryItem.fromMap(
+                  doc.data() as Map<String, dynamic>,
+                  doc.id,
+                ),
+              )
               .toList();
         })
         .handleError((error) {

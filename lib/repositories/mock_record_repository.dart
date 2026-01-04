@@ -189,10 +189,15 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
-  Stream<List<HistoryItem>> getHistoryItemsStream() {
-    // 초기값 전달
-    Future.microtask(() => _historyStreamController.add(_mockHistoryItems));
-    return _historyStreamController.stream;
+  Stream<List<HistoryItem>> getHistoryItemsStream({List<String>? userIds}) {
+    // Return a stream that updates whenever _mockHistoryItems changes,
+    // filtered by userIds if provided.
+    return _historyStreamController.stream.map((allItems) {
+      if (userIds == null || userIds.isEmpty) return allItems;
+      return allItems
+          .where((item) => userIds.contains(item.executorId))
+          .toList();
+    });
   }
 
   void _notifyStream() {

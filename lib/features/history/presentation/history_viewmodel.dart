@@ -16,25 +16,36 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
     final historyUseCase = ref.watch(getHistoryUseCaseProvider);
     final profile = ref.watch(myProfileProvider).value;
     final myUid = profile?.uid ?? 'me';
+
+    // Watch partner UID for full sync
+    final connectedUsers = ref.watch(connectedProfilesProvider).value ?? [];
+    final partnerUid = connectedUsers.isNotEmpty
+        ? connectedUsers.first.user.uid
+        : null;
+    final userIds = [myUid, if (partnerUid != null) partnerUid];
+
     final recordRepo = ref.watch(recordRepositoryProvider);
 
-    // 1. Get History Stream
-    final historyStream = historyUseCase.executeStream();
+    // 1. Get Unified History Stream (Me + Partner)
+    final historyStream = historyUseCase.executeStream(userIds: userIds);
 
-    // Combine streams
-    // Note: This is a simple combination. For production, consider using RxDart's CombineLatest.
-    // or separate providers that this one watches.
-    // Here we use nested streams/mapping for simplicity without extra dependencies.
     return historyStream.asyncMap((allItems) async {
-      // Since plans are also a stream, we fetch the current list of plans.
-      // In a more reactive way, this should also rebuild when plans change.
+      // 2. Fetch both my plans and partner plans to reconcile history and summaries
+      final allPlans = <Plan>[];
       final myPlans = await recordRepo.getPlansByUserId(myUid);
+      allPlans.addAll(myPlans);
 
-      final activePlanIds = myPlans
+      if (partnerUid != null) {
+        final partnerPlans = await recordRepo.getPlansByUserId(partnerUid);
+        allPlans.addAll(partnerPlans);
+      }
+
+      final activePlanIds = allPlans
           .where((p) => p.state == PlanState.active)
           .map((p) => p.id)
           .toSet();
 
+      // Show items related to active plans (or generic items)
       final activeItems = allItems.where((item) {
         if (item.planId != null) {
           return activePlanIds.contains(item.planId);
@@ -44,15 +55,15 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
 
       activeItems.sort((a, b) => b.date.compareTo(a.date));
 
+      // 3. Prepare summaries for completed plans
       final finishedPlanSummaries = <PlanSummary>[];
-      final completedPlans = myPlans.where(
+      final completedPlans = allPlans.where(
         (p) => p.state == PlanState.completed,
       );
 
       for (var plan in completedPlans) {
-        final myCount = allItems.where((item) {
+        final count = allItems.where((item) {
           return item.planId == plan.id &&
-              item.executorId == myUid &&
               (item.status == HistoryStatus.done ||
                   item.status == HistoryStatus.actuallyDone);
         }).length;
@@ -63,7 +74,8 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
             title: plan.items.isNotEmpty ? plan.items.first.title : '제목 없음',
             startDate: plan.startDate,
             endDate: plan.endDate,
-            myCount: myCount,
+            myCount:
+                count, // This is technically "Our Count" or "Executor Count"
           ),
         );
       }

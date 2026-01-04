@@ -10,7 +10,7 @@ class GetHistoryUseCase {
     return _repository.getHistoryItems();
   }
 
-  Stream<List<HistoryItem>> executeStream() {
-    return _repository.getHistoryItemsStream();
+  Stream<List<HistoryItem>> executeStream({List<String>? userIds}) {
+    return _repository.getHistoryItemsStream(userIds: userIds);
   }
 }
