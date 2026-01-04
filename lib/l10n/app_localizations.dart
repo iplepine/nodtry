@@ -656,6 +656,12 @@ abstract class AppLocalizations {
   /// **'Let\'s skip today'**
   String get nowActionSkipToday;
 
+  /// Button to add more plans in TodayComplete/TodayEmpty state
+  ///
+  /// In en, this message translates to:
+  /// **'Shall we make another promise?'**
+  String get nowAddMorePlan;
+
   /// Record gaze - showing count in current week
   ///
   /// In en, this message translates to:

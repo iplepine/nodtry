@@ -6,6 +6,8 @@ import '../screens/developer_screen.dart';
 import '../features/plan/presentation/screens/plan_create_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../features/auth/presentation/screens/email_login_screen.dart';
+import '../models/plan_model.dart';
+import '../features/plan/presentation/screens/plan_detail_screen.dart';
 
 /// 앱 라우팅 경로 상수
 class AppRoutes {
@@ -71,7 +73,19 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.planCreate,
       name: 'plan-create',
-      builder: (context, state) => const PlanCreateScreen(),
+      builder: (context, state) {
+        final planToEdit = state.extra as Plan?;
+        return PlanCreateScreen(planToEdit: planToEdit);
+      },
+    ),
+    // 계획 상세 화면
+    GoRoute(
+      path: '/plan/detail',
+      name: 'plan-detail',
+      builder: (context, state) {
+        final plan = state.extra as Plan;
+        return PlanDetailScreen(plan: plan);
+      },
     ),
     // 계획 생성 플로우 (기존 단계별 화면 - 하위 호환성 유지)
     GoRoute(

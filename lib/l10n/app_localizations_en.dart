@@ -310,6 +310,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowActionSkipToday => 'Let\'s skip today';
 
   @override
+  String get nowAddMorePlan => 'Shall we make another promise?';
+
+  @override
   String recordGazeWeekCount(int count) {
     return '${count}th promise this week';
   }

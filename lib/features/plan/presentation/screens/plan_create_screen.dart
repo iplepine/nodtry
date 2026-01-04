@@ -18,7 +18,9 @@ import '../viewmodel/plan_create_viewmodel.dart';
 
 /// 통합 계획 생성 화면 (Wizard 방식)
 class PlanCreateScreen extends ConsumerStatefulWidget {
-  const PlanCreateScreen({super.key});
+  final Plan? planToEdit;
+
+  const PlanCreateScreen({super.key, this.planToEdit});
 
   @override
   ConsumerState<PlanCreateScreen> createState() => _PlanCreateScreenState();
@@ -39,8 +41,24 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
   @override
   void initState() {
     super.initState();
-    _actionController = TextEditingController();
-    _descriptionController = TextEditingController();
+    // Initialize with existing data if editing
+    final plan = widget.planToEdit;
+    final item = plan?.items.firstOrNull;
+
+    _actionController = TextEditingController(text: item?.title ?? '');
+    _descriptionController = TextEditingController(
+      text: item?.description ?? '',
+    );
+
+    // Init ViewModel directly via Intent or overrides?
+    // Dispatch init intent after first build or use microtask
+    if (plan != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(planCreateViewModelProvider.notifier)
+            .dispatch(InitializePlanIntent(plan));
+      });
+    }
 
     _actionController.addListener(() {
       ref
@@ -52,6 +70,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
           .read(planCreateViewModelProvider.notifier)
           .dispatch(UpdateDescriptionIntent(_descriptionController.text));
     });
+    // ... existing ...
 
     NotificationService().init();
   }

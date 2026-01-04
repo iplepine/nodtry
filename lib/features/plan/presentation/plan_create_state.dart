@@ -1,24 +1,63 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:flutter/foundation.dart';
 import '../../../models/plan_model.dart';
 
-part 'plan_create_state.freezed.dart';
+// part 'plan_create_state.freezed.dart'; // Removed
 
-@freezed
-abstract class PlanCreateState with _$PlanCreateState {
-  const factory PlanCreateState({
-    @Default(1) int currentStep,
-    @Default('') String action,
-    @Default(3) int selectedFrequency,
-    @Default('') String description,
-    @Default({}) Set<int> selectedDays,
-    required NotificationTime notificationTime,
-    @Default(false) bool isSaving,
+class PlanCreateState {
+  final int currentStep;
+  final String action;
+  final int selectedFrequency;
+  final String description;
+  final Set<int> selectedDays;
+  final NotificationTime notificationTime;
+  final bool isSaving;
+  final String? errorMessage;
+  final String? existingPlanId;
+
+  const PlanCreateState({
+    this.currentStep = 1,
+    this.action = '',
+    this.selectedFrequency = 3,
+    this.description = '',
+    this.selectedDays = const {},
+    required this.notificationTime,
+    this.isSaving = false,
+    this.errorMessage,
+    this.existingPlanId,
+  });
+
+  PlanCreateState copyWith({
+    int? currentStep,
+    String? action,
+    int? selectedFrequency,
+    String? description,
+    Set<int>? selectedDays,
+    NotificationTime? notificationTime,
+    bool? isSaving,
     String? errorMessage,
-  }) = _PlanCreateState;
+    String? existingPlanId,
+  }) {
+    return PlanCreateState(
+      currentStep: currentStep ?? this.currentStep,
+      action: action ?? this.action,
+      selectedFrequency: selectedFrequency ?? this.selectedFrequency,
+      description: description ?? this.description,
+      selectedDays: selectedDays ?? this.selectedDays,
+      notificationTime: notificationTime ?? this.notificationTime,
+      isSaving: isSaving ?? this.isSaving,
+      errorMessage: errorMessage ?? this.errorMessage,
+      existingPlanId: existingPlanId ?? this.existingPlanId,
+    );
+  }
 }
 
 sealed class PlanCreateIntent {
   const PlanCreateIntent();
+}
+
+class InitializePlanIntent extends PlanCreateIntent {
+  final Plan plan;
+  const InitializePlanIntent(this.plan);
 }
 
 class UpdateActionIntent extends PlanCreateIntent {

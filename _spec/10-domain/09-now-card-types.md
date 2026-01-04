@@ -137,3 +137,5 @@ Mine 영역은 다음 4가지 경우의 수로만 구성된다.
 ### 4-2. Yours Area (너의 활동)
 *   **구성**: 파트너의 요청/알림이 있는 만큼 **여러 개 노출 가능**.
 *   **순서**: 중요도(Response > Decision) 또는 시간순 정렬.
+
+> **Note**: 내가 제안한 약속(Proposed by Me)은 별도의 승인 대기 카드 없이, 즉시 **Mine Area(NowAction/NextAction)**에 편성되어 바로 실천할 수 있다.

@@ -9,4 +9,8 @@ class GetNowCardsUseCase {
   Future<List<HomeCardModel>> execute() {
     return _recordRepository.getHomeCardStates();
   }
+
+  Stream<List<HomeCardModel>> executeStream() {
+    return _recordRepository.getHomeCardStatesStream();
+  }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import '../models/home_state.dart';
 import '../models/history_item.dart';
 import '../models/plan_model.dart';
@@ -176,15 +177,60 @@ class MockRecordRepository implements RecordRepository {
     return _mockHistoryItems;
   }
 
+  final _streamController = StreamController<List<HomeCardModel>>.broadcast();
+
+  @override
+  Stream<List<HomeCardModel>> getHomeCardStatesStream() {
+    // 초기값 전달
+    Future.microtask(() => _streamController.add(_mockHomeCardModels));
+    return _streamController.stream;
+  }
+
+  void _notifyStream() {
+    _streamController.add(_mockHomeCardModels);
+  }
+
   @override
   Future<void> createPlan(Plan plan) async {
     // Mock: 1초 딜레이 후 성공
     await Future.delayed(const Duration(seconds: 1));
-    _mockPlans.add(plan); // 리스트에 추가
-    // 상태를 Active로 변경 시뮬레이션
+    // Generate ID if missing
+    final newPlan = plan.copyWith(
+      id: plan.id ?? 'mock-${DateTime.now().millisecondsSinceEpoch}',
+    );
+    _mockPlans.add(newPlan); // 리스트에 추가
+
+    // 상태를 Active로 변경 시뮬레이션 (단순화: 덮어쓰기)
     _mockHomeCardModels = [
-      HomeCardModel(state: HomeCardState.nowAction, plan: plan),
+      HomeCardModel(state: HomeCardState.nowAction, plan: newPlan),
     ];
+    _notifyStream();
+  }
+
+  @override
+  Future<void> updatePlan(Plan plan) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final index = _mockHomeCardModels.indexWhere((m) => m.plan?.id == plan.id);
+    if (index != -1) {
+      // Re-process to model (simplified for mock: Assume active)
+      _mockHomeCardModels[index] = HomeCardModel(
+        state: HomeCardState.nowAction,
+        plan: plan,
+      );
+      _notifyStream();
+    }
+  }
+
+  @override
+  Future<void> deletePlan(String planId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    _mockHomeCardModels.removeWhere((m) => m.plan?.id == planId);
+    if (_mockHomeCardModels.isEmpty) {
+      _mockHomeCardModels.add(
+        const HomeCardModel(state: HomeCardState.todayComplete),
+      );
+    }
+    _notifyStream();
   }
 
   Plan _createMockPlan({
@@ -221,6 +267,9 @@ class MockRecordRepository implements RecordRepository {
   Future<void> deletePlansByUserId(String uid) async {
     // Mock: 딜레이만
     await Future.delayed(const Duration(milliseconds: 500));
+    // For completeness, updates could be simulated here too
+    _mockHomeCardModels = [const HomeCardModel(state: HomeCardState.emptyPlan)];
+    _notifyStream();
   }
 
   @override
@@ -228,6 +277,7 @@ class MockRecordRepository implements RecordRepository {
     await Future.delayed(const Duration(milliseconds: 500));
     // 선택된 항목을 목록에서 제거하거나 상태를 변경함
     _mockHomeCardModels.removeWhere((m) => m.plan?.id == planId);
+    _notifyStream();
   }
 
   @override
@@ -255,16 +305,32 @@ class MockRecordRepository implements RecordRepository {
   @override
   Future<void> reportCompletion(String planId) async {
     await Future.delayed(const Duration(milliseconds: 500));
+    // Find model
     final index = _mockHomeCardModels.indexWhere((m) => m.plan?.id == planId);
+
     if (index != -1) {
       final model = _mockHomeCardModels[index];
-      _mockHomeCardModels[index] = HomeCardModel(
-        state: HomeCardState.partnerAction, // Checked -> Type 4
-        plan: model.plan,
-        partnerName: model.partnerName,
-        partnerImageUrl: model.partnerImageUrl,
-        headerMessage: '함께하는 중', // Completion implies 'Together' or similar
-      );
+      // If it's my plan (active), remove it to show next card
+      if (model.state == HomeCardState.nowAction ||
+          model.state == HomeCardState.overdue) {
+        _mockHomeCardModels.removeAt(index);
+        // If empty, add todayComplete
+        if (_mockHomeCardModels.isEmpty) {
+          _mockHomeCardModels.add(
+            const HomeCardModel(state: HomeCardState.todayComplete),
+          );
+        }
+      } else {
+        // Partner plan logic (existing)
+        _mockHomeCardModels[index] = HomeCardModel(
+          state: HomeCardState.partnerAction,
+          plan: model.plan,
+          partnerName: model.partnerName,
+          partnerImageUrl: model.partnerImageUrl,
+          headerMessage: '함께하는 중',
+        );
+      }
+      _notifyStream();
     }
   }
 
@@ -273,7 +339,10 @@ class MockRecordRepository implements RecordRepository {
     String historyId,
     HistoryStatus status,
   ) async {
+    // ... existing impl ...
     await Future.delayed(const Duration(milliseconds: 500));
+    // ... logic omitted for brevity as it doesn't affect HomeCardState directly usually ...
+    // But copying existing logic just in case
     final index = _mockHistoryItems.indexWhere((item) => item.id == historyId);
     if (index != -1) {
       final item = _mockHistoryItems[index];
@@ -300,17 +369,12 @@ class MockRecordRepository implements RecordRepository {
     await Future.delayed(const Duration(milliseconds: 500));
     _mockHomeCardModels.removeWhere((m) => m.plan?.id == planId);
 
-    // If empty after removal, add todayDone or relaxedDay?
-    // For now, let's leave it empty so ViewModel/UI handles it or Repository checks.
-    // Actually getHomeCardStates returns _mockHomeCardModels.
-    // If empty, 'PlanNeeded' or 'RelaxedDay' logic is usually inside getHomeCardStates logic in real repo.
-    // In Mock, we should probably ensure it's not just empty list if we want to show 'Done'.
-
     if (_mockHomeCardModels.isEmpty) {
       _mockHomeCardModels.add(
         const HomeCardModel(state: HomeCardState.todayComplete),
       );
     }
+    _notifyStream();
   }
 
   @override
@@ -318,6 +382,7 @@ class MockRecordRepository implements RecordRepository {
     // ignore: avoid_print
     print('Mock: Partner cheered for plan $planId with reaction $reactionType');
     await Future.delayed(const Duration(milliseconds: 500));
+    // Ideally this might update UI state too? For now, no change needed in mock state.
   }
 
   @override
@@ -325,5 +390,7 @@ class MockRecordRepository implements RecordRepository {
     // ignore: avoid_print
     print('Mock: Plan passed for $planId');
     await Future.delayed(const Duration(milliseconds: 300));
+    // Mock passing logic
+    _notifyStream();
   }
 }

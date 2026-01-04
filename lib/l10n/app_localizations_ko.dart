@@ -306,6 +306,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowActionSkipToday => '오늘은 넘어가자';
 
   @override
+  String get nowAddMorePlan => '다른 약속도 만들어볼까요?';
+
+  @override
   String recordGazeWeekCount(int count) {
     return '이번 주 약속 중 $count번째';
   }

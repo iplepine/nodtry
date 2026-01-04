@@ -12,6 +12,140 @@ class RealRecordRepository implements RecordRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
+  Stream<List<HomeCardModel>> getHomeCardStatesStream() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Stream.value([
+        const HomeCardModel(state: HomeCardState.emptyPlan),
+      ]);
+    }
+
+    // Firestore `snapshots()` for offline-first updates
+    return _firestore
+        .collection('plans')
+        .where('userId', isEqualTo: user.uid)
+        .snapshots()
+        .map(_mapSnapshotToModels)
+        .handleError((error) {
+          debugPrint('[RealRecordRepository] Error in stream: $error');
+          return [const HomeCardModel(state: HomeCardState.emptyPlan)];
+        });
+  }
+
+  /// Helper to convert Firestore snapshot to HomeCardModels
+  List<HomeCardModel> _mapSnapshotToModels(QuerySnapshot snapshot) {
+    try {
+      final plans = snapshot.docs
+          .map(
+            (doc) => Plan.fromMap(doc.data() as Map<String, dynamic>, doc.id),
+          )
+          .where(
+            (p) =>
+                p.state == PlanState.active ||
+                p.state == PlanState.pendingApproval,
+          )
+          .toList();
+
+      if (plans.isEmpty) {
+        return [const HomeCardModel(state: HomeCardState.emptyPlan)];
+      }
+      return _processPlans(plans);
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error mapping snapshot: $e');
+      return [const HomeCardModel(state: HomeCardState.emptyPlan)];
+    }
+  }
+
+  /// Extracted logic for processing plans into cards
+  List<HomeCardModel> _processPlans(List<Plan> plans) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final todayWeekday = now.weekday; // 1=Mon, 7=Sun
+    final nowInMinutes = now.hour * 60 + now.minute;
+
+    // 1. 오늘 해야 할 모든 아이템 수집
+    final List<({Plan plan, PlanItem item, int timeInMin})> allTodayItems = [];
+
+    for (var plan in plans) {
+      if (now.isBefore(plan.startDate) || now.isAfter(plan.endDate)) {
+        continue;
+      }
+
+      // Check if completed for today (ignore time component)
+      final isCompletedToday = plan.completedDates.any(
+        (d) =>
+            d.year == today.year &&
+            d.month == today.month &&
+            d.day == today.day,
+      );
+
+      if (isCompletedToday) {
+        continue;
+      }
+
+      final todayItems = plan.items
+          .where((item) => item.days.contains(todayWeekday))
+          .toList();
+
+      for (var item in todayItems) {
+        final time = item.notificationTime;
+        // 알림 시간이 없으면 당일 23:59로 처리
+        final timeInMin = time != null
+            ? (time.hour * 60 + time.minute)
+            : (23 * 60 + 59);
+
+        allTodayItems.add((plan: plan, item: item, timeInMin: timeInMin));
+      }
+    }
+
+    if (allTodayItems.isEmpty) {
+      return [const HomeCardModel(state: HomeCardState.todayComplete)];
+    }
+
+    // 2. 시간 순 정렬
+    allTodayItems.sort((a, b) => a.timeInMin.compareTo(b.timeInMin));
+
+    // 3. 상태 결정
+    final upcomingItems = allTodayItems
+        .where((i) => i.timeInMin >= nowInMinutes)
+        .toList();
+    final pastItems = allTodayItems
+        .where((i) => i.timeInMin < nowInMinutes)
+        .toList();
+
+    final List<HomeCardModel> finalModels = [];
+
+    // Primary: 현재 이후 가장 가까운 것 1개
+    if (upcomingItems.isNotEmpty) {
+      final primary = upcomingItems.first;
+      finalModels.add(
+        HomeCardModel(
+          state: HomeCardState.nowAction, // Was reportNeeded
+          plan: _createSingleItemPlan(primary.plan, primary.item),
+        ),
+      );
+    }
+
+    // Secondary: 지나간 것들 (격하된 계획) - 최대 3개, 최근 것 우선(역순 정렬)
+    final sortedPastItems = pastItems.reversed.take(3).toList();
+    for (var past in sortedPastItems) {
+      finalModels.add(
+        HomeCardModel(
+          state: HomeCardState.overdue, // Was pastUncompleted
+          plan: _createSingleItemPlan(past.plan, past.item),
+        ),
+      );
+    }
+
+    // 만약 Primary도 없고 지남(Secondary)도 없으면 Quiet Day
+    if (finalModels.isEmpty) {
+      return [const HomeCardModel(state: HomeCardState.todayEmpty)];
+    }
+
+    return finalModels;
+  }
+
+  @override
   Future<List<HomeCardModel>> getHomeCardStates() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -37,83 +171,7 @@ class RealRecordRepository implements RecordRepository {
         return [const HomeCardModel(state: HomeCardState.emptyPlan)];
       }
 
-      final now = DateTime.now();
-      final todayWeekday = now.weekday; // 1=Mon, 7=Sun
-      final nowInMinutes = now.hour * 60 + now.minute;
-
-      // 1. 오늘 해야 할 모든 아이템 수집
-      final List<({Plan plan, PlanItem item, int timeInMin})> allTodayItems =
-          [];
-
-      for (var plan in plans) {
-        if (now.isBefore(plan.startDate) || now.isAfter(plan.endDate)) {
-          continue;
-        }
-
-        final todayItems = plan.items
-            .where((item) => item.days.contains(todayWeekday))
-            .toList();
-
-        for (var item in todayItems) {
-          final time = item.notificationTime;
-          // 알림 시간이 없으면 당일 23:59로 처리
-          final timeInMin = time != null
-              ? (time.hour * 60 + time.minute)
-              : (23 * 60 + 59);
-
-          allTodayItems.add((plan: plan, item: item, timeInMin: timeInMin));
-        }
-      }
-
-      if (allTodayItems.isEmpty) {
-        return [const HomeCardModel(state: HomeCardState.todayEmpty)];
-      }
-
-      // 2. 시간 순 정렬
-      allTodayItems.sort((a, b) => a.timeInMin.compareTo(b.timeInMin));
-
-      // 3. 상태 결정
-      // TODO: 실제 완료 여부(Actions 컬렉션) 연동 필요. 현재는 모두 미완료로 가정.
-
-      final upcomingItems = allTodayItems
-          .where((i) => i.timeInMin >= nowInMinutes)
-          .toList();
-      final pastItems = allTodayItems
-          .where((i) => i.timeInMin < nowInMinutes)
-          .toList();
-
-      final List<HomeCardModel> finalModels = [];
-
-      // Primary: 현재 이후 가장 가까운 것 1개
-      if (upcomingItems.isNotEmpty) {
-        final primary = upcomingItems.first;
-        finalModels.add(
-          HomeCardModel(
-            state: HomeCardState.nowAction, // Was reportNeeded
-            plan: _createSingleItemPlan(primary.plan, primary.item),
-          ),
-        );
-      }
-
-      // Secondary: 지나간 것들 (격하된 계획) - 최대 3개, 최근 것 우선(역순 정렬)
-      final sortedPastItems = pastItems.reversed.take(3).toList();
-      for (var past in sortedPastItems) {
-        finalModels.add(
-          HomeCardModel(
-            state: HomeCardState.overdue, // Was pastUncompleted
-            plan: _createSingleItemPlan(past.plan, past.item),
-          ),
-        );
-      }
-
-      // 만약 Primary도 없고 지남(Secondary)도 없으면 Quiet Day
-      if (finalModels.isEmpty) {
-        return [
-          const HomeCardModel(state: HomeCardState.todayEmpty),
-        ]; // Was quietDay
-      }
-
-      return finalModels;
+      return _processPlans(plans);
     } catch (e) {
       debugPrint('[RealRecordRepository] Error fetching home cards: $e');
       return [const HomeCardModel(state: HomeCardState.emptyPlan)];
@@ -155,6 +213,7 @@ class RealRecordRepository implements RecordRepository {
       state: original.state,
       items: [item],
       createdAt: original.createdAt,
+      completedDates: original.completedDates,
     );
   }
 
@@ -179,14 +238,41 @@ class RealRecordRepository implements RecordRepository {
         await docRef.set(plan.toMap());
         debugPrint('[RealRecordRepository] Document created successfully.');
       } else {
+        // Technically create should be fresh, but if ID provided, treat as create
         debugPrint(
-          '[RealRecordRepository] Updating document with ID: ${plan.id}',
+          '[RealRecordRepository] Creating with existing ID: ${plan.id}',
         );
         await collection.doc(plan.id).set(plan.toMap());
-        debugPrint('[RealRecordRepository] Document updated successfully.');
       }
     } catch (e) {
       debugPrint('[RealRecordRepository] Error creating plan: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updatePlan(Plan plan) async {
+    debugPrint('[RealRecordRepository] updatePlan called. Plan ID: ${plan.id}');
+    if (plan.id == null) {
+      throw ArgumentError('Cannot update plan without ID');
+    }
+    try {
+      await _firestore.collection('plans').doc(plan.id).update(plan.toMap());
+      debugPrint('[RealRecordRepository] Plan updated successfully.');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error updating plan: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deletePlan(String planId) async {
+    debugPrint('[RealRecordRepository] deletePlan called. Plan ID: $planId');
+    try {
+      await _firestore.collection('plans').doc(planId).delete();
+      debugPrint('[RealRecordRepository] Plan deleted successfully.');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error deleting plan: $e');
       rethrow;
     }
   }
@@ -226,7 +312,17 @@ class RealRecordRepository implements RecordRepository {
 
   @override
   Future<void> reportCompletion(String planId) async {
-    // TODO: Firestore에 실천 기록 생성 및 계획 상태 업데이트
+    debugPrint('[RealRecordRepository] reportCompletion for $planId');
+    try {
+      final now = DateTime.now();
+      await _firestore.collection('plans').doc(planId).update({
+        'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+      });
+      // This update triggers the stream logic in _processPlans to filter it out.
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error reporting completion: $e');
+      rethrow;
+    }
   }
 
   @override

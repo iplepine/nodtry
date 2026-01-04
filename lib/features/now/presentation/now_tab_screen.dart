@@ -141,6 +141,12 @@ class _NowTabState extends ConsumerState<NowTab>
         );
   }
 
+  void _handleCardTap(HomeCardModel model) {
+    if (model.plan != null) {
+      context.pushNamed('plan-detail', extra: model.plan);
+    }
+  }
+
   Future<void> _handlePass(HomeCardModel managerCard) async {
     if (managerCard.plan?.id == null) return;
 
@@ -451,6 +457,8 @@ class _NowTabState extends ConsumerState<NowTab>
                                         onDidIt: _handleDidIt,
                                         onSkip: _handleSkip,
                                         onCreatePlan: _handleCreatePlan,
+                                        onTap: () =>
+                                            _handleCardTap(primaryExecutorCard),
                                         timeChipText: _getTimeChipText(
                                           primaryExecutorCard,
                                         ),
@@ -666,6 +674,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
 class _PrimaryExecutorCard extends StatelessWidget {
   final HomeCardModel model;
+  final VoidCallback? onTap;
   final VoidCallback? onDidIt;
   final VoidCallback? onSkip;
   final VoidCallback? onCreatePlan;
@@ -679,6 +688,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     this.onDidIt,
     this.onSkip,
     this.onCreatePlan,
+    this.onTap,
     this.timeChipText,
     this.timeChipType,
     this.recordGazeText,
@@ -689,54 +699,57 @@ class _PrimaryExecutorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Card(
-      elevation: 1,
-      margin: EdgeInsets.zero,
-      color: AppColors.surface.withOpacity(0.7),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(4),
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 1,
+        margin: EdgeInsets.zero,
+        color: AppColors.surface.withOpacity(0.7),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(4),
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (timeChipText != null && timeChipType != null)
-              Align(
-                alignment: Alignment.centerRight,
-                child: exactTimeText != null
-                    ? Tooltip(
-                        message: exactTimeText!,
-                        triggerMode: TooltipTriggerMode.longPress,
-                        child: TimeChip(
-                          text: timeChipText!,
-                          type: timeChipType!,
-                        ),
-                      )
-                    : TimeChip(text: timeChipText!, type: timeChipType!),
-              ),
-            if (timeChipText != null && timeChipType != null)
-              const SizedBox(height: 12),
-            _buildMessage(context, l10n),
-            if (recordGazeText != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                recordGazeText!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (timeChipText != null && timeChipType != null)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: exactTimeText != null
+                      ? Tooltip(
+                          message: exactTimeText!,
+                          triggerMode: TooltipTriggerMode.longPress,
+                          child: TimeChip(
+                            text: timeChipText!,
+                            type: timeChipType!,
+                          ),
+                        )
+                      : TimeChip(text: timeChipText!, type: timeChipType!),
                 ),
-                textAlign: TextAlign.left,
-              ),
+              if (timeChipText != null && timeChipType != null)
+                const SizedBox(height: 12),
+              _buildMessage(context, l10n),
+              if (recordGazeText != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  recordGazeText!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ],
+              const SizedBox(height: 20),
+              _buildButton(context, l10n),
             ],
-            const SizedBox(height: 20),
-            _buildButton(context, l10n),
-          ],
+          ),
         ),
       ),
     );

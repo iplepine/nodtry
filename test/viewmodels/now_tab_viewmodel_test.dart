@@ -10,6 +10,7 @@ import 'package:nod_try/repositories/record_repository.dart';
 import 'package:nod_try/features/now/domain/usecases/get_now_cards_use_case.dart';
 import 'package:nod_try/models/plan_model.dart';
 import 'package:nod_try/models/history_item.dart';
+import 'dart:async';
 
 class MockRecordRepository extends Fake implements RecordRepository {
   int reportCompletionCallCount = 0;
@@ -21,32 +22,52 @@ class MockRecordRepository extends Fake implements RecordRepository {
   int passPlanCallCount = 0;
   String? lastPassedPlanId;
 
+  // Stream Controller for testing real-time updates
+  final _controller = StreamController<List<HomeCardModel>>.broadcast();
+  List<HomeCardModel> _currentValue = [];
+
+  void emit(List<HomeCardModel> data) {
+    _currentValue = data;
+    _controller.add(data);
+  }
+
   @override
   Future<void> reportCompletion(String planId) async {
     reportCompletionCallCount++;
     lastReportedPlanId = planId;
+    emit(_currentValue); // Emit current (or updated) value to trigger stream
   }
 
   @override
   Future<void> reportSkip(String planId) async {
     reportSkipCallCount++;
     lastSkippedPlanId = planId;
+    emit(_currentValue);
   }
 
   @override
   Future<void> cheerPartner(String planId, String reactionType) async {
     cheerPartnerCallCount++;
     lastCheeredPlanId = planId;
+    emit(_currentValue);
   }
 
   @override
   Future<void> passPlan(String planId) async {
     passPlanCallCount++;
     lastPassedPlanId = planId;
+    emit(_currentValue);
   }
 
   @override
   Future<List<HomeCardModel>> getHomeCardStates() => Future.value([]);
+
+  @override
+  Stream<List<HomeCardModel>> getHomeCardStatesStream() async* {
+    yield _currentValue;
+    yield* _controller.stream;
+  }
+
   @override
   Future<List<HistoryItem>> getHistoryItems() => Future.value([]);
   @override
@@ -67,12 +88,24 @@ class MockRecordRepository extends Fake implements RecordRepository {
 
 class MockGetNowCardsUseCase extends Fake implements GetNowCardsUseCase {
   int executeCallCount = 0;
-  List<HomeCardModel> returnValues = [];
+  final _controller = StreamController<List<HomeCardModel>>.broadcast();
+  List<HomeCardModel> _currentValue = [];
+
+  void emit(List<HomeCardModel> data) {
+    _currentValue = data;
+    _controller.add(data);
+  }
 
   @override
   Future<List<HomeCardModel>> execute() async {
+    return [];
+  }
+
+  @override
+  Stream<List<HomeCardModel>> executeStream() async* {
     executeCallCount++;
-    return returnValues;
+    yield _currentValue;
+    yield* _controller.stream;
   }
 }
 
@@ -104,92 +137,72 @@ void main() {
       secondaryCards: [],
       managerCards: const [],
     );
-    mockGetNowCardsUseCase.returnValues = [state.primaryCard!];
-    final expectedCards = mockGetNowCardsUseCase.returnValues;
+    final expectedCards = [state.primaryCard!];
+    mockGetNowCardsUseCase.emit(expectedCards); // Pre-set value
 
     // Act
-    final sub = container.listen(nowTabViewModelProvider, (_, __) {});
-    await container.read(nowTabViewModelProvider.future);
+    // Reading future waits for the first valid state
+    final result = await container.read(nowTabViewModelProvider.future);
 
     // Assert
-    expect(sub.read().value?.allCards, expectedCards);
+    expect(result.allCards, expectedCards);
     expect(mockGetNowCardsUseCase.executeCallCount, 1);
   });
 
-  test('CompletePlanIntent should call repository and refresh', () async {
-    // Arrange
-    mockGetNowCardsUseCase.returnValues = [];
+  test('CompletePlanIntent should call repository', () async {
+    mockGetNowCardsUseCase.emit([]);
     await container.read(nowTabViewModelProvider.future);
-    mockGetNowCardsUseCase.executeCallCount = 0;
     mockRecordRepository.reportCompletionCallCount = 0;
 
-    // Act
     await container
         .read(nowTabViewModelProvider.notifier)
         .dispatch(const CompletePlanIntent('plan-123'));
 
-    // Assert
     expect(mockRecordRepository.reportCompletionCallCount, 1);
     expect(mockRecordRepository.lastReportedPlanId, 'plan-123');
-    expect(mockGetNowCardsUseCase.executeCallCount, greaterThan(0));
   });
 
-  test('CheckPartnerActionIntent should call repository and refresh', () async {
-    // Arrange
-    mockGetNowCardsUseCase.returnValues = [];
+  test('CheckPartnerActionIntent should call repository', () async {
+    mockGetNowCardsUseCase.emit([]);
     await container.read(nowTabViewModelProvider.future);
-    mockGetNowCardsUseCase.executeCallCount = 0;
     mockRecordRepository.reportCompletionCallCount = 0;
 
-    // Act
     await container
         .read(nowTabViewModelProvider.notifier)
         .dispatch(const CheckPartnerActionIntent('plan-456'));
 
-    // Assert
     expect(mockRecordRepository.reportCompletionCallCount, 1);
     expect(mockRecordRepository.lastReportedPlanId, 'plan-456');
-    expect(mockGetNowCardsUseCase.executeCallCount, greaterThan(0));
   });
 
-  test('CheerPartnerActionIntent should call repository and refresh', () async {
-    // Arrange
-    mockGetNowCardsUseCase.returnValues = [];
+  test('CheerPartnerActionIntent should call repository', () async {
+    mockGetNowCardsUseCase.emit([]);
     await container.read(nowTabViewModelProvider.future);
-    mockGetNowCardsUseCase.executeCallCount = 0;
     mockRecordRepository.cheerPartnerCallCount = 0;
 
-    // Act
     await container
         .read(nowTabViewModelProvider.notifier)
         .dispatch(const CheerPartnerActionIntent('plan-cheer', 'fire'));
 
-    // Assert
     expect(mockRecordRepository.cheerPartnerCallCount, 1);
     expect(mockRecordRepository.lastCheeredPlanId, 'plan-cheer');
-    expect(mockGetNowCardsUseCase.executeCallCount, greaterThan(0));
   });
 
-  test('PassPlanIntent should call repository and refresh', () async {
-    // Arrange
-    mockGetNowCardsUseCase.returnValues = [];
+  test('PassPlanIntent should call repository', () async {
+    mockGetNowCardsUseCase.emit([]);
     await container.read(nowTabViewModelProvider.future);
-    mockGetNowCardsUseCase.executeCallCount = 0;
     mockRecordRepository.passPlanCallCount = 0;
 
-    // Act
     await container
         .read(nowTabViewModelProvider.notifier)
         .dispatch(const PassPlanIntent('plan-pass'));
 
-    // Assert
     expect(mockRecordRepository.passPlanCallCount, 1);
     expect(mockRecordRepository.lastPassedPlanId, 'plan-pass');
-    expect(mockGetNowCardsUseCase.executeCallCount, greaterThan(0));
   });
 
-  test('RefreshIntent should trigger refresh', () async {
-    mockGetNowCardsUseCase.returnValues = [];
+  test('RefreshIntent should re-subscribe to stream', () async {
+    mockGetNowCardsUseCase.emit([]);
     await container.read(nowTabViewModelProvider.future);
     mockGetNowCardsUseCase.executeCallCount = 0; // Reset
 
@@ -197,13 +210,16 @@ void main() {
         .read(nowTabViewModelProvider.notifier)
         .dispatch(const RefreshIntent());
 
+    // Invalidate re-triggers build, which calls executeStream
+    // We wait for microtask cycle
+    await Future.delayed(Duration.zero);
+
     expect(mockGetNowCardsUseCase.executeCallCount, 1);
   });
 
-  test('SkipPlanIntent should call repository and refresh', () async {
-    mockGetNowCardsUseCase.returnValues = [];
+  test('SkipPlanIntent should call repository', () async {
+    mockGetNowCardsUseCase.emit([]);
     await container.read(nowTabViewModelProvider.future);
-    mockGetNowCardsUseCase.executeCallCount = 0;
     mockRecordRepository.reportSkipCallCount = 0;
 
     await container
@@ -212,6 +228,5 @@ void main() {
 
     expect(mockRecordRepository.reportSkipCallCount, 1);
     expect(mockRecordRepository.lastSkippedPlanId, 'plan-skip-123');
-    expect(mockGetNowCardsUseCase.executeCallCount, greaterThan(0));
   });
 }
