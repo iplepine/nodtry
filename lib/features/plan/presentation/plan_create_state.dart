@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import '../../../models/plan_model.dart';
 
 // part 'plan_create_state.freezed.dart'; // Removed

@@ -135,6 +135,10 @@ class PlanCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (onTap != null) ...[
+                  const SizedBox(width: 12),
+                  Icon(Icons.chevron_right, color: AppColors.textDisabled),
+                ],
               ],
             ),
 

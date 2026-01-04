@@ -1088,7 +1088,7 @@ class _ActivePlanListSection extends ConsumerWidget {
                     (plan) => PlanCard(
                       plan: plan,
                       onTap: () {
-                        // TODO: Plan Detail
+                        context.pushNamed('plan-detail', extra: plan);
                       },
                     ),
                   )
