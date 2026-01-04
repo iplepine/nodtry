@@ -108,6 +108,9 @@ final getConnectedProfilesUseCaseProvider =
 
 /// 연결된 프로필 목록 Provider (Future)
 final connectedProfilesProvider = FutureProvider<List<ConnectedUser>>((ref) {
+  // 연결 상태 변화를 감시하여 상태 변경 시 데이터 재조회
+  ref.watch(connectionStatusStreamProvider);
+
   final useCase = ref.watch(getConnectedProfilesUseCaseProvider);
   return useCase.execute();
 });

@@ -110,10 +110,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   // I will check the file content first to be safe, or just view_file.
   // But to be quick, I'll update `_copyCode` and `_shareCode` to accept arguments and remove old `_buildCodeCard` if present.
 
-  void _navigateToHome() {
-    context.go(AppRoutes.home);
-  }
-
   void _connectManually() {
     final code = _codeController.text;
     if (code.length == 8) {
@@ -138,6 +134,10 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
             backgroundColor: AppColors.primary,
           ),
         );
+        // 즉시 이전 화면으로 돌아감
+        if (context.mounted) {
+          context.pop();
+        }
       }
     });
 
@@ -169,9 +169,9 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
 
               const SizedBox(height: 48),
 
-              if (connectState.flowState == ConnectFlowState.connected)
-                _buildConnectedState()
-              else ...[
+              // 연결 성공 상태에서는 이미 팝되었으므로 여기 오지 않음
+              // 하지만 안전을 위해 flowState 체크 유지
+              if (connectState.flowState != ConnectFlowState.connected) ...[
                 // 2. 상대방 코드 입력
                 Text(
                   AppLocalizations.of(context)!.enterInviteCode,
@@ -188,7 +188,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                 if (!canPop) ...[
                   const SizedBox(height: 40),
                   TextButton(
-                    onPressed: _navigateToHome,
+                    onPressed: () => context.go(AppRoutes.home),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.textSecondary,
                       padding: const EdgeInsets.symmetric(
@@ -324,71 +324,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
           ),
         ],
       ],
-    );
-  }
-
-  Future<void> _disconnect() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('연결 해제'),
-        content: const Text('정말로 연결을 끊으시겠습니까?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('해제', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      ref
-          .read(connectViewModelProvider.notifier)
-          .dispatch(const DisconnectPartnerIntent());
-    }
-  }
-
-  Widget _buildConnectedState() {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Icon(Icons.check_circle, size: 48, color: AppColors.primary),
-          const SizedBox(height: 24),
-          Text(
-            AppLocalizations.of(context)!.connectConnected,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: AppColors.textPrimary),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          PrimaryButton(
-            text: AppLocalizations.of(context)!.connectGoToHome,
-            onPressed: _navigateToHome,
-          ),
-          const SizedBox(height: 16),
-          TextButton(
-            onPressed: _disconnect,
-            child: const Text(
-              '연결 끊기',
-              style: TextStyle(
-                color: Colors.red,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
