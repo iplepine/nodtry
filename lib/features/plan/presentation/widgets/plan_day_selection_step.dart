@@ -44,8 +44,18 @@ class PlanDaySelectionStep extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          l10n.planDaySubtitle,
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          selectedDays.isEmpty
+              ? "요일을 선택하지 않으면 매일 하는 약속이 돼요."
+              : l10n.planDaySubtitle,
+          style: TextStyle(
+            fontSize: 14,
+            color: selectedDays.isEmpty
+                ? AppColors.primary
+                : AppColors.textSecondary,
+            fontWeight: selectedDays.isEmpty
+                ? FontWeight.w500
+                : FontWeight.normal,
+          ),
         ),
         const SizedBox(height: 16),
         Wrap(

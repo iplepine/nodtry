@@ -91,10 +91,14 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         throw Exception("사용자 정보를 찾을 수 없습니다.");
       }
 
+      final finalDays = prevState.selectedDays.isEmpty
+          ? [1, 2, 3, 4, 5, 6, 7]
+          : prevState.selectedDays.map((d) => d + 1).toList();
+
       final planItem = PlanItem(
         title: prevState.action,
         count: prevState.selectedFrequency,
-        days: prevState.selectedDays.map((d) => d + 1).toList(),
+        days: finalDays,
         notificationTime: prevState.notificationTime,
         description: prevState.description, // Ensure description is saved
       );
