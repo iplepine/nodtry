@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/history_item.dart';
 import '../../theme/app_colors.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 
 class HistoryCard extends StatelessWidget {
   final HistoryItem item;
@@ -56,7 +56,7 @@ class HistoryCard extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: Colors.black.withValues(alpha: 0.03),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -64,7 +64,7 @@ class HistoryCard extends StatelessWidget {
                   // Highlight reconcilable items slightly??
                   border: canReconcile
                       ? Border.all(
-                          color: AppColors.primary.withOpacity(0.3),
+                          color: AppColors.primary.withValues(alpha: 0.3),
                           width: 1,
                         )
                       : null,
@@ -225,35 +225,35 @@ class HistoryCard extends StatelessWidget {
       case HistoryStatus.done:
         return _StatusDisplayInfo(
           text: AppLocalizations.of(context)!.homeDidIt,
-          color: AppColors.primary.withOpacity(0.1),
+          color: AppColors.primary.withValues(alpha: 0.1),
           textColor: AppColors.primary,
           icon: Icons.check,
         );
       case HistoryStatus.actuallyDone:
         return _StatusDisplayInfo(
           text: AppLocalizations.of(context)!.nowStatusActuallyDone,
-          color: AppColors.secondary.withOpacity(0.1),
+          color: AppColors.secondary.withValues(alpha: 0.1),
           textColor: AppColors.secondary,
           icon: Icons.check_circle_outline,
         );
       case HistoryStatus.rested:
         return _StatusDisplayInfo(
           text: AppLocalizations.of(context)!.reconcileTookRest,
-          color: Colors.grey.withOpacity(0.1),
+          color: Colors.grey.withValues(alpha: 0.1),
           textColor: AppColors.textSecondary,
           icon: Icons.hotel, // Bed icon
         );
       case HistoryStatus.skipped:
         return _StatusDisplayInfo(
           text: AppLocalizations.of(context)!.timeChipPassed,
-          color: Colors.orange.withOpacity(0.1),
+          color: Colors.orange.withValues(alpha: 0.1),
           textColor: Colors.orange,
           icon: Icons.remove_circle_outline,
         );
       case HistoryStatus.verified:
         return _StatusDisplayInfo(
           text: AppLocalizations.of(context)!.homeChecked,
-          color: AppColors.primary.withOpacity(0.1),
+          color: AppColors.primary.withValues(alpha: 0.1),
           textColor: AppColors.primary,
           icon: Icons.verified,
         );
