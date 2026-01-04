@@ -31,10 +31,15 @@ void main() async {
   // Edge-to-edge 활성화
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } catch (e) {
+    // Ignore duplicate app initialization error
+    debugPrint('Firebase init error (ignored): $e');
   }
 
   final prefs = await SharedPreferences.getInstance();
