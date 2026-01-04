@@ -2,6 +2,7 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math';
 import '../models/relation_model.dart';
 import 'connect_repository.dart';
 
@@ -47,17 +48,34 @@ class RealConnectRepository implements ConnectRepository {
 
   @override
   Future<String> generateInviteCode() async {
-    // TODO: implement generateInviteCode
-    // 1. 랜덤 코드 생성
-    // 2. users 컬렉션 내 정보 업데이트
-    throw UnimplementedError();
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    // Simple 8-char random code (UPPERCASE + DIGITS)
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final rnd = Random();
+    final code = List.generate(
+      8,
+      (index) => chars[rnd.nextInt(chars.length)],
+    ).join();
+    // Ideally use Random.secure() but simple logic for now
+
+    // Check uniqueness omitted for MVP (Low collision probability for small scale)
+
+    await _firestore.collection('users').doc(user.uid).update({
+      'inviteCode': code,
+    });
+
+    return code;
   }
 
   @override
   Future<String?> getMyInviteCode() async {
-    // TODO: implement getMyInviteCode
-    // 내 정보에서 inviteCode 필드 조회
-    return null;
+    final user = _auth.currentUser;
+    if (user == null) return null;
+
+    final doc = await _firestore.collection('users').doc(user.uid).get();
+    return doc.data()?['inviteCode'] as String?;
   }
 
   @override
@@ -145,8 +163,28 @@ class RealConnectRepository implements ConnectRepository {
 
   @override
   Future<ConnectionStatus> getConnectionStatus() async {
-    // TODO: Implement
-    return ConnectionStatus.none;
+    final user = _auth.currentUser;
+    if (user == null) return ConnectionStatus.none;
+
+    try {
+      final query = await _firestore
+          .collection('relations')
+          .where(
+            Filter.or(
+              Filter('executorId', isEqualTo: user.uid),
+              Filter('managerId', isEqualTo: user.uid),
+            ),
+          )
+          .limit(1)
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        return ConnectionStatus.active;
+      }
+      return ConnectionStatus.none;
+    } catch (e) {
+      return ConnectionStatus.none;
+    }
   }
 
   @override

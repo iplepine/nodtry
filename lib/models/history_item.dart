@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 /// 기록 상태 (Spec 3.1)
 enum HistoryStatus {
   /// 했어 (Did it)
@@ -45,4 +47,33 @@ class HistoryItem {
 
   /// 내가 실천한 기록인지 여부
   bool isMine(String myUid) => executorId == myUid;
+
+  factory HistoryItem.fromMap(Map<String, dynamic> map, String id) {
+    return HistoryItem(
+      id: id,
+      planId: map['planId'] as String?,
+      date: (map['date'] as Timestamp).toDate(),
+      title: map['title'] as String? ?? '알 수 없는 계획',
+      status: _parseStatus(map['type'] as String),
+      executorId: map['userId'] as String,
+      comment: map['comment'] as String?,
+      isVerifiedByPartner: map['verifiedBy'] != null, // 확인자가 있으면 확인된 것
+      isVerifiedByMe: false, // 별도 로직으로 판단 필요
+      partnerName: null, // Join 필요 (repository에서 처리)
+      partnerImageUrl: null,
+    );
+  }
+
+  static HistoryStatus _parseStatus(String type) {
+    switch (type) {
+      case 'done':
+        return HistoryStatus.done;
+      case 'skipped':
+        return HistoryStatus.skipped;
+      case 'rested':
+        return HistoryStatus.rested;
+      default:
+        return HistoryStatus.skipped;
+    }
+  }
 }

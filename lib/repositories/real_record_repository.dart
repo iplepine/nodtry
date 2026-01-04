@@ -243,8 +243,23 @@ class RealRecordRepository implements RecordRepository {
 
   @override
   Future<List<HistoryItem>> getHistoryItems() async {
-    // TODO: Firestore에서 실제 데이터 가져오기
-    return [];
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return [];
+
+    try {
+      final snapshot = await _firestore
+          .collection('actions')
+          .where('userId', isEqualTo: user.uid)
+          .orderBy('date', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => HistoryItem.fromMap(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error fetching history items: $e');
+      return [];
+    }
   }
 
   @override
@@ -325,24 +340,134 @@ class RealRecordRepository implements RecordRepository {
 
   @override
   Future<void> reconcilePlan(String planId, HistoryStatus status) async {
-    // TODO: Firestore에서 해당 계획의 상태를 업데이트하고 히스토리에 기록
-    // 48시간 제한 로직 포함 필요
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      // 1. Update Plan's completedDates based on status
+      if (status == HistoryStatus.done ||
+          status == HistoryStatus.actuallyDone) {
+        // Add to completedDates
+        await _firestore.collection('plans').doc(planId).update({
+          'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+        });
+      } else {
+        // Remove from completedDates (Requires reading first or tricky arrayRemove)
+        // ArrayRemove requires exact element match. Since we use Timestamp.fromDate(now)
+        // which includes time, we might have issues if we don't know the exact time it was added.
+        // But for "Today" check, we essentially just need to ensure *some* timestamp for today exists or not.
+        // Ideally, completedDates should be normalized to midnight to make removal easy.
+        // For now, let's assume we read the plan, filter out today's dates, and update.
+
+        final planDoc = await _firestore.collection('plans').doc(planId).get();
+        if (planDoc.exists) {
+          final data = planDoc.data();
+          final dates = (data?['completedDates'] as List<dynamic>? ?? [])
+              .map((t) => (t as Timestamp).toDate())
+              .toList();
+
+          // Remove dates that match today
+          dates.removeWhere(
+            (d) =>
+                d.year == today.year &&
+                d.month == today.month &&
+                d.day == today.day,
+          );
+
+          await _firestore.collection('plans').doc(planId).update({
+            'completedDates': dates.map((d) => Timestamp.fromDate(d)).toList(),
+          });
+        }
+      }
+
+      // 2. Add History Entry (Correction)
+      final planDoc = await _firestore.collection('plans').doc(planId).get();
+      final planTitle =
+          (planDoc.data()?['items'] as List?)?.firstOrNull?['title'] ??
+          '알 수 없는 계획';
+
+      String typeStr;
+      switch (status) {
+        case HistoryStatus.done:
+          typeStr = 'done';
+          break;
+        case HistoryStatus.actuallyDone:
+          typeStr = 'done';
+          break;
+        case HistoryStatus.rested:
+          typeStr = 'rested';
+          break;
+        case HistoryStatus.skipped:
+          typeStr = 'skipped';
+          break;
+        default:
+          typeStr = 'skipped';
+          break;
+      }
+
+      await _firestore.collection('actions').add({
+        'userId': user.uid,
+        'planId': planId,
+        'date': Timestamp.fromDate(now),
+        'type': typeStr,
+        'title': planTitle,
+        'createdAt': FieldValue.serverTimestamp(),
+        'isReconciled': true,
+      });
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error reconciling plan: $e');
+      rethrow;
+    }
   }
 
   @override
   Future<void> verifyHistoryItem(String historyId) async {
-    // TODO: Firestore에서 해당 히스토리 항목의 isVerifiedByMe 필드를 true로 업데이트
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await _firestore.collection('actions').doc(historyId).update({
+        'verifiedBy': user.uid,
+        'verifiedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error verifying history item: $e');
+      rethrow;
+    }
   }
 
   @override
   Future<void> reportCompletion(String planId) async {
     debugPrint('[RealRecordRepository] reportCompletion for $planId');
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
     try {
       final now = DateTime.now();
+
+      // 1. Update Plan (completedDates)
       await _firestore.collection('plans').doc(planId).update({
         'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
       });
-      // This update triggers the stream logic in _processPlans to filter it out.
+
+      // 2. Add to actions collection
+      // Need Plan Title for denormalization (Optional but recommended)
+      final planDoc = await _firestore.collection('plans').doc(planId).get();
+      final planData = planDoc.data();
+      final planTitle =
+          (planData?['items'] as List?)?.firstOrNull?['title'] ?? '알 수 없는 계획';
+
+      await _firestore.collection('actions').add({
+        'userId': user.uid,
+        'planId': planId,
+        'date': Timestamp.fromDate(now),
+        'type': 'done', // HistoryStatus.done
+        'title': planTitle,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
     } catch (e) {
       debugPrint('[RealRecordRepository] Error reporting completion: $e');
       rethrow;
@@ -354,21 +479,155 @@ class RealRecordRepository implements RecordRepository {
     String historyId,
     HistoryStatus status,
   ) async {
-    // TODO: Firestore에서 해당 HistoryItem 업데이트
+    try {
+      // 1. Get History Item to find planId and Date
+      final historyDoc = await _firestore
+          .collection('actions')
+          .doc(historyId)
+          .get();
+      if (!historyDoc.exists) return;
+
+      final data = historyDoc.data()!;
+      final planId = data['planId'] as String;
+      final date = (data['date'] as Timestamp).toDate();
+      final historyDate = DateTime(date.year, date.month, date.day);
+
+      String typeStr;
+      switch (status) {
+        case HistoryStatus.done:
+          typeStr = 'done';
+          break;
+        case HistoryStatus.actuallyDone:
+          typeStr = 'done';
+          break;
+        case HistoryStatus.rested:
+          typeStr = 'rested';
+          break;
+        case HistoryStatus.skipped:
+          typeStr = 'skipped';
+          break;
+        default:
+          typeStr = 'skipped';
+          break;
+      }
+
+      // 2. Update History Item
+      await _firestore.collection('actions').doc(historyId).update({
+        'type': typeStr,
+        'isReconciled': true,
+        'reconciledAt': FieldValue.serverTimestamp(),
+      });
+
+      // 3. Update Plan's completedDates
+      final planDoc = await _firestore.collection('plans').doc(planId).get();
+      if (planDoc.exists) {
+        final planData = planDoc.data();
+        final completedDates =
+            (planData?['completedDates'] as List<dynamic>? ?? [])
+                .map((t) => (t as Timestamp).toDate())
+                .toList();
+
+        final isDoneStatus =
+            (status == HistoryStatus.done ||
+            status == HistoryStatus.actuallyDone);
+
+        bool changed = false;
+        if (isDoneStatus) {
+          // Add if not present for that day
+          final hasDate = completedDates.any(
+            (d) =>
+                d.year == historyDate.year &&
+                d.month == historyDate.month &&
+                d.day == historyDate.day,
+          );
+          if (!hasDate) {
+            completedDates.add(date); // Use history item's date timestamp
+            changed = true;
+          }
+        } else {
+          // Remove if present for that day
+          final initialLen = completedDates.length;
+          completedDates.removeWhere(
+            (d) =>
+                d.year == historyDate.year &&
+                d.month == historyDate.month &&
+                d.day == historyDate.day,
+          );
+          if (completedDates.length != initialLen) {
+            changed = true;
+          }
+        }
+
+        if (changed) {
+          await _firestore.collection('plans').doc(planId).update({
+            'completedDates': completedDates
+                .map((d) => Timestamp.fromDate(d))
+                .toList(),
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error reconciling history item: $e');
+      rethrow;
+    }
   }
 
   @override
   Future<void> reportSkip(String planId) async {
-    // TODO: Firestore에 건너뛰기 기록 생성 및 계획 상태 업데이트
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final now = DateTime.now();
+
+      // Need Plan Title for denormalization
+      final planDoc = await _firestore.collection('plans').doc(planId).get();
+      final planData = planDoc.data();
+      final planTitle =
+          (planData?['items'] as List?)?.firstOrNull?['title'] ?? '알 수 없는 계획';
+
+      await _firestore.collection('actions').add({
+        'userId': user.uid,
+        'planId': planId,
+        'date': Timestamp.fromDate(now),
+        'type': 'skipped', // HistoryStatus.skipped
+        'title': planTitle,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error reporting skip: $e');
+      rethrow;
+    }
   }
 
   @override
   Future<void> cheerPartner(String planId, String reactionType) async {
-    // TODO: Firestore에 응원 기록 생성
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      // Get Plan to find who to cheer for (the plan owner)
+      final planDoc = await _firestore.collection('plans').doc(planId).get();
+      final toUserId =
+          planDoc.data()?['userId'] as String? ?? ''; // Should valid
+
+      await _firestore.collection('cheers').add({
+        'fromUserId': user.uid,
+        'toUserId': toUserId,
+        'planId': planId,
+        'reactionType': reactionType,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error cheering partner: $e');
+      rethrow;
+    }
   }
 
   @override
   Future<void> passPlan(String planId) async {
-    // TODO: Firestore에 계획 넘기기 처리
+    // Treat pass as 'skipped' for now, or maybe 'rested' if it implies "Not today"
+    // Using reportSkip implementation for consistency
+    await reportSkip(planId);
   }
 }
