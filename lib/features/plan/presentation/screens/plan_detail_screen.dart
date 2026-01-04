@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../utils/time_formatter.dart';
-import '../../../../routes/app_router.dart';
 import 'package:nod_try/providers/repository_provider.dart';
 
 class PlanDetailScreen extends ConsumerWidget {
@@ -34,7 +33,7 @@ class PlanDetailScreen extends ConsumerWidget {
             onPressed: () {
               // Navigate to Edit Mode
               context.pushNamed(
-                AppRoutes.planCreate,
+                'plan-create',
                 extra: plan, // Pass plan object for editing
               );
             },
