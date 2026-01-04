@@ -774,4 +774,64 @@ class RealRecordRepository implements RecordRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> approvePlan(String planId) async {
+    debugPrint('[RealRecordRepository] approvePlan called for $planId');
+    try {
+      await _firestore.collection('plans').doc(planId).update({
+        'state': 'active', // PlanState.active
+      });
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error approving plan: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> verifyPlan(String planId) async {
+    debugPrint('[RealRecordRepository] verifyPlan called for $planId');
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final now = DateTime.now();
+
+      // 1. Update Plan's verifiedDates
+      // Note: We use arrayUnion with Timestamp.fromDate(now).
+      // Since 'completedDates' and 'verifiedDates' are checked by comparing YMD,
+      // adding current timestamp works.
+      await _firestore.collection('plans').doc(planId).update({
+        'verifiedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+      });
+
+      // 2. Find associated history item (action) for today and mark as verified
+      // Since we don't know the exact history ID, we query by planId + date range (today)
+      final startOfDay = Timestamp.fromDate(
+        DateTime(now.year, now.month, now.day),
+      );
+      final endOfDay = Timestamp.fromDate(
+        DateTime(now.year, now.month, now.day, 23, 59, 59),
+      );
+
+      final snapshot = await _firestore
+          .collection('actions')
+          .where('planId', isEqualTo: planId)
+          .where('date', isGreaterThanOrEqualTo: startOfDay)
+          .where('date', isLessThanOrEqualTo: endOfDay)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final historyId = snapshot.docs.first.id;
+        await _firestore.collection('actions').doc(historyId).update({
+          'verifiedBy': user.uid,
+          'verifiedAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error verifying plan: $e');
+      rethrow;
+    }
+  }
 }

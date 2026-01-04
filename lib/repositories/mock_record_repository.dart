@@ -508,4 +508,30 @@ class MockRecordRepository implements RecordRepository {
       }
     }
   }
+
+  @override
+  Future<void> approvePlan(String planId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final index = _mockPlans.indexWhere((p) => p.id == planId);
+    if (index != -1) {
+      _mockPlans[index] = _mockPlans[index].copyWith(state: PlanState.active);
+      _notifyPlansStream();
+      // Update Home Cards? For mock, simplified.
+    }
+  }
+
+  @override
+  Future<void> verifyPlan(String planId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    // Verify Logic for Mock
+    final index = _mockHistoryItems.indexWhere(
+      (h) => h.planId == planId && h.date.day == DateTime.now().day,
+    );
+    if (index != -1) {
+      _mockHistoryItems[index] = _mockHistoryItems[index].copyWith(
+        isVerifiedByMe: true,
+      );
+      _notifyHistoryStream();
+    }
+  }
 }

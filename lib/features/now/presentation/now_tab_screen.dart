@@ -94,19 +94,41 @@ class _NowTabState extends ConsumerState<NowTab>
   Future<void> _handleCheckIt(HomeCardModel managerCard) async {
     if (managerCard.plan?.id == null) return;
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('시작을 응원해요!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+    final planId = managerCard.plan!.id!;
 
-    // Dispatch Intent
-    await ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(CheckPartnerActionIntent(managerCard.plan!.id!));
+    // 카드 상태에 따라 다른 인텐트 발송
+    if (managerCard.state == HomeCardState.partnerPlanCreate ||
+        managerCard.state == HomeCardState.partnerPlanModify) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('시작을 응원해요!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(ApprovePlanIntent(planId));
+    } else if (managerCard.state == HomeCardState.partnerAction) {
+      // 실천 확인
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('실천을 확인했어요!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(VerifyPartnerPlanIntent(planId));
+    } else {
+      // Fallback
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(CheckPartnerActionIntent(planId));
+    }
   }
 
   Future<void> _handleCheer(HomeCardModel managerCard) async {

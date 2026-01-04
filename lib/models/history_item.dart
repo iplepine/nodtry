@@ -76,4 +76,32 @@ class HistoryItem {
         return HistoryStatus.skipped;
     }
   }
+
+  HistoryItem copyWith({
+    String? id,
+    String? planId,
+    DateTime? date,
+    String? title,
+    HistoryStatus? status,
+    String? executorId,
+    String? comment,
+    bool? isVerifiedByPartner,
+    bool? isVerifiedByMe,
+    String? partnerName,
+    String? partnerImageUrl,
+  }) {
+    return HistoryItem(
+      id: id ?? this.id,
+      planId: planId ?? this.planId,
+      date: date ?? this.date,
+      title: title ?? this.title,
+      status: status ?? this.status,
+      executorId: executorId ?? this.executorId,
+      comment: comment ?? this.comment,
+      isVerifiedByPartner: isVerifiedByPartner ?? this.isVerifiedByPartner,
+      isVerifiedByMe: isVerifiedByMe ?? this.isVerifiedByMe,
+      partnerName: partnerName ?? this.partnerName,
+      partnerImageUrl: partnerImageUrl ?? this.partnerImageUrl,
+    );
+  }
 }

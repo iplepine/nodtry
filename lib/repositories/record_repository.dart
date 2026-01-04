@@ -61,4 +61,10 @@ abstract class RecordRepository {
 
   /// 기존의 모든 활성 계획에 대해 매니저를 일괄 할당합니다.
   Future<void> assignManagerToActivePlans(String managerId);
+
+  /// 계획 승인 (pending_approval -> active)
+  Future<void> approvePlan(String planId);
+
+  /// 계획 실천 확인 (매니저가 파트너의 실천을 확인)
+  Future<void> verifyPlan(String planId);
 }

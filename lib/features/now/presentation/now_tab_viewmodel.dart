@@ -42,6 +42,10 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         await _cheerPartner(intent.planId, intent.reactionType);
       } else if (intent is PassPlanIntent) {
         await _passPlan(intent.planId);
+      } else if (intent is ApprovePlanIntent) {
+        await _approvePlan(intent.planId);
+      } else if (intent is VerifyPartnerPlanIntent) {
+        await _verifyPlan(intent.planId);
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -55,6 +59,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
   }
 
   Future<void> _checkPartnerAction(String planId) async {
+    // Legacy support or specific use case
     await ref.read(recordRepositoryProvider).reportCompletion(planId);
   }
 
@@ -68,6 +73,14 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _passPlan(String planId) async {
     await ref.read(recordRepositoryProvider).passPlan(planId);
+  }
+
+  Future<void> _approvePlan(String planId) async {
+    await ref.read(recordRepositoryProvider).approvePlan(planId);
+  }
+
+  Future<void> _verifyPlan(String planId) async {
+    await ref.read(recordRepositoryProvider).verifyPlan(planId);
   }
 
   /// 디버그 전용: Fake State 주입

@@ -93,3 +93,35 @@ class PassPlanIntent extends NowTabIntent {
   @override
   int get hashCode => planId.hashCode;
 }
+
+/// 계획 승인 (pending_approval -> active)
+class ApprovePlanIntent extends NowTabIntent {
+  final String planId;
+  const ApprovePlanIntent(this.planId);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ApprovePlanIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId;
+
+  @override
+  int get hashCode => planId.hashCode;
+}
+
+/// 파트너 실천 확인 (사실 했어요 -> 확인됨)
+class VerifyPartnerPlanIntent extends NowTabIntent {
+  final String planId;
+  const VerifyPartnerPlanIntent(this.planId);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VerifyPartnerPlanIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId;
+
+  @override
+  int get hashCode => planId.hashCode;
+}
