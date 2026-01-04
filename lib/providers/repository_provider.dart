@@ -1,6 +1,7 @@
 import '../features/plan/domain/usecases/create_new_plan_use_case.dart';
 import '../features/now/domain/usecases/get_now_cards_use_case.dart';
 import '../features/history/domain/usecases/get_history_use_case.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../repositories/record_repository.dart';
@@ -66,8 +67,16 @@ final getMyProfileUseCaseProvider = Provider<GetMyProfileUseCase>((ref) {
 
 /// My Profile Provider (Stream)
 final myProfileProvider = StreamProvider<UserModel?>((ref) {
+  // 인증 상태 변화를 감시하여 상태 변경 시 스트림 재구성
+  ref.watch(authStateChangesProvider);
+
   final useCase = ref.watch(getMyProfileUseCaseProvider);
   return useCase.execute();
+});
+
+/// 인증 상태 스트림 프로바이더
+final authStateChangesProvider = StreamProvider<User?>((ref) {
+  return ref.watch(authServiceProvider).authStateChanges;
 });
 
 /// GuestLoginUseCase Provider

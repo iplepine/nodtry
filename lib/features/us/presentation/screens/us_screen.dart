@@ -31,6 +31,28 @@ class _UsScreenState extends ConsumerState<UsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final usStateAsync = ref.watch(usViewModelProvider);
 
+    // 에러 발생 시 다이얼로그 노출
+    ref.listen(usViewModelProvider, (previous, next) {
+      if (next.hasValue && next.value?.errorNotification != null) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("안내"),
+            content: Text(next.value!.errorNotification!),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ref.read(usViewModelProvider.notifier).clearError();
+                },
+                child: const Text("확인"),
+              ),
+            ],
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -158,7 +180,38 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Text('${l10n.usLoadError}: $err'),
+                error: (err, stack) {
+                  // 만약 데이터가 이미 있다면 에러 메시지 대신 이전 데이터를 보여줌으로써 화면 깜빡임 방지
+                  final previousUser = ref.read(myProfileProvider).value;
+                  if (previousUser != null) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _MeSection(
+                          l10n: l10n,
+                          name: (previousUser.displayName?.isNotEmpty ?? false)
+                              ? previousUser.displayName!
+                              : l10n.usDefaultNameMe,
+                          statusMessage: previousUser.statusMessage,
+                          profileImageUrl: previousUser.profileImageUrl,
+                          onEditProfile: () => _showEditProfileDialog(
+                            context,
+                            previousUser.displayName ?? l10n.usDefaultNameMe,
+                            previousUser.statusMessage,
+                          ),
+                          inviteCode: previousUser.inviteCode,
+                        ),
+                        const SizedBox(height: 24),
+                        _ActivePlanListSection(
+                          userId: previousUser.uid,
+                          title: l10n.usMyPlanTitle,
+                          isMe: true,
+                        ),
+                      ],
+                    );
+                  }
+                  return Center(child: Text('${l10n.usLoadError}: $err'));
+                },
               ),
 
               const SizedBox(height: 48),

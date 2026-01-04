@@ -12,6 +12,7 @@ abstract class UsState with _$UsState {
     @Default([]) List<ConnectedUser> connectedProfiles,
     @Default(false) bool isLinking,
     @Default(false) bool isUpdatingProfile,
+    String? errorNotification,
   }) = _UsState;
 }
 

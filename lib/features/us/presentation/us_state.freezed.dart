@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UsState {
 
- UserModel? get myProfile; List<ConnectedUser> get connectedProfiles; bool get isLinking; bool get isUpdatingProfile;
+ UserModel? get myProfile; List<ConnectedUser> get connectedProfiles; bool get isLinking; bool get isUpdatingProfile; String? get errorNotification;
 /// Create a copy of UsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $UsStateCopyWith<UsState> get copyWith => _$UsStateCopyWithImpl<UsState>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UsState&&(identical(other.myProfile, myProfile) || other.myProfile == myProfile)&&const DeepCollectionEquality().equals(other.connectedProfiles, connectedProfiles)&&(identical(other.isLinking, isLinking) || other.isLinking == isLinking)&&(identical(other.isUpdatingProfile, isUpdatingProfile) || other.isUpdatingProfile == isUpdatingProfile));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UsState&&(identical(other.myProfile, myProfile) || other.myProfile == myProfile)&&const DeepCollectionEquality().equals(other.connectedProfiles, connectedProfiles)&&(identical(other.isLinking, isLinking) || other.isLinking == isLinking)&&(identical(other.isUpdatingProfile, isUpdatingProfile) || other.isUpdatingProfile == isUpdatingProfile)&&(identical(other.errorNotification, errorNotification) || other.errorNotification == errorNotification));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,myProfile,const DeepCollectionEquality().hash(connectedProfiles),isLinking,isUpdatingProfile);
+int get hashCode => Object.hash(runtimeType,myProfile,const DeepCollectionEquality().hash(connectedProfiles),isLinking,isUpdatingProfile,errorNotification);
 
 @override
 String toString() {
-  return 'UsState(myProfile: $myProfile, connectedProfiles: $connectedProfiles, isLinking: $isLinking, isUpdatingProfile: $isUpdatingProfile)';
+  return 'UsState(myProfile: $myProfile, connectedProfiles: $connectedProfiles, isLinking: $isLinking, isUpdatingProfile: $isUpdatingProfile, errorNotification: $errorNotification)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $UsStateCopyWith<$Res>  {
   factory $UsStateCopyWith(UsState value, $Res Function(UsState) _then) = _$UsStateCopyWithImpl;
 @useResult
 $Res call({
- UserModel? myProfile, List<ConnectedUser> connectedProfiles, bool isLinking, bool isUpdatingProfile
+ UserModel? myProfile, List<ConnectedUser> connectedProfiles, bool isLinking, bool isUpdatingProfile, String? errorNotification
 });
 
 
@@ -62,13 +62,14 @@ class _$UsStateCopyWithImpl<$Res>
 
 /// Create a copy of UsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? myProfile = freezed,Object? connectedProfiles = null,Object? isLinking = null,Object? isUpdatingProfile = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? myProfile = freezed,Object? connectedProfiles = null,Object? isLinking = null,Object? isUpdatingProfile = null,Object? errorNotification = freezed,}) {
   return _then(_self.copyWith(
 myProfile: freezed == myProfile ? _self.myProfile : myProfile // ignore: cast_nullable_to_non_nullable
 as UserModel?,connectedProfiles: null == connectedProfiles ? _self.connectedProfiles : connectedProfiles // ignore: cast_nullable_to_non_nullable
 as List<ConnectedUser>,isLinking: null == isLinking ? _self.isLinking : isLinking // ignore: cast_nullable_to_non_nullable
 as bool,isUpdatingProfile: null == isUpdatingProfile ? _self.isUpdatingProfile : isUpdatingProfile // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,errorNotification: freezed == errorNotification ? _self.errorNotification : errorNotification // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -153,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( UserModel? myProfile,  List<ConnectedUser> connectedProfiles,  bool isLinking,  bool isUpdatingProfile)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( UserModel? myProfile,  List<ConnectedUser> connectedProfiles,  bool isLinking,  bool isUpdatingProfile,  String? errorNotification)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UsState() when $default != null:
-return $default(_that.myProfile,_that.connectedProfiles,_that.isLinking,_that.isUpdatingProfile);case _:
+return $default(_that.myProfile,_that.connectedProfiles,_that.isLinking,_that.isUpdatingProfile,_that.errorNotification);case _:
   return orElse();
 
 }
@@ -174,10 +175,10 @@ return $default(_that.myProfile,_that.connectedProfiles,_that.isLinking,_that.is
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( UserModel? myProfile,  List<ConnectedUser> connectedProfiles,  bool isLinking,  bool isUpdatingProfile)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( UserModel? myProfile,  List<ConnectedUser> connectedProfiles,  bool isLinking,  bool isUpdatingProfile,  String? errorNotification)  $default,) {final _that = this;
 switch (_that) {
 case _UsState():
-return $default(_that.myProfile,_that.connectedProfiles,_that.isLinking,_that.isUpdatingProfile);case _:
+return $default(_that.myProfile,_that.connectedProfiles,_that.isLinking,_that.isUpdatingProfile,_that.errorNotification);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +195,10 @@ return $default(_that.myProfile,_that.connectedProfiles,_that.isLinking,_that.is
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( UserModel? myProfile,  List<ConnectedUser> connectedProfiles,  bool isLinking,  bool isUpdatingProfile)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( UserModel? myProfile,  List<ConnectedUser> connectedProfiles,  bool isLinking,  bool isUpdatingProfile,  String? errorNotification)?  $default,) {final _that = this;
 switch (_that) {
 case _UsState() when $default != null:
-return $default(_that.myProfile,_that.connectedProfiles,_that.isLinking,_that.isUpdatingProfile);case _:
+return $default(_that.myProfile,_that.connectedProfiles,_that.isLinking,_that.isUpdatingProfile,_that.errorNotification);case _:
   return null;
 
 }
@@ -209,7 +210,7 @@ return $default(_that.myProfile,_that.connectedProfiles,_that.isLinking,_that.is
 
 
 class _UsState extends UsState {
-  const _UsState({this.myProfile, final  List<ConnectedUser> connectedProfiles = const [], this.isLinking = false, this.isUpdatingProfile = false}): _connectedProfiles = connectedProfiles,super._();
+  const _UsState({this.myProfile, final  List<ConnectedUser> connectedProfiles = const [], this.isLinking = false, this.isUpdatingProfile = false, this.errorNotification}): _connectedProfiles = connectedProfiles,super._();
   
 
 @override final  UserModel? myProfile;
@@ -222,6 +223,7 @@ class _UsState extends UsState {
 
 @override@JsonKey() final  bool isLinking;
 @override@JsonKey() final  bool isUpdatingProfile;
+@override final  String? errorNotification;
 
 /// Create a copy of UsState
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +235,16 @@ _$UsStateCopyWith<_UsState> get copyWith => __$UsStateCopyWithImpl<_UsState>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UsState&&(identical(other.myProfile, myProfile) || other.myProfile == myProfile)&&const DeepCollectionEquality().equals(other._connectedProfiles, _connectedProfiles)&&(identical(other.isLinking, isLinking) || other.isLinking == isLinking)&&(identical(other.isUpdatingProfile, isUpdatingProfile) || other.isUpdatingProfile == isUpdatingProfile));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UsState&&(identical(other.myProfile, myProfile) || other.myProfile == myProfile)&&const DeepCollectionEquality().equals(other._connectedProfiles, _connectedProfiles)&&(identical(other.isLinking, isLinking) || other.isLinking == isLinking)&&(identical(other.isUpdatingProfile, isUpdatingProfile) || other.isUpdatingProfile == isUpdatingProfile)&&(identical(other.errorNotification, errorNotification) || other.errorNotification == errorNotification));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,myProfile,const DeepCollectionEquality().hash(_connectedProfiles),isLinking,isUpdatingProfile);
+int get hashCode => Object.hash(runtimeType,myProfile,const DeepCollectionEquality().hash(_connectedProfiles),isLinking,isUpdatingProfile,errorNotification);
 
 @override
 String toString() {
-  return 'UsState(myProfile: $myProfile, connectedProfiles: $connectedProfiles, isLinking: $isLinking, isUpdatingProfile: $isUpdatingProfile)';
+  return 'UsState(myProfile: $myProfile, connectedProfiles: $connectedProfiles, isLinking: $isLinking, isUpdatingProfile: $isUpdatingProfile, errorNotification: $errorNotification)';
 }
 
 
@@ -253,7 +255,7 @@ abstract mixin class _$UsStateCopyWith<$Res> implements $UsStateCopyWith<$Res> {
   factory _$UsStateCopyWith(_UsState value, $Res Function(_UsState) _then) = __$UsStateCopyWithImpl;
 @override @useResult
 $Res call({
- UserModel? myProfile, List<ConnectedUser> connectedProfiles, bool isLinking, bool isUpdatingProfile
+ UserModel? myProfile, List<ConnectedUser> connectedProfiles, bool isLinking, bool isUpdatingProfile, String? errorNotification
 });
 
 
@@ -270,13 +272,14 @@ class __$UsStateCopyWithImpl<$Res>
 
 /// Create a copy of UsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? myProfile = freezed,Object? connectedProfiles = null,Object? isLinking = null,Object? isUpdatingProfile = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? myProfile = freezed,Object? connectedProfiles = null,Object? isLinking = null,Object? isUpdatingProfile = null,Object? errorNotification = freezed,}) {
   return _then(_UsState(
 myProfile: freezed == myProfile ? _self.myProfile : myProfile // ignore: cast_nullable_to_non_nullable
 as UserModel?,connectedProfiles: null == connectedProfiles ? _self._connectedProfiles : connectedProfiles // ignore: cast_nullable_to_non_nullable
 as List<ConnectedUser>,isLinking: null == isLinking ? _self.isLinking : isLinking // ignore: cast_nullable_to_non_nullable
 as bool,isUpdatingProfile: null == isUpdatingProfile ? _self.isUpdatingProfile : isUpdatingProfile // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,errorNotification: freezed == errorNotification ? _self.errorNotification : errorNotification // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
