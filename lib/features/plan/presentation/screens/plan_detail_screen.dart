@@ -18,6 +18,9 @@ class PlanDetailScreen extends ConsumerWidget {
     final time = item.notificationTime;
     final days = item.days;
 
+    final currentUser = ref.watch(authStateChangesProvider).value;
+    final isMine = currentUser?.uid == plan.userId;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -28,20 +31,22 @@ class PlanDetailScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.edit_outlined, color: AppColors.textPrimary),
-            onPressed: () {
-              // Navigate to Edit Mode
-              context.pushNamed(
-                'plan-create',
-                extra: plan, // Pass plan object for editing
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.delete_outline, color: AppColors.error),
-            onPressed: () => _showDeleteCurrentPlanDialog(context, ref),
-          ),
+          if (isMine) ...[
+            IconButton(
+              icon: Icon(Icons.edit_outlined, color: AppColors.textPrimary),
+              onPressed: () {
+                // Navigate to Edit Mode
+                context.pushNamed(
+                  'plan-create',
+                  extra: plan, // Pass plan object for editing
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: AppColors.error),
+              onPressed: () => _showDeleteCurrentPlanDialog(context, ref),
+            ),
+          ],
         ],
       ),
       body: SafeArea(
