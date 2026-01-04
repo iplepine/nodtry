@@ -73,6 +73,9 @@ class ConnectViewModel extends AsyncNotifier<ConnectState> {
           .read(recordRepositoryProvider)
           .assignManagerToActivePlans(managerId);
 
+      // Us 탭 갱신을 위해 파트너 목록 다시 로드
+      ref.invalidate(connectedProfilesProvider);
+
       state = AsyncValue.data(state.value!.copyWith(isProcessing: false));
     } catch (e) {
       state = AsyncValue.data(
