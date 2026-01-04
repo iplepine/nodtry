@@ -6,27 +6,20 @@ import '../../../providers/repository_provider.dart';
 
 class UsViewModel extends AsyncNotifier<UsState> {
   @override
+  @override
   FutureOr<UsState> build() async {
-    // Listen to profile updates
-    ref.listen(myProfileProvider, (prev, next) {
-      if (next is AsyncData && state.hasValue) {
-        state = AsyncValue.data(state.value!.copyWith(myProfile: next.value));
-      }
-    });
+    // Watch providers directly to allow auto-rebuild on changes
+    final myProfileAsync = ref.watch(myProfileProvider);
+    final connectedProfilesAsync = ref.watch(connectedProfilesProvider);
 
-    // Listen to connected profiles
-    ref.listen(connectedProfilesProvider, (prev, next) {
-      if (next is AsyncData && state.hasValue) {
-        state = AsyncValue.data(
-          state.value!.copyWith(connectedProfiles: next.value ?? []),
-        );
-      }
-    });
+    // If either is loading, we can return pre-existing state if implementing optimistic updates,
+    // or let AsyncNotifier handle loading state naturally.
+    // Here we'll return the combined state.
 
-    return UsState(
-      myProfile: ref.read(myProfileProvider).value,
-      connectedProfiles: ref.read(connectedProfilesProvider).value ?? [],
-    );
+    final myProfile = myProfileAsync.value;
+    final connectedProfiles = connectedProfilesAsync.value ?? [];
+
+    return UsState(myProfile: myProfile, connectedProfiles: connectedProfiles);
   }
 
   Future<void> dispatch(UsIntent intent) async {
