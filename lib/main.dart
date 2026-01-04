@@ -69,7 +69,7 @@ class OnMyBehalfApp extends ConsumerWidget {
       state: settingsState,
       notifier: settingsNotifier,
       child: MaterialApp.router(
-        title: 'Nod & Try',
+        onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
         debugShowCheckedModeBanner: false,
         theme: themeData,
         locale: settingsState.currentLocale,

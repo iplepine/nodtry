@@ -295,6 +295,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                 _connectManually();
               }
             },
+            inputFormatters: [
+              TextInputFormatter.withFunction((oldValue, newValue) {
+                return newValue.copyWith(text: newValue.text.toUpperCase());
+              }),
+            ],
             keyboardType: TextInputType.text,
             textCapitalization: TextCapitalization.characters,
             autocorrect: false,
