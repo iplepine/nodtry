@@ -641,6 +641,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vagueTimeBedtime => '자기 전';
 
   @override
+  String get cheerSimple => '그래';
+
+  @override
+  String get cheerMore => '더보기';
+
+  @override
+  String get cheerSheetTitle => '어떻게 응원할까요?';
+
+  @override
+  String get cheerMessageHint => '직접 응원 메시지를 남겨보세요';
+
+  @override
+  String get cheerSend => '보내기';
+
+  @override
   String get settingsDeveloperDesc => '디버그 메뉴';
 
   @override

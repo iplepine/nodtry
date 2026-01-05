@@ -1310,6 +1310,36 @@ abstract class AppLocalizations {
   /// **'Bedtime'**
   String get vagueTimeBedtime;
 
+  /// Simple cheer option
+  ///
+  /// In en, this message translates to:
+  /// **'Okay'**
+  String get cheerSimple;
+
+  /// Option to see more cheer options
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get cheerMore;
+
+  /// Title for the cheer selection sheet
+  ///
+  /// In en, this message translates to:
+  /// **'How to Cheer?'**
+  String get cheerSheetTitle;
+
+  /// Hint text for cheer message input
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a cheer message'**
+  String get cheerMessageHint;
+
+  /// Send button for cheer message
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get cheerSend;
+
   /// Description for developer menu
   ///
   /// In en, this message translates to:

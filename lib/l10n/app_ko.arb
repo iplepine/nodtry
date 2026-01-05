@@ -424,5 +424,10 @@
     }
   },
   "vagueTimeDinner": "저녁",
-  "vagueTimeBedtime": "자기 전"
+  "vagueTimeBedtime": "자기 전",
+  "cheerSimple": "그래",
+  "cheerMore": "더보기",
+  "cheerSheetTitle": "어떻게 응원할까요?",
+  "cheerMessageHint": "직접 응원 메시지를 남겨보세요",
+  "cheerSend": "보내기"
 }

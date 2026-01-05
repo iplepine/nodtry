@@ -9,11 +9,10 @@ import '../../../theme/app_colors.dart';
 import '../../../widgets/quiet_header.dart';
 import '../../../widgets/time_chip.dart';
 import '../../../models/home_state.dart';
-import 'now_tab_state.dart';
 import '../../../routes/app_router.dart';
 import '../../../utils/time_formatter.dart';
-import 'now_tab_viewmodel.dart';
 import 'now_tab_intent.dart';
+import 'now_tab_viewmodel.dart';
 import 'now_tab_fake_states.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
@@ -405,6 +404,68 @@ class _NowTabState extends ConsumerState<NowTab>
           prevUiState.primaryCard?.plan?.id !=
           nextUiState.primaryCard?.plan?.id;
 
+      // 에러 핸들링
+      if (next.hasError && !next.isLoading) {
+        // 기존 데이터가 있는 상태에서 에러가 발생했을 때만 다이얼로그 표시 (SnackBar 대신)
+        // 화면 전체가 에러인 경우는 build()의 error 위젯이 처리
+        if (previous?.hasError != true) {
+          final error = next.error;
+          String errorMessage = '알 수 없는 오류가 발생했습니다.';
+          String? errorUrl;
+
+          if (error.toString().contains('failed-precondition') ||
+              error.toString().contains('requires an index')) {
+            errorMessage = '데이터 조회에 필요한 인덱스가 없습니다.\n개발자에게 이 화면을 캡처해서 보내주세요.';
+
+            // Extract URL if possible (very rough regex)
+            final urlRegExp = RegExp(
+              r'https://console\.firebase\.google\.com[^\s]*',
+            );
+            final match = urlRegExp.firstMatch(error.toString());
+            if (match != null) {
+              errorUrl = match.group(0);
+            }
+          } else {
+            errorMessage = error.toString();
+          }
+
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('오류 발생'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(errorMessage),
+                  if (errorUrl != null) ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      '생성 링크:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      errorUrl,
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('확인'),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+
       // 카드의 식별자가 변경되었을 때만 애니메이션 재시작
       if (managerChanged || primaryChanged) {
         _onDataLoaded();
@@ -417,183 +478,341 @@ class _NowTabState extends ConsumerState<NowTab>
       WidgetsBinding.instance.addPostFrameCallback((_) => _onDataLoaded());
     }
 
-    return homeStateAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text('Error: $err')),
-      data: (NowTabState uiState) {
-        // 상태 사용
-        final primaryExecutorCard = uiState.primaryCard;
-        final secondaryExecutorCards = uiState.secondaryCards;
-        final managerCards = uiState.managerCards;
+    // 에러가 있어도 데이터가 있으면 보여줌 (Dialog로 에러 알림)
+    // 데이터가 없고 에러만 있으면 빈 화면 (Dialog로 에러 알림)
+    // 데이터가 없고 로딩 중이면 로딩 표시
 
-        return Stack(
-          children: [
-            Column(
-              children: [
-                // 헤더
-                QuietHeader(
-                  partnerName: null,
-                  periodState: HeaderPeriodState.inProgress,
-                  onSettingsTap: null,
-                ),
-                // Now Card
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                        top: 24,
-                        bottom: MediaQuery.of(context).padding.bottom + 80,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Executor Area (Primary Action)
-                          if (primaryExecutorCard != null) ...[
-                            FadeTransition(
-                              opacity: _primaryFadeAnimation,
-                              child: ScaleTransition(
-                                scale: _primaryScaleAnimation,
-                                child: SlideTransition(
-                                  position:
-                                      Tween<Offset>(
-                                        begin: const Offset(
-                                          0,
-                                          0.15,
-                                        ), // 시작/사라질 때 더 아래로
-                                        end: Offset.zero, // 정상 위치
-                                      ).animate(
-                                        CurvedAnimation(
-                                          parent: _animationController,
-                                          curve: Curves.easeIn,
-                                        ),
+    if (homeStateAsync.hasValue) {
+      final uiState = homeStateAsync.value!;
+      // 기존 data: (...) 블록 내용 사용
+      final primaryExecutorCard = uiState.primaryCard;
+      final secondaryExecutorCards = uiState.secondaryCards;
+      final managerCards = uiState.managerCards;
+
+      return Stack(
+        children: [
+          Column(
+            children: [
+              // 헤더
+              QuietHeader(
+                partnerName: null,
+                periodState: HeaderPeriodState.inProgress,
+                onSettingsTap: null,
+              ),
+              // Now Card
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      top: 24,
+                      bottom: MediaQuery.of(context).padding.bottom + 80,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Executor Area (Primary Action)
+                        if (primaryExecutorCard != null) ...[
+                          FadeTransition(
+                            opacity: _primaryFadeAnimation,
+                            child: ScaleTransition(
+                              scale: _primaryScaleAnimation,
+                              child: SlideTransition(
+                                position:
+                                    Tween<Offset>(
+                                      begin: const Offset(
+                                        0,
+                                        0.15,
+                                      ), // 시작/사라질 때 더 아래로
+                                      end: Offset.zero, // 정상 위치
+                                    ).animate(
+                                      CurvedAnimation(
+                                        parent: _animationController,
+                                        curve: Curves.easeIn,
                                       ),
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: FractionallySizedBox(
-                                      widthFactor: 0.9,
-                                      child: _PrimaryExecutorCard(
-                                        model: primaryExecutorCard,
-                                        onDidIt: _handleDidIt,
-                                        onSkip: _handleSkip,
-                                        onCreatePlan: _handleCreatePlan,
-                                        onTap: () =>
-                                            _handleCardTap(primaryExecutorCard),
-                                        timeChipText: _getTimeChipText(
-                                          primaryExecutorCard,
-                                        ),
-                                        timeChipType: _getTimeChipType(
-                                          primaryExecutorCard,
-                                        ),
-                                        recordGazeText: _getRecordGazeText(
-                                          primaryExecutorCard,
-                                        ),
-                                        exactTimeText: _getExactTimeText(
-                                          primaryExecutorCard,
-                                        ),
+                                    ),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: FractionallySizedBox(
+                                    widthFactor: 0.9,
+                                    child: _PrimaryExecutorCard(
+                                      model: primaryExecutorCard,
+                                      onDidIt: _handleDidIt,
+                                      onSkip: _handleSkip,
+                                      onCreatePlan: _handleCreatePlan,
+                                      onTap: () =>
+                                          _handleCardTap(primaryExecutorCard),
+                                      timeChipText: _getTimeChipText(
+                                        primaryExecutorCard,
+                                      ),
+                                      timeChipType: _getTimeChipType(
+                                        primaryExecutorCard,
+                                      ),
+                                      recordGazeText: _getRecordGazeText(
+                                        primaryExecutorCard,
+                                      ),
+                                      exactTimeText: _getExactTimeText(
+                                        primaryExecutorCard,
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
-                          ],
-                          // Secondary Executor Cards (My Contexts)
-                          if (secondaryExecutorCards.isNotEmpty) ...[
-                            ...secondaryExecutorCards.map(
-                              (state) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: FadeTransition(
-                                  opacity: _secondaryFadeAnimation,
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: FractionallySizedBox(
-                                      widthFactor: 0.85,
-                                      child: _SecondaryExecutorCard(
-                                        model: state,
-                                        timeChipText: _getSecondaryTimeChipText(
-                                          state,
-                                        ),
-                                        timeChipType: _getSecondaryTimeChipType(
-                                          state,
-                                        ),
-                                        onReconcile: () {
-                                          ref
-                                              .read(
-                                                nowTabViewModelProvider
-                                                    .notifier,
-                                              )
-                                              .dispatch(const RefreshIntent());
-                                        },
-                                        exactTimeText: _getExactTimeText(state),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        // Secondary Executor Cards (My Contexts)
+                        if (secondaryExecutorCards.isNotEmpty) ...[
+                          ...secondaryExecutorCards.map(
+                            (state) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: FadeTransition(
+                                opacity: _secondaryFadeAnimation,
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: FractionallySizedBox(
+                                    widthFactor: 0.85,
+                                    child: _SecondaryExecutorCard(
+                                      model: state,
+                                      timeChipText: _getSecondaryTimeChipText(
+                                        state,
                                       ),
+                                      timeChipType: _getSecondaryTimeChipType(
+                                        state,
+                                      ),
+                                      onReconcile: () {
+                                        ref
+                                            .read(
+                                              nowTabViewModelProvider.notifier,
+                                            )
+                                            .dispatch(const RefreshIntent());
+                                      },
+                                      exactTimeText: _getExactTimeText(state),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 24),
-                          ],
-                          // Manager Area (Partner's Requests)
-                          if (managerCards.isNotEmpty) ...[
-                            ...managerCards.map((card) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: FadeTransition(
-                                  opacity: _managerFadeAnimation,
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: FractionallySizedBox(
-                                      widthFactor: 0.88,
-                                      child: _ManagerQuickCard(
-                                        model: card,
-                                        partnerName: card.partnerName,
-                                        onCheckIt: () => _handleCheckIt(card),
-                                        onCheer: () => _handleCheer(card),
-                                        onPass: () => _handlePass(card),
-                                        timeChipText: _getManagerTimeChipText(
-                                          card,
-                                        ),
-                                        timeChipType: _getManagerTimeChipType(
-                                          card,
-                                        ),
-                                        exactTimeText: _getExactTimeText(card),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ],
-                          // Footer
-                          const _ContextFooter(),
+                          ),
                           const SizedBox(height: 24),
                         ],
-                      ),
+                        // Manager Area (Partner's Requests)
+                        if (managerCards.isNotEmpty) ...[
+                          ...managerCards.map((card) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: FadeTransition(
+                                opacity: _managerFadeAnimation,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: FractionallySizedBox(
+                                    widthFactor: 0.88,
+                                    child: _ManagerQuickCard(
+                                      model: card,
+                                      partnerName: card.partnerName,
+                                      onCheckIt: () => _handleCheckIt(card),
+                                      onCheer: () => _handleCheer(card),
+                                      onPass: () => _handlePass(card),
+                                      onSimpleCheer: () =>
+                                          _handleSimpleCheer(card),
+                                      onMoreCheer: () => _handleMoreCheer(card),
+                                      timeChipText: _getManagerTimeChipText(
+                                        card,
+                                      ),
+                                      timeChipType: _getManagerTimeChipType(
+                                        card,
+                                      ),
+                                      exactTimeText: _getExactTimeText(card),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                        // Footer
+                        const _ContextFooter(),
+                        const SizedBox(height: 24),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
 
-            // Debug Fake State Toggle Button (Debug Only)
-            if (kDebugMode)
-              Positioned(
-                bottom: 120, // Raised to avoid bottom nav overlap
-                right: 16,
-                child: FloatingActionButton(
-                  mini: true,
-                  backgroundColor: AppColors.primary,
-                  child: const Icon(Icons.bug_report, size: 20),
-                  onPressed: () {
-                    _showFakeStateSelector(context, ref);
-                  },
+          // Debug Fake State Toggle Button (Debug Only)
+          if (kDebugMode)
+            Positioned(
+              bottom: 120, // Raised to avoid bottom nav overlap
+              right: 16,
+              child: FloatingActionButton(
+                mini: true,
+                backgroundColor: AppColors.primary,
+                child: const Icon(Icons.bug_report, size: 20),
+                onPressed: () {
+                  _showFakeStateSelector(context, ref);
+                },
+              ),
+            ),
+        ],
+      );
+    } else if (homeStateAsync.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      // 에러 상황이나 빈 상황이지만 데이터가 없는 경우 -> 빈 화면 반환 (다이얼로그가 에러를 보여줌)
+      // 혹은 "다시 시도" 버튼 정도는 보여줄 수 있음.
+      return const SizedBox.shrink();
+    }
+  }
+
+  void _handleSimpleCheer(HomeCardModel card) {
+    if (card.plan?.id == null) return;
+    // Simple cheer = 'check' reaction
+    ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(CheerPartnerActionIntent(card.plan!.id!, 'check'));
+  }
+
+  void _handleMoreCheer(HomeCardModel card) {
+    if (card.plan?.id == null) return;
+    _showReactionBottomSheet(context, card.plan!.id!);
+  }
+
+  void _showReactionBottomSheet(BuildContext context, String planId) {
+    final l10n = AppLocalizations.of(context)!;
+    final messageController = TextEditingController();
+    String selectedReaction = 'fire'; // Default
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
                 ),
               ),
-          ],
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.cheerSheetTitle,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // Emoji Grid
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: ['🔥', '❤️', '👏', '👍', '😮', '😢', '💪', '✨']
+                          .map((emoji) {
+                            final isSelected = selectedReaction == emoji;
+                            return GestureDetector(
+                              onTap: () {
+                                setSheetState(() {
+                                  selectedReaction = emoji;
+                                });
+                              },
+                              child: Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.primary.withOpacity(0.1)
+                                      : Colors.transparent,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : Colors.grey.shade300,
+                                    width: 2,
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  emoji,
+                                  style: const TextStyle(fontSize: 28),
+                                ),
+                              ),
+                            );
+                          })
+                          .toList(),
+                    ),
+                    const SizedBox(height: 24),
+                    // TextField
+                    TextField(
+                      controller: messageController,
+                      decoration: InputDecoration(
+                        hintText: l10n.cheerMessageHint,
+                        filled: true,
+                        fillColor: AppColors.background,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 24),
+                    // Send Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          ref
+                              .read(nowTabViewModelProvider.notifier)
+                              .dispatch(
+                                CheerPartnerActionIntent(
+                                  planId,
+                                  selectedReaction,
+                                  message: messageController.text.trim(),
+                                ),
+                              );
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Text(
+                          l10n.cheerSend,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -1324,6 +1543,8 @@ class _ManagerQuickCard extends StatelessWidget {
   final VoidCallback? onCheckIt;
   final VoidCallback? onCheer;
   final VoidCallback? onPass;
+  final VoidCallback? onSimpleCheer;
+  final VoidCallback? onMoreCheer;
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? exactTimeText;
@@ -1334,6 +1555,8 @@ class _ManagerQuickCard extends StatelessWidget {
     this.onCheckIt,
     this.onCheer,
     this.onPass,
+    this.onSimpleCheer,
+    this.onMoreCheer,
     this.timeChipText,
     this.timeChipType,
     this.exactTimeText,
@@ -1508,7 +1731,7 @@ class _ManagerQuickCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: onCheckIt,
+                      onPressed: onSimpleCheer ?? onCheckIt,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
@@ -1519,7 +1742,7 @@ class _ManagerQuickCard extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        l10n.homeChecked,
+                        l10n.cheerSimple, // "그래"
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -1530,7 +1753,7 @@ class _ManagerQuickCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: onCheer, // TODO: Implement cheer logic
+                      onPressed: onMoreCheer,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary.withValues(
                           alpha: 0.1,
@@ -1543,7 +1766,7 @@ class _ManagerQuickCard extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        l10n.homeThankYou,
+                        l10n.cheerMore, // "더보기"
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,

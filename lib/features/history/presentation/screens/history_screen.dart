@@ -25,6 +25,65 @@ class HistoryScreen extends ConsumerWidget {
     final myProfileAsync = ref.watch(myProfileProvider);
     final myUid = myProfileAsync.value?.uid ?? 'me';
 
+    ref.listen(historyViewModelProvider, (previous, next) {
+      if (next.hasError && !next.isLoading) {
+        if (previous?.hasError != true) {
+          final error = next.error;
+          String errorMessage = '알 수 없는 오류가 발생했습니다.';
+          String? errorUrl;
+
+          if (error.toString().contains('failed-precondition') ||
+              error.toString().contains('requires an index')) {
+            errorMessage = '데이터 조회에 필요한 인덱스가 없습니다.\n개발자에게 이 화면을 캡처해서 보내주세요.';
+            final urlRegExp = RegExp(
+              r'https://console\.firebase\.google\.com[^\s]*',
+            );
+            final match = urlRegExp.firstMatch(error.toString());
+            if (match != null) {
+              errorUrl = match.group(0);
+            }
+          } else {
+            errorMessage = error.toString();
+          }
+
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('오류 발생'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(errorMessage),
+                  if (errorUrl != null) ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      '생성 링크:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      errorUrl,
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('확인'),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    });
+
     return Stack(
       children: [
         Column(
@@ -40,6 +99,7 @@ class HistoryScreen extends ConsumerWidget {
 
             // 기록 리스트
             Expanded(
+              // 에러가 있어도 데이터가 있으면 보여줌 (Dialog로 에러 알림)
               child: historyStateAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, stack) => Center(child: Text('Error: $err')),

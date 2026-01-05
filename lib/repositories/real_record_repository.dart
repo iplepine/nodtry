@@ -29,12 +29,8 @@ class RealRecordRepository implements RecordRepository {
             Filter('managerId', isEqualTo: user.uid),
           ),
         )
-        .snapshots()
-        .map((snapshot) => _mapSnapshotToModels(snapshot, user.uid))
-        .handleError((error) {
-          debugPrint('[RealRecordRepository] Error in stream: $error');
-          return [const HomeCardModel(state: HomeCardState.emptyPlan)];
-        });
+        .snapshots(includeMetadataChanges: true)
+        .map((snapshot) => _mapSnapshotToModels(snapshot, user.uid));
   }
 
   /// Helper to convert Firestore snapshot to HomeCardModels
@@ -273,12 +269,6 @@ class RealRecordRepository implements RecordRepository {
                     p.state == PlanState.pendingApproval,
               )
               .toList();
-        })
-        .handleError((error) {
-          debugPrint(
-            '[RealRecordRepository] Error in plans stream for user $userId: $error',
-          );
-          return <Plan>[];
         });
   }
 
@@ -331,23 +321,14 @@ class RealRecordRepository implements RecordRepository {
       query = query.where('userId', isEqualTo: user.uid);
     }
 
-    return query
-        .orderBy('date', descending: true)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs
-              .map(
-                (doc) => HistoryItem.fromMap(
-                  doc.data() as Map<String, dynamic>,
-                  doc.id,
-                ),
-              )
-              .toList();
-        })
-        .handleError((error) {
-          debugPrint('[RealRecordRepository] Error in history stream: $error');
-          return <HistoryItem>[];
-        });
+    return query.orderBy('date', descending: true).snapshots().map((snapshot) {
+      return snapshot.docs
+          .map(
+            (doc) =>
+                HistoryItem.fromMap(doc.data() as Map<String, dynamic>, doc.id),
+          )
+          .toList();
+    });
   }
 
   @override
@@ -711,7 +692,11 @@ class RealRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> cheerPartner(String planId, String reactionType) async {
+  Future<void> cheerPartner(
+    String planId,
+    String reactionType, {
+    String? message,
+  }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
@@ -721,13 +706,22 @@ class RealRecordRepository implements RecordRepository {
       final toUserId =
           planDoc.data()?['userId'] as String? ?? ''; // Should valid
 
-      await _firestore.collection('cheers').add({
+      final data = {
         'fromUserId': user.uid,
         'toUserId': toUserId,
         'planId': planId,
         'reactionType': reactionType,
         'createdAt': FieldValue.serverTimestamp(),
-      });
+      };
+
+      if (message != null && message.isNotEmpty) {
+        data['message'] = message;
+      }
+
+      await _firestore.collection('cheers').add(data);
+
+      // 2. Also mark as verified so the card disappears from "Yours" immediately
+      await verifyPlan(planId);
     } catch (e) {
       debugPrint('[RealRecordRepository] Error cheering partner: $e');
       rethrow;

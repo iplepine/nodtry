@@ -654,6 +654,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vagueTimeBedtime => 'Bedtime';
 
   @override
+  String get cheerSimple => 'Okay';
+
+  @override
+  String get cheerMore => 'More';
+
+  @override
+  String get cheerSheetTitle => 'How to Cheer?';
+
+  @override
+  String get cheerMessageHint => 'Leave a cheer message';
+
+  @override
+  String get cheerSend => 'Send';
+
+  @override
   String get settingsDeveloperDesc => 'Debug menu';
 
   @override

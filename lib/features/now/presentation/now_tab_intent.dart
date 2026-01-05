@@ -64,7 +64,12 @@ class SkipPlanIntent extends NowTabIntent {
 class CheerPartnerActionIntent extends NowTabIntent {
   final String planId;
   final String reactionType; // 'fire', 'heart', 'thumbs_up', 'muscle'
-  const CheerPartnerActionIntent(this.planId, this.reactionType);
+  final String? message;
+  const CheerPartnerActionIntent(
+    this.planId,
+    this.reactionType, {
+    this.message,
+  });
 
   @override
   bool operator ==(Object other) =>
@@ -72,10 +77,12 @@ class CheerPartnerActionIntent extends NowTabIntent {
       other is CheerPartnerActionIntent &&
           runtimeType == other.runtimeType &&
           planId == other.planId &&
-          reactionType == other.reactionType;
+          reactionType == other.reactionType &&
+          message == other.message;
 
   @override
-  int get hashCode => planId.hashCode ^ reactionType.hashCode;
+  int get hashCode =>
+      planId.hashCode ^ reactionType.hashCode ^ (message?.hashCode ?? 0);
 }
 
 /// 계획 넘기기 (카드 넘기기)

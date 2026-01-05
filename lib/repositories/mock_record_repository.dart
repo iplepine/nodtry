@@ -478,9 +478,15 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> cheerPartner(String planId, String reactionType) async {
+  Future<void> cheerPartner(
+    String planId,
+    String reactionType, {
+    String? message,
+  }) async {
     // ignore: avoid_print
-    print('Mock: Partner cheered for plan $planId with reaction $reactionType');
+    print(
+      'Mock: Partner cheered for plan $planId with reaction $reactionType, message: $message',
+    );
     await Future.delayed(const Duration(milliseconds: 500));
     // Ideally this might update UI state too? For now, no change needed in mock state.
   }

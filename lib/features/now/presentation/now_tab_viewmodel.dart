@@ -39,7 +39,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
       } else if (intent is SkipPlanIntent) {
         await _skipPlan(intent.planId);
       } else if (intent is CheerPartnerActionIntent) {
-        await _cheerPartner(intent.planId, intent.reactionType);
+        await _cheerPartner(intent.planId, intent.reactionType, intent.message);
       } else if (intent is PassPlanIntent) {
         await _passPlan(intent.planId);
       } else if (intent is ApprovePlanIntent) {
@@ -67,8 +67,14 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     await ref.read(recordRepositoryProvider).reportSkip(planId);
   }
 
-  Future<void> _cheerPartner(String planId, String reactionType) async {
-    await ref.read(recordRepositoryProvider).cheerPartner(planId, reactionType);
+  Future<void> _cheerPartner(
+    String planId,
+    String reactionType, [
+    String? message,
+  ]) async {
+    await ref
+        .read(recordRepositoryProvider)
+        .cheerPartner(planId, reactionType, message: message);
   }
 
   Future<void> _passPlan(String planId) async {

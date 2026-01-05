@@ -48,7 +48,11 @@ abstract class RecordRepository {
 
   /// 파트너 응원하기 (고마워요)
   /// reactionType: 'fire', 'heart', 'thumbs_up', 'muscle' 등
-  Future<void> cheerPartner(String planId, String reactionType);
+  Future<void> cheerPartner(
+    String planId,
+    String reactionType, {
+    String? message,
+  });
 
   /// 실천 건너뛰기 보고 (오늘은 쉴게요) / 카드 넘기기
   Future<void> reportSkip(String planId);

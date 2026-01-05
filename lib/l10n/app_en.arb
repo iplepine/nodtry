@@ -834,6 +834,26 @@
     "description": "Vague time label for dinner"
   },
   "vagueTimeBedtime": "Bedtime",
+  "cheerSimple": "Okay",
+  "@cheerSimple": {
+    "description": "Simple cheer option"
+  },
+  "cheerMore": "More",
+  "@cheerMore": {
+    "description": "Option to see more cheer options"
+  },
+  "cheerSheetTitle": "How to Cheer?",
+  "@cheerSheetTitle": {
+    "description": "Title for the cheer selection sheet"
+  },
+  "cheerMessageHint": "Leave a cheer message",
+  "@cheerMessageHint": {
+    "description": "Hint text for cheer message input"
+  },
+  "cheerSend": "Send",
+  "@cheerSend": {
+    "description": "Send button for cheer message"
+  },
   "@vagueTimeBedtime": {
     "description": "Vague time label for bedtime"
   },

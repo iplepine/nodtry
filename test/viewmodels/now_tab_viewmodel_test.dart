@@ -46,7 +46,11 @@ class MockRecordRepository extends Fake implements RecordRepository {
   }
 
   @override
-  Future<void> cheerPartner(String planId, String reactionType) async {
+  Future<void> cheerPartner(
+    String planId,
+    String reactionType, {
+    String? message,
+  }) async {
     cheerPartnerCallCount++;
     lastCheeredPlanId = planId;
     emit(_currentValue);
