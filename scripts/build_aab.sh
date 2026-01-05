@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to build Android App Bundle (AAB) for release with auto-increment version (Semantic Versioning Only)
+# Script to build Android App Bundle (AAB) for release with auto-increment version (Semantic Version + Build Number)
 
 PUBSPEC="pubspec.yaml"
 
@@ -15,24 +15,32 @@ echo "Starting build process..."
 echo "checking version..."
 VERSION_LINE=$(grep "^version:" $PUBSPEC)
 CURRENT_VERSION=${VERSION_LINE#version: }
+# CURRENT_VERSION is like 1.0.0+1 or 1.0.0
 
-# Extract semantic version X.Y.Z, ignoring build number (+...)
 if [[ "$CURRENT_VERSION" == *"+"* ]]; then
-    VERSION_NAME=${CURRENT_VERSION%+*}
+    # Has build number
+    VERSION_NAME=${CURRENT_VERSION%+*} # 1.0.0
+    VERSION_CODE=${CURRENT_VERSION#*+} # 1
 else
+    # No build number
     VERSION_NAME=$CURRENT_VERSION
+    VERSION_CODE=0 # Default start previous code as 0 so next is 1
 fi
 
 # Parse x.y.z
 IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NAME"
 
-# Check if PATCH is a number
-if [[ "$PATCH" =~ ^[0-9]+$ ]]; then
-    # Increment Patch only
+# Check if PATCH and CODE are numbers
+if [[ "$PATCH" =~ ^[0-9]+$ ]] && [[ "$VERSION_CODE" =~ ^[0-9]+$ ]]; then
+    # Increment Patch
     NEW_PATCH=$((PATCH + 1))
     
-    # Construct new version (No +n suffix)
-    NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+    # Increment Build Number
+    NEW_CODE=$((VERSION_CODE + 1))
+    
+    # Construct new version
+    NEW_VERSION_NAME="$MAJOR.$MINOR.$NEW_PATCH"
+    NEW_VERSION="$NEW_VERSION_NAME+$NEW_CODE"
     
     echo "Current Version: $CURRENT_VERSION"
     echo "New Version:     $NEW_VERSION"
@@ -47,20 +55,15 @@ else
 fi
 
 # 2. Build Process
-# Get dependencies
 echo "Getting dependencies..."
 flutter pub get
 
-# Build App Bundle
 echo "Building App Bundle..."
 flutter build appbundle --release
 
-# Check if build was successful
 if [ $? -eq 0 ]; then
     echo "✅ Build successful!"
     echo "AAB location: build/app/outputs/bundle/release/app-release.aab"
-    
-    # Open the output directory
     open build/app/outputs/bundle/release/
 else
     echo "❌ Build failed!"
