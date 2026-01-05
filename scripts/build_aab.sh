@@ -19,9 +19,17 @@ CURRENT_VERSION=${VERSION_LINE#version: }
 VERSION_NAME=${CURRENT_VERSION%+*}
 VERSION_CODE=${CURRENT_VERSION#*+}
 
-if [[ "$VERSION_CODE" =~ ^[0-9]+$ ]]; then
+# Parse x.y.z
+IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NAME"
+
+if [[ "$VERSION_CODE" =~ ^[0-9]+$ ]] && [[ -n "$PATCH" ]]; then
+    # Increment Patch and Version Code
+    NEW_PATCH=$((PATCH + 1))
     NEW_CODE=$((VERSION_CODE + 1))
-    NEW_VERSION="$VERSION_NAME+$NEW_CODE"
+    
+    # Construct new version
+    NEW_VERSION_NAME="$MAJOR.$MINOR.$NEW_PATCH"
+    NEW_VERSION="$NEW_VERSION_NAME+$NEW_CODE"
     
     echo "Current Version: $CURRENT_VERSION"
     echo "New Version:     $NEW_VERSION"
@@ -31,7 +39,7 @@ if [[ "$VERSION_CODE" =~ ^[0-9]+$ ]]; then
     
     echo "✅ Version updated to $NEW_VERSION"
 else
-    echo "⚠️  Could not parse version code. Skipping auto-increment."
+    echo "⚠️  Could not parse version. Skipping auto-increment."
     echo "Current Version: $CURRENT_VERSION"
 fi
 
