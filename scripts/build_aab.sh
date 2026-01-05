@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to build Android App Bundle (AAB) for release with auto-increment version
+# Script to build Android App Bundle (AAB) for release with auto-increment version (Semantic Versioning Only)
 
 PUBSPEC="pubspec.yaml"
 
@@ -15,26 +15,29 @@ echo "Starting build process..."
 echo "checking version..."
 VERSION_LINE=$(grep "^version:" $PUBSPEC)
 CURRENT_VERSION=${VERSION_LINE#version: }
-# Extract version parts. Format expected: x.y.z+n
-VERSION_NAME=${CURRENT_VERSION%+*}
-VERSION_CODE=${CURRENT_VERSION#*+}
+
+# Extract semantic version X.Y.Z, ignoring build number (+...)
+if [[ "$CURRENT_VERSION" == *"+"* ]]; then
+    VERSION_NAME=${CURRENT_VERSION%+*}
+else
+    VERSION_NAME=$CURRENT_VERSION
+fi
 
 # Parse x.y.z
 IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NAME"
 
-if [[ "$VERSION_CODE" =~ ^[0-9]+$ ]] && [[ -n "$PATCH" ]]; then
-    # Increment Patch and Version Code
+# Check if PATCH is a number
+if [[ "$PATCH" =~ ^[0-9]+$ ]]; then
+    # Increment Patch only
     NEW_PATCH=$((PATCH + 1))
-    NEW_CODE=$((VERSION_CODE + 1))
     
-    # Construct new version
-    NEW_VERSION_NAME="$MAJOR.$MINOR.$NEW_PATCH"
-    NEW_VERSION="$NEW_VERSION_NAME+$NEW_CODE"
+    # Construct new version (No +n suffix)
+    NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
     
     echo "Current Version: $CURRENT_VERSION"
     echo "New Version:     $NEW_VERSION"
     
-    # Update pubspec.yaml (macOS sed requires empty extension for -i)
+    # Update pubspec.yaml
     sed -i '' "s/^version: .*/version: $NEW_VERSION/" $PUBSPEC
     
     echo "✅ Version updated to $NEW_VERSION"
@@ -44,10 +47,6 @@ else
 fi
 
 # 2. Build Process
-# Clean the project
-# echo "Cleaning project..."
-# flutter clean
-
 # Get dependencies
 echo "Getting dependencies..."
 flutter pub get
