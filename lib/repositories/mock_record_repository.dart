@@ -510,7 +510,10 @@ class MockRecordRepository implements RecordRepository {
               plan.state == PlanState.pendingApproval)) {
         // Mock update: Create new instance with managerId
         final index = _mockPlans.indexOf(plan);
-        _mockPlans[index] = plan.copyWith(managerId: managerId);
+        _mockPlans[index] = plan.copyWith(
+          managerId: managerId,
+          state: PlanState.pendingApproval, // 변경
+        );
       }
     }
   }

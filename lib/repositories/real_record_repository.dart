@@ -757,7 +757,10 @@ class RealRecordRepository implements RecordRepository {
         final data = doc.data();
         if (data['managerId'] == null ||
             (data['managerId'] as String).isEmpty) {
-          batch.update(doc.reference, {'managerId': managerId});
+          batch.update(doc.reference, {
+            'managerId': managerId,
+            'state': 'pending_approval', // PlanState.pendingApproval
+          });
         }
       }
       await batch.commit();
