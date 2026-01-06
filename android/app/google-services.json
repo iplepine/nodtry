@@ -14,6 +14,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "39831135432-279eds64uk0euc8ag0o6hpuvpfogh01i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devho.nodtry.app",
+            "certificate_hash": "a18ccfa8f2c14ed2ab229de3499dbffb0aeed057"
+          }
+        },
+        {
+          "client_id": "39831135432-iuntupolueaaj9lj19ckuuh2tgjdfkno.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devho.nodtry.app",
+            "certificate_hash": "d5afd314cdcdb36b9bae1f2190761e9703e2fade"
+          }
+        },
+        {
+          "client_id": "39831135432-uo3ds0tmmvoq80nm2u9t0b9jml0b84bp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devho.nodtry.app",
+            "certificate_hash": "40bfad9611d60eb188cbc7f0af783eb8cd907dc3"
+          }
+        },
+        {
           "client_id": "39831135432-isvt1eo7d81qicirr7dquj7ntppaims0.apps.googleusercontent.com",
           "client_type": 3
         }
