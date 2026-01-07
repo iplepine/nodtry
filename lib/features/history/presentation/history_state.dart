@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../models/history_item.dart';
 import '../../../models/plan_summary.dart';
+import '../../../widgets/quiet_header.dart';
 
 part 'history_state.freezed.dart';
 
@@ -14,6 +15,10 @@ abstract class HistoryState with _$HistoryState {
     @Default([]) List<PlanSummary> finishedPlanSummaries,
     @Default(false) bool isLoading,
     @Default(HistoryFilter.all) HistoryFilter filter,
+    @Default(null) String? partnerName,
+    @Default(HeaderPeriodState.inProgress) HeaderPeriodState periodState,
+    @Default(null) int? currentWeek,
+    @Default(null) int? totalWeeks,
   }) = _HistoryState;
 }
 

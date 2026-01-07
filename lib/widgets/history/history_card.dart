@@ -3,6 +3,7 @@ import '../../models/history_item.dart';
 import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HistoryCard extends StatelessWidget {
   final HistoryItem item;
@@ -324,18 +325,35 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 18,
-      backgroundImage: imageUrl != null
-          ? CachedNetworkImageProvider(imageUrl!)
-          : null,
-      backgroundColor: AppColors.surface,
-      child: imageUrl == null
-          ? Text(
-              name?.isNotEmpty == true ? name![0] : '?',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-            )
-          : null,
+    if (imageUrl == null || imageUrl!.isEmpty) {
+      return CircleAvatar(
+        radius: 18,
+        backgroundColor: AppColors.surface,
+        child: Text(
+          name?.isNotEmpty == true ? name![0] : '?',
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+      );
+    }
+
+    return CachedNetworkImage(
+      imageUrl: imageUrl!,
+      imageBuilder: (context, imageProvider) =>
+          CircleAvatar(radius: 18, backgroundImage: imageProvider),
+      placeholder: (context, url) => Shimmer.fromColors(
+        baseColor: AppColors.surface,
+        highlightColor: Colors.white,
+        child: const CircleAvatar(radius: 18, backgroundColor: Colors.white),
+      ),
+      errorWidget: (context, url, error) => CircleAvatar(
+        radius: 18,
+        backgroundColor: AppColors.surface,
+        child: Icon(
+          Icons.error_outline,
+          size: 16,
+          color: AppColors.textDisabled,
+        ),
+      ),
     );
   }
 }

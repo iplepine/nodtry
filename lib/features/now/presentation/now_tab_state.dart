@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../models/home_state.dart';
+import '../../../models/user_model.dart';
+import '../../../widgets/quiet_header.dart';
 
 part 'now_tab_state.freezed.dart';
 
@@ -20,6 +22,12 @@ abstract class NowTabState with _$NowTabState {
 
     /// 관리자/파트너 카드 리스트 (좌측 정렬)
     @Default([]) List<HomeCardModel> managerCards,
+
+    /// 헤더용 데이터
+    @Default(null) UserModel? partnerProfile,
+    @Default(HeaderPeriodState.inProgress) HeaderPeriodState headerPeriodState,
+    @Default(null) int? currentWeek,
+    @Default(null) int? totalWeeks,
   }) = _NowTabState;
 
   /// HomeCardModel 리스트로부터 UI State 생성

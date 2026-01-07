@@ -12,6 +12,7 @@ class PlanCreateState {
   final bool isSaving;
   final String? errorMessage;
   final String? existingPlanId;
+  final Plan? originalPlan;
 
   const PlanCreateState({
     this.currentStep = 1,
@@ -23,6 +24,7 @@ class PlanCreateState {
     this.isSaving = false,
     this.errorMessage,
     this.existingPlanId,
+    this.originalPlan,
   });
 
   PlanCreateState copyWith({
@@ -35,6 +37,7 @@ class PlanCreateState {
     bool? isSaving,
     String? errorMessage,
     String? existingPlanId,
+    Plan? originalPlan,
   }) {
     return PlanCreateState(
       currentStep: currentStep ?? this.currentStep,
@@ -46,6 +49,7 @@ class PlanCreateState {
       isSaving: isSaving ?? this.isSaving,
       errorMessage: errorMessage ?? this.errorMessage,
       existingPlanId: existingPlanId ?? this.existingPlanId,
+      originalPlan: originalPlan ?? this.originalPlan,
     );
   }
 }

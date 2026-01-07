@@ -15,6 +15,7 @@ import '../../../../providers/plan_list_provider.dart';
 import '../us_state.dart';
 import '../us_viewmodel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 /// 우리 탭 - 안전 기지 & 연결 허브
 ///
@@ -165,6 +166,7 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                           context,
                           user?.displayName ?? l10n.usDefaultNameMe,
                           user?.statusMessage,
+                          user?.profileImageUrl,
                         ),
                         inviteCode: user?.inviteCode,
                       ),
@@ -199,6 +201,7 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                             context,
                             previousUser.displayName ?? l10n.usDefaultNameMe,
                             previousUser.statusMessage,
+                            previousUser.profileImageUrl,
                           ),
                           inviteCode: previousUser.inviteCode,
                         ),
@@ -236,6 +239,7 @@ class _UsScreenState extends ConsumerState<UsScreen> {
     BuildContext context,
     String currentName,
     String? currentStatus,
+    String? currentImageUrl,
   ) {
     final l10n = AppLocalizations.of(context)!;
     // Removed unused controllers and variable
@@ -247,6 +251,7 @@ class _UsScreenState extends ConsumerState<UsScreen> {
           return _EditProfileDialogContent(
             name: currentName,
             status: currentStatus,
+            imageUrl: currentImageUrl,
             l10n: l10n,
             ref: ref,
           );
@@ -276,11 +281,6 @@ class _MeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ImageProvider? imageProvider;
-    if (profileImageUrl != null && profileImageUrl!.isNotEmpty) {
-      imageProvider = CachedNetworkImageProvider(profileImageUrl!);
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -326,23 +326,60 @@ class _MeSection extends StatelessWidget {
               Row(
                 children: [
                   // 프로필 이미지
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                      image: imageProvider != null
-                          ? DecorationImage(
-                              image: imageProvider,
-                              fit: BoxFit.cover,
-                            )
-                          : null,
+                  if (profileImageUrl != null && profileImageUrl!.isNotEmpty)
+                    CachedNetworkImage(
+                      imageUrl: profileImageUrl!,
+                      imageBuilder: (context, imageProvider) => Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      placeholder: (context, url) => Shimmer.fromColors(
+                        baseColor: AppColors.surface,
+                        highlightColor: Colors.white,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.person,
+                          size: 32,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.person,
+                        size: 32,
+                        color: AppColors.primary,
+                      ),
                     ),
-                    child: imageProvider == null
-                        ? Icon(Icons.person, size: 32, color: AppColors.primary)
-                        : null,
-                  ),
                   const SizedBox(width: 16),
 
                   // 이름 및 편집
@@ -713,19 +750,42 @@ class _PersonCard extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: AppColors.secondary,
-                  child: Text(
-                    (person.user.displayName?.isNotEmpty ?? false)
-                        ? person.user.displayName![0]
-                        : '?',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
+                if (person.user.profileImageUrl != null &&
+                    person.user.profileImageUrl!.isNotEmpty)
+                  CachedNetworkImage(
+                    imageUrl: person.user.profileImageUrl!,
+                    imageBuilder: (context, imageProvider) => CircleAvatar(
+                      radius: 20,
+                      backgroundImage: imageProvider,
+                    ),
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: AppColors.surface,
+                      highlightColor: Colors.white,
+                      child: const CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      radius: 20,
+                      backgroundColor: AppColors.secondary,
+                      child: Icon(Icons.person, color: AppColors.textPrimary),
+                    ),
+                  )
+                else
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: AppColors.secondary,
+                    child: Text(
+                      (person.user.displayName?.isNotEmpty ?? false)
+                          ? person.user.displayName![0]
+                          : '?',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -829,12 +889,14 @@ class _RelationshipBadge extends StatelessWidget {
 class _EditProfileDialogContent extends ConsumerStatefulWidget {
   final String name;
   final String? status;
+  final String? imageUrl;
   final AppLocalizations l10n;
   final WidgetRef ref;
 
   const _EditProfileDialogContent({
     required this.name,
     this.status,
+    this.imageUrl,
     required this.l10n,
     required this.ref,
   });
@@ -959,23 +1021,73 @@ class _EditProfileDialogContentState
               child: Stack(
                 alignment: Alignment.bottomRight,
                 children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                      image: _tempProfileImage != null
-                          ? DecorationImage(
-                              image: FileImage(_tempProfileImage!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
+                  if (_tempProfileImage != null)
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: FileImage(_tempProfileImage!),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    )
+                  else if (widget.imageUrl != null &&
+                      widget.imageUrl!.isNotEmpty)
+                    CachedNetworkImage(
+                      imageUrl: widget.imageUrl!,
+                      imageBuilder: (context, imageProvider) => Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      placeholder: (context, url) => Shimmer.fromColors(
+                        baseColor: AppColors.surface,
+                        highlightColor: Colors.white,
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.person,
+                          size: 48,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.person,
+                        size: 48,
+                        color: AppColors.primary,
+                      ),
                     ),
-                    child: _tempProfileImage == null
-                        ? Icon(Icons.person, size: 48, color: AppColors.primary)
-                        : null,
-                  ),
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(

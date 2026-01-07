@@ -403,7 +403,7 @@ class _NowTabState extends ConsumerState<NowTab>
       if (next.hasError && !next.isLoading) {
         // 기존 데이터가 있는 상태에서 에러가 발생했을 때만 다이얼로그 표시 (SnackBar 대신)
         // 화면 전체가 에러인 경우는 build()의 error 위젯이 처리
-        if (previous?.hasError != true) {
+        if (previous.hasError != true) {
           final error = next.error;
           String errorMessage = '알 수 없는 오류가 발생했습니다.';
           String? errorUrl;
@@ -490,9 +490,11 @@ class _NowTabState extends ConsumerState<NowTab>
             children: [
               // 헤더
               QuietHeader(
-                partnerName: null,
-                periodState: HeaderPeriodState.inProgress,
-                onSettingsTap: null,
+                partnerName: uiState.partnerProfile?.displayName,
+                periodState: uiState.headerPeriodState,
+                currentWeek: uiState.currentWeek,
+                totalWeeks: uiState.totalWeeks,
+                onSettingsTap: () => context.push(AppRoutes.settings),
               ),
               // Now Card
               Expanded(

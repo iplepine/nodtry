@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../widgets/quiet_header.dart';
 import 'history_state.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../models/history_item.dart';
@@ -88,11 +89,39 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         );
       }
 
+      // 5. Calculate Header Data
+      HeaderPeriodState periodState = HeaderPeriodState.noPlan;
+      int? currentWeekNum;
+      int? totalWeeksNum;
+
+      if (allPlans.any((p) => p.state == PlanState.active)) {
+        periodState = HeaderPeriodState.inProgress;
+        final plan = allPlans.firstWhere((p) => p.state == PlanState.active);
+        final now = DateTime.now();
+        final diff = now.difference(plan.startDate).inDays;
+        currentWeekNum = (diff / 7).floor() + 1;
+
+        final totalDiff = plan.endDate.difference(plan.startDate).inDays;
+        totalWeeksNum = (totalDiff / 7).ceil();
+        if (totalWeeksNum == 0) totalWeeksNum = 1;
+      } else if (allPlans.any((p) => p.state == PlanState.pendingApproval)) {
+        periodState =
+            HeaderPeriodState.inProgress; // Or a specific state if needed
+      }
+
+      final partnerName = connectedUsers.isNotEmpty
+          ? connectedUsers.first.user.displayName
+          : null;
+
       return HistoryState(
         activeItems: filteredItems,
         finishedPlanSummaries: finishedPlanSummaries,
         isLoading: false,
         filter: currentFilter,
+        partnerName: partnerName,
+        periodState: periodState,
+        currentWeek: currentWeekNum,
+        totalWeeks: totalWeeksNum,
       );
     });
   }

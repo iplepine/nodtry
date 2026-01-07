@@ -12,6 +12,8 @@ import '../history_state.dart';
 import '../history_viewmodel.dart';
 import '../history_fake_states.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../routes/app_router.dart';
 
 /// 기록 탭 (History Tab)
 /// 우리가 나눈 약속의 흔적을 보는 곳
@@ -89,11 +91,14 @@ class HistoryScreen extends ConsumerWidget {
         Column(
           children: [
             // 헤더
-            QuietHeader(
-              partnerName: null,
-              periodState: HeaderPeriodState.inProgress,
-              onSettingsTap: null,
-            ),
+            if (historyStateAsync.hasValue)
+              QuietHeader(
+                partnerName: historyStateAsync.value!.partnerName,
+                periodState: historyStateAsync.value!.periodState,
+                currentWeek: historyStateAsync.value!.currentWeek,
+                totalWeeks: historyStateAsync.value!.totalWeeks,
+                onSettingsTap: () => context.push(AppRoutes.settings),
+              ),
 
             const SizedBox(height: 8),
 

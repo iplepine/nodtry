@@ -1,12 +1,14 @@
-import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'now_tab_intent.dart';
-import '../../../providers/repository_provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'now_tab_state.dart';
+import 'now_tab_intent.dart';
+import '../../../models/plan_model.dart';
+import '../../../models/home_state.dart';
+import '../../../models/connected_user.dart';
+import '../../../providers/repository_provider.dart';
+import '../../../widgets/quiet_header.dart';
 import '../domain/usecases/feedback_to_partner_use_case.dart';
 
-/// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel
-/// MVI 패턴의 'Model' (State Holder) 역할
 /// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel
 /// MVI 패턴의 'Model' (State Holder) 역할
 class NowTabViewModel extends StreamNotifier<NowTabState> {
@@ -18,9 +20,48 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
   /// 데이터 스트림 로드 및 State 변환
   Stream<NowTabState> _fetchStateStream() {
     final useCase = ref.watch(getNowCardsUseCaseProvider);
-    return useCase.executeStream().map((models) {
-      return NowTabState.fromModels(models);
-    });
+    final partnerStream = Stream.fromFuture(
+      ref.watch(connectedProfilesProvider.future),
+    );
+
+    return CombineLatestStream.combine2(
+      useCase.executeStream(),
+      partnerStream,
+      (List<HomeCardModel> models, List<ConnectedUser> profiles) {
+        final baseState = NowTabState.fromModels(models);
+        final partner = profiles.isNotEmpty ? profiles.first.user : null;
+
+        // 헤더 정보 계산
+        HeaderPeriodState periodState = HeaderPeriodState.noPlan;
+        int? currentWeek;
+        int? totalWeeks;
+
+        // 실행 중인 계획 찾기 (내 것 우선)
+        final activePlans = models
+            .where((m) => m.plan != null && m.plan!.state == PlanState.active)
+            .map((m) => m.plan!)
+            .toList();
+
+        if (activePlans.isNotEmpty) {
+          periodState = HeaderPeriodState.inProgress;
+          final plan = activePlans.first;
+          final now = DateTime.now();
+          final diff = now.difference(plan.startDate).inDays;
+          currentWeek = (diff / 7).floor() + 1;
+
+          final totalDiff = plan.endDate.difference(plan.startDate).inDays;
+          totalWeeks = (totalDiff / 7).ceil();
+          if (totalWeeks == 0) totalWeeks = 1;
+        }
+
+        return baseState.copyWith(
+          partnerProfile: partner,
+          headerPeriodState: periodState,
+          currentWeek: currentWeek,
+          totalWeeks: totalWeeks,
+        );
+      },
+    );
   }
 
   /// 사용자 의도(Intent) 처리

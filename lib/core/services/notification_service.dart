@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/repository_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../../services/notification_service.dart' as local_notifications;
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(ref);
@@ -11,6 +13,8 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 class NotificationService {
   final Ref _ref;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      local_notifications.NotificationService().flutterLocalNotificationsPlugin;
 
   NotificationService(this._ref);
 
@@ -46,11 +50,42 @@ class NotificationService {
           debugPrint(
             'Message also contained a notification: ${message.notification}',
           );
-          // TODO: Show local notification (flutter_local_notifications) if needed
-          // For now, iOS shows foreground notification if configured in presentation options
+          _showLocalNotification(message);
         }
       });
     }
+  }
+
+  Future<void> _showLocalNotification(RemoteMessage message) async {
+    final notification = message.notification;
+    if (notification == null) return;
+
+    const androidDetails = AndroidNotificationDetails(
+      'general_notifications', // channel Id
+      'General Notifications', // channel Name
+      channelDescription:
+          'Notifications for cheer messages and partner actions',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const iOSDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iOSDetails,
+    );
+
+    await _localNotifications.show(
+      message.hashCode,
+      notification.title,
+      notification.body,
+      notificationDetails,
+    );
   }
 
   Future<void> _saveTokenToFirestore(String? token) async {

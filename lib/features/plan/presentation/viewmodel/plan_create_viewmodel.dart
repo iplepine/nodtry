@@ -61,6 +61,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       state = AsyncValue.data(
         prevState.copyWith(
           existingPlanId: plan.id,
+          originalPlan: plan,
           action: item.title,
           description: item.description ?? '',
           selectedFrequency: item.count,
@@ -112,29 +113,22 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         id: prevState.existingPlanId, // Preserves ID if editing
         userId: userId,
         managerId: managerId, // 파트너가 있다면 매니저로 지정
-        startDate: DateTime.now(),
-        endDate: DateTime.now().add(const Duration(days: 30)),
-        state:
-            PlanState.pendingApproval, // Or maintain existing state if editing?
-        // TODO: If editing, maybe keep startDate/State/etc?
-        // For now adhering to "Create" flow which resets period.
-        // But for "Update" we might want to keep startDate.
-        // Let's improve:
-        // If existingPlanId is present, we are updating. ideally we fetch original?
-        // But we have valid ID.
+        startDate: prevState.originalPlan?.startDate ?? DateTime.now(),
+        endDate:
+            prevState.originalPlan?.endDate ??
+            DateTime.now().add(const Duration(days: 30)),
+        state: prevState.originalPlan?.state ?? PlanState.pendingApproval,
         items: [planItem],
-        createdAt: DateTime.now(), // UpdatedAt?
+        createdAt: prevState.originalPlan?.createdAt ?? DateTime.now(),
+        completedDates: prevState.originalPlan?.completedDates ?? [],
+        verifiedDates: prevState.originalPlan?.verifiedDates ?? [],
+        lastCheerMessage: prevState.originalPlan?.lastCheerMessage,
+        lastCheerType: prevState.originalPlan?.lastCheerType,
+        lastCheerAt: prevState.originalPlan?.lastCheerAt,
       );
 
-      // Better approach for Update:
       // If updating, call updatePlan.
       if (prevState.existingPlanId != null) {
-        // We might want to preserve the original Plan fields (startDate, state).
-        // Since we don't have the full original plan in state here (only partial fields),
-        // ideally we should have stored the full plan or fetch it.
-        // For simplicity in this CRUD iteration: overwrite mostly, but let's try to be safe.
-        // Actually, `InitializePlanIntent` could store the full `originalPlan` in state if we added it.
-        // BUT, for now, let's just use what we have. `updatePlan` in repo does a set/update.
         await ref.read(recordRepositoryProvider).updatePlan(plan);
       } else {
         await ref.read(createNewPlanUseCaseProvider).execute(plan);
