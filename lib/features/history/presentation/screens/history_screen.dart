@@ -97,6 +97,54 @@ class HistoryScreen extends ConsumerWidget {
 
             const SizedBox(height: 8),
 
+            // 필터 칩
+            historyStateAsync.when(
+              data: (state) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: SegmentedButton<HistoryFilter>(
+                  segments: [
+                    ButtonSegment(
+                      value: HistoryFilter.all,
+                      label: Text(l10n.historyFilterAll),
+                    ),
+                    ButtonSegment(
+                      value: HistoryFilter.me,
+                      label: Text(l10n.historyFilterMe),
+                    ),
+                    ButtonSegment(
+                      value: HistoryFilter.partner,
+                      label: Text(l10n.historyFilterPartner),
+                    ),
+                  ],
+                  selected: {state.filter},
+                  onSelectionChanged: (newSelection) {
+                    ref
+                        .read(historyViewModelProvider.notifier)
+                        .dispatch(HistoryIntent.setFilter(newSelection.first));
+                  },
+                  showSelectedIcon: false,
+                  style: SegmentedButton.styleFrom(
+                    backgroundColor: AppColors.background,
+                    selectedBackgroundColor: AppColors.primary,
+                    selectedForegroundColor: Colors.white,
+                    foregroundColor: AppColors.textSecondary,
+                    side: BorderSide(color: AppColors.divider),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+
+            const SizedBox(height: 8),
+
             // 기록 리스트
             Expanded(
               // 에러가 있어도 데이터가 있으면 보여줌 (Dialog로 에러 알림)
@@ -203,7 +251,7 @@ class HistoryScreen extends ConsumerWidget {
               margin: const EdgeInsets.symmetric(vertical: 16),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.surface.withOpacity(0.5),
+                color: AppColors.surface.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Text(

@@ -1056,5 +1056,9 @@
   "weekdayThu": "Thu",
   "weekdayFri": "Fri",
   "weekdaySat": "Sat",
-  "weekdaySun": "Sun"
+  "weekdaySun": "Sun",
+  "planTimeQuestion": "When should I notify you?",
+  "comfortingFuture": "Great job today",
+  "comfortingLate": "Late is okay",
+  "comfortingJustDoIt": "Just do it today"
 }

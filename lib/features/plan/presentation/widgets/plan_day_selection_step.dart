@@ -81,44 +81,93 @@ class PlanDaySelectionStep extends StatelessWidget {
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 16),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildNotificationChip(
-                context,
-                l10n,
-                'morning',
-                l10n.vagueTimeMorning,
+        Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 24),
+          child: InkWell(
+            onTap: () async {
+              final initialTime = TimeOfDay(
+                hour: notificationTime.hour,
+                minute: notificationTime.minute,
+              );
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: initialTime,
+                builder: (context, child) {
+                  return Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: ColorScheme.light(
+                        primary: AppColors.primary,
+                        onPrimary: Colors.white,
+                        onSurface: AppColors.textPrimary,
+                      ),
+                      textButtonTheme: TextButtonThemeData(
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    child: child!,
+                  );
+                },
+              );
+
+              if (picked != null) {
+                onTimeChanged(
+                  NotificationTime.custom(picked.hour, picked.minute),
+                );
+              }
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.divider),
+                borderRadius: BorderRadius.circular(12),
+                color: AppColors.surface,
               ),
-              const SizedBox(width: 8),
-              _buildNotificationChip(
-                context,
-                l10n,
-                'lunch',
-                l10n.vagueTimeLunch,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.access_time_rounded,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _formatTimeOfDay(
+                      TimeOfDay(
+                        hour: notificationTime.hour,
+                        minute: notificationTime.minute,
+                      ),
+                      context,
+                    ),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              _buildNotificationChip(
-                context,
-                l10n,
-                'dinner',
-                l10n.vagueTimeDinner,
-              ),
-              const SizedBox(width: 8),
-              _buildNotificationChip(
-                context,
-                l10n,
-                'bedtime',
-                l10n.vagueTimeBedtime,
-              ),
-              const SizedBox(width: 8),
-              _buildCustomTimeChip(context, l10n),
-            ],
+            ),
           ),
         ),
       ],
     );
+  }
+
+  String _formatTimeOfDay(TimeOfDay time, BuildContext context) {
+    // Basic formatting or use TimeFormatter if available.
+    // Localized formatting:
+    final localizations = MaterialLocalizations.of(context);
+    return localizations.formatTimeOfDay(time, alwaysUse24HourFormat: false);
   }
 
   Widget _buildDayChip(
@@ -136,7 +185,7 @@ class PlanDaySelectionStep extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary.withOpacity(0.1)
+                ? AppColors.primary.withValues(alpha: 0.1)
                 : AppColors.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
@@ -154,70 +203,6 @@ class PlanDaySelectionStep extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildNotificationChip(
-    BuildContext context,
-    AppLocalizations l10n,
-    String value,
-    String label,
-  ) {
-    final isSelected =
-        notificationTime.type == 'preset' && notificationTime.value == value;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (selected) {
-        if (isSelected) {
-          // 이미 선택된 상태에서 다시 누르면 선택 해제 (toggle off)
-          onTimeChanged(NotificationTime.none());
-        } else {
-          onTimeChanged(NotificationTime.preset(value));
-        }
-      },
-      selectedColor: AppColors.primary.withOpacity(0.1),
-      backgroundColor: AppColors.surface,
-      labelStyle: TextStyle(
-        color: isSelected ? AppColors.primary : AppColors.textPrimary,
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-      ),
-      side: BorderSide(
-        color: isSelected ? AppColors.primary : AppColors.divider,
-      ),
-    );
-  }
-
-  Widget _buildCustomTimeChip(BuildContext context, AppLocalizations l10n) {
-    final isCustom = notificationTime.type == 'custom';
-    final label = isCustom
-        ? "${notificationTime.hour.toString().padLeft(2, '0')}:${notificationTime.minute.toString().padLeft(2, '0')}"
-        : "직접 설정";
-
-    return ChoiceChip(
-      label: Text(label),
-      selected: isCustom,
-      onSelected: (selected) async {
-        if (selected) {
-          final TimeOfDay? picked = await showTimePicker(
-            context: context,
-            initialTime: TimeOfDay(
-              hour: notificationTime.hour,
-              minute: notificationTime.minute,
-            ),
-          );
-          if (picked != null) {
-            onTimeChanged(NotificationTime.custom(picked.hour, picked.minute));
-          }
-        }
-      },
-      selectedColor: AppColors.primary.withOpacity(0.1),
-      backgroundColor: AppColors.surface,
-      labelStyle: TextStyle(
-        color: isCustom ? AppColors.primary : AppColors.textPrimary,
-        fontWeight: isCustom ? FontWeight.w600 : FontWeight.normal,
-      ),
-      side: BorderSide(color: isCustom ? AppColors.primary : AppColors.divider),
     );
   }
 }

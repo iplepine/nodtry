@@ -259,7 +259,6 @@ class _NowTabState extends ConsumerState<NowTab>
   String? _getTimeChipText(HomeCardModel model) {
     if (model.state == HomeCardState.overdue) {
       return '${AppLocalizations.of(context)!.pastUncompletedTimeChip} · ${AppLocalizations.of(context)!.timeChipPassed}';
-      // "조금 전 · 지나갔어요" (기존 유지)
     }
 
     if (model.plan != null && model.plan!.items.isNotEmpty) {
@@ -267,9 +266,6 @@ class _NowTabState extends ConsumerState<NowTab>
         if (item.notificationTime != null &&
             item.notificationTime!.type != 'none') {
           final now = DateTime.now();
-          // Use plan start date if it's in the future, otherwise assume today/relevant date
-          // This is a simple heuristic for the 'Upcoming' debug scenario.
-          // Ideally HomeCardModel should carry the target date.
           DateTime dateBase = now;
           if (model.plan != null && model.plan!.startDate.isAfter(now)) {
             dateBase = model.plan!.startDate;
@@ -283,14 +279,11 @@ class _NowTabState extends ConsumerState<NowTab>
             item.notificationTime!.minute,
           );
 
-          // Vague Time 적용
+          // 정확한 시간 표시 (예: "20:00")
+          final timeText = TimeFormatter.formatExactTime(scheduledTime);
           final l10n = AppLocalizations.of(context)!;
-          final vagueTime = TimeFormatter.formatForVagueTime(
-            l10n,
-            scheduledTime,
-          );
 
-          // 날짜 비교 (오늘/내일/그외)
+          // 날짜 비교
           final today = DateTime(now.year, now.month, now.day);
           final scheduledDate = DateTime(
             scheduledTime.year,
@@ -299,27 +292,29 @@ class _NowTabState extends ConsumerState<NowTab>
           );
           final diffDays = scheduledDate.difference(today).inDays;
 
-          String displayText = vagueTime;
+          String displayText = timeText;
           if (diffDays == 1) {
-            displayText = '${l10n.timeChipTomorrow} $vagueTime';
+            displayText = '${l10n.timeChipTomorrow} $timeText';
           } else if (diffDays > 1) {
             displayText =
-                '${scheduledTime.month}.${scheduledTime.day} $vagueTime';
+                '${scheduledTime.month}.${scheduledTime.day} $timeText';
           }
 
           if (model.state == HomeCardState.nowAction) {
             final isToday = diffDays == 0;
             final isPast = now.isAfter(scheduledTime);
 
-            // 30분 정도는 제시간으로 간주 (30분 초과 시에만 '아직 할 수 있어요' 표시)
-            if (isToday &&
-                isPast &&
-                now.difference(scheduledTime).inMinutes > 30) {
-              return '$displayText · ${l10n.timeChipStillActionable}';
+            if (isToday) {
+              if (isPast) {
+                // 이미 시간이 지난 경우: 안심시키는 메시지
+                return '$displayText · ${l10n.comfortingLate}';
+              } else {
+                // 아직 시간이 남은 경우: 응원 메시지
+                return '$displayText · ${l10n.comfortingFuture}';
+              }
             }
-            return displayText;
           }
-          return displayText; // "내일 아침에" or "점심쯤"
+          return displayText;
         }
       }
     }
@@ -819,7 +814,7 @@ class _NowTabState extends ConsumerState<NowTab>
                                 height: 56,
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? AppColors.primary.withOpacity(0.1)
+                                      ? AppColors.primary.withValues(alpha: 0.1)
                                       : Colors.transparent,
                                   shape: BoxShape.circle,
                                   border: Border.all(
@@ -1029,7 +1024,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
       child: Card(
         elevation: 1,
         margin: EdgeInsets.zero,
-        color: AppColors.surface.withOpacity(0.7),
+        color: AppColors.surface.withValues(alpha: 0.7),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
@@ -1361,7 +1356,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: AppColors.surface.withOpacity(0.7),
+      color: AppColors.surface.withValues(alpha: 0.7),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -1437,7 +1432,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: AppColors.surface.withOpacity(0.5),
+      color: AppColors.surface.withValues(alpha: 0.5),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -1468,7 +1463,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -1495,7 +1490,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.background.withOpacity(0.3),
+                color: AppColors.background.withValues(alpha: 0.3),
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(10),
                   bottomLeft: Radius.circular(10),
@@ -1622,7 +1617,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -1741,7 +1736,7 @@ class _ManagerQuickCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: AppColors.surface.withOpacity(0.6),
+      color: AppColors.surface.withValues(alpha: 0.6),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),

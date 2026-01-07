@@ -432,5 +432,9 @@
   "cheerSend": "보내기",
   "doneSheetTitle": "완료 소감을 남겨보세요",
   "doneMessageHint": "짧은 메모를 남겨주세요",
-  "doneButton": "완료하기"
+  "doneButton": "완료하기",
+  "planTimeQuestion": "몇 시쯤 알려드릴까요?",
+  "comfortingFuture": "오늘 하루도 수고했어요",
+  "comfortingLate": "늦어도 괜찮아요",
+  "comfortingJustDoIt": "오늘 안에만 하면 돼요"
 }

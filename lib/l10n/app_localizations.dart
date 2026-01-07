@@ -1771,6 +1771,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sun'**
   String get weekdaySun;
+
+  /// No description provided for @planTimeQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'When should I notify you?'**
+  String get planTimeQuestion;
+
+  /// No description provided for @comfortingFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Great job today'**
+  String get comfortingFuture;
+
+  /// No description provided for @comfortingLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late is okay'**
+  String get comfortingLate;
+
+  /// No description provided for @comfortingJustDoIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Just do it today'**
+  String get comfortingJustDoIt;
 }
 
 class _AppLocalizationsDelegate

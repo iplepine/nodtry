@@ -4,6 +4,8 @@ import '../../../models/plan_summary.dart';
 
 part 'history_state.freezed.dart';
 
+enum HistoryFilter { all, me, partner }
+
 @freezed
 abstract class HistoryState with _$HistoryState {
   const HistoryState._();
@@ -11,6 +13,7 @@ abstract class HistoryState with _$HistoryState {
     @Default([]) List<HistoryItem> activeItems,
     @Default([]) List<PlanSummary> finishedPlanSummaries,
     @Default(false) bool isLoading,
+    @Default(HistoryFilter.all) HistoryFilter filter,
   }) = _HistoryState;
 }
 
@@ -22,4 +25,5 @@ class HistoryIntent with _$HistoryIntent {
     String historyId,
     HistoryStatus status,
   ) = ReconcileIntent;
+  const factory HistoryIntent.setFilter(HistoryFilter filter) = SetFilterIntent;
 }

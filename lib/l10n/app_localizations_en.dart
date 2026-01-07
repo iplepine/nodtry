@@ -904,4 +904,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weekdaySun => 'Sun';
+
+  @override
+  String get planTimeQuestion => 'When should I notify you?';
+
+  @override
+  String get comfortingFuture => 'Great job today';
+
+  @override
+  String get comfortingLate => 'Late is okay';
+
+  @override
+  String get comfortingJustDoIt => 'Just do it today';
 }

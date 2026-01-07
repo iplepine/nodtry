@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/history_item.dart';
 import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class HistoryCard extends StatelessWidget {
   final HistoryItem item;
@@ -325,7 +326,9 @@ class _Avatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 18,
-      backgroundImage: imageUrl != null ? NetworkImage(imageUrl!) : null,
+      backgroundImage: imageUrl != null
+          ? CachedNetworkImageProvider(imageUrl!)
+          : null,
       backgroundColor: AppColors.surface,
       child: imageUrl == null
           ? Text(

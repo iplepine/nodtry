@@ -14,6 +14,7 @@ import '../../../../widgets/plan/plan_card.dart';
 import '../../../../providers/plan_list_provider.dart';
 import '../us_state.dart';
 import '../us_viewmodel.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 /// 우리 탭 - 안전 기지 & 연결 허브
 ///
@@ -277,7 +278,7 @@ class _MeSection extends StatelessWidget {
   Widget build(BuildContext context) {
     ImageProvider? imageProvider;
     if (profileImageUrl != null && profileImageUrl!.isNotEmpty) {
-      imageProvider = NetworkImage(profileImageUrl!);
+      imageProvider = CachedNetworkImageProvider(profileImageUrl!);
     }
 
     return Column(
@@ -314,7 +315,7 @@ class _MeSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -329,7 +330,7 @@ class _MeSection extends StatelessWidget {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                       image: imageProvider != null
                           ? DecorationImage(
@@ -769,7 +770,9 @@ class _PersonCard extends StatelessWidget {
                             if (person.isCheering)
                               _RelationshipBadge(
                                 text: l10n.usBadgeCheering,
-                                color: AppColors.primary.withOpacity(0.15),
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.15,
+                                ),
                                 textColor: AppColors.primary,
                               ),
                           ],
@@ -960,7 +963,7 @@ class _EditProfileDialogContentState
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                       image: _tempProfileImage != null
                           ? DecorationImage(
@@ -1116,7 +1119,7 @@ class _ActivePlanListSection extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.surface.withOpacity(0.5),
+                  color: AppColors.surface.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.divider),
                 ),

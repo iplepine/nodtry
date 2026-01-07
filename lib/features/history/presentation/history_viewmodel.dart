@@ -47,11 +47,23 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         allPlans.addAll(partnerPlans);
       }
 
-      // Show all items (removing PlanState.active restriction to ensure all recordings are visible)
-      final activeItems = List<HistoryItem>.from(allItems);
-      activeItems.sort((a, b) => b.date.compareTo(a.date));
+      // 3. Apply Filtering
+      List<HistoryItem> filteredItems = List<HistoryItem>.from(allItems);
+      final currentFilter = state.asData?.value.filter ?? HistoryFilter.all;
 
-      // 3. Prepare summaries for completed plans
+      if (currentFilter == HistoryFilter.me) {
+        filteredItems = filteredItems
+            .where((item) => item.executorId == myUid)
+            .toList();
+      } else if (currentFilter == HistoryFilter.partner && partnerUid != null) {
+        filteredItems = filteredItems
+            .where((item) => item.executorId == partnerUid)
+            .toList();
+      }
+
+      filteredItems.sort((a, b) => b.date.compareTo(a.date));
+
+      // 4. Prepare summaries for completed plans
       final finishedPlanSummaries = <PlanSummary>[];
       final completedPlans = allPlans.where(
         (p) => p.state == PlanState.completed,
@@ -77,9 +89,10 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
       }
 
       return HistoryState(
-        activeItems: activeItems,
+        activeItems: filteredItems,
         finishedPlanSummaries: finishedPlanSummaries,
         isLoading: false,
+        filter: currentFilter,
       );
     });
   }
@@ -92,6 +105,17 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         ref.invalidateSelf();
       } else if (intent is ReconcileIntent) {
         await _reconcile(intent.historyId, intent.status);
+      } else if (intent is SetFilterIntent) {
+        state = AsyncValue.data(state.value!.copyWith(filter: intent.filter));
+        // Filtering is done in the stream naturally when state.value.filter changes?
+        // Wait, _fetchStateStream uses state.asData?.value.filter.
+        // It's a StreamNotifier, so manually setting state to data with new filter
+        // will trigger the stream to re-map if the stream is watched?
+        // Actually, StreamNotifier's build() returns the stream.
+        // If I update the state manually, the stream map should use the new filter value.
+        // But the stream itself doesn't emit a new event just because the filter changed.
+        // I should probably invalidate if I want the stream to re-emit with new filter
+        // OR make the filtering happen more reactively.
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);

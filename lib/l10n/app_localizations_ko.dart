@@ -889,4 +889,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get weekdaySun => '일';
+
+  @override
+  String get planTimeQuestion => '몇 시쯤 알려드릴까요?';
+
+  @override
+  String get comfortingFuture => '오늘 하루도 수고했어요';
+
+  @override
+  String get comfortingLate => '늦어도 괜찮아요';
+
+  @override
+  String get comfortingJustDoIt => '오늘 안에만 하면 돼요';
 }
