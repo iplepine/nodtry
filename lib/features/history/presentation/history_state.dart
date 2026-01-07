@@ -16,7 +16,7 @@ abstract class HistoryState with _$HistoryState {
     @Default(false) bool isLoading,
     @Default(HistoryFilter.all) HistoryFilter filter,
     @Default(null) String? partnerName,
-    @Default(HeaderPeriodState.inProgress) HeaderPeriodState periodState,
+    @Default(HeaderPeriodState.inProgress) HeaderPeriodState headerPeriodState,
     @Default(null) int? currentWeek,
     @Default(null) int? totalWeeks,
   }) = _HistoryState;

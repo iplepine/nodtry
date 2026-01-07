@@ -57,6 +57,7 @@ abstract class NowTabState with _$NowTabState {
       primaryCard: primary,
       secondaryCards: secondaries,
       managerCards: managers,
+      headerPeriodState: HeaderPeriodState.noPlan,
     );
   }
 }

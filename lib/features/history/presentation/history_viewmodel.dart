@@ -20,7 +20,12 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
 
     // If profile is not loaded yet, wait to avoid querying with mock 'me' ID
     if (profile == null) {
-      return Stream.value(const HistoryState(isLoading: true));
+      return Stream.value(
+        const HistoryState(
+          isLoading: true,
+          headerPeriodState: HeaderPeriodState.noPlan,
+        ),
+      );
     }
 
     final myUid = profile.uid;
@@ -119,7 +124,7 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         isLoading: false,
         filter: currentFilter,
         partnerName: partnerName,
-        periodState: periodState,
+        headerPeriodState: periodState,
         currentWeek: currentWeekNum,
         totalWeeks: totalWeeksNum,
       );

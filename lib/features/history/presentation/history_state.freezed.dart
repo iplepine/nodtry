@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$HistoryState {
 
- List<HistoryItem> get activeItems; List<PlanSummary> get finishedPlanSummaries; bool get isLoading; HistoryFilter get filter; String? get partnerName; HeaderPeriodState get periodState; int? get currentWeek; int? get totalWeeks;
+ List<HistoryItem> get activeItems; List<PlanSummary> get finishedPlanSummaries; bool get isLoading; HistoryFilter get filter; String? get partnerName; HeaderPeriodState get headerPeriodState; int? get currentWeek; int? get totalWeeks;
 /// Create a copy of HistoryState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $HistoryStateCopyWith<HistoryState> get copyWith => _$HistoryStateCopyWithImpl<H
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HistoryState&&const DeepCollectionEquality().equals(other.activeItems, activeItems)&&const DeepCollectionEquality().equals(other.finishedPlanSummaries, finishedPlanSummaries)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.partnerName, partnerName) || other.partnerName == partnerName)&&(identical(other.periodState, periodState) || other.periodState == periodState)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.totalWeeks, totalWeeks) || other.totalWeeks == totalWeeks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HistoryState&&const DeepCollectionEquality().equals(other.activeItems, activeItems)&&const DeepCollectionEquality().equals(other.finishedPlanSummaries, finishedPlanSummaries)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.partnerName, partnerName) || other.partnerName == partnerName)&&(identical(other.headerPeriodState, headerPeriodState) || other.headerPeriodState == headerPeriodState)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.totalWeeks, totalWeeks) || other.totalWeeks == totalWeeks));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(activeItems),const DeepCollectionEquality().hash(finishedPlanSummaries),isLoading,filter,partnerName,periodState,currentWeek,totalWeeks);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(activeItems),const DeepCollectionEquality().hash(finishedPlanSummaries),isLoading,filter,partnerName,headerPeriodState,currentWeek,totalWeeks);
 
 @override
 String toString() {
-  return 'HistoryState(activeItems: $activeItems, finishedPlanSummaries: $finishedPlanSummaries, isLoading: $isLoading, filter: $filter, partnerName: $partnerName, periodState: $periodState, currentWeek: $currentWeek, totalWeeks: $totalWeeks)';
+  return 'HistoryState(activeItems: $activeItems, finishedPlanSummaries: $finishedPlanSummaries, isLoading: $isLoading, filter: $filter, partnerName: $partnerName, headerPeriodState: $headerPeriodState, currentWeek: $currentWeek, totalWeeks: $totalWeeks)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $HistoryStateCopyWith<$Res>  {
   factory $HistoryStateCopyWith(HistoryState value, $Res Function(HistoryState) _then) = _$HistoryStateCopyWithImpl;
 @useResult
 $Res call({
- List<HistoryItem> activeItems, List<PlanSummary> finishedPlanSummaries, bool isLoading, HistoryFilter filter, String? partnerName, HeaderPeriodState periodState, int? currentWeek, int? totalWeeks
+ List<HistoryItem> activeItems, List<PlanSummary> finishedPlanSummaries, bool isLoading, HistoryFilter filter, String? partnerName, HeaderPeriodState headerPeriodState, int? currentWeek, int? totalWeeks
 });
 
 
@@ -62,14 +62,14 @@ class _$HistoryStateCopyWithImpl<$Res>
 
 /// Create a copy of HistoryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? activeItems = null,Object? finishedPlanSummaries = null,Object? isLoading = null,Object? filter = null,Object? partnerName = freezed,Object? periodState = null,Object? currentWeek = freezed,Object? totalWeeks = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? activeItems = null,Object? finishedPlanSummaries = null,Object? isLoading = null,Object? filter = null,Object? partnerName = freezed,Object? headerPeriodState = null,Object? currentWeek = freezed,Object? totalWeeks = freezed,}) {
   return _then(_self.copyWith(
 activeItems: null == activeItems ? _self.activeItems : activeItems // ignore: cast_nullable_to_non_nullable
 as List<HistoryItem>,finishedPlanSummaries: null == finishedPlanSummaries ? _self.finishedPlanSummaries : finishedPlanSummaries // ignore: cast_nullable_to_non_nullable
 as List<PlanSummary>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,filter: null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
 as HistoryFilter,partnerName: freezed == partnerName ? _self.partnerName : partnerName // ignore: cast_nullable_to_non_nullable
-as String?,periodState: null == periodState ? _self.periodState : periodState // ignore: cast_nullable_to_non_nullable
+as String?,headerPeriodState: null == headerPeriodState ? _self.headerPeriodState : headerPeriodState // ignore: cast_nullable_to_non_nullable
 as HeaderPeriodState,currentWeek: freezed == currentWeek ? _self.currentWeek : currentWeek // ignore: cast_nullable_to_non_nullable
 as int?,totalWeeks: freezed == totalWeeks ? _self.totalWeeks : totalWeeks // ignore: cast_nullable_to_non_nullable
 as int?,
@@ -157,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HistoryItem> activeItems,  List<PlanSummary> finishedPlanSummaries,  bool isLoading,  HistoryFilter filter,  String? partnerName,  HeaderPeriodState periodState,  int? currentWeek,  int? totalWeeks)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HistoryItem> activeItems,  List<PlanSummary> finishedPlanSummaries,  bool isLoading,  HistoryFilter filter,  String? partnerName,  HeaderPeriodState headerPeriodState,  int? currentWeek,  int? totalWeeks)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HistoryState() when $default != null:
-return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading,_that.filter,_that.partnerName,_that.periodState,_that.currentWeek,_that.totalWeeks);case _:
+return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading,_that.filter,_that.partnerName,_that.headerPeriodState,_that.currentWeek,_that.totalWeeks);case _:
   return orElse();
 
 }
@@ -178,10 +178,10 @@ return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HistoryItem> activeItems,  List<PlanSummary> finishedPlanSummaries,  bool isLoading,  HistoryFilter filter,  String? partnerName,  HeaderPeriodState periodState,  int? currentWeek,  int? totalWeeks)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HistoryItem> activeItems,  List<PlanSummary> finishedPlanSummaries,  bool isLoading,  HistoryFilter filter,  String? partnerName,  HeaderPeriodState headerPeriodState,  int? currentWeek,  int? totalWeeks)  $default,) {final _that = this;
 switch (_that) {
 case _HistoryState():
-return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading,_that.filter,_that.partnerName,_that.periodState,_that.currentWeek,_that.totalWeeks);case _:
+return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading,_that.filter,_that.partnerName,_that.headerPeriodState,_that.currentWeek,_that.totalWeeks);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +198,10 @@ return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HistoryItem> activeItems,  List<PlanSummary> finishedPlanSummaries,  bool isLoading,  HistoryFilter filter,  String? partnerName,  HeaderPeriodState periodState,  int? currentWeek,  int? totalWeeks)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HistoryItem> activeItems,  List<PlanSummary> finishedPlanSummaries,  bool isLoading,  HistoryFilter filter,  String? partnerName,  HeaderPeriodState headerPeriodState,  int? currentWeek,  int? totalWeeks)?  $default,) {final _that = this;
 switch (_that) {
 case _HistoryState() when $default != null:
-return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading,_that.filter,_that.partnerName,_that.periodState,_that.currentWeek,_that.totalWeeks);case _:
+return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading,_that.filter,_that.partnerName,_that.headerPeriodState,_that.currentWeek,_that.totalWeeks);case _:
   return null;
 
 }
@@ -213,7 +213,7 @@ return $default(_that.activeItems,_that.finishedPlanSummaries,_that.isLoading,_t
 
 
 class _HistoryState extends HistoryState {
-  const _HistoryState({final  List<HistoryItem> activeItems = const [], final  List<PlanSummary> finishedPlanSummaries = const [], this.isLoading = false, this.filter = HistoryFilter.all, this.partnerName = null, this.periodState = HeaderPeriodState.inProgress, this.currentWeek = null, this.totalWeeks = null}): _activeItems = activeItems,_finishedPlanSummaries = finishedPlanSummaries,super._();
+  const _HistoryState({final  List<HistoryItem> activeItems = const [], final  List<PlanSummary> finishedPlanSummaries = const [], this.isLoading = false, this.filter = HistoryFilter.all, this.partnerName = null, this.headerPeriodState = HeaderPeriodState.inProgress, this.currentWeek = null, this.totalWeeks = null}): _activeItems = activeItems,_finishedPlanSummaries = finishedPlanSummaries,super._();
   
 
  final  List<HistoryItem> _activeItems;
@@ -233,7 +233,7 @@ class _HistoryState extends HistoryState {
 @override@JsonKey() final  bool isLoading;
 @override@JsonKey() final  HistoryFilter filter;
 @override@JsonKey() final  String? partnerName;
-@override@JsonKey() final  HeaderPeriodState periodState;
+@override@JsonKey() final  HeaderPeriodState headerPeriodState;
 @override@JsonKey() final  int? currentWeek;
 @override@JsonKey() final  int? totalWeeks;
 
@@ -247,16 +247,16 @@ _$HistoryStateCopyWith<_HistoryState> get copyWith => __$HistoryStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HistoryState&&const DeepCollectionEquality().equals(other._activeItems, _activeItems)&&const DeepCollectionEquality().equals(other._finishedPlanSummaries, _finishedPlanSummaries)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.partnerName, partnerName) || other.partnerName == partnerName)&&(identical(other.periodState, periodState) || other.periodState == periodState)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.totalWeeks, totalWeeks) || other.totalWeeks == totalWeeks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HistoryState&&const DeepCollectionEquality().equals(other._activeItems, _activeItems)&&const DeepCollectionEquality().equals(other._finishedPlanSummaries, _finishedPlanSummaries)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.partnerName, partnerName) || other.partnerName == partnerName)&&(identical(other.headerPeriodState, headerPeriodState) || other.headerPeriodState == headerPeriodState)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.totalWeeks, totalWeeks) || other.totalWeeks == totalWeeks));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_activeItems),const DeepCollectionEquality().hash(_finishedPlanSummaries),isLoading,filter,partnerName,periodState,currentWeek,totalWeeks);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_activeItems),const DeepCollectionEquality().hash(_finishedPlanSummaries),isLoading,filter,partnerName,headerPeriodState,currentWeek,totalWeeks);
 
 @override
 String toString() {
-  return 'HistoryState(activeItems: $activeItems, finishedPlanSummaries: $finishedPlanSummaries, isLoading: $isLoading, filter: $filter, partnerName: $partnerName, periodState: $periodState, currentWeek: $currentWeek, totalWeeks: $totalWeeks)';
+  return 'HistoryState(activeItems: $activeItems, finishedPlanSummaries: $finishedPlanSummaries, isLoading: $isLoading, filter: $filter, partnerName: $partnerName, headerPeriodState: $headerPeriodState, currentWeek: $currentWeek, totalWeeks: $totalWeeks)';
 }
 
 
@@ -267,7 +267,7 @@ abstract mixin class _$HistoryStateCopyWith<$Res> implements $HistoryStateCopyWi
   factory _$HistoryStateCopyWith(_HistoryState value, $Res Function(_HistoryState) _then) = __$HistoryStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<HistoryItem> activeItems, List<PlanSummary> finishedPlanSummaries, bool isLoading, HistoryFilter filter, String? partnerName, HeaderPeriodState periodState, int? currentWeek, int? totalWeeks
+ List<HistoryItem> activeItems, List<PlanSummary> finishedPlanSummaries, bool isLoading, HistoryFilter filter, String? partnerName, HeaderPeriodState headerPeriodState, int? currentWeek, int? totalWeeks
 });
 
 
@@ -284,14 +284,14 @@ class __$HistoryStateCopyWithImpl<$Res>
 
 /// Create a copy of HistoryState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? activeItems = null,Object? finishedPlanSummaries = null,Object? isLoading = null,Object? filter = null,Object? partnerName = freezed,Object? periodState = null,Object? currentWeek = freezed,Object? totalWeeks = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? activeItems = null,Object? finishedPlanSummaries = null,Object? isLoading = null,Object? filter = null,Object? partnerName = freezed,Object? headerPeriodState = null,Object? currentWeek = freezed,Object? totalWeeks = freezed,}) {
   return _then(_HistoryState(
 activeItems: null == activeItems ? _self._activeItems : activeItems // ignore: cast_nullable_to_non_nullable
 as List<HistoryItem>,finishedPlanSummaries: null == finishedPlanSummaries ? _self._finishedPlanSummaries : finishedPlanSummaries // ignore: cast_nullable_to_non_nullable
 as List<PlanSummary>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,filter: null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
 as HistoryFilter,partnerName: freezed == partnerName ? _self.partnerName : partnerName // ignore: cast_nullable_to_non_nullable
-as String?,periodState: null == periodState ? _self.periodState : periodState // ignore: cast_nullable_to_non_nullable
+as String?,headerPeriodState: null == headerPeriodState ? _self.headerPeriodState : headerPeriodState // ignore: cast_nullable_to_non_nullable
 as HeaderPeriodState,currentWeek: freezed == currentWeek ? _self.currentWeek : currentWeek // ignore: cast_nullable_to_non_nullable
 as int?,totalWeeks: freezed == totalWeeks ? _self.totalWeeks : totalWeeks // ignore: cast_nullable_to_non_nullable
 as int?,
