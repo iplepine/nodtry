@@ -138,6 +138,46 @@ class HistoryCard extends StatelessWidget {
                       ),
                     ],
 
+                    // Partner Message (Feedback/Cheer)
+                    if (item.partnerMessage != null &&
+                        item.partnerMessage!.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Emoji or Icon based on reactionType?
+                            // HistoryItem doesn't have reactionType field yet, only message.
+                            // Assuming message contains emoji or just use default icon.
+                            Icon(
+                              Icons.favorite_rounded,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                item.partnerMessage!,
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
                     // Verification Badge
                     // My Item: Verified by Partner
                     if (isMe && item.isVerifiedByPartner) ...[

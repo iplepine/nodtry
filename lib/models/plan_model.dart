@@ -51,6 +51,9 @@ class Plan {
   final DateTime createdAt;
   final List<DateTime> completedDates;
   final List<DateTime> verifiedDates;
+  final String? lastCheerMessage; // 마지막 응원 메시지
+  final String? lastCheerType; // 마지막 응원 타입 (fire, heart etc)
+  final DateTime? lastCheerAt; // 마지막 응원 시간
 
   Plan({
     this.id,
@@ -63,6 +66,9 @@ class Plan {
     required this.createdAt,
     this.completedDates = const [],
     this.verifiedDates = const [],
+    this.lastCheerMessage,
+    this.lastCheerType,
+    this.lastCheerAt,
   });
 
   Plan copyWith({
@@ -76,6 +82,9 @@ class Plan {
     DateTime? createdAt,
     List<DateTime>? completedDates,
     List<DateTime>? verifiedDates,
+    String? lastCheerMessage,
+    String? lastCheerType,
+    DateTime? lastCheerAt,
   }) {
     return Plan(
       id: id ?? this.id,
@@ -88,6 +97,9 @@ class Plan {
       createdAt: createdAt ?? this.createdAt,
       completedDates: completedDates ?? this.completedDates,
       verifiedDates: verifiedDates ?? this.verifiedDates,
+      lastCheerMessage: lastCheerMessage ?? this.lastCheerMessage,
+      lastCheerType: lastCheerType ?? this.lastCheerType,
+      lastCheerAt: lastCheerAt ?? this.lastCheerAt,
     );
   }
 
@@ -104,6 +116,9 @@ class Plan {
           .map((d) => Timestamp.fromDate(d))
           .toList(),
       'verifiedDates': verifiedDates.map((d) => Timestamp.fromDate(d)).toList(),
+      if (lastCheerMessage != null) 'lastCheerMessage': lastCheerMessage,
+      if (lastCheerType != null) 'lastCheerType': lastCheerType,
+      if (lastCheerAt != null) 'lastCheerAt': Timestamp.fromDate(lastCheerAt!),
     };
   }
 

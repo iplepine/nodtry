@@ -76,4 +76,10 @@ class MockUserRepository implements UserRepository {
       updatedAt: DateTime.now(),
     );
   }
+
+  @override
+  Future<void> updateFcmToken(String uid, String token) async {
+    // Mock implementation - do nothing or log
+    print('MockUserRepository: FCM token updated for $uid: $token');
+  }
 }

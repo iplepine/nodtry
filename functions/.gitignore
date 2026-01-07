@@ -1,0 +1,14 @@
+# Compiled JavaScript files
+lib/
+
+# TypeScript v1 declaration files
+lib.d.ts
+
+# Node_modules
+node_modules/
+
+# log files
+npm-debug.log
+yarn-error.log
+firebase-debug.log
+firebase-debug.*.log

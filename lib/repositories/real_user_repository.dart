@@ -320,4 +320,18 @@ class RealUserRepository implements UserRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> updateFcmToken(String uid, String token) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'fcmToken': token,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      debugPrint('[RealUserRepository] FCM Token updated for $uid');
+    } catch (e) {
+      debugPrint('[RealUserRepository] updateFcmToken Error: $e');
+      // FCM failed shouldn't crash app, just log
+    }
+  }
 }

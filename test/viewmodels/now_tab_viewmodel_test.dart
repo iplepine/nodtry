@@ -32,7 +32,7 @@ class MockRecordRepository extends Fake implements RecordRepository {
   }
 
   @override
-  Future<void> reportCompletion(String planId) async {
+  Future<void> reportCompletion(String planId, {String? message}) async {
     reportCompletionCallCount++;
     lastReportedPlanId = planId;
     emit(_currentValue); // Emit current (or updated) value to trigger stream
@@ -75,11 +75,23 @@ class MockRecordRepository extends Fake implements RecordRepository {
   @override
   Future<List<HistoryItem>> getHistoryItems() => Future.value([]);
   @override
+  Stream<List<HistoryItem>> getHistoryItemsStream({List<String>? userIds}) =>
+      Stream.value([]);
+
+  @override
   Future<List<Plan>> getPlansByUserId(String userId) => Future.value([]);
+  @override
+  Stream<List<Plan>> getPlansByUserIdStream(String userId) => Stream.value([]);
+
   @override
   Future<void> createPlan(Plan plan) => Future.value();
   @override
+  Future<void> updatePlan(Plan plan) => Future.value();
+  @override
+  Future<void> deletePlan(String planId) => Future.value();
+  @override
   Future<void> deletePlansByUserId(String uid) => Future.value();
+
   @override
   Future<void> reconcilePlan(String planId, HistoryStatus status) =>
       Future.value();
@@ -88,6 +100,13 @@ class MockRecordRepository extends Fake implements RecordRepository {
   @override
   Future<void> reconcileHistoryItem(String historyId, HistoryStatus status) =>
       Future.value();
+
+  @override
+  Future<void> assignManagerToActivePlans(String managerId) => Future.value();
+  @override
+  Future<void> approvePlan(String planId) => Future.value();
+  @override
+  Future<void> verifyPlan(String planId) => Future.value();
 }
 
 class MockGetNowCardsUseCase extends Fake implements GetNowCardsUseCase {

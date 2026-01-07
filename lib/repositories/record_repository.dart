@@ -44,7 +44,7 @@ abstract class RecordRepository {
   Future<void> verifyHistoryItem(String historyId);
 
   /// 실천 완료 보고 (했어)
-  Future<void> reportCompletion(String planId);
+  Future<void> reportCompletion(String planId, {String? message});
 
   /// 파트너 응원하기 (고마워요)
   /// reactionType: 'fire', 'heart', 'thumbs_up', 'muscle' 등

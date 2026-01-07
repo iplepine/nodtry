@@ -527,7 +527,8 @@ class RealRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> reportCompletion(String planId) async {
+  @override
+  Future<void> reportCompletion(String planId, {String? message}) async {
     debugPrint('[RealRecordRepository] reportCompletion for $planId');
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -554,6 +555,7 @@ class RealRecordRepository implements RecordRepository {
         'date': Timestamp.fromDate(now),
         'type': 'done', // HistoryStatus.done
         'title': planTitle,
+        'comment': message, // 저장
         'createdAt': FieldValue.serverTimestamp(),
       });
       debugPrint(
@@ -701,6 +703,7 @@ class RealRecordRepository implements RecordRepository {
     if (user == null) return;
 
     try {
+      final now = DateTime.now();
       // Get Plan to find who to cheer for (the plan owner)
       final planDoc = await _firestore.collection('plans').doc(planId).get();
       final toUserId =
@@ -718,10 +721,54 @@ class RealRecordRepository implements RecordRepository {
         data['message'] = message;
       }
 
+      // 1. Add to cheers collection
       await _firestore.collection('cheers').add(data);
 
-      // 2. Also mark as verified so the card disappears from "Yours" immediately
-      await verifyPlan(planId);
+      // 2. Denormalize to plan (Recent cheer) & Update Action (History)
+      final batch = _firestore.batch();
+      final planRef = _firestore.collection('plans').doc(planId);
+
+      batch.update(planRef, {
+        if (message != null) 'lastCheerMessage': message,
+        'lastCheerType': reactionType,
+        'lastCheerAt': Timestamp.fromDate(now),
+      });
+
+      // 3. Update Action (HistoryItem) to verify and add message
+      // Find today's action for this plan
+      final startOfDay = Timestamp.fromDate(
+        DateTime(now.year, now.month, now.day),
+      );
+      final endOfDay = Timestamp.fromDate(
+        DateTime(now.year, now.month, now.day, 23, 59, 59),
+      );
+
+      final snapshot = await _firestore
+          .collection('actions')
+          .where('planId', isEqualTo: planId)
+          .where('date', isGreaterThanOrEqualTo: startOfDay)
+          .where('date', isLessThanOrEqualTo: endOfDay)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final historyRef = snapshot.docs.first.reference;
+        final updateData = <String, dynamic>{
+          'verifiedBy': user.uid,
+          'verifiedAt': FieldValue.serverTimestamp(),
+        };
+        if (message != null && message.isNotEmpty) {
+          updateData['partnerMessage'] = message;
+        }
+        batch.update(historyRef, updateData);
+
+        // Also update plan's verifiedDates (duplicate logic from verifyPlan but efficient in batch)
+        batch.update(planRef, {
+          'verifiedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+        });
+      }
+
+      await batch.commit();
     } catch (e) {
       debugPrint('[RealRecordRepository] Error cheering partner: $e');
       rethrow;

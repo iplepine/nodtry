@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'now_tab_intent.dart';
 import '../../../providers/repository_provider.dart';
 import 'now_tab_state.dart';
+import '../domain/usecases/feedback_to_partner_use_case.dart';
 
 /// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel
 /// MVI 패턴의 'Model' (State Holder) 역할
@@ -29,7 +30,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
     try {
       if (intent is CompletePlanIntent) {
-        await _completePlan(intent.planId);
+        await _completePlan(intent.planId, intent.message);
       } else if (intent is CheckPartnerActionIntent) {
         await _checkPartnerAction(intent.planId);
       } else if (intent is RefreshIntent) {
@@ -52,8 +53,10 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     }
   }
 
-  Future<void> _completePlan(String planId) async {
-    await ref.read(recordRepositoryProvider).reportCompletion(planId);
+  Future<void> _completePlan(String planId, [String? message]) async {
+    await ref
+        .read(recordRepositoryProvider)
+        .reportCompletion(planId, message: message);
     // Stream updates automatically, no need to invalidate manually for logic correctness
     // BUT for Optimistic UI or immediate feedback, we rely on the repository emitting the new event.
   }
@@ -73,8 +76,8 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     String? message,
   ]) async {
     await ref
-        .read(recordRepositoryProvider)
-        .cheerPartner(planId, reactionType, message: message);
+        .read(feedbackToPartnerUseCaseProvider)
+        .execute(planId: planId, reactionType: reactionType, message: message);
   }
 
   Future<void> _passPlan(String planId) async {

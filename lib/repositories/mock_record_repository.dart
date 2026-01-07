@@ -366,7 +366,7 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> reportCompletion(String planId) async {
+  Future<void> reportCompletion(String planId, {String? message}) async {
     await Future.delayed(const Duration(milliseconds: 500));
     // Find model
     final index = _mockHomeCardModels.indexWhere((m) => m.plan?.id == planId);

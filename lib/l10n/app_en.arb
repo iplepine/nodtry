@@ -854,6 +854,9 @@
   "@cheerSend": {
     "description": "Send button for cheer message"
   },
+  "doneSheetTitle": "Share your thoughts",
+  "doneMessageHint": "Leave a short note",
+  "doneButton": "Complete",
   "@vagueTimeBedtime": {
     "description": "Vague time label for bedtime"
   },

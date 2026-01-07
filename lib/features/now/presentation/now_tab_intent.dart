@@ -10,17 +10,19 @@ sealed class NowTabIntent {
 /// 계획 실천 완료 (했어/넘어갈게요)
 class CompletePlanIntent extends NowTabIntent {
   final String planId;
-  const CompletePlanIntent(this.planId);
+  final String? message;
+  const CompletePlanIntent(this.planId, {this.message});
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is CompletePlanIntent &&
           runtimeType == other.runtimeType &&
-          planId == other.planId;
+          planId == other.planId &&
+          message == other.message;
 
   @override
-  int get hashCode => planId.hashCode;
+  int get hashCode => planId.hashCode ^ message.hashCode;
 }
 
 /// 파트너 실천 확인 (확인하기/응원하기)

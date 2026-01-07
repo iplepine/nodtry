@@ -1340,6 +1340,24 @@ abstract class AppLocalizations {
   /// **'Send'**
   String get cheerSend;
 
+  /// No description provided for @doneSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your thoughts'**
+  String get doneSheetTitle;
+
+  /// No description provided for @doneMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a short note'**
+  String get doneMessageHint;
+
+  /// No description provided for @doneButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get doneButton;
+
   /// Description for developer menu
   ///
   /// In en, this message translates to:

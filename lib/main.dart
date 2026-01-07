@@ -11,6 +11,8 @@ import 'firebase_options.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/repository_provider.dart';
+import 'core/services/notification_service.dart';
+import 'services/notification_service.dart' as local_notifications;
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -44,9 +46,23 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
+  final container = ProviderContainer(
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+  );
+
+  // Initialize Notification Service (FCM)
+  // We don't await this to avoid blocking UI startup,
+  // but it's fine to fire and forget or await if critical.
+  // Generally permission request might block, but we handle that in initialize().
+  // Using fire-and-forget here to let app start.
+  container.read(notificationServiceProvider).initialize();
+
+  // Initialize Local Notification Service (Plan Reminders)
+  await local_notifications.NotificationService().init();
+
   runApp(
-    ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    UncontrolledProviderScope(
+      container: container,
       child: const OnMyBehalfApp(),
     ),
   );

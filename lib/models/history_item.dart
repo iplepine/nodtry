@@ -30,6 +30,7 @@ class HistoryItem {
   final bool isVerifiedByMe; // 내가 확인해줬는지 여부 (상대 실천에 대해)
   final String? partnerName;
   final String? partnerImageUrl;
+  final String? partnerMessage; // 파트너의 응원 메시지
 
   const HistoryItem({
     required this.id,
@@ -43,6 +44,7 @@ class HistoryItem {
     this.comment,
     this.partnerName,
     this.partnerImageUrl,
+    this.partnerMessage,
   });
 
   /// 내가 실천한 기록인지 여부
@@ -61,6 +63,7 @@ class HistoryItem {
       isVerifiedByMe: false, // 별도 로직으로 판단 필요
       partnerName: null, // Join 필요 (repository에서 처리)
       partnerImageUrl: null,
+      partnerMessage: map['partnerMessage'] as String?,
     );
   }
 
@@ -89,6 +92,7 @@ class HistoryItem {
     bool? isVerifiedByMe,
     String? partnerName,
     String? partnerImageUrl,
+    String? partnerMessage,
   }) {
     return HistoryItem(
       id: id ?? this.id,
@@ -102,6 +106,7 @@ class HistoryItem {
       isVerifiedByMe: isVerifiedByMe ?? this.isVerifiedByMe,
       partnerName: partnerName ?? this.partnerName,
       partnerImageUrl: partnerImageUrl ?? this.partnerImageUrl,
+      partnerMessage: partnerMessage ?? this.partnerMessage,
     );
   }
 }

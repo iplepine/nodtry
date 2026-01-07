@@ -429,5 +429,8 @@
   "cheerMore": "더보기",
   "cheerSheetTitle": "어떻게 응원할까요?",
   "cheerMessageHint": "직접 응원 메시지를 남겨보세요",
-  "cheerSend": "보내기"
+  "cheerSend": "보내기",
+  "doneSheetTitle": "완료 소감을 남겨보세요",
+  "doneMessageHint": "짧은 메모를 남겨주세요",
+  "doneButton": "완료하기"
 }

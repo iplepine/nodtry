@@ -656,6 +656,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cheerSend => '보내기';
 
   @override
+  String get doneSheetTitle => '완료 소감을 남겨보세요';
+
+  @override
+  String get doneMessageHint => '짧은 메모를 남겨주세요';
+
+  @override
+  String get doneButton => '완료하기';
+
+  @override
   String get settingsDeveloperDesc => '디버그 메뉴';
 
   @override

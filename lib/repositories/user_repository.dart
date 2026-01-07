@@ -27,4 +27,7 @@ abstract class UserRepository {
 
   /// 회원 탈퇴 (데이터 삭제)
   Future<void> deleteUser(String uid);
+
+  /// FCM 토큰 업데이트
+  Future<void> updateFcmToken(String uid, String token);
 }

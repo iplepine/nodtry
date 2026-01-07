@@ -669,6 +669,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cheerSend => 'Send';
 
   @override
+  String get doneSheetTitle => 'Share your thoughts';
+
+  @override
+  String get doneMessageHint => 'Leave a short note';
+
+  @override
+  String get doneButton => 'Complete';
+
+  @override
   String get settingsDeveloperDesc => 'Debug menu';
 
   @override
