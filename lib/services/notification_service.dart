@@ -204,31 +204,29 @@ class NotificationService {
     );
   }
 
-  /// Test alarm: set one in 5 seconds
-  Future<void> setTestAlarm({
+  /// 특정 시각에 알람 예약 (범용)
+  Future<void> scheduleNotificationAt({
     required int id,
     required String title,
     required String body,
-    required int secondsFromNow,
+    required DateTime scheduledDate,
   }) async {
-    final tz.TZDateTime scheduledDate = tz.TZDateTime.now(
-      tz.local,
-    ).add(Duration(seconds: secondsFromNow));
+    final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
 
     debugPrint(
-      '[Notification] Scheduling TEST alarm in $secondsFromNow seconds. Target: $scheduledDate',
+      '[Notification] Scheduling at specific time: $tzScheduledDate (ID: $id)',
     );
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
       body,
-      scheduledDate,
+      tzScheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'debug_notifications',
-          'Debug Notifications',
-          channelDescription: 'Notifications for testing purposes',
+          'scheduled_notifications',
+          'Scheduled Notifications',
+          channelDescription: 'Specific time notifications',
           importance: Importance.max,
           priority: Priority.high,
         ),
@@ -237,6 +235,22 @@ class NotificationService {
       androidScheduleMode: await canScheduleExactAlarms()
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+  }
+
+  /// Test alarm: set one in X seconds (Internal use/Legacy support)
+  Future<void> setTestAlarm({
+    required int id,
+    required String title,
+    required String body,
+    required int secondsFromNow,
+  }) async {
+    final scheduledDate = DateTime.now().add(Duration(seconds: secondsFromNow));
+    await scheduleNotificationAt(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: scheduledDate,
     );
   }
 

@@ -5,36 +5,16 @@ class SetAlarmUseCase {
 
   SetAlarmUseCase(this._notificationService);
 
-  /// 5초 뒤 등 특정 시간 이후에 울리는 테스트 알람 설정
-  Future<void> setTestAlarm({
-    required int id,
-    required String title,
-    required String body,
-    required int secondsFromNow,
-  }) async {
-    await _notificationService.setTestAlarm(
-      id: id,
-      title: title,
-      body: body,
-      secondsFromNow: secondsFromNow,
-    );
-  }
-
-  /// 즉시 울리는 알람 표시
-  Future<void> showInstantNotification({
-    required int id,
-    required String title,
-    required String body,
-  }) async {
-    await _notificationService.showInstantNotification(
-      id: id,
-      title: title,
-      body: body,
-    );
-  }
-
-  /// 모든 알람 취소
-  Future<void> cancelAll() async {
-    await _notificationService.cancelAllNotifications();
+  /// 여러 개의 DateTime에 대해 알람을 예약합니다. (단일 책임: 알람 설정)
+  Future<void> execute(List<DateTime> scheduledDates) async {
+    for (int i = 0; i < scheduledDates.length; i++) {
+      final date = scheduledDates[i];
+      await _notificationService.scheduleNotificationAt(
+        id: 99000 + i, // 고정 기초 ID + 인덱스
+        title: '알람 테스트',
+        body: '${date.toLocal()}에 예약된 알람입니다.',
+        scheduledDate: date,
+      );
+    }
   }
 }

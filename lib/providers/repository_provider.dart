@@ -1,6 +1,8 @@
 import '../features/plan/domain/usecases/create_new_plan_use_case.dart';
 import '../features/plan/domain/usecases/setting_alarm_use_case.dart';
 import '../usecases/set_alarm_use_case.dart';
+import '../usecases/show_instant_notification_use_case.dart';
+import '../usecases/cancel_all_notifications_use_case.dart';
 import '../services/notification_service.dart' as local_notifications;
 import '../features/now/domain/usecases/get_now_cards_use_case.dart';
 import '../features/history/domain/usecases/get_history_use_case.dart';
@@ -239,6 +241,20 @@ final withdrawUseCaseProvider = Provider<WithdrawUseCase>((ref) {
 final setAlarmUseCaseProvider = Provider<SetAlarmUseCase>((ref) {
   return SetAlarmUseCase(local_notifications.NotificationService());
 });
+
+final showInstantNotificationUseCaseProvider =
+    Provider<ShowInstantNotificationUseCase>((ref) {
+      return ShowInstantNotificationUseCase(
+        local_notifications.NotificationService(),
+      );
+    });
+
+final cancelAllNotificationsUseCaseProvider =
+    Provider<CancelAllNotificationsUseCase>((ref) {
+      return CancelAllNotificationsUseCase(
+        local_notifications.NotificationService(),
+      );
+    });
 
 final settingAlarmUseCaseProvider = Provider<SettingAlarmUseCase>((ref) {
   return SettingAlarmUseCase(local_notifications.NotificationService());

@@ -11,11 +11,26 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
 /// 개발자 화면 - 모든 화면으로 이동할 수 있는 디버그 화면
-class DeveloperScreen extends ConsumerWidget {
+class DeveloperScreen extends ConsumerStatefulWidget {
   const DeveloperScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DeveloperScreen> createState() => _DeveloperScreenState();
+}
+
+class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
+  final TextEditingController _alarmTimesController = TextEditingController(
+    text: '5, 10',
+  );
+
+  @override
+  void dispose() {
+    _alarmTimesController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -357,9 +372,9 @@ class DeveloperScreen extends ConsumerWidget {
             color: AppColors.textPrimary,
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
@@ -369,9 +384,36 @@ class DeveloperScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _AlarmPermissionWidget(),
-              Divider(height: 32),
+              const Divider(height: 32),
               _AlarmListWidget(),
-              Divider(height: 32),
+              const Divider(height: 32),
+
+              // 다중 시간 입력 필드
+              Text(
+                '예약 시간 (초, 콤마로 구분)',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _alarmTimesController,
+                decoration: InputDecoration(
+                  hintText: '예: 5, 10, 15',
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                keyboardType: TextInputType.text,
+              ),
+              const SizedBox(height: 16),
+
               Row(
                 children: [
                   Expanded(
@@ -381,23 +423,46 @@ class DeveloperScreen extends ConsumerWidget {
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () async {
+                        final input = _alarmTimesController.text;
+                        final secondsList = input
+                            .split(',')
+                            .map((s) => int.tryParse(s.trim()))
+                            .whereType<int>()
+                            .toList();
+
+                        if (secondsList.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('올바른 시간을 입력해주세요. (예: 5, 10)'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        // DateTime 배열로 변환 (현재 시간 + 입력 초)
+                        final now = DateTime.now();
+                        final scheduledDates = secondsList
+                            .map((s) => now.add(Duration(seconds: s)))
+                            .toList();
+
+                        // SetAlarmUseCase 호출
                         await ref
                             .read(setAlarmUseCaseProvider)
-                            .setTestAlarm(
-                              id: 99999,
-                              title: '테스트 알람',
-                              body: '5초 뒤에 울리는 테스트 알람입니다.',
-                              secondsFromNow: 5,
-                            );
+                            .execute(scheduledDates);
+
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('5초 뒤 알람이 설정되었습니다.')),
+                          SnackBar(
+                            content: Text(
+                              '${secondsList.length}개의 알람이 예약되었습니다.',
+                            ),
+                          ),
                         );
                       },
-                      child: Text('5초 뒤 테스트'),
+                      child: const Text('알람 예약'),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -406,24 +471,26 @@ class DeveloperScreen extends ConsumerWidget {
                       ),
                       onPressed: () async {
                         await ref
-                            .read(setAlarmUseCaseProvider)
-                            .showInstantNotification(
+                            .read(showInstantNotificationUseCaseProvider)
+                            .execute(
                               id: 88888,
                               title: '즉시 테스트 알람',
                               body: '즉시 울리는 테스트 알람입니다.',
                             );
                       },
-                      child: Text('즉시 테스트'),
+                      child: const Text('즉시 테스트'),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   IconButton(
-                    icon: Icon(Icons.delete_sweep, color: Colors.red),
+                    icon: const Icon(Icons.delete_sweep, color: Colors.red),
                     onPressed: () async {
-                      await ref.read(setAlarmUseCaseProvider).cancelAll();
+                      await ref
+                          .read(cancelAllNotificationsUseCaseProvider)
+                          .execute();
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('모든 알람이 취소되었습니다.')),
+                        const SnackBar(content: Text('모든 알람이 취소되었습니다.')),
                       );
                     },
                     tooltip: '모든 알람 취소',
