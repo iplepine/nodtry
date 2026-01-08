@@ -13,8 +13,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/repository_provider.dart';
 import 'core/services/notification_service.dart';
 import 'services/notification_service.dart' as local_notifications;
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  debugPrint("Handling a background message: ${message.messageId}");
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,10 +57,7 @@ void main() async {
   );
 
   // Initialize Notification Service (FCM)
-  // We don't await this to avoid blocking UI startup,
-  // but it's fine to fire and forget or await if critical.
-  // Generally permission request might block, but we handle that in initialize().
-  // Using fire-and-forget here to let app start.
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   container.read(notificationServiceProvider).initialize();
 
   // Initialize Local Notification Service (Plan Reminders)

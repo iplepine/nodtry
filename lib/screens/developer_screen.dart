@@ -8,8 +8,11 @@ import '../providers/repository_provider.dart';
 import '../services/notification_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
+import '../models/plan_model.dart';
 import 'dart:io';
 
 /// 개발자 화면 - 모든 화면으로 이동할 수 있는 디버그 화면
@@ -178,6 +181,11 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
                   ],
                 ),
               ),
+              SizedBox(height: 32),
+
+              // 푸시 테스트 섹션
+              _buildPushTestSection(context, ref),
+              SizedBox(height: 32),
             ],
           ),
         ),
@@ -282,6 +290,227 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
           Divider(height: 1, color: AppColors.divider.withOpacity(0.5)),
         ],
       ),
+    );
+  }
+
+  Widget _buildPushTestSection(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Push Notification Test',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Column(
+            children: [
+              _buildPushTestButton(
+                context,
+                title: '나에게 약속 제안 푸시 보내기',
+                subtitle: 'onPlanCreated 트리거 테스트',
+                icon: Icons.assignment_turned_in,
+                onPressed: () async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) return;
+
+                  final now = DateTime.now();
+                  final plan = Plan(
+                    userId: 'DEBUG_SENDER',
+                    managerId: user.uid,
+                    state: PlanState.pendingApproval,
+                    createdAt: now,
+                    startDate: now,
+                    endDate: now.add(Duration(days: 30)),
+                    items: [
+                      PlanItem(
+                        title: '테스트 약속입니다! ✉️',
+                        days: [1, 2, 3, 4, 5, 6, 7],
+                        count: 1,
+                      ),
+                    ],
+                  );
+
+                  try {
+                    await ref.read(recordRepositoryProvider).createPlan(plan);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('약속 생성 완료! 잠시 후 푸시가 도착합니다.')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('에러 발생: $e')));
+                  }
+                },
+              ),
+              Divider(height: 24),
+              _buildPushTestButton(
+                context,
+                title: '나에게 응원 푸시 보내기',
+                subtitle: 'onCheerCreated 트리거 테스트',
+                icon: Icons.favorite,
+                onPressed: () async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) return;
+
+                  try {
+                    // cheers 컬렉션에 임의의 문서 생성
+                    await FirebaseFirestore.instance.collection('cheers').add({
+                      'fromUserId': 'DEBUG_SENDER',
+                      'toUserId': user.uid,
+                      'message': '잘 하고 있어요! 화이팅! 💪',
+                      'reactionType': 'heart',
+                      'planId': 'test_plan_id',
+                      'createdAt': FieldValue.serverTimestamp(),
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('응원 생성 완료! 잠시 후 푸시가 도착합니다.')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('에러 발생: $e')));
+                  }
+                },
+              ),
+              Divider(height: 24),
+              _buildPushTestButton(
+                context,
+                title: '나에게 실천 완료 푸시 보내기',
+                subtitle: 'onActionCompleted 트리거 테스트',
+                icon: Icons.check_circle,
+                onPressed: () async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) return;
+
+                  try {
+                    final plans = await FirebaseFirestore.instance
+                        .collection('plans')
+                        .where('managerId', isEqualTo: user.uid)
+                        .limit(1)
+                        .get();
+
+                    if (plans.docs.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('매니저로 등록된 계획이 없습니다.')),
+                      );
+                      return;
+                    }
+
+                    final planId = plans.docs.first.id;
+                    final planTitle =
+                        (plans.docs.first.data()['items'] as List?)
+                            ?.firstOrNull?['title'] ??
+                        '테스트 계획';
+
+                    await FirebaseFirestore.instance.collection('actions').add({
+                      'userId': 'DEBUG_SENDER',
+                      'planId': planId,
+                      'date': Timestamp.now(),
+                      'type': 'done',
+                      'title': planTitle,
+                      'createdAt': FieldValue.serverTimestamp(),
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('실천 기록 생성 완료! 푸시를 확인하세요.')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('에러 발생: $e')));
+                  }
+                },
+              ),
+              Divider(height: 24),
+              _buildPushTestButton(
+                context,
+                title: '나에게 계획 수정 푸시 보내기',
+                subtitle: 'onPlanUpdated 트리거 테스트',
+                icon: Icons.edit_note,
+                onPressed: () async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) return;
+
+                  try {
+                    final plans = await FirebaseFirestore.instance
+                        .collection('plans')
+                        .where('managerId', isEqualTo: user.uid)
+                        .limit(1)
+                        .get();
+
+                    if (plans.docs.isEmpty) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('수정할 계획이 없습니다.')));
+                      return;
+                    }
+
+                    final docRef = plans.docs.first.reference;
+                    final currentData = plans.docs.first.data();
+                    final currentItems = List.from(currentData['items'] ?? []);
+
+                    if (currentItems.isNotEmpty) {
+                      currentItems[0]['title'] =
+                          '${currentItems[0]['title']} (수정됨)';
+                    }
+
+                    await docRef.update({
+                      'items': currentItems,
+                      'updatedAt': FieldValue.serverTimestamp(),
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('계획 수정 완료! 푸시를 확인하세요.')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('에러 발생: $e')));
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPushTestButton(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: AppColors.primary.withOpacity(0.1),
+        child: Icon(icon, color: AppColors.primary, size: 20),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+      ),
+      trailing: Icon(Icons.send, size: 16, color: AppColors.textSecondary),
+      onTap: onPressed,
+      contentPadding: EdgeInsets.zero,
     );
   }
 
