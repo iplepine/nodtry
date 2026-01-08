@@ -14,6 +14,7 @@ import '../../../utils/time_formatter.dart';
 import 'now_tab_intent.dart';
 import 'now_tab_viewmodel.dart';
 import 'now_tab_fake_states.dart';
+import '../../../widgets/action_note_dialog.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 class NowTab extends ConsumerStatefulWidget {
@@ -73,17 +74,35 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   Future<void> _handleDidIt() async {
+    final l10n = AppLocalizations.of(context)!;
     final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
-    if (primaryCard?.plan?.id == null) return;
+    if (primaryCard == null || primaryCard.plan?.id == null) return;
 
     // 1. Shrink animation
     await _animationController.reverse();
 
-    // 2. Dispatch Intent to ViewModel
+    // 2. Show Dialog to input note
+    final note = await showDialog<String>(
+      context: context,
+      builder: (context) => ActionNoteDialog(
+        title: primaryCard.plan?.items.firstOrNull?.title ?? l10n.homeDidIt,
+      ),
+    );
+
+    if (note == null) {
+      // 3. Restore animation if canceled
+      if (mounted) _animationController.forward();
+      return;
+    }
+
+    // 4. Dispatch Intent with note
     try {
-      await ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(CompletePlanIntent(primaryCard!.plan!.id!));
+      final planId = primaryCard.plan?.id;
+      if (planId != null) {
+        await ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(CompletePlanIntent(planId, message: note));
+      }
     } catch (e) {
       // Error handling (restore animation if failed)
       if (mounted) _animationController.forward();
@@ -1178,9 +1197,41 @@ class _PrimaryExecutorCard extends StatelessWidget {
       );
     }
 
-    // Partner Feedback (Cheer Message)
-    if (model.plan?.lastCheerMessage != null) {
+    // ----------------------------------------------------
+    // 1. lastActionNote (실천자 한마디 - 나/파트너 공통)
+    // ----------------------------------------------------
+    if (model.plan?.lastActionNote != null &&
+        model.plan!.lastActionNote!.isNotEmpty) {
       children.add(const SizedBox(height: 12));
+      children.add(
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.background.withValues(alpha: 0.5),
+            borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(12),
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
+              topLeft: Radius.circular(2),
+            ),
+          ),
+          child: Text(
+            model.plan!.lastActionNote!,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textPrimary,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ----------------------------------------------------
+    // 2. lastComment (매니저 피드백/응원)
+    // ----------------------------------------------------
+    if (model.plan?.lastComment != null &&
+        model.plan!.lastComment!.isNotEmpty) {
+      children.add(const SizedBox(height: 8));
       children.add(
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1200,7 +1251,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
               ],
               Flexible(
                 child: Text(
-                  model.plan!.lastCheerMessage!,
+                  model.plan!.lastComment!,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
@@ -1612,10 +1663,37 @@ class _SecondaryExecutorCard extends StatelessWidget {
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
           // ----------------------------------------------------
-          // Partner Feedback (Cheer Message)
+          // 1. lastActionNote (실천자 한마디)
           // ----------------------------------------------------
-          if (model.plan?.lastCheerMessage != null) ...[
+          if (model.plan?.lastActionNote != null &&
+              model.plan!.lastActionNote!.isNotEmpty) ...[
             const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.background.withValues(alpha: 0.5),
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                  topLeft: Radius.circular(2),
+                ),
+              ),
+              child: Text(
+                model.plan!.lastActionNote!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textPrimary,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          ],
+          // ----------------------------------------------------
+          // 2. lastComment (매니저 피드백)
+          // ----------------------------------------------------
+          if (model.plan?.lastComment != null &&
+              model.plan!.lastComment!.isNotEmpty) ...[
+            const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
@@ -1634,7 +1712,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
                   ],
                   Flexible(
                     child: Text(
-                      model.plan!.lastCheerMessage!,
+                      model.plan!.lastComment!,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -2028,3 +2106,65 @@ class _ContextFooter extends StatelessWidget {
 }
 
 // _ReconcileMenu removed per user request (was unused after UI updates)
+
+class _ActionNoteDialog extends StatefulWidget {
+  final String title;
+
+  const _ActionNoteDialog({required this.title});
+
+  @override
+  State<_ActionNoteDialog> createState() => _ActionNoteDialogState();
+}
+
+class _ActionNoteDialogState extends State<_ActionNoteDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(widget.title),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: "실천 소감을 남겨보세요 (선택)",
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+        ),
+        maxLength: 30,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (value) => Navigator.pop(context, value),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            l10n.cancel,
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, _controller.text),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: Text(l10n.homeDidIt),
+        ),
+      ],
+    );
+  }
+}

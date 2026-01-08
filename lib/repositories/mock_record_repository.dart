@@ -78,7 +78,7 @@ class MockRecordRepository implements RecordRepository {
         status: HistoryStatus.verified,
         executorId: 'partner',
         isVerifiedByMe: true,
-        comment: '어제도 고마워요. 덕분에 책 읽는 시간이 생겼어요.',
+        note: '어제도 고마워요. 덕분에 책 읽는 시간이 생겼어요.',
         partnerName: '지민',
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
@@ -91,7 +91,7 @@ class MockRecordRepository implements RecordRepository {
         status: HistoryStatus.actuallyDone,
         executorId: 'me',
         isVerifiedByPartner: true,
-        comment: '뒤늦게라도 완료!',
+        note: '뒤늦게라도 완료!',
       ),
       HistoryItem(
         id: '3',
@@ -112,7 +112,7 @@ class MockRecordRepository implements RecordRepository {
         title: '영양제 챙겨 먹기',
         status: HistoryStatus.rested,
         executorId: 'me',
-        comment: '오늘은 컨디션 난조로 쉬어갔어요.',
+        note: '오늘은 컨디션 난조로 쉬어갔어요.',
       ),
     ];
   }
@@ -344,7 +344,7 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> verifyHistoryItem(String historyId) async {
+  Future<void> verifyHistoryItem(String historyId, {String? message}) async {
     await Future.delayed(const Duration(milliseconds: 500));
     final index = _mockHistoryItems.indexWhere((item) => item.id == historyId);
     if (index != -1) {
@@ -358,7 +358,8 @@ class MockRecordRepository implements RecordRepository {
         executorId: item.executorId,
         isVerifiedByMe: true, // 내가 확인함
         isVerifiedByPartner: item.isVerifiedByPartner,
-        comment: item.comment,
+        note: item.note,
+        comment: message ?? item.comment,
         partnerName: item.partnerName,
         partnerImageUrl: item.partnerImageUrl,
       );
@@ -366,7 +367,7 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> reportCompletion(String planId, {String? message}) async {
+  Future<void> reportCompletion(String planId, {String? note}) async {
     await Future.delayed(const Duration(milliseconds: 500));
     // Find model
     final index = _mockHomeCardModels.indexWhere((m) => m.plan?.id == planId);
@@ -413,6 +414,7 @@ class MockRecordRepository implements RecordRepository {
                   model.state == HomeCardState.overdue)
               ? 'me'
               : 'partner',
+          note: note,
         ),
       );
       _notifyHistoryStream();
@@ -440,9 +442,9 @@ class MockRecordRepository implements RecordRepository {
         executorId: item.executorId,
         isVerifiedByMe: item.isVerifiedByMe,
         isVerifiedByPartner: item.isVerifiedByPartner,
-        comment: status == HistoryStatus.actuallyDone
+        note: status == HistoryStatus.actuallyDone
             ? '사실 완료했어요'
-            : (status == HistoryStatus.rested ? '쉬어갔어요' : item.comment),
+            : (status == HistoryStatus.rested ? '쉬어갔어요' : item.note),
         partnerName: item.partnerName,
         partnerImageUrl: item.partnerImageUrl,
       );
@@ -488,7 +490,17 @@ class MockRecordRepository implements RecordRepository {
       'Mock: Partner cheered for plan $planId with reaction $reactionType, message: $message',
     );
     await Future.delayed(const Duration(milliseconds: 500));
-    // Ideally this might update UI state too? For now, no change needed in mock state.
+
+    // Plan 업데이트 시뮬레이션
+    final index = _mockPlans.indexWhere((p) => p.id == planId);
+    if (index != -1) {
+      _mockPlans[index] = _mockPlans[index].copyWith(
+        lastComment: message,
+        lastCheerType: reactionType,
+        lastCheerAt: DateTime.now(),
+      );
+      _notifyPlansStream();
+    }
   }
 
   @override

@@ -97,7 +97,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
   Future<void> _completePlan(String planId, [String? message]) async {
     await ref
         .read(recordRepositoryProvider)
-        .reportCompletion(planId, message: message);
+        .reportCompletion(planId, note: message);
     // Stream updates automatically, no need to invalidate manually for logic correctness
     // BUT for Optimistic UI or immediate feedback, we rely on the repository emitting the new event.
   }

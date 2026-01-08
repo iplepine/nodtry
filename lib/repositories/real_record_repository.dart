@@ -493,16 +493,21 @@ class RealRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> verifyHistoryItem(String historyId) async {
+  Future<void> verifyHistoryItem(String historyId, {String? message}) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     try {
       // 1. Update actions collection
-      await _firestore.collection('actions').doc(historyId).update({
+      final updateData = {
         'verifiedBy': user.uid,
         'verifiedAt': FieldValue.serverTimestamp(),
-      });
+      };
+      if (message != null && message.isNotEmpty) {
+        updateData['comment'] = message;
+      }
+
+      await _firestore.collection('actions').doc(historyId).update(updateData);
 
       // 2. Synchronize verifiedDates in plans collection for real-time Home Card sync
       final historyDoc = await _firestore
@@ -528,7 +533,7 @@ class RealRecordRepository implements RecordRepository {
 
   @override
   @override
-  Future<void> reportCompletion(String planId, {String? message}) async {
+  Future<void> reportCompletion(String planId, {String? note}) async {
     debugPrint('[RealRecordRepository] reportCompletion for $planId');
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -536,9 +541,10 @@ class RealRecordRepository implements RecordRepository {
     try {
       final now = DateTime.now();
 
-      // 1. Update Plan (completedDates)
+      // 1. Update Plan (completedDates & lastActionNote)
       await _firestore.collection('plans').doc(planId).update({
         'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+        'lastActionNote': note,
       });
       debugPrint('[RealRecordRepository] Plan updated successfully');
 
@@ -555,7 +561,7 @@ class RealRecordRepository implements RecordRepository {
         'date': Timestamp.fromDate(now),
         'type': 'done', // HistoryStatus.done
         'title': planTitle,
-        'comment': message, // 저장
+        'note': note, // 저장
         'createdAt': FieldValue.serverTimestamp(),
       });
       debugPrint(

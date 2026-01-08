@@ -32,7 +32,7 @@ class MockRecordRepository extends Fake implements RecordRepository {
   }
 
   @override
-  Future<void> reportCompletion(String planId, {String? message}) async {
+  Future<void> reportCompletion(String planId, {String? note}) async {
     reportCompletionCallCount++;
     lastReportedPlanId = planId;
     emit(_currentValue); // Emit current (or updated) value to trigger stream
@@ -96,7 +96,8 @@ class MockRecordRepository extends Fake implements RecordRepository {
   Future<void> reconcilePlan(String planId, HistoryStatus status) =>
       Future.value();
   @override
-  Future<void> verifyHistoryItem(String historyId) => Future.value();
+  Future<void> verifyHistoryItem(String historyId, {String? message}) =>
+      Future.value();
   @override
   Future<void> reconcileHistoryItem(String historyId, HistoryStatus status) =>
       Future.value();

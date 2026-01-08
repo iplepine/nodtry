@@ -54,6 +54,8 @@ class Plan {
   final String? lastCheerMessage; // 마지막 응원 메시지
   final String? lastCheerType; // 마지막 응원 타입 (fire, heart etc)
   final DateTime? lastCheerAt; // 마지막 응원 시간
+  final String? lastActionNote; // 마지막 실천 한마디 (실천자)
+  final String? lastComment; // 마지막 피드백/응원 메시지 (매니저)
 
   Plan({
     this.id,
@@ -69,6 +71,8 @@ class Plan {
     this.lastCheerMessage,
     this.lastCheerType,
     this.lastCheerAt,
+    this.lastActionNote,
+    this.lastComment,
   });
 
   Plan copyWith({
@@ -85,6 +89,8 @@ class Plan {
     String? lastCheerMessage,
     String? lastCheerType,
     DateTime? lastCheerAt,
+    String? lastActionNote,
+    String? lastComment,
   }) {
     return Plan(
       id: id ?? this.id,
@@ -100,6 +106,8 @@ class Plan {
       lastCheerMessage: lastCheerMessage ?? this.lastCheerMessage,
       lastCheerType: lastCheerType ?? this.lastCheerType,
       lastCheerAt: lastCheerAt ?? this.lastCheerAt,
+      lastActionNote: lastActionNote ?? this.lastActionNote,
+      lastComment: lastComment ?? this.lastComment,
     );
   }
 
@@ -119,6 +127,8 @@ class Plan {
       if (lastCheerMessage != null) 'lastCheerMessage': lastCheerMessage,
       if (lastCheerType != null) 'lastCheerType': lastCheerType,
       if (lastCheerAt != null) 'lastCheerAt': Timestamp.fromDate(lastCheerAt!),
+      if (lastActionNote != null) 'lastActionNote': lastActionNote,
+      if (lastComment != null) 'lastComment': lastComment,
     };
   }
 
@@ -146,6 +156,8 @@ class Plan {
               ?.map((d) => (d as Timestamp).toDate())
               .toList() ??
           [],
+      lastActionNote: map['lastActionNote'],
+      lastComment: map['lastComment'] ?? map['lastCheerMessage'], // 하위 호환성
     );
   }
 }

@@ -25,7 +25,8 @@ class HistoryItem {
   final String title;
   final HistoryStatus status;
   final String executorId; // 누가 했는지 (UID)
-  final String? comment;
+  final String? note; // 실천자가 남긴 한마디
+  final String? comment; // 매니저가 남긴 피드백/응원
   final bool isVerifiedByPartner; // 파트너가 확인해줬는지 여부
   final bool isVerifiedByMe; // 내가 확인해줬는지 여부 (상대 실천에 대해)
   final String? partnerName;
@@ -41,6 +42,7 @@ class HistoryItem {
     required this.executorId,
     this.isVerifiedByPartner = false,
     this.isVerifiedByMe = false,
+    this.note,
     this.comment,
     this.partnerName,
     this.partnerImageUrl,
@@ -58,7 +60,10 @@ class HistoryItem {
       title: map['title'] as String? ?? '알 수 없는 계획',
       status: _parseStatus(map['type'] as String),
       executorId: map['userId'] as String,
-      comment: map['comment'] as String?,
+      note: map['note'] as String? ?? map['comment'] as String?, // 하위 호환
+      comment:
+          map['partnerMessage'] as String? ??
+          map['comment'] as String?, // 매니저 피드백 하위 호환
       isVerifiedByPartner: map['verifiedBy'] != null, // 확인자가 있으면 확인된 것
       isVerifiedByMe: false, // 별도 로직으로 판단 필요
       partnerName: null, // Join 필요 (repository에서 처리)
@@ -87,6 +92,7 @@ class HistoryItem {
     String? title,
     HistoryStatus? status,
     String? executorId,
+    String? note,
     String? comment,
     bool? isVerifiedByPartner,
     bool? isVerifiedByMe,
@@ -101,6 +107,7 @@ class HistoryItem {
       title: title ?? this.title,
       status: status ?? this.status,
       executorId: executorId ?? this.executorId,
+      note: note ?? this.note,
       comment: comment ?? this.comment,
       isVerifiedByPartner: isVerifiedByPartner ?? this.isVerifiedByPartner,
       isVerifiedByMe: isVerifiedByMe ?? this.isVerifiedByMe,

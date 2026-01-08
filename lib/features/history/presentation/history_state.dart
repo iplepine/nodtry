@@ -31,4 +31,6 @@ class HistoryIntent with _$HistoryIntent {
     HistoryStatus status,
   ) = ReconcileIntent;
   const factory HistoryIntent.setFilter(HistoryFilter filter) = SetFilterIntent;
+  const factory HistoryIntent.verify(String historyId, {String? message}) =
+      VerifyHistoryIntent;
 }

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/history_item.dart';
 import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import '../action_note_dialog.dart';
+import '../../features/history/presentation/history_viewmodel.dart';
+import '../../features/history/presentation/history_state.dart';
 
-class HistoryCard extends StatelessWidget {
+class HistoryCard extends ConsumerWidget {
   final HistoryItem item;
   final bool isMe;
   final VoidCallback? onReconcile;
@@ -18,7 +22,7 @@ class HistoryCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Mirror Layout: My cards aligned right, Partner cards aligned left
     final alignment = isMe ? MainAxisAlignment.end : MainAxisAlignment.start;
     final bgColor = isMe
@@ -128,11 +132,11 @@ class HistoryCard extends StatelessWidget {
                       ),
                     ),
 
-                    // Comment (if any)
-                    if (item.comment != null && item.comment!.isNotEmpty) ...[
+                    // note (실천자 소감)
+                    if (item.note != null && item.note!.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Text(
-                        item.comment!,
+                        item.note!,
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 14,
@@ -140,9 +144,8 @@ class HistoryCard extends StatelessWidget {
                       ),
                     ],
 
-                    // Partner Message (Feedback/Cheer)
-                    if (item.partnerMessage != null &&
-                        item.partnerMessage!.isNotEmpty) ...[
+                    // comment (매니저 피드백)
+                    if (item.comment != null && item.comment!.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -156,9 +159,6 @@ class HistoryCard extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Emoji or Icon based on reactionType?
-                            // HistoryItem doesn't have reactionType field yet, only message.
-                            // Assuming message contains emoji or just use default icon.
                             Icon(
                               Icons.favorite_rounded,
                               size: 16,
@@ -167,7 +167,7 @@ class HistoryCard extends StatelessWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                item.partnerMessage!,
+                                item.comment!,
                                 style: TextStyle(
                                   color: AppColors.primary,
                                   fontSize: 14,
@@ -225,6 +225,51 @@ class HistoryCard extends StatelessWidget {
                             ),
                           ),
                         ],
+                      ),
+                    ] else if (!isMe &&
+                        !item.isVerifiedByMe &&
+                        item.status == HistoryStatus.done) ...[
+                      // Not verified yet button
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            // Show Dialog to input feedback (reuse ActionNoteDialog)
+                            final feedback = await showDialog<String>(
+                              context: context,
+                              builder: (context) => ActionNoteDialog(
+                                title: item.title,
+                                hintText: "따뜻한 피드백을 남겨주세요 (선택)",
+                                buttonLabel: "확인 완료",
+                              ),
+                            );
+
+                            if (feedback != null) {
+                              ref
+                                  .read(historyViewModelProvider.notifier)
+                                  .dispatch(
+                                    HistoryIntent.verify(
+                                      item.id,
+                                      message: feedback,
+                                    ),
+                                  );
+                            }
+                          },
+                          icon: const Icon(
+                            Icons.check_circle_outline,
+                            size: 16,
+                          ),
+                          label: const Text("확인 및 피드백 남기기"),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(color: AppColors.primary),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
 

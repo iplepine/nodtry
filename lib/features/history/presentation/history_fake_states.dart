@@ -28,7 +28,8 @@ class HistoryFakeStates {
         title: '아침 조깅',
         status: HistoryStatus.done,
         executorId: 'me',
-        comment: '상쾌하게 시작!',
+        note: '상쾌하게 시작!',
+        comment: '오늘도 멋진 시작이네요! 파이팅!',
       ),
       HistoryItem(
         id: '2',
@@ -100,6 +101,7 @@ class HistoryFakeStates {
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
         isVerifiedByMe: true,
+        comment: '동작이 아주 정확하네요! 👍',
       ),
       // 어제
       HistoryItem(
@@ -109,7 +111,7 @@ class HistoryFakeStates {
         title: '명상 10분',
         status: HistoryStatus.actuallyDone,
         executorId: 'me',
-        comment: '늦었지만 완료했어요!',
+        note: '늦었지만 완료했어요!',
       ),
       // 2일 전
       HistoryItem(
@@ -119,10 +121,11 @@ class HistoryFakeStates {
         title: '스트레칭',
         status: HistoryStatus.rested,
         executorId: 'partner',
-        comment: '오늘은 컨디션이 안 좋아서 쉬었어요',
+        note: '오늘은 컨디션이 안 좋아서 쉬었어요',
         partnerName: '지민',
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+        comment: '오늘 푹 쉬고 내일 다시 함께해요 🍵',
       ),
     ],
     finishedPlanSummaries: [

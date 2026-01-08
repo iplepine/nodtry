@@ -15,13 +15,21 @@ class NowTabFakeStates {
   static final DateTime _yesterday = _now.subtract(const Duration(days: 1));
 
   // --- Helpers ---
-  static Plan _createPlan(String title, DateTime date, {int hour = 0}) {
+  static Plan _createPlan(
+    String title,
+    DateTime date, {
+    int hour = 0,
+    String? note,
+    String? comment,
+  }) {
     return Plan(
       userId: 'test_user',
       startDate: date,
       endDate: date.add(const Duration(days: 7)),
       state: PlanState.active,
       createdAt: date,
+      lastActionNote: note,
+      lastComment: comment,
       items: [
         PlanItem(
           title: title,
@@ -39,7 +47,7 @@ class NowTabFakeStates {
   }
 
   // --- Case 0: EmptyPlan ---
-  static NowTabState get case0_empty => NowTabState(
+  static NowTabState get case0Empty => NowTabState(
     allCards: const [HomeCardModel(state: HomeCardState.emptyPlan)],
     primaryCard: const HomeCardModel(state: HomeCardState.emptyPlan),
     secondaryCards: const [],
@@ -47,7 +55,7 @@ class NowTabFakeStates {
   );
 
   // --- Case 1: NowAction + Overdue ---
-  static NowTabState get case1_now_overdue => NowTabState(
+  static NowTabState get case1NowOverdue => NowTabState(
     allCards: [],
     primaryCard: HomeCardModel(
       state: HomeCardState.nowAction,
@@ -63,7 +71,7 @@ class NowTabFakeStates {
   );
 
   // --- Case 2: Overdue + NextAction ---
-  static NowTabState get case2_overdue_next => NowTabState(
+  static NowTabState get case2OverdueNext => NowTabState(
     allCards: [],
     primaryCard: HomeCardModel(
       state: HomeCardState.overdue,
@@ -80,7 +88,7 @@ class NowTabFakeStates {
   );
 
   // --- Case 3: TodayComplete + NextAction ---
-  static NowTabState get case3_today_next => NowTabState(
+  static NowTabState get case3TodayNext => NowTabState(
     allCards: [],
     primaryCard: const HomeCardModel(state: HomeCardState.todayComplete),
     secondaryCards: [
@@ -98,12 +106,23 @@ class NowTabFakeStates {
     allCards: [],
     primaryCard: HomeCardModel(
       state: HomeCardState.nowAction,
-      plan: _createPlan('저녁 샐러드 먹기', _now, hour: 19),
+      plan: _createPlan(
+        '저녁 샐러드 먹기',
+        _now,
+        hour: 19,
+        note: '오늘은 드레싱 없이 먹었어요! 뿌듯합니다.',
+        comment: '오 드레싱 없이! 대단해요 🥗 칭찬합니다!',
+      ),
     ),
     secondaryCards: [
       HomeCardModel(
         state: HomeCardState.overdue,
-        plan: _createPlan('아침 약 챙겨먹기', _yesterday, hour: 8),
+        plan: _createPlan(
+          '아침 약 챙겨먹기',
+          _yesterday,
+          hour: 8,
+          note: '어제는 깜빡했네요 ㅠㅠ',
+        ),
       ),
     ],
     managerCards: [
@@ -122,17 +141,58 @@ class NowTabFakeStates {
         partnerName: '지민',
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
-        plan: _createPlan('아침 스트레칭', _now, hour: 7),
+        plan: _createPlan(
+          '아침 스트레칭',
+          _now,
+          hour: 7,
+          note: '아침 공기가 상쾌해서 평소보다 길게 했어요 🏃‍♀️',
+          comment: '상쾌한 아침이었겠네요! 멋져요!',
+        ),
+      ),
+    ],
+  );
+
+  // --- Case 4: Message Variations (Note only, Comment only, Both) ---
+  static NowTabState get case4Messages => NowTabState(
+    allCards: [],
+    primaryCard: HomeCardModel(
+      state: HomeCardState.nowAction,
+      plan: _createPlan('노트만 있는 경우', _now, hour: 12, note: '실천자가 남긴 한마디입니다.'),
+    ),
+    secondaryCards: [
+      HomeCardModel(
+        state: HomeCardState.overdue,
+        plan: _createPlan(
+          '피드백만 있는 경우',
+          _yesterday,
+          hour: 10,
+          comment: '매니저의 따뜻한 응원 한마디!',
+        ),
+      ),
+    ],
+    managerCards: [
+      HomeCardModel(
+        state: HomeCardState.partnerAction,
+        headerMessage: '나 했어요!',
+        partnerName: '상대방',
+        plan: _createPlan(
+          '둘 다 있는 경우',
+          _now,
+          hour: 9,
+          note: '실천 소감과 함께입니다.',
+          comment: '소감을 보고 답해주는 피드백입니다.',
+        ),
       ),
     ],
   );
 
   /// 모든 fake state의 맵
   static Map<String, NowTabState> get all => {
-    'Case 0: Empty': case0_empty,
-    'Case 1: Now + Overdue': case1_now_overdue,
-    'Case 2: Overdue + Next': case2_overdue_next,
-    'Case 3: Done + Next': case3_today_next,
+    'Case 0: Empty': case0Empty,
+    'Case 1: Now + Overdue': case1NowOverdue,
+    'Case 2: Overdue + Next': case2OverdueNext,
+    'Case 3: Done + Next': case3TodayNext,
+    'Case 4: Variations': case4Messages,
     'Advanced: Complex Day': complexDay,
   };
 }

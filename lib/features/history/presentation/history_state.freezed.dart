@@ -345,13 +345,14 @@ extension HistoryIntentPatterns on HistoryIntent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RefreshIntent value)?  refresh,TResult Function( ReconcileIntent value)?  reconcile,TResult Function( SetFilterIntent value)?  setFilter,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RefreshIntent value)?  refresh,TResult Function( ReconcileIntent value)?  reconcile,TResult Function( SetFilterIntent value)?  setFilter,TResult Function( VerifyHistoryIntent value)?  verify,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
 return refresh(_that);case ReconcileIntent() when reconcile != null:
 return reconcile(_that);case SetFilterIntent() when setFilter != null:
-return setFilter(_that);case _:
+return setFilter(_that);case VerifyHistoryIntent() when verify != null:
+return verify(_that);case _:
   return orElse();
 
 }
@@ -369,13 +370,14 @@ return setFilter(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RefreshIntent value)  refresh,required TResult Function( ReconcileIntent value)  reconcile,required TResult Function( SetFilterIntent value)  setFilter,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RefreshIntent value)  refresh,required TResult Function( ReconcileIntent value)  reconcile,required TResult Function( SetFilterIntent value)  setFilter,required TResult Function( VerifyHistoryIntent value)  verify,}){
 final _that = this;
 switch (_that) {
 case RefreshIntent():
 return refresh(_that);case ReconcileIntent():
 return reconcile(_that);case SetFilterIntent():
-return setFilter(_that);case _:
+return setFilter(_that);case VerifyHistoryIntent():
+return verify(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -392,13 +394,14 @@ return setFilter(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RefreshIntent value)?  refresh,TResult? Function( ReconcileIntent value)?  reconcile,TResult? Function( SetFilterIntent value)?  setFilter,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RefreshIntent value)?  refresh,TResult? Function( ReconcileIntent value)?  reconcile,TResult? Function( SetFilterIntent value)?  setFilter,TResult? Function( VerifyHistoryIntent value)?  verify,}){
 final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
 return refresh(_that);case ReconcileIntent() when reconcile != null:
 return reconcile(_that);case SetFilterIntent() when setFilter != null:
-return setFilter(_that);case _:
+return setFilter(_that);case VerifyHistoryIntent() when verify != null:
+return verify(_that);case _:
   return null;
 
 }
@@ -415,12 +418,13 @@ return setFilter(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  refresh,TResult Function( String historyId,  HistoryStatus status)?  reconcile,TResult Function( HistoryFilter filter)?  setFilter,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  refresh,TResult Function( String historyId,  HistoryStatus status)?  reconcile,TResult Function( HistoryFilter filter)?  setFilter,TResult Function( String historyId,  String? message)?  verify,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
 return refresh();case ReconcileIntent() when reconcile != null:
 return reconcile(_that.historyId,_that.status);case SetFilterIntent() when setFilter != null:
-return setFilter(_that.filter);case _:
+return setFilter(_that.filter);case VerifyHistoryIntent() when verify != null:
+return verify(_that.historyId,_that.message);case _:
   return orElse();
 
 }
@@ -438,12 +442,13 @@ return setFilter(_that.filter);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  refresh,required TResult Function( String historyId,  HistoryStatus status)  reconcile,required TResult Function( HistoryFilter filter)  setFilter,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  refresh,required TResult Function( String historyId,  HistoryStatus status)  reconcile,required TResult Function( HistoryFilter filter)  setFilter,required TResult Function( String historyId,  String? message)  verify,}) {final _that = this;
 switch (_that) {
 case RefreshIntent():
 return refresh();case ReconcileIntent():
 return reconcile(_that.historyId,_that.status);case SetFilterIntent():
-return setFilter(_that.filter);case _:
+return setFilter(_that.filter);case VerifyHistoryIntent():
+return verify(_that.historyId,_that.message);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -460,12 +465,13 @@ return setFilter(_that.filter);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  refresh,TResult? Function( String historyId,  HistoryStatus status)?  reconcile,TResult? Function( HistoryFilter filter)?  setFilter,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  refresh,TResult? Function( String historyId,  HistoryStatus status)?  reconcile,TResult? Function( HistoryFilter filter)?  setFilter,TResult? Function( String historyId,  String? message)?  verify,}) {final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
 return refresh();case ReconcileIntent() when reconcile != null:
 return reconcile(_that.historyId,_that.status);case SetFilterIntent() when setFilter != null:
-return setFilter(_that.filter);case _:
+return setFilter(_that.filter);case VerifyHistoryIntent() when verify != null:
+return verify(_that.historyId,_that.message);case _:
   return null;
 
 }
@@ -633,6 +639,74 @@ class _$SetFilterIntentCopyWithImpl<$Res>
   return _then(SetFilterIntent(
 null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
 as HistoryFilter,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class VerifyHistoryIntent implements HistoryIntent {
+  const VerifyHistoryIntent(this.historyId, {this.message});
+  
+
+ final  String historyId;
+ final  String? message;
+
+/// Create a copy of HistoryIntent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$VerifyHistoryIntentCopyWith<VerifyHistoryIntent> get copyWith => _$VerifyHistoryIntentCopyWithImpl<VerifyHistoryIntent>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VerifyHistoryIntent&&(identical(other.historyId, historyId) || other.historyId == historyId)&&(identical(other.message, message) || other.message == message));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,historyId,message);
+
+@override
+String toString() {
+  return 'HistoryIntent.verify(historyId: $historyId, message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $VerifyHistoryIntentCopyWith<$Res> implements $HistoryIntentCopyWith<$Res> {
+  factory $VerifyHistoryIntentCopyWith(VerifyHistoryIntent value, $Res Function(VerifyHistoryIntent) _then) = _$VerifyHistoryIntentCopyWithImpl;
+@useResult
+$Res call({
+ String historyId, String? message
+});
+
+
+
+
+}
+/// @nodoc
+class _$VerifyHistoryIntentCopyWithImpl<$Res>
+    implements $VerifyHistoryIntentCopyWith<$Res> {
+  _$VerifyHistoryIntentCopyWithImpl(this._self, this._then);
+
+  final VerifyHistoryIntent _self;
+  final $Res Function(VerifyHistoryIntent) _then;
+
+/// Create a copy of HistoryIntent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? historyId = null,Object? message = freezed,}) {
+  return _then(VerifyHistoryIntent(
+null == historyId ? _self.historyId : historyId // ignore: cast_nullable_to_non_nullable
+as String,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

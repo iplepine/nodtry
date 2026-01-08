@@ -139,6 +139,8 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         ref.invalidateSelf();
       } else if (intent is ReconcileIntent) {
         await _reconcile(intent.historyId, intent.status);
+      } else if (intent is VerifyHistoryIntent) {
+        await _verify(intent.historyId, message: intent.message);
       } else if (intent is SetFilterIntent) {
         state = AsyncValue.data(state.value!.copyWith(filter: intent.filter));
         // Filtering is done in the stream naturally when state.value.filter changes?
@@ -161,6 +163,13 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         .read(recordRepositoryProvider)
         .reconcileHistoryItem(historyId, status);
     // Stream handles updates automatically, but we can invalidate if we want immediate fresh build
+    ref.invalidateSelf();
+  }
+
+  Future<void> _verify(String historyId, {String? message}) async {
+    await ref
+        .read(recordRepositoryProvider)
+        .verifyHistoryItem(historyId, message: message);
     ref.invalidateSelf();
   }
 

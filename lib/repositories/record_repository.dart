@@ -41,10 +41,10 @@ abstract class RecordRepository {
   Future<void> reconcilePlan(String planId, HistoryStatus status);
 
   /// 파트너의 실천 기록 확인 처리
-  Future<void> verifyHistoryItem(String historyId);
+  Future<void> verifyHistoryItem(String historyId, {String? message});
 
   /// 실천 완료 보고 (했어)
-  Future<void> reportCompletion(String planId, {String? message});
+  Future<void> reportCompletion(String planId, {String? note});
 
   /// 파트너 응원하기 (고마워요)
   /// reactionType: 'fire', 'heart', 'thumbs_up', 'muscle' 등
