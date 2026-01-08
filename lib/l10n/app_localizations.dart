@@ -1070,18 +1070,6 @@ abstract class AppLocalizations {
   /// **'Developer Screen'**
   String get developerTitle;
 
-  /// Developer screen navigation section title
-  ///
-  /// In en, this message translates to:
-  /// **'Screen Navigation'**
-  String get developerScreenNavigation;
-
-  /// Developer screen navigation description
-  ///
-  /// In en, this message translates to:
-  /// **'Navigate to any screen directly'**
-  String get developerScreenNavigationDesc;
-
   /// Auth section title in developer screen
   ///
   /// In en, this message translates to:

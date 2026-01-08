@@ -5,7 +5,6 @@ import '../plan_create_state.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../providers/home_provider.dart';
-import '../../../../services/notification_service.dart';
 
 final planCreateViewModelProvider =
     AsyncNotifierProvider<PlanCreateViewModel, PlanCreateState>(
@@ -138,26 +137,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       ref.invalidate(homeCardStateProvider);
 
       // 알림 설정 (Regardlessly of create/update, reschedule)
-      if (prevState.selectedDays.isNotEmpty ||
-          prevState.notificationTime.type != 'none') {
-        await NotificationService().requestPermissions();
-        await NotificationService().schedulePlanReminder(
-          planId: (plan.id ?? plan.createdAt.millisecondsSinceEpoch.toString())
-              .hashCode, // Hash for int ID?
-          // Note: NotificationService expects int ID.
-          // Existing logic used `plan.createdAt.millisecondsSinceEpoch ~/ 1000`.
-          // If updating, we should use a consistent ID derived from planId if possible or same logic.
-          // Let's fallback to hashcode or similar if planId is string.
-          // Reverting to previous logic for new plans, but for existing planId string?
-          // NotificationService likely needs refactor to support string Plan IDs usually,
-          // but if it demands int, we map it unique.
-          // For now, let's blindly use the same logic as Create for ID generation or just `hashCode`.
-          title: planItem.title,
-          hour: prevState.notificationTime.hour,
-          minute: prevState.notificationTime.minute,
-          days: planItem.days,
-        );
-      }
+      await ref.read(settingAlarmUseCaseProvider).execute(plan);
 
       state = AsyncValue.data(prevState.copyWith(isSaving: false));
     } catch (e, stack) {

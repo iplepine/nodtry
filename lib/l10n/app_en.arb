@@ -675,14 +675,6 @@
   "@developerTitle": {
     "description": "Developer screen title"
   },
-  "developerScreenNavigation": "Screen Navigation",
-  "@developerScreenNavigation": {
-    "description": "Developer screen navigation section title"
-  },
-  "developerScreenNavigationDesc": "Navigate to any screen directly",
-  "@developerScreenNavigationDesc": {
-    "description": "Developer screen navigation description"
-  },
   "developerAuthSection": "Authentication & Connection",
   "@developerAuthSection": {
     "description": "Auth section title in developer screen"

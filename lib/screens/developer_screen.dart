@@ -5,6 +5,10 @@ import '../theme/app_colors.dart';
 import '../routes/app_router.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/repository_provider.dart';
+import '../services/notification_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 /// 개발자 화면 - 모든 화면으로 이동할 수 있는 디버그 화면
 class DeveloperScreen extends ConsumerWidget {
@@ -37,29 +41,12 @@ class DeveloperScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 헤더
-              Text(
-                l10n.developerScreenNavigation,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                l10n.developerScreenNavigationDesc,
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-              ),
-              SizedBox(height: 8),
-              Text(
-                l10n.developerScreenNavigationDesc,
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-              ),
-              SizedBox(height: 32),
-
               // 데이터 소스 섹션
               _buildRepositorySection(context, ref),
+              SizedBox(height: 32),
+
+              // 알람 디버그 섹션
+              _buildAlarmDebugSection(context, ref),
               SizedBox(height: 32),
 
               // 메인 화면 섹션
@@ -320,7 +307,7 @@ class DeveloperScreen extends ConsumerWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(screen.icon, color: AppColors.primary, size: 24),
@@ -355,6 +342,98 @@ class DeveloperScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAlarmDebugSection(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Alarm Debug',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 16),
+        Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _AlarmPermissionWidget(),
+              Divider(height: 32),
+              _AlarmListWidget(),
+              Divider(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () async {
+                        await ref
+                            .read(setAlarmUseCaseProvider)
+                            .setTestAlarm(
+                              id: 99999,
+                              title: '테스트 알람',
+                              body: '5초 뒤에 울리는 테스트 알람입니다.',
+                              secondsFromNow: 5,
+                            );
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('5초 뒤 알람이 설정되었습니다.')),
+                        );
+                      },
+                      child: Text('5초 뒤 테스트'),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () async {
+                        await ref
+                            .read(setAlarmUseCaseProvider)
+                            .showInstantNotification(
+                              id: 88888,
+                              title: '즉시 테스트 알람',
+                              body: '즉시 울리는 테스트 알람입니다.',
+                            );
+                      },
+                      child: Text('즉시 테스트'),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(Icons.delete_sweep, color: Colors.red),
+                    onPressed: () async {
+                      await ref.read(setAlarmUseCaseProvider).cancelAll();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('모든 알람이 취소되었습니다.')),
+                      );
+                    },
+                    tooltip: '모든 알람 취소',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -416,4 +495,145 @@ class _ScreenInfo {
     required this.description,
     required this.icon,
   });
+}
+
+class _AlarmListWidget extends StatefulWidget {
+  @override
+  State<_AlarmListWidget> createState() => _AlarmListWidgetState();
+}
+
+class _AlarmListWidgetState extends State<_AlarmListWidget> {
+  List<PendingNotificationRequest> _pending = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _refresh();
+  }
+
+  Future<void> _refresh() async {
+    setState(() => _isLoading = true);
+    final pending = await NotificationService().getPendingNotifications();
+    if (mounted) {
+      setState(() {
+        _pending = pending;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) return Center(child: CircularProgressIndicator());
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '대기 중인 알람 (${_pending.length})',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            IconButton(
+              icon: Icon(Icons.refresh, size: 20),
+              onPressed: _refresh,
+            ),
+          ],
+        ),
+        if (_pending.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text('대기 중인 알람이 없습니다.', style: TextStyle(fontSize: 12)),
+          )
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: _pending.length,
+            itemBuilder: (context, index) {
+              final req = _pending[index];
+              return ListTile(
+                dense: true,
+                title: Text('[${req.id}] ${req.title ?? "No Title"}'),
+                subtitle: Text(req.body ?? "No Body"),
+                contentPadding: EdgeInsets.zero,
+              );
+            },
+          ),
+      ],
+    );
+  }
+}
+
+class _AlarmPermissionWidget extends StatefulWidget {
+  @override
+  State<_AlarmPermissionWidget> createState() => _AlarmPermissionWidgetState();
+}
+
+class _AlarmPermissionWidgetState extends State<_AlarmPermissionWidget> {
+  bool? _isGranted;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermission();
+  }
+
+  Future<void> _checkPermission() async {
+    final granted = await NotificationService().canScheduleExactAlarms();
+    if (mounted) {
+      setState(() {
+        _isGranted = granted;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isGranted == null) return const SizedBox.shrink();
+
+    return Row(
+      children: [
+        Icon(
+          _isGranted! ? Icons.check_circle : Icons.warning,
+          color: _isGranted! ? Colors.green : Colors.orange,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _isGranted! ? '정확한 알람 권한 허용됨' : '정확한 알람 권한 필요',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: _isGranted! ? Colors.green : Colors.orange,
+                ),
+              ),
+              if (!_isGranted!)
+                const Text(
+                  'Android 13+에서는 이 권한이 있어야 정확한 시간에 알람이 울립니다.',
+                  style: TextStyle(fontSize: 12),
+                ),
+            ],
+          ),
+        ),
+        if (!_isGranted! && Platform.isAndroid)
+          TextButton(
+            onPressed: () async {
+              await openAppSettings();
+              _checkPermission();
+            },
+            child: const Text('설정 열기'),
+          ),
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: _checkPermission,
+        ),
+      ],
+    );
+  }
 }

@@ -519,12 +519,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get developerTitle => '개발자 화면';
 
   @override
-  String get developerScreenNavigation => '화면 이동';
-
-  @override
-  String get developerScreenNavigationDesc => '각 화면으로 바로 이동할 수 있습니다';
-
-  @override
   String get developerAuthSection => '인증 & 연결';
 
   @override

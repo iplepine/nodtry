@@ -531,12 +531,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get developerTitle => 'Developer Screen';
 
   @override
-  String get developerScreenNavigation => 'Screen Navigation';
-
-  @override
-  String get developerScreenNavigationDesc => 'Navigate to any screen directly';
-
-  @override
   String get developerAuthSection => 'Authentication & Connection';
 
   @override
