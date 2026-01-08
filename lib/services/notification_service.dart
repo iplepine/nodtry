@@ -1,6 +1,10 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -16,6 +20,11 @@ class NotificationService {
 
   Future<void> init() async {
     tz.initializeTimeZones();
+    final timezoneInfo = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timezoneInfo.identifier));
+    debugPrint(
+      'NotificationService initialized with timezone: ${timezoneInfo.identifier}',
+    );
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -50,6 +59,20 @@ class NotificationService {
             >();
 
     await androidImplementation?.requestNotificationsPermission();
+
+    // Exact Alarm permission for Android 13+
+    if (Platform.isAndroid) {
+      if (await Permission.scheduleExactAlarm.isDenied) {
+        await Permission.scheduleExactAlarm.request();
+      }
+    }
+  }
+
+  Future<bool> canScheduleExactAlarms() async {
+    if (Platform.isAndroid) {
+      return await Permission.scheduleExactAlarm.isGranted;
+    }
+    return true; // iOS doesn't have this specific exact alarm permission
   }
 
   /// Schedule a notification for a plan
@@ -69,7 +92,15 @@ class NotificationService {
     // 200 million seconds is approx 6.3 years.
 
     for (int day in days) {
-      // 0-based index for logic if needed, but TZ uses weekday
+      final tz.TZDateTime scheduledDate = _nextInstanceOfDayAndTime(
+        day,
+        hour,
+        minute,
+      );
+      debugPrint(
+        '[Notification] Scheduling for plan $planId, day $day at $hour:$minute. Calculated time: $scheduledDate (Local now: ${tz.TZDateTime.now(tz.local)})',
+      );
+
       await _scheduleWeekly(
         id: (planId % 200000000) * 10 + day,
         title: title,
@@ -77,6 +108,7 @@ class NotificationService {
         hour: hour,
         minute: minute,
         day: day,
+        scheduledDate: scheduledDate,
       );
     }
   }
@@ -88,12 +120,13 @@ class NotificationService {
     required int hour,
     required int minute,
     required int day, // 1=Mon, 7=Sun
+    required tz.TZDateTime scheduledDate,
   }) async {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
       body,
-      _nextInstanceOfDayAndTime(day, hour, minute),
+      scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'plan_reminders', // channel Id
@@ -104,9 +137,9 @@ class NotificationService {
         ),
         iOS: DarwinNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      // uiLocalNotificationDateInterpretation:
-      //     UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: await canScheduleExactAlarms()
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
   }
@@ -141,5 +174,74 @@ class NotificationService {
         (planId % 200000000) * 10 + i,
       );
     }
+  }
+
+  /// Get list of all pending notifications
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    return await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+  }
+
+  /// Show an instant notification
+  Future<void> showInstantNotification({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    await flutterLocalNotificationsPlugin.show(
+      id,
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'debug_notifications',
+          'Debug Notifications',
+          channelDescription: 'Notifications for testing purposes',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
+  }
+
+  /// Test alarm: set one in 5 seconds
+  Future<void> setTestAlarm({
+    required int id,
+    required String title,
+    required String body,
+    required int secondsFromNow,
+  }) async {
+    final tz.TZDateTime scheduledDate = tz.TZDateTime.now(
+      tz.local,
+    ).add(Duration(seconds: secondsFromNow));
+
+    debugPrint(
+      '[Notification] Scheduling TEST alarm in $secondsFromNow seconds. Target: $scheduledDate',
+    );
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'debug_notifications',
+          'Debug Notifications',
+          channelDescription: 'Notifications for testing purposes',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: await canScheduleExactAlarms()
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+  }
+
+  /// Cancel all notifications
+  Future<void> cancelAllNotifications() async {
+    await flutterLocalNotificationsPlugin.cancelAll();
   }
 }
