@@ -19,7 +19,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
-    tz.initializeTimeZones();
+    tz.initializeTimeZones(); // Ensure timezones are loaded first
     final timezoneInfo = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(timezoneInfo.identifier));
     debugPrint(

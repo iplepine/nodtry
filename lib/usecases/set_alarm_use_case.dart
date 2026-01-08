@@ -7,6 +7,9 @@ class SetAlarmUseCase {
 
   /// 여러 개의 DateTime에 대해 알람을 예약합니다. (단일 책임: 알람 설정)
   Future<void> execute(List<DateTime> scheduledDates) async {
+    // 알람 예약 전 권한 확인 및 요청
+    await _notificationService.requestPermissions();
+
     for (int i = 0; i < scheduledDates.length; i++) {
       final date = scheduledDates[i];
       await _notificationService.scheduleNotificationAt(
