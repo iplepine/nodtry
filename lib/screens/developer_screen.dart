@@ -8,6 +8,8 @@ import '../providers/repository_provider.dart';
 import '../services/notification_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 import 'dart:io';
 
 /// 개발자 화면 - 모든 화면으로 이동할 수 있는 디버그 화면
@@ -56,6 +58,10 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 내 정보 섹션
+              _buildUserInfoSection(context, ref),
+              SizedBox(height: 32),
+
               // 데이터 소스 섹션
               _buildRepositorySection(context, ref),
               SizedBox(height: 32),
@@ -175,6 +181,106 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildUserInfoSection(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(myProfileProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'My Information',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: profileAsync.when(
+            data: (user) {
+              if (user == null) return Text('로그인 정보가 없습니다.');
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInfoRow(context, 'UID', user.uid),
+                  _buildInfoRow(context, 'Name', user.displayName ?? 'N/A'),
+                  _buildInfoRow(context, 'Email', user.email ?? 'N/A'),
+                  _buildInfoRow(
+                    context,
+                    'Invite Code',
+                    user.inviteCode ?? 'N/A',
+                  ),
+                  FutureBuilder<String?>(
+                    future: FirebaseMessaging.instance.getToken(),
+                    builder: (context, snapshot) {
+                      return _buildInfoRow(
+                        context,
+                        'FCM Token',
+                        snapshot.data ?? 'Loading...',
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+            loading: () => Center(child: CircularProgressIndicator()),
+            error: (e, s) => Text('Error: $e'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(BuildContext context, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: SelectableText(
+                  value,
+                  style: TextStyle(fontSize: 13, fontFamily: 'monospace'),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.copy, size: 16, color: AppColors.primary),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: value));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('$label 복사되었습니다.'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          Divider(height: 1, color: AppColors.divider.withOpacity(0.5)),
+        ],
       ),
     );
   }
