@@ -21,10 +21,21 @@ class ActionNoteDialog extends StatefulWidget {
 class _ActionNoteDialogState extends State<ActionNoteDialog> {
   final _controller = TextEditingController();
 
+  String? _selectedEmoji;
+  final List<String> _emojis = ['🔥', '❤️', '👏', '👍', '😮', '😢', '💪', '✨'];
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  String _getResult() {
+    final text = _controller.text.trim();
+    if (_selectedEmoji != null && text.isNotEmpty) {
+      return "$_selectedEmoji $text";
+    }
+    return _selectedEmoji ?? text;
   }
 
   @override
@@ -81,7 +92,44 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+
+            // Emoji Selection
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12,
+              runSpacing: 12,
+              children: _emojis.map((emoji) {
+                final isSelected = _selectedEmoji == emoji;
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedEmoji = isSelected ? null : emoji;
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary.withValues(alpha: 0.15)
+                          : AppColors.surface.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(emoji, style: const TextStyle(fontSize: 22)),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
 
             // TextField
             TextField(
@@ -102,10 +150,9 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
               ),
               maxLength: 30,
               textInputAction: TextInputAction.done,
-              onSubmitted: (value) => Navigator.pop(context, value),
+              onSubmitted: (value) => Navigator.pop(context, _getResult()),
             ),
-            const SizedBox(height: 24),
-
+            const SizedBox(height: 12), // Reduced since counter is there
             // Actions
             Row(
               children: [
@@ -130,7 +177,7 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context, _controller.text),
+                    onPressed: () => Navigator.pop(context, _getResult()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
