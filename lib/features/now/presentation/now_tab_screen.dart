@@ -683,12 +683,29 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
-  void _handleSimpleCheer(HomeCardModel card) {
+  Future<void> _handleSimpleCheer(HomeCardModel card) async {
     if (card.plan?.id == null) return;
-    // Simple cheer = 'check' reaction
-    ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(CheerPartnerActionIntent(card.plan!.id!, 'check'));
+
+    // Show Dialog to input feedback (consistent with History tab)
+    final feedback = await showDialog<String>(
+      context: context,
+      builder: (context) => ActionNoteDialog(
+        title: card.plan?.items.firstOrNull?.title ?? "파트너의 실천",
+        hintText: "따뜻한 피드백을 남겨주세요 (선택)",
+        buttonLabel: "그래",
+      ),
+    );
+
+    if (feedback != null) {
+      ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(
+            CheerPartnerActionIntent(
+              card.plan!.id!,
+              feedback.isEmpty ? 'check' : feedback,
+            ),
+          );
+    }
   }
 
   void _handleMoreCheer(HomeCardModel card) {
@@ -1987,56 +2004,24 @@ class _ManagerQuickCard extends StatelessWidget {
               ],
             ] else if (model.state == HomeCardState.partnerAction) ...[
               const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                      onPressed: onSimpleCheer ?? onCheckIt,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        l10n.cheerSimple, // "그래"
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onSimpleCheer ?? onCheckIt,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 1,
-                    child: ElevatedButton(
-                      onPressed: onMoreCheer,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary.withValues(
-                          alpha: 0.1,
-                        ),
-                        foregroundColor: AppColors.primary,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        l10n.cheerMore, // "더보기"
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                  child: const Text(
+                    "그래",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                ],
+                ),
               ),
             ],
           ],
