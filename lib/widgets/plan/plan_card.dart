@@ -5,8 +5,18 @@ import '../../theme/app_colors.dart';
 class PlanCard extends StatelessWidget {
   final Plan plan;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final bool isOwner;
 
-  const PlanCard({super.key, required this.plan, this.onTap});
+  const PlanCard({
+    super.key,
+    required this.plan,
+    this.onTap,
+    this.onEdit,
+    this.onDelete,
+    this.isOwner = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +48,10 @@ class PlanCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.outline.withOpacity(0.5)),
+          border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -57,7 +67,7 @@ class PlanCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -135,7 +145,53 @@ class PlanCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (onTap != null) ...[
+                if (isOwner && (onEdit != null || onDelete != null)) ...[
+                  const SizedBox(width: 4),
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: AppColors.textDisabled,
+                      size: 20,
+                    ),
+                    padding: EdgeInsets.zero,
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        onEdit?.call();
+                      } else if (value == 'delete') {
+                        onDelete?.call();
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_outlined, size: 18),
+                            SizedBox(width: 8),
+                            Text('수정'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline,
+                              size: 18,
+                              color: AppColors.error,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              '삭제',
+                              style: TextStyle(color: AppColors.error),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else if (onTap != null) ...[
                   const SizedBox(width: 12),
                   Icon(Icons.chevron_right, color: AppColors.textDisabled),
                 ],
@@ -183,31 +239,31 @@ class PlanCard extends StatelessWidget {
       case PlanState.active:
         return {
           'text': '진행 중',
-          'color': AppColors.primary.withOpacity(0.1),
+          'color': AppColors.primary.withValues(alpha: 0.1),
           'textColor': AppColors.primary,
         };
       case PlanState.draft:
         return {
           'text': '작성 중',
-          'color': AppColors.textDisabled.withOpacity(0.2),
+          'color': AppColors.textDisabled.withValues(alpha: 0.2),
           'textColor': AppColors.textSecondary,
         };
       case PlanState.pendingApproval:
         return {
           'text': '수락 대기',
-          'color': Color(0xFFFF9800).withOpacity(0.1), // Orange
-          'textColor': Color(0xFFEF6C00),
+          'color': const Color(0xFFFF9800).withValues(alpha: 0.1), // Orange
+          'textColor': const Color(0xFFEF6C00),
         };
       case PlanState.rejected:
         return {
           'text': '거절됨',
-          'color': Color(0xFFF44336).withOpacity(0.1), // Red
-          'textColor': Color(0xFFD32F2F),
+          'color': const Color(0xFFF44336).withValues(alpha: 0.1), // Red
+          'textColor': const Color(0xFFD32F2F),
         };
       case PlanState.completed:
         return {
           'text': '종료됨',
-          'color': AppColors.textSecondary.withOpacity(0.1),
+          'color': AppColors.textSecondary.withValues(alpha: 0.1),
           'textColor': AppColors.textSecondary,
         };
     }

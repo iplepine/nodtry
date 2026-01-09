@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../models/connected_user.dart';
+import '../../../../models/plan_model.dart';
 import '../../../../widgets/plan/plan_card.dart';
 import '../../../../providers/plan_list_provider.dart';
 import '../us_state.dart';
@@ -1294,9 +1295,18 @@ class _ActivePlanListSection extends ConsumerWidget {
                   .map(
                     (plan) => PlanCard(
                       plan: plan,
+                      isOwner: isMe,
                       onTap: () {
                         context.pushNamed('plan-detail', extra: plan);
                       },
+                      onEdit: isMe
+                          ? () {
+                              context.pushNamed('plan-create', extra: plan);
+                            }
+                          : null,
+                      onDelete: isMe
+                          ? () => _showDeletePlanDialog(context, ref, plan)
+                          : null,
                     ),
                   )
                   .toList(),
@@ -1311,6 +1321,51 @@ class _ActivePlanListSection extends ConsumerWidget {
           error: (err, stack) => Text('Error: $err'),
         ),
       ],
+    );
+  }
+
+  void _showDeletePlanDialog(BuildContext context, WidgetRef ref, Plan plan) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('약속을 삭제할까요?'),
+        content: const Text('삭제하면 되돌릴 수 없어요.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context); // Close Dialog
+              try {
+                if (plan.id != null) {
+                  // 1. Cancel related alarms
+                  await ref.read(settingAlarmUseCaseProvider).cancel(plan);
+
+                  // 2. Delete plan from repository
+                  await ref.read(recordRepositoryProvider).deletePlan(plan.id!);
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('약속이 삭제되었습니다.')),
+                    );
+                    // Refresh plans by invalidating the provider
+                    ref.invalidate(activePlansProvider(userId));
+                  }
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('삭제 실패: $e')));
+                }
+              }
+            },
+            child: Text('삭제', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
     );
   }
 }
