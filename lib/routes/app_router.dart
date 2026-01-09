@@ -9,6 +9,9 @@ import '../features/auth/presentation/screens/email_login_screen.dart';
 import '../models/plan_model.dart';
 import '../features/plan/presentation/screens/plan_detail_screen.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/repository_provider.dart';
+
 /// 앱 라우팅 경로 상수
 class AppRoutes {
   AppRoutes._();
@@ -32,66 +35,96 @@ class AppRoutes {
   static const String deepLinkDeveloper = '/developer';
 }
 
-/// GoRouter 설정
-///
-/// 딥링크 지원:
-/// - onmybehalf://splash
-/// - onmybehalf://login
-/// - onmybehalf://connect
-/// - onmybehalf://home
-/// - onmybehalf://developer
+/// GoRouter Provider
+final routerProvider = Provider<GoRouter>((ref) {
+  return GoRouter(
+    initialLocation: AppRoutes.splash,
+    debugLogDiagnostics: true,
+    redirect: (context, state) {
+      // 1. 인증 상태 및 프로필 감시
+      final authAsync = ref.watch(authStateChangesProvider);
+      final profileAsync = ref.watch(myProfileProvider);
+
+      // 로딩 중일 때는 리다이렉션 유보
+      if (authAsync.isLoading || profileAsync.isLoading) return null;
+
+      final user = authAsync.value;
+      final profile = profileAsync.value;
+
+      final isSplash = state.matchedLocation == AppRoutes.splash;
+      final isEmailLogin = state.matchedLocation == AppRoutes.emailLogin;
+
+      // 로그인이 안 되어 있거나 프로필이 없는 경우
+      if (user == null || profile == null) {
+        // 이미 스플래시나 로그인 화면이면 그대로 둠
+        if (isSplash || isEmailLogin) return null;
+        // 다른 보호된 화면이면 스플래시로 강제 이동
+        return AppRoutes.splash;
+      }
+
+      // 로그인이 되어 있는 상태인데 스플래시나 로그인 화면에 머물러 있으면 홈으로 이동
+      if (isSplash || isEmailLogin) {
+        return AppRoutes.home;
+      }
+
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: AppRoutes.splash,
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.connect,
+        name: 'connect',
+        builder: (context, state) => const ConnectScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.home,
+        name: 'home',
+        builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.developer,
+        name: 'developer',
+        builder: (context, state) => const DeveloperScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      // 통합 계획 생성 화면
+      GoRoute(
+        path: AppRoutes.planCreate,
+        name: 'plan-create',
+        builder: (context, state) {
+          final planToEdit = state.extra as Plan?;
+          return PlanCreateScreen(planToEdit: planToEdit);
+        },
+      ),
+      // 계획 상세 화면
+      GoRoute(
+        path: '/plan/detail',
+        name: 'plan-detail',
+        builder: (context, state) {
+          final plan = state.extra as Plan;
+          return PlanDetailScreen(plan: plan);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.emailLogin,
+        name: 'email-login',
+        builder: (context, state) => const EmailLoginScreen(),
+      ),
+    ],
+  );
+});
+
+// Deprecated: Use routerProvider instead
+@Deprecated('Use ref.watch(routerProvider) instead')
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.splash,
-  debugLogDiagnostics: true,
-  routes: [
-    GoRoute(
-      path: AppRoutes.splash,
-      name: 'splash',
-      builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.connect,
-      name: 'connect',
-      builder: (context, state) => const ConnectScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.home,
-      name: 'home',
-      builder: (context, state) => const HomeScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.developer,
-      name: 'developer',
-      builder: (context, state) => const DeveloperScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.settings,
-      name: 'settings',
-      builder: (context, state) => const SettingsScreen(),
-    ),
-    // 통합 계획 생성 화면
-    GoRoute(
-      path: AppRoutes.planCreate,
-      name: 'plan-create',
-      builder: (context, state) {
-        final planToEdit = state.extra as Plan?;
-        return PlanCreateScreen(planToEdit: planToEdit);
-      },
-    ),
-    // 계획 상세 화면
-    GoRoute(
-      path: '/plan/detail',
-      name: 'plan-detail',
-      builder: (context, state) {
-        final plan = state.extra as Plan;
-        return PlanDetailScreen(plan: plan);
-      },
-    ),
-    // 계획 생성 플로우 (기존 단계별 화면 - 하위 호환성 유지)
-    GoRoute(
-      path: AppRoutes.emailLogin,
-      name: 'email-login',
-      builder: (context, state) => const EmailLoginScreen(),
-    ),
-  ],
+  routes: [], // Empty to avoid confusion, but kept for symbol compatibility
 );

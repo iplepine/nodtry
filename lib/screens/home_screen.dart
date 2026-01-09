@@ -9,9 +9,6 @@ import '../features/us/presentation/screens/us_screen.dart';
 ///
 /// 3개 탭: 지금 · 기록 · 우리
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../providers/repository_provider.dart';
-import '../routes/app_router.dart';
 import 'dart:ui';
 
 /// 홈 화면 - 하단 탭 구조
@@ -30,27 +27,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-
-    // 실시간 계정 삭제 모니터링
-    ref.listen(myProfileProvider, (previous, next) {
-      if (next is AsyncData && next.value == null) {
-        // 계정이 삭제되었거나 로그아웃 됨
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          if (!mounted) return;
-
-          // 로그아웃 처리
-          final authService = ref.read(authServiceProvider);
-          await authService.signOut();
-
-          if (mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('계정 정보를 찾을 수 없습니다.')));
-            context.go(AppRoutes.splash);
-          }
-        });
-      }
-    });
 
     return Scaffold(
       backgroundColor: AppColors.background,

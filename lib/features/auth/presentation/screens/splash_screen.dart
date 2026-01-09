@@ -8,8 +8,6 @@ import '../../../../theme/app_colors.dart';
 import '../../../../widgets/primary_button.dart';
 import 'dart:io';
 
-import '../../../../providers/repository_provider.dart';
-
 import '../auth_state.dart';
 import '../viewmodel/auth_viewmodel.dart';
 
@@ -83,10 +81,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     ref.read(authViewModelProvider.notifier).dispatch(const LoginGuestIntent());
   }
 
-  void _navigateToNext() {
-    context.go(AppRoutes.home);
-  }
-
   @override
   void dispose() {
     _controller.dispose();
@@ -97,13 +91,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Widget build(BuildContext context) {
     final authState =
         ref.watch(authViewModelProvider).value ?? const AuthState();
-
-    // Listen to profile updates for navigation
-    ref.listen(myProfileProvider, (prev, next) {
-      if (next is AsyncData && next.value != null) {
-        _navigateToNext();
-      }
-    });
 
     // Listen to errors
     ref.listen(authViewModelProvider, (prev, next) {

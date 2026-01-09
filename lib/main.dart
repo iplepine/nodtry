@@ -104,7 +104,7 @@ class OnMyBehalfApp extends ConsumerWidget {
           Locale('en', ''), // English
           Locale('ko', ''), // Korean
         ],
-        routerConfig: appRouter,
+        routerConfig: ref.watch(routerProvider),
       ),
     );
   }
