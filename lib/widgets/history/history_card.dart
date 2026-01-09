@@ -234,7 +234,7 @@ class HistoryCard extends ConsumerWidget {
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
-                        child: OutlinedButton.icon(
+                        child: ElevatedButton(
                           onPressed: () async {
                             // Show Dialog to input feedback (reuse ActionNoteDialog)
                             final feedback = await showDialog<String>(
@@ -257,18 +257,18 @@ class HistoryCard extends ConsumerWidget {
                                   );
                             }
                           },
-                          icon: const Icon(
-                            Icons.check_circle_outline,
-                            size: 16,
-                          ),
-                          label: const Text("그래"),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            side: BorderSide(color: AppColors.primary),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                          ),
+                          child: const Text(
+                            "그래",
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
