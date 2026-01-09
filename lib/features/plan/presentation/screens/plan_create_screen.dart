@@ -58,6 +58,12 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
             .read(planCreateViewModelProvider.notifier)
             .dispatch(InitializePlanIntent(plan));
       });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(planCreateViewModelProvider.notifier)
+            .dispatch(const ResetIntent());
+      });
     }
 
     _actionController.addListener(() {
@@ -77,8 +83,8 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
 
   @override
   void dispose() {
-    // 화면 종료 시 상태 초기화
-    ref.invalidate(planCreateViewModelProvider);
+    // 화면 종료 시 상태 초기화는 더 이상 dispose에서 ref를 사용하여 처리하지 않음
+    // 대신 initState에서 진입 시 초기화하도록 변경
 
     _pageController.dispose();
     _actionController.dispose();
