@@ -9,7 +9,6 @@ import '../../../../services/notification_service.dart';
 // No repository_provider or home_provider needed here if only using the viewModel state
 
 import '../widgets/plan_action_step.dart';
-import '../widgets/plan_frequency_step.dart';
 import '../widgets/plan_description_step.dart';
 import '../widgets/plan_day_selection_step.dart';
 
@@ -95,7 +94,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
   }
 
   void _nextPage(int currentStep) {
-    if (currentStep < 4) {
+    if (currentStep < 3) {
       if (currentStep == 1 && _actionController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -164,7 +163,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
         ref.watch(planCreateViewModelProvider).value ??
         PlanCreateState(notificationTime: NotificationTime.preset('dinner'));
     final currentStep = planCreateState.currentStep;
-    const totalSteps = 4;
+    const totalSteps = 3;
 
     return PopScope(
       canPop: currentStep == 1,
@@ -258,16 +257,6 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                       child: PlanActionStep(
                         controller: _actionController,
                         focusNode: _actionFocus,
-                      ),
-                    ),
-                    _buildStepContainer(
-                      child: PlanFrequencyStep(
-                        selectedFrequency: planCreateState.selectedFrequency,
-                        onFrequencySelected: (value) {
-                          ref
-                              .read(planCreateViewModelProvider.notifier)
-                              .dispatch(UpdateFrequencyIntent(value));
-                        },
                       ),
                     ),
                     _buildStepContainer(

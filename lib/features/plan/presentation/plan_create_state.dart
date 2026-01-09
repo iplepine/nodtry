@@ -5,7 +5,6 @@ import '../../../models/plan_model.dart';
 class PlanCreateState {
   final int currentStep;
   final String action;
-  final int selectedFrequency;
   final String description;
   final Set<int> selectedDays;
   final NotificationTime notificationTime;
@@ -17,7 +16,6 @@ class PlanCreateState {
   const PlanCreateState({
     this.currentStep = 1,
     this.action = '',
-    this.selectedFrequency = 3,
     this.description = '',
     this.selectedDays = const {},
     required this.notificationTime,
@@ -30,7 +28,6 @@ class PlanCreateState {
   PlanCreateState copyWith({
     int? currentStep,
     String? action,
-    int? selectedFrequency,
     String? description,
     Set<int>? selectedDays,
     NotificationTime? notificationTime,
@@ -42,7 +39,6 @@ class PlanCreateState {
     return PlanCreateState(
       currentStep: currentStep ?? this.currentStep,
       action: action ?? this.action,
-      selectedFrequency: selectedFrequency ?? this.selectedFrequency,
       description: description ?? this.description,
       selectedDays: selectedDays ?? this.selectedDays,
       notificationTime: notificationTime ?? this.notificationTime,
@@ -66,11 +62,6 @@ class InitializePlanIntent extends PlanCreateIntent {
 class UpdateActionIntent extends PlanCreateIntent {
   final String action;
   const UpdateActionIntent(this.action);
-}
-
-class UpdateFrequencyIntent extends PlanCreateIntent {
-  final int frequency;
-  const UpdateFrequencyIntent(this.frequency);
 }
 
 class UpdateDescriptionIntent extends PlanCreateIntent {

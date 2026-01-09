@@ -27,10 +27,6 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       state = AsyncValue.data(_initialState());
     } else if (intent is UpdateActionIntent) {
       state = AsyncValue.data(prevState.copyWith(action: intent.action));
-    } else if (intent is UpdateFrequencyIntent) {
-      state = AsyncValue.data(
-        prevState.copyWith(selectedFrequency: intent.frequency),
-      );
     } else if (intent is UpdateDescriptionIntent) {
       state = AsyncValue.data(
         prevState.copyWith(description: intent.description),
@@ -48,7 +44,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         prevState.copyWith(notificationTime: intent.notificationTime),
       );
     } else if (intent is NextStepIntent) {
-      if (prevState.currentStep < 4) {
+      if (prevState.currentStep < 3) {
         state = AsyncValue.data(
           prevState.copyWith(currentStep: prevState.currentStep + 1),
         );
@@ -68,7 +64,6 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           originalPlan: plan,
           action: item.title,
           description: item.description ?? '',
-          selectedFrequency: item.count,
           selectedDays: item.days.map((d) => d - 1).toSet(), // 1-7 -> 0-6
           notificationTime:
               item.notificationTime ?? NotificationTime.preset('dinner'),
@@ -101,7 +96,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
 
       final planItem = PlanItem(
         title: prevState.action,
-        count: prevState.selectedFrequency,
+        count: finalDays.length, // Frequency is now determined by dayscount
         days: finalDays,
         notificationTime: prevState.notificationTime,
         description: prevState.description,
