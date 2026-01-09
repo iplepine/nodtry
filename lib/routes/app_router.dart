@@ -10,6 +10,7 @@ import '../models/plan_model.dart';
 import '../features/plan/presentation/screens/plan_detail_screen.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import '../providers/repository_provider.dart';
 
 /// 앱 라우팅 경로 상수
@@ -35,15 +36,34 @@ class AppRoutes {
   static const String deepLinkDeveloper = '/developer';
 }
 
+/// 라우터의 리다이렉션을 트리거하기 위한 Notifier
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+
+  RouterNotifier(this._ref) {
+    _ref.listen<AsyncValue<void>>(
+      authStateChangesProvider,
+      (_, __) => notifyListeners(),
+    );
+    _ref.listen<AsyncValue<void>>(
+      myProfileProvider,
+      (_, __) => notifyListeners(),
+    );
+  }
+}
+
 /// GoRouter Provider
 final routerProvider = Provider<GoRouter>((ref) {
+  final notifier = RouterNotifier(ref);
+
   return GoRouter(
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: true,
+    refreshListenable: notifier,
     redirect: (context, state) {
       // 1. 인증 상태 및 프로필 감시
-      final authAsync = ref.watch(authStateChangesProvider);
-      final profileAsync = ref.watch(myProfileProvider);
+      final authAsync = ref.read(authStateChangesProvider);
+      final profileAsync = ref.read(myProfileProvider);
 
       // 로딩 중일 때는 리다이렉션 유보
       if (authAsync.isLoading || profileAsync.isLoading) return null;

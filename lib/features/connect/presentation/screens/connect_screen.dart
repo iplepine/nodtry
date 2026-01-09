@@ -40,6 +40,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     }
 
     final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+    if (!mounted) return;
+
     final text = clipboardData?.text;
     final myCode = ref.read(myProfileProvider).value?.inviteCode;
 
