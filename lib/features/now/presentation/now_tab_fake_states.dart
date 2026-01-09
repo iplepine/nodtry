@@ -60,11 +60,15 @@ class NowTabFakeStates {
     primaryCard: HomeCardModel(
       state: HomeCardState.nowAction,
       plan: _createPlan('지금 운동하기', _now, hour: _now.hour),
+      currentWeek: 2,
+      totalWeeks: 4,
     ),
     secondaryCards: [
       HomeCardModel(
         state: HomeCardState.overdue,
         plan: _createPlan('아침 약 먹기 (지난 일)', _yesterday, hour: 8),
+        currentWeek: 1,
+        totalWeeks: 4,
       ),
     ],
     managerCards: const [],
@@ -113,6 +117,8 @@ class NowTabFakeStates {
         note: '오늘은 드레싱 없이 먹었어요! 뿌듯합니다.',
         comment: '오 드레싱 없이! 대단해요 🥗 칭찬합니다!',
       ),
+      currentWeek: 3,
+      totalWeeks: 8,
     ),
     secondaryCards: [
       HomeCardModel(
@@ -148,6 +154,8 @@ class NowTabFakeStates {
           note: '아침 공기가 상쾌해서 평소보다 길게 했어요 🏃‍♀️',
           comment: '상쾌한 아침이었겠네요! 멋져요!',
         ),
+        currentWeek: 2,
+        totalWeeks: 4,
       ),
     ],
   );

@@ -196,8 +196,9 @@ class HomeCardModel {
   final String? partnerName;
   final String? partnerImageUrl;
   final String? headerMessage;
-
   final Plan? previousPlan;
+  final int? currentWeek;
+  final int? totalWeeks;
 
   const HomeCardModel({
     required this.state,
@@ -206,6 +207,8 @@ class HomeCardModel {
     this.partnerImageUrl,
     this.headerMessage,
     this.previousPlan,
+    this.currentWeek,
+    this.totalWeeks,
   });
 
   @override
@@ -216,12 +219,16 @@ class HomeCardModel {
           state == other.state &&
           plan?.id == other.plan?.id &&
           headerMessage == other.headerMessage &&
-          previousPlan?.id == other.previousPlan?.id;
+          previousPlan?.id == other.previousPlan?.id &&
+          currentWeek == other.currentWeek &&
+          totalWeeks == other.totalWeeks;
 
   @override
   int get hashCode =>
       state.hashCode ^
       (plan?.id).hashCode ^
       headerMessage.hashCode ^
-      (previousPlan?.id).hashCode;
+      (previousPlan?.id).hashCode ^
+      currentWeek.hashCode ^
+      totalWeeks.hashCode;
 }

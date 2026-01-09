@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 
 /// Quiet Context Header
@@ -12,8 +11,6 @@ class QuietHeader extends StatelessWidget {
   final String? partnerName;
   final String? relationshipAlias;
   final HeaderPeriodState periodState;
-  final int? currentWeek;
-  final int? totalWeeks;
   final VoidCallback? onSettingsTap;
 
   const QuietHeader({
@@ -21,8 +18,6 @@ class QuietHeader extends StatelessWidget {
     this.partnerName,
     this.relationshipAlias,
     required this.periodState,
-    this.currentWeek,
-    this.totalWeeks,
     this.onSettingsTap,
   });
 
@@ -39,15 +34,13 @@ class QuietHeader extends StatelessWidget {
         bottom: 12,
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // 좌측: 관계 정보
           Expanded(child: _buildRelationshipInfo(context)),
 
-          // 중앙: 기간 정보
-          Expanded(child: _buildPeriodInfo(context)),
-
-          // 우측: 설정
-          _buildSettingsButton(context),
+          // 우측: 설정 (있는 경우에만)
+          if (onSettingsTap != null) _buildSettingsButton(context),
         ],
       ),
     );
@@ -68,42 +61,6 @@ class QuietHeader extends StatelessWidget {
       ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildPeriodInfo(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    String periodText;
-
-    switch (periodState) {
-      case HeaderPeriodState.inProgress:
-        if (currentWeek != null && totalWeeks != null) {
-          periodText = l10n.headerWeekProgress(currentWeek!, totalWeeks!);
-        } else {
-          periodText = '';
-        }
-        break;
-      case HeaderPeriodState.noPlan:
-        periodText = l10n.headerNoPlan;
-        break;
-      case HeaderPeriodState.ended:
-        periodText = l10n.headerPlanEnded;
-        break;
-    }
-
-    if (periodText.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Center(
-      child: Text(
-        periodText,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-        textAlign: TextAlign.center,
-      ),
     );
   }
 

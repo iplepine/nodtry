@@ -33,14 +33,21 @@ class TimeChip extends StatelessWidget {
         color: _getBackgroundColor(),
         borderRadius: BorderRadius.circular(20), // Pill shape (Full radius)
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: _getTextColor(),
-          height: 1.2,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.access_time, size: 14, color: _getTextColor()),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: _getTextColor(),
+              height: 1.2,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -511,9 +511,7 @@ class _NowTabState extends ConsumerState<NowTab>
               QuietHeader(
                 partnerName: uiState.partnerProfile?.displayName,
                 periodState: uiState.headerPeriodState,
-                currentWeek: uiState.currentWeek,
-                totalWeeks: uiState.totalWeeks,
-                onSettingsTap: () => context.push(AppRoutes.settings),
+                onSettingsTap: null,
               ),
               // Now Card
               Expanded(
@@ -1060,18 +1058,28 @@ class _PrimaryExecutorCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (timeChipText != null && timeChipType != null)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: exactTimeText != null
-                      ? Tooltip(
-                          message: exactTimeText!,
-                          triggerMode: TooltipTriggerMode.longPress,
-                          child: TimeChip(
-                            text: timeChipText!,
-                            type: timeChipType!,
-                          ),
-                        )
-                      : TimeChip(text: timeChipText!, type: timeChipType!),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (model.currentWeek != null && model.totalWeeks != null)
+                      Text(
+                        '${model.currentWeek}/${model.totalWeeks}주차',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    exactTimeText != null
+                        ? Tooltip(
+                            message: exactTimeText!,
+                            triggerMode: TooltipTriggerMode.longPress,
+                            child: TimeChip(
+                              text: timeChipText!,
+                              type: timeChipType!,
+                            ),
+                          )
+                        : TimeChip(text: timeChipText!, type: timeChipType!),
+                  ],
                 ),
               if (timeChipText != null && timeChipType != null)
                 const SizedBox(height: 12),
@@ -1445,7 +1453,14 @@ class _SecondaryExecutorCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                     ],
-                    // Removed _ReconcileMenu per user request
+                    if (model.currentWeek != null && model.totalWeeks != null)
+                      Text(
+                        '${model.currentWeek}/${model.totalWeeks}주차',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                   ],
                 ),
                 if (timeChipText != null && timeChipType != null) ...[
@@ -1849,14 +1864,31 @@ class _ManagerQuickCard extends StatelessWidget {
                   const SizedBox(width: 12),
                 ],
                 Expanded(
-                  child: Text(
-                    headerText,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textPrimary,
-                      height: 1.4,
-                      fontSize: 16,
-                    ),
-                    textAlign: TextAlign.left,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (model.currentWeek != null && model.totalWeeks != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Text(
+                            '${model.currentWeek}/${model.totalWeeks}주차',
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ),
+                      Text(
+                        headerText,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textPrimary,
+                          height: 1.4,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                    ],
                   ),
                 ),
                 if (timeChipText != null && timeChipType != null) ...[

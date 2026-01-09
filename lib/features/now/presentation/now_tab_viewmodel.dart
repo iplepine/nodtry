@@ -28,37 +28,48 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
       useCase.executeStream(),
       partnerStream,
       (List<HomeCardModel> models, List<ConnectedUser> profiles) {
-        final baseState = NowTabState.fromModels(models);
-        final partner = profiles.isNotEmpty ? profiles.first.user : null;
-
         // 헤더 정보 계산
         HeaderPeriodState periodState = HeaderPeriodState.noPlan;
-        int? currentWeek;
-        int? totalWeeks;
 
-        // 실행 중인 계획 찾기 (내 것 우선)
-        final activePlans = models
-            .where((m) => m.plan != null && m.plan!.state == PlanState.active)
-            .map((m) => m.plan!)
-            .toList();
+        // 개별 카드들에 주차 정보 주입 및 헤더 상태 결정
+        final updatedModels = models.map((m) {
+          int? cWeek;
+          int? tWeeks;
 
-        if (activePlans.isNotEmpty) {
-          periodState = HeaderPeriodState.inProgress;
-          final plan = activePlans.first;
-          final now = DateTime.now();
-          final diff = now.difference(plan.startDate).inDays;
-          currentWeek = (diff / 7).floor() + 1;
+          if (m.plan != null && m.plan!.state == PlanState.active) {
+            periodState =
+                HeaderPeriodState.inProgress; // 하나라도 활성이면 헤더는 inProgress
 
-          final totalDiff = plan.endDate.difference(plan.startDate).inDays;
-          totalWeeks = (totalDiff / 7).ceil();
-          if (totalWeeks == 0) totalWeeks = 1;
-        }
+            final plan = m.plan!;
+            final now = DateTime.now();
+            final diff = now.difference(plan.startDate).inDays;
+            cWeek = (diff / 7).floor() + 1;
+
+            final totalDiff = plan.endDate.difference(plan.startDate).inDays;
+            tWeeks = (totalDiff / 7).ceil();
+            if (tWeeks == 0) tWeeks = 1;
+          }
+
+          return HomeCardModel(
+            state: m.state,
+            plan: m.plan,
+            partnerName: m.partnerName,
+            partnerImageUrl: m.partnerImageUrl,
+            headerMessage: m.headerMessage,
+            previousPlan: m.previousPlan,
+            currentWeek: cWeek,
+            totalWeeks: tWeeks,
+          );
+        }).toList();
+
+        final baseState = NowTabState.fromModels(updatedModels);
+        final partner = profiles.isNotEmpty ? profiles.first.user : null;
 
         return baseState.copyWith(
           partnerProfile: partner,
           headerPeriodState: periodState,
-          currentWeek: currentWeek,
-          totalWeeks: totalWeeks,
+          currentWeek: null, // 헤더에서는 더 이상 사용 안 함
+          totalWeeks: null,
         );
       },
     );

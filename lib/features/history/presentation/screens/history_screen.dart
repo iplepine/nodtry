@@ -95,8 +95,6 @@ class HistoryScreen extends ConsumerWidget {
               QuietHeader(
                 partnerName: historyStateAsync.value!.partnerName,
                 periodState: historyStateAsync.value!.headerPeriodState,
-                currentWeek: historyStateAsync.value!.currentWeek,
-                totalWeeks: historyStateAsync.value!.totalWeeks,
                 onSettingsTap: () => context.push(AppRoutes.settings),
               ),
 
