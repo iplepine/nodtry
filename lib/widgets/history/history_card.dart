@@ -242,7 +242,7 @@ class HistoryCard extends ConsumerWidget {
                               builder: (context) => ActionNoteDialog(
                                 title: item.title,
                                 hintText: "따뜻한 피드백을 남겨주세요 (선택)",
-                                buttonLabel: "확인 완료",
+                                buttonLabel: "그래",
                               ),
                             );
 
@@ -261,7 +261,7 @@ class HistoryCard extends ConsumerWidget {
                             Icons.check_circle_outline,
                             size: 16,
                           ),
-                          label: const Text("확인 및 피드백 남기기"),
+                          label: const Text("그래"),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.primary,
                             side: BorderSide(color: AppColors.primary),
