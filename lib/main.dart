@@ -15,6 +15,7 @@ import 'core/services/notification_service.dart';
 import 'services/notification_service.dart' as local_notifications;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -24,6 +25,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ko', null);
   await dotenv.load(fileName: ".env");
 
   // Edge-to-edge를 위한 시스템 UI 오버레이 설정

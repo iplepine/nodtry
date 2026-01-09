@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:intl/intl.dart';
 import '../action_note_dialog.dart';
 import '../../features/history/presentation/history_viewmodel.dart';
 import '../../features/history/presentation/history_state.dart';
@@ -300,8 +301,7 @@ class HistoryCard extends ConsumerWidget {
   }
 
   String _formatDate(DateTime date) {
-    // Setup simple date format
-    return "${date.month}/${date.day}";
+    return DateFormat('M/d (E)', 'ko').format(date);
   }
 
   _StatusDisplayInfo _getStatusInfo(

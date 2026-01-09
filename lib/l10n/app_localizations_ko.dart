@@ -752,10 +752,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get historyFilterAll => '모두';
 
   @override
-  String get historyFilterMe => '내 실천';
+  String get historyFilterMe => '나';
 
   @override
-  String get historyFilterPartner => '파트너의 실천';
+  String get historyFilterPartner => '너';
 
   @override
   String get historyMyActionVerified => '파트너가 봤어요';

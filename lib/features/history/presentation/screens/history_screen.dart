@@ -294,7 +294,7 @@ class HistoryScreen extends ConsumerWidget {
 
     if (date == today) return '오늘';
     if (date == yesterday) return '어제';
-    return DateFormat('yyyy년 M월 d일').format(date);
+    return DateFormat('yyyy년 M월 d일 (E)', 'ko').format(date);
   }
 
   void _showReconcileSheet(

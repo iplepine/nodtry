@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/plan_summary.dart';
 import '../../theme/app_colors.dart';
+import 'package:intl/intl.dart';
 
 class PlanSummaryCard extends StatelessWidget {
   final PlanSummary summary;
@@ -76,7 +77,7 @@ class PlanSummaryCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '${summary.startDate.year}.${summary.startDate.month}.${summary.startDate.day} ~ ${summary.endDate.year}.${summary.endDate.month}.${summary.endDate.day}',
+            '${DateFormat('yyyy.MM.dd (E)', 'ko').format(summary.startDate)} ~ ${DateFormat('yyyy.MM.dd (E)', 'ko').format(summary.endDate)}',
             style: TextStyle(color: AppColors.textDisabled, fontSize: 12),
           ),
         ],
