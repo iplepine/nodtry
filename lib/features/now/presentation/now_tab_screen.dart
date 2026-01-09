@@ -1990,13 +1990,14 @@ class _ManagerQuickCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
+                    flex: 2,
                     child: ElevatedButton(
                       onPressed: onSimpleCheer ?? onCheckIt,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -2012,6 +2013,7 @@ class _ManagerQuickCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
+                    flex: 1,
                     child: ElevatedButton(
                       onPressed: onMoreCheer,
                       style: ElevatedButton.styleFrom(
@@ -2020,7 +2022,7 @@ class _ManagerQuickCard extends StatelessWidget {
                         ),
                         foregroundColor: AppColors.primary,
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
