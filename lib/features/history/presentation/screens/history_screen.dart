@@ -12,7 +12,6 @@ import '../history_state.dart';
 import '../history_viewmodel.dart';
 import '../history_fake_states.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/intl.dart';
 
 /// 기록 탭 (History Tab)
 /// 우리가 나눈 약속의 흔적을 보는 곳

@@ -53,7 +53,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      extendBody: true,
+      extendBody: false,
       extendBodyBehindAppBar: false,
       body: IndexedStack(
         index: _currentIndex,
