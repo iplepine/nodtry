@@ -77,6 +77,9 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
 
   @override
   void dispose() {
+    // 화면 종료 시 상태 초기화
+    ref.invalidate(planCreateViewModelProvider);
+
     _pageController.dispose();
     _actionController.dispose();
     _descriptionController.dispose();

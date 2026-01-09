@@ -1,5 +1,4 @@
 import 'dart:async';
-// Removed unused foundation import
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../plan_create_state.dart';
 import '../../../../models/plan_model.dart';
@@ -14,13 +13,19 @@ final planCreateViewModelProvider =
 class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
   @override
   FutureOr<PlanCreateState> build() {
+    return _initialState();
+  }
+
+  PlanCreateState _initialState() {
     return PlanCreateState(notificationTime: NotificationTime.preset('dinner'));
   }
 
   Future<void> dispatch(PlanCreateIntent intent) async {
     final prevState = state.value!;
 
-    if (intent is UpdateActionIntent) {
+    if (intent is ResetIntent) {
+      state = AsyncValue.data(_initialState());
+    } else if (intent is UpdateActionIntent) {
       state = AsyncValue.data(prevState.copyWith(action: intent.action));
     } else if (intent is UpdateFrequencyIntent) {
       state = AsyncValue.data(
@@ -67,7 +72,6 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           selectedDays: item.days.map((d) => d - 1).toSet(), // 1-7 -> 0-6
           notificationTime:
               item.notificationTime ?? NotificationTime.preset('dinner'),
-          // Skip step 1 if data exists? Or let user review? Let's stay on step 1 but filled.
         ),
       );
     } else if (intent is SavePlanIntent) {
@@ -100,18 +104,16 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         count: prevState.selectedFrequency,
         days: finalDays,
         notificationTime: prevState.notificationTime,
-        description: prevState.description, // Ensure description is saved
+        description: prevState.description,
       );
 
-      // 연결된 파트너 확인 (매니저 자동 지정)
       final connectedProfiles = ref.read(connectedProfilesProvider).value;
       final managerId = connectedProfiles?.firstOrNull?.user.uid;
 
-      // Create new plan object
       final plan = Plan(
-        id: prevState.existingPlanId, // Preserves ID if editing
+        id: prevState.existingPlanId,
         userId: userId,
-        managerId: managerId, // 파트너가 있다면 매니저로 지정
+        managerId: managerId,
         startDate: prevState.originalPlan?.startDate ?? DateTime.now(),
         endDate:
             prevState.originalPlan?.endDate ??
@@ -126,17 +128,13 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         lastCheerAt: prevState.originalPlan?.lastCheerAt,
       );
 
-      // If updating, call updatePlan.
       if (prevState.existingPlanId != null) {
         await ref.read(recordRepositoryProvider).updatePlan(plan);
       } else {
         await ref.read(createNewPlanUseCaseProvider).execute(plan);
       }
 
-      // Provider 갱신
       ref.invalidate(homeCardStateProvider);
-
-      // 알림 설정 (Regardlessly of create/update, reschedule)
       await ref.read(settingAlarmUseCaseProvider).execute(plan);
 
       state = AsyncValue.data(prevState.copyWith(isSaving: false));

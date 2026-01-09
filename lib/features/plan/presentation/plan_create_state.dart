@@ -99,3 +99,7 @@ class PrevStepIntent extends PlanCreateIntent {
 class SavePlanIntent extends PlanCreateIntent {
   const SavePlanIntent();
 }
+
+class ResetIntent extends PlanCreateIntent {
+  const ResetIntent();
+}

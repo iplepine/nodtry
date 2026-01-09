@@ -737,7 +737,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get reconcileTitle => '정리하기';
 
   @override
-  String get reconcileActuallyDone => '사실 했어요';
+  String get reconcileActuallyDone => '했어';
 
   @override
   String get reconcileTookRest => '오늘은 쉬어갔어요';
@@ -779,7 +779,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get timeChipPassed => '지나갔어요';
 
   @override
-  String get nowStatusActuallyDone => '사실 했어요';
+  String get nowStatusActuallyDone => '했어';
 
   @override
   String get nowLateCompletion => '뒤늦게라도 완료!';
