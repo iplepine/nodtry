@@ -154,12 +154,19 @@ class PlanDetailScreen extends ConsumerWidget {
               Navigator.pop(context); // Close Dialog
               try {
                 if (plan.id != null) {
+                  // 1. Cancel related alarms
+                  await ref.read(settingAlarmUseCaseProvider).cancel(plan);
+
+                  // 2. Delete plan from repository
                   await ref.read(recordRepositoryProvider).deletePlan(plan.id!);
+
                   if (context.mounted) {
-                    context.pop(); // Close Detail Screen
+                    // Success message
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('약속이 삭제되었습니다.')),
                     );
+                    // Close Detail Screen and go back
+                    context.pop();
                   }
                 }
               } catch (e) {

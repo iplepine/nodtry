@@ -64,6 +64,15 @@ flutter build appbundle --release
 if [ $? -eq 0 ]; then
     echo "✅ Build successful!"
     echo "AAB location: build/app/outputs/bundle/release/app-release.aab"
+    
+    # 3. Git Commit (Version Bump)
+    if [ ! -z "$NEW_VERSION" ]; then
+        echo "Committing version update..."
+        git add pubspec.yaml
+        git commit -m "chore: bump version to $NEW_VERSION"
+        echo "✅ Version bump committed"
+    fi
+
     open build/app/outputs/bundle/release/
 else
     echo "❌ Build failed!"
