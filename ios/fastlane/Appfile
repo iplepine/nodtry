@@ -1,0 +1,5 @@
+app_identifier("com.devho.nodtry.app") # The bundle identifier of your app
+# apple_id("user@email.com") # Your Apple email address
+
+# For App Store Connect API Key
+# api_key_path("./fastlane/api_key.json") 

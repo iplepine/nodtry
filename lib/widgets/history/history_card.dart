@@ -87,7 +87,7 @@ class HistoryCard extends ConsumerWidget {
                           _formatDate(item.date),
                           style: TextStyle(
                             color: AppColors.textSecondary,
-                            fontSize: 12,
+                            fontSize: 13,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -112,7 +112,7 @@ class HistoryCard extends ConsumerWidget {
                                 statusInfo.text,
                                 style: TextStyle(
                                   color: statusInfo.textColor,
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -128,7 +128,7 @@ class HistoryCard extends ConsumerWidget {
                       item.title,
                       style: TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -140,7 +140,7 @@ class HistoryCard extends ConsumerWidget {
                         item.note!,
                         style: TextStyle(
                           color: AppColors.textSecondary,
-                          fontSize: 14,
+                          fontSize: 15,
                         ),
                       ),
                     ],
@@ -171,7 +171,7 @@ class HistoryCard extends ConsumerWidget {
                                 item.comment!,
                                 style: TextStyle(
                                   color: AppColors.primary,
-                                  fontSize: 14,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),

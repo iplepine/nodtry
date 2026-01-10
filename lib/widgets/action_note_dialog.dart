@@ -6,12 +6,14 @@ class ActionNoteDialog extends StatefulWidget {
   final String title;
   final String? hintText;
   final String? buttonLabel;
+  final bool showEmoji;
 
   const ActionNoteDialog({
     super.key,
     required this.title,
     this.hintText,
     this.buttonLabel,
+    this.showEmoji = true,
   });
 
   @override
@@ -95,41 +97,43 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
             const SizedBox(height: 24),
 
             // Emoji Selection
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 12,
-              runSpacing: 12,
-              children: _emojis.map((emoji) {
-                final isSelected = _selectedEmoji == emoji;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedEmoji = isSelected ? null : emoji;
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primary.withValues(alpha: 0.15)
-                          : AppColors.surface.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
+            if (widget.showEmoji) ...[
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 12,
+                runSpacing: 12,
+                children: _emojis.map((emoji) {
+                  final isSelected = _selectedEmoji == emoji;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedEmoji = isSelected ? null : emoji;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.primary
-                            : Colors.transparent,
-                        width: 2,
+                            ? AppColors.primary.withValues(alpha: 0.15)
+                            : AppColors.surface.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primary
+                              : Colors.transparent,
+                          width: 2,
+                        ),
                       ),
+                      alignment: Alignment.center,
+                      child: Text(emoji, style: const TextStyle(fontSize: 22)),
                     ),
-                    alignment: Alignment.center,
-                    child: Text(emoji, style: const TextStyle(fontSize: 22)),
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 24),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 24),
+            ],
 
             // TextField
             TextField(

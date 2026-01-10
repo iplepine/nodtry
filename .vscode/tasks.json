@@ -13,6 +13,19 @@
                 "kind": "build",
                 "isDefault": false
             }
+        },
+        {
+            "label": "Build & Deploy AAB",
+            "type": "shell",
+            "command": "./scripts/build_aab_deploy.sh",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
         }
     ]
 }

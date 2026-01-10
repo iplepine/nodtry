@@ -78,24 +78,24 @@ class _NowTabState extends ConsumerState<NowTab>
     final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
     if (primaryCard == null || primaryCard.plan?.id == null) return;
 
-    // 1. Shrink animation
-    await _animationController.reverse();
-
-    // 2. Show Dialog to input note
+    // 1. Show Dialog to input note
     final note = await showDialog<String>(
       context: context,
       builder: (context) => ActionNoteDialog(
         title: primaryCard.plan?.items.firstOrNull?.title ?? l10n.homeDidIt,
+        showEmoji: false,
       ),
     );
 
     if (note == null) {
-      // 3. Restore animation if canceled
-      if (mounted) _animationController.forward();
+      // Canceled: Do nothing (card didn't vanish)
       return;
     }
 
-    // 4. Dispatch Intent with note
+    // 2. Shrink animation (Card disappears AFTER confirmation)
+    await _animationController.reverse();
+
+    // 3. Dispatch Intent with note
     try {
       final planId = primaryCard.plan?.id;
       if (planId != null) {
@@ -711,90 +711,6 @@ class _NowTabState extends ConsumerState<NowTab>
   void _handleMoreCheer(HomeCardModel card) {
     if (card.plan?.id == null) return;
     _showReactionBottomSheet(context, card.plan!.id!);
-  }
-
-  void _showCompletionBottomSheet(BuildContext context, String planId) {
-    final l10n = AppLocalizations.of(context)!;
-    final messageController = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.doneSheetTitle,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: messageController,
-                  decoration: InputDecoration(
-                    hintText: l10n.doneMessageHint,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: AppColors.background,
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final message = messageController.text.trim();
-                      ref
-                          .read(nowTabViewModelProvider.notifier)
-                          .dispatch(
-                            CompletePlanIntent(
-                              planId,
-                              message: message.isEmpty ? null : message,
-                            ),
-                          );
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      l10n.doneButton,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   void _showReactionBottomSheet(BuildContext context, String planId) {

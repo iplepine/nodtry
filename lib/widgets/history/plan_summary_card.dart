@@ -37,6 +37,7 @@ class PlanSummaryCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
+                    fontSize: 18,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -55,7 +56,7 @@ class PlanSummaryCard extends StatelessWidget {
                   summary.periodString,
                   style: TextStyle(
                     color: AppColors.primary,
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -78,7 +79,7 @@ class PlanSummaryCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             '${DateFormat('yyyy.MM.dd (E)', 'ko').format(summary.startDate)} ~ ${DateFormat('yyyy.MM.dd (E)', 'ko').format(summary.endDate)}',
-            style: TextStyle(color: AppColors.textDisabled, fontSize: 12),
+            style: TextStyle(color: AppColors.textDisabled, fontSize: 13),
           ),
         ],
       ),
@@ -97,14 +98,14 @@ class PlanSummaryCard extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           label,
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         const SizedBox(width: 4),
         Text(
           value,
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),

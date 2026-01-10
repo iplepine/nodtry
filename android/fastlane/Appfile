@@ -1,0 +1,2 @@
+json_key_file("./fastlane/json_key.json") # Path to your service account key
+package_name("com.devho.nodtry.app") # Your package name

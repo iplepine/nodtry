@@ -1,0 +1,21 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Push a new beta build to TestFlight"
+  lane :beta do
+    upload_to_testflight(
+      ipa: '../build/ios/ipa/IfTogether.ipa', # Ensure this matches your IPA name
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Push a new release build to the App Store"
+  lane :release do
+    upload_to_app_store(
+      ipa: '../build/ios/ipa/IfTogether.ipa',
+      force: true,
+      skip_screenshots: true,
+      skip_metadata: true
+    )
+  end
+end
