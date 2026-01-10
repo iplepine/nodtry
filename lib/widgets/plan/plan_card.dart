@@ -145,53 +145,7 @@ class PlanCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (isOwner && (onEdit != null || onDelete != null)) ...[
-                  const SizedBox(width: 4),
-                  PopupMenuButton<String>(
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: AppColors.textDisabled,
-                      size: 20,
-                    ),
-                    padding: EdgeInsets.zero,
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        onEdit?.call();
-                      } else if (value == 'delete') {
-                        onDelete?.call();
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit_outlined, size: 18),
-                            SizedBox(width: 8),
-                            Text('수정'),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.delete_outline,
-                              size: 18,
-                              color: AppColors.error,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              '삭제',
-                              style: TextStyle(color: AppColors.error),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ] else if (onTap != null) ...[
+                if (onTap != null) ...[
                   const SizedBox(width: 12),
                   Icon(Icons.chevron_right, color: AppColors.textDisabled),
                 ],
