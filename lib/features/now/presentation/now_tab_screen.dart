@@ -1078,14 +1078,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (model.currentWeek != null && model.totalWeeks != null)
-                      Text(
-                        '${model.currentWeek}/${model.totalWeeks}주차',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    // Week indicator removed per user request
                     exactTimeText != null
                         ? Tooltip(
                             message: exactTimeText!,
@@ -1470,14 +1463,8 @@ class _SecondaryExecutorCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                     ],
-                    if (model.currentWeek != null && model.totalWeeks != null)
-                      Text(
-                        '${model.currentWeek}/${model.totalWeeks}주차',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+
+                    // Week indicator removed
                   ],
                 ),
                 if (timeChipText != null && timeChipType != null) ...[
@@ -1884,18 +1871,7 @@ class _ManagerQuickCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (model.currentWeek != null && model.totalWeeks != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 2),
-                          child: Text(
-                            '${model.currentWeek}/${model.totalWeeks}주차',
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        ),
+                      // Week indicator removed
                       Text(
                         headerText,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
