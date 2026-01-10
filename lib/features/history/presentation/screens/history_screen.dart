@@ -97,52 +97,7 @@ class HistoryScreen extends ConsumerWidget {
 
             const SizedBox(height: 8),
 
-            // 필터 칩
-            historyStateAsync.when(
-              data: (state) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: SegmentedButton<HistoryFilter>(
-                  segments: [
-                    ButtonSegment(
-                      value: HistoryFilter.all,
-                      label: Text(l10n.historyFilterAll),
-                    ),
-                    ButtonSegment(
-                      value: HistoryFilter.me,
-                      label: Text(l10n.historyFilterMe),
-                    ),
-                    ButtonSegment(
-                      value: HistoryFilter.partner,
-                      label: Text(l10n.historyFilterPartner),
-                    ),
-                  ],
-                  selected: {state.filter},
-                  onSelectionChanged: (newSelection) {
-                    ref
-                        .read(historyViewModelProvider.notifier)
-                        .dispatch(HistoryIntent.setFilter(newSelection.first));
-                  },
-                  showSelectedIcon: false,
-                  style: SegmentedButton.styleFrom(
-                    backgroundColor: AppColors.background,
-                    selectedBackgroundColor: AppColors.primary,
-                    selectedForegroundColor: Colors.white,
-                    foregroundColor: AppColors.textSecondary,
-                    side: BorderSide(color: AppColors.divider),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
-
+            // 필터 칩 제거됨
             const SizedBox(height: 8),
 
             // 기록 리스트
