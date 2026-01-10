@@ -330,13 +330,14 @@ extension UsIntentPatterns on UsIntent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RefreshIntent value)?  refresh,TResult Function( UpdateProfileIntent value)?  updateProfile,TResult Function( LinkGoogleIntent value)?  linkGoogle,TResult Function( DisconnectIntent value)?  disconnect,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RefreshIntent value)?  refresh,TResult Function( UpdateProfileIntent value)?  updateProfile,TResult Function( LinkGoogleIntent value)?  linkGoogle,TResult Function( LinkEmailIntent value)?  linkEmail,TResult Function( DisconnectIntent value)?  disconnect,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
 return refresh(_that);case UpdateProfileIntent() when updateProfile != null:
 return updateProfile(_that);case LinkGoogleIntent() when linkGoogle != null:
-return linkGoogle(_that);case DisconnectIntent() when disconnect != null:
+return linkGoogle(_that);case LinkEmailIntent() when linkEmail != null:
+return linkEmail(_that);case DisconnectIntent() when disconnect != null:
 return disconnect(_that);case _:
   return orElse();
 
@@ -355,13 +356,14 @@ return disconnect(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RefreshIntent value)  refresh,required TResult Function( UpdateProfileIntent value)  updateProfile,required TResult Function( LinkGoogleIntent value)  linkGoogle,required TResult Function( DisconnectIntent value)  disconnect,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RefreshIntent value)  refresh,required TResult Function( UpdateProfileIntent value)  updateProfile,required TResult Function( LinkGoogleIntent value)  linkGoogle,required TResult Function( LinkEmailIntent value)  linkEmail,required TResult Function( DisconnectIntent value)  disconnect,}){
 final _that = this;
 switch (_that) {
 case RefreshIntent():
 return refresh(_that);case UpdateProfileIntent():
 return updateProfile(_that);case LinkGoogleIntent():
-return linkGoogle(_that);case DisconnectIntent():
+return linkGoogle(_that);case LinkEmailIntent():
+return linkEmail(_that);case DisconnectIntent():
 return disconnect(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -379,13 +381,14 @@ return disconnect(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RefreshIntent value)?  refresh,TResult? Function( UpdateProfileIntent value)?  updateProfile,TResult? Function( LinkGoogleIntent value)?  linkGoogle,TResult? Function( DisconnectIntent value)?  disconnect,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RefreshIntent value)?  refresh,TResult? Function( UpdateProfileIntent value)?  updateProfile,TResult? Function( LinkGoogleIntent value)?  linkGoogle,TResult? Function( LinkEmailIntent value)?  linkEmail,TResult? Function( DisconnectIntent value)?  disconnect,}){
 final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
 return refresh(_that);case UpdateProfileIntent() when updateProfile != null:
 return updateProfile(_that);case LinkGoogleIntent() when linkGoogle != null:
-return linkGoogle(_that);case DisconnectIntent() when disconnect != null:
+return linkGoogle(_that);case LinkEmailIntent() when linkEmail != null:
+return linkEmail(_that);case DisconnectIntent() when disconnect != null:
 return disconnect(_that);case _:
   return null;
 
@@ -403,12 +406,13 @@ return disconnect(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  refresh,TResult Function( String? displayName,  String? statusMessage,  String? profileImageUrl)?  updateProfile,TResult Function()?  linkGoogle,TResult Function( String partnerId)?  disconnect,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  refresh,TResult Function( String? displayName,  String? statusMessage,  String? profileImageUrl)?  updateProfile,TResult Function()?  linkGoogle,TResult Function( String email,  String password)?  linkEmail,TResult Function( String partnerId)?  disconnect,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
 return refresh();case UpdateProfileIntent() when updateProfile != null:
 return updateProfile(_that.displayName,_that.statusMessage,_that.profileImageUrl);case LinkGoogleIntent() when linkGoogle != null:
-return linkGoogle();case DisconnectIntent() when disconnect != null:
+return linkGoogle();case LinkEmailIntent() when linkEmail != null:
+return linkEmail(_that.email,_that.password);case DisconnectIntent() when disconnect != null:
 return disconnect(_that.partnerId);case _:
   return orElse();
 
@@ -427,12 +431,13 @@ return disconnect(_that.partnerId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  refresh,required TResult Function( String? displayName,  String? statusMessage,  String? profileImageUrl)  updateProfile,required TResult Function()  linkGoogle,required TResult Function( String partnerId)  disconnect,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  refresh,required TResult Function( String? displayName,  String? statusMessage,  String? profileImageUrl)  updateProfile,required TResult Function()  linkGoogle,required TResult Function( String email,  String password)  linkEmail,required TResult Function( String partnerId)  disconnect,}) {final _that = this;
 switch (_that) {
 case RefreshIntent():
 return refresh();case UpdateProfileIntent():
 return updateProfile(_that.displayName,_that.statusMessage,_that.profileImageUrl);case LinkGoogleIntent():
-return linkGoogle();case DisconnectIntent():
+return linkGoogle();case LinkEmailIntent():
+return linkEmail(_that.email,_that.password);case DisconnectIntent():
 return disconnect(_that.partnerId);case _:
   throw StateError('Unexpected subclass');
 
@@ -450,12 +455,13 @@ return disconnect(_that.partnerId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  refresh,TResult? Function( String? displayName,  String? statusMessage,  String? profileImageUrl)?  updateProfile,TResult? Function()?  linkGoogle,TResult? Function( String partnerId)?  disconnect,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  refresh,TResult? Function( String? displayName,  String? statusMessage,  String? profileImageUrl)?  updateProfile,TResult? Function()?  linkGoogle,TResult? Function( String email,  String password)?  linkEmail,TResult? Function( String partnerId)?  disconnect,}) {final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
 return refresh();case UpdateProfileIntent() when updateProfile != null:
 return updateProfile(_that.displayName,_that.statusMessage,_that.profileImageUrl);case LinkGoogleIntent() when linkGoogle != null:
-return linkGoogle();case DisconnectIntent() when disconnect != null:
+return linkGoogle();case LinkEmailIntent() when linkEmail != null:
+return linkEmail(_that.email,_that.password);case DisconnectIntent() when disconnect != null:
 return disconnect(_that.partnerId);case _:
   return null;
 
@@ -597,6 +603,74 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class LinkEmailIntent implements UsIntent {
+  const LinkEmailIntent(this.email, this.password);
+  
+
+ final  String email;
+ final  String password;
+
+/// Create a copy of UsIntent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LinkEmailIntentCopyWith<LinkEmailIntent> get copyWith => _$LinkEmailIntentCopyWithImpl<LinkEmailIntent>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LinkEmailIntent&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,email,password);
+
+@override
+String toString() {
+  return 'UsIntent.linkEmail(email: $email, password: $password)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $LinkEmailIntentCopyWith<$Res> implements $UsIntentCopyWith<$Res> {
+  factory $LinkEmailIntentCopyWith(LinkEmailIntent value, $Res Function(LinkEmailIntent) _then) = _$LinkEmailIntentCopyWithImpl;
+@useResult
+$Res call({
+ String email, String password
+});
+
+
+
+
+}
+/// @nodoc
+class _$LinkEmailIntentCopyWithImpl<$Res>
+    implements $LinkEmailIntentCopyWith<$Res> {
+  _$LinkEmailIntentCopyWithImpl(this._self, this._then);
+
+  final LinkEmailIntent _self;
+  final $Res Function(LinkEmailIntent) _then;
+
+/// Create a copy of UsIntent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? email = null,Object? password = null,}) {
+  return _then(LinkEmailIntent(
+null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

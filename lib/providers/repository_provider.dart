@@ -23,6 +23,8 @@ import '../repositories/real_user_repository.dart';
 import '../usecases/update_profile_use_case.dart';
 import '../features/auth/domain/usecases/auto_login_use_case.dart';
 import '../features/auth/domain/usecases/link_with_google_use_case.dart';
+import '../features/auth/domain/usecases/link_with_email_use_case.dart';
+import '../features/auth/domain/usecases/sign_up_with_email_use_case.dart';
 import '../features/auth/domain/usecases/login_with_google_use_case.dart';
 import '../features/auth/domain/usecases/withdraw_use_case.dart';
 
@@ -215,6 +217,18 @@ final linkWithGoogleUseCaseProvider = Provider<LinkWithGoogleUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   return LinkWithGoogleUseCase(authService, userRepository);
+});
+
+final linkWithEmailUseCaseProvider = Provider<LinkWithEmailUseCase>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final userRepository = ref.watch(userRepositoryProvider);
+  return LinkWithEmailUseCase(authService, userRepository);
+});
+
+final signUpWithEmailUseCaseProvider = Provider<SignUpWithEmailUseCase>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final userRepository = ref.watch(userRepositoryProvider);
+  return SignUpWithEmailUseCase(authService, userRepository);
 });
 
 final loginWithGoogleUseCaseProvider = Provider<LoginWithGoogleUseCase>((ref) {

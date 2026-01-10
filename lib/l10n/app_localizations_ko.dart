@@ -609,6 +609,39 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsDeveloper => '개발자 메뉴';
 
   @override
+  String get usLinkEmailAction => '이메일로 연결하기';
+
+  @override
+  String get usLinkEmailTitle => '이메일 계정 연결';
+
+  @override
+  String get usLinkEmailContent => '로그인에 사용할 이메일과 비밀번호를 입력해주세요.';
+
+  @override
+  String get usEmailLabel => '이메일';
+
+  @override
+  String get usPasswordLabel => '비밀번호';
+
+  @override
+  String get usLinkConfirm => '연결';
+
+  @override
+  String get usLinkEmailSuccess => '이메일 계정이 성공적으로 연결되었습니다!';
+
+  @override
+  String get emailHint => '이메일을 입력해주세요';
+
+  @override
+  String get passwordHint => '비밀번호를 입력해주세요';
+
+  @override
+  String get invalidEmail => '유효한 이메일 형식이 아닙니다';
+
+  @override
+  String get weakPassword => '비밀번호는 6자 이상이어야 합니다';
+
+  @override
   String get historyPartnerVerified => '파트너가 확인했어요';
 
   @override
@@ -700,18 +733,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get emailStartMessage => '이메일로 시작하기';
-
-  @override
-  String get passwordHint => '비밀번호를 입력해주세요';
-
-  @override
-  String get emailHint => '이메일을 입력해주세요';
-
-  @override
-  String get invalidEmail => '유효한 이메일 형식이 아닙니다';
-
-  @override
-  String get weakPassword => '비밀번호는 6자 이상이어야 합니다';
 
   @override
   String get accountExistsWithDifferentCredential => '이미 가입된 이메일입니다.';

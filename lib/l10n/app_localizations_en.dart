@@ -622,6 +622,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDeveloper => 'Developer Menu';
 
   @override
+  String get usLinkEmailAction => 'Link with Email';
+
+  @override
+  String get usLinkEmailTitle => 'Link Email Account';
+
+  @override
+  String get usLinkEmailContent =>
+      'Enter an email and password to use for login.';
+
+  @override
+  String get usEmailLabel => 'Email';
+
+  @override
+  String get usPasswordLabel => 'Password';
+
+  @override
+  String get usLinkConfirm => 'Link';
+
+  @override
+  String get usLinkEmailSuccess => 'Email account linked successfully!';
+
+  @override
+  String get emailHint => 'Enter your email';
+
+  @override
+  String get passwordHint => 'Enter your password';
+
+  @override
+  String get invalidEmail => 'Invalid email format';
+
+  @override
+  String get weakPassword => 'Password must be at least 6 characters';
+
+  @override
   String get historyPartnerVerified => 'Partner verified';
 
   @override
@@ -714,18 +748,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emailStartMessage => 'Start with Email';
-
-  @override
-  String get passwordHint => 'Enter your password';
-
-  @override
-  String get emailHint => 'Enter your email';
-
-  @override
-  String get invalidEmail => 'Invalid email format';
-
-  @override
-  String get weakPassword => 'Password must be at least 6 characters';
 
   @override
   String get accountExistsWithDifferentCredential =>

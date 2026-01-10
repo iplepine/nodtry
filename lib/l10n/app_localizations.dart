@@ -1250,6 +1250,72 @@ abstract class AppLocalizations {
   /// **'Developer Menu'**
   String get settingsDeveloper;
 
+  /// No description provided for @usLinkEmailAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Link with Email'**
+  String get usLinkEmailAction;
+
+  /// No description provided for @usLinkEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Email Account'**
+  String get usLinkEmailTitle;
+
+  /// No description provided for @usLinkEmailContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an email and password to use for login.'**
+  String get usLinkEmailContent;
+
+  /// No description provided for @usEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get usEmailLabel;
+
+  /// No description provided for @usPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get usPasswordLabel;
+
+  /// No description provided for @usLinkConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get usLinkConfirm;
+
+  /// No description provided for @usLinkEmailSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Email account linked successfully!'**
+  String get usLinkEmailSuccess;
+
+  /// Hint text for email input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get emailHint;
+
+  /// Hint text for password input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get passwordHint;
+
+  /// Error message for invalid email
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email format'**
+  String get invalidEmail;
+
+  /// Error message for weak password
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get weakPassword;
+
   /// History card label when partner verified
   ///
   /// In en, this message translates to:
@@ -1429,30 +1495,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start with Email'**
   String get emailStartMessage;
-
-  /// Hint text for password input
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your password'**
-  String get passwordHint;
-
-  /// Hint text for email input
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your email'**
-  String get emailHint;
-
-  /// Error message for invalid email
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid email format'**
-  String get invalidEmail;
-
-  /// Error message for weak password
-  ///
-  /// In en, this message translates to:
-  /// **'Password must be at least 6 characters'**
-  String get weakPassword;
 
   /// Error message for existing account
   ///

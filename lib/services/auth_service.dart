@@ -120,6 +120,27 @@ class AuthService {
     }
   }
 
+  /// 익명 계정을 이메일 계정으로 전환 (계정 연결)
+  Future<UserCredential?> linkWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) throw Exception('No current user');
+
+      final credential = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+
+      return await currentUser.linkWithCredential(credential);
+    } catch (e) {
+      debugPrint("Error linking with Email: $e");
+      rethrow;
+    }
+  }
+
   /// 회원 탈퇴 (계정 삭제)
   Future<void> deleteAccount() async {
     try {

@@ -108,11 +108,8 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     InkWell(
-                                      onTap: () => ref
-                                          .read(usViewModelProvider.notifier)
-                                          .dispatch(
-                                            const UsIntent.linkGoogle(),
-                                          ),
+                                      onTap: () =>
+                                          _showLinkAccountOptionDialog(context),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -232,6 +229,158 @@ class _UsScreenState extends ConsumerState<UsScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showLinkAccountOptionDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.background,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.usGuestWarningAction,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ref
+                        .read(usViewModelProvider.notifier)
+                        .dispatch(const UsIntent.linkGoogle());
+                  },
+                  icon: const Icon(Icons.g_mobiledata_rounded),
+                  label: Text(l10n.loginWithGoogle),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Colors.grey[300]!),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _showEmailLinkDialog(context, ref);
+                  },
+                  icon: const Icon(Icons.email_outlined),
+                  label: Text(l10n.usLinkEmailAction),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Colors.grey[300]!),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showEmailLinkDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.usLinkEmailTitle),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.usLinkEmailContent),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: l10n.usEmailLabel,
+                  hintText: l10n.emailHint,
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty || !value.contains('@')) {
+                    return l10n.invalidEmail;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: passwordController,
+                decoration: InputDecoration(
+                  labelText: l10n.usPasswordLabel,
+                  hintText: l10n.passwordHint,
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty || value.length < 6) {
+                    return l10n.weakPassword;
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(context);
+                ref
+                    .read(usViewModelProvider.notifier)
+                    .dispatch(
+                      UsIntent.linkEmail(
+                        emailController.text.trim(),
+                        passwordController.text.trim(),
+                      ),
+                    );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.usLinkEmailSuccess)),
+                );
+              }
+            },
+            child: Text(l10n.usLinkConfirm),
+          ),
+        ],
       ),
     );
   }

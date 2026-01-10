@@ -33,11 +33,15 @@ class UsViewModel extends AsyncNotifier<UsState> {
         await _updateProfile(intent);
       } else if (intent is LinkGoogleIntent) {
         await _linkGoogle();
+      } else if (intent is LinkEmailIntent) {
+        await _linkEmail(intent.email, intent.password);
       } else if (intent is DisconnectIntent) {
         await _disconnect(intent.partnerId);
       }
     } catch (e, stack) {
-      if (intent is LinkGoogleIntent || intent is UpdateProfileIntent) {
+      if (intent is LinkGoogleIntent ||
+          intent is UpdateProfileIntent ||
+          intent is LinkEmailIntent) {
         // 액션 중 에러는 전체 상태를 에러로 바꾸지 않고 알림만 설정
         String errorMessage = e.toString();
         if (e is FirebaseAuthException) {
@@ -89,6 +93,13 @@ class UsViewModel extends AsyncNotifier<UsState> {
     state = AsyncValue.data(state.value!.copyWith(isLinking: true));
     final useCase = ref.read(linkWithGoogleUseCaseProvider);
     await useCase.execute();
+    state = AsyncValue.data(state.value!.copyWith(isLinking: false));
+  }
+
+  Future<void> _linkEmail(String email, String password) async {
+    state = AsyncValue.data(state.value!.copyWith(isLinking: true));
+    final useCase = ref.read(linkWithEmailUseCaseProvider);
+    await useCase.execute(email, password);
     state = AsyncValue.data(state.value!.copyWith(isLinking: false));
   }
 

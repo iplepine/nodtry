@@ -792,6 +792,17 @@
   "@settingsDeveloper": {
     "description": "Developer menu label"
   },
+  "usLinkEmailAction": "Link with Email",
+  "usLinkEmailTitle": "Link Email Account",
+  "usLinkEmailContent": "Enter an email and password to use for login.",
+  "usEmailLabel": "Email",
+  "usPasswordLabel": "Password",
+  "usLinkConfirm": "Link",
+  "usLinkEmailSuccess": "Email account linked successfully!",
+  "emailHint": "Enter your email",
+  "passwordHint": "Enter your password",
+  "invalidEmail": "Invalid email format",
+  "weakPassword": "Password must be at least 6 characters",
   "historyPartnerVerified": "Partner verified",
   "@historyPartnerVerified": {
     "description": "History card label when partner verified"

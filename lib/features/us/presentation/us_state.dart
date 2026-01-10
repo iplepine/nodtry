@@ -25,5 +25,7 @@ class UsIntent with _$UsIntent {
     String? profileImageUrl,
   }) = UpdateProfileIntent;
   const factory UsIntent.linkGoogle() = LinkGoogleIntent;
+  const factory UsIntent.linkEmail(String email, String password) =
+      LinkEmailIntent;
   const factory UsIntent.disconnect(String partnerId) = DisconnectIntent;
 }
