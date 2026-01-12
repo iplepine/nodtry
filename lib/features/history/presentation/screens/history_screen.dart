@@ -42,6 +42,9 @@ class HistoryScreen extends ConsumerWidget {
             if (match != null) {
               errorUrl = match.group(0);
             }
+          } else if (error.toString().contains('not-found') ||
+              error.toString().contains('No document to update')) {
+            errorMessage = '이미 삭제된 기록이거나 약속이라\n리액션을 남길 수 없어요.';
           } else {
             errorMessage = error.toString();
           }
