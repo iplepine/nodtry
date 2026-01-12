@@ -34,6 +34,9 @@ abstract class RecordRepository {
   /// 특정 계획을 삭제합니다.
   Future<void> deletePlan(String planId);
 
+  /// 특정 계획을 중단합니다. (삭제 대신 상태 변경)
+  Future<void> stopPlan(String planId);
+
   /// 특정 유저의 모든 계획을 삭제합니다. (회원 탈퇴 처리용)
   Future<void> deletePlansByUserId(String uid);
 

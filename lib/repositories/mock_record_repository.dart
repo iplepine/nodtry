@@ -287,6 +287,25 @@ class MockRecordRepository implements RecordRepository {
     _notifyPlansStream();
   }
 
+  @override
+  Future<void> stopPlan(String planId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    // Mock Stop Logic: Remove from Home cards (as if deleted) but keep in plans list with Stopped state
+    _mockHomeCardModels.removeWhere((m) => m.plan?.id == planId);
+    if (_mockHomeCardModels.isEmpty) {
+      _mockHomeCardModels.add(
+        const HomeCardModel(state: HomeCardState.todayComplete),
+      );
+    }
+    _notifyStream();
+
+    final index = _mockPlans.indexWhere((p) => p.id == planId);
+    if (index != -1) {
+      _mockPlans[index] = _mockPlans[index].copyWith(state: PlanState.stopped);
+      _notifyPlansStream();
+    }
+  }
+
   Plan _createMockPlan({
     String? id,
     required int hour,

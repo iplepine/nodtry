@@ -33,18 +33,12 @@ class PlanDetailScreen extends ConsumerWidget {
         actions: [
           if (isMine) ...[
             IconButton(
-              icon: Icon(Icons.edit_outlined, color: AppColors.textPrimary),
-              onPressed: () {
-                // Navigate to Edit Mode
-                context.pushNamed(
-                  'plan-create',
-                  extra: plan, // Pass plan object for editing
-                );
-              },
+              icon: Icon(Icons.refresh, color: AppColors.textPrimary),
+              onPressed: () => _showRestartPlanDialog(context, ref),
             ),
             IconButton(
-              icon: Icon(Icons.delete_outline, color: AppColors.error),
-              onPressed: () => _showDeleteCurrentPlanDialog(context, ref),
+              icon: Icon(Icons.stop_circle_outlined, color: AppColors.error),
+              onPressed: () => _showStopCurrentPlanDialog(context, ref),
             ),
           ],
         ],
@@ -138,12 +132,12 @@ class PlanDetailScreen extends ConsumerWidget {
     return TimeFormatter.formatExactTime(dt);
   }
 
-  void _showDeleteCurrentPlanDialog(BuildContext context, WidgetRef ref) {
+  void _showStopCurrentPlanDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('약속을 삭제할까요?'),
-        content: const Text('삭제하면 되돌릴 수 없어요.'),
+        title: const Text('약속을 그만할까요?'),
+        content: const Text('그만하더라도 지금까지의 실천 기록은 유지돼요.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -157,15 +151,13 @@ class PlanDetailScreen extends ConsumerWidget {
                   // 1. Cancel related alarms
                   await ref.read(settingAlarmUseCaseProvider).cancel(plan);
 
-                  // 2. Delete plan from repository
-                  await ref.read(recordRepositoryProvider).deletePlan(plan.id!);
+                  // 2. Stop plan
+                  await ref.read(recordRepositoryProvider).stopPlan(plan.id!);
 
                   if (context.mounted) {
-                    // Success message
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('약속이 삭제되었습니다.')),
+                      const SnackBar(content: Text('약속이 중단되었습니다.')),
                     );
-                    // Close Detail Screen and go back
                     context.pop();
                   }
                 }
@@ -173,11 +165,64 @@ class PlanDetailScreen extends ConsumerWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(
                     context,
-                  ).showSnackBar(SnackBar(content: Text('삭제 실패: $e')));
+                  ).showSnackBar(SnackBar(content: Text('처리 실패: $e')));
                 }
               }
             },
-            child: Text('삭제', style: TextStyle(color: AppColors.error)),
+            child: Text('그만하기', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRestartPlanDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('새 스케줄로 다시 시작할까요?'), // 25자 이내 권장
+        content: const Text(
+          '현재 약속은 중단 처리되고\n새로운 약속 만들기로 이동해요.\n기존 기록은 안전하게 보관돼요.',
+        ), // 줄바꿈으로 가독성 확보
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context); // Close Dialog
+
+              try {
+                if (plan.id != null) {
+                  // 1. Cancel Alarms
+                  await ref.read(settingAlarmUseCaseProvider).cancel(plan);
+
+                  // 2. Stop Current Plan
+                  await ref.read(recordRepositoryProvider).stopPlan(plan.id!);
+                }
+
+                if (context.mounted) {
+                  // 3. Navigate to Create Screen with 'template'
+                  // We pass the plan BUT verify in ViewModel to treat it as new if needed
+                  // Or manually strip ID here if ViewModel logic relies on ID presence
+                  // Let's pass it, and rely on PlanCreateViewModel treating it as template logic
+                  // Actually, PlanCreateViewModel logic: "if (intent is InitializePlanIntent) has ID -> Existing"
+                  // So we must pass a COPY without ID to treat as NEW.
+                  context.pushNamed(
+                    'plan-create',
+                    extra: plan.copyWith(id: null), // ID 제거하여 전달 -> 신규 생성 모드
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('처리 실패: $e')));
+                }
+              }
+            },
+            child: Text('다시 시작', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),

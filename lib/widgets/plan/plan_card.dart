@@ -220,6 +220,12 @@ class PlanCard extends StatelessWidget {
           'color': AppColors.textSecondary.withValues(alpha: 0.1),
           'textColor': AppColors.textSecondary,
         };
+      case PlanState.stopped:
+        return {
+          'text': '중단됨',
+          'color': AppColors.error.withValues(alpha: 0.1),
+          'textColor': AppColors.error,
+        };
     }
   }
 }

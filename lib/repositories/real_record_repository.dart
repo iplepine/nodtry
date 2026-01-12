@@ -386,6 +386,20 @@ class RealRecordRepository implements RecordRepository {
   }
 
   @override
+  Future<void> stopPlan(String planId) async {
+    debugPrint('[RealRecordRepository] stopPlan called. Plan ID: $planId');
+    try {
+      await _firestore.collection('plans').doc(planId).update({
+        'state': PlanState.stopped.toMap(),
+      });
+      debugPrint('[RealRecordRepository] Plan stopped successfully.');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error stopping plan: $e');
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> deletePlansByUserId(String uid) async {
     try {
       final plans = await _firestore

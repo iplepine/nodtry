@@ -106,21 +106,31 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       final managerId = connectedProfiles?.firstOrNull?.user.uid;
 
       final plan = Plan(
-        id: prevState.existingPlanId,
+        id: prevState.existingPlanId, // null for restart/new
         userId: userId,
         managerId: managerId,
-        startDate: prevState.originalPlan?.startDate ?? DateTime.now(),
-        endDate:
-            prevState.originalPlan?.endDate ??
-            DateTime.now().add(const Duration(days: 30)),
-        state: prevState.originalPlan?.state ?? PlanState.pendingApproval,
+        startDate: DateTime.now(), // Always reset start date for new/restart
+        endDate: DateTime.now().add(const Duration(days: 30)),
+        state: prevState.existingPlanId != null
+            ? (prevState.originalPlan?.state ?? PlanState.pendingApproval)
+            : PlanState.pendingApproval, // Always pending for new/restart
         items: [planItem],
-        createdAt: prevState.originalPlan?.createdAt ?? DateTime.now(),
-        completedDates: prevState.originalPlan?.completedDates ?? [],
-        verifiedDates: prevState.originalPlan?.verifiedDates ?? [],
-        lastCheerMessage: prevState.originalPlan?.lastCheerMessage,
-        lastCheerType: prevState.originalPlan?.lastCheerType,
-        lastCheerAt: prevState.originalPlan?.lastCheerAt,
+        createdAt: DateTime.now(), // Reset created
+        completedDates: prevState.existingPlanId != null
+            ? (prevState.originalPlan?.completedDates ?? [])
+            : [], // Reset history
+        verifiedDates: prevState.existingPlanId != null
+            ? (prevState.originalPlan?.verifiedDates ?? [])
+            : [], // Reset history
+        lastCheerMessage: prevState.existingPlanId != null
+            ? prevState.originalPlan?.lastCheerMessage
+            : null,
+        lastCheerType: prevState.existingPlanId != null
+            ? prevState.originalPlan?.lastCheerType
+            : null,
+        lastCheerAt: prevState.existingPlanId != null
+            ? prevState.originalPlan?.lastCheerAt
+            : null,
       );
 
       if (prevState.existingPlanId != null) {

@@ -5,7 +5,8 @@ enum PlanState {
   pendingApproval,
   active,
   completed,
-  rejected;
+  rejected,
+  stopped;
 
   String toMap() {
     switch (this) {
@@ -19,6 +20,8 @@ enum PlanState {
         return 'completed';
       case PlanState.rejected:
         return 'rejected';
+      case PlanState.stopped:
+        return 'stopped';
     }
   }
 
@@ -34,6 +37,8 @@ enum PlanState {
         return PlanState.completed;
       case 'rejected':
         return PlanState.rejected;
+      case 'stopped':
+        return PlanState.stopped;
       default:
         return PlanState.draft;
     }
