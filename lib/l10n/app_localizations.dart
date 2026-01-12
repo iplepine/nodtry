@@ -1286,6 +1286,12 @@ abstract class AppLocalizations {
   /// **'Link'**
   String get usLinkConfirm;
 
+  /// Header text showing partner name
+  ///
+  /// In en, this message translates to:
+  /// **'With {name}'**
+  String headerWithPartner(String name);
+
   /// No description provided for @usLinkEmailSuccess.
   ///
   /// In en, this message translates to:

@@ -332,6 +332,20 @@ class RealRecordRepository implements RecordRepository {
   }
 
   @override
+  Stream<List<HistoryItem>> getHistoryItemsByPlanIdStream(String planId) {
+    return _firestore
+        .collection('actions')
+        .where('planId', isEqualTo: planId)
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => HistoryItem.fromMap(doc.data(), doc.id))
+              .toList();
+        });
+  }
+
+  @override
   Future<void> createPlan(Plan plan) async {
     debugPrint(
       '[RealRecordRepository] createPlan called. Plan: ${plan.toMap()}',

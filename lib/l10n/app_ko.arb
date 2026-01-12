@@ -441,5 +441,13 @@
   "planTimeQuestion": "몇 시쯤 알려드릴까요?",
   "comfortingFuture": "오늘 하루도 수고했어요",
   "comfortingLate": "늦어도 괜찮아요",
-  "comfortingJustDoIt": "오늘 안에만 하면 돼요"
+  "comfortingJustDoIt": "오늘 안에만 하면 돼요",
+  "headerWithPartner": "{name}님과 함께",
+  "@headerWithPartner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

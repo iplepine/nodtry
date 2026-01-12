@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../utils/time_formatter.dart';
+import '../widgets/notification_setting_editor.dart';
+// import '../../../../features/plan/domain/usecases/setting_alarm_use_case.dart'; // Unused
+import '../../../../models/history_item.dart';
 import 'package:nod_try/providers/repository_provider.dart';
 
 class PlanDetailScreen extends ConsumerWidget {
@@ -87,7 +90,79 @@ class PlanDetailScreen extends ConsumerWidget {
                 context,
                 icon: Icons.access_time,
                 label: _getTimeText(time),
+                trailing: isMine
+                    ? Icon(Icons.edit, size: 16, color: AppColors.textSecondary)
+                    : null,
+                onTap: isMine
+                    ? () => _showEditNotificationDialog(context, ref)
+                    : null,
               ),
+              const SizedBox(height: 48),
+
+              // History Header
+              Text(
+                '실천 기록',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // History List
+              if (plan.id != null)
+                Expanded(
+                  child: StreamBuilder<List<HistoryItem>>(
+                    stream: ref
+                        .watch(getPlanHistoryUseCaseProvider)
+                        .execute(plan.id!),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        debugPrint('History Stream Error: ${snapshot.error}');
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              '기록을 불러오지 못했어요.\n${snapshot.error}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: AppColors.error),
+                            ),
+                          ),
+                        );
+                      }
+
+                      final items = snapshot.data ?? [];
+                      if (items.isEmpty) {
+                        return Center(
+                          child: Text(
+                            '아직 기록이 없어요.',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: AppColors.textSecondary),
+                          ),
+                        );
+                      }
+
+                      return ListView.separated(
+                        itemCount: items.length,
+                        separatorBuilder: (c, i) => const Divider(),
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          return _buildHistoryItem(context, item);
+                        },
+                      );
+                    },
+                  ),
+                )
+              else
+                Center(
+                  child: Text(
+                    '저장된 계획이 아닙니다.',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
             ],
           ),
         ),
@@ -95,23 +170,91 @@ class PlanDetailScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildHistoryItem(BuildContext context, HistoryItem item) {
+    IconData icon = Icons.help_outline;
+    Color color = AppColors.textDisabled;
+
+    switch (item.status) {
+      case HistoryStatus.done:
+      case HistoryStatus.actuallyDone:
+      case HistoryStatus.verified:
+        icon = Icons.check_circle;
+        color = AppColors.primary;
+        break;
+      case HistoryStatus.skipped:
+        icon = Icons.cancel_outlined;
+        color = AppColors.textDisabled;
+        break;
+      case HistoryStatus.rested:
+        icon = Icons.hotel;
+        color = AppColors.secondary;
+        break;
+    }
+
+    // Format Date: e.g. 1/12 (Mon)
+    // Simple util or manual
+    final dateStr = '${item.date.month}/${item.date.day}';
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: color),
+      title: Text(
+        _getHistoryStatusText(item.status),
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+      ),
+      subtitle: item.note != null && item.note!.isNotEmpty
+          ? Text(item.note!, style: TextStyle(color: AppColors.textSecondary))
+          : null,
+      trailing: Text(
+        dateStr,
+        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+      ),
+    );
+  }
+
+  String _getHistoryStatusText(HistoryStatus status) {
+    switch (status) {
+      case HistoryStatus.done:
+      case HistoryStatus.actuallyDone:
+      case HistoryStatus.verified:
+        return '완료';
+      case HistoryStatus.skipped:
+        return '건너뜀';
+      case HistoryStatus.rested:
+        return '휴식';
+    }
+  }
+
   Widget _buildInfoRow(
     BuildContext context, {
     required IconData icon,
     required String label,
+    Widget? trailing,
+    VoidCallback? onTap,
   }) {
-    return Row(
-      children: [
-        Icon(icon, size: 24, color: AppColors.textSecondary),
-        const SizedBox(width: 16),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w500,
-          ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          children: [
+            Icon(icon, size: 24, color: AppColors.textSecondary),
+            const SizedBox(width: 16),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (trailing != null) ...[const SizedBox(width: 8), trailing],
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -126,10 +269,159 @@ class PlanDetailScreen extends ConsumerWidget {
   }
 
   String _getTimeText(NotificationTime? time) {
-    if (time == null || time.type == 'none') return '시간 미정';
-    // Use TimeFormatter logic ideally, or simple formatting
-    final dt = DateTime(2020, 1, 1, time.hour, time.minute);
+    if (time == null || time.type == 'none') {
+      // Show target time (which is the goal time) even if alarm is off
+      // But if time is null, just show Undecided.
+      // Wait, current logic: if type == 'none', return '시간 미정'?
+      // The User wants "Time is set, Notification is optional".
+      // So if type == 'none' BUT time is set (hour/minute non zero or we trust hour/min), we should show time.
+      // NotificationTime.none() has 0:0.
+      // If I update logic to preserve time even if type='none', I should display it.
+      if (time != null && (time.hour != 0 || time.minute != 0)) {
+        // We have a time, but alarm is off.
+        // Display time.
+        final dt = DateTime(2020, 1, 1, time.targetHour, time.targetMinute);
+        return TimeFormatter.formatExactTime(dt);
+      }
+      return '시간 미정';
+    }
+    // Alarm ON
+    final dt = DateTime(2020, 1, 1, time.targetHour, time.targetMinute);
     return TimeFormatter.formatExactTime(dt);
+  }
+
+  void _showEditNotificationDialog(BuildContext context, WidgetRef ref) {
+    final notificationTime =
+        plan.items.first.notificationTime ?? NotificationTime.none();
+    // We need state for the editor.
+    NotificationTime tempTime = notificationTime;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Handle Bar
+                    Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 24),
+                      decoration: BoxDecoration(
+                        color: AppColors.divider,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+
+                    // Editor
+                    // Import needed? It's in the project already.
+                    // I will add import at top of file.
+                    // Assuming widget is imported.
+                    // NotificationSettingEditor is a widget I created.
+                    // I will need to replace the imports in this file too.
+                    NotificationSettingEditor(
+                      notificationTime: tempTime,
+                      onTimeChanged: (newTime) {
+                        setState(() {
+                          tempTime = newTime;
+                        });
+                      },
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Save Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          if (plan.id == null) return;
+
+                          try {
+                            // 1. Update Plan
+                            final updatedItems = List<PlanItem>.from(
+                              plan.items,
+                            );
+                            final firstItem = updatedItems[0];
+                            // PlanItem is immutable, copy manually or assume single item update
+                            // PlanItem doesn't have copyWith in snippet? I should check or create new.
+                            // PlanItem(..., notificationTime: tempTime, ...)
+                            final updatedItem = PlanItem(
+                              title: firstItem.title,
+                              days: firstItem.days,
+                              count: firstItem.count,
+                              description: firstItem.description,
+                              notificationTime: tempTime,
+                            );
+                            updatedItems[0] = updatedItem;
+
+                            final updatedPlan = plan.copyWith(
+                              items: updatedItems,
+                            );
+
+                            await ref
+                                .read(recordRepositoryProvider)
+                                .updatePlan(updatedPlan);
+
+                            // 2. Reschedule Alarm
+                            await ref
+                                .read(settingAlarmUseCaseProvider)
+                                .execute(updatedPlan);
+
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('알림 설정이 저장되었어요.')),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('저장 실패: $e')),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          '저장',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _showStopCurrentPlanDialog(BuildContext context, WidgetRef ref) {

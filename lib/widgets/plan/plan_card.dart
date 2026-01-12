@@ -33,8 +33,9 @@ class PlanCard extends StatelessWidget {
         })
         .join(', ');
 
-    final timeString = time != null
-        ? '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'
+    final isAlarmOn = time != null && time.type != 'none';
+    final displayTime = time != null
+        ? '${time.targetHour.toString().padLeft(2, '0')}:${time.targetMinute.toString().padLeft(2, '0')}'
         : '시간 미정';
 
     // Status Badge Logic
@@ -133,11 +134,24 @@ class PlanCard extends StatelessWidget {
                               style: TextStyle(color: AppColors.textDisabled),
                             ),
                           ),
+                          if (isAlarmOn) ...[
+                            Icon(
+                              Icons.notifications_active_rounded,
+                              size: 14,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 4),
+                          ],
                           Text(
-                            timeString,
+                            displayTime,
                             style: TextStyle(
-                              color: AppColors.textSecondary,
+                              color: isAlarmOn
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
                               fontSize: 13,
+                              fontWeight: isAlarmOn
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
                             ),
                           ),
                         ],

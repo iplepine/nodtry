@@ -627,6 +627,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usLinkConfirm => '연결';
 
   @override
+  String headerWithPartner(String name) {
+    return '$name님과 함께';
+  }
+
+  @override
   String get usLinkEmailSuccess => '이메일 계정이 성공적으로 연결되었습니다!';
 
   @override

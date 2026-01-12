@@ -798,6 +798,15 @@
   "usEmailLabel": "Email",
   "usPasswordLabel": "Password",
   "usLinkConfirm": "Link",
+  "headerWithPartner": "With {name}",
+  "@headerWithPartner": {
+    "description": "Header text showing partner name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "usLinkEmailSuccess": "Email account linked successfully!",
   "emailHint": "Enter your email",
   "passwordHint": "Enter your password",

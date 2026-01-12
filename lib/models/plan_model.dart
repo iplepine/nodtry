@@ -211,16 +211,40 @@ class NotificationTime {
   final String value; // 'morning' | 'lunch' | 'dinner' | 'bedtime' | 'HH:mm'
   final int hour;
   final int minute;
+  final int alertOffset; // minutes before (0 means at time)
 
   NotificationTime({
     required this.type,
     required this.value,
     required this.hour,
     required this.minute,
+    this.alertOffset = 0,
   });
 
+  NotificationTime copyWith({
+    String? type,
+    String? value,
+    int? hour,
+    int? minute,
+    int? alertOffset,
+  }) {
+    return NotificationTime(
+      type: type ?? this.type,
+      value: value ?? this.value,
+      hour: hour ?? this.hour,
+      minute: minute ?? this.minute,
+      alertOffset: alertOffset ?? this.alertOffset,
+    );
+  }
+
   Map<String, dynamic> toMap() {
-    return {'type': type, 'value': value, 'hour': hour, 'minute': minute};
+    return {
+      'type': type,
+      'value': value,
+      'hour': hour,
+      'minute': minute,
+      'alertOffset': alertOffset,
+    };
   }
 
   factory NotificationTime.fromMap(Map<String, dynamic> map) {
@@ -229,6 +253,7 @@ class NotificationTime {
       value: map['value'] ?? 'dinner',
       hour: map['hour']?.toInt() ?? 20,
       minute: map['minute']?.toInt() ?? 0,
+      alertOffset: map['alertOffset']?.toInt() ?? 0,
     );
   }
 
@@ -256,20 +281,38 @@ class NotificationTime {
       value: value,
       hour: hour,
       minute: minute,
+      alertOffset: 0,
     );
   }
 
-  static NotificationTime custom(int hour, int minute) {
+  static NotificationTime custom(int hour, int minute, {int alertOffset = 0}) {
     return NotificationTime(
       type: 'custom',
       value:
           '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}',
       hour: hour,
       minute: minute,
+      alertOffset: alertOffset,
     );
   }
 
+  int get targetHour {
+    final total = hour * 60 + minute + alertOffset;
+    return (total % 1440) ~/ 60;
+  }
+
+  int get targetMinute {
+    final total = hour * 60 + minute + alertOffset;
+    return (total % 1440) % 60;
+  }
+
   static NotificationTime none() {
-    return NotificationTime(type: 'none', value: 'none', hour: 0, minute: 0);
+    return NotificationTime(
+      type: 'none',
+      value: 'none',
+      hour: 0,
+      minute: 0,
+      alertOffset: 0,
+    );
   }
 }

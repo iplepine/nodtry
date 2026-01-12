@@ -6,6 +6,7 @@ import '../usecases/cancel_all_notifications_use_case.dart';
 import '../services/notification_service.dart' as local_notifications;
 import '../features/now/domain/usecases/get_now_cards_use_case.dart';
 import '../features/history/domain/usecases/get_history_use_case.dart';
+import '../features/plan/domain/usecases/get_plan_history_use_case.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -280,4 +281,8 @@ final getNowCardsUseCaseProvider = Provider<GetNowCardsUseCase>((ref) {
 
 final getHistoryUseCaseProvider = Provider<GetHistoryUseCase>((ref) {
   return GetHistoryUseCase(ref.watch(recordRepositoryProvider));
+});
+
+final getPlanHistoryUseCaseProvider = Provider<GetPlanHistoryUseCase>((ref) {
+  return GetPlanHistoryUseCase(ref.watch(recordRepositoryProvider));
 });

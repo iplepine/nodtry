@@ -200,6 +200,33 @@ class MockRecordRepository implements RecordRepository {
     });
   }
 
+  @override
+  Stream<List<HistoryItem>> getHistoryItemsByPlanIdStream(String planId) {
+    // This stream should emit the current state immediately, then follow updates.
+    // Create a controller to manage this behavior.
+    late StreamController<List<HistoryItem>> controller;
+    StreamSubscription<List<HistoryItem>>? subscription;
+
+    controller = StreamController<List<HistoryItem>>(
+      onListen: () {
+        // Emit initial value
+        controller.add(
+          _mockHistoryItems.where((item) => item.planId == planId).toList(),
+        );
+
+        // Listen to updates
+        subscription = _historyStreamController.stream.listen((items) {
+          controller.add(items.where((item) => item.planId == planId).toList());
+        });
+      },
+      onCancel: () {
+        subscription?.cancel();
+      },
+    );
+
+    return controller.stream;
+  }
+
   void _notifyStream() {
     _streamController.add(_mockHomeCardModels);
   }

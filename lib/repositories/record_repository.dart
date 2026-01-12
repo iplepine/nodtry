@@ -74,4 +74,7 @@ abstract class RecordRepository {
 
   /// 계획 실천 확인 (매니저가 파트너의 실천을 확인)
   Future<void> verifyPlan(String planId);
+
+  /// 특정 계획의 히스토리 아이템 목록을 스트림으로 가져옵니다.
+  Stream<List<HistoryItem>> getHistoryItemsByPlanIdStream(String planId);
 }

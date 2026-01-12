@@ -641,6 +641,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usLinkConfirm => 'Link';
 
   @override
+  String headerWithPartner(String name) {
+    return 'With $name';
+  }
+
+  @override
   String get usLinkEmailSuccess => 'Email account linked successfully!';
 
   @override

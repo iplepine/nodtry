@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../l10n/app_localizations.dart';
 
 /// Quiet Context Header
 ///
@@ -54,8 +55,14 @@ class QuietHeader extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    // Only apply format if partnerName is provided (assuming relationshipAlias might be "Jimin" too, but safe to format)
+    final l10n = AppLocalizations.of(context)!;
+    final text = partnerName != null
+        ? l10n.headerWithPartner(displayName)
+        : displayName;
+
     return Text(
-      displayName,
+      text,
       style: Theme.of(
         context,
       ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),

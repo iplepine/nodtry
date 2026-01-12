@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
+import 'notification_setting_editor.dart';
 
 class PlanDaySelectionStep extends StatelessWidget {
   final Set<int> selectedDays;
@@ -67,107 +68,14 @@ class PlanDaySelectionStep extends StatelessWidget {
           }),
         ),
         const SizedBox(height: 48),
-        Text(
-          l10n.planNotificationTimeOptional,
-          style: TextStyle(
-            fontSize: 18, // Slightly smaller than main title
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          "제 시간에 못 해도 괜찮아요. 오늘 안에만 하면 돼요.", // Warm copy - Keep hardcoded for now or add new key? Sticking to plan.
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.only(top: 8, bottom: 24),
-          child: InkWell(
-            onTap: () async {
-              final initialTime = TimeOfDay(
-                hour: notificationTime.hour,
-                minute: notificationTime.minute,
-              );
-              final picked = await showTimePicker(
-                context: context,
-                initialTime: initialTime,
-                builder: (context, child) {
-                  return Theme(
-                    data: Theme.of(context).copyWith(
-                      colorScheme: ColorScheme.light(
-                        primary: AppColors.primary,
-                        onPrimary: Colors.white,
-                        onSurface: AppColors.textPrimary,
-                      ),
-                      textButtonTheme: TextButtonThemeData(
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                    child: child!,
-                  );
-                },
-              );
 
-              if (picked != null) {
-                onTimeChanged(
-                  NotificationTime.custom(picked.hour, picked.minute),
-                );
-              }
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.divider),
-                borderRadius: BorderRadius.circular(12),
-                color: AppColors.surface,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.access_time_rounded,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    _formatTimeOfDay(
-                      TimeOfDay(
-                        hour: notificationTime.hour,
-                        minute: notificationTime.minute,
-                      ),
-                      context,
-                    ),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: AppColors.textSecondary,
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
-          ),
+        NotificationSettingEditor(
+          notificationTime: notificationTime,
+          onTimeChanged: onTimeChanged,
         ),
+        const SizedBox(height: 32),
       ],
     );
-  }
-
-  String _formatTimeOfDay(TimeOfDay time, BuildContext context) {
-    // Basic formatting or use TimeFormatter if available.
-    // Localized formatting:
-    final localizations = MaterialLocalizations.of(context);
-    return localizations.formatTimeOfDay(time, alwaysUse24HourFormat: false);
   }
 
   Widget _buildDayChip(
