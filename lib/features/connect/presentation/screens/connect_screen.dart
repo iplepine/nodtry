@@ -112,9 +112,32 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   // I will check the file content first to be safe, or just view_file.
   // But to be quick, I'll update `_copyCode` and `_shareCode` to accept arguments and remove old `_buildCodeCard` if present.
 
-  void _connectManually() {
+  Future<void> _connectManually() async {
     final code = _codeController.text;
     if (code.length == 8) {
+      // 1. 이미 연결된 파트너가 있는지 확인
+      final profiles = await ref.read(connectedProfilesProvider.future);
+      if (profiles.isNotEmpty) {
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('알림'),
+            content: const Text(
+              '현재 연결된 파트너가 있어요.\n더 많은 파트너와의 연결은 추후 지원될 예정이에요.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('확인', style: TextStyle(color: AppColors.primary)),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+
+      // 2. 연결 요청
       ref
           .read(connectViewModelProvider.notifier)
           .dispatch(SubmitInviteCodeIntent(code));

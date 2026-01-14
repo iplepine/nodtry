@@ -46,7 +46,8 @@ class RealRecordRepository implements RecordRepository {
           .where(
             (p) =>
                 p.state == PlanState.active ||
-                p.state == PlanState.pendingApproval,
+                p.state == PlanState.pendingApproval ||
+                p.state == PlanState.rejected,
           )
           .toList();
 
@@ -112,6 +113,18 @@ class RealRecordRepository implements RecordRepository {
     bool hasAnyPlanToday = false;
 
     for (var plan in myPlans) {
+      // 1. Rejected Check (Top Priority)
+      if (plan.state == PlanState.rejected) {
+        mineCards.add(
+          HomeCardModel(
+            state: HomeCardState.rejected,
+            plan: plan,
+            headerMessage: '파트너가 조율을 요청했어요',
+          ),
+        );
+        continue; // Skip other checks for this plan
+      }
+
       if (now.isBefore(plan.startDate) || now.isAfter(plan.endDate)) {
         continue;
       }
@@ -909,6 +922,23 @@ class RealRecordRepository implements RecordRepository {
       }
     } catch (e) {
       debugPrint('[RealRecordRepository] Error verifying plan: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> rejectPlan(String planId, {String? reason}) async {
+    debugPrint('[RealRecordRepository] rejectPlan called. Plan ID: $planId');
+    try {
+      final updateData = <String, dynamic>{'state': PlanState.rejected.toMap()};
+      if (reason != null && reason.isNotEmpty) {
+        updateData['lastComment'] = reason;
+      }
+
+      await _firestore.collection('plans').doc(planId).update(updateData);
+      debugPrint('[RealRecordRepository] Plan rejected successfully.');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error rejecting plan: $e');
       rethrow;
     }
   }

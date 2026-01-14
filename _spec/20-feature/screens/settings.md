@@ -24,3 +24,7 @@
 ### 2.3 정보
 6. **버전 정보 (Version Info)**
    - 현재 앱의 버전을 확인한다.
+
+### 2.4 지원 (Support)
+7. **개발자 응원하기 (Support Developer)**
+   - 앱 내 결제(In-App Purchase)를 통해 개발자에게 후원(커피 사주기)한다.

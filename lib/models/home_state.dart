@@ -23,6 +23,9 @@ enum HomeCardState {
   /// Type 1-6: Overdue (기한 지남)
   overdue,
 
+  /// Type 1-7: Rejected (반려됨/조율 요청)
+  rejected,
+
   // --- Yours (너의 활동) ---
   /// Type 2-1: Partner Plan Create (계획 제안)
   partnerPlanCreate,
@@ -63,6 +66,7 @@ extension HomeCardStatePriority on HomeCardState {
       case HomeCardState.todayEmpty:
       case HomeCardState.todayComplete:
       case HomeCardState.overdue:
+      case HomeCardState.rejected:
         return CardRole.mine;
       case HomeCardState.partnerPlanCreate:
       case HomeCardState.partnerPlanModify:
@@ -75,6 +79,8 @@ extension HomeCardStatePriority on HomeCardState {
   /// 낮을수록 높은 우선순위
   int get minePrimaryPriority {
     switch (this) {
+      case HomeCardState.rejected:
+        return 0; // 0순위: 반려됨 (가장 급함)
       case HomeCardState.nowAction:
         return 1; // 1순위: 지금 실천
       case HomeCardState.overdue:

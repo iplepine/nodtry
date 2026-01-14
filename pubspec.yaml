@@ -60,6 +60,7 @@ dependencies:
   shimmer: ^3.0.0
   rxdart: ^0.28.0
   google_fonts: ^6.3.2
+  in_app_purchase: ^3.2.3
 
 dev_dependencies:
   flutter_test:

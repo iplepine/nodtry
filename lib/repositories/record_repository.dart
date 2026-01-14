@@ -75,6 +75,9 @@ abstract class RecordRepository {
   /// 계획 실천 확인 (매니저가 파트너의 실천을 확인)
   Future<void> verifyPlan(String planId);
 
+  /// 계획 반려(조율 요청) (pending_approval -> rejected)
+  Future<void> rejectPlan(String planId, {String? reason});
+
   /// 특정 계획의 히스토리 아이템 목록을 스트림으로 가져옵니다.
   Stream<List<HistoryItem>> getHistoryItemsByPlanIdStream(String planId);
 }

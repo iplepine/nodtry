@@ -158,6 +158,110 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
+  Future<void> _handleReject(HomeCardModel managerCard) async {
+    if (managerCard.plan?.id == null) return;
+
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('조금 더 조율해볼까요?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildRejectOption(context, '빈도를 조금 줄여보자'),
+            const SizedBox(height: 8),
+            _buildRejectOption(context, '다른 시간대가 좋을 것 같아'),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () async {
+                Navigator.pop(context, 'custom');
+              },
+              style: _rejectOptionStyle(),
+              child: const Text('직접 입력하기'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+        ],
+      ),
+    );
+
+    if (reason == null) return;
+
+    String? finalReason = reason;
+    if (reason == 'custom') {
+      if (!mounted) return;
+      finalReason = await _showCustomRejectInput(context);
+    }
+
+    if (finalReason != null && finalReason.isNotEmpty) {
+      if (!mounted) return;
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(
+            RejectPlanIntent(managerCard.plan!.id!, reason: finalReason),
+          );
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('조율을 요청했어요')));
+      }
+    }
+  }
+
+  Future<String?> _showCustomRejectInput(BuildContext context) {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('어떤 점을 조율할까요?'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: '예: 주 3회로 시작해보는 건 어때?',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: const Text('보내기'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRejectOption(BuildContext context, String text) {
+    return OutlinedButton(
+      onPressed: () => Navigator.pop(context, text),
+      style: _rejectOptionStyle(),
+      child: Text(text),
+    );
+  }
+
+  ButtonStyle _rejectOptionStyle() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: AppColors.textPrimary,
+      side: BorderSide(color: AppColors.textSecondary.withValues(alpha: 0.3)),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    );
+  }
+
   Future<void> _handleCheer(HomeCardModel managerCard) async {
     if (managerCard.plan?.id == null) return;
 
@@ -233,6 +337,13 @@ class _NowTabState extends ConsumerState<NowTab>
   void _handleCreatePlan() {
     // 계획 생성 플로우 진입
     context.push(AppRoutes.planCreate);
+  }
+
+  void _handleModify(HomeCardModel card) {
+    // 계획 수정 (반려된 계획 재수정)
+    if (card.plan != null) {
+      context.push(AppRoutes.planCreate, extra: card.plan);
+    }
   }
 
   /// Time Chip 텍스트 가져오기
@@ -565,6 +676,9 @@ class _NowTabState extends ConsumerState<NowTab>
                                       onDidIt: _handleDidIt,
                                       onSkip: _handleSkip,
                                       onCreatePlan: _handleCreatePlan,
+                                      onModify: () => _handleModify(
+                                        primaryExecutorCard,
+                                      ), // Added
                                       onTap: () =>
                                           _handleCardTap(primaryExecutorCard),
                                       timeChipText: _getTimeChipText(
@@ -658,6 +772,8 @@ class _NowTabState extends ConsumerState<NowTab>
                                       model: card,
                                       partnerName: card.partnerName,
                                       onCheckIt: () => _handleCheckIt(card),
+                                      onReject: () =>
+                                          _handleReject(card), // Added
                                       onCheer: () => _handleCheer(card),
                                       onPass: () => _handlePass(card),
                                       onSimpleCheer: () =>
@@ -994,6 +1110,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final VoidCallback? onDidIt;
   final VoidCallback? onSkip;
   final VoidCallback? onCreatePlan;
+  final VoidCallback? onModify; // Added
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? recordGazeText;
@@ -1004,6 +1121,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     this.onDidIt,
     this.onSkip,
     this.onCreatePlan,
+    this.onModify, // Added
     this.onTap,
     this.timeChipText,
     this.timeChipType,
@@ -1131,6 +1249,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
           break;
         case HomeCardState.todayEmpty: // Type 2-2 B: 여유로운 날
           statusMessage = l10n.nowQuietRest;
+          break;
+        case HomeCardState.rejected: // Type 1-7: 반려됨
+          statusMessage = '조율이 필요해요'; // Fallback if headerMessage is null
           break;
         case HomeCardState.nextAction: // Type 1-3: 다음 일정
           // Next Action usually uses headerMessage or defaults to nothing special
@@ -1263,6 +1384,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
     } else if (model.state == HomeCardState.emptyPlan) {
       buttonText = l10n.nowCreatePlan;
       onPressed = onCreatePlan;
+    } else if (model.state == HomeCardState.rejected) {
+      buttonText = '수정하기'; // "Modify"
+      onPressed = onModify;
     } else if (model.state == HomeCardState.todayComplete ||
         model.state == HomeCardState.todayEmpty) {
       // "작은 버튼" 요청: TextButton으로 구현
@@ -1752,6 +1876,7 @@ class _ManagerQuickCard extends StatelessWidget {
   final VoidCallback? onPass;
   final VoidCallback? onSimpleCheer;
   final VoidCallback? onMoreCheer;
+  final VoidCallback? onReject; // Added
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? exactTimeText;
@@ -1764,6 +1889,7 @@ class _ManagerQuickCard extends StatelessWidget {
     this.onPass,
     this.onSimpleCheer,
     this.onMoreCheer,
+    this.onReject, // Added
     this.timeChipText,
     this.timeChipType,
     this.exactTimeText,
@@ -1901,14 +2027,14 @@ class _ManagerQuickCard extends StatelessWidget {
                 model.state == HomeCardState.partnerPlanModify) ...[
               if (model.headerMessage != '함께하는 중') ...[
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: onCheckIt,
-                    style:
-                        ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: onReject,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: AppColors.primary),
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -1917,25 +2043,55 @@ class _ManagerQuickCard extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                        ).copyWith(
-                          overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                            (states) {
-                              if (states.contains(WidgetState.pressed)) {
-                                return AppColors.primaryPressed;
-                              }
-                              return null;
-                            },
+                        ),
+                        child: Text(
+                          "조율하기",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
                           ),
                         ),
-                    child: Text(
-                      l10n.homeCheckIt,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: onCheckIt,
+                        style:
+                            ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ).copyWith(
+                              overlayColor:
+                                  WidgetStateProperty.resolveWith<Color?>((
+                                    states,
+                                  ) {
+                                    if (states.contains(WidgetState.pressed)) {
+                                      return AppColors.primaryPressed;
+                                    }
+                                    return null;
+                                  }),
+                            ),
+                        child: Text(
+                          l10n.homeCheckIt,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ] else if (model.state == HomeCardState.partnerAction) ...[

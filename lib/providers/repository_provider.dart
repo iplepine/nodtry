@@ -23,6 +23,7 @@ import '../repositories/user_repository.dart';
 import '../repositories/mock_user_repository.dart';
 import '../repositories/real_user_repository.dart';
 import '../usecases/update_profile_use_case.dart';
+import '../services/iap_service.dart'; // Added
 import '../features/auth/domain/usecases/auto_login_use_case.dart';
 import '../features/auth/domain/usecases/link_with_google_use_case.dart';
 import '../features/auth/domain/usecases/link_with_email_use_case.dart';
@@ -293,3 +294,7 @@ final getPlansByUserIdStreamProvider =
       final repository = ref.watch(recordRepositoryProvider);
       return repository.getPlansByUserIdStream(userId);
     });
+
+final iapServiceProvider = NotifierProvider<IAPService, IAPState>(() {
+  return IAPService();
+});

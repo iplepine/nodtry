@@ -21,6 +21,8 @@ class MockRecordRepository extends Fake implements RecordRepository {
   String? lastCheeredPlanId;
   int passPlanCallCount = 0;
   String? lastPassedPlanId;
+  int rejectPlanCallCount = 0;
+  String? lastRejectedPlanId;
 
   // Stream Controller for testing real-time updates
   final _controller = StreamController<List<HomeCardModel>>.broadcast();
@@ -60,6 +62,13 @@ class MockRecordRepository extends Fake implements RecordRepository {
   Future<void> passPlan(String planId) async {
     passPlanCallCount++;
     lastPassedPlanId = planId;
+    emit(_currentValue);
+  }
+
+  @override
+  Future<void> rejectPlan(String planId, {String? reason}) async {
+    rejectPlanCallCount++;
+    lastRejectedPlanId = planId;
     emit(_currentValue);
   }
 
@@ -252,5 +261,20 @@ void main() {
 
     expect(mockRecordRepository.reportSkipCallCount, 1);
     expect(mockRecordRepository.lastSkippedPlanId, 'plan-skip-123');
+  });
+
+  test('RejectPlanIntent should call repository', () async {
+    mockGetNowCardsUseCase.emit([]);
+    await container.read(nowTabViewModelProvider.future);
+    mockRecordRepository.rejectPlanCallCount = 0;
+
+    await container
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(
+          const RejectPlanIntent('plan-reject-123', reason: 'Too frequent'),
+        );
+
+    expect(mockRecordRepository.rejectPlanCallCount, 1);
+    expect(mockRecordRepository.lastRejectedPlanId, 'plan-reject-123');
   });
 }

@@ -134,3 +134,21 @@ class VerifyPartnerPlanIntent extends NowTabIntent {
   @override
   int get hashCode => planId.hashCode;
 }
+
+/// 계획 반려 (pending_approval -> rejected)
+class RejectPlanIntent extends NowTabIntent {
+  final String planId;
+  final String? reason;
+  const RejectPlanIntent(this.planId, {this.reason});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RejectPlanIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId &&
+          reason == other.reason;
+
+  @override
+  int get hashCode => planId.hashCode ^ reason.hashCode;
+}

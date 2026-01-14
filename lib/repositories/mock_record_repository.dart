@@ -601,4 +601,21 @@ class MockRecordRepository implements RecordRepository {
       _notifyHistoryStream();
     }
   }
+
+  @override
+  Future<void> rejectPlan(String planId, {String? reason}) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final index = _mockPlans.indexWhere((p) => p.id == planId);
+    if (index != -1) {
+      _mockPlans[index] = _mockPlans[index].copyWith(
+        state: PlanState.rejected,
+        lastComment: reason, // 반려 사유를 lastComment에 저장 (임시 약속)
+      );
+      _notifyPlansStream();
+
+      // Update HomeCards to reflect change (remove from Manager Cards)
+      _mockHomeCardModels.removeWhere((m) => m.plan?.id == planId);
+      _notifyStream();
+    }
+  }
 }

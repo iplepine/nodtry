@@ -99,6 +99,8 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         await _approvePlan(intent.planId);
       } else if (intent is VerifyPartnerPlanIntent) {
         await _verifyPlan(intent.planId);
+      } else if (intent is RejectPlanIntent) {
+        await _rejectPlan(intent.planId, intent.reason);
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -138,6 +140,10 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _approvePlan(String planId) async {
     await ref.read(recordRepositoryProvider).approvePlan(planId);
+  }
+
+  Future<void> _rejectPlan(String planId, String? reason) async {
+    await ref.read(recordRepositoryProvider).rejectPlan(planId, reason: reason);
   }
 
   Future<void> _verifyPlan(String planId) async {

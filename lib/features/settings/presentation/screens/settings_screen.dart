@@ -9,7 +9,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme_enum.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
-// removed unused repository_provider import
+import '../../../../providers/repository_provider.dart';
 
 /// 설정 화면 - 언어 및 테마 변경
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -154,6 +154,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
               // 알림 설정 (New)
               _buildNotificationSettingsOption(context),
+              const SizedBox(height: 32),
+
+              // 지원 (New)
+              Text(
+                '지원', // l10n.settingsSupport (Need to add to l10n later, hardcode for now or generic)
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildDonationOption(context, ref),
               const SizedBox(height: 32),
 
               // 계정 관리
@@ -432,6 +445,92 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 if (isSelected)
                   Icon(Icons.check_circle, color: AppColors.primary, size: 24),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDonationOption(BuildContext context, WidgetRef ref) {
+    // Watch IAP State
+    final iapState = ref.watch(iapServiceProvider);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async {
+          if (!iapState.isAvailable) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('스토어와 연결할 수 없어요. (설정 확인 필요)')),
+            );
+            return;
+          }
+          if (iapState.isPurchasing) return;
+
+          // Call notifier method
+          await ref.read(iapServiceProvider.notifier).buyCoffee();
+
+          if (iapState.purchaseError != null && context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(iapState.purchaseError!)));
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider, width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Text('☕', style: TextStyle(fontSize: 20)),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '개발자에게 커피 사주기',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      if (iapState.isPurchasing)
+                        Text(
+                          '결제 처리 중...',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      else
+                        Text(
+                          '따뜻한 커피 한 잔이 큰 힘이 됩니다!',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: AppColors.textDisabled),
               ],
             ),
           ),
