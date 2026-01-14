@@ -587,6 +587,26 @@ class _NowTabState extends ConsumerState<NowTab>
                             ),
                           ),
                           const SizedBox(height: 16),
+                        ] else if (secondaryExecutorCards.isEmpty &&
+                            managerCards.isEmpty) ...[
+                          // Empty State (No Plan)
+                          FadeTransition(
+                            opacity: _primaryFadeAnimation,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: FractionallySizedBox(
+                                widthFactor: 0.9,
+                                child: _PrimaryExecutorCard(
+                                  model: const HomeCardModel(
+                                    state: HomeCardState.emptyPlan,
+                                  ),
+                                  onCreatePlan: _handleCreatePlan,
+                                  onTap: _handleCreatePlan,
+                                ).wrapWithGlass(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                         ],
                         // Secondary Executor Cards (My Contexts)
                         if (secondaryExecutorCards.isNotEmpty) ...[
@@ -689,7 +709,21 @@ class _NowTabState extends ConsumerState<NowTab>
     } else {
       // 에러 상황이나 빈 상황이지만 데이터가 없는 경우 -> 빈 화면 반환 (다이얼로그가 에러를 보여줌)
       // 혹은 "다시 시도" 버튼 정도는 보여줄 수 있음.
-      return const SizedBox.shrink();
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              "잠시 후 다시 시도해주세요",
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+      );
     }
   }
 
