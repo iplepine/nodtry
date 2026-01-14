@@ -5,6 +5,7 @@ import '../screens/home_screen.dart';
 import '../screens/developer_screen.dart';
 import '../features/plan/presentation/screens/plan_create_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/settings/presentation/screens/notification_settings_screen.dart';
 import '../features/auth/presentation/screens/email_login_screen.dart';
 import '../models/plan_model.dart';
 import '../features/plan/presentation/screens/plan_detail_screen.dart';
@@ -137,6 +138,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.emailLogin,
         name: 'email-login',
         builder: (context, state) => const EmailLoginScreen(),
+      ),
+      GoRoute(
+        path: '/settings/notifications',
+        name: 'notification-settings',
+        builder: (context, state) => const NotificationSettingsScreen(),
       ),
     ],
   );

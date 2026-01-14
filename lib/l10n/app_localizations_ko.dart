@@ -921,4 +921,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get comfortingJustDoIt => '오늘 안에만 하면 돼요';
+
+  @override
+  String get settingsNotifications => '알림 설정';
+
+  @override
+  String get notificationSettingsTitle => '알림 관리';
+
+  @override
+  String get noActiveAlarms => '설정된 알림이 없어요';
 }

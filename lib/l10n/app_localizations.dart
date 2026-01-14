@@ -1831,6 +1831,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Just do it today'**
   String get comfortingJustDoIt;
+
+  /// No description provided for @settingsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotifications;
+
+  /// No description provided for @notificationSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Manager'**
+  String get notificationSettingsTitle;
+
+  /// No description provided for @noActiveAlarms.
+  ///
+  /// In en, this message translates to:
+  /// **'No active alarms'**
+  String get noActiveAlarms;
 }
 
 class _AppLocalizationsDelegate

@@ -937,4 +937,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comfortingJustDoIt => 'Just do it today';
+
+  @override
+  String get settingsNotifications => 'Notifications';
+
+  @override
+  String get notificationSettingsTitle => 'Notification Manager';
+
+  @override
+  String get noActiveAlarms => 'No active alarms';
 }

@@ -152,6 +152,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 32),
               ],
 
+              // 알림 설정 (New)
+              _buildNotificationSettingsOption(context),
               const SizedBox(height: 32),
 
               // 계정 관리
@@ -166,6 +168,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 16),
               _buildWithdrawOption(context),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationSettingsOption(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          context.pushNamed('notification-settings');
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider, width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.settingsNotifications, // '알림 설정'
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: AppColors.textDisabled),
+              ],
+            ),
           ),
         ),
       ),

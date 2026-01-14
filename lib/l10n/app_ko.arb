@@ -449,5 +449,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsNotifications": "알림 설정",
+  "notificationSettingsTitle": "알림 관리",
+  "noActiveAlarms": "설정된 알림이 없어요"
 }
