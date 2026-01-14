@@ -74,21 +74,28 @@ class IAPService extends Notifier<IAPState> {
     if (response.notFoundIDs.isNotEmpty) {
       debugPrint('Products not found: ${response.notFoundIDs}');
     }
-    state = state.copyWith(products: response.productDetails);
+    state = state.copyWith(
+      products: List<ProductDetails>.from(response.productDetails),
+    );
   }
 
   Future<void> buyCoffee() async {
     // 상품 확인
+    if (state.products.isEmpty) {
+      state = state.copyWith(purchaseError: 'Thank you for your support!');
+      debugPrint('IAP Error: No products loaded.');
+      return;
+    }
+
     final product = state.products.firstWhere(
       (p) => p.id == _coffeeProductId,
-      orElse: () => state.products.isNotEmpty
-          ? state.products.first
-          : throw Exception('Product NOT found'), // Fallback safety
+      orElse: () => state.products.first,
     );
 
-    if (!state.products.any((p) => p.id == _coffeeProductId)) {
-      state = state.copyWith(purchaseError: '상품 정보를 불러올 수 없습니다.');
-      return;
+    if (product.id != _coffeeProductId) {
+      debugPrint(
+        'Warning: Requested $_coffeeProductId but found ${product.id}',
+      );
     }
 
     final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);

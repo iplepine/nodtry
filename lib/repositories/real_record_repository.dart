@@ -726,6 +726,12 @@ class RealRecordRepository implements RecordRepository {
       final planTitle =
           (planData?['items'] as List?)?.firstOrNull?['title'] ?? '알 수 없는 계획';
 
+      // 1. Update Plan (Add to completedDates)
+      await _firestore.collection('plans').doc(planId).update({
+        'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+      });
+
+      // 2. Add to actions
       await _firestore.collection('actions').add({
         'userId': user.uid,
         'planId': planId,
