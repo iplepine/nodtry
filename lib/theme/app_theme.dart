@@ -41,6 +41,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colors.background, // 커스텀 배경색 유지
+      fontFamily: 'Pretendard', // 기본 한글 폰트
       textTheme: TextTheme(
         displayLarge: TextStyle(
           color: colors.textPrimary,

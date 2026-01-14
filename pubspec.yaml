@@ -59,6 +59,7 @@ dependencies:
   cached_network_image: ^3.4.1
   shimmer: ^3.0.0
   rxdart: ^0.28.0
+  google_fonts: ^6.3.2
 
 dev_dependencies:
   flutter_test:
@@ -121,7 +122,16 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Regular.otf
+          weight: 400
+        - asset: assets/fonts/Pretendard-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Pretendard-Bold.otf
+          weight: 700
+
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'dart:ui'; // To use backdrop filter
 import 'package:flutter/foundation.dart';
 import '../../../models/plan_model.dart';
 import 'package:go_router/go_router.dart';
@@ -92,7 +93,15 @@ class _NowTabState extends ConsumerState<NowTab>
       return;
     }
 
-    // 2. Shrink animation (Card disappears AFTER confirmation)
+    // 2. Success Animation: Scale Up slightly then Shrink
+    // First, animate scale up to 1.1 quickly
+    await _animationController.animateTo(
+      1.05,
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
+    );
+
+    // Then reverse (shrink)
     await _animationController.reverse();
 
     // 3. Dispatch Intent with note
@@ -571,7 +580,8 @@ class _NowTabState extends ConsumerState<NowTab>
                                         primaryExecutorCard,
                                       ),
                                     ),
-                                  ),
+                                    // Glassmorphism wrapper
+                                  ).wrapWithGlass(),
                                 ),
                               ),
                             ),
@@ -640,7 +650,7 @@ class _NowTabState extends ConsumerState<NowTab>
                                         card,
                                       ),
                                       exactTimeText: _getExactTimeText(card),
-                                    ),
+                                    ).wrapWithGlass(),
                                   ),
                                 ),
                               ),
@@ -2017,3 +2027,25 @@ class _ContextFooter extends StatelessWidget {
 }
 
 // _ReconcileMenu removed per user request (was unused after UI updates)
+
+extension GlassExtension on Widget {
+  Widget wrapWithGlass() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20), // Higher radius for glass effect
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.3), // Milky White Glass
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.2),
+              width: 1.5,
+            ),
+          ),
+          child: this,
+        ),
+      ),
+    );
+  }
+}
