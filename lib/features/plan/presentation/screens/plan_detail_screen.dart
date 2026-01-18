@@ -9,13 +9,52 @@ import '../widgets/notification_setting_editor.dart';
 import '../../../../models/history_item.dart';
 import 'package:nod_try/providers/repository_provider.dart';
 
-class PlanDetailScreen extends ConsumerWidget {
+class PlanDetailScreen extends ConsumerStatefulWidget {
   final Plan plan;
 
   const PlanDetailScreen({super.key, required this.plan});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PlanDetailScreen> createState() => _PlanDetailScreenState();
+}
+
+class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
+  late final ScrollController _scrollController;
+  late final ValueNotifier<bool> _showAppBarTitleNotifier;
+  bool _targetTitleState = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _showAppBarTitleNotifier = ValueNotifier(false);
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _showAppBarTitleNotifier.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    // Show title when scrolled past a certain threshold (e.g. 40)
+    final show = _scrollController.offset > 40;
+    if (show != _targetTitleState) {
+      _targetTitleState = show;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _showAppBarTitleNotifier.value = _targetTitleState;
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = widget.plan;
     // l10n unused for now
     final item = plan.items.first;
     final time = item.notificationTime;
@@ -29,6 +68,23 @@ class PlanDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
+        centerTitle: false,
+        title: ValueListenableBuilder<bool>(
+          valueListenable: _showAppBarTitleNotifier,
+          builder: (context, show, child) {
+            return AnimatedOpacity(
+              opacity: show ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: Text(
+                item.title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          },
+        ),
         leading: IconButton(
           icon: Icon(Icons.close, color: AppColors.textPrimary),
           onPressed: () => context.pop(),
@@ -47,82 +103,105 @@ class PlanDetailScreen extends ConsumerWidget {
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title
-              Text(
-                item.title,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
-                  height: 1.3,
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      item.title,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            height: 1.3,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Description
+                    if (item.description != null &&
+                        item.description!.isNotEmpty) ...[
+                      Text(
+                        item.description!,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColors.textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+
+                    // Divider
+                    Divider(
+                      color: AppColors.textDisabled.withValues(alpha: 0.2),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Info Rows
+                    _buildInfoRow(
+                      context,
+                      icon: Icons.calendar_today,
+                      label: _getDaysText(days),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildInfoRow(
+                      context,
+                      icon: Icons.access_time,
+                      label: _getTimeText(time),
+                      trailing: isMine
+                          ? Icon(
+                              Icons.edit,
+                              size: 16,
+                              color: AppColors.textSecondary,
+                            )
+                          : null,
+                      onTap: isMine
+                          ? () => _showEditNotificationDialog(context, ref)
+                          : null,
+                    ),
+                    const SizedBox(height: 48),
+
+                    // History Header
+                    Text(
+                      '실천 기록',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
+            ),
 
-              // Description
-              if (item.description != null && item.description!.isNotEmpty) ...[
-                Text(
-                  item.description!,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 32),
-              ],
-
-              // Divider
-              Divider(color: AppColors.textDisabled.withOpacity(0.2)),
-              const SizedBox(height: 32),
-
-              // Info Rows
-              _buildInfoRow(
-                context,
-                icon: Icons.calendar_today,
-                label: _getDaysText(days),
-              ),
-              const SizedBox(height: 24),
-              _buildInfoRow(
-                context,
-                icon: Icons.access_time,
-                label: _getTimeText(time),
-                trailing: isMine
-                    ? Icon(Icons.edit, size: 16, color: AppColors.textSecondary)
-                    : null,
-                onTap: isMine
-                    ? () => _showEditNotificationDialog(context, ref)
-                    : null,
-              ),
-              const SizedBox(height: 48),
-
-              // History Header
-              Text(
-                '실천 기록',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // History List
-              if (plan.id != null)
-                Expanded(
-                  child: StreamBuilder<List<HistoryItem>>(
-                    stream: ref
-                        .watch(getPlanHistoryUseCaseProvider)
-                        .execute(plan.id!),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        debugPrint('History Stream Error: ${snapshot.error}');
-                        return Center(
+            // History List
+            if (plan.id != null)
+              StreamBuilder<List<HistoryItem>>(
+                stream: ref
+                    .watch(getPlanHistoryUseCaseProvider)
+                    .execute(plan.id!),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 200,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    debugPrint('History Stream Error: ${snapshot.error}');
+                    return SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 200,
+                        child: Center(
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Text(
@@ -131,40 +210,55 @@ class PlanDetailScreen extends ConsumerWidget {
                               style: TextStyle(color: AppColors.error),
                             ),
                           ),
-                        );
-                      }
+                        ),
+                      ),
+                    );
+                  }
 
-                      final items = snapshot.data ?? [];
-                      if (items.isEmpty) {
-                        return Center(
+                  final items = snapshot.data ?? [];
+                  if (items.isEmpty) {
+                    return SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 200,
+                        child: Center(
                           child: Text(
                             '아직 기록이 없어요.',
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(color: AppColors.textSecondary),
                           ),
-                        );
-                      }
+                        ),
+                      ),
+                    );
+                  }
 
-                      return ListView.separated(
-                        itemCount: items.length,
-                        separatorBuilder: (c, i) => const Divider(),
-                        itemBuilder: (context, index) {
-                          final item = items[index];
-                          return _buildHistoryItem(context, item);
-                        },
-                      );
-                    },
-                  ),
-                )
-              else
-                Center(
-                  child: Text(
-                    '저장된 계획이 아닙니다.',
-                    style: TextStyle(color: AppColors.textSecondary),
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        if (index.isOdd) return const Divider();
+                        final itemIndex = index ~/ 2;
+                        final item = items[itemIndex];
+                        return _buildHistoryItem(context, item);
+                      }, childCount: items.length * 2 - 1),
+                    ),
+                  );
+                },
+              )
+            else
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: Text(
+                      '저장된 계획이 아닙니다.',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
                   ),
                 ),
-            ],
-          ),
+              ),
+            // Bottom Padding
+            const SliverToBoxAdapter(child: SizedBox(height: 48)),
+          ],
         ),
       ),
     );
@@ -292,7 +386,7 @@ class PlanDetailScreen extends ConsumerWidget {
 
   void _showEditNotificationDialog(BuildContext context, WidgetRef ref) {
     final notificationTime =
-        plan.items.first.notificationTime ?? NotificationTime.none();
+        widget.plan.items.first.notificationTime ?? NotificationTime.none();
     // We need state for the editor.
     NotificationTime tempTime = notificationTime;
 
@@ -349,12 +443,12 @@ class PlanDetailScreen extends ConsumerWidget {
                       child: ElevatedButton(
                         onPressed: () async {
                           Navigator.pop(context);
-                          if (plan.id == null) return;
+                          if (widget.plan.id == null) return;
 
                           try {
                             // 1. Update Plan
                             final updatedItems = List<PlanItem>.from(
-                              plan.items,
+                              widget.plan.items,
                             );
                             final firstItem = updatedItems[0];
                             // PlanItem is immutable, copy manually or assume single item update
@@ -369,7 +463,7 @@ class PlanDetailScreen extends ConsumerWidget {
                             );
                             updatedItems[0] = updatedItem;
 
-                            final updatedPlan = plan.copyWith(
+                            final updatedPlan = widget.plan.copyWith(
                               items: updatedItems,
                             );
 
@@ -439,12 +533,16 @@ class PlanDetailScreen extends ConsumerWidget {
             onPressed: () async {
               Navigator.pop(context); // Close Dialog
               try {
-                if (plan.id != null) {
+                if (widget.plan.id != null) {
                   // 1. Cancel related alarms
-                  await ref.read(settingAlarmUseCaseProvider).cancel(plan);
+                  await ref
+                      .read(settingAlarmUseCaseProvider)
+                      .cancel(widget.plan);
 
                   // 2. Stop plan
-                  await ref.read(recordRepositoryProvider).stopPlan(plan.id!);
+                  await ref
+                      .read(recordRepositoryProvider)
+                      .stopPlan(widget.plan.id!);
 
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -486,12 +584,16 @@ class PlanDetailScreen extends ConsumerWidget {
               Navigator.pop(context); // Close Dialog
 
               try {
-                if (plan.id != null) {
+                if (widget.plan.id != null) {
                   // 1. Cancel Alarms
-                  await ref.read(settingAlarmUseCaseProvider).cancel(plan);
+                  await ref
+                      .read(settingAlarmUseCaseProvider)
+                      .cancel(widget.plan);
 
                   // 2. Stop Current Plan
-                  await ref.read(recordRepositoryProvider).stopPlan(plan.id!);
+                  await ref
+                      .read(recordRepositoryProvider)
+                      .stopPlan(widget.plan.id!);
                 }
 
                 if (context.mounted) {
@@ -503,7 +605,9 @@ class PlanDetailScreen extends ConsumerWidget {
                   // So we must pass a COPY without ID to treat as NEW.
                   context.pushNamed(
                     'plan-create',
-                    extra: plan.copyWith(id: null), // ID 제거하여 전달 -> 신규 생성 모드
+                    extra: widget.plan.copyWith(
+                      id: null,
+                    ), // ID 제거하여 전달 -> 신규 생성 모드
                   );
                 }
               } catch (e) {
