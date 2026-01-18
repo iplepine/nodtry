@@ -101,6 +101,8 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         await _verifyPlan(intent.planId);
       } else if (intent is RejectPlanIntent) {
         await _rejectPlan(intent.planId, intent.reason);
+      } else if (intent is AcknowledgePokeIntent) {
+        await _acknowledgePoke(intent.planId);
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -148,6 +150,10 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _verifyPlan(String planId) async {
     await ref.read(recordRepositoryProvider).verifyPlan(planId);
+  }
+
+  Future<void> _acknowledgePoke(String planId) async {
+    await ref.read(recordRepositoryProvider).acknowledgePoke(planId);
   }
 
   /// 디버그 전용: Fake State 주입

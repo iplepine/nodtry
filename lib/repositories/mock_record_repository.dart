@@ -588,6 +588,21 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
+  Future<void> pokePartner(String planId, {String? message}) async {
+    // ignore: avoid_print
+    print('Mock: Poke partner for plan $planId with message: $message');
+    await Future.delayed(const Duration(milliseconds: 500));
+    // 실제 로직: 파트너의 HomeCardState에 'poked' 상태의 카드를 추가하거나 알림 전송
+  }
+
+  @override
+  Future<void> acknowledgePoke(String planId) async {
+    // ignore: avoid_print
+    print('Mock: Acknowledge poke for plan $planId');
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  @override
   Future<void> verifyPlan(String planId) async {
     await Future.delayed(const Duration(milliseconds: 500));
     // Verify Logic for Mock

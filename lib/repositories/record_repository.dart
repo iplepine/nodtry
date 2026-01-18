@@ -63,6 +63,13 @@ abstract class RecordRepository {
   /// 계획 넘기기 (카드 넘기기 - secondary etc)
   Future<void> passPlan(String planId);
 
+  /// 파트너 찌르기 (똑똑)
+  /// message: "똑똑... 혹시 잊으셨나요?" 등
+  Future<void> pokePartner(String planId, {String? message});
+
+  /// 찌르기 확인 (응답)
+  Future<void> acknowledgePoke(String planId);
+
   /// 과거 기록 소명 (HistoryItem 수정)
   Future<void> reconcileHistoryItem(String historyId, HistoryStatus status);
 

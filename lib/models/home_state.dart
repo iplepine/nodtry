@@ -23,6 +23,9 @@ enum HomeCardState {
   /// Type 1-6: Overdue (기한 지남)
   overdue,
 
+  /// Type 1-8: Poked (피드백/찌르기 받음)
+  poked,
+
   /// Type 1-7: Rejected (반려됨/조율 요청)
   rejected,
 
@@ -67,6 +70,7 @@ extension HomeCardStatePriority on HomeCardState {
       case HomeCardState.todayComplete:
       case HomeCardState.overdue:
       case HomeCardState.rejected:
+      case HomeCardState.poked:
         return CardRole.mine;
       case HomeCardState.partnerPlanCreate:
       case HomeCardState.partnerPlanModify:
@@ -81,15 +85,17 @@ extension HomeCardStatePriority on HomeCardState {
     switch (this) {
       case HomeCardState.rejected:
         return 0; // 0순위: 반려됨 (가장 급함)
+      case HomeCardState.poked:
+        return 0; // 0순위: 찌르기 받음 (반려와 동급, 즉시 확인 필요)
       case HomeCardState.nowAction:
         return 1; // 1순위: 지금 실천
       case HomeCardState.overdue:
         return 2; // 2순위: 지남 (NowAction 없을 때)
       case HomeCardState.todayComplete:
       case HomeCardState.todayEmpty:
-        return 3; // 3순위: 오늘 완료/없음
+        return 4; // 4순위: 오늘 완료/없음 (이전 3)
       case HomeCardState.emptyPlan:
-        return 4; // 4순위: 계획 없음 (CTA)
+        return 5; // 5순위: 계획 없음 (CTA) (이전 4)
       default:
         return 999;
     }

@@ -152,3 +152,19 @@ class RejectPlanIntent extends NowTabIntent {
   @override
   int get hashCode => planId.hashCode ^ reason.hashCode;
 }
+
+/// 찌르기 확인 (똑똑 -> 네)
+class AcknowledgePokeIntent extends NowTabIntent {
+  final String planId;
+  const AcknowledgePokeIntent(this.planId);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AcknowledgePokeIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId;
+
+  @override
+  int get hashCode => planId.hashCode;
+}

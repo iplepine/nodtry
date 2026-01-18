@@ -43,7 +43,11 @@
       - `value` (string): 'morning' | 'lunch' | 'dinner' | 'bedtime' | 'HH:mm'
       - `hour` (int): 0-23
       - `minute` (int): 0-59
+      - `minute` (int): 0-59
   - `createdAt` (timestamp)
+  - `lastCheerType` (string?): 'poke' | 'cheer' | 'poke_acked'
+  - `lastCheerAt` (timestamp?): 마지막 응원/찌르기 일시
+  - `lastCheerMessage` (string?): 응원 메시지
 
 ### `actions`
 매일의 수행 기록 (History Tab의 소스).

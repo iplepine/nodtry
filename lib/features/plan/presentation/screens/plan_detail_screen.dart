@@ -22,6 +22,9 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
   late final ScrollController _scrollController;
   late final ValueNotifier<bool> _showAppBarTitleNotifier;
   bool _targetTitleState = false;
+  bool _isPoking = false; // Local loading state for Poke action
+  DateTime? _optimisticLastCheerAt; // Optimistic UI state
+  String? _optimisticLastCheerType; // Optimistic UI state
 
   @override
   void initState() {
@@ -54,7 +57,23 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final plan = widget.plan;
+    // Watch live plan data
+    final plansAsync = ref.watch(
+      getPlansByUserIdStreamProvider(widget.plan.userId),
+    );
+
+    Plan plan = widget.plan;
+
+    // If stream has data, try to find the updated plan
+    if (plansAsync.hasValue) {
+      final found = plansAsync.value!
+          .where((p) => p.id == widget.plan.id)
+          .firstOrNull;
+      if (found != null) {
+        plan = found;
+      }
+    }
+
     // l10n unused for now
     final item = plan.items.first;
     final time = item.notificationTime;
@@ -165,7 +184,13 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                           ? () => _showEditNotificationDialog(context, ref)
                           : null,
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 32),
+
+                    // Actions (Partner Only)
+                    if (!isMine) ...[
+                      _buildActionButtons(context, ref, plan),
+                      const SizedBox(height: 48),
+                    ],
 
                     // History Header
                     Text(
@@ -320,6 +345,96 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
       case HistoryStatus.rested:
         return '휴식';
     }
+  }
+
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref, Plan plan) {
+    // Check for Poke availability
+    // Prioritize Optimistic State if available
+    final effectiveLastCheerAt = _optimisticLastCheerAt ?? plan.lastCheerAt;
+    final effectiveLastCheerType =
+        _optimisticLastCheerType ?? plan.lastCheerType;
+
+    final now = DateTime.now();
+
+    // Check if poked today
+    bool isPokedToday = false;
+    if (effectiveLastCheerAt != null &&
+        effectiveLastCheerType != null &&
+        effectiveLastCheerType.startsWith('poke')) {
+      final localCheerDate = effectiveLastCheerAt.toLocal();
+      if (localCheerDate.year == now.year &&
+          localCheerDate.month == now.month &&
+          localCheerDate.day == now.day) {
+        isPokedToday = true;
+      }
+    }
+
+    // Debug Log
+    debugPrint('[PlanDetail] Plan ID: ${plan.id}');
+    debugPrint('[PlanDetail] lastCheerType: $effectiveLastCheerType');
+    debugPrint(
+      '[PlanDetail] lastCheerAt: $effectiveLastCheerAt (Local: ${effectiveLastCheerAt?.toLocal()})',
+    );
+    debugPrint('[PlanDetail] Now: $now');
+    debugPrint(
+      '[PlanDetail] isPokedToday: $isPokedToday, _isPoking: $_isPoking',
+    );
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: (isPokedToday || _isPoking)
+            ? null
+            : () async {
+                setState(() => _isPoking = true); // Disable immediately
+                try {
+                  await ref.read(pokePartnerUseCaseProvider).execute(plan.id!);
+                  if (context.mounted) {
+                    // Optimistic Update: Force local state to "Poked Today"
+                    setState(() {
+                      _optimisticLastCheerAt = DateTime.now();
+                      _optimisticLastCheerType = 'poke';
+                      _isPoking = false;
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('똑똑, 문을 두드렸어요!')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) setState(() => _isPoking = false);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('전송 실패: $e')));
+                  }
+                }
+              },
+        icon: _isPoking
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.touch_app, size: 18),
+        label: Text(
+          isPokedToday
+              ? '오늘의 똑똑 완료'
+              : (_isPoking ? '전송 중...' : '똑똑... 혹시 잊으셨나요?'),
+        ),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          side: BorderSide(
+            color: (isPokedToday || _isPoking)
+                ? AppColors.textDisabled.withValues(alpha: 0.2)
+                : AppColors.primary.withValues(alpha: 0.5),
+          ),
+          foregroundColor: (isPokedToday || _isPoking)
+              ? AppColors.textDisabled
+              : AppColors.primary,
+        ),
+      ),
+    );
   }
 
   Widget _buildInfoRow(

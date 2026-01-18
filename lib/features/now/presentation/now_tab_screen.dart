@@ -346,6 +346,13 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
+  void _handlePokeAck(HomeCardModel card) {
+    if (card.plan?.id == null) return;
+    ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(AcknowledgePokeIntent(card.plan!.id!));
+  }
+
   /// Time Chip 텍스트 가져오기
 
   /// 정확한 시간 텍스트 가져오기 (롱 프레스용)
@@ -677,6 +684,9 @@ class _NowTabState extends ConsumerState<NowTab>
                                       onSkip: _handleSkip,
                                       onCreatePlan: _handleCreatePlan,
                                       onModify: () => _handleModify(
+                                        primaryExecutorCard,
+                                      ), // Added
+                                      onPokeAck: () => _handlePokeAck(
                                         primaryExecutorCard,
                                       ), // Added
                                       onTap: () =>
@@ -1111,6 +1121,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final VoidCallback? onSkip;
   final VoidCallback? onCreatePlan;
   final VoidCallback? onModify; // Added
+  final VoidCallback? onPokeAck; // Added
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? recordGazeText;
@@ -1122,6 +1133,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     this.onSkip,
     this.onCreatePlan,
     this.onModify, // Added
+    this.onPokeAck, // Added
     this.onTap,
     this.timeChipText,
     this.timeChipType,
@@ -1256,6 +1268,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
         case HomeCardState.nextAction: // Type 1-3: 다음 일정
           // Next Action usually uses headerMessage or defaults to nothing special
           break;
+        case HomeCardState.poked: // Type 1-8: 찌르기 받음
+          statusMessage = '똑똑... 혹시 잊으셨나요?'; // Fallback message
+          break;
         default:
           break;
       }
@@ -1387,6 +1402,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
     } else if (model.state == HomeCardState.rejected) {
       buttonText = '수정하기'; // "Modify"
       onPressed = onModify;
+    } else if (model.state == HomeCardState.poked) {
+      buttonText = '네'; // "Yes" (Ack)
+      onPressed = onPokeAck;
     } else if (model.state == HomeCardState.todayComplete ||
         model.state == HomeCardState.todayEmpty) {
       // "작은 버튼" 요청: TextButton으로 구현

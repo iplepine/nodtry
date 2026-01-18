@@ -7,6 +7,7 @@ import '../services/notification_service.dart' as local_notifications;
 import '../features/now/domain/usecases/get_now_cards_use_case.dart';
 import '../features/history/domain/usecases/get_history_use_case.dart';
 import '../features/plan/domain/usecases/get_plan_history_use_case.dart';
+import '../features/plan/domain/usecases/poke_partner_use_case.dart';
 import '../models/plan_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -287,6 +288,10 @@ final getHistoryUseCaseProvider = Provider<GetHistoryUseCase>((ref) {
 
 final getPlanHistoryUseCaseProvider = Provider<GetPlanHistoryUseCase>((ref) {
   return GetPlanHistoryUseCase(ref.watch(recordRepositoryProvider));
+});
+
+final pokePartnerUseCaseProvider = Provider<PokePartnerUseCase>((ref) {
+  return PokePartnerUseCase(ref.watch(recordRepositoryProvider));
 });
 
 final getPlansByUserIdStreamProvider =

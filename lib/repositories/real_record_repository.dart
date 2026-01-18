@@ -144,6 +144,30 @@ class RealRecordRepository implements RecordRepository {
         hasAnyPlanToday = true;
       }
 
+      // Check for Poke (Priority handling will determine if it shows)
+      if (plan.lastCheerType == 'poke') {
+        final cheerDate = plan
+            .lastCheerAt; // Timestamp is converted in model? No, Plan model has DateTime
+        if (cheerDate != null &&
+            cheerDate.year == today.year &&
+            cheerDate.month == today.month &&
+            cheerDate.day == today.day) {
+          mineCards.add(
+            HomeCardModel(
+              state: HomeCardState.poked,
+              plan: plan,
+              headerMessage: plan.lastCheerMessage ?? '똑똑... 혹시 잊으셨나요?',
+            ),
+          );
+          // If poked, we might want to continue or allow other cards?
+          // Since it's added to mineCards, priority logic will sort it.
+          // We don't 'continue' here because we might also want to generate NowAction to fall back if Poke is low priority?
+          // But valid states for one plan usually result in one card.
+          // If we add multiple cards for one plan (Poked + NowAction), selectPrimaryExecutorCard needs to pick one.
+          // It picks from *all* mineCards. So adding both is fine.
+        }
+      }
+
       if (isCompletedToday) {
         continue;
       }
@@ -408,6 +432,40 @@ class RealRecordRepository implements RecordRepository {
       debugPrint('[RealRecordRepository] Plan deleted successfully.');
     } catch (e) {
       debugPrint('[RealRecordRepository] Error deleting plan: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> pokePartner(String planId, {String? message}) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final now = DateTime.now();
+      // Use existing cheer structure but with special type
+      await _firestore.collection('plans').doc(planId).update({
+        'lastCheerType': 'poke',
+        'lastCheerAt': Timestamp.fromDate(now),
+        if (message != null) 'lastCheerMessage': message,
+      });
+      debugPrint('[RealRecordRepository] Poked partner for plan $planId');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error poking partner: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> acknowledgePoke(String planId) async {
+    try {
+      // Clear the poke status
+      await _firestore.collection('plans').doc(planId).update({
+        'lastCheerType': 'poke_acked',
+      });
+      debugPrint('[RealRecordRepository] Acknowledged poke for plan $planId');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error acknowledging poke: $e');
       rethrow;
     }
   }
