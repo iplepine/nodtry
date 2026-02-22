@@ -309,6 +309,19 @@ class RealRecordRepository implements RecordRepository {
         });
   }
 
+  @override
+  Stream<List<Plan>> getAllPlansByUserIdStream(String userId) {
+    return _firestore
+        .collection('plans')
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => Plan.fromMap(doc.data(), doc.id))
+              .toList();
+        });
+  }
+
   /// 특정 아이템 하나만 포함된 임시 Plan 객체 생성 (UI 노출용)
   Plan _createSingleItemPlan(Plan original, PlanItem item) {
     return Plan(
@@ -383,7 +396,7 @@ class RealRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> createPlan(Plan plan) async {
+  Future<String> createPlan(Plan plan) async {
     debugPrint(
       '[RealRecordRepository] createPlan called. Plan: ${plan.toMap()}',
     );
@@ -396,12 +409,14 @@ class RealRecordRepository implements RecordRepository {
         );
         await docRef.set(plan.toMap());
         debugPrint('[RealRecordRepository] Document created successfully.');
+        return docRef.id;
       } else {
         // Technically create should be fresh, but if ID provided, treat as create
         debugPrint(
           '[RealRecordRepository] Creating with existing ID: ${plan.id}',
         );
         await collection.doc(plan.id).set(plan.toMap());
+        return plan.id!;
       }
     } catch (e) {
       debugPrint('[RealRecordRepository] Error creating plan: $e');
@@ -447,6 +462,7 @@ class RealRecordRepository implements RecordRepository {
       await _firestore.collection('plans').doc(planId).update({
         'lastCheerType': 'poke',
         'lastCheerAt': Timestamp.fromDate(now),
+        'lastUpdatedBy': user.uid,
         if (message != null) 'lastCheerMessage': message,
       });
       debugPrint('[RealRecordRepository] Poked partner for plan $planId');
@@ -933,9 +949,12 @@ class RealRecordRepository implements RecordRepository {
   @override
   Future<void> approvePlan(String planId) async {
     debugPrint('[RealRecordRepository] approvePlan called for $planId');
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
     try {
       await _firestore.collection('plans').doc(planId).update({
         'state': 'active', // PlanState.active
+        'lastUpdatedBy': user.uid,
       });
     } catch (e) {
       debugPrint('[RealRecordRepository] Error approving plan: $e');
@@ -958,6 +977,7 @@ class RealRecordRepository implements RecordRepository {
       // adding current timestamp works.
       await _firestore.collection('plans').doc(planId).update({
         'verifiedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+        'lastUpdatedBy': user.uid,
       });
 
       // 2. Find associated history item (action) for today and mark as verified
@@ -994,7 +1014,11 @@ class RealRecordRepository implements RecordRepository {
   Future<void> rejectPlan(String planId, {String? reason}) async {
     debugPrint('[RealRecordRepository] rejectPlan called. Plan ID: $planId');
     try {
-      final updateData = <String, dynamic>{'state': PlanState.rejected.toMap()};
+      final user = FirebaseAuth.instance.currentUser;
+      final updateData = <String, dynamic>{
+        'state': PlanState.rejected.toMap(),
+        'lastUpdatedBy': user?.uid,
+      };
       if (reason != null && reason.isNotEmpty) {
         updateData['lastComment'] = reason;
       }
@@ -1004,6 +1028,57 @@ class RealRecordRepository implements RecordRepository {
     } catch (e) {
       debugPrint('[RealRecordRepository] Error rejecting plan: $e');
       rethrow;
+    }
+  }
+
+  @override
+  Future<void> completeOverduePlans() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    try {
+      // 내가 실행자이거나 매니저인 활성 계획 중 종료일이 지난 것들을 찾습니다.
+      final snapshot = await _firestore
+          .collection('plans')
+          .where('state', isEqualTo: 'active')
+          .get();
+
+      final batch = _firestore.batch();
+      int count = 0;
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final userId = data['userId'] as String?;
+        final managerId = data['managerId'] as String?;
+
+        // 관련이 없는 계획은 건너뜁니다.
+        if (userId != user.uid && managerId != user.uid) continue;
+
+        final endDateTimestamp = data['endDate'] as Timestamp?;
+        if (endDateTimestamp == null) continue;
+
+        final endDate = endDateTimestamp.toDate();
+        final endDay = DateTime(endDate.year, endDate.month, endDate.day);
+
+        // 오늘보다 종료일이 전이면 완료 처리
+        if (endDay.isBefore(today)) {
+          batch.update(doc.reference, {
+            'state': PlanState.completed.toMap(),
+            'lastUpdatedBy': 'system_cleanup',
+          });
+          count++;
+        }
+      }
+
+      if (count > 0) {
+        await batch.commit();
+        debugPrint('[RealRecordRepository] Completed $count overdue plans');
+      }
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error completing overdue plans: $e');
     }
   }
 }

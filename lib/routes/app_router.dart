@@ -9,6 +9,7 @@ import '../features/settings/presentation/screens/notification_settings_screen.d
 import '../features/auth/presentation/screens/email_login_screen.dart';
 import '../models/plan_model.dart';
 import '../features/plan/presentation/screens/plan_detail_screen.dart';
+import '../features/plan/presentation/screens/all_plans_screen.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +25,9 @@ class AppRoutes {
   static const String developer = '/developer';
   static const String settings = '/settings';
 
-  // 계획 생성 플로우
+  // 계획 생성 및 조회 플로우
   static const String planCreate = '/plan/create';
+  static const String allPlans = '/plan/all';
 
   // 로그인
   static const String emailLogin = '/login/email';
@@ -143,6 +145,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/settings/notifications',
         name: 'notification-settings',
         builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.allPlans,
+        name: 'all-plans',
+        builder: (context, state) {
+          final userId = state.extra as String;
+          return AllPlansScreen(userId: userId);
+        },
       ),
     ],
   );

@@ -132,14 +132,19 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
             : null,
       );
 
+      String planId;
       if (prevState.existingPlanId != null) {
         await ref.read(recordRepositoryProvider).updatePlan(plan);
+        planId = prevState.existingPlanId!;
       } else {
-        await ref.read(createNewPlanUseCaseProvider).execute(plan);
+        planId = await ref.read(createNewPlanUseCaseProvider).execute(plan);
       }
 
       ref.invalidate(homeCardStateProvider);
-      await ref.read(settingAlarmUseCaseProvider).execute(plan);
+      // 생성된 ID가 반영된 Plan 객체로 알람 설정
+      await ref
+          .read(settingAlarmUseCaseProvider)
+          .execute(plan.copyWith(id: planId));
 
       state = AsyncValue.data(prevState.copyWith(isSaving: false));
     } catch (e, stack) {

@@ -6,7 +6,7 @@ class CreateNewPlanUseCase {
 
   CreateNewPlanUseCase(this._recordRepository);
 
-  Future<void> execute(Plan plan) {
+  Future<String> execute(Plan plan) {
     return _recordRepository.createPlan(plan);
   }
 }

@@ -93,7 +93,7 @@ class MockRecordRepository extends Fake implements RecordRepository {
   Stream<List<Plan>> getPlansByUserIdStream(String userId) => Stream.value([]);
 
   @override
-  Future<void> createPlan(Plan plan) => Future.value();
+  Future<String> createPlan(Plan plan) => Future.value('mock-id');
   @override
   Future<void> updatePlan(Plan plan) => Future.value();
   @override

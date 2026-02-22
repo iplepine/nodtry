@@ -14,7 +14,17 @@ import '../domain/usecases/feedback_to_partner_use_case.dart';
 class NowTabViewModel extends StreamNotifier<NowTabState> {
   @override
   Stream<NowTabState> build() {
+    // 앱 시작 시 기간 만료된 계획 정리
+    _completeOverduePlans();
     return _fetchStateStream();
+  }
+
+  Future<void> _completeOverduePlans() async {
+    try {
+      await ref.read(recordRepositoryProvider).completeOverduePlans();
+    } catch (e) {
+      print('[NowTabViewModel] Failed to complete overdue plans: $e');
+    }
   }
 
   /// 데이터 스트림 로드 및 State 변환
@@ -113,17 +123,42 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     await ref
         .read(recordRepositoryProvider)
         .reportCompletion(planId, note: message);
-    // Stream updates automatically, no need to invalidate manually for logic correctness
-    // BUT for Optimistic UI or immediate feedback, we rely on the repository emitting the new event.
+
+    // 알람 업데이트: 오늘 알람 건너뛰기
+    _updateAlarmToSkipToday(planId);
   }
 
   Future<void> _checkPartnerAction(String planId) async {
     // Legacy support or specific use case
     await ref.read(recordRepositoryProvider).reportCompletion(planId);
+    _updateAlarmToSkipToday(planId);
   }
 
   Future<void> _skipPlan(String planId) async {
     await ref.read(recordRepositoryProvider).reportSkip(planId);
+    _updateAlarmToSkipToday(planId);
+  }
+
+  void _updateAlarmToSkipToday(String planId) {
+    try {
+      final currentAllCards = state.asData?.value.allCards ?? [];
+      Plan? targetPlan;
+      for (final card in currentAllCards) {
+        if (card.plan?.id == planId) {
+          targetPlan = card.plan;
+          break;
+        }
+      }
+
+      if (targetPlan != null) {
+        ref
+            .read(settingAlarmUseCaseProvider)
+            .execute(targetPlan, skipToday: true);
+      }
+    } catch (e) {
+      // 알람 업데이트 실패가 실천 보고 자체를 방해하지 않도록 swallow
+      print('[NowTabViewModel] Failed to update alarm to skip today: $e');
+    }
   }
 
   Future<void> _cheerPartner(

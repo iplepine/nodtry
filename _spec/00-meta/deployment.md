@@ -19,7 +19,7 @@
 ## 4. 인증 (Secrets)
 - **Service Account Key:** `android/fastlane/json_key.json`
 - **Signing Key:** `android/key.properties`
-
+1
 ## 5. 실행 방법 (Workflow)
 
 VS Code Task **"Build & Deploy AAB"**를 실행하거나 다음 명령어를 사용한다.

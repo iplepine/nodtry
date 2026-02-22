@@ -25,8 +25,11 @@ abstract class RecordRepository {
   /// 특정 유저의 활성 계획 목록을 스트림으로 가져옵니다. (Offline-First)
   Stream<List<Plan>> getPlansByUserIdStream(String userId);
 
-  /// 새로운 계획을 생성합니다.
-  Future<void> createPlan(Plan plan);
+  /// 특정 유저의 모든 계획 목록(상태 상관없이)을 스트림으로 가져옵니다.
+  Stream<List<Plan>> getAllPlansByUserIdStream(String userId);
+
+  /// 새로운 계획을 생성합니다. (생성된 ID 반환)
+  Future<String> createPlan(Plan plan);
 
   /// 기존 계획을 수정합니다.
   Future<void> updatePlan(Plan plan);
@@ -87,4 +90,7 @@ abstract class RecordRepository {
 
   /// 특정 계획의 히스토리 아이템 목록을 스트림으로 가져옵니다.
   Stream<List<HistoryItem>> getHistoryItemsByPlanIdStream(String planId);
+
+  /// 기간이 만료된 활성 계획들을 찾아 '완료(completed)' 상태로 자동 전환합니다.
+  Future<void> completeOverduePlans();
 }

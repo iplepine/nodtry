@@ -189,8 +189,14 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                     // Actions (Partner Only)
                     if (!isMine) ...[
                       _buildActionButtons(context, ref, plan),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 32),
                     ],
+
+                    // Completion Report Section
+                    if (plan.state == PlanState.completed)
+                      _buildSummaryReport(context, plan),
+
+                    const SizedBox(height: 48),
 
                     // History Header
                     Text(
@@ -737,6 +743,71 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSummaryReport(BuildContext context, Plan plan) {
+    final totalDays = plan.endDate.difference(plan.startDate).inDays + 1;
+    final completedCount = plan.completedDates.length;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.insights, color: AppColors.primary),
+              const SizedBox(width: 12),
+              Text(
+                '실천 리포트',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildReportItem('총 기간', '$totalDays일'),
+              _buildReportItem('완료 횟수', '${completedCount}회'),
+              _buildReportItem(
+                '달성률',
+                '${(completedCount / totalDays * 100).toStringAsFixed(0)}%',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportItem(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: TextStyle(
+            color: AppColors.primary,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }

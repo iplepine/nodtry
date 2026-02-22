@@ -6,7 +6,7 @@ class SettingAlarmUseCase {
 
   SettingAlarmUseCase(this._notificationService);
 
-  Future<void> execute(Plan plan) async {
+  Future<void> execute(Plan plan, {bool skipToday = false}) async {
     final item = plan.items.firstOrNull;
     if (item == null) return;
 
@@ -29,6 +29,7 @@ class SettingAlarmUseCase {
       hour: item.notificationTime?.hour ?? 20,
       minute: item.notificationTime?.minute ?? 0,
       days: item.days,
+      skipToday: skipToday,
     );
   }
 

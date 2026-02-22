@@ -78,12 +78,14 @@ class NotificationService {
   /// Schedule a notification for a plan
   /// [id] should be unique per plan-day combination or plan ID base
   /// [days] 1=Mon, 7=Sun (compatible with DateTime.weekday)
+  /// [skipToday] if true, and the next instance is today, it will schedule for next week instead
   Future<void> schedulePlanReminder({
     required int planId, // Using plan.hashCode or similar as base
     required String title,
     required int hour,
     required int minute,
     required List<int> days,
+    bool skipToday = false,
   }) async {
     // Cancel existing notifications for this plan (simple strategy: cancel all range)
     // Use modulo to prevent integer overflow (32-bit limit for Notification ID)
@@ -96,6 +98,7 @@ class NotificationService {
         day,
         hour,
         minute,
+        skipToday: skipToday,
       );
       debugPrint(
         '[Notification] Scheduling for plan $planId, day $day at $hour:$minute. Calculated time: $scheduledDate (Local now: ${tz.TZDateTime.now(tz.local)})',
@@ -144,7 +147,12 @@ class NotificationService {
     );
   }
 
-  tz.TZDateTime _nextInstanceOfDayAndTime(int day, int hour, int minute) {
+  tz.TZDateTime _nextInstanceOfDayAndTime(
+    int day,
+    int hour,
+    int minute, {
+    bool skipToday = false,
+  }) {
     tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate = tz.TZDateTime(
       tz.local,
@@ -159,7 +167,11 @@ class NotificationService {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    if (scheduledDate.isBefore(now)) {
+    if (scheduledDate.isBefore(now) ||
+        (skipToday &&
+            scheduledDate.year == now.year &&
+            scheduledDate.month == now.month &&
+            scheduledDate.day == now.day)) {
       scheduledDate = scheduledDate.add(const Duration(days: 7));
     }
 

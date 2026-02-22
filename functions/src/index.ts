@@ -1,11 +1,11 @@
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
 export const onCheerCreated = functions.firestore
     .document("cheers/{cheerId}")
-    .onCreate(async (snapshot, context) => {
+    .onCreate(async (snapshot: functions.firestore.QueryDocumentSnapshot, context: functions.EventContext) => {
         const cheer = snapshot.data();
         if (!cheer) return;
 
@@ -75,7 +75,7 @@ export const onCheerCreated = functions.firestore
 
 export const onPlanCreated = functions.firestore
     .document("plans/{planId}")
-    .onCreate(async (snapshot, context) => {
+    .onCreate(async (snapshot: functions.firestore.QueryDocumentSnapshot, context: functions.EventContext) => {
         const plan = snapshot.data();
         if (!plan) return;
 
@@ -145,10 +145,11 @@ export const onActionCompleted = functions.firestore
     .document("actions/{actionId}")
     .onCreate(async (snapshot, context) => {
         const action = snapshot.data();
-        if (!action || action.type !== "done") return;
+        if (!action) return;
 
         const userId = action.userId;
         const planId = action.planId;
+        const type = action.type;
 
         try {
             // 1. 해당 계획의 매니저 ID 찾기
@@ -167,14 +168,23 @@ export const onActionCompleted = functions.firestore
             const userDoc = await admin.firestore().collection("users").doc(userId).get();
             const senderName = userDoc.exists ? userDoc.data()?.displayName || "파트너" : "파트너";
 
-            // 4. 메시지 페이로드 구성
+            // 4. 메시지 구성 (행동 타입에 따라)
+            let title = "약속 실천 완료! 🌟";
+            let body = `${senderName}님이 약속을 실천했어요! 확인하고 칭찬해 주세요.`;
+
+            if (type === "skipped") {
+                title = "약속을 건너뛰었어요 ↩️";
+                body = `${senderName}님이 오늘 약속은 건너뛰기로 했어요.`;
+            } else if (type === "rested") {
+                title = "오늘은 쉬어갈게요 🌿";
+                body = `${senderName}님이 오늘 약속은 쉬어가기로 했어요.`;
+            }
+
             const messagePayload: admin.messaging.Message = {
-                notification: {
-                    title: "약속 실천 완료! 🌟",
-                    body: `${senderName}님이 약속을 실천했어요! 확인하고 칭찬해 주세요.`,
-                },
+                notification: { title, body },
                 data: {
                     type: "action_completed",
+                    actionType: type || "",
                     planId: planId,
                 },
                 token: fcmToken,
@@ -195,7 +205,7 @@ export const onActionCompleted = functions.firestore
             };
 
             await admin.messaging().send(messagePayload);
-            console.log(`Successfully sent completion notification to ${managerId}`);
+            console.log(`Successfully sent action notification (${type}) to ${managerId}`);
         } catch (error) {
             console.error("Error sending completion notification:", error);
         }
@@ -203,40 +213,83 @@ export const onActionCompleted = functions.firestore
 
 export const onPlanUpdated = functions.firestore
     .document("plans/{planId}")
-    .onUpdate(async (change, context) => {
+    .onUpdate(async (change: functions.Change<functions.firestore.QueryDocumentSnapshot>, context: functions.EventContext) => {
         const before = change.before.data();
         const after = change.after.data();
         if (!before || !after) return;
 
-        // 단순 상태 메시지나 응원 정보 업데이트는 제외 (중요한 변경만 감지)
-        const isImportantChange =
-            JSON.stringify(before.items) !== JSON.stringify(after.items) ||
-            before.startDate?.seconds !== after.startDate?.seconds ||
-            before.endDate?.seconds !== after.endDate?.seconds;
-
-        if (!isImportantChange) return;
-
         const userId = after.userId;
         const managerId = after.managerId;
-        if (!managerId) return;
+        const lastUpdatedBy = after.lastUpdatedBy;
+
+        // 알림을 보낼 대상 (수정한 사람이 아닌 다른 사람)
+        const toUserId = (lastUpdatedBy === userId) ? managerId : userId;
+        if (!toUserId) return;
 
         try {
-            // 여기서는 일단 계획 생성자(userId)가 수정했다고 가정하고 매니저에게 알림
-            // (추후 매니저가 수정할 경우 로직 분기 필요)
-            const managerDoc = await admin.firestore().collection("users").doc(managerId).get();
-            const fcmToken = managerDoc.data()?.fcmToken;
+            // 1. 수신자 FCM 토큰 조회
+            const targetUserDoc = await admin.firestore().collection("users").doc(toUserId).get();
+            const fcmToken = targetUserDoc.data()?.fcmToken;
             if (!fcmToken) return;
 
-            const userDoc = await admin.firestore().collection("users").doc(userId).get();
-            const senderName = userDoc.exists ? userDoc.data()?.displayName || "파트너" : "파트너";
+            // 2. 발신자 이름 조회
+            let senderName = "파트너";
+            if (lastUpdatedBy) {
+                const senderDoc = await admin.firestore().collection("users").doc(lastUpdatedBy).get();
+                senderName = senderDoc.exists ? senderDoc.data()?.displayName || "파트너" : "파트너";
+            }
+
+            // 3. 변경 내용 분석 및 알림 내용 구성
+            let title = "";
+            let body = "";
+            let type = "plan_updated";
+
+            // A. 찌르기 (Poke) 감지
+            if (after.lastCheerType === "poke" && before.lastCheerType !== "poke") {
+                title = "똑똑! ✊";
+                body = after.lastCheerMessage || `${senderName}님이 똑똑! 신호를 보냈어요.`;
+                type = "poke";
+            }
+            // B. 계획 승인 감지
+            else if (after.state === "active" && before.state === "pending_approval") {
+                title = "약속이 승인되었어요! ✨";
+                body = `${senderName}님이 약속을 승인했어요. 이제 함께 시작해 봐요!`;
+                type = "plan_approved";
+            }
+            // C. 계획 반려 감지
+            else if (after.state === "rejected" && before.state === "pending_approval") {
+                title = "약속 조율이 필요해요 🤝";
+                body = after.lastComment ? `${senderName}: ${after.lastComment}` : `${senderName}님이 약속 조율을 요청했어요.`;
+                type = "plan_rejected";
+            }
+            // D. 실천 확인 감지 (Manager verified User's action)
+            else if ((after.verifiedDates?.length || 0) > (before.verifiedDates?.length || 0)) {
+                if (lastUpdatedBy === managerId) { // 매니저가 확인했을 때만 실행자에게 알림
+                    title = "약속 실천 확인! ✅";
+                    body = `${senderName}님이 오늘의 실천을 확인했어요. 잘하셨어요!`;
+                    type = "action_verified";
+                } else return;
+            }
+            // E. 일반적인 중요 변경사항 (아이템, 기간 등)
+            else {
+                const isImportantChange =
+                    JSON.stringify(before.items) !== JSON.stringify(after.items) ||
+                    before.startDate?.seconds !== after.startDate?.seconds ||
+                    before.endDate?.seconds !== after.endDate?.seconds;
+
+                if (isImportantChange) {
+                    title = "약속 내용이 변경되었어요 📝";
+                    body = `${senderName}님이 약속 내용을 변경했어요. 확인해 보세요!`;
+                    type = "plan_updated";
+                } else {
+                    return; // 알림 보낼 만큼 중요한 변경이 아님
+                }
+            }
 
             const messagePayload: admin.messaging.Message = {
-                notification: {
-                    title: "약속 내용이 변경되었어요 📝",
-                    body: `${senderName}님이 약속 내용을 변경했어요. 확인해 보세요!`,
-                },
+                notification: { title, body },
                 data: {
-                    type: "plan_updated",
+                    type: type,
                     planId: context.params.planId,
                 },
                 token: fcmToken,
@@ -257,7 +310,7 @@ export const onPlanUpdated = functions.firestore
             };
 
             await admin.messaging().send(messagePayload);
-            console.log(`Successfully sent update notification to ${managerId}`);
+            console.log(`Successfully sent ${type} notification to ${toUserId}`);
         } catch (error) {
             console.error("Error sending update notification:", error);
         }

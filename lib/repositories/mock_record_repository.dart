@@ -261,13 +261,31 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> createPlan(Plan plan) async {
+  Stream<List<Plan>> getAllPlansByUserIdStream(String userId) {
+    // Initial emission
+    Future.microtask(() {
+      final filtered = userId == 'me'
+          ? _mockPlans.where((p) => p.userId == 'me').toList()
+          : _mockPlans.where((p) => p.userId != 'me').toList();
+      _plansStreamController.add(filtered);
+    });
+
+    return _plansStreamController.stream.map((plans) {
+      if (userId == 'me') {
+        return plans.where((p) => p.userId == 'me').toList();
+      } else {
+        return plans.where((p) => p.userId != 'me').toList();
+      }
+    });
+  }
+
+  @override
+  Future<String> createPlan(Plan plan) async {
     // Mock: 1초 딜레이 후 성공
     await Future.delayed(const Duration(seconds: 1));
     // Generate ID if missing
-    final newPlan = plan.copyWith(
-      id: plan.id ?? 'mock-${DateTime.now().millisecondsSinceEpoch}',
-    );
+    final id = plan.id ?? 'mock-${DateTime.now().millisecondsSinceEpoch}';
+    final newPlan = plan.copyWith(id: id);
     _mockPlans.add(newPlan); // 리스트에 추가
 
     // 상태를 Active로 변경 시뮬레이션 (단순화: 덮어쓰기)
@@ -276,6 +294,7 @@ class MockRecordRepository implements RecordRepository {
     ];
     _notifyStream();
     _notifyPlansStream();
+    return id;
   }
 
   @override
@@ -632,5 +651,11 @@ class MockRecordRepository implements RecordRepository {
       _mockHomeCardModels.removeWhere((m) => m.plan?.id == planId);
       _notifyStream();
     }
+  }
+
+  @override
+  Future<void> completeOverduePlans() async {
+    // Mock: No action needed for now
+    return;
   }
 }

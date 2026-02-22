@@ -61,6 +61,7 @@ class Plan {
   final DateTime? lastCheerAt; // 마지막 응원 시간
   final String? lastActionNote; // 마지막 실천 한마디 (실천자)
   final String? lastComment; // 마지막 피드백/응원 메시지 (매니저)
+  final String? lastUpdatedBy; // 마지막으로 문서를 수정한 사람의 UID
 
   Plan({
     this.id,
@@ -78,6 +79,7 @@ class Plan {
     this.lastCheerAt,
     this.lastActionNote,
     this.lastComment,
+    this.lastUpdatedBy,
   });
 
   Plan copyWith({
@@ -96,6 +98,7 @@ class Plan {
     DateTime? lastCheerAt,
     String? lastActionNote,
     String? lastComment,
+    String? lastUpdatedBy,
   }) {
     return Plan(
       id: id ?? this.id,
@@ -113,6 +116,7 @@ class Plan {
       lastCheerAt: lastCheerAt ?? this.lastCheerAt,
       lastActionNote: lastActionNote ?? this.lastActionNote,
       lastComment: lastComment ?? this.lastComment,
+      lastUpdatedBy: lastUpdatedBy ?? this.lastUpdatedBy,
     );
   }
 
@@ -134,6 +138,7 @@ class Plan {
       if (lastCheerAt != null) 'lastCheerAt': Timestamp.fromDate(lastCheerAt!),
       if (lastActionNote != null) 'lastActionNote': lastActionNote,
       if (lastComment != null) 'lastComment': lastComment,
+      if (lastUpdatedBy != null) 'lastUpdatedBy': lastUpdatedBy,
     };
   }
 
@@ -163,6 +168,7 @@ class Plan {
           [],
       lastActionNote: map['lastActionNote'],
       lastComment: map['lastComment'] ?? map['lastCheerMessage'], // 하위 호환성
+      lastUpdatedBy: map['lastUpdatedBy'],
     );
   }
 }

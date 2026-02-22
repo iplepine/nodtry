@@ -1352,22 +1352,37 @@ class _ActivePlanListSection extends ConsumerWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            plansAsync.maybeWhen(
-              data: (plans) => (isMe && plans.isNotEmpty)
-                  ? InkWell(
-                      onTap: () => context.push(AppRoutes.planCreate),
-                      borderRadius: BorderRadius.circular(20),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Icon(
-                          Icons.add_circle,
-                          color: AppColors.primary,
-                          size: 24,
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-              orElse: () => const SizedBox.shrink(),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () =>
+                      context.pushNamed('all-plans', extra: userId),
+                  child: Text(
+                    "전체보기 >",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                plansAsync.maybeWhen(
+                  data: (plans) => (isMe)
+                      ? InkWell(
+                          onTap: () => context.push(AppRoutes.planCreate),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.add_circle,
+                              color: AppColors.primary,
+                              size: 24,
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                  orElse: () => const SizedBox.shrink(),
+                ),
+              ],
             ),
           ],
         ),
