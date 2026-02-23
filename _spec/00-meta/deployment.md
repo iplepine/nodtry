@@ -5,7 +5,7 @@
 
 ## 2. 버전 관리 (Versioning)
 - **Semantic Versioning (Major.Minor.Patch)** 원칙을 따른다.
-- **Build Number**는 자동 증가한다.
+- **Build Number와 Patch 버전**은 배포 시 자동으로 1씩 증가한다.
 - `pubspec.yaml`이 버전의 기준이다.
 
 ## 3. 배포 자동화 (Android First)

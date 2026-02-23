@@ -35,11 +35,11 @@ fi
 # Parse version
 IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NAME"
 
-# Check if we should increment patch
-INCREMENT_PATCH=false
+# Check if we should increment patch (Default is true now)
+INCREMENT_PATCH=true
 for arg in "$@"; do
-    if [[ "$arg" == "--patch" ]]; then
-        INCREMENT_PATCH=true
+    if [[ "$arg" == "--no-patch" ]]; then
+        INCREMENT_PATCH=false
     fi
 done
 
