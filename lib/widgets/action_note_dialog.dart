@@ -145,7 +145,8 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
                 autofocus: true,
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
                 minLines: 3,
-                maxLines: 5,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
                 decoration: InputDecoration(
                   hintMaxLines: 2,
                   hintText: widget.hintText ?? "실천 소감을 남겨보세요 (선택)",
@@ -159,9 +160,8 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
                   contentPadding: const EdgeInsets.all(16),
                   counterStyle: TextStyle(color: AppColors.textDisabled),
                 ),
-                maxLength: 100,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (value) => Navigator.pop(context, _getResult()),
+                maxLength: 300,
+                textInputAction: TextInputAction.newline,
               ),
               const SizedBox(height: 12), // Reduced since counter is there
               // Actions
