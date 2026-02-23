@@ -1365,23 +1365,6 @@ class _ActivePlanListSection extends ConsumerWidget {
                     ),
                   ),
                 ),
-                plansAsync.maybeWhen(
-                  data: (plans) => (isMe)
-                      ? InkWell(
-                          onTap: () => context.push(AppRoutes.planCreate),
-                          borderRadius: BorderRadius.circular(20),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Icon(
-                              Icons.add_circle,
-                              color: AppColors.primary,
-                              size: 24,
-                            ),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                  orElse: () => const SizedBox.shrink(),
-                ),
               ],
             ),
           ],
@@ -1455,25 +1438,62 @@ class _ActivePlanListSection extends ConsumerWidget {
               );
             }
             return Column(
-              children: plans
-                  .map(
-                    (plan) => PlanCard(
-                      plan: plan,
-                      isOwner: isMe,
-                      onTap: () {
-                        context.pushNamed('plan-detail', extra: plan);
-                      },
-                      onEdit: isMe
-                          ? () {
-                              context.pushNamed('plan-create', extra: plan);
-                            }
-                          : null,
-                      onDelete: isMe
-                          ? () => _showDeletePlanDialog(context, ref, plan)
-                          : null,
+              children: [
+                ...plans.map(
+                  (plan) => PlanCard(
+                    plan: plan,
+                    isOwner: isMe,
+                    onTap: () {
+                      context.pushNamed('plan-detail', extra: plan);
+                    },
+                    onEdit: isMe
+                        ? () {
+                            context.pushNamed('plan-create', extra: plan);
+                          }
+                        : null,
+                    onDelete: isMe
+                        ? () => _showDeletePlanDialog(context, ref, plan)
+                        : null,
+                  ),
+                ),
+                if (isMe)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                    child: InkWell(
+                      onTap: () => context.push(AppRoutes.planCreate),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: AppColors.divider.withValues(alpha: 0.5),
+                          ),
+                          color: AppColors.surface.withValues(alpha: 0.3),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add,
+                              color: AppColors.textSecondary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "새 약속 정하기",
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  )
-                  .toList(),
+                  ),
+              ],
             );
           },
           loading: () => const Center(
