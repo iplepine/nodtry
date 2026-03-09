@@ -315,6 +315,16 @@ class _NowTabState extends ConsumerState<NowTab>
         .dispatch(PassPlanIntent(managerCard.plan!.id!));
   }
 
+  void _handlePokeUser(HomeCardModel model) {
+    if (model.partnerUid == null) return;
+    ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(PokeUserIntent(model.partnerUid!));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('파트너를 똑똑! 찔렀습니다.')));
+  }
+
   Future<void> _handleSkip() async {
     final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
     if (primaryCard?.plan?.id == null) return;
@@ -789,6 +799,8 @@ class _NowTabState extends ConsumerState<NowTab>
                                       onSimpleCheer: () =>
                                           _handleSimpleCheer(card),
                                       onMoreCheer: () => _handleMoreCheer(card),
+                                      onPokeUser: () =>
+                                          _handlePokeUser(card), // Added
                                       timeChipText: _getManagerTimeChipText(
                                         card,
                                       ),
@@ -1894,7 +1906,8 @@ class _ManagerQuickCard extends StatelessWidget {
   final VoidCallback? onPass;
   final VoidCallback? onSimpleCheer;
   final VoidCallback? onMoreCheer;
-  final VoidCallback? onReject; // Added
+  final VoidCallback? onReject;
+  final VoidCallback? onPokeUser;
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? exactTimeText;
@@ -1907,7 +1920,8 @@ class _ManagerQuickCard extends StatelessWidget {
     this.onPass,
     this.onSimpleCheer,
     this.onMoreCheer,
-    this.onReject, // Added
+    this.onReject,
+    this.onPokeUser,
     this.timeChipText,
     this.timeChipType,
     this.exactTimeText,
@@ -1922,16 +1936,14 @@ class _ManagerQuickCard extends StatelessWidget {
       headerText = l10n.nowPartnerDidIt;
     } else if (model.state == HomeCardState.partnerPlanCreate ||
         model.state == HomeCardState.partnerPlanModify) {
-      // Type 3: "이런 약속을 제안했어요" or "약속을 조금 조정하고 있어요"
-      // We can distinguish based on headerMessage if available or default to proposed
-      // Or assuming default is proposed (Type 3-A)
       if (model.headerMessage == '조정 중' ||
           model.headerMessage == '같이 맞춰보는 중이에요') {
-        // Example logic
         headerText = l10n.nowPartnerAdjusting;
       } else {
         headerText = l10n.nowPartnerProposed;
       }
+    } else if (model.state == HomeCardState.partnerNoPlan) {
+      headerText = '기다리는 중';
     } else {
       headerText = model.headerMessage ?? l10n.homeReceivedMessage;
     }
@@ -2099,12 +2111,11 @@ class _ManagerQuickCard extends StatelessWidget {
                                     return null;
                                   }),
                             ),
-                        child: Text(
-                          l10n.homeCheckIt,
-                          style: const TextStyle(
+                        child: const Text(
+                          "승인하기",
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -2112,6 +2123,44 @@ class _ManagerQuickCard extends StatelessWidget {
                   ],
                 ),
               ],
+            ],
+
+            // Button (Partner No Plan - Poke)
+            if (model.state == HomeCardState.partnerNoPlan) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: Text(
+                  '상대방이 아직 새로운 약속을 만들지 않았어요. 똑똑! 신호를 보내볼까요?',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onPokeUser,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "똑똑! 하기",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
             ] else if (model.state == HomeCardState.partnerAction) ...[
               const SizedBox(height: 20),
               SizedBox(

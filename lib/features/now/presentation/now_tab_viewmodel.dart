@@ -113,10 +113,16 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         await _rejectPlan(intent.planId, intent.reason);
       } else if (intent is AcknowledgePokeIntent) {
         await _acknowledgePoke(intent.planId);
+      } else if (intent is PokeUserIntent) {
+        await _pokeUser(intent.userId, intent.message);
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
+  }
+
+  Future<void> _pokeUser(String userId, [String? message]) async {
+    await ref.read(recordRepositoryProvider).pokeUser(userId, message: message);
   }
 
   Future<void> _completePlan(String planId, [String? message]) async {

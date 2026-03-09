@@ -168,3 +168,21 @@ class AcknowledgePokeIntent extends NowTabIntent {
   @override
   int get hashCode => planId.hashCode;
 }
+
+/// 유저 찌르기 (계획 없이 똑똑)
+class PokeUserIntent extends NowTabIntent {
+  final String userId;
+  final String? message;
+  const PokeUserIntent(this.userId, {this.message});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PokeUserIntent &&
+          runtimeType == other.runtimeType &&
+          userId == other.userId &&
+          message == other.message;
+
+  @override
+  int get hashCode => userId.hashCode ^ (message?.hashCode ?? 0);
+}

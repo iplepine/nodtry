@@ -658,4 +658,11 @@ class MockRecordRepository implements RecordRepository {
     // Mock: No action needed for now
     return;
   }
+
+  @override
+  Future<void> pokeUser(String userId, {String? message}) async {
+    // ignore: avoid_print
+    print('Mock: Poke user $userId generally with message: $message');
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
 }

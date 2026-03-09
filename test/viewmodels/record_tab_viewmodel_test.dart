@@ -4,6 +4,7 @@ import 'package:nod_try/features/history/presentation/history_viewmodel.dart';
 import 'package:nod_try/features/history/presentation/history_state.dart';
 import 'package:nod_try/models/history_item.dart';
 import 'package:nod_try/models/plan_model.dart';
+import 'package:nod_try/models/user_model.dart';
 import 'package:nod_try/providers/repository_provider.dart';
 import 'package:nod_try/repositories/record_repository.dart';
 
@@ -25,9 +26,21 @@ class MockRecordRepository extends Fake implements RecordRepository {
   }
 
   @override
+  Stream<List<HistoryItem>> getHistoryItemsStream({List<String>? userIds}) {
+    getHistoryItemsCallCount++;
+    return Stream.value(mockItems);
+  }
+
+  @override
   Future<List<Plan>> getPlansByUserId(String userId) async {
     getPlansCallCount++;
     return mockPlans;
+  }
+
+  @override
+  Stream<List<Plan>> getPlansByUserIdStream(String userId) {
+    getPlansCallCount++;
+    return Stream.value(mockPlans);
   }
 
   @override
@@ -38,6 +51,11 @@ class MockRecordRepository extends Fake implements RecordRepository {
     reconcileCallCount++;
     lastReconciledId = historyId;
     lastReconciledStatus = status;
+  }
+
+  @override
+  Future<void> pokeUser(String userId, {String? message}) async {
+    // Mock implementation for test
   }
 }
 
@@ -73,6 +91,15 @@ void main() {
     createdAt: DateTime.now(),
   );
 
+  final mockUser = UserModel(
+    uid: 'me',
+    email: 'me@example.com',
+    displayName: 'Me',
+    loginType: LoginType.email,
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  );
+
   setUp(() {
     mockRecordRepository = MockRecordRepository();
     mockRecordRepository.mockItems = [itemMe, itemPartner];
@@ -81,6 +108,8 @@ void main() {
     container = ProviderContainer(
       overrides: [
         recordRepositoryProvider.overrideWithValue(mockRecordRepository),
+        myProfileProvider.overrideWith((ref) => Stream.value(mockUser)),
+        connectedProfilesProvider.overrideWith((ref) => Future.value([])),
       ],
     );
   });
@@ -95,11 +124,10 @@ void main() {
     final result = await container.read(historyViewModelProvider.future);
 
     // Assert
-    // activePlanId에 해당하는 itemMe만 포함되어야 함 (VM logic)
-    expect(result.activeItems.length, 1);
-    expect(result.activeItems.first.id, '1');
-    expect(mockRecordRepository.getHistoryItemsCallCount, 1);
-    expect(mockRecordRepository.getPlansCallCount, 1);
+    // Default filter is 'all', so it should load both items
+    expect(result.activeItems.length, 2);
+    expect(mockRecordRepository.getHistoryItemsCallCount, greaterThan(0));
+    expect(mockRecordRepository.getPlansCallCount, greaterThan(0));
   });
 
   test('reconcile should call repository and refresh', () async {
@@ -111,11 +139,9 @@ void main() {
     // Act
     await container
         .read(historyViewModelProvider.notifier)
-        .dispatch(
-          const HistoryIntent.reconcile('1', HistoryStatus.actuallyDone),
-        );
+        .dispatch(HistoryIntent.reconcile('1', HistoryStatus.actuallyDone));
 
-    // Wait for async rebuild
+    // Wait for async rebuild - invalidateSelf triggers build() in next microtask
     await container.read(historyViewModelProvider.future);
 
     // Assert

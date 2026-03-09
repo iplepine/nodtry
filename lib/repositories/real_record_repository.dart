@@ -6,11 +6,12 @@ import '../models/plan_model.dart';
 import 'record_repository.dart';
 
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
+import '../models/relation_model.dart';
 
 /// 실제 데이터 저장소 구현체 (Firestore 연동 예정)
 class RealRecordRepository implements RecordRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   @override
   Stream<List<HomeCardModel>> getHomeCardStatesStream() {
     final user = FirebaseAuth.instance.currentUser;
@@ -20,8 +21,7 @@ class RealRecordRepository implements RecordRepository {
       ]);
     }
 
-    // Watch plans where I am either the Executor (userId) or the Manager (managerId)
-    return _firestore
+    final plansStream = _firestore
         .collection('plans')
         .where(
           Filter.or(
@@ -29,17 +29,23 @@ class RealRecordRepository implements RecordRepository {
             Filter('managerId', isEqualTo: user.uid),
           ),
         )
-        .snapshots(includeMetadataChanges: true)
-        .map((snapshot) => _mapSnapshotToModels(snapshot, user.uid));
-  }
+        .snapshots(includeMetadataChanges: true);
 
-  /// Helper to convert Firestore snapshot to HomeCardModels
-  List<HomeCardModel> _mapSnapshotToModels(
-    QuerySnapshot snapshot,
-    String myUid,
-  ) {
-    try {
-      final plans = snapshot.docs
+    final relationsStream = _firestore
+        .collection('relations')
+        .where(
+          Filter.or(
+            Filter('executorId', isEqualTo: user.uid),
+            Filter('managerId', isEqualTo: user.uid),
+          ),
+        )
+        .snapshots();
+
+    return Rx.combineLatest2(plansStream, relationsStream, (
+      QuerySnapshot planSnapshot,
+      QuerySnapshot relationSnapshot,
+    ) {
+      final plans = planSnapshot.docs
           .map(
             (doc) => Plan.fromMap(doc.data() as Map<String, dynamic>, doc.id),
           )
@@ -51,17 +57,22 @@ class RealRecordRepository implements RecordRepository {
           )
           .toList();
 
-      // Even if plans is empty, we should process to ensure logic consistency (e.g. EmptyPlan generation)
-      // and to allow future extensibility.
-      return _processPlans(plans, myUid);
-    } catch (e) {
-      debugPrint('[RealRecordRepository] Error mapping snapshot: $e');
-      return [const HomeCardModel(state: HomeCardState.emptyPlan)];
-    }
+      final relations = relationSnapshot.docs
+          .map((doc) => RelationModel.fromFirestore(doc))
+          .toList();
+
+      return _processPlans(plans, user.uid, relations: relations);
+    }).doOnError((e, s) {
+      debugPrint('[RealRecordRepository] Stream Error: $e');
+    });
   }
 
   /// Extracted logic for processing plans into cards
-  List<HomeCardModel> _processPlans(List<Plan> plans, String myUid) {
+  List<HomeCardModel> _processPlans(
+    List<Plan> plans,
+    String myUid, {
+    List<RelationModel>? relations,
+  }) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final todayWeekday = now.weekday; // 1=Mon, 7=Sun
@@ -213,6 +224,27 @@ class RealRecordRepository implements RecordRepository {
             plan: _createSingleItemPlan(past.plan, past.item),
           ),
         );
+      }
+    }
+
+    // --- Part 3: Partner No Plan Check (Poke Feature) ---
+    if (relations != null) {
+      for (var relation in relations) {
+        // If I am the Manager of this relation, check if the Executor (Partner) has any plans
+        if (relation.managerId == myUid) {
+          final partnerUid = relation.executorId;
+          final partnerPlans = plans.where((p) => p.userId == partnerUid);
+
+          if (partnerPlans.isEmpty) {
+            yoursCards.add(
+              HomeCardModel(
+                state: HomeCardState.partnerNoPlan,
+                partnerUid: partnerUid,
+                headerMessage: '약속을 기다리고 있어요',
+              ),
+            );
+          }
+        }
       }
     }
 
@@ -1079,6 +1111,26 @@ class RealRecordRepository implements RecordRepository {
       }
     } catch (e) {
       debugPrint('[RealRecordRepository] Error completing overdue plans: $e');
+    }
+  }
+
+  @override
+  Future<void> pokeUser(String userId, {String? message}) async {
+    final me = FirebaseAuth.instance.currentUser;
+    if (me == null) throw Exception('Not authenticated');
+
+    try {
+      await _firestore.collection('cheers').add({
+        'fromUserId': me.uid,
+        'toUserId': userId,
+        'message': message ?? '똑똑... 혹시 잊으셨나요?',
+        'reactionType': 'poke',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      debugPrint('[RealRecordRepository] Poked user $userId successfully');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error poking user: $e');
+      rethrow;
     }
   }
 }
