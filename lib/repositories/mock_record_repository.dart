@@ -28,6 +28,14 @@ class MockRecordRepository implements RecordRepository {
         plan: _createMockPlan(hour: 13, minute: 0, title: '점심 후 10분 명상'),
       ),
       HomeCardModel(
+        state: HomeCardState.partnerPoke,
+        plan: _createMockPlan(hour: 9, minute: 0, title: '아침 영양제 챙겨먹기'),
+        partnerName: '지민',
+        partnerImageUrl:
+            'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
+        headerMessage: '기다리는 중',
+      ),
+      HomeCardModel(
         state: HomeCardState.partnerPlanCreate,
         plan: _createMockPlan(hour: 10, minute: 0, title: '책 30분 읽기'),
       ),

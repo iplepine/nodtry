@@ -325,6 +325,16 @@ class _NowTabState extends ConsumerState<NowTab>
     ).showSnackBar(const SnackBar(content: Text('파트너를 똑똑! 찔렀습니다.')));
   }
 
+  void _handlePokePartner(HomeCardModel model) {
+    if (model.plan?.id == null) return;
+    ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(PokePartnerIntent(model.plan!.id!));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('똑똑, 문을 두드렸어요!')));
+  }
+
   Future<void> _handleSkip() async {
     final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
     if (primaryCard?.plan?.id == null) return;
@@ -801,6 +811,8 @@ class _NowTabState extends ConsumerState<NowTab>
                                       onMoreCheer: () => _handleMoreCheer(card),
                                       onPokeUser: () =>
                                           _handlePokeUser(card), // Added
+                                      onPokePartner: () =>
+                                          _handlePokePartner(card), // Added
                                       timeChipText: _getManagerTimeChipText(
                                         card,
                                       ),
@@ -1908,6 +1920,7 @@ class _ManagerQuickCard extends StatelessWidget {
   final VoidCallback? onMoreCheer;
   final VoidCallback? onReject;
   final VoidCallback? onPokeUser;
+  final VoidCallback? onPokePartner; // Added
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? exactTimeText;
@@ -1922,6 +1935,7 @@ class _ManagerQuickCard extends StatelessWidget {
     this.onMoreCheer,
     this.onReject,
     this.onPokeUser,
+    this.onPokePartner,
     this.timeChipText,
     this.timeChipType,
     this.exactTimeText,
@@ -2143,6 +2157,41 @@ class _ManagerQuickCard extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: onPokeUser,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "똑똑! 하기",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ] else if (model.state == HomeCardState.partnerPoke) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: Text(
+                  '${partnerName ?? "파트너"}님이 아직 소식이 없어요. 똑똑! 하고 깨워볼까요?',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onPokePartner,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,

@@ -227,7 +227,7 @@ class RealRecordRepository implements RecordRepository {
       }
     }
 
-    // --- Part 3: Partner No Plan Check (Poke Feature) ---
+    // --- Part 3: Partner No Plan Check / Poke Feature ---
     if (relations != null) {
       for (var relation in relations) {
         // If I am the Manager of this relation, check if the Executor (Partner) has any plans
@@ -243,6 +243,34 @@ class RealRecordRepository implements RecordRepository {
                 headerMessage: '약속을 기다리고 있어요',
               ),
             );
+          } else {
+            // Status H: 파트너가 오늘 해야 할 일이 있는데 아직 안 했을 때
+            for (var plan in partnerPlans) {
+              if (plan.state != PlanState.active) continue;
+
+              final hasCompletedToday = plan.completedDates.any(
+                (d) =>
+                    d.year == today.year &&
+                    d.month == today.month &&
+                    d.day == today.day,
+              );
+
+              if (!hasCompletedToday) {
+                final hasTodayItem = plan.items.any(
+                  (item) => item.days.contains(todayWeekday),
+                );
+                if (hasTodayItem) {
+                  yoursCards.add(
+                    HomeCardModel(
+                      state: HomeCardState.partnerPoke,
+                      plan: plan,
+                      partnerUid: partnerUid,
+                      headerMessage: '기다리는 중',
+                    ),
+                  );
+                }
+              }
+            }
           }
         }
       }

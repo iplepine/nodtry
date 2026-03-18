@@ -186,3 +186,21 @@ class PokeUserIntent extends NowTabIntent {
   @override
   int get hashCode => userId.hashCode ^ (message?.hashCode ?? 0);
 }
+
+/// 특정 계획 찌르기 (계획에 대해 똑똑)
+class PokePartnerIntent extends NowTabIntent {
+  final String planId;
+  final String? message;
+  const PokePartnerIntent(this.planId, {this.message});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PokePartnerIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId &&
+          message == other.message;
+
+  @override
+  int get hashCode => planId.hashCode ^ (message?.hashCode ?? 0);
+}

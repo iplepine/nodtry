@@ -41,6 +41,9 @@ enum HomeCardState {
 
   /// Type 2-4: Partner No Plan (상대방 계획 없음 - 똑똑/제안 유도)
   partnerNoPlan,
+
+  /// Type 2-5: Partner Poke (상대방 실천 지연 - 똑똑 유도)
+  partnerPoke,
 }
 
 /// 카드 계층 타입
@@ -79,6 +82,7 @@ extension HomeCardStatePriority on HomeCardState {
       case HomeCardState.partnerPlanModify:
       case HomeCardState.partnerAction:
       case HomeCardState.partnerNoPlan:
+      case HomeCardState.partnerPoke:
         return CardRole.yours;
     }
   }
@@ -228,6 +232,30 @@ class HomeCardModel {
     this.currentWeek,
     this.totalWeeks,
   });
+
+  HomeCardModel copyWith({
+    HomeCardState? state,
+    Plan? plan,
+    String? partnerUid,
+    String? partnerName,
+    String? partnerImageUrl,
+    String? headerMessage,
+    Plan? previousPlan,
+    int? currentWeek,
+    int? totalWeeks,
+  }) {
+    return HomeCardModel(
+      state: state ?? this.state,
+      plan: plan ?? this.plan,
+      partnerUid: partnerUid ?? this.partnerUid,
+      partnerName: partnerName ?? this.partnerName,
+      partnerImageUrl: partnerImageUrl ?? this.partnerImageUrl,
+      headerMessage: headerMessage ?? this.headerMessage,
+      previousPlan: previousPlan ?? this.previousPlan,
+      currentWeek: currentWeek ?? this.currentWeek,
+      totalWeeks: totalWeeks ?? this.totalWeeks,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
