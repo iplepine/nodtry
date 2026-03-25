@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>개인정보처리방침 - 그래, 해봐</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.8;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      color: #333;
+      background: #fafafa;
+    }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    h2 { font-size: 20px; margin-top: 36px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+    p, li { font-size: 15px; }
+    ul { padding-left: 20px; }
+    .updated { color: #888; font-size: 14px; margin-bottom: 32px; }
+    a { color: #1a73e8; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { border: 1px solid #ddd; padding: 10px 12px; font-size: 14px; text-align: left; }
+    th { background: #f5f5f5; }
+    .lang-toggle { text-align: right; margin-bottom: 20px; }
+    .lang-toggle a { cursor: pointer; padding: 6px 14px; border: 1px solid #ddd; border-radius: 6px; text-decoration: none; font-size: 14px; }
+    .section-en { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="lang-toggle">
+  <a onclick="toggleLang('ko')">한국어</a>
+  <a onclick="toggleLang('en')">English</a>
+</div>
+
+<!-- ===== 한국어 ===== -->
+<div id="lang-ko" class="section-ko">
+  <h1>개인정보처리방침</h1>
+  <p class="updated">시행일: 2026년 3월 24일</p>
+
+  <p>그래, 해봐(이하 "앱")는 파트너와 함께 계획을 지켜나가는 책임 관리 앱입니다. 본 개인정보처리방침은 앱이 수집하는 정보, 이용 목적, 보관 및 삭제 방법을 안내합니다.</p>
+
+  <h2>1. 수집하는 개인정보 항목</h2>
+  <table>
+    <tr><th>항목</th><th>수집 목적</th><th>수집 방법</th></tr>
+    <tr><td>이메일 주소, 로그인 ID (Firebase Auth UID)</td><td>회원 식별 및 계정 관리</td><td>회원가입 시</td></tr>
+    <tr><td>닉네임, 프로필 이미지</td><td>서비스 내 프로필 표시</td><td>사용자 직접 입력</td></tr>
+    <tr><td>약속 데이터 (계획, 실천 기록, 완료 상태, 소감)</td><td>핵심 서비스 기능 제공</td><td>서비스 이용 중 생성</td></tr>
+    <tr><td>건강 관련 데이터 (운동, 식단 등 계획에 포함될 경우)</td><td>계획 관리 및 파트너 확인</td><td>사용자 자발적 입력</td></tr>
+    <tr><td>기기 정보 (기기 모델, OS 버전, 앱 버전)</td><td>푸시 알림 발송 및 오류 해결</td><td>자동 수집</td></tr>
+  </table>
+
+  <h2>2. 개인정보 이용 목적</h2>
+  <ul>
+    <li>계획 생성, 추적, 파트너 연결 등 핵심 기능 제공</li>
+    <li>알림 및 리마인더 발송</li>
+    <li>회원 식별 및 계정 관리</li>
+    <li>서비스 품질 개선 및 신규 기능 개발</li>
+  </ul>
+  <p>당사는 개인정보를 <strong>광고 목적으로 판매하거나 제3자에게 제공하지 않습니다.</strong> 건강 관련 데이터는 마케팅이나 광고 목적으로 절대 공유하지 않습니다.</p>
+
+  <h2>3. 제3자 제공 및 위탁</h2>
+  <p>앱 운영을 위해 다음 제3자 서비스를 이용합니다:</p>
+  <table>
+    <tr><th>서비스</th><th>제공업체</th><th>이용 목적</th></tr>
+    <tr><td>Firebase Authentication</td><td>Google LLC</td><td>사용자 인증</td></tr>
+    <tr><td>Cloud Firestore</td><td>Google LLC</td><td>데이터 저장</td></tr>
+    <tr><td>Firebase Cloud Messaging</td><td>Google LLC</td><td>푸시 알림</td></tr>
+  </table>
+  <p>해당 서비스는 각 사의 개인정보처리방침에 따라 데이터를 처리합니다.</p>
+
+  <h2>4. 개인정보 보관 기간</h2>
+  <table>
+    <tr><th>데이터 유형</th><th>보관 기간</th></tr>
+    <tr><td>계정 정보 (이메일, 닉네임, 프로필)</td><td>회원 탈퇴 시까지</td></tr>
+    <tr><td>약속/실천 데이터</td><td>회원 탈퇴 시까지</td></tr>
+    <tr><td>건강 관련 데이터</td><td>회원 탈퇴 시까지</td></tr>
+    <tr><td>기기 정보 및 로그</td><td>수집일로부터 1년</td></tr>
+  </table>
+  <p>보관 기간이 경과하거나 처리 목적이 달성된 경우, 해당 개인정보를 지체 없이 파기합니다.</p>
+
+  <h2>5. 개인정보 삭제 방법</h2>
+  <p>사용자는 언제든지 다음 방법으로 개인정보를 삭제할 수 있습니다:</p>
+  <ul>
+    <li><strong>앱 내 삭제:</strong> 설정 &gt; 계정 삭제를 통해 모든 데이터를 즉시 삭제할 수 있습니다.</li>
+    <li><strong>이메일 요청:</strong> <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a>으로 삭제 요청을 보내실 수 있습니다.</li>
+  </ul>
+  <p>삭제 요청 시 처리 절차:</p>
+  <ol>
+    <li>요청 접수 후 본인 확인</li>
+    <li>계정 정보, 약속 데이터, 프로필 정보, 건강 관련 데이터 등 모든 개인정보를 <strong>30일 이내</strong>에 완전 파기</li>
+    <li>전자적 파일은 복구 불가능한 기술적 방법으로 영구 삭제</li>
+  </ol>
+
+  <h2>6. 이용자의 권리</h2>
+  <ul>
+    <li>개인정보 열람 요청</li>
+    <li>설정 &gt; 프로필 수정을 통한 개인정보 수정</li>
+    <li>언제든지 계정 삭제 및 모든 관련 데이터 삭제 요청</li>
+    <li>개인정보 수집에 대한 동의 철회</li>
+  </ul>
+
+  <h2>7. 데이터 보안</h2>
+  <p>암호화된 데이터 전송(HTTPS/TLS), Google Firebase의 보안 클라우드 인프라를 포함한 적절한 보안 조치를 시행하여 개인정보를 보호합니다.</p>
+
+  <h2>8. 아동 개인정보 보호</h2>
+  <p>본 앱은 만 14세 미만의 아동을 대상으로 하지 않으며, 만 14세 미만 아동의 개인정보를 고의로 수집하지 않습니다.</p>
+
+  <h2>9. 개인정보처리방침 변경</h2>
+  <p>본 방침은 수시로 업데이트될 수 있으며, 변경 사항은 시행일과 함께 이 페이지에 게시됩니다.</p>
+
+  <h2>10. 문의</h2>
+  <p>개인정보처리방침에 대한 문의사항이 있으시면 아래로 연락해 주세요:</p>
+  <ul>
+    <li>개인정보 보호책임자: 박정호</li>
+    <li>이메일: <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a></li>
+  </ul>
+</div>
+
+<!-- ===== English ===== -->
+<div id="lang-en" class="section-en">
+  <h1>Privacy Policy</h1>
+  <p class="updated">Effective Date: March 24, 2026</p>
+
+  <p>Geurae, Haebwa ("we", "our", or "the App") is an accountability app that helps users keep their plans with a partner. This Privacy Policy explains how we collect, use, store, and delete your information.</p>
+
+  <h2>1. Information We Collect</h2>
+  <table>
+    <tr><th>Data</th><th>Purpose</th><th>Method</th></tr>
+    <tr><td>Email address, Login ID (Firebase Auth UID)</td><td>Account identification and management</td><td>At sign-up</td></tr>
+    <tr><td>Nickname, profile image</td><td>In-app profile display</td><td>User input</td></tr>
+    <tr><td>Plan data (plans, practice records, completion status, reflections)</td><td>Core service features</td><td>Generated during use</td></tr>
+    <tr><td>Health-related data (exercise, diet, etc. if included in plans)</td><td>Plan management and partner confirmation</td><td>Voluntary user input</td></tr>
+    <tr><td>Device information (model, OS version, app version)</td><td>Push notifications and troubleshooting</td><td>Automatic collection</td></tr>
+  </table>
+
+  <h2>2. How We Use Your Information</h2>
+  <ul>
+    <li>Provide core service features (plan creation, tracking, partner connection)</li>
+    <li>Send notifications and reminders</li>
+    <li>Member identification and account management</li>
+    <li>Improve service quality and develop new features</li>
+  </ul>
+  <p>We do <strong>not</strong> sell your personal data or use it for advertising. Health-related data is never shared with third parties for marketing or advertising.</p>
+
+  <h2>3. Third-Party Services</h2>
+  <table>
+    <tr><th>Service</th><th>Provider</th><th>Purpose</th></tr>
+    <tr><td>Firebase Authentication</td><td>Google LLC</td><td>User authentication</td></tr>
+    <tr><td>Cloud Firestore</td><td>Google LLC</td><td>Data storage</td></tr>
+    <tr><td>Firebase Cloud Messaging</td><td>Google LLC</td><td>Push notifications</td></tr>
+  </table>
+  <p>These services process data in accordance with their own privacy policies.</p>
+
+  <h2>4. Data Retention Period</h2>
+  <table>
+    <tr><th>Data Type</th><th>Retention Period</th></tr>
+    <tr><td>Account information (email, nickname, profile)</td><td>Until account deletion</td></tr>
+    <tr><td>Plan and practice data</td><td>Until account deletion</td></tr>
+    <tr><td>Health-related data</td><td>Until account deletion</td></tr>
+    <tr><td>Device information and logs</td><td>1 year from collection</td></tr>
+  </table>
+  <p>Data is destroyed without delay once the retention period expires or the purpose of processing is fulfilled.</p>
+
+  <h2>5. How to Delete Your Data</h2>
+  <p>You can delete your personal data at any time through the following methods:</p>
+  <ul>
+    <li><strong>In-App Deletion:</strong> Go to Settings &gt; Delete Account to immediately delete all your data.</li>
+    <li><strong>Email Request:</strong> Send a deletion request to <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a>.</li>
+  </ul>
+  <p>Deletion process:</p>
+  <ol>
+    <li>Identity verification upon receiving the request</li>
+    <li>All personal information including account data, plan data, profile information, and health-related data will be permanently destroyed within <strong>30 days</strong></li>
+    <li>Electronic files are permanently deleted using technical methods that prevent recovery</li>
+  </ol>
+
+  <h2>6. Your Rights</h2>
+  <ul>
+    <li>Request access to your personal information</li>
+    <li>Modify your profile through Settings &gt; Edit Profile</li>
+    <li>Delete your account and all associated data at any time</li>
+    <li>Withdraw consent for data collection</li>
+  </ul>
+
+  <h2>7. Data Security</h2>
+  <p>We implement appropriate security measures including encrypted data transmission (HTTPS/TLS) and secure cloud infrastructure provided by Google Firebase.</p>
+
+  <h2>8. Children's Privacy</h2>
+  <p>The App is not intended for children under the age of 14. We do not knowingly collect personal information from children under 14.</p>
+
+  <h2>9. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated effective date.</p>
+
+  <h2>10. Contact Us</h2>
+  <ul>
+    <li>Privacy Officer: Jungho Park</li>
+    <li>Email: <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a></li>
+  </ul>
+</div>
+
+<script>
+  function toggleLang(lang) {
+    document.getElementById('lang-ko').style.display = lang === 'ko' ? 'block' : 'none';
+    document.getElementById('lang-en').style.display = lang === 'en' ? 'block' : 'none';
+  }
+</script>
+</body>
+</html>
