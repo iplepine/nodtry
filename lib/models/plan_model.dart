@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'promise_model.dart';
 
 enum PlanState {
   draft,
@@ -62,6 +63,7 @@ class Plan {
   final String? lastActionNote; // 마지막 실천 한마디 (실천자)
   final String? lastComment; // 마지막 피드백/응원 메시지 (매니저)
   final String? lastUpdatedBy; // 마지막으로 문서를 수정한 사람의 UID
+  final Promise? promise; // 보상/벌칙 약속
 
   Plan({
     this.id,
@@ -80,6 +82,7 @@ class Plan {
     this.lastActionNote,
     this.lastComment,
     this.lastUpdatedBy,
+    this.promise,
   });
 
   Plan copyWith({
@@ -99,6 +102,7 @@ class Plan {
     String? lastActionNote,
     String? lastComment,
     String? lastUpdatedBy,
+    Promise? promise,
   }) {
     return Plan(
       id: id ?? this.id,
@@ -117,6 +121,7 @@ class Plan {
       lastActionNote: lastActionNote ?? this.lastActionNote,
       lastComment: lastComment ?? this.lastComment,
       lastUpdatedBy: lastUpdatedBy ?? this.lastUpdatedBy,
+      promise: promise ?? this.promise,
     );
   }
 
@@ -139,6 +144,7 @@ class Plan {
       if (lastActionNote != null) 'lastActionNote': lastActionNote,
       if (lastComment != null) 'lastComment': lastComment,
       if (lastUpdatedBy != null) 'lastUpdatedBy': lastUpdatedBy,
+      if (promise != null) 'promise': promise!.toMap(),
     };
   }
 
@@ -169,6 +175,9 @@ class Plan {
       lastActionNote: map['lastActionNote'],
       lastComment: map['lastComment'] ?? map['lastCheerMessage'], // 하위 호환성
       lastUpdatedBy: map['lastUpdatedBy'],
+      promise: map['promise'] != null
+          ? Promise.fromMap(map['promise'] as Map<String, dynamic>)
+          : null,
     );
   }
 }

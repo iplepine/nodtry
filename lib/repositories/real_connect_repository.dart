@@ -35,15 +35,28 @@ class RealConnectRepository implements ConnectRepository {
     // 2. 이미 연결되어 있는지 확인 (옵션)
     // (MVP에서는 일단 중복 체크 없이 생성하거나, 클라이언트에서 필터링)
 
-    // 3. Relations 생성
-    // 정책: 초대자(Target) = Manager, 참여자(Me) = Executor
-    await _firestore.collection('relations').add({
+    // 3. Relations 생성 (양방향 — 상호지지)
+    final batch = _firestore.batch();
+
+    // A: 초대자(Target) = Manager, 참여자(Me) = Executor
+    batch.set(_firestore.collection('relations').doc(), {
       'managerId': targetUserId,
       'executorId': me.uid,
-      'status': 'active', // MVP: 즉시 연결
+      'status': 'active',
       'createdAt': FieldValue.serverTimestamp(),
       'connectedAt': FieldValue.serverTimestamp(),
     });
+
+    // B: 참여자(Me) = Manager, 초대자(Target) = Executor
+    batch.set(_firestore.collection('relations').doc(), {
+      'managerId': me.uid,
+      'executorId': targetUserId,
+      'status': 'active',
+      'createdAt': FieldValue.serverTimestamp(),
+      'connectedAt': FieldValue.serverTimestamp(),
+    });
+
+    await batch.commit();
 
     return targetUserId;
   }

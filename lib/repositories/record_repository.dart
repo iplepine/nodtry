@@ -1,6 +1,7 @@
 import '../models/home_state.dart';
 import '../models/history_item.dart';
 import '../models/plan_model.dart';
+import '../models/promise_model.dart';
 
 /// 기록 관련 데이터 저장소 인터페이스
 ///
@@ -96,4 +97,17 @@ abstract class RecordRepository {
 
   /// 특정 유저를 찌릅니다. (계획과 상관없이)
   Future<void> pokeUser(String userId, {String? message});
+
+  /// 약속 제안 (보상/벌칙). reward, penalty 중 최소 하나는 non-null.
+  Future<void> proposePromise(
+    String planId, {
+    PromiseReward? reward,
+    PromisePenalty? penalty,
+  });
+
+  /// 약속 수락 또는 거절.
+  Future<void> respondPromise(String planId, {required bool accept});
+
+  /// 약속 정산. Plan 종료/중단 시 내부적으로 호출.
+  Future<void> settlePromise(String planId);
 }

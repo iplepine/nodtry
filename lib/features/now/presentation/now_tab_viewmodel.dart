@@ -4,6 +4,7 @@ import 'now_tab_state.dart';
 import 'now_tab_intent.dart';
 import '../../../models/plan_model.dart';
 import '../../../models/home_state.dart';
+import '../../../models/promise_model.dart';
 import '../../../models/connected_user.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../widgets/quiet_header.dart';
@@ -116,7 +117,12 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
       } else if (intent is PokeUserIntent) {
         await _pokeUser(intent.userId, intent.message);
       } else if (intent is PokePartnerIntent) {
-        await _pokePartner(intent.planId, intent.message);
+        await _pokePartner(intent.planId, intent.message,
+            intent.reward, intent.penalty);
+      } else if (intent is ProposePromiseIntent) {
+        await _proposePromise(intent.planId, intent.reward, intent.penalty);
+      } else if (intent is RespondPromiseIntent) {
+        await _respondPromise(intent.planId, intent.accept);
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -127,10 +133,29 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     await ref.read(recordRepositoryProvider).pokeUser(userId, message: message);
   }
 
-  Future<void> _pokePartner(String planId, [String? message]) async {
+  Future<void> _pokePartner(String planId, [String? message,
+      PromiseReward? reward, PromisePenalty? penalty]) async {
     await ref
         .read(recordRepositoryProvider)
         .pokePartner(planId, message: message);
+    if (reward != null || penalty != null) {
+      await ref
+          .read(recordRepositoryProvider)
+          .proposePromise(planId, reward: reward, penalty: penalty);
+    }
+  }
+
+  Future<void> _proposePromise(String planId, PromiseReward? reward,
+      PromisePenalty? penalty) async {
+    await ref
+        .read(recordRepositoryProvider)
+        .proposePromise(planId, reward: reward, penalty: penalty);
+  }
+
+  Future<void> _respondPromise(String planId, bool accept) async {
+    await ref
+        .read(recordRepositoryProvider)
+        .respondPromise(planId, accept: accept);
   }
 
   Future<void> _completePlan(String planId, [String? message]) async {

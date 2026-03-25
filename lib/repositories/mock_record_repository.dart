@@ -2,6 +2,7 @@ import 'dart:async';
 import '../models/home_state.dart';
 import '../models/history_item.dart';
 import '../models/plan_model.dart';
+import '../models/promise_model.dart';
 import 'record_repository.dart';
 
 /// Mock 데이터 저장소 구현체
@@ -672,5 +673,24 @@ class MockRecordRepository implements RecordRepository {
     // ignore: avoid_print
     print('Mock: Poke user $userId generally with message: $message');
     await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  @override
+  Future<void> proposePromise(
+    String planId, {
+    PromiseReward? reward,
+    PromisePenalty? penalty,
+  }) async {
+    print('Mock: Propose promise for plan $planId');
+  }
+
+  @override
+  Future<void> respondPromise(String planId, {required bool accept}) async {
+    print('Mock: Respond promise for plan $planId, accept: $accept');
+  }
+
+  @override
+  Future<void> settlePromise(String planId) async {
+    print('Mock: Settle promise for plan $planId');
   }
 }

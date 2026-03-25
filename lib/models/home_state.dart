@@ -44,6 +44,16 @@ enum HomeCardState {
 
   /// Type 2-5: Partner Poke (상대방 실천 지연 - 똑똑 유도)
   partnerPoke,
+
+  // --- Promise (약속 보상/벌칙) ---
+  /// Type 3-1: 상대가 나에게 약속을 제안함 (수락/거절 필요)
+  promiseProposed,
+
+  /// Type 3-2: 내가 상대에게 약속을 제안함 (대기 중, 정보성)
+  partnerPromiseProposed,
+
+  /// Type 3-3: 약속 정산 결과 (양쪽 모두에게 노출)
+  promiseSettled,
 }
 
 /// 카드 계층 타입
@@ -77,12 +87,15 @@ extension HomeCardStatePriority on HomeCardState {
       case HomeCardState.overdue:
       case HomeCardState.rejected:
       case HomeCardState.poked:
+      case HomeCardState.promiseProposed:
+      case HomeCardState.promiseSettled:
         return CardRole.mine;
       case HomeCardState.partnerPlanCreate:
       case HomeCardState.partnerPlanModify:
       case HomeCardState.partnerAction:
       case HomeCardState.partnerNoPlan:
       case HomeCardState.partnerPoke:
+      case HomeCardState.partnerPromiseProposed:
         return CardRole.yours;
     }
   }
@@ -95,6 +108,10 @@ extension HomeCardStatePriority on HomeCardState {
         return 0; // 0순위: 반려됨 (가장 급함)
       case HomeCardState.poked:
         return 0; // 0순위: 찌르기 받음 (반려와 동급, 즉시 확인 필요)
+      case HomeCardState.promiseProposed:
+        return 0; // 0순위: 약속 제안 받음 (즉시 응답 필요)
+      case HomeCardState.promiseSettled:
+        return 0; // 0순위: 약속 정산 결과 (확인 필요)
       case HomeCardState.nowAction:
         return 1; // 1순위: 지금 실천
       case HomeCardState.overdue:

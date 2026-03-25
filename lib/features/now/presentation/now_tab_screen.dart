@@ -12,6 +12,7 @@ import '../../../widgets/time_chip.dart';
 import '../../../models/home_state.dart';
 import '../../../routes/app_router.dart';
 import '../../../utils/time_formatter.dart';
+import '../../../models/promise_model.dart';
 import 'now_tab_intent.dart';
 import 'now_tab_viewmodel.dart';
 import 'now_tab_fake_states.dart';
@@ -373,6 +374,45 @@ class _NowTabState extends ConsumerState<NowTab>
         .dispatch(AcknowledgePokeIntent(card.plan!.id!));
   }
 
+  void _handleRespondPromise(HomeCardModel card, bool accept) {
+    if (card.plan?.id == null) return;
+    ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(RespondPromiseIntent(card.plan!.id!, accept: accept));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(accept ? '약속을 수락했어요!' : '약속을 거절했어요.')),
+      );
+    }
+  }
+
+  Future<void> _handleProposePromise(HomeCardModel card) async {
+    if (card.plan?.id == null) return;
+
+    final result = await showModalBottomSheet<({PromiseReward? reward, PromisePenalty? penalty})>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const _PromiseProposalSheet(),
+    );
+
+    if (result == null) return;
+    if (result.reward == null && result.penalty == null) return;
+
+    ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(ProposePromiseIntent(
+          card.plan!.id!,
+          reward: result.reward,
+          penalty: result.penalty,
+        ));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('약속을 제안했어요!')),
+      );
+    }
+  }
+
   /// Time Chip 텍스트 가져오기
 
   /// 정확한 시간 텍스트 가져오기 (롱 프레스용)
@@ -709,6 +749,16 @@ class _NowTabState extends ConsumerState<NowTab>
                                       onPokeAck: () => _handlePokeAck(
                                         primaryExecutorCard,
                                       ), // Added
+                                      onAcceptPromise: () =>
+                                          _handleRespondPromise(
+                                        primaryExecutorCard,
+                                        true,
+                                      ),
+                                      onRejectPromise: () =>
+                                          _handleRespondPromise(
+                                        primaryExecutorCard,
+                                        false,
+                                      ),
                                       onTap: () =>
                                           _handleCardTap(primaryExecutorCard),
                                       timeChipText: _getTimeChipText(
@@ -813,6 +863,8 @@ class _NowTabState extends ConsumerState<NowTab>
                                           _handlePokeUser(card), // Added
                                       onPokePartner: () =>
                                           _handlePokePartner(card), // Added
+                                      onProposePromise: () =>
+                                          _handleProposePromise(card),
                                       timeChipText: _getManagerTimeChipText(
                                         card,
                                       ),
@@ -1146,6 +1198,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final VoidCallback? onCreatePlan;
   final VoidCallback? onModify; // Added
   final VoidCallback? onPokeAck; // Added
+  final VoidCallback? onAcceptPromise;
+  final VoidCallback? onRejectPromise;
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? recordGazeText;
@@ -1158,6 +1212,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
     this.onCreatePlan,
     this.onModify, // Added
     this.onPokeAck, // Added
+    this.onAcceptPromise,
+    this.onRejectPromise,
     this.onTap,
     this.timeChipText,
     this.timeChipType,
@@ -1295,6 +1351,12 @@ class _PrimaryExecutorCard extends StatelessWidget {
         case HomeCardState.poked: // Type 1-8: 찌르기 받음
           statusMessage = '똑똑... 혹시 잊으셨나요?'; // Fallback message
           break;
+        case HomeCardState.promiseProposed:
+          statusMessage = '약속 제안이 도착했어요';
+          break;
+        case HomeCardState.promiseSettled:
+          statusMessage = '약속 결과가 나왔어요';
+          break;
         default:
           break;
       }
@@ -1402,10 +1464,184 @@ class _PrimaryExecutorCard extends StatelessWidget {
       );
     }
 
+    // ----------------------------------------------------
+    // 3. Promise 상세 (약속 제안/정산 결과)
+    // ----------------------------------------------------
+    if (model.plan?.promise != null) {
+      final promise = model.plan!.promise!;
+      if (model.state == HomeCardState.promiseProposed ||
+          model.state == HomeCardState.promiseSettled) {
+        children.add(const SizedBox(height: 12));
+        children.add(_buildPromiseDetail(context, promise));
+      }
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: children,
+    );
+  }
+
+  Widget _buildPromiseDetail(BuildContext context, Promise promise) {
+    final isSettled = promise.status == PromiseStatus.settled;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.outline.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (promise.reward != null) ...[
+            Row(
+              children: [
+                const Text('🏆', style: TextStyle(fontSize: 16)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${promise.reward!.targetDays}일 성공 시: ${promise.reward!.description}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                if (isSettled)
+                  _buildSettlementBadge(context, promise, isReward: true),
+              ],
+            ),
+          ],
+          if (promise.reward != null && promise.penalty != null)
+            const SizedBox(height: 8),
+          if (promise.penalty != null) ...[
+            Row(
+              children: [
+                const Text('⚡', style: TextStyle(fontSize: 16)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${promise.penalty!.targetDays}일 실패 시: ${promise.penalty!.description}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                if (isSettled)
+                  _buildSettlementBadge(context, promise, isReward: false),
+              ],
+            ),
+          ],
+          if (isSettled && promise.settledSuccessDays != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              '성공 ${promise.settledSuccessDays}일 / 실패 ${promise.settledFailDays ?? 0}일',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettlementBadge(BuildContext context, Promise promise,
+      {required bool isReward}) {
+    final result = promise.settlementResult;
+    final bool achieved;
+    if (isReward) {
+      achieved = result == SettlementResult.rewardAchieved ||
+          result == SettlementResult.bothMet;
+    } else {
+      achieved = result == SettlementResult.penaltyTriggered ||
+          result == SettlementResult.bothMet;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: achieved
+            ? (isReward ? AppColors.success : AppColors.error)
+                .withValues(alpha: 0.15)
+            : AppColors.disabled.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        achieved ? (isReward ? '달성!' : '발동!') : '미달',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: achieved
+              ? (isReward ? AppColors.success : AppColors.error)
+              : AppColors.textDisabled,
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPromiseProposedButtons(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: onRejectPromise,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.primary),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  '거절',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: onAcceptPromise,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  '수락',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -1429,6 +1665,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
     } else if (model.state == HomeCardState.poked) {
       buttonText = '네'; // "Yes" (Ack)
       onPressed = onPokeAck;
+    } else if (model.state == HomeCardState.promiseProposed) {
+      return _buildPromiseProposedButtons(context);
+    } else if (model.state == HomeCardState.promiseSettled) {
+      return const SizedBox.shrink();
     } else if (model.state == HomeCardState.todayComplete ||
         model.state == HomeCardState.todayEmpty) {
       // "작은 버튼" 요청: TextButton으로 구현
@@ -1921,6 +2161,7 @@ class _ManagerQuickCard extends StatelessWidget {
   final VoidCallback? onReject;
   final VoidCallback? onPokeUser;
   final VoidCallback? onPokePartner; // Added
+  final VoidCallback? onProposePromise;
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? exactTimeText;
@@ -1936,6 +2177,7 @@ class _ManagerQuickCard extends StatelessWidget {
     this.onReject,
     this.onPokeUser,
     this.onPokePartner,
+    this.onProposePromise,
     this.timeChipText,
     this.timeChipType,
     this.exactTimeText,
@@ -1958,6 +2200,10 @@ class _ManagerQuickCard extends StatelessWidget {
       }
     } else if (model.state == HomeCardState.partnerNoPlan) {
       headerText = '기다리는 중';
+    } else if (model.state == HomeCardState.partnerPromiseProposed) {
+      headerText = '약속 수락을 기다리는 중';
+    } else if (model.state == HomeCardState.promiseSettled) {
+      headerText = '약속 결과가 나왔어요';
     } else {
       headerText = model.headerMessage ?? l10n.homeReceivedMessage;
     }
@@ -2231,11 +2477,130 @@ class _ManagerQuickCard extends StatelessWidget {
                   ),
                 ),
               ),
+            ] else if (model.state == HomeCardState.partnerPromiseProposed) ...[
+              const SizedBox(height: 12),
+              if (model.plan?.promise != null)
+                _buildManagerPromiseDetail(context, model.plan!.promise!),
+            ] else if (model.state == HomeCardState.promiseSettled) ...[
+              const SizedBox(height: 12),
+              if (model.plan?.promise != null)
+                _buildManagerPromiseDetail(context, model.plan!.promise!),
+            ],
+            // "약속 걸기" 버튼 (partnerPoke, partnerPlanCreate에서 약속 없을 때)
+            if ((model.state == HomeCardState.partnerPoke ||
+                    model.state == HomeCardState.partnerPlanCreate ||
+                    model.state == HomeCardState.partnerAction) &&
+                (model.plan?.promise == null ||
+                    model.plan?.promise?.status == PromiseStatus.rejected)) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: onProposePromise,
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.textSecondary,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.handshake_outlined,
+                          size: 16, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        '약속 걸기',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildManagerPromiseDetail(BuildContext context, Promise promise) {
+    final isSettled = promise.status == PromiseStatus.settled;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.background.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (promise.reward != null) ...[
+            Text(
+              '🏆 ${promise.reward!.targetDays}일 성공 시: ${promise.reward!.description}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+          if (promise.reward != null && promise.penalty != null)
+            const SizedBox(height: 4),
+          if (promise.penalty != null) ...[
+            Text(
+              '⚡ ${promise.penalty!.targetDays}일 실패 시: ${promise.penalty!.description}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+          if (isSettled && promise.settledSuccessDays != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              '결과: 성공 ${promise.settledSuccessDays}일 / 실패 ${promise.settledFailDays ?? 0}일',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (promise.settlementResult != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                _settlementResultText(promise.settlementResult!),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ] else ...[
+            const SizedBox(height: 4),
+            Text(
+              '수락 대기 중...',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String _settlementResultText(SettlementResult result) {
+    switch (result) {
+      case SettlementResult.rewardAchieved:
+        return '🎉 보상 달성!';
+      case SettlementResult.penaltyTriggered:
+        return '⚡ 벌칙 발동!';
+      case SettlementResult.bothMet:
+        return '🎉 보상 달성! + ⚡ 벌칙 발동!';
+      case SettlementResult.neitherMet:
+        return '조건 미달';
+    }
   }
 
   Widget _buildDiffText(
@@ -2333,6 +2698,270 @@ class _ContextFooter extends StatelessWidget {
 }
 
 // _ReconcileMenu removed per user request (was unused after UI updates)
+
+class _PromiseProposalSheet extends StatefulWidget {
+  const _PromiseProposalSheet();
+
+  @override
+  State<_PromiseProposalSheet> createState() => _PromiseProposalSheetState();
+}
+
+class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
+  bool _enableReward = true;
+  bool _enablePenalty = false;
+  final _rewardDescController = TextEditingController();
+  final _penaltyDescController = TextEditingController();
+  int _rewardDays = 20;
+  int _penaltyDays = 10;
+
+  @override
+  void dispose() {
+    _rewardDescController.dispose();
+    _penaltyDescController.dispose();
+    super.dispose();
+  }
+
+  bool get _isValid {
+    if (!_enableReward && !_enablePenalty) return false;
+    if (_enableReward && _rewardDescController.text.trim().isEmpty) return false;
+    if (_enablePenalty && _penaltyDescController.text.trim().isEmpty) return false;
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.disabled,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              '약속 걸기',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '상대가 수락하면 약속이 시작돼요',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // 보상 섹션
+            _buildSectionToggle(
+              title: '🏆 보상 (당근)',
+              enabled: _enableReward,
+              onToggle: (v) => setState(() => _enableReward = v),
+            ),
+            if (_enableReward) ...[
+              const SizedBox(height: 8),
+              TextField(
+                controller: _rewardDescController,
+                decoration: InputDecoration(
+                  hintText: '예: 치킨 사주기, 맛집 가기',
+                  hintStyle: TextStyle(color: AppColors.textDisabled),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                maxLength: 100,
+                onChanged: (_) => setState(() {}),
+              ),
+              _buildDaysPicker(
+                label: '성공 목표',
+                days: _rewardDays,
+                onChanged: (d) => setState(() => _rewardDays = d),
+              ),
+            ],
+
+            const SizedBox(height: 16),
+
+            // 벌칙 섹션
+            _buildSectionToggle(
+              title: '⚡ 벌칙 (채찍)',
+              enabled: _enablePenalty,
+              onToggle: (v) => setState(() => _enablePenalty = v),
+            ),
+            if (_enablePenalty) ...[
+              const SizedBox(height: 8),
+              TextField(
+                controller: _penaltyDescController,
+                decoration: InputDecoration(
+                  hintText: '예: 설거지 일주일, 커피 쏘기',
+                  hintStyle: TextStyle(color: AppColors.textDisabled),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                maxLength: 100,
+                onChanged: (_) => setState(() {}),
+              ),
+              _buildDaysPicker(
+                label: '실패 한도',
+                days: _penaltyDays,
+                onChanged: (d) => setState(() => _penaltyDays = d),
+              ),
+            ],
+
+            const SizedBox(height: 24),
+
+            // 제출 버튼
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isValid
+                    ? () {
+                        Navigator.pop(context, (
+                          reward: _enableReward
+                              ? PromiseReward(
+                                  description:
+                                      _rewardDescController.text.trim(),
+                                  targetDays: _rewardDays,
+                                )
+                              : null,
+                          penalty: _enablePenalty
+                              ? PromisePenalty(
+                                  description:
+                                      _penaltyDescController.text.trim(),
+                                  targetDays: _penaltyDays,
+                                )
+                              : null,
+                        ));
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: AppColors.disabled,
+                  disabledForegroundColor: Colors.white70,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  '약속 제안하기',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionToggle({
+    required String title,
+    required bool enabled,
+    required ValueChanged<bool> onToggle,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Switch(
+          value: enabled,
+          onChanged: onToggle,
+          activeColor: AppColors.primary,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDaysPicker({
+    required String label,
+    required int days,
+    required ValueChanged<int> onChanged,
+  }) {
+    return Row(
+      children: [
+        Text(
+          '$label: ',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        IconButton(
+          onPressed: days > 1 ? () => onChanged(days - 1) : null,
+          icon: const Icon(Icons.remove_circle_outline, size: 20),
+          color: AppColors.primary,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            '$days일',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: () => onChanged(days + 1),
+          icon: const Icon(Icons.add_circle_outline, size: 20),
+          color: AppColors.primary,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+        ),
+      ],
+    );
+  }
+}
 
 extension GlassExtension on Widget {
   Widget wrapWithGlass() {

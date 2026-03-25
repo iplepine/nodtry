@@ -332,7 +332,7 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
                     state: PlanState.pendingApproval,
                     createdAt: now,
                     startDate: now,
-                    endDate: now.add(Duration(days: 30)),
+                    endDate: now.add(Duration(days: 14)),
                     items: [
                       PlanItem(
                         title: '테스트 약속입니다! ✉️',

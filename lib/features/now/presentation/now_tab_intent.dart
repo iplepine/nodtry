@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../../models/promise_model.dart';
 
 /// Now Tab에서 발생하는 사용자 의도(Intent) 정의
 /// MVI 패턴의 'Intent' 역할
@@ -191,7 +192,14 @@ class PokeUserIntent extends NowTabIntent {
 class PokePartnerIntent extends NowTabIntent {
   final String planId;
   final String? message;
-  const PokePartnerIntent(this.planId, {this.message});
+  final PromiseReward? reward;
+  final PromisePenalty? penalty;
+  const PokePartnerIntent(
+    this.planId, {
+    this.message,
+    this.reward,
+    this.penalty,
+  });
 
   @override
   bool operator ==(Object other) =>
@@ -203,4 +211,40 @@ class PokePartnerIntent extends NowTabIntent {
 
   @override
   int get hashCode => planId.hashCode ^ (message?.hashCode ?? 0);
+}
+
+/// 약속 제안 (보상/벌칙)
+class ProposePromiseIntent extends NowTabIntent {
+  final String planId;
+  final PromiseReward? reward;
+  final PromisePenalty? penalty;
+  const ProposePromiseIntent(this.planId, {this.reward, this.penalty});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProposePromiseIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId;
+
+  @override
+  int get hashCode => planId.hashCode;
+}
+
+/// 약속 수락/거절
+class RespondPromiseIntent extends NowTabIntent {
+  final String planId;
+  final bool accept;
+  const RespondPromiseIntent(this.planId, {required this.accept});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RespondPromiseIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId &&
+          accept == other.accept;
+
+  @override
+  int get hashCode => planId.hashCode ^ accept.hashCode;
 }

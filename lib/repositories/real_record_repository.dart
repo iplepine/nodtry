@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/home_state.dart';
 import '../models/history_item.dart';
 import '../models/plan_model.dart';
+import '../models/promise_model.dart';
 import 'record_repository.dart';
 
 import 'package:flutter/foundation.dart';
@@ -116,6 +117,31 @@ class RealRecordRepository implements RecordRepository {
           ),
         );
       }
+
+      // Promise: 내가 제안한 약속이 대기 중
+      if (plan.promise != null &&
+          plan.promise!.status == PromiseStatus.proposed &&
+          plan.promise!.proposerId == myUid) {
+        yoursCards.add(
+          HomeCardModel(
+            state: HomeCardState.partnerPromiseProposed,
+            plan: plan,
+            headerMessage: '약속 수락을 기다리고 있어요',
+          ),
+        );
+      }
+
+      // Promise: 정산 결과 (매니저 측)
+      if (plan.promise != null &&
+          plan.promise!.status == PromiseStatus.settled) {
+        yoursCards.add(
+          HomeCardModel(
+            state: HomeCardState.promiseSettled,
+            plan: plan,
+            headerMessage: '약속 결과가 나왔어요',
+          ),
+        );
+      }
     }
 
     // --- Part 2: My Actions (Executor Role) -> Mine ---
@@ -134,6 +160,31 @@ class RealRecordRepository implements RecordRepository {
           ),
         );
         continue; // Skip other checks for this plan
+      }
+
+      // Promise: 상대가 나에게 약속을 제안함 (수락/거절 필요)
+      if (plan.promise != null &&
+          plan.promise!.status == PromiseStatus.proposed &&
+          plan.promise!.proposerId != myUid) {
+        mineCards.add(
+          HomeCardModel(
+            state: HomeCardState.promiseProposed,
+            plan: plan,
+            headerMessage: '약속 제안이 도착했어요',
+          ),
+        );
+      }
+
+      // Promise: 정산 결과 (실행자 측)
+      if (plan.promise != null &&
+          plan.promise!.status == PromiseStatus.settled) {
+        mineCards.add(
+          HomeCardModel(
+            state: HomeCardState.promiseSettled,
+            plan: plan,
+            headerMessage: '약속 결과가 나왔어요',
+          ),
+        );
       }
 
       if (now.isBefore(plan.startDate) || now.isAfter(plan.endDate)) {
@@ -228,47 +279,60 @@ class RealRecordRepository implements RecordRepository {
     }
 
     // --- Part 3: Partner No Plan Check / Poke Feature ---
+    // 양방향 체크: Manager든 Executor든 파트너의 플랜 상태를 확인
     if (relations != null) {
+      // 이미 체크한 파트너 중복 방지
+      final checkedPartnerUids = <String>{};
+
       for (var relation in relations) {
-        // If I am the Manager of this relation, check if the Executor (Partner) has any plans
+        final String? partnerUid;
         if (relation.managerId == myUid) {
-          final partnerUid = relation.executorId;
-          final partnerPlans = plans.where((p) => p.userId == partnerUid);
+          partnerUid = relation.executorId;
+        } else if (relation.executorId == myUid) {
+          partnerUid = relation.managerId;
+        } else {
+          continue;
+        }
 
-          if (partnerPlans.isEmpty) {
-            yoursCards.add(
-              HomeCardModel(
-                state: HomeCardState.partnerNoPlan,
-                partnerUid: partnerUid,
-                headerMessage: '약속을 기다리고 있어요',
-              ),
+        // 같은 파트너를 중복 체크하지 않음
+        if (checkedPartnerUids.contains(partnerUid)) continue;
+        checkedPartnerUids.add(partnerUid);
+
+        final partnerPlans = plans.where((p) => p.userId == partnerUid);
+
+        if (partnerPlans.isEmpty) {
+          yoursCards.add(
+            HomeCardModel(
+              state: HomeCardState.partnerNoPlan,
+              partnerUid: partnerUid,
+              headerMessage: '약속을 기다리고 있어요',
+            ),
+          );
+        } else {
+          // Status H: 파트너가 오늘 해야 할 일이 있는데 아직 안 했을 때
+          for (var plan in partnerPlans) {
+            if (plan.state != PlanState.active) continue;
+
+            final hasCompletedToday = plan.completedDates.any(
+              (d) =>
+                  d.year == today.year &&
+                  d.month == today.month &&
+                  d.day == today.day,
             );
-          } else {
-            // Status H: 파트너가 오늘 해야 할 일이 있는데 아직 안 했을 때
-            for (var plan in partnerPlans) {
-              if (plan.state != PlanState.active) continue;
 
-              final hasCompletedToday = plan.completedDates.any(
-                (d) =>
-                    d.year == today.year &&
-                    d.month == today.month &&
-                    d.day == today.day,
+            if (!hasCompletedToday) {
+              final hasTodayItem = plan.items.any(
+                (item) => item.days.contains(todayWeekday),
               );
-
-              if (!hasCompletedToday) {
-                final hasTodayItem = plan.items.any(
-                  (item) => item.days.contains(todayWeekday),
+              if (hasTodayItem) {
+                yoursCards.add(
+                  HomeCardModel(
+                    state: HomeCardState.partnerPoke,
+                    plan: plan,
+                    partnerUid: partnerUid,
+                    headerMessage: '기다리는 중',
+                  ),
                 );
-                if (hasTodayItem) {
-                  yoursCards.add(
-                    HomeCardModel(
-                      state: HomeCardState.partnerPoke,
-                      plan: plan,
-                      partnerUid: partnerUid,
-                      headerMessage: '기다리는 중',
-                    ),
-                  );
-                }
               }
             }
           }
@@ -553,6 +617,7 @@ class RealRecordRepository implements RecordRepository {
       await _firestore.collection('plans').doc(planId).update({
         'state': PlanState.stopped.toMap(),
       });
+      await settlePromise(planId);
       debugPrint('[RealRecordRepository] Plan stopped successfully.');
     } catch (e) {
       debugPrint('[RealRecordRepository] Error stopping plan: $e');
@@ -1108,6 +1173,7 @@ class RealRecordRepository implements RecordRepository {
 
       final batch = _firestore.batch();
       int count = 0;
+      final List<String> completedPlanIds = [];
 
       for (var doc in snapshot.docs) {
         final data = doc.data();
@@ -1129,6 +1195,7 @@ class RealRecordRepository implements RecordRepository {
             'state': PlanState.completed.toMap(),
             'lastUpdatedBy': 'system_cleanup',
           });
+          completedPlanIds.add(doc.id);
           count++;
         }
       }
@@ -1136,6 +1203,9 @@ class RealRecordRepository implements RecordRepository {
       if (count > 0) {
         await batch.commit();
         debugPrint('[RealRecordRepository] Completed $count overdue plans');
+        for (final planId in completedPlanIds) {
+          await settlePromise(planId);
+        }
       }
     } catch (e) {
       debugPrint('[RealRecordRepository] Error completing overdue plans: $e');
@@ -1159,6 +1229,167 @@ class RealRecordRepository implements RecordRepository {
     } catch (e) {
       debugPrint('[RealRecordRepository] Error poking user: $e');
       rethrow;
+    }
+  }
+
+  @override
+  Future<void> proposePromise(
+    String planId, {
+    PromiseReward? reward,
+    PromisePenalty? penalty,
+  }) async {
+    assert(reward != null || penalty != null);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    try {
+      final doc = await _firestore.collection('plans').doc(planId).get();
+      final data = doc.data();
+      if (data == null) throw Exception('Plan not found');
+
+      final planState = PlanState.fromMap(data['state'] ?? 'draft');
+      if (planState != PlanState.pendingApproval &&
+          planState != PlanState.active) {
+        throw Exception('Plan is not in a valid state for promise proposal');
+      }
+
+      // 기존 약속이 active/settled이면 제안 불가
+      if (data['promise'] != null) {
+        final existingStatus = data['promise']['status'] as String?;
+        if (existingStatus == 'active' || existingStatus == 'settled') {
+          throw Exception('An active or settled promise already exists');
+        }
+      }
+
+      final now = DateTime.now();
+      final promise = {
+        'status': PromiseStatus.proposed.toMap(),
+        'proposerId': user.uid,
+        if (reward != null) 'reward': reward.toMap(),
+        if (penalty != null) 'penalty': penalty.toMap(),
+        'proposedAt': Timestamp.fromDate(now),
+      };
+
+      await _firestore.collection('plans').doc(planId).update({
+        'promise': promise,
+      });
+      debugPrint('[RealRecordRepository] Promise proposed for plan $planId');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error proposing promise: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> respondPromise(String planId, {required bool accept}) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    try {
+      final doc = await _firestore.collection('plans').doc(planId).get();
+      final data = doc.data();
+      if (data == null) throw Exception('Plan not found');
+      if (data['promise'] == null) throw Exception('No promise to respond to');
+
+      final promiseData = data['promise'] as Map<String, dynamic>;
+      if (promiseData['status'] != 'proposed') {
+        throw Exception('Promise is not in proposed state');
+      }
+      if (promiseData['proposerId'] == user.uid) {
+        throw Exception('Cannot respond to own promise');
+      }
+
+      if (accept) {
+        await _firestore.collection('plans').doc(planId).update({
+          'promise.status': PromiseStatus.active.toMap(),
+          'promise.acceptedAt': Timestamp.fromDate(DateTime.now()),
+        });
+      } else {
+        await _firestore.collection('plans').doc(planId).update({
+          'promise.status': PromiseStatus.rejected.toMap(),
+        });
+      }
+      debugPrint(
+        '[RealRecordRepository] Promise ${accept ? "accepted" : "rejected"} for plan $planId',
+      );
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error responding to promise: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> settlePromise(String planId) async {
+    try {
+      final doc = await _firestore.collection('plans').doc(planId).get();
+      final data = doc.data();
+      if (data == null) return;
+      if (data['promise'] == null) return;
+
+      final promiseData = data['promise'] as Map<String, dynamic>;
+      if (promiseData['status'] != 'active') return;
+
+      final plan = Plan.fromMap(data, doc.id);
+      final now = DateTime.now();
+      final cutoffDate = plan.endDate.isBefore(now) ? plan.endDate : now;
+      final cutoff = DateTime(cutoffDate.year, cutoffDate.month, cutoffDate.day);
+
+      // 예정일 계산
+      final scheduledDates = <DateTime>[];
+      for (var d = DateTime(plan.startDate.year, plan.startDate.month, plan.startDate.day);
+          !d.isAfter(cutoff);
+          d = d.add(const Duration(days: 1))) {
+        final weekday = d.weekday;
+        if (plan.items.any((item) => item.days.contains(weekday))) {
+          scheduledDates.add(d);
+        }
+      }
+
+      // 성공일 계산
+      final successDays = plan.completedDates.where((cd) {
+        final c = DateTime(cd.year, cd.month, cd.day);
+        return !c.isAfter(cutoff) && !c.isBefore(
+          DateTime(plan.startDate.year, plan.startDate.month, plan.startDate.day),
+        );
+      }).length;
+
+      var failDays = scheduledDates.length - successDays;
+      if (failDays < 0) failDays = 0;
+
+      // 판정
+      final reward = promiseData['reward'] != null
+          ? PromiseReward.fromMap(promiseData['reward'] as Map<String, dynamic>)
+          : null;
+      final penalty = promiseData['penalty'] != null
+          ? PromisePenalty.fromMap(promiseData['penalty'] as Map<String, dynamic>)
+          : null;
+
+      final rewardMet = reward != null && successDays >= reward.targetDays;
+      final penaltyMet = penalty != null && failDays >= penalty.targetDays;
+
+      SettlementResult result;
+      if (rewardMet && penaltyMet) {
+        result = SettlementResult.bothMet;
+      } else if (rewardMet) {
+        result = SettlementResult.rewardAchieved;
+      } else if (penaltyMet) {
+        result = SettlementResult.penaltyTriggered;
+      } else {
+        result = SettlementResult.neitherMet;
+      }
+
+      await _firestore.collection('plans').doc(planId).update({
+        'promise.status': PromiseStatus.settled.toMap(),
+        'promise.settledAt': Timestamp.fromDate(now),
+        'promise.settledSuccessDays': successDays,
+        'promise.settledFailDays': failDays,
+        'promise.settlementResult': result.toMap(),
+      });
+      debugPrint(
+        '[RealRecordRepository] Promise settled for plan $planId: $result (success: $successDays, fail: $failDays)',
+      );
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error settling promise: $e');
     }
   }
 }

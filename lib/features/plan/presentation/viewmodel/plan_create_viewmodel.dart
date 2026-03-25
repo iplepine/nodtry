@@ -110,7 +110,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         userId: userId,
         managerId: managerId,
         startDate: DateTime.now(), // Always reset start date for new/restart
-        endDate: DateTime.now().add(const Duration(days: 30)),
+        endDate: DateTime.now().add(const Duration(days: 14)),
         state: PlanState
             .pendingApproval, // Always reset to pendingApproval on save, even if editing
         items: [planItem],
