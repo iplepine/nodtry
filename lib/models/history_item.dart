@@ -56,7 +56,7 @@ class HistoryItem {
     return HistoryItem(
       id: id,
       planId: map['planId'] as String?,
-      date: (map['date'] as Timestamp).toDate(),
+      date: (map['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
       title: map['title'] as String? ?? '알 수 없는 계획',
       status: _parseStatus(map['type'] as String),
       executorId: map['userId'] as String,

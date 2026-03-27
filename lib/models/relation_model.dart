@@ -29,7 +29,7 @@ class RelationModel {
         (e) => e.name == data['status'],
         orElse: () => RelationStatus.pending,
       ),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       connectedAt: data['connectedAt'] != null
           ? (data['connectedAt'] as Timestamp).toDate()
           : null,

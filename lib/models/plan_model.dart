@@ -153,15 +153,15 @@ class Plan {
       id: id,
       userId: map['userId'] ?? '',
       managerId: map['managerId'],
-      startDate: (map['startDate'] as Timestamp).toDate(),
-      endDate: (map['endDate'] as Timestamp).toDate(),
+      startDate: (map['startDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      endDate: (map['endDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
       state: PlanState.fromMap(map['state'] ?? 'draft'),
       items: List<PlanItem>.from(
         (map['items'] as List<dynamic>).map<PlanItem>(
           (x) => PlanItem.fromMap(x as Map<String, dynamic>),
         ),
       ),
-      createdAt: (map['createdAt'] as Timestamp).toDate(),
+      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       completedDates:
           (map['completedDates'] as List<dynamic>?)
               ?.map((d) => (d as Timestamp).toDate())

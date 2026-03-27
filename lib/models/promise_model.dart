@@ -195,7 +195,7 @@ class Promise {
       penalty: map['penalty'] != null
           ? PromisePenalty.fromMap(map['penalty'] as Map<String, dynamic>)
           : null,
-      proposedAt: (map['proposedAt'] as Timestamp).toDate(),
+      proposedAt: (map['proposedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       acceptedAt: map['acceptedAt'] != null
           ? (map['acceptedAt'] as Timestamp).toDate()
           : null,
