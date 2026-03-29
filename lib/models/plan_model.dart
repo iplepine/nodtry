@@ -57,6 +57,8 @@ class Plan {
   final DateTime createdAt;
   final List<DateTime> completedDates;
   final List<DateTime> verifiedDates;
+  final List<DateTime> rescuedDates; // 파트너가 실천 인정한 날짜
+  final List<DateTime> restedDates; // 휴식권 사용한 날짜
   final String? lastCheerMessage; // 마지막 응원 메시지
   final String? lastCheerType; // 마지막 응원 타입 (fire, heart etc)
   final DateTime? lastCheerAt; // 마지막 응원 시간
@@ -76,6 +78,8 @@ class Plan {
     required this.createdAt,
     this.completedDates = const [],
     this.verifiedDates = const [],
+    this.rescuedDates = const [],
+    this.restedDates = const [],
     this.lastCheerMessage,
     this.lastCheerType,
     this.lastCheerAt,
@@ -96,6 +100,8 @@ class Plan {
     DateTime? createdAt,
     List<DateTime>? completedDates,
     List<DateTime>? verifiedDates,
+    List<DateTime>? rescuedDates,
+    List<DateTime>? restedDates,
     String? lastCheerMessage,
     String? lastCheerType,
     DateTime? lastCheerAt,
@@ -115,6 +121,8 @@ class Plan {
       createdAt: createdAt ?? this.createdAt,
       completedDates: completedDates ?? this.completedDates,
       verifiedDates: verifiedDates ?? this.verifiedDates,
+      rescuedDates: rescuedDates ?? this.rescuedDates,
+      restedDates: restedDates ?? this.restedDates,
       lastCheerMessage: lastCheerMessage ?? this.lastCheerMessage,
       lastCheerType: lastCheerType ?? this.lastCheerType,
       lastCheerAt: lastCheerAt ?? this.lastCheerAt,
@@ -138,6 +146,8 @@ class Plan {
           .map((d) => Timestamp.fromDate(d))
           .toList(),
       'verifiedDates': verifiedDates.map((d) => Timestamp.fromDate(d)).toList(),
+      'rescuedDates': rescuedDates.map((d) => Timestamp.fromDate(d)).toList(),
+      'restedDates': restedDates.map((d) => Timestamp.fromDate(d)).toList(),
       if (lastCheerMessage != null) 'lastCheerMessage': lastCheerMessage,
       if (lastCheerType != null) 'lastCheerType': lastCheerType,
       if (lastCheerAt != null) 'lastCheerAt': Timestamp.fromDate(lastCheerAt!),
@@ -172,6 +182,16 @@ class Plan {
               ?.map((d) => (d as Timestamp).toDate())
               .toList() ??
           [],
+      rescuedDates:
+          (map['rescuedDates'] as List<dynamic>?)
+              ?.map((d) => (d as Timestamp).toDate())
+              .toList() ??
+          [],
+      restedDates:
+          (map['restedDates'] as List<dynamic>?)
+              ?.map((d) => (d as Timestamp).toDate())
+              .toList() ??
+          [],
       lastActionNote: map['lastActionNote'],
       lastComment: map['lastComment'] ?? map['lastCheerMessage'], // 하위 호환성
       lastUpdatedBy: map['lastUpdatedBy'],
@@ -179,6 +199,78 @@ class Plan {
           ? Promise.fromMap(map['promise'] as Map<String, dynamic>)
           : null,
     );
+  }
+
+  /// 현재 연속 달성 횟수 (스트릭) 계산
+  int get currentStreak {
+    if (items.isEmpty) return 0;
+
+    // 모든 아이템의 요일을 합산
+    final scheduledDays = items.expand((i) => i.days).toSet();
+    if (scheduledDays.isEmpty) return 0;
+
+    int streak = 0;
+    var checkDate = DateTime.now();
+    final todayDate = DateTime(checkDate.year, checkDate.month, checkDate.day);
+
+    // 오늘이 스케줄 날인데 아직 완료 안 했으면 어제부터 체크
+    if (scheduledDays.contains(checkDate.weekday) &&
+        !_isDateCovered(todayDate)) {
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+
+    // 최대 365일 뒤로 탐색
+    for (int i = 0; i < 365; i++) {
+      final date = DateTime(checkDate.year, checkDate.month, checkDate.day);
+
+      if (!scheduledDays.contains(checkDate.weekday)) {
+        checkDate = checkDate.subtract(const Duration(days: 1));
+        continue;
+      }
+
+      if (date.isBefore(DateTime(startDate.year, startDate.month, startDate.day))) {
+        break;
+      }
+
+      if (_isDateCovered(date)) {
+        streak++;
+      } else {
+        break;
+      }
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+    return streak;
+  }
+
+  bool _isDateCovered(DateTime date) {
+    return _containsDate(completedDates, date) ||
+        _containsDate(rescuedDates, date) ||
+        _containsDate(restedDates, date);
+  }
+
+  static bool _containsDate(List<DateTime> dates, DateTime target) {
+    return dates.any(
+      (d) =>
+          d.year == target.year &&
+          d.month == target.month &&
+          d.day == target.day,
+    );
+  }
+
+  /// 이번 주 휴식권 사용 가능 여부
+  bool get canUseRestToday {
+    final now = DateTime.now();
+    // 이번 주 월요일 계산
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final mondayDate = DateTime(monday.year, monday.month, monday.day);
+    final sundayDate = mondayDate.add(const Duration(days: 7));
+
+    final usedThisWeek = restedDates.where((d) {
+      final date = DateTime(d.year, d.month, d.day);
+      return !date.isBefore(mondayDate) && date.isBefore(sundayDate);
+    }).length;
+
+    return usedThisWeek < 1;
   }
 }
 

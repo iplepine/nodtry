@@ -693,4 +693,14 @@ class MockRecordRepository implements RecordRepository {
   Future<void> settlePromise(String planId) async {
     print('Mock: Settle promise for plan $planId');
   }
+
+  @override
+  Future<void> rescuePlan(String planId, {DateTime? date}) async {
+    print('Mock: Rescue plan $planId');
+  }
+
+  @override
+  Future<void> reportRest(String planId) async {
+    print('Mock: Report rest for plan $planId');
+  }
 }

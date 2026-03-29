@@ -336,6 +336,65 @@ class _NowTabState extends ConsumerState<NowTab>
     ).showSnackBar(const SnackBar(content: Text('똑똑, 문을 두드렸어요!')));
   }
 
+  Future<void> _handleRest() async {
+    final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
+    if (primaryCard?.plan?.id == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('휴식권 사용'),
+        content: const Text('이번 주 1회 휴식권을 사용합니다.\n스트릭이 유지됩니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('사용하기', style: TextStyle(color: AppColors.primary)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    await _animationController.reverse();
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(RestPlanIntent(primaryCard!.plan!.id!));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('오늘은 편히 쉬세요. 스트릭은 유지됩니다!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _animationController.forward();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().contains('이미 사용')
+              ? '이번 주 휴식권을 이미 사용했어요.'
+              : '오류가 발생했습니다.')),
+        );
+      }
+    }
+  }
+
+  void _handleRescue(HomeCardModel card) {
+    if (card.plan?.id == null) return;
+    ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(RescuePlanIntent(card.plan!.id!));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('실천을 인정해줬어요! 스트릭이 유지됩니다.')),
+      );
+    }
+  }
+
   Future<void> _handleSkip() async {
     final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
     if (primaryCard?.plan?.id == null) return;
@@ -570,10 +629,35 @@ class _NowTabState extends ConsumerState<NowTab>
     return _getTimeChipType(model);
   }
 
-  /// 기록의 시선 텍스트 생성
+  /// 기록의 시선 텍스트 생성 (If-Then 팁 + 스트릭 독려)
   String? _getRecordGazeText(HomeCardModel model) {
-    // TODO: 히스토리 기반 칭찬/독려 메시지
-    return null;
+    if (model.state != HomeCardState.nowAction &&
+        model.state != HomeCardState.overdue) {
+      return null;
+    }
+
+    // 스트릭 기반 독려 메시지
+    final streak = model.streakCount;
+    if (streak != null && streak >= 5) {
+      return '대단해요! 이 흐름을 이어가봐요';
+    }
+
+    // description에 if-then 패턴이 있으면 리마인더로 활용
+    final desc = model.plan?.items.firstOrNull?.description;
+    if (desc != null && desc.isNotEmpty) {
+      if (desc.contains('하면') || desc.contains('되면') || desc.contains('나면')) {
+        return desc;
+      }
+    }
+
+    // if-then 팁 로테이션 (날짜 기반)
+    final tips = [
+      '"언제 할지" 정하면 실천 확률이 올라가요',
+      '작게 시작해도 괜찮아요. 꾸준함이 힘이에요',
+      '어제보다 나은 오늘이면 충분해요',
+    ];
+    final dayIndex = DateTime.now().day % tips.length;
+    return tips[dayIndex];
   }
 
   @override
@@ -742,6 +826,7 @@ class _NowTabState extends ConsumerState<NowTab>
                                       model: primaryExecutorCard,
                                       onDidIt: _handleDidIt,
                                       onSkip: _handleSkip,
+                                      onRest: _handleRest,
                                       onCreatePlan: _handleCreatePlan,
                                       onModify: () => _handleModify(
                                         primaryExecutorCard,
@@ -863,6 +948,7 @@ class _NowTabState extends ConsumerState<NowTab>
                                           _handlePokeUser(card), // Added
                                       onPokePartner: () =>
                                           _handlePokePartner(card), // Added
+                                      onRescue: () => _handleRescue(card),
                                       onProposePromise: () =>
                                           _handleProposePromise(card),
                                       timeChipText: _getManagerTimeChipText(
@@ -1195,6 +1281,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onDidIt;
   final VoidCallback? onSkip;
+  final VoidCallback? onRest; // 휴식권
   final VoidCallback? onCreatePlan;
   final VoidCallback? onModify; // Added
   final VoidCallback? onPokeAck; // Added
@@ -1209,6 +1296,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     required this.model,
     this.onDidIt,
     this.onSkip,
+    this.onRest,
     this.onCreatePlan,
     this.onModify, // Added
     this.onPokeAck, // Added
@@ -1317,6 +1405,28 @@ class _PrimaryExecutorCard extends StatelessWidget {
           ),
         );
       }
+    }
+
+    // 스트릭 배지
+    if (model.streakCount != null && model.streakCount! >= 2) {
+      children.add(const SizedBox(height: 8));
+      children.add(
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            '${model.streakCount}회 연속 달성!',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      );
     }
 
     String? statusMessage = model.headerMessage;
@@ -1741,24 +1851,65 @@ class _PrimaryExecutorCard extends StatelessWidget {
             ),
           ),
         ),
-        if (model.state == HomeCardState.overdue && onSkip != null) ...[
-          const SizedBox(height: 12),
+        // 휴식권 버튼 (nowAction에서 사용 가능 시)
+        if (model.state == HomeCardState.nowAction &&
+            onRest != null &&
+            model.plan?.canUseRestToday == true) ...[
+          const SizedBox(height: 8),
           TextButton(
-            onPressed: onSkip,
+            onPressed: onRest,
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
               minimumSize: const Size(double.infinity, 32),
               padding: const EdgeInsets.symmetric(vertical: 4),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: Text(
-              l10n.nowActionSkipToday,
-              style: const TextStyle(
+            child: const Text(
+              '오늘은 쉬어갈게요 (휴식권)',
+              style: TextStyle(
                 fontSize: 13,
                 decoration: TextDecoration.underline,
               ),
             ),
           ),
+        ],
+        if (model.state == HomeCardState.overdue && onSkip != null) ...[
+          const SizedBox(height: 12),
+          // 휴식권 우선, 없으면 skip
+          if (onRest != null && model.plan?.canUseRestToday == true)
+            TextButton(
+              onPressed: onRest,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textSecondary,
+                minimumSize: const Size(double.infinity, 32),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text(
+                '오늘은 쉬어갈게요 (휴식권)',
+                style: TextStyle(
+                  fontSize: 13,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            )
+          else
+            TextButton(
+              onPressed: onSkip,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textSecondary,
+                minimumSize: const Size(double.infinity, 32),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                l10n.nowActionSkipToday,
+                style: const TextStyle(
+                  fontSize: 13,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
         ],
       ],
     );
@@ -2161,6 +2312,7 @@ class _ManagerQuickCard extends StatelessWidget {
   final VoidCallback? onReject;
   final VoidCallback? onPokeUser;
   final VoidCallback? onPokePartner; // Added
+  final VoidCallback? onRescue; // 실천 인정
   final VoidCallback? onProposePromise;
   final String? timeChipText;
   final TimeChipType? timeChipType;
@@ -2177,6 +2329,7 @@ class _ManagerQuickCard extends StatelessWidget {
     this.onReject,
     this.onPokeUser,
     this.onPokePartner,
+    this.onRescue,
     this.onProposePromise,
     this.timeChipText,
     this.timeChipType,
@@ -2456,6 +2609,37 @@ class _ManagerQuickCard extends StatelessWidget {
                   ),
                 ),
               ),
+              // 실천 인정 버튼 (어제 놓친 경우)
+              if (model.canRescue && onRescue != null) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: onRescue,
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.volunteer_activism,
+                            size: 16, color: AppColors.textSecondary),
+                        const SizedBox(width: 4),
+                        Text(
+                          '어제 실천 인정해주기',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ] else if (model.state == HomeCardState.partnerAction) ...[
               const SizedBox(height: 20),
               SizedBox(

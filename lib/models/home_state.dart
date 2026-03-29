@@ -237,6 +237,8 @@ class HomeCardModel {
   final Plan? previousPlan;
   final int? currentWeek;
   final int? totalWeeks;
+  final int? streakCount; // 연속 달성 횟수
+  final bool canRescue; // 파트너가 실천 인정 가능 여부
 
   const HomeCardModel({
     required this.state,
@@ -248,6 +250,8 @@ class HomeCardModel {
     this.previousPlan,
     this.currentWeek,
     this.totalWeeks,
+    this.streakCount,
+    this.canRescue = false,
   });
 
   HomeCardModel copyWith({
@@ -260,6 +264,8 @@ class HomeCardModel {
     Plan? previousPlan,
     int? currentWeek,
     int? totalWeeks,
+    int? streakCount,
+    bool? canRescue,
   }) {
     return HomeCardModel(
       state: state ?? this.state,
@@ -271,6 +277,8 @@ class HomeCardModel {
       previousPlan: previousPlan ?? this.previousPlan,
       currentWeek: currentWeek ?? this.currentWeek,
       totalWeeks: totalWeeks ?? this.totalWeeks,
+      streakCount: streakCount ?? this.streakCount,
+      canRescue: canRescue ?? this.canRescue,
     );
   }
 
@@ -284,7 +292,9 @@ class HomeCardModel {
           headerMessage == other.headerMessage &&
           previousPlan?.id == other.previousPlan?.id &&
           currentWeek == other.currentWeek &&
-          totalWeeks == other.totalWeeks;
+          totalWeeks == other.totalWeeks &&
+          streakCount == other.streakCount &&
+          canRescue == other.canRescue;
 
   @override
   int get hashCode =>
@@ -293,5 +303,7 @@ class HomeCardModel {
       headerMessage.hashCode ^
       (previousPlan?.id).hashCode ^
       currentWeek.hashCode ^
-      totalWeeks.hashCode;
+      totalWeeks.hashCode ^
+      streakCount.hashCode ^
+      canRescue.hashCode;
 }

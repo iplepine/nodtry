@@ -258,10 +258,12 @@ class RealRecordRepository implements RecordRepository {
       // Primary: 현재 이후 가장 가까운 것 1개
       if (upcomingItems.isNotEmpty) {
         final primary = upcomingItems.first;
+        final streak = primary.plan.currentStreak;
         mineCards.add(
           HomeCardModel(
             state: HomeCardState.nowAction,
             plan: _createSingleItemPlan(primary.plan, primary.item),
+            streakCount: streak >= 2 ? streak : null,
           ),
         );
       }
@@ -325,12 +327,33 @@ class RealRecordRepository implements RecordRepository {
                 (item) => item.days.contains(todayWeekday),
               );
               if (hasTodayItem) {
+                // 파트너가 어제도 못 했는지 확인 (실천 인정 가능 여부)
+                final yesterday = today.subtract(const Duration(days: 1));
+                final missedYesterday = !plan.completedDates.any(
+                  (d) => d.year == yesterday.year &&
+                      d.month == yesterday.month &&
+                      d.day == yesterday.day,
+                ) && !plan.rescuedDates.any(
+                  (d) => d.year == yesterday.year &&
+                      d.month == yesterday.month &&
+                      d.day == yesterday.day,
+                ) && !plan.restedDates.any(
+                  (d) => d.year == yesterday.year &&
+                      d.month == yesterday.month &&
+                      d.day == yesterday.day,
+                );
+                // 어제가 스케줄 날인 경우에만 rescue 가능
+                final yesterdayScheduled = plan.items.any(
+                  (item) => item.days.contains(yesterday.weekday),
+                );
+
                 yoursCards.add(
                   HomeCardModel(
                     state: HomeCardState.partnerPoke,
                     plan: plan,
                     partnerUid: partnerUid,
                     headerMessage: '기다리는 중',
+                    canRescue: missedYesterday && yesterdayScheduled,
                   ),
                 );
               }
@@ -347,7 +370,14 @@ class RealRecordRepository implements RecordRepository {
         mineCards.add(const HomeCardModel(state: HomeCardState.emptyPlan));
       } else if (hasAnyPlanToday) {
         // 오늘 계획은 있었는데 모두 완료함 -> TodayComplete
-        mineCards.add(const HomeCardModel(state: HomeCardState.todayComplete));
+        // 스트릭 계산하여 주입
+        final activePlan = myPlans.where((p) => p.state == PlanState.active).firstOrNull;
+        final streak = activePlan?.currentStreak ?? 0;
+        mineCards.add(HomeCardModel(
+          state: HomeCardState.todayComplete,
+          plan: activePlan,
+          streakCount: streak >= 2 ? streak : null,
+        ));
       } else {
         // 오늘 해당되는 요일의 계획이 없음 -> TodayEmpty
         mineCards.add(const HomeCardModel(state: HomeCardState.todayEmpty));
@@ -712,6 +742,9 @@ class RealRecordRepository implements RecordRepository {
         case HistoryStatus.skipped:
           typeStr = 'skipped';
           break;
+        case HistoryStatus.rescued:
+          typeStr = 'rescued';
+          break;
         default:
           typeStr = 'skipped';
           break;
@@ -844,6 +877,9 @@ class RealRecordRepository implements RecordRepository {
           break;
         case HistoryStatus.skipped:
           typeStr = 'skipped';
+          break;
+        case HistoryStatus.rescued:
+          typeStr = 'rescued';
           break;
         default:
           typeStr = 'skipped';
@@ -1390,6 +1426,97 @@ class RealRecordRepository implements RecordRepository {
       );
     } catch (e) {
       debugPrint('[RealRecordRepository] Error settling promise: $e');
+    }
+  }
+
+  @override
+  Future<void> rescuePlan(String planId, {DateTime? date}) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final targetDate = date ?? DateTime.now().subtract(const Duration(days: 1));
+
+      // Plan 정보 가져오기
+      final planDoc = await _firestore.collection('plans').doc(planId).get();
+      final planData = planDoc.data();
+      final planTitle =
+          (planData?['items'] as List?)?.firstOrNull?['title'] ?? '알 수 없는 계획';
+
+      // 1. rescuedDates에 추가
+      await _firestore.collection('plans').doc(planId).update({
+        'rescuedDates': FieldValue.arrayUnion([Timestamp.fromDate(targetDate)]),
+        'lastUpdatedBy': user.uid,
+      });
+
+      // 2. actions에 기록 추가
+      await _firestore.collection('actions').add({
+        'userId': planData?['userId'] ?? '',
+        'planId': planId,
+        'date': Timestamp.fromDate(targetDate),
+        'type': 'rescued',
+        'title': planTitle,
+        'rescuedBy': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      debugPrint('[RealRecordRepository] Plan rescued: $planId');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error rescuing plan: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> reportRest(String planId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final now = DateTime.now();
+
+      // Plan 정보 가져오기
+      final planDoc = await _firestore.collection('plans').doc(planId).get();
+      final planData = planDoc.data();
+      final planTitle =
+          (planData?['items'] as List?)?.firstOrNull?['title'] ?? '알 수 없는 계획';
+
+      // 주간 휴식권 사용 확인
+      final restedDates = (planData?['restedDates'] as List<dynamic>? ?? [])
+          .map((t) => (t as Timestamp).toDate())
+          .toList();
+      final monday = now.subtract(Duration(days: now.weekday - 1));
+      final mondayDate = DateTime(monday.year, monday.month, monday.day);
+      final sundayDate = mondayDate.add(const Duration(days: 7));
+      final usedThisWeek = restedDates.where((d) {
+        final date = DateTime(d.year, d.month, d.day);
+        return !date.isBefore(mondayDate) && date.isBefore(sundayDate);
+      }).length;
+
+      if (usedThisWeek >= 1) {
+        throw Exception('이번 주 휴식권을 이미 사용했습니다.');
+      }
+
+      // 1. restedDates + completedDates에 추가 (카드 상태 전환 위해)
+      await _firestore.collection('plans').doc(planId).update({
+        'restedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+        'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+      });
+
+      // 2. actions에 기록 추가
+      await _firestore.collection('actions').add({
+        'userId': user.uid,
+        'planId': planId,
+        'date': Timestamp.fromDate(now),
+        'type': 'rested',
+        'title': planTitle,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      debugPrint('[RealRecordRepository] Rest day used: $planId');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error reporting rest: $e');
+      rethrow;
     }
   }
 }

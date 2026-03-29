@@ -70,6 +70,8 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
             previousPlan: m.previousPlan,
             currentWeek: cWeek,
             totalWeeks: tWeeks,
+            streakCount: m.streakCount,
+            canRescue: m.canRescue,
           );
         }).toList();
 
@@ -123,6 +125,10 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         await _proposePromise(intent.planId, intent.reward, intent.penalty);
       } else if (intent is RespondPromiseIntent) {
         await _respondPromise(intent.planId, intent.accept);
+      } else if (intent is RescuePlanIntent) {
+        await _rescuePlan(intent.planId);
+      } else if (intent is RestPlanIntent) {
+        await _restPlan(intent.planId);
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -228,6 +234,15 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _acknowledgePoke(String planId) async {
     await ref.read(recordRepositoryProvider).acknowledgePoke(planId);
+  }
+
+  Future<void> _rescuePlan(String planId) async {
+    await ref.read(recordRepositoryProvider).rescuePlan(planId);
+  }
+
+  Future<void> _restPlan(String planId) async {
+    await ref.read(recordRepositoryProvider).reportRest(planId);
+    _updateAlarmToSkipToday(planId);
   }
 
   /// 디버그 전용: Fake State 주입

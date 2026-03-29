@@ -16,6 +16,9 @@ enum HistoryStatus {
 
   /// 이번엔 못 했어 (Skipped)
   skipped,
+
+  /// 파트너가 실천 인정 (Rescued)
+  rescued,
 }
 
 class HistoryItem {
@@ -80,6 +83,8 @@ class HistoryItem {
         return HistoryStatus.skipped;
       case 'rested':
         return HistoryStatus.rested;
+      case 'rescued':
+        return HistoryStatus.rescued;
       default:
         return HistoryStatus.skipped;
     }

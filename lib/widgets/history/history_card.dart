@@ -344,6 +344,13 @@ class HistoryCard extends ConsumerWidget {
           textColor: AppColors.primary,
           icon: Icons.verified,
         );
+      case HistoryStatus.rescued:
+        return _StatusDisplayInfo(
+          text: '실천 인정',
+          color: AppColors.secondary.withValues(alpha: 0.1),
+          textColor: AppColors.secondary,
+          icon: Icons.volunteer_activism,
+        );
     }
   }
 }

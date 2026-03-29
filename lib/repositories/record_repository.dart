@@ -110,4 +110,10 @@ abstract class RecordRepository {
 
   /// 약속 정산. Plan 종료/중단 시 내부적으로 호출.
   Future<void> settlePromise(String planId);
+
+  /// 파트너 실천 인정 (스트릭 구제)
+  Future<void> rescuePlan(String planId, {DateTime? date});
+
+  /// 휴식권 사용 (주 1회, 스트릭 유지)
+  Future<void> reportRest(String planId);
 }

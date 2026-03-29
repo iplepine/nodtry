@@ -248,3 +248,35 @@ class RespondPromiseIntent extends NowTabIntent {
   @override
   int get hashCode => planId.hashCode ^ accept.hashCode;
 }
+
+/// 파트너 실천 인정 (스트릭 구제)
+class RescuePlanIntent extends NowTabIntent {
+  final String planId;
+  const RescuePlanIntent(this.planId);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RescuePlanIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId;
+
+  @override
+  int get hashCode => planId.hashCode;
+}
+
+/// 휴식권 사용 (주 1회)
+class RestPlanIntent extends NowTabIntent {
+  final String planId;
+  const RestPlanIntent(this.planId);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RestPlanIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId;
+
+  @override
+  int get hashCode => planId.hashCode;
+}

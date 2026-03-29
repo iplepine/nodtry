@@ -314,6 +314,10 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
         icon = Icons.hotel;
         color = AppColors.secondary;
         break;
+      case HistoryStatus.rescued:
+        icon = Icons.volunteer_activism;
+        color = AppColors.secondary;
+        break;
     }
 
     // Format Date: e.g. 1/12 (Mon)
@@ -350,6 +354,8 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
         return '건너뜀';
       case HistoryStatus.rested:
         return '휴식';
+      case HistoryStatus.rescued:
+        return '실천 인정';
     }
   }
 
