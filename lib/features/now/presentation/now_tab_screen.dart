@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'dart:ui'; // To use backdrop filter
 import 'package:flutter/foundation.dart';
 import '../../../models/plan_model.dart';
 import 'package:go_router/go_router.dart';
@@ -1402,6 +1401,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
               height: 1.4,
             ),
             textAlign: TextAlign.left,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
           ),
         );
       }
@@ -2153,6 +2154,8 @@ class _SecondaryExecutorCard extends StatelessWidget {
               height: 1.4,
             ),
             textAlign: TextAlign.left,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         );
       }
@@ -2196,6 +2199,8 @@ class _SecondaryExecutorCard extends StatelessWidget {
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           // ----------------------------------------------------
           // 1. lastActionNote (실천자 한마디)
@@ -3148,21 +3153,17 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
 
 extension GlassExtension on Widget {
   Widget wrapWithGlass() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20), // Higher radius for glass effect
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.3), // Milky White Glass
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-              width: 1.5,
-            ),
+    return RepaintBoundary(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface.withValues(alpha: 0.85),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.2),
+            width: 1.5,
           ),
-          child: this,
         ),
+        child: this,
       ),
     );
   }
