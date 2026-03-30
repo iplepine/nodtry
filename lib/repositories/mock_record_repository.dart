@@ -663,9 +663,9 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> completeOverduePlans() async {
+  Future<List<String>> completeOverduePlans() async {
     // Mock: No action needed for now
-    return;
+    return [];
   }
 
   @override

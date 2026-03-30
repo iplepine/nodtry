@@ -946,4 +946,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noActiveAlarms => 'No active alarms';
+
+  @override
+  String get historyTapToChange => 'Tap to change status';
 }

@@ -1193,9 +1193,9 @@ class RealRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> completeOverduePlans() async {
+  Future<List<String>> completeOverduePlans() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) return [];
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -1243,8 +1243,10 @@ class RealRecordRepository implements RecordRepository {
           await settlePromise(planId);
         }
       }
+      return completedPlanIds;
     } catch (e) {
       debugPrint('[RealRecordRepository] Error completing overdue plans: $e');
+      return [];
     }
   }
 

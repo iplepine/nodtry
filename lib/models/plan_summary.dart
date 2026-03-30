@@ -4,6 +4,7 @@ class PlanSummary {
   final DateTime startDate;
   final DateTime endDate;
   final int myCount;
+  final int? partnerCount;
 
   PlanSummary({
     required this.planId,
@@ -11,6 +12,7 @@ class PlanSummary {
     required this.startDate,
     required this.endDate,
     required this.myCount,
+    this.partnerCount,
   });
 
   String get periodString {

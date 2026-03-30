@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../models/plan_model.dart';
 import '../../theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 class PlanCard extends StatelessWidget {
   final Plan plan;
@@ -25,13 +27,17 @@ class PlanCard extends StatelessWidget {
     final time = item.notificationTime;
 
     // 요일 문자열 변환 (예: 월, 수, 금)
-    // TODO: Localization
-    final daysString = item.days
-        .map((d) {
-          const weekDays = ['월', '화', '수', '목', '금', '토', '일'];
-          return weekDays[d - 1]; // d is 1-based
-        })
-        .join(', ');
+    final l10n = AppLocalizations.of(context)!;
+    final weekDays = [
+      l10n.weekdayMon,
+      l10n.weekdayTue,
+      l10n.weekdayWed,
+      l10n.weekdayThu,
+      l10n.weekdayFri,
+      l10n.weekdaySat,
+      l10n.weekdaySun,
+    ];
+    final daysString = item.days.map((d) => weekDays[d - 1]).join(', ');
 
     final isAlarmOn = time != null && time.type != 'none';
     final displayTime = time != null
@@ -155,6 +161,14 @@ class PlanCard extends StatelessWidget {
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${DateFormat('MM.dd').format(plan.startDate)} ~ ${DateFormat('MM.dd').format(plan.endDate)}',
+                        style: TextStyle(
+                          color: AppColors.textDisabled,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),

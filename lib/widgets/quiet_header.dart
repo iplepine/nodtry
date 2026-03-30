@@ -48,7 +48,6 @@ class QuietHeader extends StatelessWidget {
   }
 
   Widget _buildRelationshipInfo(BuildContext context) {
-    // TODO: 실제 데이터에서 가져오기
     final displayName = partnerName ?? relationshipAlias ?? '';
 
     if (displayName.isEmpty) {

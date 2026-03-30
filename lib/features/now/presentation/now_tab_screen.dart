@@ -2180,8 +2180,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
                   text: title,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                const TextSpan(text: '를\n'),
-                // TODO: action type based suffix
+                TextSpan(text: '${_particleEulReul(title ?? '')}\n'),
                 TextSpan(
                   text: l10n.nowPartnerDidIt,
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -3167,4 +3166,15 @@ extension GlassExtension on Widget {
       ),
     );
   }
+}
+
+/// 한국어 조사 을/를 판별 (받침 유무 기준)
+String _particleEulReul(String text) {
+  if (text.isEmpty) return '를';
+  final lastChar = text.codeUnitAt(text.length - 1);
+  // 한글 유니코드 범위: 0xAC00 ~ 0xD7A3
+  if (lastChar >= 0xAC00 && lastChar <= 0xD7A3) {
+    return (lastChar - 0xAC00) % 28 == 0 ? '를' : '을';
+  }
+  return '를';
 }

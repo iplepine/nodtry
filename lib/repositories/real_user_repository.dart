@@ -162,7 +162,7 @@ class RealUserRepository implements UserRepository {
         return UserModel.fromFirestore(doc);
       }
     } catch (e) {
-      // TODO: 에러 핸들링
+      debugPrint('[RealUserRepository] getMyProfile Error: $e');
     }
     return null;
   }
@@ -226,7 +226,7 @@ class RealUserRepository implements UserRepository {
         return UserModel.fromFirestore(snapshot.docs.first);
       }
     } catch (e) {
-      // Error
+      debugPrint('[RealUserRepository] getUserByInviteCode Error: $e');
     }
     return null;
   }

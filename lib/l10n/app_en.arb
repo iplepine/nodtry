@@ -1075,5 +1075,6 @@
   "comfortingJustDoIt": "Just do it today",
   "settingsNotifications": "Notifications",
   "notificationSettingsTitle": "Notification Manager",
-  "noActiveAlarms": "No active alarms"
+  "noActiveAlarms": "No active alarms",
+  "historyTapToChange": "Tap to change status"
 }

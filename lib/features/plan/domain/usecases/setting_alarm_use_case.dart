@@ -38,4 +38,8 @@ class SettingAlarmUseCase {
       (plan.id ?? plan.createdAt.millisecondsSinceEpoch.toString()).hashCode,
     );
   }
+
+  Future<void> cancelById(String planId) async {
+    await _notificationService.cancelPlanReminders(planId.hashCode);
+  }
 }

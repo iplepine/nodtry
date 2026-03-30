@@ -452,5 +452,6 @@
   },
   "settingsNotifications": "알림 설정",
   "notificationSettingsTitle": "알림 관리",
-  "noActiveAlarms": "설정된 알림이 없어요"
+  "noActiveAlarms": "설정된 알림이 없어요",
+  "historyTapToChange": "탭해서 상태 변경하기"
 }

@@ -278,7 +278,7 @@ class HistoryCard extends ConsumerWidget {
                     if (canReconcile) ...[
                       const SizedBox(height: 12),
                       Text(
-                        "탭해서 상태 변경하기", // TODO: L10n if needed or keep implicit
+                        AppLocalizations.of(context)!.historyTapToChange,
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,

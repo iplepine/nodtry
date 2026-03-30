@@ -110,14 +110,22 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
         ),
         actions: [
           if (isMine) ...[
-            IconButton(
-              icon: Icon(Icons.refresh, color: AppColors.textPrimary),
-              onPressed: () => _showRestartPlanDialog(context, ref),
-            ),
-            IconButton(
-              icon: Icon(Icons.stop_circle_outlined, color: AppColors.error),
-              onPressed: () => _showStopCurrentPlanDialog(context, ref),
-            ),
+            if (plan.state == PlanState.completed ||
+                plan.state == PlanState.stopped)
+              IconButton(
+                icon: Icon(Icons.refresh, color: AppColors.textPrimary),
+                onPressed: () => _showCreateFromCompletedDialog(context, ref),
+              )
+            else if (plan.state == PlanState.active) ...[
+              IconButton(
+                icon: Icon(Icons.refresh, color: AppColors.textPrimary),
+                onPressed: () => _showRestartPlanDialog(context, ref),
+              ),
+              IconButton(
+                icon: Icon(Icons.stop_circle_outlined, color: AppColors.error),
+                onPressed: () => _showStopCurrentPlanDialog(context, ref),
+              ),
+            ],
           ],
         ],
       ),
@@ -687,6 +695,37 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
               }
             },
             child: Text('그만하기', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCreateFromCompletedDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('같은 약속으로 다시 시작할까요?'),
+        content: const Text(
+          '이전 약속 내용을 그대로 가져와요.\n시작 전에 수정할 수 있어요.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              if (context.mounted) {
+                context.pushNamed(
+                  'plan-create',
+                  extra: widget.plan.copyWith(id: null),
+                  queryParameters: {'startAtLastStep': 'true'},
+                );
+              }
+            },
+            child: Text('다시 시작', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),

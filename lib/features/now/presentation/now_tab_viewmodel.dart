@@ -22,7 +22,14 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _completeOverduePlans() async {
     try {
-      await ref.read(recordRepositoryProvider).completeOverduePlans();
+      final completedPlanIds =
+          await ref.read(recordRepositoryProvider).completeOverduePlans();
+      // 완료된 계획들의 알림 제거
+      final notificationService =
+          ref.read(settingAlarmUseCaseProvider);
+      for (final planId in completedPlanIds) {
+        await notificationService.cancelById(planId);
+      }
     } catch (e) {
       print('[NowTabViewModel] Failed to complete overdue plans: $e');
     }
@@ -226,6 +233,8 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _rejectPlan(String planId, String? reason) async {
     await ref.read(recordRepositoryProvider).rejectPlan(planId, reason: reason);
+    // 거절된 계획의 알림 제거
+    await ref.read(settingAlarmUseCaseProvider).cancelById(planId);
   }
 
   Future<void> _verifyPlan(String planId) async {

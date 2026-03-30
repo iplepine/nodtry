@@ -1849,6 +1849,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No active alarms'**
   String get noActiveAlarms;
+
+  /// No description provided for @historyTapToChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change status'**
+  String get historyTapToChange;
 }
 
 class _AppLocalizationsDelegate

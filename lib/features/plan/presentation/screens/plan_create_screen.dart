@@ -18,8 +18,13 @@ import '../viewmodel/plan_create_viewmodel.dart';
 /// 통합 계획 생성 화면 (Wizard 방식)
 class PlanCreateScreen extends ConsumerStatefulWidget {
   final Plan? planToEdit;
+  final bool startAtLastStep;
 
-  const PlanCreateScreen({super.key, this.planToEdit});
+  const PlanCreateScreen({
+    super.key,
+    this.planToEdit,
+    this.startAtLastStep = false,
+  });
 
   @override
   ConsumerState<PlanCreateScreen> createState() => _PlanCreateScreenState();
@@ -56,6 +61,15 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
         ref
             .read(planCreateViewModelProvider.notifier)
             .dispatch(InitializePlanIntent(plan));
+
+        // 종료된 계획에서 "다시 시작"한 경우 마지막 단계로 이동
+        if (widget.startAtLastStep) {
+          // step을 마지막(3)까지 진행
+          final vm = ref.read(planCreateViewModelProvider.notifier);
+          vm.dispatch(const NextStepIntent()); // 1 -> 2
+          vm.dispatch(const NextStepIntent()); // 2 -> 3
+          _pageController.jumpToPage(2); // 0-indexed
+        }
       });
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {

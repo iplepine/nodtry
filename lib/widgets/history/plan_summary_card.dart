@@ -72,8 +72,15 @@ class PlanSummaryCard extends StatelessWidget {
                 '나의 완료',
                 '${summary.myCount}회',
               ),
-              const Spacer(),
-              // TODO: 파트너의 완료 횟수도 필요하면 추가 (현재 모델엔 myCount만 있음)
+              if (summary.partnerCount != null) ...[
+                const Spacer(),
+                _buildMetric(
+                  context,
+                  Icons.favorite_outline,
+                  '파트너 확인',
+                  '${summary.partnerCount}회',
+                ),
+              ]
             ],
           ),
           const SizedBox(height: 12),

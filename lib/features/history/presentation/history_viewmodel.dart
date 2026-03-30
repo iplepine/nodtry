@@ -82,14 +82,18 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
                   item.status == HistoryStatus.actuallyDone);
         }).length;
 
+        final pCount = allItems.where((item) {
+          return item.planId == plan.id && item.isVerifiedByPartner == true;
+        }).length;
+
         finishedPlanSummaries.add(
           PlanSummary(
             planId: plan.id ?? '',
             title: plan.items.isNotEmpty ? plan.items.first.title : '제목 없음',
             startDate: plan.startDate,
             endDate: plan.endDate,
-            myCount:
-                count, // This is technically "Our Count" or "Executor Count"
+            myCount: count,
+            partnerCount: pCount > 0 ? pCount : null,
           ),
         );
       }

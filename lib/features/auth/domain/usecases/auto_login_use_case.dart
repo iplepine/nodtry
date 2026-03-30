@@ -3,16 +3,19 @@ import '../../../../models/user_model.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../repositories/user_repository.dart';
 import '../../../../datasources/user_local_data_source.dart';
+import '../../../../usecases/cancel_all_notifications_use_case.dart';
 
 class AutoLoginUseCase {
   final AuthService _authService;
   final UserRepository _userRepository;
   final UserLocalDataSource _userLocalDataSource;
+  final CancelAllNotificationsUseCase _cancelAllNotificationsUseCase;
 
   AutoLoginUseCase(
     this._authService,
     this._userRepository,
     this._userLocalDataSource,
+    this._cancelAllNotificationsUseCase,
   );
 
   Future<UserModel?> execute() async {
@@ -32,6 +35,7 @@ class AutoLoginUseCase {
         debugPrint(
           '[AutoLoginUseCase] User not found in Firestore. Clearing local data...',
         );
+        await _cancelAllNotificationsUseCase.execute();
         await _userLocalDataSource.clearUser();
         await _authService.signOut();
         return null;
@@ -58,6 +62,7 @@ class AutoLoginUseCase {
       debugPrint('[AutoLoginUseCase] Error during auto-login check: $e');
       // 타임아웃이나 다른 에러 발생 시 로그아웃 처리하여 무한 로딩 방지
       if (!user.isAnonymous) {
+        await _cancelAllNotificationsUseCase.execute();
         await _authService.signOut();
       }
       return null; // 에러 발생 시 null 반환하여 호출 측에서 로딩 상태를 해제하게 함

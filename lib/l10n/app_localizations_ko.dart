@@ -930,4 +930,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noActiveAlarms => '설정된 알림이 없어요';
+
+  @override
+  String get historyTapToChange => '탭해서 상태 변경하기';
 }

@@ -3,6 +3,7 @@ import '../../../../repositories/connect_repository.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../repositories/user_repository.dart';
 import '../../../../datasources/user_local_data_source.dart';
+import '../../../../usecases/cancel_all_notifications_use_case.dart';
 
 class WithdrawUseCase {
   final AuthService _authService;
@@ -10,6 +11,7 @@ class WithdrawUseCase {
   final UserLocalDataSource _userLocalDataSource;
   final RecordRepository _recordRepository;
   final ConnectRepository _connectRepository;
+  final CancelAllNotificationsUseCase _cancelAllNotificationsUseCase;
 
   WithdrawUseCase(
     this._authService,
@@ -17,12 +19,16 @@ class WithdrawUseCase {
     this._userLocalDataSource,
     this._recordRepository,
     this._connectRepository,
+    this._cancelAllNotificationsUseCase,
   );
 
   Future<void> execute() async {
     final user = _authService.currentUser;
     if (user != null) {
-      // 0. 연관 데이터 삭제 (Cascade)
+      // 0. 모든 알림 제거
+      await _cancelAllNotificationsUseCase.execute();
+
+      // 1. 연관 데이터 삭제 (Cascade)
       // plans, relations 삭제
       await _recordRepository.deletePlansByUserId(user.uid);
       await _connectRepository.deleteAllRelationsByUserId(user.uid);

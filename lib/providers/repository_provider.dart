@@ -214,7 +214,8 @@ final autoLoginUseCaseProvider = Provider<AutoLoginUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final userLocalDataSource = ref.watch(userLocalDataSourceProvider);
-  return AutoLoginUseCase(authService, userRepository, userLocalDataSource);
+  final cancelAllNotifications = ref.watch(cancelAllNotificationsUseCaseProvider);
+  return AutoLoginUseCase(authService, userRepository, userLocalDataSource, cancelAllNotifications);
 });
 
 final linkWithGoogleUseCaseProvider = Provider<LinkWithGoogleUseCase>((ref) {
@@ -247,12 +248,14 @@ final withdrawUseCaseProvider = Provider<WithdrawUseCase>((ref) {
   final localDataSource = ref.watch(userLocalDataSourceProvider);
   final recordRepository = ref.watch(recordRepositoryProvider);
   final connectRepository = ref.watch(connectRepositoryProvider);
+  final cancelAllNotifications = ref.watch(cancelAllNotificationsUseCaseProvider);
   return WithdrawUseCase(
     authService,
     userRepository,
     localDataSource,
     recordRepository,
     connectRepository,
+    cancelAllNotifications,
   );
 });
 

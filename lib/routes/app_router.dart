@@ -124,7 +124,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'plan-create',
         builder: (context, state) {
           final planToEdit = state.extra as Plan?;
-          return PlanCreateScreen(planToEdit: planToEdit);
+          final startAtLastStep =
+              state.uri.queryParameters['startAtLastStep'] == 'true';
+          return PlanCreateScreen(
+            planToEdit: planToEdit,
+            startAtLastStep: startAtLastStep,
+          );
         },
       ),
       // 계획 상세 화면

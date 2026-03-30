@@ -212,13 +212,15 @@ class AppColors {
   static const Color darkBackgroundSmokyPlum = Color(0xFF1E1A1D);
   static const Color darkSurfaceSmokyPlum = Color(0xFF2A2328);
 
+  static const Color darkBackgroundDeepOlive = Color(0xFF1A1C1A);
+  static const Color darkSurfaceDeepOlive = Color(0xFF252825);
+
   static Color get darkBackground {
     switch (_currentTheme) {
       case AppThemeType.smokyPlum:
         return darkBackgroundSmokyPlum;
       case AppThemeType.deepOlive:
-        // TODO: Deep Olive 다크 모드 색상 정의
-        return darkBackgroundSmokyPlum;
+        return darkBackgroundDeepOlive;
     }
   }
 
@@ -227,8 +229,7 @@ class AppColors {
       case AppThemeType.smokyPlum:
         return darkSurfaceSmokyPlum;
       case AppThemeType.deepOlive:
-        // TODO: Deep Olive 다크 모드 색상 정의
-        return darkSurfaceSmokyPlum;
+        return darkSurfaceDeepOlive;
     }
   }
 
