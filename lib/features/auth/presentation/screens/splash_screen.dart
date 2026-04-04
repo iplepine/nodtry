@@ -5,7 +5,6 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
 // Removed unused AuthService import
 import '../../../../theme/app_colors.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../auth_state.dart';
 import '../viewmodel/auth_viewmodel.dart';
@@ -193,7 +192,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Apple 로그인 버튼 (영문 텍스트)
+                                // Apple 로그인 버튼 (규격 완벽 일치 커스텀형)
                                 SizedBox(
                                   width: double.infinity,
                                   height: 52,
@@ -208,17 +207,43 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                             ),
                                           ),
                                         )
-                                      : SignInWithAppleButton(
+                                      : OutlinedButton(
                                           onPressed: _handleAppleLogin,
-                                          text: 'Sign in with Apple', // 사용자 요청: 영문 고정
-                                          borderRadius: const BorderRadius.all(Radius.circular(12)),
-                                          height: 52,
-                                          style: SignInWithAppleButtonStyle.white,
+                                          style: OutlinedButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            foregroundColor: Colors.black,
+                                            side: const BorderSide(color: Color(0xFFBDC1C6)),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            padding: EdgeInsets.zero,
+                                            elevation: 0,
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.apple,
+                                                size: 24,
+                                                color: Colors.black,
+                                              ),
+                                              const SizedBox(width: 12),
+                                              const Text(
+                                                'Sign in with Apple',
+                                                style: TextStyle(
+                                                  fontSize: 19,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontFamily: 'Pretendard',
+                                                  letterSpacing: -0.5,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                 ),
                                 const SizedBox(height: 12),
 
-                                // Google 로그인 버튼 영문 텍스트 및 공식 아이콘 보정 (52px / 12px)
+                                // Google 로그인 버튼 공식 투명 로고 적용 및 규격 싱크
                                 SizedBox(
                                   width: double.infinity,
                                   height: 52,
@@ -249,18 +274,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Image.asset(
-                                                'assets/images/google_icon.png',
+                                                'assets/images/google_logo.png', // 투명 배경 로고로 교체
                                                 width: 22,
                                                 height: 22,
                                               ),
                                               const SizedBox(width: 12),
                                               const Text(
-                                                'Sign in with Google', // 사용자 요청: 영문 고정
+                                                'Sign in with Google',
                                                 style: TextStyle(
-                                                  fontSize: 19, // Apple 버튼 규격에 맞춤 상향
-                                                  fontWeight: FontWeight.w500,
-                                                  fontFamily: 'Roboto',
-                                                  letterSpacing: 0.25,
+                                                  fontSize: 19,
+                                                  fontWeight: FontWeight.w600, // Apple 버튼과 동일하게 Bold 적용
+                                                  fontFamily: 'Pretendard',
+                                                  letterSpacing: -0.5,
                                                 ),
                                               ),
                                             ],
