@@ -193,7 +193,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Apple 로그인 버튼 (HIG 완벽 준수)
+                                // Apple 로그인 버튼 (공식 가이드라인 및 패션 준수)
                                 SizedBox(
                                   width: double.infinity,
                                   height: 52,
@@ -218,53 +218,28 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                 ),
                                 const SizedBox(height: 12),
 
-                                // Google 로그인 버튼 공식 가이드라인 100% 보정 (Centered Group)
+                                // Google 로그인 버튼 (공식 어셋 이미지 전용)
                                 SizedBox(
                                   width: double.infinity,
                                   height: 52,
-                                  child: ElevatedButton(
-                                    onPressed: authState.isGoogleLoading ? null : _handleGoogleLogin,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      foregroundColor: const Color(0xFF1F1F1F),
-                                      elevation: 0,
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                                      side: const BorderSide(color: Color(0xFFBDC1C6), width: 1.0),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        if (authState.isGoogleLoading)
-                                          const SizedBox(
-                                            width: 20,
-                                            height: 20,
+                                  child: authState.isGoogleLoading
+                                      ? Center(
+                                          child: SizedBox(
+                                            width: 24,
+                                            height: 24,
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2,
-                                            ),
-                                          )
-                                        else ...[
-                                          Image.asset(
-                                            'assets/images/google_logo.png',
-                                            width: 20,
-                                            height: 20,
-                                          ),
-                                          const SizedBox(width: 10), // Google 가이드라인: 10px 간격
-                                          Text(
-                                            AppLocalizations.of(context)!.loginWithGoogle,
-                                            style: const TextStyle(
-                                              fontSize: 14, // 가이드라인 사양
-                                              fontWeight: FontWeight.w500, // Roboto Medium
-                                              fontFamily: 'Roboto',
-                                              letterSpacing: 0.25,
+                                              color: AppColors.primary,
                                             ),
                                           ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
+                                        )
+                                      : InkWell(
+                                          onTap: _handleGoogleLogin,
+                                          child: Image.asset(
+                                            'assets/images/google_signin_button.png',
+                                            fit: BoxFit.fitWidth,
+                                          ),
+                                        ),
                                 ),
                                 const SizedBox(height: 12),
 
