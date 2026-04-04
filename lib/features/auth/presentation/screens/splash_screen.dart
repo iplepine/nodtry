@@ -193,7 +193,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Apple 로그인 버튼 (공식 가이드라인 및 패션 준수)
+                                // Apple 로그인 버튼 (White 스타일 통일)
                                 SizedBox(
                                   width: double.infinity,
                                   height: 52,
@@ -213,12 +213,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                           text: AppLocalizations.of(context)!.loginWithApple,
                                           borderRadius: const BorderRadius.all(Radius.circular(12)),
                                           height: 52,
-                                          style: SignInWithAppleButtonStyle.black,
+                                          style: SignInWithAppleButtonStyle.white,
                                         ),
                                 ),
                                 const SizedBox(height: 12),
 
-                                // Google 로그인 버튼 (공식 어셋 이미지 전용)
+                                // Google 로그인 버튼 공식 규격 보정 (52px / 12px / Centered Group)
                                 SizedBox(
                                   width: double.infinity,
                                   height: 52,
@@ -233,11 +233,37 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                             ),
                                           ),
                                         )
-                                      : InkWell(
-                                          onTap: _handleGoogleLogin,
-                                          child: Image.asset(
-                                            'assets/images/google_signin_button.png',
-                                            fit: BoxFit.fitWidth,
+                                      : OutlinedButton(
+                                          onPressed: _handleGoogleLogin,
+                                          style: OutlinedButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            foregroundColor: const Color(0xFF1F1F1F),
+                                            side: const BorderSide(color: Color(0xFFBDC1C6)),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            padding: EdgeInsets.zero,
+                                            elevation: 0,
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/google_icon.png',
+                                                width: 18,
+                                                height: 18,
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Text(
+                                                AppLocalizations.of(context)!.loginWithGoogle,
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontFamily: 'Roboto',
+                                                  letterSpacing: 0.25,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                 ),
