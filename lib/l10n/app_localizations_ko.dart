@@ -15,10 +15,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get splashTagline => '혼자서 지키지 못했던 계획을, 함께';
 
   @override
-  String get loginWithGoogle => 'Google로 시작하기';
+  String get loginWithGoogle => 'Google 계정으로 계속하기';
 
   @override
-  String get loginWithApple => 'Apple로 시작하기';
+  String get loginWithApple => 'Apple로 계속하기';
 
   @override
   String get loginGuest => '로그인 없이 시작하기';
