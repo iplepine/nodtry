@@ -30,6 +30,8 @@ class SettingsViewModel extends AsyncNotifier<SettingsState> {
       state = AsyncValue.data(prevState.copyWith(currentTheme: intent.theme));
     } else if (intent is WithdrawAccountIntent) {
       await _withdraw();
+    } else if (intent is LogoutIntent) {
+      await _logout();
     }
   }
 
@@ -49,4 +51,16 @@ class SettingsViewModel extends AsyncNotifier<SettingsState> {
       );
     }
   }
+
+  Future<void> _logout() async {
+    try {
+      final authService = ref.read(authServiceProvider);
+      await authService.signOut();
+    } catch (e) {
+      state = AsyncValue.data(
+        state.value!.copyWith(errorMessage: e.toString()),
+      );
+    }
+  }
 }
+

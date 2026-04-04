@@ -808,10 +808,6 @@
     }
   },
   "usLinkEmailSuccess": "Email account linked successfully!",
-  "emailHint": "Enter your email",
-  "passwordHint": "Enter your password",
-  "invalidEmail": "Invalid email format",
-  "weakPassword": "Password must be at least 6 characters",
   "historyPartnerVerified": "Partner verified",
   "@historyPartnerVerified": {
     "description": "History card label when partner verified"
@@ -879,6 +875,26 @@
   "settingsAccount": "Account",
   "@settingsAccount": {
     "description": "Account section title in settings"
+  },
+  "settingsLogout": "Log out",
+  "@settingsLogout": {
+    "description": "Logout button title"
+  },
+  "settingsLogoutDesc": "Log out from your current account",
+  "@settingsLogoutDesc": {
+    "description": "Description for logout option"
+  },
+  "settingsLogoutDialogTitle": "Log out",
+  "@settingsLogoutDialogTitle": {
+    "description": "Title for logout confirmation dialog"
+  },
+  "settingsLogoutDialogContent": "Are you sure you want to log out?",
+  "@settingsLogoutDialogContent": {
+    "description": "Content for logout confirmation dialog"
+  },
+  "settingsLogoutConfirm": "Log out",
+  "@settingsLogoutConfirm": {
+    "description": "Logout confirmation button label"
   },
   "settingsDeleteAccount": "Delete Account",
   "@settingsDeleteAccount": {

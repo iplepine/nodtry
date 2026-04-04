@@ -179,6 +179,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              _buildLogoutOption(context),
+              const SizedBox(height: 12),
               _buildWithdrawOption(context),
             ],
           ),
@@ -223,6 +225,85 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildLogoutOption(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showLogoutDialog(context),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider, width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.settingsLogout,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.settingsLogoutDesc,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: AppColors.textDisabled),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showLogoutDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.settingsLogoutDialogTitle),
+        content: Text(l10n.settingsLogoutDialogContent),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: Text(l10n.settingsCancel),
+          ),
+          TextButton(
+            onPressed: () => context.pop(true),
+            child: Text(
+              l10n.settingsLogoutConfirm,
+              style: TextStyle(color: AppColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      ref
+          .read(settingsViewModelProvider.notifier)
+          .dispatch(const LogoutIntent());
+    }
   }
 
   Widget _buildWithdrawOption(BuildContext context) {

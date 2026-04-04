@@ -1298,30 +1298,6 @@ abstract class AppLocalizations {
   /// **'Email account linked successfully!'**
   String get usLinkEmailSuccess;
 
-  /// Hint text for email input
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your email'**
-  String get emailHint;
-
-  /// Hint text for password input
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your password'**
-  String get passwordHint;
-
-  /// Error message for invalid email
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid email format'**
-  String get invalidEmail;
-
-  /// Error message for weak password
-  ///
-  /// In en, this message translates to:
-  /// **'Password must be at least 6 characters'**
-  String get weakPassword;
-
   /// History card label when partner verified
   ///
   /// In en, this message translates to:
@@ -1430,6 +1406,36 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get settingsAccount;
 
+  /// Logout button title
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get settingsLogout;
+
+  /// Description for logout option
+  ///
+  /// In en, this message translates to:
+  /// **'Log out from your current account'**
+  String get settingsLogoutDesc;
+
+  /// Title for logout confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get settingsLogoutDialogTitle;
+
+  /// Content for logout confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get settingsLogoutDialogContent;
+
+  /// Logout confirmation button label
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get settingsLogoutConfirm;
+
   /// Delete account button title
   ///
   /// In en, this message translates to:
@@ -1501,6 +1507,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start with Email'**
   String get emailStartMessage;
+
+  /// Hint text for password input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get passwordHint;
+
+  /// Hint text for email input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get emailHint;
+
+  /// Error message for invalid email
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email format'**
+  String get invalidEmail;
+
+  /// Error message for weak password
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get weakPassword;
 
   /// Error message for existing account
   ///

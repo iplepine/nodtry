@@ -635,18 +635,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usLinkEmailSuccess => '이메일 계정이 성공적으로 연결되었습니다!';
 
   @override
-  String get emailHint => '이메일을 입력해주세요';
-
-  @override
-  String get passwordHint => '비밀번호를 입력해주세요';
-
-  @override
-  String get invalidEmail => '유효한 이메일 형식이 아닙니다';
-
-  @override
-  String get weakPassword => '비밀번호는 6자 이상이어야 합니다';
-
-  @override
   String get historyPartnerVerified => '파트너가 확인했어요';
 
   @override
@@ -703,6 +691,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAccount => '계정 관리';
 
   @override
+  String get settingsLogout => '로그아웃';
+
+  @override
+  String get settingsLogoutDesc => '현재 계정에서 로그아웃합니다';
+
+  @override
+  String get settingsLogoutDialogTitle => '로그아웃';
+
+  @override
+  String get settingsLogoutDialogContent => '정말로 로그아웃하시겠습니까?';
+
+  @override
+  String get settingsLogoutConfirm => '로그아웃';
+
+  @override
   String get settingsDeleteAccount => '회원 탈퇴';
 
   @override
@@ -738,6 +741,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get emailStartMessage => '이메일로 시작하기';
+
+  @override
+  String get passwordHint => '비밀번호를 입력해주세요';
+
+  @override
+  String get emailHint => '이메일을 입력해주세요';
+
+  @override
+  String get invalidEmail => '유효한 이메일 형식이 아닙니다';
+
+  @override
+  String get weakPassword => '비밀번호는 6자 이상이어야 합니다';
 
   @override
   String get accountExistsWithDifferentCredential => '이미 가입된 이메일입니다.';

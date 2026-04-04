@@ -31,3 +31,8 @@ class ChangeThemeIntent extends SettingsIntent {
 class WithdrawAccountIntent extends SettingsIntent {
   const WithdrawAccountIntent();
 }
+
+class LogoutIntent extends SettingsIntent {
+  const LogoutIntent();
+}
+

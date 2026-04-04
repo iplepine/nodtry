@@ -649,18 +649,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usLinkEmailSuccess => 'Email account linked successfully!';
 
   @override
-  String get emailHint => 'Enter your email';
-
-  @override
-  String get passwordHint => 'Enter your password';
-
-  @override
-  String get invalidEmail => 'Invalid email format';
-
-  @override
-  String get weakPassword => 'Password must be at least 6 characters';
-
-  @override
   String get historyPartnerVerified => 'Partner verified';
 
   @override
@@ -717,6 +705,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAccount => 'Account';
 
   @override
+  String get settingsLogout => 'Log out';
+
+  @override
+  String get settingsLogoutDesc => 'Log out from your current account';
+
+  @override
+  String get settingsLogoutDialogTitle => 'Log out';
+
+  @override
+  String get settingsLogoutDialogContent => 'Are you sure you want to log out?';
+
+  @override
+  String get settingsLogoutConfirm => 'Log out';
+
+  @override
   String get settingsDeleteAccount => 'Delete Account';
 
   @override
@@ -753,6 +756,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emailStartMessage => 'Start with Email';
+
+  @override
+  String get passwordHint => 'Enter your password';
+
+  @override
+  String get emailHint => 'Enter your email';
+
+  @override
+  String get invalidEmail => 'Invalid email format';
+
+  @override
+  String get weakPassword => 'Password must be at least 6 characters';
 
   @override
   String get accountExistsWithDifferentCredential =>
