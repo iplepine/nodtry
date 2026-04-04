@@ -218,7 +218,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                 ),
                                 const SizedBox(height: 12),
 
-                                // Google 로그인 버튼
+                                // Google 로그인 버튼 (공식 가이드라인 준수)
                                 SizedBox(
                                   width: double.infinity,
                                   height: 52,
@@ -226,43 +226,42 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                     onPressed: authState.isGoogleLoading ? null : _handleGoogleLogin,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.white,
-                                      foregroundColor: Colors.black87,
+                                      foregroundColor: const Color(0xFF1F1F1F),
                                       elevation: 0,
-                                      padding: EdgeInsets.zero,
-                                      side: const BorderSide(color: Colors.black26),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      side: const BorderSide(color: Color(0xFF747775), width: 1.0),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                    child: Stack(
                                       children: [
-                                        authState.isGoogleLoading
-                                            ? const SizedBox(
-                                                width: 20,
-                                                height: 20,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                ),
-                                              )
-                                            : const Padding(
-                                                padding: EdgeInsets.only(bottom: 2), // 시각적 중앙 보정
-                                                child: Text(
-                                                  'G',
-                                                  style: TextStyle(
-                                                    fontSize: 22,
-                                                    fontWeight: FontWeight.w800,
-                                                    fontFamily: 'SF Pro Display', // 기본 시스템 폰트에 의존
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: authState.isGoogleLoading
+                                              ? const SizedBox(
+                                                  width: 18,
+                                                  height: 18,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
                                                   ),
+                                                )
+                                              : Image.asset(
+                                                  'assets/images/google_logo.png',
+                                                  width: 18,
+                                                  height: 18,
                                                 ),
-                                              ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          AppLocalizations.of(context)!.loginWithGoogle,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w500,
-                                            letterSpacing: -0.5,
+                                        ),
+                                        Align(
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            AppLocalizations.of(context)!.loginWithGoogle,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              fontFamily: 'Roboto',
+                                              letterSpacing: 0.25,
+                                            ),
                                           ),
                                         ),
                                       ],
