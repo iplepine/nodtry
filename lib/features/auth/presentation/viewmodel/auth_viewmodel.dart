@@ -69,6 +69,11 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
         );
         rethrow;
       }
+    } else {
+      // 사용자가 없는 경우(로그아웃 상태 등)에 대비하여 로딩 상태를 false로 유지
+      state = AsyncValue.data(
+        state.value!.copyWith(isAutoLoggingIn: false),
+      );
     }
   }
 
