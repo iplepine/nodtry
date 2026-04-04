@@ -7,6 +7,7 @@ abstract class AuthState with _$AuthState {
   const factory AuthState({
     @Default(false) bool isAutoLoggingIn,
     @Default(false) bool isGoogleLoading,
+    @Default(false) bool isAppleLoading,
     @Default(false) bool isGuestLoading,
     @Default(false) bool isEmailLoading,
     String? errorMessage,
@@ -23,6 +24,10 @@ class CheckAuthIntent extends AuthIntent {
 
 class LoginWithGoogleIntent extends AuthIntent {
   const LoginWithGoogleIntent();
+}
+
+class LoginWithAppleIntent extends AuthIntent {
+  const LoginWithAppleIntent();
 }
 
 class LoginGuestIntent extends AuthIntent {

@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:math' as math;
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -43,6 +47,88 @@ class AuthService {
       return await _auth.signInWithCredential(credential);
     } catch (e) {
       debugPrint("Error signing in with Google: $e");
+      rethrow;
+    }
+  }
+
+  /// Apple 로그인용 nonce 생성
+  String _generateNonce([int length = 32]) {
+    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = math.Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)]).join();
+  }
+
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  /// Apple 로그인
+  Future<UserCredential?> signInWithApple() async {
+    try {
+      final rawNonce = _generateNonce();
+      final nonce = _sha256ofString(rawNonce);
+
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+      );
+
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+      );
+
+      final userCredential = await _auth.signInWithCredential(oauthCredential);
+
+      // Apple은 최초 로그인 시에만 이름을 제공하므로 displayName 업데이트
+      if (userCredential.user?.displayName == null || userCredential.user!.displayName!.isEmpty) {
+        final givenName = appleCredential.givenName;
+        final familyName = appleCredential.familyName;
+        if (givenName != null || familyName != null) {
+          final displayName = [givenName, familyName].where((s) => s != null && s.isNotEmpty).join(' ');
+          if (displayName.isNotEmpty) {
+            await userCredential.user?.updateDisplayName(displayName);
+          }
+        }
+      }
+
+      return userCredential;
+    } catch (e) {
+      debugPrint("Error signing in with Apple: $e");
+      rethrow;
+    }
+  }
+
+  /// 익명 계정을 Apple 계정으로 전환 (계정 연결)
+  Future<UserCredential?> linkWithApple() async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) throw Exception('No current user');
+
+      final rawNonce = _generateNonce();
+      final nonce = _sha256ofString(rawNonce);
+
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+      );
+
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+      );
+
+      return await currentUser.linkWithCredential(oauthCredential);
+    } catch (e) {
+      debugPrint("Error linking with Apple: $e");
       rethrow;
     }
   }

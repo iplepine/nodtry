@@ -4,7 +4,7 @@ platform :ios do
   desc "Push a new beta build to TestFlight"
   lane :beta do
     upload_to_testflight(
-      ipa: '../build/ios/ipa/IfTogether.ipa', # Ensure this matches your IPA name
+      ipa: '../build/ios/ipa/nod_try.ipa',
       skip_waiting_for_build_processing: true
     )
   end
@@ -12,7 +12,7 @@ platform :ios do
   desc "Push a new release build to the App Store"
   lane :release do
     upload_to_app_store(
-      ipa: '../build/ios/ipa/IfTogether.ipa',
+      ipa: '../build/ios/ipa/nod_try.ipa',
       force: true,
       skip_screenshots: true,
       skip_metadata: true

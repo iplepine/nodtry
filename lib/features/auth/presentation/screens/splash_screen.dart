@@ -5,8 +5,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
 // Removed unused AuthService import
 import '../../../../theme/app_colors.dart';
-import '../../../../widgets/primary_button.dart';
-import 'dart:io';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../auth_state.dart';
 import '../viewmodel/auth_viewmodel.dart';
@@ -75,6 +74,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     ref
         .read(authViewModelProvider.notifier)
         .dispatch(const LoginWithGoogleIntent());
+  }
+
+  void _handleAppleLogin() {
+    ref
+        .read(authViewModelProvider.notifier)
+        .dispatch(const LoginWithAppleIntent());
   }
 
   void _handleGuestLogin() {
@@ -156,7 +161,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
               // 로그인 버튼 영역 (아래에서 애니메이션)
               SizedBox(
-                height: 240,
+                height: 300,
                 width: double.infinity,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
@@ -188,52 +193,112 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Android에서만 구글 로그인 버튼 표시
-                                if (Platform.isAndroid) ...[
-                                  PrimaryButton(
-                                    text: AppLocalizations.of(
-                                      context,
-                                    )!.loginWithGoogle,
-                                    onPressed: _handleGoogleLogin,
-                                    isLoading: authState.isGoogleLoading,
-                                  ),
-                                  const SizedBox(height: 12),
+                                // Apple 로그인 버튼 (HIG 완벽 준수)
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 52,
+                                  child: authState.isAppleLoading
+                                      ? Center(
+                                          child: SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                        )
+                                      : SignInWithAppleButton(
+                                          onPressed: _handleAppleLogin,
+                                          text: AppLocalizations.of(context)!.loginWithApple,
+                                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                          height: 52,
+                                          style: SignInWithAppleButtonStyle.black,
+                                        ),
+                                ),
+                                const SizedBox(height: 12),
 
-                                  // 이메일 로그인 버튼
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: OutlinedButton(
-                                      onPressed: () {
-                                        context.push(AppRoutes.emailLogin);
-                                      },
-                                      style: OutlinedButton.styleFrom(
-                                        side: BorderSide(
-                                          color: AppColors.primary,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 24,
-                                          vertical: 16,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
+                                // Google 로그인 버튼
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 52,
+                                  child: ElevatedButton(
+                                    onPressed: authState.isGoogleLoading ? null : _handleGoogleLogin,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: Colors.black87,
+                                      elevation: 0,
+                                      padding: EdgeInsets.zero,
+                                      side: const BorderSide(color: Colors.black26),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        authState.isGoogleLoading
+                                            ? const SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                ),
+                                              )
+                                            : const Padding(
+                                                padding: EdgeInsets.only(bottom: 2), // 시각적 중앙 보정
+                                                child: Text(
+                                                  'G',
+                                                  style: TextStyle(
+                                                    fontSize: 22,
+                                                    fontWeight: FontWeight.w800,
+                                                    fontFamily: 'SF Pro Display', // 기본 시스템 폰트에 의존
+                                                  ),
+                                                ),
+                                              ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          AppLocalizations.of(context)!.loginWithGoogle,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                            letterSpacing: -0.5,
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+
+                                // 이메일 로그인 버튼
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 52,
+                                  child: OutlinedButton(
+                                    onPressed: () {
+                                      context.push(AppRoutes.emailLogin);
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(
+                                        color: AppColors.primary,
                                       ),
-                                      child: Text(
-                                        AppLocalizations.of(
-                                          context,
-                                        )!.loginWithEmail,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.primary,
-                                        ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      AppLocalizations.of(context)!.loginWithEmail,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        letterSpacing: -0.3,
+                                        color: AppColors.primary,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
-                                ],
+                                ),
+                                const SizedBox(height: 12),
 
                                 // 게스트 로그인 (둘러보기) - 커스텀 밑줄 (Border)
                                 TextButton(

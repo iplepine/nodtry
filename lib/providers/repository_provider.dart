@@ -30,6 +30,8 @@ import '../features/auth/domain/usecases/link_with_google_use_case.dart';
 import '../features/auth/domain/usecases/link_with_email_use_case.dart';
 import '../features/auth/domain/usecases/sign_up_with_email_use_case.dart';
 import '../features/auth/domain/usecases/login_with_google_use_case.dart';
+import '../features/auth/domain/usecases/login_with_apple_use_case.dart';
+import '../features/auth/domain/usecases/link_with_apple_use_case.dart';
 import '../features/auth/domain/usecases/withdraw_use_case.dart';
 
 import '../features/auth/domain/usecases/guest_login_use_case.dart';
@@ -240,6 +242,18 @@ final loginWithGoogleUseCaseProvider = Provider<LoginWithGoogleUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   return LoginWithGoogleUseCase(authService, userRepository);
+});
+
+final loginWithAppleUseCaseProvider = Provider<LoginWithAppleUseCase>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final userRepository = ref.watch(userRepositoryProvider);
+  return LoginWithAppleUseCase(authService, userRepository);
+});
+
+final linkWithAppleUseCaseProvider = Provider<LinkWithAppleUseCase>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final userRepository = ref.watch(userRepositoryProvider);
+  return LinkWithAppleUseCase(authService, userRepository);
 });
 
 final withdrawUseCaseProvider = Provider<WithdrawUseCase>((ref) {

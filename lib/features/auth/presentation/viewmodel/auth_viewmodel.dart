@@ -22,6 +22,8 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
         await _checkAuth();
       } else if (intent is LoginWithGoogleIntent) {
         await _loginWithGoogle();
+      } else if (intent is LoginWithAppleIntent) {
+        await _loginWithApple();
       } else if (intent is LoginGuestIntent) {
         await _loginGuest();
       } else if (intent is LoginWithEmailIntent) {
@@ -37,6 +39,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
         prevState.copyWith(
           isAutoLoggingIn: false,
           isGoogleLoading: false,
+          isAppleLoading: false,
           isGuestLoading: false,
           isEmailLoading: false,
           errorMessage: e.toString(),
@@ -78,6 +81,18 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
       await useCase.execute();
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isGoogleLoading: false));
+    }
+  }
+
+  Future<void> _loginWithApple() async {
+    state = AsyncValue.data(
+      state.value!.copyWith(isAppleLoading: true, errorMessage: null),
+    );
+    try {
+      final useCase = ref.read(loginWithAppleUseCaseProvider);
+      await useCase.execute();
+    } finally {
+      state = AsyncValue.data(state.value!.copyWith(isAppleLoading: false));
     }
   }
 

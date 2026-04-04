@@ -3,17 +3,19 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>39831135432-6gr4710ej4qtj317cjipn9ghg439l05h.apps.googleusercontent.com</string>
+	<string>39831135432-sbq2shm7qj0893b5a8o9nb76pv16mdpa.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.39831135432-6gr4710ej4qtj317cjipn9ghg439l05h</string>
+	<string>com.googleusercontent.apps.39831135432-sbq2shm7qj0893b5a8o9nb76pv16mdpa</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>39831135432-279eds64uk0euc8ag0o6hpuvpfogh01i.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyA_oa1AVis46MEUEFCzbCtY02Z1FJVnhgY</string>
+	<string>AIzaSyC_cSUBvYQv784xZvUPtPFVFd4UnZGOe-k</string>
 	<key>GCM_SENDER_ID</key>
 	<string>39831135432</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.mindgardener.mindGardener</string>
+	<string>com.devho.nodtry.app</string>
 	<key>PROJECT_ID</key>
 	<string>nod-try</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:39831135432:ios:95e15365da684b6703f1fd</string>
+	<string>1:39831135432:ios:689fb8a2e7413ad303f1fd</string>
 </dict>
 </plist>
