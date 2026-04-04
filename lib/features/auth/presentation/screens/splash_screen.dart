@@ -193,7 +193,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Apple 로그인 버튼 (White 스타일 통일)
+                                // Apple 로그인 버튼 (영문 텍스트)
                                 SizedBox(
                                   width: double.infinity,
                                   height: 52,
@@ -210,7 +210,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                         )
                                       : SignInWithAppleButton(
                                           onPressed: _handleAppleLogin,
-                                          text: AppLocalizations.of(context)!.loginWithApple,
+                                          text: 'Sign in with Apple', // 사용자 요청: 영문 고정
                                           borderRadius: const BorderRadius.all(Radius.circular(12)),
                                           height: 52,
                                           style: SignInWithAppleButtonStyle.white,
@@ -218,7 +218,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                 ),
                                 const SizedBox(height: 12),
 
-                                // Google 로그인 버튼 공식 규격 보정 (52px / 12px / Centered Group)
+                                // Google 로그인 버튼 영문 텍스트 및 공식 아이콘 보정 (52px / 12px)
                                 SizedBox(
                                   width: double.infinity,
                                   height: 52,
@@ -250,14 +250,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                             children: [
                                               Image.asset(
                                                 'assets/images/google_icon.png',
-                                                width: 18,
-                                                height: 18,
+                                                width: 22,
+                                                height: 22,
                                               ),
-                                              const SizedBox(width: 10),
-                                              Text(
-                                                AppLocalizations.of(context)!.loginWithGoogle,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
+                                              const SizedBox(width: 12),
+                                              const Text(
+                                                'Sign in with Google', // 사용자 요청: 영문 고정
+                                                style: TextStyle(
+                                                  fontSize: 19, // Apple 버튼 규격에 맞춤 상향
                                                   fontWeight: FontWeight.w500,
                                                   fontFamily: 'Roboto',
                                                   letterSpacing: 0.25,
@@ -288,7 +288,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                     child: Text(
                                       AppLocalizations.of(context)!.loginWithEmail,
                                       style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 19, // Apple 및 Google과 규격 통일
                                         fontWeight: FontWeight.w500,
                                         letterSpacing: -0.3,
                                         color: AppColors.primary,
