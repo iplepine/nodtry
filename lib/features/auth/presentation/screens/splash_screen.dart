@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -192,61 +193,61 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Apple 로그인 버튼 (규격 완벽 일치 커스텀형)
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 52,
-                                  child: authState.isAppleLoading
-                                      ? Center(
-                                          child: SizedBox(
-                                            width: 24,
-                                            height: 24,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: AppColors.primary,
-                                            ),
-                                          ),
-                                        )
-                                      : OutlinedButton(
-                                          onPressed: _handleAppleLogin,
-                                          style: OutlinedButton.styleFrom(
-                                            backgroundColor: Colors.white,
-                                            foregroundColor: Colors.black,
-                                            side: const BorderSide(color: Color(0xFFBDC1C6)),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            padding: EdgeInsets.zero,
-                                            elevation: 0,
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                Icons.apple,
-                                                size: 24,
-                                                color: Colors.black,
+                                // Apple 로그인 버튼 (iOS만 표시)
+                                if (Platform.isIOS) ...[
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 50,
+                                    child: authState.isAppleLoading
+                                        ? Center(
+                                            child: SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: AppColors.primary,
                                               ),
-                                              const SizedBox(width: 12),
-                                              const Text(
-                                                'Sign in with Apple',
-                                                style: TextStyle(
-                                                  fontSize: 19,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontFamily: 'Pretendard',
-                                                  letterSpacing: -0.5,
+                                            ),
+                                          )
+                                        : ElevatedButton(
+                                            onPressed: _handleAppleLogin,
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.black,
+                                              foregroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              padding: EdgeInsets.zero,
+                                              elevation: 0,
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.apple,
+                                                  size: 22,
+                                                  color: Colors.white,
                                                 ),
-                                              ),
-                                            ],
+                                                const SizedBox(width: 10),
+                                                Text(
+                                                  AppLocalizations.of(context)!.loginWithApple,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                    letterSpacing: 0.0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                ),
-                                const SizedBox(height: 12),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
 
-                                // Google 로그인 버튼 공식 투명 로고 적용 및 규격 싱크
+                                // Google 로그인 버튼 (Google Identity 브랜드 가이드라인)
                                 SizedBox(
                                   width: double.infinity,
-                                  height: 52,
+                                  height: 50,
                                   child: authState.isGoogleLoading
                                       ? Center(
                                           child: SizedBox(
@@ -263,7 +264,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                           style: OutlinedButton.styleFrom(
                                             backgroundColor: Colors.white,
                                             foregroundColor: const Color(0xFF1F1F1F),
-                                            side: const BorderSide(color: Color(0xFFBDC1C6)),
+                                            side: const BorderSide(color: Color(0xFF747775)),
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(12),
                                             ),
@@ -274,18 +275,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Image.asset(
-                                                'assets/images/google_logo.png', // 투명 배경 로고로 교체
-                                                width: 22,
-                                                height: 22,
+                                                'assets/images/google_logo.png',
+                                                width: 20,
+                                                height: 20,
                                               ),
-                                              const SizedBox(width: 12),
-                                              const Text(
-                                                'Sign in with Google',
-                                                style: TextStyle(
-                                                  fontSize: 19,
-                                                  fontWeight: FontWeight.w600, // Apple 버튼과 동일하게 Bold 적용
-                                                  fontFamily: 'Pretendard',
-                                                  letterSpacing: -0.5,
+                                              const SizedBox(width: 10),
+                                              Text(
+                                                AppLocalizations.of(context)!.loginWithGoogle,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: 0.0,
                                                 ),
                                               ),
                                             ],
@@ -297,7 +297,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                 // 이메일 로그인 버튼
                                 SizedBox(
                                   width: double.infinity,
-                                  height: 52,
+                                  height: 50,
                                   child: OutlinedButton(
                                     onPressed: () {
                                       context.push(AppRoutes.emailLogin);
@@ -313,9 +313,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                     child: Text(
                                       AppLocalizations.of(context)!.loginWithEmail,
                                       style: TextStyle(
-                                        fontSize: 19, // Apple 및 Google과 규격 통일
+                                        fontSize: 16,
                                         fontWeight: FontWeight.w500,
-                                        letterSpacing: -0.3,
+                                        letterSpacing: 0.0,
                                         color: AppColors.primary,
                                       ),
                                     ),

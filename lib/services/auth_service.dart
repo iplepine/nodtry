@@ -98,6 +98,18 @@ class AuthService {
       }
 
       return userCredential;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-credential') {
+        throw Exception('Apple 로그인은 실제 기기에서만 가능합니다. 시뮬레이터에서는 지원되지 않습니다.');
+      }
+      debugPrint("Error signing in with Apple: $e");
+      rethrow;
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        return null;
+      }
+      debugPrint("Error signing in with Apple: $e");
+      rethrow;
     } catch (e) {
       debugPrint("Error signing in with Apple: $e");
       rethrow;
