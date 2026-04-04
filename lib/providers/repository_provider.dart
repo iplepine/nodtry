@@ -30,6 +30,7 @@ import '../features/auth/domain/usecases/link_with_google_use_case.dart';
 import '../features/auth/domain/usecases/link_with_email_use_case.dart';
 import '../features/auth/domain/usecases/sign_up_with_email_use_case.dart';
 import '../features/auth/domain/usecases/login_with_google_use_case.dart';
+import '../features/auth/domain/usecases/login_with_email_use_case.dart';
 import '../features/auth/domain/usecases/login_with_apple_use_case.dart';
 import '../features/auth/domain/usecases/link_with_apple_use_case.dart';
 import '../features/auth/domain/usecases/withdraw_use_case.dart';
@@ -236,6 +237,12 @@ final signUpWithEmailUseCaseProvider = Provider<SignUpWithEmailUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   return SignUpWithEmailUseCase(authService, userRepository);
+});
+
+final loginWithEmailUseCaseProvider = Provider<LoginWithEmailUseCase>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final userRepository = ref.watch(userRepositoryProvider);
+  return LoginWithEmailUseCase(authService, userRepository);
 });
 
 final loginWithGoogleUseCaseProvider = Provider<LoginWithGoogleUseCase>((ref) {

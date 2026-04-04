@@ -118,8 +118,8 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
       state.value!.copyWith(isEmailLoading: true, errorMessage: null),
     );
     try {
-      final authService = ref.read(authServiceProvider);
-      await authService.signInWithEmailAndPassword(email, password);
+      final useCase = ref.read(loginWithEmailUseCaseProvider);
+      await useCase.execute(email, password);
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isEmailLoading: false));
     }
