@@ -2,20 +2,26 @@ import 'package:flutter/foundation.dart';
 import '../../../../models/user_model.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../repositories/user_repository.dart';
+import '../../../../repositories/record_repository.dart';
 import '../../../../datasources/user_local_data_source.dart';
 import '../../../../usecases/cancel_all_notifications_use_case.dart';
+import '../../../plan/domain/usecases/setting_alarm_use_case.dart';
 
 class AutoLoginUseCase {
   final AuthService _authService;
   final UserRepository _userRepository;
   final UserLocalDataSource _userLocalDataSource;
   final CancelAllNotificationsUseCase _cancelAllNotificationsUseCase;
+  final RecordRepository _recordRepository;
+  final SettingAlarmUseCase _settingAlarmUseCase;
 
   AutoLoginUseCase(
     this._authService,
     this._userRepository,
     this._userLocalDataSource,
     this._cancelAllNotificationsUseCase,
+    this._recordRepository,
+    this._settingAlarmUseCase,
   );
 
   Future<UserModel?> execute() async {
@@ -55,6 +61,9 @@ class AutoLoginUseCase {
       if (userModel != null) {
         // 4. 로컬 캐시 갱신
         await _userLocalDataSource.saveUser(userModel);
+
+        // 5. 알림 복구: 기존 로컬 알림 전부 취소 후, 서버 설정 기반 재등록
+        await _restoreNotifications(user.uid);
       }
 
       return userModel;
@@ -66,6 +75,34 @@ class AutoLoginUseCase {
         await _authService.signOut();
       }
       return null; // 에러 발생 시 null 반환하여 호출 측에서 로딩 상태를 해제하게 함
+    }
+  }
+
+  /// 서버에 저장된 알림 설정을 기반으로 로컬 알림을 복구
+  Future<void> _restoreNotifications(String userId) async {
+    try {
+      // 1. 기존 로컬 알림 전부 취소 (중복 방지)
+      await _cancelAllNotificationsUseCase.execute();
+
+      // 2. Firestore에서 플랜 목록 조회
+      final plans = await _recordRepository.getPlansByUserId(userId);
+
+      // 3. 알림이 ON인 플랜만 재등록
+      for (final plan in plans) {
+        final item = plan.items.firstOrNull;
+        if (item == null) continue;
+
+        final notificationTime = item.notificationTime;
+        if (notificationTime != null && notificationTime.type != 'none') {
+          await _settingAlarmUseCase.execute(plan);
+          debugPrint('[AutoLoginUseCase] Restored notification for plan: ${item.title}');
+        }
+      }
+
+      debugPrint('[AutoLoginUseCase] Notification restore complete. ${plans.length} plans checked.');
+    } catch (e) {
+      debugPrint('[AutoLoginUseCase] Failed to restore notifications: $e');
+      // 알림 복구 실패해도 로그인 자체는 차단하지 않음
     }
   }
 }

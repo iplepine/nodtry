@@ -218,7 +218,9 @@ final autoLoginUseCaseProvider = Provider<AutoLoginUseCase>((ref) {
   final userRepository = ref.watch(userRepositoryProvider);
   final userLocalDataSource = ref.watch(userLocalDataSourceProvider);
   final cancelAllNotifications = ref.watch(cancelAllNotificationsUseCaseProvider);
-  return AutoLoginUseCase(authService, userRepository, userLocalDataSource, cancelAllNotifications);
+  final recordRepository = ref.watch(recordRepositoryProvider);
+  final settingAlarmUseCase = ref.watch(settingAlarmUseCaseProvider);
+  return AutoLoginUseCase(authService, userRepository, userLocalDataSource, cancelAllNotifications, recordRepository, settingAlarmUseCase);
 });
 
 final linkWithGoogleUseCaseProvider = Provider<LinkWithGoogleUseCase>((ref) {
