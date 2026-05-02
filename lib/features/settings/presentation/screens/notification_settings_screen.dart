@@ -6,7 +6,6 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../utils/time_formatter.dart';
-import '../../../plan/domain/usecases/setting_alarm_use_case.dart';
 
 class NotificationSettingsScreen extends ConsumerWidget {
   const NotificationSettingsScreen({super.key});
@@ -132,12 +131,17 @@ class NotificationSettingsScreen extends ConsumerWidget {
       ),
       value: isAlarmOn,
       onChanged: (bool value) async {
-        await _toggleAlarm(ref, plan, value);
+        await _toggleAlarm(context, ref, plan, value);
       },
     );
   }
 
-  Future<void> _toggleAlarm(WidgetRef ref, Plan plan, bool value) async {
+  Future<void> _toggleAlarm(
+    BuildContext context,
+    WidgetRef ref,
+    Plan plan,
+    bool value,
+  ) async {
     final item = plan.items.first;
     var currentTime = item.notificationTime ?? NotificationTime.none();
 
@@ -166,17 +170,28 @@ class NotificationSettingsScreen extends ConsumerWidget {
     newItems[0] = newItem;
 
     final updatedPlan = plan.copyWith(items: newItems);
+    final repository = ref.read(recordRepositoryProvider);
+    final settingAlarmUseCase = ref.read(settingAlarmUseCaseProvider);
 
     try {
-      // 1. Update Repository
-      await ref.read(recordRepositoryProvider).updatePlan(updatedPlan);
-
-      // 2. Schedule/Cancel Alarm Logic via UseCase
-      // The useCase 'execute' checks type. if 'none', it cancels.
-      await ref.read(settingAlarmUseCaseProvider).execute(updatedPlan);
+      await repository.updatePlan(updatedPlan);
+      await settingAlarmUseCase.execute(updatedPlan);
     } catch (e) {
+      try {
+        await repository.updatePlan(plan);
+        await settingAlarmUseCase.execute(plan);
+      } catch (rollbackError) {
+        debugPrint(
+          '[NotificationSettingsScreen] Failed to rollback alarm change: $rollbackError',
+        );
+      }
+
       debugPrint('Failed to toggle alarm: $e');
-      // Ideally show toast
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('알림 설정을 저장하지 못했어요. 이전 설정으로 되돌렸어요.')),
+        );
+      }
     }
   }
 }

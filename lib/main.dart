@@ -21,6 +21,10 @@ import 'package:intl/date_symbol_data_local.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   debugPrint("Handling a background message: ${message.messageId}");
+  await local_notifications.NotificationService().init();
+  await local_notifications.NotificationService().showRemoteMessageNotification(
+    message,
+  );
 }
 
 void main() async {
@@ -60,10 +64,9 @@ void main() async {
 
   // Initialize Notification Service (FCM)
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  container.read(notificationServiceProvider).initialize();
-
   // Initialize Local Notification Service (Plan Reminders)
   await local_notifications.NotificationService().init();
+  await container.read(notificationServiceProvider).initialize();
 
   runApp(
     UncontrolledProviderScope(

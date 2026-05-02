@@ -56,12 +56,16 @@ class Plan {
   final List<PlanItem> items;
   final DateTime createdAt;
   final List<DateTime> completedDates;
+  final List<DateTime> skippedDates;
   final List<DateTime> verifiedDates;
   final List<DateTime> rescuedDates; // 파트너가 실천 인정한 날짜
   final List<DateTime> restedDates; // 휴식권 사용한 날짜
   final String? lastCheerMessage; // 마지막 응원 메시지
   final String? lastCheerType; // 마지막 응원 타입 (fire, heart etc)
   final DateTime? lastCheerAt; // 마지막 응원 시간
+  final String? lastPokeMessage; // 마지막 똑똑 메시지
+  final DateTime? lastPokeAt; // 마지막 똑똑 시간
+  final DateTime? lastPokeAcknowledgedAt; // 마지막 똑똑 확인 시간
   final String? lastActionNote; // 마지막 실천 한마디 (실천자)
   final String? lastComment; // 마지막 피드백/응원 메시지 (매니저)
   final String? lastUpdatedBy; // 마지막으로 문서를 수정한 사람의 UID
@@ -77,12 +81,16 @@ class Plan {
     required this.items,
     required this.createdAt,
     this.completedDates = const [],
+    this.skippedDates = const [],
     this.verifiedDates = const [],
     this.rescuedDates = const [],
     this.restedDates = const [],
     this.lastCheerMessage,
     this.lastCheerType,
     this.lastCheerAt,
+    this.lastPokeMessage,
+    this.lastPokeAt,
+    this.lastPokeAcknowledgedAt,
     this.lastActionNote,
     this.lastComment,
     this.lastUpdatedBy,
@@ -99,12 +107,16 @@ class Plan {
     List<PlanItem>? items,
     DateTime? createdAt,
     List<DateTime>? completedDates,
+    List<DateTime>? skippedDates,
     List<DateTime>? verifiedDates,
     List<DateTime>? rescuedDates,
     List<DateTime>? restedDates,
     String? lastCheerMessage,
     String? lastCheerType,
     DateTime? lastCheerAt,
+    String? lastPokeMessage,
+    DateTime? lastPokeAt,
+    DateTime? lastPokeAcknowledgedAt,
     String? lastActionNote,
     String? lastComment,
     String? lastUpdatedBy,
@@ -120,12 +132,17 @@ class Plan {
       items: items ?? this.items,
       createdAt: createdAt ?? this.createdAt,
       completedDates: completedDates ?? this.completedDates,
+      skippedDates: skippedDates ?? this.skippedDates,
       verifiedDates: verifiedDates ?? this.verifiedDates,
       rescuedDates: rescuedDates ?? this.rescuedDates,
       restedDates: restedDates ?? this.restedDates,
       lastCheerMessage: lastCheerMessage ?? this.lastCheerMessage,
       lastCheerType: lastCheerType ?? this.lastCheerType,
       lastCheerAt: lastCheerAt ?? this.lastCheerAt,
+      lastPokeMessage: lastPokeMessage ?? this.lastPokeMessage,
+      lastPokeAt: lastPokeAt ?? this.lastPokeAt,
+      lastPokeAcknowledgedAt:
+          lastPokeAcknowledgedAt ?? this.lastPokeAcknowledgedAt,
       lastActionNote: lastActionNote ?? this.lastActionNote,
       lastComment: lastComment ?? this.lastComment,
       lastUpdatedBy: lastUpdatedBy ?? this.lastUpdatedBy,
@@ -145,12 +162,17 @@ class Plan {
       'completedDates': completedDates
           .map((d) => Timestamp.fromDate(d))
           .toList(),
+      'skippedDates': skippedDates.map((d) => Timestamp.fromDate(d)).toList(),
       'verifiedDates': verifiedDates.map((d) => Timestamp.fromDate(d)).toList(),
       'rescuedDates': rescuedDates.map((d) => Timestamp.fromDate(d)).toList(),
       'restedDates': restedDates.map((d) => Timestamp.fromDate(d)).toList(),
       if (lastCheerMessage != null) 'lastCheerMessage': lastCheerMessage,
       if (lastCheerType != null) 'lastCheerType': lastCheerType,
       if (lastCheerAt != null) 'lastCheerAt': Timestamp.fromDate(lastCheerAt!),
+      if (lastPokeMessage != null) 'lastPokeMessage': lastPokeMessage,
+      if (lastPokeAt != null) 'lastPokeAt': Timestamp.fromDate(lastPokeAt!),
+      if (lastPokeAcknowledgedAt != null)
+        'lastPokeAcknowledgedAt': Timestamp.fromDate(lastPokeAcknowledgedAt!),
       if (lastActionNote != null) 'lastActionNote': lastActionNote,
       if (lastComment != null) 'lastComment': lastComment,
       if (lastUpdatedBy != null) 'lastUpdatedBy': lastUpdatedBy,
@@ -159,6 +181,15 @@ class Plan {
   }
 
   factory Plan.fromMap(Map<String, dynamic> map, String id) {
+    final rawLastCheerMessage = map['lastCheerMessage'] as String?;
+    final rawLastCheerType = map['lastCheerType'] as String?;
+    final rawLastCheerAt = (map['lastCheerAt'] as Timestamp?)?.toDate();
+    final isLegacyPoke =
+        rawLastCheerType == 'poke' || rawLastCheerType == 'poke_acked';
+    final effectiveLastComment =
+        map['lastComment'] as String? ??
+        (isLegacyPoke ? null : rawLastCheerMessage);
+
     return Plan(
       id: id,
       userId: map['userId'] ?? '',
@@ -177,6 +208,11 @@ class Plan {
               ?.map((d) => (d as Timestamp).toDate())
               .toList() ??
           [],
+      skippedDates:
+          (map['skippedDates'] as List<dynamic>?)
+              ?.map((d) => (d as Timestamp).toDate())
+              .toList() ??
+          [],
       verifiedDates:
           (map['verifiedDates'] as List<dynamic>?)
               ?.map((d) => (d as Timestamp).toDate())
@@ -192,8 +228,20 @@ class Plan {
               ?.map((d) => (d as Timestamp).toDate())
               .toList() ??
           [],
+      lastCheerMessage: isLegacyPoke ? null : rawLastCheerMessage,
+      lastCheerType: isLegacyPoke ? null : rawLastCheerType,
+      lastCheerAt: isLegacyPoke ? null : rawLastCheerAt,
+      lastPokeMessage:
+          map['lastPokeMessage'] as String? ??
+          (isLegacyPoke ? rawLastCheerMessage : null),
+      lastPokeAt:
+          (map['lastPokeAt'] as Timestamp?)?.toDate() ??
+          (rawLastCheerType == 'poke' ? rawLastCheerAt : null),
+      lastPokeAcknowledgedAt:
+          (map['lastPokeAcknowledgedAt'] as Timestamp?)?.toDate() ??
+          (rawLastCheerType == 'poke_acked' ? rawLastCheerAt : null),
       lastActionNote: map['lastActionNote'],
-      lastComment: map['lastComment'] ?? map['lastCheerMessage'], // 하위 호환성
+      lastComment: effectiveLastComment,
       lastUpdatedBy: map['lastUpdatedBy'],
       promise: map['promise'] != null
           ? Promise.fromMap(map['promise'] as Map<String, dynamic>)
@@ -228,7 +276,9 @@ class Plan {
         continue;
       }
 
-      if (date.isBefore(DateTime(startDate.year, startDate.month, startDate.day))) {
+      if (date.isBefore(
+        DateTime(startDate.year, startDate.month, startDate.day),
+      )) {
         break;
       }
 

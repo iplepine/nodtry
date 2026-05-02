@@ -118,9 +118,18 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         completedDates: prevState.existingPlanId != null
             ? (prevState.originalPlan?.completedDates ?? [])
             : [], // Reset history
+        skippedDates: prevState.existingPlanId != null
+            ? (prevState.originalPlan?.skippedDates ?? [])
+            : [],
         verifiedDates: prevState.existingPlanId != null
             ? (prevState.originalPlan?.verifiedDates ?? [])
             : [], // Reset history
+        rescuedDates: prevState.existingPlanId != null
+            ? (prevState.originalPlan?.rescuedDates ?? [])
+            : [],
+        restedDates: prevState.existingPlanId != null
+            ? (prevState.originalPlan?.restedDates ?? [])
+            : [],
         lastCheerMessage: prevState.existingPlanId != null
             ? prevState.originalPlan?.lastCheerMessage
             : null,
@@ -129,6 +138,21 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
             : null,
         lastCheerAt: prevState.existingPlanId != null
             ? prevState.originalPlan?.lastCheerAt
+            : null,
+        lastPokeMessage: prevState.existingPlanId != null
+            ? prevState.originalPlan?.lastPokeMessage
+            : null,
+        lastPokeAt: prevState.existingPlanId != null
+            ? prevState.originalPlan?.lastPokeAt
+            : null,
+        lastPokeAcknowledgedAt: prevState.existingPlanId != null
+            ? prevState.originalPlan?.lastPokeAcknowledgedAt
+            : null,
+        lastActionNote: prevState.existingPlanId != null
+            ? prevState.originalPlan?.lastActionNote
+            : null,
+        lastComment: prevState.existingPlanId != null
+            ? prevState.originalPlan?.lastComment
             : null,
       );
 

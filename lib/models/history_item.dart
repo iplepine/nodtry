@@ -56,6 +56,10 @@ class HistoryItem {
   bool isMine(String myUid) => executorId == myUid;
 
   factory HistoryItem.fromMap(Map<String, dynamic> map, String id) {
+    final verifiedBy = map['verifiedBy'] as String?;
+    final rawComment =
+        map['partnerMessage'] as String? ?? map['comment'] as String?;
+
     return HistoryItem(
       id: id,
       planId: map['planId'] as String?,
@@ -63,11 +67,11 @@ class HistoryItem {
       title: map['title'] as String? ?? '알 수 없는 계획',
       status: _parseStatus(map['type'] as String),
       executorId: map['userId'] as String,
-      note: map['note'] as String? ?? map['comment'] as String?, // 하위 호환
-      comment:
-          map['partnerMessage'] as String? ??
-          map['comment'] as String?, // 매니저 피드백 하위 호환
-      isVerifiedByPartner: map['verifiedBy'] != null, // 확인자가 있으면 확인된 것
+      note:
+          map['note'] as String? ??
+          (verifiedBy == null ? map['comment'] as String? : null),
+      comment: rawComment,
+      isVerifiedByPartner: verifiedBy != null, // repository에서 사용자 기준으로 보정 가능
       isVerifiedByMe: false, // 별도 로직으로 판단 필요
       partnerName: null, // Join 필요 (repository에서 처리)
       partnerImageUrl: null,

@@ -126,30 +126,46 @@ class _NowTabState extends ConsumerState<NowTab>
     // 카드 상태에 따라 다른 인텐트 발송
     if (managerCard.state == HomeCardState.partnerPlanCreate ||
         managerCard.state == HomeCardState.partnerPlanModify) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('시작을 응원해요!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+      try {
+        await ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(ApprovePlanIntent(planId));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('시작을 응원해요!'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('승인에 실패했어요.')));
+        }
       }
-      await ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(ApprovePlanIntent(planId));
     } else if (managerCard.state == HomeCardState.partnerAction) {
       // 실천 확인
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('실천을 확인했어요!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+      try {
+        await ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(VerifyPartnerPlanIntent(planId));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('실천을 확인했어요!'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('확인 처리에 실패했어요.')));
+        }
       }
-      await ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(VerifyPartnerPlanIntent(planId));
     } else {
       // Fallback
       await ref
@@ -267,31 +283,37 @@ class _NowTabState extends ConsumerState<NowTab>
 
     // 1. Random Reaction Selection
     final reactions = [
-      ('fire', '열정적인 응원을 보냈어요! 🔥'),
-      ('heart', '사랑을 담아 응원했어요! ❤️'),
-      ('thumbs_up', '멋지다고 전했어요! 👍'),
-      ('muscle', '힘내라고 응원했어요! 💪'),
+      ('🔥', '열정적인 응원을 보냈어요! 🔥'),
+      ('❤️', '사랑을 담아 응원했어요! ❤️'),
+      ('👍', '멋지다고 전했어요! 👍'),
+      ('💪', '힘내라고 응원했어요! 💪'),
     ];
     final random = Random();
     final selected = reactions[random.nextInt(reactions.length)];
     final reactionType = selected.$1;
     final reactionMessage = selected.$2;
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(reactionMessage),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-
-    // 2. Dispatch Intent with Reaction Type
-    await ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(
-          CheerPartnerActionIntent(managerCard.plan!.id!, reactionType),
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(
+            CheerPartnerActionIntent(managerCard.plan!.id!, reactionType),
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(reactionMessage),
+            duration: const Duration(seconds: 2),
+          ),
         );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('응원 전송에 실패했어요.')));
+      }
+    }
   }
 
   void _handleCardTap(HomeCardModel model) {
@@ -315,24 +337,44 @@ class _NowTabState extends ConsumerState<NowTab>
         .dispatch(PassPlanIntent(managerCard.plan!.id!));
   }
 
-  void _handlePokeUser(HomeCardModel model) {
+  Future<void> _handlePokeUser(HomeCardModel model) async {
     if (model.partnerUid == null) return;
-    ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(PokeUserIntent(model.partnerUid!));
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('파트너를 똑똑! 찔렀습니다.')));
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(PokeUserIntent(model.partnerUid!));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('파트너를 똑똑! 찔렀습니다.')));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('똑똑 전송에 실패했어요.')));
+      }
+    }
   }
 
-  void _handlePokePartner(HomeCardModel model) {
+  Future<void> _handlePokePartner(HomeCardModel model) async {
     if (model.plan?.id == null) return;
-    ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(PokePartnerIntent(model.plan!.id!));
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('똑똑, 문을 두드렸어요!')));
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(PokePartnerIntent(model.plan!.id!));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('똑똑, 문을 두드렸어요!')));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('똑똑 전송에 실패했어요.')));
+      }
+    }
   }
 
   Future<void> _handleRest() async {
@@ -374,23 +416,35 @@ class _NowTabState extends ConsumerState<NowTab>
       if (mounted) {
         _animationController.forward();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().contains('이미 사용')
-              ? '이번 주 휴식권을 이미 사용했어요.'
-              : '오류가 발생했습니다.')),
+          SnackBar(
+            content: Text(
+              e.toString().contains('이미 사용')
+                  ? '이번 주 휴식권을 이미 사용했어요.'
+                  : '오류가 발생했습니다.',
+            ),
+          ),
         );
       }
     }
   }
 
-  void _handleRescue(HomeCardModel card) {
+  Future<void> _handleRescue(HomeCardModel card) async {
     if (card.plan?.id == null) return;
-    ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(RescuePlanIntent(card.plan!.id!));
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('실천을 인정해줬어요! 스트릭이 유지됩니다.')),
-      );
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(RescuePlanIntent(card.plan!.id!));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('실천을 인정해줬어요! 스트릭이 유지됩니다.')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('실천 인정에 실패했어요.')));
+      }
     }
   }
 
@@ -432,42 +486,63 @@ class _NowTabState extends ConsumerState<NowTab>
         .dispatch(AcknowledgePokeIntent(card.plan!.id!));
   }
 
-  void _handleRespondPromise(HomeCardModel card, bool accept) {
+  Future<void> _handleRespondPromise(HomeCardModel card, bool accept) async {
     if (card.plan?.id == null) return;
-    ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(RespondPromiseIntent(card.plan!.id!, accept: accept));
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(accept ? '약속을 수락했어요!' : '약속을 거절했어요.')),
-      );
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(RespondPromiseIntent(card.plan!.id!, accept: accept));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(accept ? '약속을 수락했어요!' : '약속을 거절했어요.')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('약속 응답에 실패했어요.')));
+      }
     }
   }
 
   Future<void> _handleProposePromise(HomeCardModel card) async {
     if (card.plan?.id == null) return;
 
-    final result = await showModalBottomSheet<({PromiseReward? reward, PromisePenalty? penalty})>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const _PromiseProposalSheet(),
-    );
+    final result =
+        await showModalBottomSheet<
+          ({PromiseReward? reward, PromisePenalty? penalty})
+        >(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const _PromiseProposalSheet(),
+        );
 
     if (result == null) return;
     if (result.reward == null && result.penalty == null) return;
 
-    ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(ProposePromiseIntent(
-          card.plan!.id!,
-          reward: result.reward,
-          penalty: result.penalty,
-        ));
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('약속을 제안했어요!')),
-      );
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(
+            ProposePromiseIntent(
+              card.plan!.id!,
+              reward: result.reward,
+              penalty: result.penalty,
+            ),
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('약속을 제안했어요!')));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('약속 제안에 실패했어요.')));
+      }
     }
   }
 
@@ -835,14 +910,14 @@ class _NowTabState extends ConsumerState<NowTab>
                                       ), // Added
                                       onAcceptPromise: () =>
                                           _handleRespondPromise(
-                                        primaryExecutorCard,
-                                        true,
-                                      ),
+                                            primaryExecutorCard,
+                                            true,
+                                          ),
                                       onRejectPromise: () =>
                                           _handleRespondPromise(
-                                        primaryExecutorCard,
-                                        false,
-                                      ),
+                                            primaryExecutorCard,
+                                            false,
+                                          ),
                                       onTap: () =>
                                           _handleCardTap(primaryExecutorCard),
                                       timeChipText: _getTimeChipText(
@@ -1028,14 +1103,23 @@ class _NowTabState extends ConsumerState<NowTab>
     );
 
     if (feedback != null) {
-      ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(
-            CheerPartnerActionIntent(
-              card.plan!.id!,
-              feedback.isEmpty ? 'check' : feedback,
-            ),
-          );
+      try {
+        await ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(
+              CheerPartnerActionIntent(
+                card.plan!.id!,
+                '👍',
+                message: feedback.isEmpty ? null : feedback,
+              ),
+            );
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('응원 전송에 실패했어요.')));
+        }
+      }
     }
   }
 
@@ -1141,17 +1225,27 @@ class _NowTabState extends ConsumerState<NowTab>
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
-                          ref
-                              .read(nowTabViewModelProvider.notifier)
-                              .dispatch(
-                                CheerPartnerActionIntent(
-                                  planId,
-                                  selectedReaction,
-                                  message: messageController.text.trim(),
-                                ),
+                        onPressed: () async {
+                          try {
+                            await ref
+                                .read(nowTabViewModelProvider.notifier)
+                                .dispatch(
+                                  CheerPartnerActionIntent(
+                                    planId,
+                                    selectedReaction,
+                                    message: messageController.text.trim(),
+                                  ),
+                                );
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          } catch (_) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('응원 전송에 실패했어요.')),
                               );
-                          Navigator.pop(context);
+                            }
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
@@ -1602,9 +1696,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.outline.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1651,9 +1743,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               '성공 ${promise.settledSuccessDays}일 / 실패 ${promise.settledFailDays ?? 0}일',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ],
@@ -1661,15 +1753,20 @@ class _PrimaryExecutorCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSettlementBadge(BuildContext context, Promise promise,
-      {required bool isReward}) {
+  Widget _buildSettlementBadge(
+    BuildContext context,
+    Promise promise, {
+    required bool isReward,
+  }) {
     final result = promise.settlementResult;
     final bool achieved;
     if (isReward) {
-      achieved = result == SettlementResult.rewardAchieved ||
+      achieved =
+          result == SettlementResult.rewardAchieved ||
           result == SettlementResult.bothMet;
     } else {
-      achieved = result == SettlementResult.penaltyTriggered ||
+      achieved =
+          result == SettlementResult.penaltyTriggered ||
           result == SettlementResult.bothMet;
     }
 
@@ -1677,8 +1774,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: achieved
-            ? (isReward ? AppColors.success : AppColors.error)
-                .withValues(alpha: 0.15)
+            ? (isReward ? AppColors.success : AppColors.error).withValues(
+                alpha: 0.15,
+              )
             : AppColors.disabled.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -1743,10 +1841,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 ),
                 child: const Text(
                   '수락',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -2628,8 +2723,11 @@ class _ManagerQuickCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.volunteer_activism,
-                            size: 16, color: AppColors.textSecondary),
+                        Icon(
+                          Icons.volunteer_activism,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '어제 실천 인정해주기',
@@ -2693,8 +2791,11 @@ class _ManagerQuickCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.handshake_outlined,
-                          size: 16, color: AppColors.textSecondary),
+                      Icon(
+                        Icons.handshake_outlined,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '약속 걸기',
@@ -2730,9 +2831,9 @@ class _ManagerQuickCard extends StatelessWidget {
           if (promise.reward != null) ...[
             Text(
               '🏆 ${promise.reward!.targetDays}일 성공 시: ${promise.reward!.description}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textPrimary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
             ),
           ],
           if (promise.reward != null && promise.penalty != null)
@@ -2740,9 +2841,9 @@ class _ManagerQuickCard extends StatelessWidget {
           if (promise.penalty != null) ...[
             Text(
               '⚡ ${promise.penalty!.targetDays}일 실패 시: ${promise.penalty!.description}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textPrimary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
             ),
           ],
           if (isSettled && promise.settledSuccessDays != null) ...[
@@ -2768,9 +2869,9 @@ class _ManagerQuickCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               '수락 대기 중...',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ],
@@ -2911,8 +3012,12 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
 
   bool get _isValid {
     if (!_enableReward && !_enablePenalty) return false;
-    if (_enableReward && _rewardDescController.text.trim().isEmpty) return false;
-    if (_enablePenalty && _penaltyDescController.text.trim().isEmpty) return false;
+    if (_enableReward && _rewardDescController.text.trim().isEmpty) {
+      return false;
+    }
+    if (_enablePenalty && _penaltyDescController.text.trim().isEmpty) {
+      return false;
+    }
     return true;
   }
 
@@ -2955,9 +3060,9 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
             const SizedBox(height: 4),
             Text(
               '상대가 수락하면 약속이 시작돼요',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 24),
 
@@ -3042,15 +3147,15 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
                         Navigator.pop(context, (
                           reward: _enableReward
                               ? PromiseReward(
-                                  description:
-                                      _rewardDescController.text.trim(),
+                                  description: _rewardDescController.text
+                                      .trim(),
                                   targetDays: _rewardDays,
                                 )
                               : null,
                           penalty: _enablePenalty
                               ? PromisePenalty(
-                                  description:
-                                      _penaltyDescController.text.trim(),
+                                  description: _penaltyDescController.text
+                                      .trim(),
                                   targetDays: _penaltyDays,
                                 )
                               : null,
@@ -3114,9 +3219,9 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
       children: [
         Text(
           '$label: ',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
         ),
         IconButton(
           onPressed: days > 1 ? () => onChanged(days - 1) : null,

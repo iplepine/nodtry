@@ -664,8 +664,39 @@ class MockRecordRepository implements RecordRepository {
 
   @override
   Future<List<String>> completeOverduePlans() async {
-    // Mock: No action needed for now
-    return [];
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final completedPlanIds = <String>[];
+
+    for (var i = 0; i < _mockPlans.length; i++) {
+      final plan = _mockPlans[i];
+      final isCompletableState =
+          plan.state == PlanState.active ||
+          plan.state == PlanState.pendingApproval;
+      final endDay = DateTime(
+        plan.endDate.year,
+        plan.endDate.month,
+        plan.endDate.day,
+      );
+
+      if (isCompletableState && endDay.isBefore(today)) {
+        _mockPlans[i] = plan.copyWith(state: PlanState.completed);
+        final planId = plan.id;
+        if (planId != null) {
+          completedPlanIds.add(planId);
+        }
+      }
+    }
+
+    if (completedPlanIds.isNotEmpty) {
+      _mockHomeCardModels.removeWhere(
+        (model) => completedPlanIds.contains(model.plan?.id),
+      );
+      _notifyPlansStream();
+      _notifyStream();
+    }
+
+    return completedPlanIds;
   }
 
   @override

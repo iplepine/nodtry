@@ -289,6 +289,9 @@ class HomeCardModel {
           runtimeType == other.runtimeType &&
           state == other.state &&
           plan?.id == other.plan?.id &&
+          partnerUid == other.partnerUid &&
+          partnerName == other.partnerName &&
+          partnerImageUrl == other.partnerImageUrl &&
           headerMessage == other.headerMessage &&
           previousPlan?.id == other.previousPlan?.id &&
           currentWeek == other.currentWeek &&
@@ -300,6 +303,9 @@ class HomeCardModel {
   int get hashCode =>
       state.hashCode ^
       (plan?.id).hashCode ^
+      partnerUid.hashCode ^
+      partnerName.hashCode ^
+      partnerImageUrl.hashCode ^
       headerMessage.hashCode ^
       (previousPlan?.id).hashCode ^
       currentWeek.hashCode ^

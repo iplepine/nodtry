@@ -45,11 +45,13 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
     return historyStream.asyncMap((allItems) async {
       // 2. Fetch both my plans and partner plans to reconcile history and summaries
       final allPlans = <Plan>[];
-      final myPlans = await recordRepo.getPlansByUserId(myUid);
+      final myPlans = await recordRepo.getAllPlansByUserIdStream(myUid).first;
       allPlans.addAll(myPlans);
 
       if (partnerUid != null) {
-        final partnerPlans = await recordRepo.getPlansByUserId(partnerUid);
+        final partnerPlans = await recordRepo
+            .getAllPlansByUserIdStream(partnerUid)
+            .first;
         allPlans.addAll(partnerPlans);
       }
 

@@ -1,11 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rxdart/rxdart.dart';
 import 'now_tab_state.dart';
 import 'now_tab_intent.dart';
 import '../../../models/plan_model.dart';
 import '../../../models/home_state.dart';
 import '../../../models/promise_model.dart';
-import '../../../models/connected_user.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../widgets/quiet_header.dart';
 import '../domain/usecases/feedback_to_partner_use_case.dart';
@@ -22,77 +21,74 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _completeOverduePlans() async {
     try {
-      final completedPlanIds =
-          await ref.read(recordRepositoryProvider).completeOverduePlans();
+      final completedPlanIds = await ref
+          .read(recordRepositoryProvider)
+          .completeOverduePlans();
+      if (!ref.mounted || completedPlanIds.isEmpty) return;
+
       // 완료된 계획들의 알림 제거
-      final notificationService =
-          ref.read(settingAlarmUseCaseProvider);
+      final notificationService = ref.read(settingAlarmUseCaseProvider);
       for (final planId in completedPlanIds) {
         await notificationService.cancelById(planId);
       }
     } catch (e) {
-      print('[NowTabViewModel] Failed to complete overdue plans: $e');
+      debugPrint('[NowTabViewModel] Failed to complete overdue plans: $e');
     }
   }
 
   /// 데이터 스트림 로드 및 State 변환
   Stream<NowTabState> _fetchStateStream() {
     final useCase = ref.watch(getNowCardsUseCaseProvider);
-    final partnerStream = Stream.fromFuture(
-      ref.watch(connectedProfilesProvider.future),
-    );
+    final profiles = ref.watch(connectedProfilesProvider).value ?? const [];
 
-    return CombineLatestStream.combine2(
-      useCase.executeStream(),
-      partnerStream,
-      (List<HomeCardModel> models, List<ConnectedUser> profiles) {
-        // 헤더 정보 계산
-        HeaderPeriodState periodState = HeaderPeriodState.noPlan;
+    return useCase.executeStream().map((models) {
+      // 헤더 정보 계산
+      HeaderPeriodState periodState = HeaderPeriodState.noPlan;
 
-        // 개별 카드들에 주차 정보 주입 및 헤더 상태 결정
-        final updatedModels = models.map((m) {
-          int? cWeek;
-          int? tWeeks;
+      // 개별 카드들에 주차 정보 주입 및 헤더 상태 결정
+      final updatedModels = models.map((m) {
+        int? cWeek;
+        int? tWeeks;
 
-          if (m.plan != null && m.plan!.state == PlanState.active) {
-            periodState =
-                HeaderPeriodState.inProgress; // 하나라도 활성이면 헤더는 inProgress
+        if (m.plan != null && m.plan!.state == PlanState.active) {
+          periodState =
+              HeaderPeriodState.inProgress; // 하나라도 활성이면 헤더는 inProgress
 
-            final plan = m.plan!;
-            final now = DateTime.now();
-            final diff = now.difference(plan.startDate).inDays;
-            cWeek = (diff / 7).floor() + 1;
+          final plan = m.plan!;
+          final now = DateTime.now();
+          final diff = now.difference(plan.startDate).inDays;
+          cWeek = (diff / 7).floor() + 1;
 
-            final totalDiff = plan.endDate.difference(plan.startDate).inDays;
-            tWeeks = (totalDiff / 7).ceil();
-            if (tWeeks == 0) tWeeks = 1;
-          }
+          final totalDiff = plan.endDate.difference(plan.startDate).inDays;
+          tWeeks = (totalDiff / 7).ceil();
+          if (tWeeks == 0) tWeeks = 1;
+        }
 
-          return HomeCardModel(
-            state: m.state,
-            plan: m.plan,
-            partnerName: m.partnerName,
-            partnerImageUrl: m.partnerImageUrl,
-            headerMessage: m.headerMessage,
-            previousPlan: m.previousPlan,
-            currentWeek: cWeek,
-            totalWeeks: tWeeks,
-            streakCount: m.streakCount,
-            canRescue: m.canRescue,
-          );
-        }).toList();
-
-        final baseState = NowTabState.fromModels(updatedModels);
-        final partner = profiles.isNotEmpty ? profiles.first.user : null;
-
-        return baseState.copyWith(
-          partnerProfile: partner,
-          headerPeriodState: periodState,
-          currentWeek: null, // 헤더에서는 더 이상 사용 안 함
-          totalWeeks: null,
+        return HomeCardModel(
+          state: m.state,
+          plan: m.plan,
+          partnerUid: m.partnerUid,
+          partnerName: m.partnerName,
+          partnerImageUrl: m.partnerImageUrl,
+          headerMessage: m.headerMessage,
+          previousPlan: m.previousPlan,
+          currentWeek: cWeek,
+          totalWeeks: tWeeks,
+          streakCount: m.streakCount,
+          canRescue: m.canRescue,
         );
-      },
-    );
+      }).toList();
+
+      final baseState = NowTabState.fromModels(updatedModels);
+      final partner = profiles.isNotEmpty ? profiles.first.user : null;
+
+      return baseState.copyWith(
+        partnerProfile: partner,
+        headerPeriodState: periodState,
+        currentWeek: null, // 헤더에서는 더 이상 사용 안 함
+        totalWeeks: null,
+      );
+    });
   }
 
   /// 사용자 의도(Intent) 처리
@@ -126,8 +122,12 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
       } else if (intent is PokeUserIntent) {
         await _pokeUser(intent.userId, intent.message);
       } else if (intent is PokePartnerIntent) {
-        await _pokePartner(intent.planId, intent.message,
-            intent.reward, intent.penalty);
+        await _pokePartner(
+          intent.planId,
+          intent.message,
+          intent.reward,
+          intent.penalty,
+        );
       } else if (intent is ProposePromiseIntent) {
         await _proposePromise(intent.planId, intent.reward, intent.penalty);
       } else if (intent is RespondPromiseIntent) {
@@ -146,8 +146,12 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     await ref.read(recordRepositoryProvider).pokeUser(userId, message: message);
   }
 
-  Future<void> _pokePartner(String planId, [String? message,
-      PromiseReward? reward, PromisePenalty? penalty]) async {
+  Future<void> _pokePartner(
+    String planId, [
+    String? message,
+    PromiseReward? reward,
+    PromisePenalty? penalty,
+  ]) async {
     await ref
         .read(recordRepositoryProvider)
         .pokePartner(planId, message: message);
@@ -158,8 +162,11 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     }
   }
 
-  Future<void> _proposePromise(String planId, PromiseReward? reward,
-      PromisePenalty? penalty) async {
+  Future<void> _proposePromise(
+    String planId,
+    PromiseReward? reward,
+    PromisePenalty? penalty,
+  ) async {
     await ref
         .read(recordRepositoryProvider)
         .proposePromise(planId, reward: reward, penalty: penalty);
@@ -177,21 +184,21 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         .reportCompletion(planId, note: message);
 
     // 알람 업데이트: 오늘 알람 건너뛰기
-    _updateAlarmToSkipToday(planId);
+    await _updateAlarmToSkipToday(planId);
   }
 
   Future<void> _checkPartnerAction(String planId) async {
     // Legacy support or specific use case
     await ref.read(recordRepositoryProvider).reportCompletion(planId);
-    _updateAlarmToSkipToday(planId);
+    await _updateAlarmToSkipToday(planId);
   }
 
   Future<void> _skipPlan(String planId) async {
     await ref.read(recordRepositoryProvider).reportSkip(planId);
-    _updateAlarmToSkipToday(planId);
+    await _updateAlarmToSkipToday(planId);
   }
 
-  void _updateAlarmToSkipToday(String planId) {
+  Future<void> _updateAlarmToSkipToday(String planId) async {
     try {
       final currentAllCards = state.asData?.value.allCards ?? [];
       Plan? targetPlan;
@@ -203,13 +210,13 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
       }
 
       if (targetPlan != null) {
-        ref
+        await ref
             .read(settingAlarmUseCaseProvider)
             .execute(targetPlan, skipToday: true);
       }
     } catch (e) {
       // 알람 업데이트 실패가 실천 보고 자체를 방해하지 않도록 swallow
-      print('[NowTabViewModel] Failed to update alarm to skip today: $e');
+      debugPrint('[NowTabViewModel] Failed to update alarm to skip today: $e');
     }
   }
 
@@ -251,7 +258,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _restPlan(String planId) async {
     await ref.read(recordRepositoryProvider).reportRest(planId);
-    _updateAlarmToSkipToday(planId);
+    await _updateAlarmToSkipToday(planId);
   }
 
   /// 디버그 전용: Fake State 주입

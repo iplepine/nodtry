@@ -1,12 +1,38 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 
-class NotificationService {
+const String _snoozeActionId = 'snooze_10m';
+const String _snoozeDarwinCategoryId = 'snooze_reminder';
+const int _planNotificationIdModulo = 200000000;
+
+abstract class PlanReminderScheduler {
+  Future<void> requestPermissions();
+
+  Future<void> schedulePlanReminder({
+    required int planId,
+    required String title,
+    required int hour,
+    required int minute,
+    required List<int> days,
+    bool skipToday,
+  });
+
+  Future<void> cancelPlanReminders(int planId);
+}
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse response) {
+  NotificationService().handleNotificationResponse(response);
+}
+
+class NotificationService implements PlanReminderScheduler {
   static final NotificationService _instance = NotificationService._internal();
 
   factory NotificationService() {
@@ -17,8 +43,13 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  bool _isInitialized = false;
 
   Future<void> init() async {
+    if (_isInitialized) {
+      return;
+    }
+
     tz.initializeTimeZones(); // Ensure timezones are loaded first
     final timezoneInfo = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(timezoneInfo.identifier));
@@ -34,6 +65,14 @@ class NotificationService {
           requestSoundPermission: false,
           requestBadgePermission: false,
           requestAlertPermission: false,
+          notificationCategories: <DarwinNotificationCategory>[
+            DarwinNotificationCategory(
+              _snoozeDarwinCategoryId,
+              actions: <DarwinNotificationAction>[
+                DarwinNotificationAction.plain(_snoozeActionId, '10분 후 다시 묻기'),
+              ],
+            ),
+          ],
         );
 
     final InitializationSettings initializationSettings =
@@ -42,9 +81,15 @@ class NotificationService {
           iOS: initializationSettingsDarwin,
         );
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: handleNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+    );
+    _isInitialized = true;
   }
 
+  @override
   Future<void> requestPermissions() async {
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -79,6 +124,7 @@ class NotificationService {
   /// [id] should be unique per plan-day combination or plan ID base
   /// [days] 1=Mon, 7=Sun (compatible with DateTime.weekday)
   /// [skipToday] if true, and the next instance is today, it will schedule for next week instead
+  @override
   Future<void> schedulePlanReminder({
     required int planId, // Using plan.hashCode or similar as base
     required String title,
@@ -87,11 +133,9 @@ class NotificationService {
     required List<int> days,
     bool skipToday = false,
   }) async {
-    // Cancel existing notifications for this plan (simple strategy: cancel all range)
-    // Use modulo to prevent integer overflow (32-bit limit for Notification ID)
-    // Max Int32 is ~2.14 billion.
-    // 200,000,000 * 10 = 2,000,000,000 (Safe)
-    // 200 million seconds is approx 6.3 years.
+    final normalizedPlanId = _normalizePlanNotificationBaseId(planId);
+
+    await cancelPlanReminders(normalizedPlanId);
 
     for (int day in days) {
       final tz.TZDateTime scheduledDate = _nextInstanceOfDayAndTime(
@@ -105,7 +149,7 @@ class NotificationService {
       );
 
       await _scheduleWeekly(
-        id: (planId % 200000000) * 10 + day,
+        id: _buildPlanDayNotificationId(normalizedPlanId, day),
         title: title,
         body: "오늘 약속, 같이 이어갈까요?", // Warm Accountability Copy
         hour: hour,
@@ -125,25 +169,23 @@ class NotificationService {
     required int day, // 1=Mon, 7=Sun
     required tz.TZDateTime scheduledDate,
   }) async {
+    final notificationDetails = _buildNotificationDetails(
+      channelId: 'plan_reminders',
+      channelName: 'Plan Reminders',
+      channelDescription: 'Notifications for your daily plans',
+    );
+
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
       body,
       scheduledDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'plan_reminders', // channel Id
-          'Plan Reminders', // channel Name
-          channelDescription: 'Notifications for your daily plans',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
+      notificationDetails,
       androidScheduleMode: await canScheduleExactAlarms()
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      payload: _buildPayload(originalId: id, title: title, body: body),
     );
   }
 
@@ -178,12 +220,15 @@ class NotificationService {
     return scheduledDate;
   }
 
+  @override
   Future<void> cancelPlanReminders(int planId) async {
-    // Naively cancel a range, or store IDs.
-    // For MVP, assuming max 7 days
+    final normalizedPlanId = _normalizePlanNotificationBaseId(planId);
+
     for (int i = 1; i <= 7; i++) {
+      final notificationId = _buildPlanDayNotificationId(normalizedPlanId, i);
+      await flutterLocalNotificationsPlugin.cancel(notificationId);
       await flutterLocalNotificationsPlugin.cancel(
-        (planId % 200000000) * 10 + i,
+        _buildSnoozedNotificationId(notificationId),
       );
     }
   }
@@ -203,15 +248,37 @@ class NotificationService {
       id,
       title,
       body,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'debug_notifications',
-          'Debug Notifications',
-          channelDescription: 'Notifications for testing purposes',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
+      _buildNotificationDetails(
+        channelId: 'debug_notifications',
+        channelName: 'Debug Notifications',
+        channelDescription: 'Notifications for testing purposes',
+      ),
+      payload: _buildPayload(originalId: id, title: title, body: body),
+    );
+  }
+
+  Future<void> showRemoteMessageNotification(RemoteMessage message) async {
+    await _ensureInitializedForActionHandling();
+
+    final title =
+        message.data['title'] ?? message.notification?.title ?? '새 알림';
+    final body = message.data['body'] ?? message.notification?.body ?? '';
+    final notificationId = _notificationIdForRemoteMessage(message);
+
+    await flutterLocalNotificationsPlugin.show(
+      notificationId,
+      title,
+      body,
+      _buildNotificationDetails(
+        channelId: 'general_notifications',
+        channelName: 'General Notifications',
+        channelDescription:
+            'Notifications for cheer messages and partner actions',
+      ),
+      payload: _buildPayload(
+        originalId: notificationId,
+        title: title,
+        body: body,
       ),
     );
   }
@@ -223,6 +290,11 @@ class NotificationService {
     required String body,
     required DateTime scheduledDate,
   }) async {
+    final notificationDetails = _buildNotificationDetails(
+      channelId: 'scheduled_notifications',
+      channelName: 'Scheduled Notifications',
+      channelDescription: 'Specific time notifications',
+    );
     final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
 
     debugPrint(
@@ -234,19 +306,11 @@ class NotificationService {
       title,
       body,
       tzScheduledDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'scheduled_notifications',
-          'Scheduled Notifications',
-          channelDescription: 'Specific time notifications',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
+      notificationDetails,
       androidScheduleMode: await canScheduleExactAlarms()
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: _buildPayload(originalId: id, title: title, body: body),
     );
   }
 
@@ -269,5 +333,115 @@ class NotificationService {
   /// Cancel all notifications
   Future<void> cancelAllNotifications() async {
     await flutterLocalNotificationsPlugin.cancelAll();
+  }
+
+  Future<void> handleNotificationResponse(NotificationResponse response) async {
+    if (response.actionId != _snoozeActionId) {
+      return;
+    }
+
+    await _ensureInitializedForActionHandling();
+
+    final payload = _parsePayload(response.payload);
+    final title = payload['title'] as String?;
+    final body = payload['body'] as String?;
+    final originalId = payload['originalId'] as int?;
+    if (title == null || body == null || originalId == null) {
+      debugPrint(
+        '[Notification] Missing snooze payload. actionId=${response.actionId}',
+      );
+      return;
+    }
+
+    final snoozedId = _buildSnoozedNotificationId(originalId);
+    final scheduledDate = DateTime.now().add(const Duration(minutes: 10));
+
+    debugPrint(
+      '[Notification] Snoozing notification $originalId until $scheduledDate with new ID $snoozedId',
+    );
+
+    await scheduleNotificationAt(
+      id: snoozedId,
+      title: title,
+      body: body,
+      scheduledDate: scheduledDate,
+    );
+  }
+
+  Future<void> _ensureInitializedForActionHandling() async {
+    if (!_isInitialized) {
+      await init();
+    }
+  }
+
+  NotificationDetails _buildNotificationDetails({
+    required String channelId,
+    required String channelName,
+    required String channelDescription,
+  }) {
+    return NotificationDetails(
+      android: AndroidNotificationDetails(
+        channelId,
+        channelName,
+        channelDescription: channelDescription,
+        importance: Importance.max,
+        priority: Priority.high,
+        actions: const <AndroidNotificationAction>[
+          AndroidNotificationAction(_snoozeActionId, '10분 후 다시 묻기'),
+        ],
+      ),
+      iOS: const DarwinNotificationDetails(
+        categoryIdentifier: _snoozeDarwinCategoryId,
+      ),
+    );
+  }
+
+  String _buildPayload({
+    required int originalId,
+    required String title,
+    required String body,
+  }) {
+    return jsonEncode(<String, Object>{
+      'originalId': originalId,
+      'title': title,
+      'body': body,
+    });
+  }
+
+  Map<String, Object?> _parsePayload(String? payload) {
+    if (payload == null || payload.isEmpty) {
+      return const <String, Object?>{};
+    }
+
+    try {
+      final decoded = jsonDecode(payload);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+    } catch (error) {
+      debugPrint('[Notification] Failed to parse payload: $error');
+    }
+
+    return const <String, Object?>{};
+  }
+
+  int _buildSnoozedNotificationId(int originalId) {
+    final normalizedId = originalId.abs() % 1000000000;
+    return 1000000000 + normalizedId;
+  }
+
+  int _normalizePlanNotificationBaseId(int planId) {
+    return planId.abs() % _planNotificationIdModulo;
+  }
+
+  int _buildPlanDayNotificationId(int normalizedPlanId, int day) {
+    return normalizedPlanId * 10 + day;
+  }
+
+  int _notificationIdForRemoteMessage(RemoteMessage message) {
+    final source =
+        message.messageId ??
+        '${message.data['type'] ?? ''}:${message.data['planId'] ?? ''}:${message.sentTime?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}';
+    return source.hashCode & 0x7fffffff;
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nod_try/features/history/presentation/history_viewmodel.dart';
@@ -39,6 +41,12 @@ class MockRecordRepository extends Fake implements RecordRepository {
 
   @override
   Stream<List<Plan>> getPlansByUserIdStream(String userId) {
+    getPlansCallCount++;
+    return Stream.value(mockPlans);
+  }
+
+  @override
+  Stream<List<Plan>> getAllPlansByUserIdStream(String userId) {
     getPlansCallCount++;
     return Stream.value(mockPlans);
   }
@@ -118,10 +126,22 @@ void main() {
     container.dispose();
   });
 
+  Future<HistoryState> readHistoryState() async {
+    final completer = Completer<HistoryState>();
+    final subscription = container.listen(historyViewModelProvider, (_, next) {
+      if (next.hasValue && !completer.isCompleted) {
+        completer.complete(next.value!);
+      } else if (next.hasError && !completer.isCompleted) {
+        completer.completeError(next.error!, next.stackTrace);
+      }
+    }, fireImmediately: true);
+    addTearDown(subscription.close);
+    return completer.future.timeout(const Duration(seconds: 5));
+  }
+
   test('Initial state should load active items', () async {
     // Act
-    container.listen(historyViewModelProvider, (_, __) {});
-    final result = await container.read(historyViewModelProvider.future);
+    final result = await readHistoryState();
 
     // Assert
     // Default filter is 'all', so it should load both items
@@ -132,8 +152,7 @@ void main() {
 
   test('reconcile should call repository and refresh', () async {
     // Arrange
-    container.listen(historyViewModelProvider, (_, __) {});
-    await container.read(historyViewModelProvider.future);
+    await readHistoryState();
     mockRecordRepository.getHistoryItemsCallCount = 0;
 
     // Act
@@ -142,7 +161,7 @@ void main() {
         .dispatch(HistoryIntent.reconcile('1', HistoryStatus.actuallyDone));
 
     // Wait for async rebuild - invalidateSelf triggers build() in next microtask
-    await container.read(historyViewModelProvider.future);
+    await container.pump();
 
     // Assert
     expect(mockRecordRepository.reconcileCallCount, 1);

@@ -62,8 +62,8 @@ class AutoLoginUseCase {
         // 4. 로컬 캐시 갱신
         await _userLocalDataSource.saveUser(userModel);
 
-        // 5. 알림 복구: 기존 로컬 알림 전부 취소 후, 서버 설정 기반 재등록
-        await _restoreNotifications(user.uid);
+        // 5. 서버 상태 정리 후 알림 복구
+        await _syncPlansAndNotifications(user.uid);
       }
 
       return userModel;
@@ -78,28 +78,55 @@ class AutoLoginUseCase {
     }
   }
 
+  /// 앱 시작 시 서버 플랜 상태를 먼저 정리하고, 정리된 서버값 기준으로 로컬 알림을 재구성
+  Future<void> _syncPlansAndNotifications(String userId) async {
+    try {
+      final completedPlanIds = await _recordRepository
+          .completeOverduePlans()
+          .timeout(const Duration(seconds: 10));
+
+      for (final planId in completedPlanIds) {
+        await _settingAlarmUseCase.cancelById(planId);
+      }
+
+      debugPrint(
+        '[AutoLoginUseCase] Startup plan sync complete. ${completedPlanIds.length} plans completed.',
+      );
+    } catch (e) {
+      debugPrint('[AutoLoginUseCase] Failed to sync overdue plans: $e');
+      // 서버 정리에 실패해도 알림 복구는 시도한다. 오프라인/타임아웃 상황에서 앱 진입을 막지 않기 위함.
+    }
+
+    await _restoreNotifications(userId);
+  }
+
   /// 서버에 저장된 알림 설정을 기반으로 로컬 알림을 복구
   Future<void> _restoreNotifications(String userId) async {
     try {
-      // 1. 기존 로컬 알림 전부 취소 (중복 방지)
+      final plans = await _recordRepository.getPlansByUserId(userId);
+      final restorablePlans = plans.where((plan) {
+        final item = plan.items.firstOrNull;
+        final notificationTime = item?.notificationTime;
+        return item != null &&
+            notificationTime != null &&
+            notificationTime.type != 'none';
+      }).toList();
+
+      // 1. 복구 가능한 플랜을 확인한 뒤에만 기존 로컬 알림을 정리한다.
       await _cancelAllNotificationsUseCase.execute();
 
-      // 2. Firestore에서 플랜 목록 조회
-      final plans = await _recordRepository.getPlansByUserId(userId);
-
-      // 3. 알림이 ON인 플랜만 재등록
-      for (final plan in plans) {
-        final item = plan.items.firstOrNull;
-        if (item == null) continue;
-
-        final notificationTime = item.notificationTime;
-        if (notificationTime != null && notificationTime.type != 'none') {
-          await _settingAlarmUseCase.execute(plan);
-          debugPrint('[AutoLoginUseCase] Restored notification for plan: ${item.title}');
-        }
+      // 2. 저장된 알림 설정이 살아 있는 플랜만 재등록한다.
+      for (final plan in restorablePlans) {
+        final item = plan.items.first;
+        await _settingAlarmUseCase.execute(plan);
+        debugPrint(
+          '[AutoLoginUseCase] Restored notification for plan: ${item.title}',
+        );
       }
 
-      debugPrint('[AutoLoginUseCase] Notification restore complete. ${plans.length} plans checked.');
+      debugPrint(
+        '[AutoLoginUseCase] Notification restore complete. ${restorablePlans.length} plans restored from ${plans.length} plans.',
+      );
     } catch (e) {
       debugPrint('[AutoLoginUseCase] Failed to restore notifications: $e');
       // 알림 복구 실패해도 로그인 자체는 차단하지 않음

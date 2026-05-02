@@ -54,7 +54,8 @@ class RealRecordRepository implements RecordRepository {
             (p) =>
                 p.state == PlanState.active ||
                 p.state == PlanState.pendingApproval ||
-                p.state == PlanState.rejected,
+                p.state == PlanState.rejected ||
+                p.promise?.status == PromiseStatus.settled,
           )
           .toList();
 
@@ -85,6 +86,10 @@ class RealRecordRepository implements RecordRepository {
     // --- Part 1: Partner Actions (Manager Role) -> Yours ---
     final managerPlans = plans.where((p) => p.managerId == myUid);
     for (var plan in managerPlans) {
+      if (plan.state == PlanState.rejected) {
+        continue;
+      }
+
       final hasCompletedToday = plan.completedDates.any(
         (d) =>
             d.year == today.year &&
@@ -197,6 +202,20 @@ class RealRecordRepository implements RecordRepository {
             d.month == today.month &&
             d.day == today.day,
       );
+      final isSkippedToday = plan.skippedDates.any(
+        (d) =>
+            d.year == today.year &&
+            d.month == today.month &&
+            d.day == today.day,
+      );
+      final isRestedToday = plan.restedDates.any(
+        (d) =>
+            d.year == today.year &&
+            d.month == today.month &&
+            d.day == today.day,
+      );
+      final isHandledToday =
+          isCompletedToday || isSkippedToday || isRestedToday;
 
       final todayItems = plan.items
           .where((item) => item.days.contains(todayWeekday))
@@ -206,31 +225,20 @@ class RealRecordRepository implements RecordRepository {
         hasAnyPlanToday = true;
       }
 
-      // Check for Poke (Priority handling will determine if it shows)
-      if (plan.lastCheerType == 'poke') {
-        final cheerDate = plan
-            .lastCheerAt; // Timestamp is converted in model? No, Plan model has DateTime
-        if (cheerDate != null &&
-            cheerDate.year == today.year &&
-            cheerDate.month == today.month &&
-            cheerDate.day == today.day) {
-          mineCards.add(
-            HomeCardModel(
-              state: HomeCardState.poked,
-              plan: plan,
-              headerMessage: plan.lastCheerMessage ?? '똑똑... 혹시 잊으셨나요?',
-            ),
-          );
-          // If poked, we might want to continue or allow other cards?
-          // Since it's added to mineCards, priority logic will sort it.
-          // We don't 'continue' here because we might also want to generate NowAction to fall back if Poke is low priority?
-          // But valid states for one plan usually result in one card.
-          // If we add multiple cards for one plan (Poked + NowAction), selectPrimaryExecutorCard needs to pick one.
-          // It picks from *all* mineCards. So adding both is fine.
-        }
+      final hasActivePoke =
+          _isSameDay(plan.lastPokeAt, today) &&
+          !_isSameDay(plan.lastPokeAcknowledgedAt, today);
+      if (!isHandledToday && hasActivePoke) {
+        mineCards.add(
+          HomeCardModel(
+            state: HomeCardState.poked,
+            plan: plan,
+            headerMessage: plan.lastPokeMessage ?? '똑똑... 혹시 잊으셨나요?',
+          ),
+        );
       }
 
-      if (isCompletedToday) {
+      if (isHandledToday) {
         continue;
       }
 
@@ -329,19 +337,25 @@ class RealRecordRepository implements RecordRepository {
               if (hasTodayItem) {
                 // 파트너가 어제도 못 했는지 확인 (실천 인정 가능 여부)
                 final yesterday = today.subtract(const Duration(days: 1));
-                final missedYesterday = !plan.completedDates.any(
-                  (d) => d.year == yesterday.year &&
-                      d.month == yesterday.month &&
-                      d.day == yesterday.day,
-                ) && !plan.rescuedDates.any(
-                  (d) => d.year == yesterday.year &&
-                      d.month == yesterday.month &&
-                      d.day == yesterday.day,
-                ) && !plan.restedDates.any(
-                  (d) => d.year == yesterday.year &&
-                      d.month == yesterday.month &&
-                      d.day == yesterday.day,
-                );
+                final missedYesterday =
+                    !plan.completedDates.any(
+                      (d) =>
+                          d.year == yesterday.year &&
+                          d.month == yesterday.month &&
+                          d.day == yesterday.day,
+                    ) &&
+                    !plan.rescuedDates.any(
+                      (d) =>
+                          d.year == yesterday.year &&
+                          d.month == yesterday.month &&
+                          d.day == yesterday.day,
+                    ) &&
+                    !plan.restedDates.any(
+                      (d) =>
+                          d.year == yesterday.year &&
+                          d.month == yesterday.month &&
+                          d.day == yesterday.day,
+                    );
                 // 어제가 스케줄 날인 경우에만 rescue 가능
                 final yesterdayScheduled = plan.items.any(
                   (item) => item.days.contains(yesterday.weekday),
@@ -371,13 +385,17 @@ class RealRecordRepository implements RecordRepository {
       } else if (hasAnyPlanToday) {
         // 오늘 계획은 있었는데 모두 완료함 -> TodayComplete
         // 스트릭 계산하여 주입
-        final activePlan = myPlans.where((p) => p.state == PlanState.active).firstOrNull;
+        final activePlan = myPlans
+            .where((p) => p.state == PlanState.active)
+            .firstOrNull;
         final streak = activePlan?.currentStreak ?? 0;
-        mineCards.add(HomeCardModel(
-          state: HomeCardState.todayComplete,
-          plan: activePlan,
-          streakCount: streak >= 2 ? streak : null,
-        ));
+        mineCards.add(
+          HomeCardModel(
+            state: HomeCardState.todayComplete,
+            plan: activePlan,
+            streakCount: streak >= 2 ? streak : null,
+          ),
+        );
       } else {
         // 오늘 해당되는 요일의 계획이 없음 -> TodayEmpty
         mineCards.add(const HomeCardModel(state: HomeCardState.todayEmpty));
@@ -406,7 +424,8 @@ class RealRecordRepository implements RecordRepository {
           .where(
             (p) =>
                 p.state == PlanState.active ||
-                p.state == PlanState.pendingApproval,
+                p.state == PlanState.pendingApproval ||
+                p.promise?.status == PromiseStatus.settled,
           )
           .toList();
 
@@ -488,7 +507,45 @@ class RealRecordRepository implements RecordRepository {
       items: [item],
       createdAt: original.createdAt,
       completedDates: original.completedDates,
+      skippedDates: original.skippedDates,
+      verifiedDates: original.verifiedDates,
+      rescuedDates: original.rescuedDates,
+      restedDates: original.restedDates,
+      lastCheerMessage: original.lastCheerMessage,
+      lastCheerType: original.lastCheerType,
+      lastCheerAt: original.lastCheerAt,
+      lastPokeMessage: original.lastPokeMessage,
+      lastPokeAt: original.lastPokeAt,
+      lastPokeAcknowledgedAt: original.lastPokeAcknowledgedAt,
+      lastActionNote: original.lastActionNote,
+      lastComment: original.lastComment,
+      lastUpdatedBy: original.lastUpdatedBy,
+      promise: original.promise,
     );
+  }
+
+  HistoryItem _mapHistoryItem(
+    Map<String, dynamic> data,
+    String id,
+    String myUid,
+  ) {
+    final item = HistoryItem.fromMap(data, id);
+    final verifiedBy = data['verifiedBy'] as String?;
+    final isMine = item.executorId == myUid;
+
+    return item.copyWith(
+      isVerifiedByPartner:
+          isMine && verifiedBy != null && verifiedBy.isNotEmpty,
+      isVerifiedByMe: !isMine && verifiedBy == myUid,
+    );
+  }
+
+  bool _isSameDay(DateTime? value, DateTime target) {
+    if (value == null) return false;
+
+    return value.year == target.year &&
+        value.month == target.month &&
+        value.day == target.day;
   }
 
   @override
@@ -504,7 +561,7 @@ class RealRecordRepository implements RecordRepository {
           .get();
 
       return snapshot.docs
-          .map((doc) => HistoryItem.fromMap(doc.data(), doc.id))
+          .map((doc) => _mapHistoryItem(doc.data(), doc.id, user.uid))
           .toList();
     } catch (e) {
       debugPrint('[RealRecordRepository] Error fetching history items: $e');
@@ -528,8 +585,11 @@ class RealRecordRepository implements RecordRepository {
     return query.orderBy('date', descending: true).snapshots().map((snapshot) {
       return snapshot.docs
           .map(
-            (doc) =>
-                HistoryItem.fromMap(doc.data() as Map<String, dynamic>, doc.id),
+            (doc) => _mapHistoryItem(
+              doc.data() as Map<String, dynamic>,
+              doc.id,
+              user.uid,
+            ),
           )
           .toList();
     });
@@ -543,8 +603,11 @@ class RealRecordRepository implements RecordRepository {
         .orderBy('date', descending: true)
         .snapshots()
         .map((snapshot) {
+          final currentUser = FirebaseAuth.instance.currentUser;
+          final myUid = currentUser?.uid ?? '';
+
           return snapshot.docs
-              .map((doc) => HistoryItem.fromMap(doc.data(), doc.id))
+              .map((doc) => _mapHistoryItem(doc.data(), doc.id, myUid))
               .toList();
         });
   }
@@ -612,12 +675,11 @@ class RealRecordRepository implements RecordRepository {
 
     try {
       final now = DateTime.now();
-      // Use existing cheer structure but with special type
       await _firestore.collection('plans').doc(planId).update({
-        'lastCheerType': 'poke',
-        'lastCheerAt': Timestamp.fromDate(now),
+        'lastPokeAt': Timestamp.fromDate(now),
+        'lastPokeMessage': message ?? '똑똑... 혹시 잊으셨나요?',
+        'lastPokeAcknowledgedAt': FieldValue.delete(),
         'lastUpdatedBy': user.uid,
-        if (message != null) 'lastCheerMessage': message,
       });
       debugPrint('[RealRecordRepository] Poked partner for plan $planId');
     } catch (e) {
@@ -629,9 +691,8 @@ class RealRecordRepository implements RecordRepository {
   @override
   Future<void> acknowledgePoke(String planId) async {
     try {
-      // Clear the poke status
       await _firestore.collection('plans').doc(planId).update({
-        'lastCheerType': 'poke_acked',
+        'lastPokeAcknowledgedAt': FieldValue.serverTimestamp(),
       });
       debugPrint('[RealRecordRepository] Acknowledged poke for plan $planId');
     } catch (e) {
@@ -893,7 +954,7 @@ class RealRecordRepository implements RecordRepository {
         'reconciledAt': FieldValue.serverTimestamp(),
       });
 
-      // 3. Update Plan's completedDates
+      // 3. Update Plan's handled-day fields
       final planDoc = await _firestore.collection('plans').doc(planId).get();
       if (planDoc.exists) {
         final planData = planDoc.data();
@@ -901,45 +962,57 @@ class RealRecordRepository implements RecordRepository {
             (planData?['completedDates'] as List<dynamic>? ?? [])
                 .map((t) => (t as Timestamp).toDate())
                 .toList();
+        final skippedDates = (planData?['skippedDates'] as List<dynamic>? ?? [])
+            .map((t) => (t as Timestamp).toDate())
+            .toList();
+        final rescuedDates = (planData?['rescuedDates'] as List<dynamic>? ?? [])
+            .map((t) => (t as Timestamp).toDate())
+            .toList();
+        final restedDates = (planData?['restedDates'] as List<dynamic>? ?? [])
+            .map((t) => (t as Timestamp).toDate())
+            .toList();
 
-        final isDoneStatus =
-            (status == HistoryStatus.done ||
-            status == HistoryStatus.actuallyDone);
-
-        bool changed = false;
-        if (isDoneStatus) {
-          // Add if not present for that day
-          final hasDate = completedDates.any(
-            (d) =>
-                d.year == historyDate.year &&
-                d.month == historyDate.month &&
-                d.day == historyDate.day,
-          );
-          if (!hasDate) {
-            completedDates.add(date); // Use history item's date timestamp
-            changed = true;
-          }
-        } else {
-          // Remove if present for that day
-          final initialLen = completedDates.length;
-          completedDates.removeWhere(
-            (d) =>
-                d.year == historyDate.year &&
-                d.month == historyDate.month &&
-                d.day == historyDate.day,
-          );
-          if (completedDates.length != initialLen) {
-            changed = true;
-          }
+        bool matchesTargetDate(DateTime value) {
+          return value.year == historyDate.year &&
+              value.month == historyDate.month &&
+              value.day == historyDate.day;
         }
 
-        if (changed) {
-          await _firestore.collection('plans').doc(planId).update({
-            'completedDates': completedDates
-                .map((d) => Timestamp.fromDate(d))
-                .toList(),
-          });
+        completedDates.removeWhere(matchesTargetDate);
+        skippedDates.removeWhere(matchesTargetDate);
+        rescuedDates.removeWhere(matchesTargetDate);
+        restedDates.removeWhere(matchesTargetDate);
+
+        switch (status) {
+          case HistoryStatus.done:
+          case HistoryStatus.actuallyDone:
+            completedDates.add(date);
+            break;
+          case HistoryStatus.rested:
+            restedDates.add(date);
+            break;
+          case HistoryStatus.skipped:
+            skippedDates.add(date);
+            break;
+          case HistoryStatus.rescued:
+            rescuedDates.add(date);
+            break;
+          case HistoryStatus.verified:
+            break;
         }
+
+        await _firestore.collection('plans').doc(planId).update({
+          'completedDates': completedDates
+              .map((d) => Timestamp.fromDate(d))
+              .toList(),
+          'skippedDates': skippedDates
+              .map((d) => Timestamp.fromDate(d))
+              .toList(),
+          'rescuedDates': rescuedDates
+              .map((d) => Timestamp.fromDate(d))
+              .toList(),
+          'restedDates': restedDates.map((d) => Timestamp.fromDate(d)).toList(),
+        });
       }
     } catch (e) {
       debugPrint('[RealRecordRepository] Error reconciling history item: $e');
@@ -961,9 +1034,9 @@ class RealRecordRepository implements RecordRepository {
       final planTitle =
           (planData?['items'] as List?)?.firstOrNull?['title'] ?? '알 수 없는 계획';
 
-      // 1. Update Plan (Add to completedDates)
+      // 1. Update Plan
       await _firestore.collection('plans').doc(planId).update({
-        'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+        'skippedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
       });
 
       // 2. Add to actions
@@ -997,7 +1070,7 @@ class RealRecordRepository implements RecordRepository {
       final toUserId =
           planDoc.data()?['userId'] as String? ?? ''; // Should valid
 
-      final data = {
+      final data = <String, dynamic>{
         'fromUserId': user.uid,
         'toUserId': toUserId,
         'planId': planId,
@@ -1017,9 +1090,15 @@ class RealRecordRepository implements RecordRepository {
       final planRef = _firestore.collection('plans').doc(planId);
 
       batch.update(planRef, {
-        if (message != null) 'lastCheerMessage': message,
+        if (message != null && message.isNotEmpty) 'lastCheerMessage': message,
+        if (message != null && message.isNotEmpty) 'lastComment': message,
+        if (message == null || message.isEmpty)
+          'lastCheerMessage': FieldValue.delete(),
+        if (message == null || message.isEmpty)
+          'lastComment': FieldValue.delete(),
         'lastCheerType': reactionType,
         'lastCheerAt': Timestamp.fromDate(now),
+        'lastUpdatedBy': user.uid,
       });
 
       // 3. Update Action (HistoryItem) to verify and add message
@@ -1179,6 +1258,7 @@ class RealRecordRepository implements RecordRepository {
       final updateData = <String, dynamic>{
         'state': PlanState.rejected.toMap(),
         'lastUpdatedBy': user?.uid,
+        'promise': FieldValue.delete(),
       };
       if (reason != null && reason.isNotEmpty) {
         updateData['lastComment'] = reason;
@@ -1201,10 +1281,16 @@ class RealRecordRepository implements RecordRepository {
     final today = DateTime(now.year, now.month, now.day);
 
     try {
-      // 내가 실행자이거나 매니저인 활성 계획 중 종료일이 지난 것들을 찾습니다.
+      // 내가 실행자이거나 매니저인 진행/승인 대기 계획 중 종료일이 지난 것들을 찾습니다.
       final snapshot = await _firestore
           .collection('plans')
-          .where('state', isEqualTo: 'active')
+          .where(
+            'state',
+            whereIn: [
+              PlanState.active.toMap(),
+              PlanState.pendingApproval.toMap(),
+            ],
+          )
           .get();
 
       final batch = _firestore.batch();
@@ -1238,7 +1324,9 @@ class RealRecordRepository implements RecordRepository {
 
       if (count > 0) {
         await batch.commit();
-        debugPrint('[RealRecordRepository] Completed $count overdue plans');
+        debugPrint(
+          '[RealRecordRepository] Completed $count overdue active/pending plans',
+        );
         for (final planId in completedPlanIds) {
           await settlePromise(planId);
         }
@@ -1370,13 +1458,23 @@ class RealRecordRepository implements RecordRepository {
       final plan = Plan.fromMap(data, doc.id);
       final now = DateTime.now();
       final cutoffDate = plan.endDate.isBefore(now) ? plan.endDate : now;
-      final cutoff = DateTime(cutoffDate.year, cutoffDate.month, cutoffDate.day);
+      final cutoff = DateTime(
+        cutoffDate.year,
+        cutoffDate.month,
+        cutoffDate.day,
+      );
 
       // 예정일 계산
       final scheduledDates = <DateTime>[];
-      for (var d = DateTime(plan.startDate.year, plan.startDate.month, plan.startDate.day);
-          !d.isAfter(cutoff);
-          d = d.add(const Duration(days: 1))) {
+      for (
+        var d = DateTime(
+          plan.startDate.year,
+          plan.startDate.month,
+          plan.startDate.day,
+        );
+        !d.isAfter(cutoff);
+        d = d.add(const Duration(days: 1))
+      ) {
         final weekday = d.weekday;
         if (plan.items.any((item) => item.days.contains(weekday))) {
           scheduledDates.add(d);
@@ -1386,9 +1484,14 @@ class RealRecordRepository implements RecordRepository {
       // 성공일 계산
       final successDays = plan.completedDates.where((cd) {
         final c = DateTime(cd.year, cd.month, cd.day);
-        return !c.isAfter(cutoff) && !c.isBefore(
-          DateTime(plan.startDate.year, plan.startDate.month, plan.startDate.day),
-        );
+        return !c.isAfter(cutoff) &&
+            !c.isBefore(
+              DateTime(
+                plan.startDate.year,
+                plan.startDate.month,
+                plan.startDate.day,
+              ),
+            );
       }).length;
 
       var failDays = scheduledDates.length - successDays;
@@ -1399,7 +1502,9 @@ class RealRecordRepository implements RecordRepository {
           ? PromiseReward.fromMap(promiseData['reward'] as Map<String, dynamic>)
           : null;
       final penalty = promiseData['penalty'] != null
-          ? PromisePenalty.fromMap(promiseData['penalty'] as Map<String, dynamic>)
+          ? PromisePenalty.fromMap(
+              promiseData['penalty'] as Map<String, dynamic>,
+            )
           : null;
 
       final rewardMet = reward != null && successDays >= reward.targetDays;
@@ -1437,7 +1542,8 @@ class RealRecordRepository implements RecordRepository {
     if (user == null) return;
 
     try {
-      final targetDate = date ?? DateTime.now().subtract(const Duration(days: 1));
+      final targetDate =
+          date ?? DateTime.now().subtract(const Duration(days: 1));
 
       // Plan 정보 가져오기
       final planDoc = await _firestore.collection('plans').doc(planId).get();
@@ -1499,10 +1605,10 @@ class RealRecordRepository implements RecordRepository {
         throw Exception('이번 주 휴식권을 이미 사용했습니다.');
       }
 
-      // 1. restedDates + completedDates에 추가 (카드 상태 전환 위해)
+      // 1. restedDates에 추가
       await _firestore.collection('plans').doc(planId).update({
         'restedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
-        'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+        'lastUpdatedBy': user.uid,
       });
 
       // 2. actions에 기록 추가

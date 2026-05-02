@@ -23,8 +23,8 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
   late final ValueNotifier<bool> _showAppBarTitleNotifier;
   bool _targetTitleState = false;
   bool _isPoking = false; // Local loading state for Poke action
-  DateTime? _optimisticLastCheerAt; // Optimistic UI state
-  String? _optimisticLastCheerType; // Optimistic UI state
+  DateTime? _optimisticLastPokeAt; // Optimistic UI state
+  DateTime? _optimisticLastPokeAcknowledgedAt; // Optimistic UI state
 
   @override
   void initState() {
@@ -189,7 +189,8 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                             )
                           : null,
                       onTap: isMine
-                          ? () => _showEditNotificationDialog(context, ref)
+                          ? () =>
+                                _showEditNotificationDialog(context, ref, plan)
                           : null,
                     ),
                     const SizedBox(height: 32),
@@ -370,30 +371,32 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
   Widget _buildActionButtons(BuildContext context, WidgetRef ref, Plan plan) {
     // Check for Poke availability
     // Prioritize Optimistic State if available
-    final effectiveLastCheerAt = _optimisticLastCheerAt ?? plan.lastCheerAt;
-    final effectiveLastCheerType =
-        _optimisticLastCheerType ?? plan.lastCheerType;
+    final effectiveLastPokeAt = _optimisticLastPokeAt ?? plan.lastPokeAt;
+    final effectiveLastPokeAcknowledgedAt =
+        _optimisticLastPokeAcknowledgedAt ?? plan.lastPokeAcknowledgedAt;
 
     final now = DateTime.now();
 
     // Check if poked today
-    bool isPokedToday = false;
-    if (effectiveLastCheerAt != null &&
-        effectiveLastCheerType != null &&
-        effectiveLastCheerType.startsWith('poke')) {
-      final localCheerDate = effectiveLastCheerAt.toLocal();
-      if (localCheerDate.year == now.year &&
-          localCheerDate.month == now.month &&
-          localCheerDate.day == now.day) {
-        isPokedToday = true;
-      }
+    bool isSameDay(DateTime? value) {
+      if (value == null) return false;
+      final local = value.toLocal();
+      return local.year == now.year &&
+          local.month == now.month &&
+          local.day == now.day;
     }
+
+    final isPokedToday =
+        isSameDay(effectiveLastPokeAt) &&
+        !isSameDay(effectiveLastPokeAcknowledgedAt);
 
     // Debug Log
     debugPrint('[PlanDetail] Plan ID: ${plan.id}');
-    debugPrint('[PlanDetail] lastCheerType: $effectiveLastCheerType');
     debugPrint(
-      '[PlanDetail] lastCheerAt: $effectiveLastCheerAt (Local: ${effectiveLastCheerAt?.toLocal()})',
+      '[PlanDetail] lastPokeAt: $effectiveLastPokeAt (Local: ${effectiveLastPokeAt?.toLocal()})',
+    );
+    debugPrint(
+      '[PlanDetail] lastPokeAcknowledgedAt: $effectiveLastPokeAcknowledgedAt (Local: ${effectiveLastPokeAcknowledgedAt?.toLocal()})',
     );
     debugPrint('[PlanDetail] Now: $now');
     debugPrint(
@@ -412,8 +415,8 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                   if (context.mounted) {
                     // Optimistic Update: Force local state to "Poked Today"
                     setState(() {
-                      _optimisticLastCheerAt = DateTime.now();
-                      _optimisticLastCheerType = 'poke';
+                      _optimisticLastPokeAt = DateTime.now();
+                      _optimisticLastPokeAcknowledgedAt = null;
                       _isPoking = false;
                     });
 
@@ -519,9 +522,13 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
     return TimeFormatter.formatExactTime(dt);
   }
 
-  void _showEditNotificationDialog(BuildContext context, WidgetRef ref) {
+  void _showEditNotificationDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Plan sourcePlan,
+  ) {
     final notificationTime =
-        widget.plan.items.first.notificationTime ?? NotificationTime.none();
+        sourcePlan.items.first.notificationTime ?? NotificationTime.none();
     // We need state for the editor.
     NotificationTime tempTime = notificationTime;
 
@@ -578,12 +585,12 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                       child: ElevatedButton(
                         onPressed: () async {
                           Navigator.pop(context);
-                          if (widget.plan.id == null) return;
+                          if (sourcePlan.id == null) return;
 
                           try {
                             // 1. Update Plan
                             final updatedItems = List<PlanItem>.from(
-                              widget.plan.items,
+                              sourcePlan.items,
                             );
                             final firstItem = updatedItems[0];
                             // PlanItem is immutable, copy manually or assume single item update
@@ -598,18 +605,18 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                             );
                             updatedItems[0] = updatedItem;
 
-                            final updatedPlan = widget.plan.copyWith(
+                            final updatedPlan = sourcePlan.copyWith(
                               items: updatedItems,
                             );
+                            final repository = ref.read(
+                              recordRepositoryProvider,
+                            );
+                            final settingAlarmUseCase = ref.read(
+                              settingAlarmUseCaseProvider,
+                            );
 
-                            await ref
-                                .read(recordRepositoryProvider)
-                                .updatePlan(updatedPlan);
-
-                            // 2. Reschedule Alarm
-                            await ref
-                                .read(settingAlarmUseCaseProvider)
-                                .execute(updatedPlan);
+                            await repository.updatePlan(updatedPlan);
+                            await settingAlarmUseCase.execute(updatedPlan);
 
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -617,9 +624,26 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                               );
                             }
                           } catch (e) {
+                            try {
+                              await ref
+                                  .read(recordRepositoryProvider)
+                                  .updatePlan(sourcePlan);
+                              await ref
+                                  .read(settingAlarmUseCaseProvider)
+                                  .execute(sourcePlan);
+                            } catch (rollbackError) {
+                              debugPrint(
+                                '[PlanDetail] Failed to rollback notification change: $rollbackError',
+                              );
+                            }
+
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('저장 실패: $e')),
+                                const SnackBar(
+                                  content: Text(
+                                    '알림 설정을 저장하지 못했어요. 이전 설정으로 되돌렸어요.',
+                                  ),
+                                ),
                               );
                             }
                           }
@@ -706,9 +730,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('같은 약속으로 다시 시작할까요?'),
-        content: const Text(
-          '이전 약속 내용을 그대로 가져와요.\n시작 전에 수정할 수 있어요.',
-        ),
+        content: const Text('이전 약속 내용을 그대로 가져와요.\n시작 전에 수정할 수 있어요.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -824,7 +846,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildReportItem('총 기간', '$totalDays일'),
-              _buildReportItem('완료 횟수', '${completedCount}회'),
+              _buildReportItem('완료 횟수', '$completedCount회'),
               _buildReportItem(
                 '달성률',
                 '${(completedCount / totalDays * 100).toStringAsFixed(0)}%',

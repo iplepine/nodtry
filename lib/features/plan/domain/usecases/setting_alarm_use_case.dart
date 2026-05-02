@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
+
 import '../../../../models/plan_model.dart';
 import '../../../../services/notification_service.dart';
 
 class SettingAlarmUseCase {
-  final NotificationService _notificationService;
+  static const int _planNotificationIdModulo = 200000000;
+  final PlanReminderScheduler _notificationService;
 
   SettingAlarmUseCase(this._notificationService);
 
@@ -10,24 +13,21 @@ class SettingAlarmUseCase {
     final item = plan.items.firstOrNull;
     if (item == null) return;
 
-    if (item.days.isEmpty && item.notificationTime?.type == 'none') {
-      // Cancel if any
-      await _notificationService.cancelPlanReminders(
-        (plan.id ?? plan.createdAt.millisecondsSinceEpoch.toString()).hashCode,
-      );
+    final planNotificationId = _notificationBaseIdForPlan(plan);
+    await _notificationService.cancelPlanReminders(planNotificationId);
+
+    if (!_shouldSchedule(item)) {
       return;
     }
 
-    // Request permissions
     await _notificationService.requestPermissions();
+    final notificationTime = item.notificationTime!;
 
-    // Schedule
     await _notificationService.schedulePlanReminder(
-      planId: (plan.id ?? plan.createdAt.millisecondsSinceEpoch.toString())
-          .hashCode,
+      planId: planNotificationId,
       title: item.title,
-      hour: item.notificationTime?.hour ?? 20,
-      minute: item.notificationTime?.minute ?? 0,
+      hour: notificationTime.hour,
+      minute: notificationTime.minute,
       days: item.days,
       skipToday: skipToday,
     );
@@ -35,11 +35,34 @@ class SettingAlarmUseCase {
 
   Future<void> cancel(Plan plan) async {
     await _notificationService.cancelPlanReminders(
-      (plan.id ?? plan.createdAt.millisecondsSinceEpoch.toString()).hashCode,
+      _notificationBaseIdForPlan(plan),
     );
   }
 
   Future<void> cancelById(String planId) async {
-    await _notificationService.cancelPlanReminders(planId.hashCode);
+    await _notificationService.cancelPlanReminders(
+      notificationBaseIdFromSeed(planId),
+    );
+  }
+
+  @visibleForTesting
+  static int notificationBaseIdFromSeed(String seed) {
+    var hash = 0;
+    for (final codeUnit in seed.codeUnits) {
+      hash = ((hash * 31) + codeUnit) % _planNotificationIdModulo;
+    }
+    return hash;
+  }
+
+  int _notificationBaseIdForPlan(Plan plan) {
+    final seed = plan.id ?? plan.createdAt.millisecondsSinceEpoch.toString();
+    return notificationBaseIdFromSeed(seed);
+  }
+
+  bool _shouldSchedule(PlanItem item) {
+    final notificationTime = item.notificationTime;
+    return item.days.isNotEmpty &&
+        notificationTime != null &&
+        notificationTime.type != 'none';
   }
 }

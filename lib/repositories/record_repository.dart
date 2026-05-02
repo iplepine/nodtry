@@ -92,7 +92,7 @@ abstract class RecordRepository {
   /// 특정 계획의 히스토리 아이템 목록을 스트림으로 가져옵니다.
   Stream<List<HistoryItem>> getHistoryItemsByPlanIdStream(String planId);
 
-  /// 기간이 만료된 활성 계획들을 찾아 '완료(completed)' 상태로 자동 전환합니다.
+  /// 기간이 만료된 진행/승인 대기 계획들을 찾아 '완료(completed)' 상태로 자동 전환합니다.
   Future<List<String>> completeOverduePlans();
 
   /// 특정 유저를 찌릅니다. (계획과 상관없이)

@@ -3,6 +3,36 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
+function buildMessagePayload(
+    token: string,
+    title: string,
+    body: string,
+    data: {[key: string]: string},
+): admin.messaging.Message {
+    return {
+        token,
+        data: {
+            ...data,
+            title,
+            body,
+        },
+        android: {
+            priority: "high",
+        },
+        apns: {
+            headers: {
+                "apns-priority": "5",
+                "apns-push-type": "background",
+            },
+            payload: {
+                aps: {
+                    contentAvailable: true,
+                },
+            },
+        },
+    };
+}
+
 export const onCheerCreated = functions.firestore
     .document("cheers/{cheerId}")
     .onCreate(async (snapshot: functions.firestore.QueryDocumentSnapshot, context: functions.EventContext) => {
@@ -39,31 +69,19 @@ export const onCheerCreated = functions.firestore
             }
 
             // 3. Construct Message
-            const messagePayload: admin.messaging.Message = {
-                notification: {
-                    title: "응원이 도착했어요! 🎉",
-                    body: message ? `${senderName}: ${message}` : `${senderName}님이 응원을 보냈어요!`,
-                },
-                data: {
+            const title = "응원이 도착했어요! 🎉";
+            const body = message ? `${senderName}: ${message}` : `${senderName}님이 응원을 보냈어요!`;
+            const messagePayload = buildMessagePayload(
+                fcmToken,
+                title,
+                body,
+                {
                     type: "cheer",
                     planId: cheer.planId || "",
+                    senderName,
+                    message: message || "",
                 },
-                token: fcmToken,
-                android: {
-                    notification: {
-                        clickAction: "FLUTTER_NOTIFICATION_CLICK",
-                        sound: "default",
-                    },
-                },
-                apns: {
-                    payload: {
-                        aps: {
-                            sound: "default",
-                            badge: 1,
-                        },
-                    },
-                },
-            };
+            );
 
             // 4. Send Message
             await admin.messaging().send(messagePayload);
@@ -107,31 +125,19 @@ export const onPlanCreated = functions.firestore
             }
 
             // 3. 메시지 페이로드 구성
-            const messagePayload: admin.messaging.Message = {
-                notification: {
-                    title: "새로운 약속 제안이 있어요 💌",
-                    body: `${senderName}님이 새로운 약속을 함께하자고 제안했어요.`,
-                },
-                data: {
+            const title = "새로운 약속 제안이 있어요 💌";
+            const body = `${senderName}님이 새로운 약속을 함께하자고 제안했어요.`;
+            const messagePayload = buildMessagePayload(
+                fcmToken,
+                title,
+                body,
+                {
                     type: "plan_proposed",
                     planId: context.params.planId,
+                    senderName,
+                    userId,
                 },
-                token: fcmToken,
-                android: {
-                    notification: {
-                        clickAction: "FLUTTER_NOTIFICATION_CLICK",
-                        sound: "default",
-                    },
-                },
-                apns: {
-                    payload: {
-                        aps: {
-                            sound: "default",
-                            badge: 1,
-                        },
-                    },
-                },
-            };
+            );
 
             // 4. 메시지 전송
             await admin.messaging().send(messagePayload);
@@ -180,29 +186,18 @@ export const onActionCompleted = functions.firestore
                 body = `${senderName}님이 오늘 약속은 쉬어가기로 했어요.`;
             }
 
-            const messagePayload: admin.messaging.Message = {
-                notification: { title, body },
-                data: {
+            const messagePayload = buildMessagePayload(
+                fcmToken,
+                title,
+                body,
+                {
                     type: "action_completed",
                     actionType: type || "",
                     planId: planId,
+                    senderName,
+                    userId,
                 },
-                token: fcmToken,
-                android: {
-                    notification: {
-                        clickAction: "FLUTTER_NOTIFICATION_CLICK",
-                        sound: "default",
-                    },
-                },
-                apns: {
-                    payload: {
-                        aps: {
-                            sound: "default",
-                            badge: 1,
-                        },
-                    },
-                },
-            };
+            );
 
             await admin.messaging().send(messagePayload);
             console.log(`Successfully sent action notification (${type}) to ${managerId}`);
@@ -286,28 +281,18 @@ export const onPlanUpdated = functions.firestore
                 }
             }
 
-            const messagePayload: admin.messaging.Message = {
-                notification: { title, body },
-                data: {
+            const messagePayload = buildMessagePayload(
+                fcmToken,
+                title,
+                body,
+                {
                     type: type,
                     planId: context.params.planId,
+                    senderName,
+                    lastComment: after.lastComment || "",
+                    lastCheerMessage: after.lastCheerMessage || "",
                 },
-                token: fcmToken,
-                android: {
-                    notification: {
-                        clickAction: "FLUTTER_NOTIFICATION_CLICK",
-                        sound: "default",
-                    },
-                },
-                apns: {
-                    payload: {
-                        aps: {
-                            sound: "default",
-                            badge: 1,
-                        },
-                    },
-                },
-            };
+            );
 
             await admin.messaging().send(messagePayload);
             console.log(`Successfully sent ${type} notification to ${toUserId}`);

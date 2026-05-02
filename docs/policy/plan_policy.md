@@ -52,8 +52,8 @@
 ## 플랜 완료 정책
 
 ### 자동 완료
-- 종료일(`endDate`)이 지난 active 플랜은 `completeOverduePlans()`에 의해 자동 완료
-- 상태: `active` → `completed`
+- 종료일(`endDate`)이 지난 `active`/`pending_approval` 플랜은 `completeOverduePlans()`에 의해 자동 완료
+- 상태: `active` → `completed`, `pending_approval` → `completed`
 
 ### 수동 중단
 - 사용자가 직접 플랜 조기 중단 가능
