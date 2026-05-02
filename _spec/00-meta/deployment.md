@@ -9,10 +9,11 @@
 - `pubspec.yaml`이 버전의 기준이다.
 
 ## 3. 배포 자동화 (Android First)
-현재 Android 빌드 및 배포가 자동화되어 있다. Fastlane을 사용하여 Google Play Console의 Internal Test Track으로 업로드한다.
+현재 Android 빌드 및 배포가 자동화되어 있다. Fastlane을 사용하여 Google Play Console의 Production Track으로 바로 업로드한다.
 
 ### Android Fastlane
-- **Track:** `internal`
+- **기본 Track:** `production`
+- **기존 보조 Track:** `internal`
 - **Artifact:** `.aab`
 - **Config:** `android/fastlane/`
 
@@ -22,7 +23,7 @@
 1
 ## 5. 실행 방법 (Workflow)
 
-VS Code Task **"Build & Deploy AAB"**를 실행하거나 다음 명령어를 사용한다.
+VS Code Task **"Build & Deploy AAB (Production)"**를 실행하거나 다음 명령어를 사용한다.
 
 ```bash
 ./scripts/build_aab_deploy.sh [options]
@@ -31,5 +32,9 @@ VS Code Task **"Build & Deploy AAB"**를 실행하거나 다음 명령어를 사
 ### 프로세스
 1. **버전 범프:** `pubspec.yaml` 업데이트
 2. **Android 빌드:** `flutter build appbundle`
-3. **Android 배포:** `fastlane internal`
+3. **Android 배포:** `fastlane deploy` (`production` lane 호출)
 4. **Git:** 커밋 및 태그 생성
+
+## 6. iOS 배포
+- iOS App Store 릴리즈 절차는 별도 런북으로 관리한다.
+- 문서: [workflow/ios-release-runbook.md](./workflow/ios-release-runbook.md)

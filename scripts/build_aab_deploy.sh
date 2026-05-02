@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # build_aab_deploy.sh
-# Builds Android App Bundle and deploys to Google Play Console (Internal Track)
+# Builds Android App Bundle and deploys to Google Play Console (Production)
 
 PUBSPEC="pubspec.yaml"
 ANDROID_DIR="android"
@@ -81,9 +81,9 @@ fi
 echo "✅ Build successful"
 
 # 3. Deploy (Fastlane)
-echo -e "${YELLOW}🚀 Uploading to Google Play Console (Internal Track)...${NC}"
+echo -e "${YELLOW}🚀 Uploading to Google Play Console (Production)...${NC}"
 cd $ANDROID_DIR
-fastlane internal
+fastlane deploy
 EXIT_CODE=$?
 cd ..
 

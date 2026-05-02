@@ -1,21 +1,83 @@
+require "shellwords"
+
 default_platform(:ios)
 
 platform :ios do
+  ipa_filename = "nodtry.ipa"
+  copyright_text = "#{Time.now.year} Devho"
+  pubspec_path = File.expand_path("../../pubspec.yaml", __dir__)
+  pubspec_version = File.read(pubspec_path).match(/^version:\s*([^\s]+)/)[1]
+  app_version, build_number = pubspec_version.split("+")
+  app_store_version = ENV["APP_STORE_VERSION"] || app_version
+  release_notes_script = File.expand_path("../../scripts/generate_ios_release_notes.sh", __dir__)
+
+  private_lane :prepare_release_notes do
+    sh("bash #{Shellwords.escape(release_notes_script)}")
+  end
+
   desc "Push a new beta build to TestFlight"
   lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: "XXU6VU63TR",
+      issuer_id: "6b17b540-3b79-4d8c-beaf-ca1c83e566f1",
+      key_filepath: "./fastlane/AuthKey_XXU6VU63TR.p8"
+    )
     upload_to_testflight(
-      ipa: '../build/ios/ipa/nod_try.ipa',
+      api_key: api_key,
+      ipa: "../build/ios/ipa/#{ipa_filename}",
       skip_waiting_for_build_processing: true
     )
   end
 
   desc "Push a new release build to the App Store"
   lane :release do
+    api_key = app_store_connect_api_key(
+      key_id: "XXU6VU63TR",
+      issuer_id: "6b17b540-3b79-4d8c-beaf-ca1c83e566f1",
+      key_filepath: "./fastlane/AuthKey_XXU6VU63TR.p8"
+    )
+    prepare_release_notes
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store",
+      output_directory: "../build/ios/ipa",
+      output_name: ipa_filename,
+      clean: true,
+      xcargs: "FLUTTER_BUILD_NAME=#{app_version} FLUTTER_BUILD_NUMBER=#{build_number}"
+    )
     upload_to_app_store(
-      ipa: '../build/ios/ipa/nod_try.ipa',
+      api_key: api_key,
+      ipa: "../build/ios/ipa/#{ipa_filename}",
+      app_version: app_store_version,
       force: true,
       skip_screenshots: true,
-      skip_metadata: true
+      skip_metadata: false,
+      copyright: copyright_text,
+      precheck_include_in_app_purchases: false
+    )
+  end
+
+  desc "Update App Store metadata only"
+  lane :metadata_only do
+    api_key = app_store_connect_api_key(
+      key_id: "XXU6VU63TR",
+      issuer_id: "6b17b540-3b79-4d8c-beaf-ca1c83e566f1",
+      key_filepath: "./fastlane/AuthKey_XXU6VU63TR.p8"
+    )
+    prepare_release_notes
+    upload_to_app_store(
+      api_key: api_key,
+      app_version: app_store_version,
+      force: true,
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      skip_metadata: false,
+      skip_app_version_update: true,
+      submit_for_review: true,
+      automatic_release: true,
+      copyright: copyright_text,
+      precheck_include_in_app_purchases: false
     )
   end
 end

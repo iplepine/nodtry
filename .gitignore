@@ -1,5 +1,8 @@
 # Miscellaneous
 *.class
+*.p8
+ios/fastlane/api_key.json
+ios/fastlane/report.xml
 *.log
 *.pyc
 *.swp

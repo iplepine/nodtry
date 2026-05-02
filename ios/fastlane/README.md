@@ -13,31 +13,31 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 # Available Actions
 
-## Android
+## iOS
 
-### android internal
-
-```sh
-[bundle exec] fastlane android internal
-```
-
-Submit a new build to the Internal Test Track
-
-### android production
+### ios beta
 
 ```sh
-[bundle exec] fastlane android production
+[bundle exec] fastlane ios beta
 ```
 
-Submit a new build to Production
+Push a new beta build to TestFlight
 
-### android deploy
+### ios release
 
 ```sh
-[bundle exec] fastlane android deploy
+[bundle exec] fastlane ios release
 ```
 
-Deploy the release build using the default production track
+Push a new release build to the App Store
+
+### ios metadata_only
+
+```sh
+[bundle exec] fastlane ios metadata_only
+```
+
+Update App Store metadata only
 
 ----
 

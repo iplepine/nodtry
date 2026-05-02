@@ -24,4 +24,9 @@ platform :android do
       skip_upload_images: true
     )
   end
+
+  desc "Deploy the release build using the default production track"
+  lane :deploy do
+    production
+  end
 end

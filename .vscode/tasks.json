@@ -15,7 +15,7 @@
             }
         },
         {
-            "label": "Build & Deploy AAB",
+            "label": "Build & Deploy AAB (Production)",
             "type": "shell",
             "command": "./scripts/build_aab_deploy.sh",
             "presentation": {

@@ -21,3 +21,5 @@
 - [아키텍쳐 스펙](./00-meta/architecture-spec.md)
 - [페르소나 정의](./60-ux/personas.md)
 - [TODO 리스트](./00-meta/workflow/TODO.md)
+- [우선순위 백로그](./00-meta/workflow/priority-backlog.md)
+- [iOS 릴리즈 런북](./00-meta/workflow/ios-release-runbook.md)
