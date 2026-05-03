@@ -12,6 +12,7 @@ class PlanActionStep extends StatelessWidget {
   final List<StudyPlanTemplate> templates;
   final String? selectedTemplateId;
   final ValueChanged<StudyPlanTemplate> onTemplateSelected;
+  final VoidCallback onActionCleared;
 
   const PlanActionStep({
     super.key,
@@ -23,6 +24,7 @@ class PlanActionStep extends StatelessWidget {
     required this.templates,
     required this.selectedTemplateId,
     required this.onTemplateSelected,
+    required this.onActionCleared,
   });
 
   @override
@@ -173,6 +175,16 @@ class PlanActionStep extends StatelessWidget {
               horizontal: 16,
               vertical: 16,
             ),
+            suffixIcon: controller.text.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: '비우기',
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: AppColors.textSecondary,
+                    ),
+                    onPressed: onActionCleared,
+                  ),
           ),
           style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
         ),

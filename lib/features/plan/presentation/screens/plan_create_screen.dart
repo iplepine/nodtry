@@ -298,6 +298,19 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                               .read(planCreateViewModelProvider.notifier)
                               .dispatch(ApplyStudyTemplateIntent(template));
                         },
+                        onActionCleared: () {
+                          _actionController.clear();
+                          _descriptionController.clear();
+                          final customCategory = planCategories.firstWhere(
+                            (category) => category.id == planCategoryCustom,
+                          );
+                          ref
+                              .read(planCreateViewModelProvider.notifier)
+                              .dispatch(
+                                SelectPlanCategoryIntent(customCategory),
+                              );
+                          _actionFocus.requestFocus();
+                        },
                       ),
                     ),
                     _buildStepContainer(
