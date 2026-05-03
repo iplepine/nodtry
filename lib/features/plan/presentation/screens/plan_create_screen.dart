@@ -6,6 +6,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../services/notification_service.dart';
+import '../../domain/study_plan_template.dart';
 // No repository_provider or home_provider needed here if only using the viewModel state
 
 import '../widgets/plan_action_step.dart';
@@ -238,8 +239,8 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                     color:
                         (currentStep == 1 &&
                             _actionController.text.trim().isEmpty)
-                        ? AppColors.textDisabled.withOpacity(0.2)
-                        : AppColors.primary.withOpacity(0.1),
+                        ? AppColors.textDisabled.withValues(alpha: 0.2)
+                        : AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -271,6 +272,18 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                       child: PlanActionStep(
                         controller: _actionController,
                         focusNode: _actionFocus,
+                        templates: studyPlanTemplates,
+                        selectedTemplateId: planCreateState.selectedTemplateId,
+                        onTemplateSelected: (template) {
+                          _actionController.text = template.action;
+                          _actionController.selection = TextSelection.collapsed(
+                            offset: _actionController.text.length,
+                          );
+                          _descriptionController.text = template.description;
+                          ref
+                              .read(planCreateViewModelProvider.notifier)
+                              .dispatch(ApplyStudyTemplateIntent(template));
+                        },
                       ),
                     ),
                     _buildStepContainer(

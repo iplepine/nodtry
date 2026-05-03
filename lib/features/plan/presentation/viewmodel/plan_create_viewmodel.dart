@@ -11,13 +11,23 @@ final planCreateViewModelProvider =
     );
 
 class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
+  static const _defaultSelectedDays = {0, 2, 4};
+  static const _studySprintDurationDays = 28;
+
   @override
   FutureOr<PlanCreateState> build() {
     return _initialState();
   }
 
   PlanCreateState _initialState() {
-    return PlanCreateState(notificationTime: NotificationTime.preset('dinner'));
+    return PlanCreateState(
+      selectedDays: _defaultSelectedDays,
+      notificationTime: _defaultNotificationTime(),
+    );
+  }
+
+  NotificationTime _defaultNotificationTime() {
+    return NotificationTime.custom(21, 0);
   }
 
   Future<void> dispatch(PlanCreateIntent intent) async {
@@ -26,10 +36,15 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
     if (intent is ResetIntent) {
       state = AsyncValue.data(_initialState());
     } else if (intent is UpdateActionIntent) {
-      state = AsyncValue.data(prevState.copyWith(action: intent.action));
+      state = AsyncValue.data(
+        prevState.copyWith(action: intent.action, selectedTemplateId: null),
+      );
     } else if (intent is UpdateDescriptionIntent) {
       state = AsyncValue.data(
-        prevState.copyWith(description: intent.description),
+        prevState.copyWith(
+          description: intent.description,
+          selectedTemplateId: null,
+        ),
       );
     } else if (intent is ToggleDayIntent) {
       final newDays = Set<int>.from(prevState.selectedDays);
@@ -38,10 +53,25 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       } else {
         newDays.add(intent.dayIndex);
       }
-      state = AsyncValue.data(prevState.copyWith(selectedDays: newDays));
+      state = AsyncValue.data(
+        prevState.copyWith(selectedDays: newDays, selectedTemplateId: null),
+      );
     } else if (intent is UpdateNotificationTimeIntent) {
       state = AsyncValue.data(
-        prevState.copyWith(notificationTime: intent.notificationTime),
+        prevState.copyWith(
+          notificationTime: intent.notificationTime,
+          selectedTemplateId: null,
+        ),
+      );
+    } else if (intent is ApplyStudyTemplateIntent) {
+      state = AsyncValue.data(
+        prevState.copyWith(
+          action: intent.template.action,
+          description: intent.template.description,
+          selectedDays: Set<int>.from(intent.template.selectedDayIndexes),
+          notificationTime: intent.template.notificationTime,
+          selectedTemplateId: intent.template.id,
+        ),
       );
     } else if (intent is NextStepIntent) {
       if (prevState.currentStep < 3) {
@@ -65,8 +95,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           action: item.title,
           description: item.description ?? '',
           selectedDays: item.days.map((d) => d - 1).toSet(), // 1-7 -> 0-6
-          notificationTime:
-              item.notificationTime ?? NotificationTime.preset('dinner'),
+          notificationTime: item.notificationTime ?? _defaultNotificationTime(),
         ),
       );
     } else if (intent is SavePlanIntent) {
@@ -93,6 +122,10 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       final finalDays = prevState.selectedDays.isEmpty
           ? [1, 2, 3, 4, 5, 6, 7]
           : prevState.selectedDays.map((d) => d + 1).toList();
+      finalDays.sort();
+
+      final now = DateTime.now();
+      final endOfStartDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
       final planItem = PlanItem(
         title: prevState.action,
@@ -109,12 +142,14 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         id: prevState.existingPlanId, // null for restart/new
         userId: userId,
         managerId: managerId,
-        startDate: DateTime.now(), // Always reset start date for new/restart
-        endDate: DateTime.now().add(const Duration(days: 14)),
+        startDate: now, // Always reset start date for new/restart
+        endDate: endOfStartDay.add(
+          const Duration(days: _studySprintDurationDays - 1),
+        ),
         state: PlanState
             .pendingApproval, // Always reset to pendingApproval on save, even if editing
         items: [planItem],
-        createdAt: DateTime.now(), // Reset created
+        createdAt: now, // Reset created
         completedDates: prevState.existingPlanId != null
             ? (prevState.originalPlan?.completedDates ?? [])
             : [], // Reset history

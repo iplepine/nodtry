@@ -1,6 +1,9 @@
 import '../../../models/plan_model.dart';
+import '../domain/study_plan_template.dart';
 
 // part 'plan_create_state.freezed.dart'; // Removed
+
+const _unset = Object();
 
 class PlanCreateState {
   final int currentStep;
@@ -8,6 +11,7 @@ class PlanCreateState {
   final String description;
   final Set<int> selectedDays;
   final NotificationTime notificationTime;
+  final String? selectedTemplateId;
   final bool isSaving;
   final String? errorMessage;
   final String? existingPlanId;
@@ -19,6 +23,7 @@ class PlanCreateState {
     this.description = '',
     this.selectedDays = const {},
     required this.notificationTime,
+    this.selectedTemplateId,
     this.isSaving = false,
     this.errorMessage,
     this.existingPlanId,
@@ -31,6 +36,7 @@ class PlanCreateState {
     String? description,
     Set<int>? selectedDays,
     NotificationTime? notificationTime,
+    Object? selectedTemplateId = _unset,
     bool? isSaving,
     String? errorMessage,
     String? existingPlanId,
@@ -42,6 +48,9 @@ class PlanCreateState {
       description: description ?? this.description,
       selectedDays: selectedDays ?? this.selectedDays,
       notificationTime: notificationTime ?? this.notificationTime,
+      selectedTemplateId: selectedTemplateId == _unset
+          ? this.selectedTemplateId
+          : selectedTemplateId as String?,
       isSaving: isSaving ?? this.isSaving,
       errorMessage: errorMessage ?? this.errorMessage,
       existingPlanId: existingPlanId ?? this.existingPlanId,
@@ -77,6 +86,11 @@ class ToggleDayIntent extends PlanCreateIntent {
 class UpdateNotificationTimeIntent extends PlanCreateIntent {
   final NotificationTime notificationTime;
   const UpdateNotificationTimeIntent(this.notificationTime);
+}
+
+class ApplyStudyTemplateIntent extends PlanCreateIntent {
+  final StudyPlanTemplate template;
+  const ApplyStudyTemplateIntent(this.template);
 }
 
 class NextStepIntent extends PlanCreateIntent {

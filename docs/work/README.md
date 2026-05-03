@@ -8,7 +8,7 @@
 
 현재 active roadmap: `R-001-study-sprint-prep`
 
-현재 active task: `NT-001-study-sprint-thin-slice`
+현재 active task: `BT-002-partner-pressure-visibility`
 
 ## 읽는 순서
 

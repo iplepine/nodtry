@@ -20,21 +20,23 @@ ID: `R-001-study-sprint-prep`
 
 ## 진행률
 
-진행률: 45%
+진행률: 65%
 
-근거: vertical, 파일럿 계획, 성공 기준 문서는 정리됐고, 현재 앱 흐름과 thin slice 대조 및 구현 점검이 남아 있다.
+근거: thin slice 대조와 스터디 템플릿/기본값 구현은 완료됐다. 파일럿 시작 전 파트너 압박 가시성, 4주 정산, 모집 운영 준비가 남아 있다.
 
 ## Milestones
 
 | 순서 | Milestone | 완료 기준 | 상태 |
 |---:|---|---|---|
 | 1 | 파일럿 문서 고정 | 실행 계획, 지표, 가격 의향 질문 완료 | `Done` |
-| 2 | 제품 thin slice 대조 | 빠진 흐름이 task로 분리됨 | `Active` |
-| 3 | 파일럿 모집 준비 | 안내 문구와 시작 전 질문 확정 | `Ready` |
+| 2 | 제품 thin slice 대조 | 빠진 흐름이 task로 분리됨 | `Done` |
+| 3 | 파일럿 필수 구현 보완 | 파트너 압박 가시성과 4주 정산 준비 | `Active` |
+| 4 | 파일럿 모집 준비 | 안내 문구와 시작 전 질문 확정 | `Ready` |
 
 ## Active Tasks
 
-- `NT-001-study-sprint-thin-slice`
+- `BT-002-partner-pressure-visibility`
+- `BT-003-four-week-settlement`
 
 ## Backlog Tasks
 
