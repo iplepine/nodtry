@@ -26,6 +26,10 @@ class MockRecordRepository extends Fake implements RecordRepository {
   String? lastPassedPlanId;
   int rejectPlanCallCount = 0;
   String? lastRejectedPlanId;
+  int recordPilotSettlementCallCount = 0;
+  String? lastSettlementPlanId;
+  String? lastNextPlanIntent;
+  String? lastExitReason;
 
   // Stream Controller for testing real-time updates
   final _controller = StreamController<List<HomeCardModel>>.broadcast();
@@ -122,6 +126,18 @@ class MockRecordRepository extends Fake implements RecordRepository {
   Future<void> verifyPlan(String planId) => Future.value();
   @override
   Future<List<String>> completeOverduePlans() => Future.value(const []);
+
+  @override
+  Future<void> recordPilotSettlement(
+    String planId, {
+    required String nextPlanIntent,
+    String? exitReason,
+  }) async {
+    recordPilotSettlementCallCount++;
+    lastSettlementPlanId = planId;
+    lastNextPlanIntent = nextPlanIntent;
+    lastExitReason = exitReason;
+  }
 }
 
 class MockGetNowCardsUseCase extends Fake implements GetNowCardsUseCase {
@@ -319,5 +335,25 @@ void main() {
 
     expect(mockRecordRepository.rejectPlanCallCount, 1);
     expect(mockRecordRepository.lastRejectedPlanId, 'plan-reject-123');
+  });
+
+  test('RecordPilotSettlementIntent should call repository', () async {
+    mockGetNowCardsUseCase.emit([]);
+    await readNowState();
+
+    await container
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(
+          const RecordPilotSettlementIntent(
+            'plan-settle-123',
+            nextPlanIntent: 'stop',
+            exitReason: '목표가 너무 컸어요',
+          ),
+        );
+
+    expect(mockRecordRepository.recordPilotSettlementCallCount, 1);
+    expect(mockRecordRepository.lastSettlementPlanId, 'plan-settle-123');
+    expect(mockRecordRepository.lastNextPlanIntent, 'stop');
+    expect(mockRecordRepository.lastExitReason, '목표가 너무 컸어요');
   });
 }

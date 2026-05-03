@@ -202,6 +202,31 @@ void main() {
   });
 
   test(
+    'day preset changes keep the selected category but clear template',
+    () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await container.read(planCreateViewModelProvider.future);
+
+      final template = studyPlanTemplates.firstWhere(
+        (template) => template.id == 'english_sentences',
+      );
+      await container
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(ApplyStudyTemplateIntent(template));
+
+      await container
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(const UpdateSelectedDaysIntent({0, 2, 4}));
+
+      final state = container.read(planCreateViewModelProvider).value!;
+      expect(state.selectedCategoryId, planCategoryStudy);
+      expect(state.selectedTemplateId, isNull);
+      expect(state.selectedDays, {0, 2, 4});
+    },
+  );
+
+  test(
     'save creates a 28-day pending study plan with sorted week days',
     () async {
       final repository = _FakeRecordRepository();

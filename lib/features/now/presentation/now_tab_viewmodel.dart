@@ -136,6 +136,12 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         await _rescuePlan(intent.planId);
       } else if (intent is RestPlanIntent) {
         await _restPlan(intent.planId);
+      } else if (intent is RecordPilotSettlementIntent) {
+        await _recordPilotSettlement(
+          intent.planId,
+          nextPlanIntent: intent.nextPlanIntent,
+          exitReason: intent.exitReason,
+        );
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -259,6 +265,20 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
   Future<void> _restPlan(String planId) async {
     await ref.read(recordRepositoryProvider).reportRest(planId);
     await _updateAlarmToSkipToday(planId);
+  }
+
+  Future<void> _recordPilotSettlement(
+    String planId, {
+    required String nextPlanIntent,
+    String? exitReason,
+  }) async {
+    await ref
+        .read(recordRepositoryProvider)
+        .recordPilotSettlement(
+          planId,
+          nextPlanIntent: nextPlanIntent,
+          exitReason: exitReason,
+        );
   }
 
   /// 디버그 전용: Fake State 주입

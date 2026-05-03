@@ -54,6 +54,7 @@ class RealRecordRepository implements RecordRepository {
             (p) =>
                 p.state == PlanState.active ||
                 p.state == PlanState.pendingApproval ||
+                p.state == PlanState.completed ||
                 p.state == PlanState.rejected ||
                 p.promise?.status == PromiseStatus.settled,
           )
@@ -147,6 +148,10 @@ class RealRecordRepository implements RecordRepository {
           ),
         );
       }
+
+      if (plan.state == PlanState.completed) {
+        continue;
+      }
     }
 
     // --- Part 2: My Actions (Executor Role) -> Mine ---
@@ -192,6 +197,19 @@ class RealRecordRepository implements RecordRepository {
         );
       }
 
+      if (plan.state == PlanState.completed) {
+        if (plan.pilotNextPlanIntent == null) {
+          mineCards.add(
+            HomeCardModel(
+              state: HomeCardState.pilotSettlement,
+              plan: plan,
+              headerMessage: '4주 정산이 필요해요',
+            ),
+          );
+        }
+        continue;
+      }
+
       if (now.isBefore(plan.startDate) || now.isAfter(plan.endDate)) {
         continue;
       }
@@ -228,12 +246,15 @@ class RealRecordRepository implements RecordRepository {
       final hasActivePoke =
           _isSameDay(plan.lastPokeAt, today) &&
           !_isSameDay(plan.lastPokeAcknowledgedAt, today);
-      if (!isHandledToday && hasActivePoke) {
+      final hasMissedNotice = _isSameDay(plan.lastMissedNotifiedAt, today);
+      if (!isHandledToday && (hasActivePoke || hasMissedNotice)) {
         mineCards.add(
           HomeCardModel(
             state: HomeCardState.poked,
             plan: plan,
-            headerMessage: plan.lastPokeMessage ?? '똑똑... 혹시 잊으셨나요?',
+            headerMessage: hasActivePoke
+                ? (plan.lastPokeMessage ?? '똑똑! 파트너가 기다리고 있어요.')
+                : '똑똑! 오늘 약속이 파트너에게 놓친 약속으로 남았어요.',
           ),
         );
       }
@@ -335,6 +356,10 @@ class RealRecordRepository implements RecordRepository {
                 (item) => item.days.contains(todayWeekday),
               );
               if (hasTodayItem) {
+                final hasMissedNotice = _isSameDay(
+                  plan.lastMissedNotifiedAt,
+                  today,
+                );
                 // 파트너가 어제도 못 했는지 확인 (실천 인정 가능 여부)
                 final yesterday = today.subtract(const Duration(days: 1));
                 final missedYesterday =
@@ -366,7 +391,7 @@ class RealRecordRepository implements RecordRepository {
                     state: HomeCardState.partnerPoke,
                     plan: plan,
                     partnerUid: partnerUid,
-                    headerMessage: '기다리는 중',
+                    headerMessage: hasMissedNotice ? '놓친 약속이 떴어요' : '똑똑 보낼 차례',
                     canRescue: missedYesterday && yesterdayScheduled,
                   ),
                 );
@@ -425,6 +450,7 @@ class RealRecordRepository implements RecordRepository {
             (p) =>
                 p.state == PlanState.active ||
                 p.state == PlanState.pendingApproval ||
+                p.state == PlanState.completed ||
                 p.promise?.status == PromiseStatus.settled,
           )
           .toList();
@@ -517,9 +543,14 @@ class RealRecordRepository implements RecordRepository {
       lastPokeMessage: original.lastPokeMessage,
       lastPokeAt: original.lastPokeAt,
       lastPokeAcknowledgedAt: original.lastPokeAcknowledgedAt,
+      lastMissedNotifiedAt: original.lastMissedNotifiedAt,
+      lastMissedItemTitle: original.lastMissedItemTitle,
       lastActionNote: original.lastActionNote,
       lastComment: original.lastComment,
       lastUpdatedBy: original.lastUpdatedBy,
+      pilotNextPlanIntent: original.pilotNextPlanIntent,
+      pilotExitReason: original.pilotExitReason,
+      pilotSettledAt: original.pilotSettledAt,
       promise: original.promise,
     );
   }
@@ -677,7 +708,7 @@ class RealRecordRepository implements RecordRepository {
       final now = DateTime.now();
       await _firestore.collection('plans').doc(planId).update({
         'lastPokeAt': Timestamp.fromDate(now),
-        'lastPokeMessage': message ?? '똑똑... 혹시 잊으셨나요?',
+        'lastPokeMessage': message ?? '똑똑! 파트너가 기다리고 있어요. 지금 약속을 정리해볼까요?',
         'lastPokeAcknowledgedAt': FieldValue.delete(),
         'lastUpdatedBy': user.uid,
       });
@@ -1347,7 +1378,7 @@ class RealRecordRepository implements RecordRepository {
       await _firestore.collection('cheers').add({
         'fromUserId': me.uid,
         'toUserId': userId,
-        'message': message ?? '똑똑... 혹시 잊으셨나요?',
+        'message': message ?? '똑똑! 약속을 기다리는 사람이 있어요.',
         'reactionType': 'poke',
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -1624,6 +1655,32 @@ class RealRecordRepository implements RecordRepository {
       debugPrint('[RealRecordRepository] Rest day used: $planId');
     } catch (e) {
       debugPrint('[RealRecordRepository] Error reporting rest: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> recordPilotSettlement(
+    String planId, {
+    required String nextPlanIntent,
+    String? exitReason,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    try {
+      final data = <String, dynamic>{
+        'pilotNextPlanIntent': nextPlanIntent,
+        'pilotSettledAt': FieldValue.serverTimestamp(),
+        'lastUpdatedBy': user?.uid ?? 'system_pilot_settlement',
+      };
+      if (exitReason != null && exitReason.trim().isNotEmpty) {
+        data['pilotExitReason'] = exitReason.trim();
+      }
+
+      await _firestore.collection('plans').doc(planId).update(data);
+      debugPrint('[RealRecordRepository] Pilot settlement recorded: $planId');
+    } catch (e) {
+      debugPrint('[RealRecordRepository] Error recording pilot settlement: $e');
       rethrow;
     }
   }

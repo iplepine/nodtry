@@ -54,3 +54,15 @@
 - `pilot_settled`: 4주 정산 확인
 - `next_plan_intent_recorded`: 다음 4주 의향 기록
 - `paid_intent_recorded`: 유료/보증금 의향 기록
+
+## 앱에 남는 파일럿 정산 필드
+
+완료 플랜의 Now 탭 정산 카드에서 최소한 아래 필드를 남긴다.
+
+| 필드 | 값 | 용도 |
+|---|---|---|
+| `pilotNextPlanIntent` | `continue` / `stop` | 다음 4주 의향 판단 |
+| `pilotExitReason` | 선택/직접 입력 사유 | 이탈 원인 분류 |
+| `pilotSettledAt` | timestamp | 종료 후 응답 시점 |
+| `lastMissedNotifiedAt` | timestamp | 똑똑/놓친 약속 압박 노출 확인 |
+| `lastMissedItemTitle` | string | 어떤 약속이 묻혔는지 수동 집계 |

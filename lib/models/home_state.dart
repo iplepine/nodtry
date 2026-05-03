@@ -54,6 +54,9 @@ enum HomeCardState {
 
   /// Type 3-3: 약속 정산 결과 (양쪽 모두에게 노출)
   promiseSettled,
+
+  /// Type 4-1: 4주 파일럿 정산 (실천자에게 노출)
+  pilotSettlement,
 }
 
 /// 카드 계층 타입
@@ -89,6 +92,7 @@ extension HomeCardStatePriority on HomeCardState {
       case HomeCardState.poked:
       case HomeCardState.promiseProposed:
       case HomeCardState.promiseSettled:
+      case HomeCardState.pilotSettlement:
         return CardRole.mine;
       case HomeCardState.partnerPlanCreate:
       case HomeCardState.partnerPlanModify:
@@ -112,6 +116,8 @@ extension HomeCardStatePriority on HomeCardState {
         return 0; // 0순위: 약속 제안 받음 (즉시 응답 필요)
       case HomeCardState.promiseSettled:
         return 0; // 0순위: 약속 정산 결과 (확인 필요)
+      case HomeCardState.pilotSettlement:
+        return 0; // 0순위: 파일럿 정산 응답 필요
       case HomeCardState.nowAction:
         return 1; // 1순위: 지금 실천
       case HomeCardState.overdue:

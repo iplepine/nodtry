@@ -14,7 +14,6 @@ class NotificationSettingEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Calculate Target Time (User-facing Plan Time)
     final currentAlertOffset = notificationTime.alertOffset;
     final currentTriggerTotal =
         notificationTime.hour * 60 + notificationTime.minute;
@@ -29,7 +28,6 @@ class NotificationSettingEditor extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Notification Header with Switch
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -46,7 +44,7 @@ class NotificationSettingEditor extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  isAlarmOn ? "설정한 시간에 알림을 보낼게요." : "알림 없이 기록만 할게요.",
+                  isAlarmOn ? "똑똑이 살아날 시간을 정해요." : "알림 없이 기록만 할게요.",
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
@@ -58,8 +56,6 @@ class NotificationSettingEditor extends StatelessWidget {
               value: isAlarmOn,
               onChanged: (value) {
                 if (value) {
-                  // Turn On: Restore to 'custom' with 0 offset (At time)
-                  // Use current target time as the time.
                   onTimeChanged(
                     NotificationTime.custom(
                       targetHour,
@@ -68,25 +64,13 @@ class NotificationSettingEditor extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // Turn Off: Set type to 'none' but PRESERVE the Target Time as the hour/minute.
-                  // Since offset will be 0, hour/minute should be the target time.
                   onTimeChanged(
                     NotificationTime.custom(
                       targetHour,
                       targetMinute,
                       alertOffset: 0,
                     ).copyWith(type: 'none'),
-                  ); // Explicitly set type none but keep time
-                  // Note: NotificationTime.none() zeroes out time. We need to use custom+type override or a new factory.
-                  // Plan logic check: does 'none' type imply ignore time?
-                  // PlanCard uses targetHour. If we set hour=target, offset=0, then targetHour=hour. Correct.
-                  // We need to ensure NotificationTime allows type='none' with non-zero hour.
-                  // The 'custom' factory sets type='custom'. We need to override it.
-                  // Let's rely on copyWith if available or create a specific instance.
-                  // NotificationTime doesn't have copyWith in the snippet I saw earlier?
-                  // I added copyWith? No, I added getters.
-                  // I will implement constructing it manually:
-                  // NotificationTime(type: 'none', value: 'none', hour: targetHour, minute: targetMinute, alertOffset: 0)
+                  );
                 }
               },
               activeColor: AppColors.primary,
@@ -95,9 +79,8 @@ class NotificationSettingEditor extends StatelessWidget {
         ),
         const SizedBox(height: 24),
 
-        // 1. Time Picker (Target Time) - ALWAYS VISIBLE
         Text(
-          '약속 시간',
+          '파트너에게 보일 약속 시간',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -134,7 +117,6 @@ class NotificationSettingEditor extends StatelessWidget {
             );
 
             if (picked != null) {
-              // Calculate new Trigger Time based on CURRENT offset (if alarm on) or 0 (if off)
               final effectiveOffset = isAlarmOn ? currentAlertOffset : 0;
 
               final newTargetTotal = picked.hour * 60 + picked.minute;
@@ -143,18 +125,13 @@ class NotificationSettingEditor extends StatelessWidget {
               final newTriggerHour = normalizedTriggerTotal ~/ 60;
               final newTriggerMinute = normalizedTriggerTotal % 60;
 
-              // Preserve current type
               final newType = isAlarmOn ? 'custom' : 'none';
 
-              // We need a way to construct this.
-              // Assuming we can't use copyWith yet (as I didn't see it added),
-              // I will use the constructor via a helper in this file or just make sure `NotificationTime` has a constructor.
-              // It accepts typical args.
               onTimeChanged(
                 NotificationTime(
                   type: newType,
                   value: isAlarmOn
-                      ? '${newTriggerHour}:${newTriggerMinute}'
+                      ? '$newTriggerHour:$newTriggerMinute'
                       : 'none',
                   hour: newTriggerHour,
                   minute: newTriggerMinute,
@@ -177,9 +154,7 @@ class NotificationSettingEditor extends StatelessWidget {
                   Icons.access_time_rounded,
                   color: isAlarmOn
                       ? AppColors.primary
-                      : AppColors
-                            .textSecondary, // Dim if alarm off? Or keep primary? User said time is set.
-                  // Let's keep it primary or neutral. Neutral seems fine.
+                      : AppColors.textSecondary,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -204,10 +179,14 @@ class NotificationSettingEditor extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 8),
+        Text(
+          '기본 저녁 9시는 하루가 묻히기 전에 파트너가 확인하기 좋은 시간이에요.',
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
         const SizedBox(height: 24),
 
         if (isAlarmOn) ...[
-          // 2. Alert Offset Selection
           Text(
             '알림 미리받기',
             style: TextStyle(

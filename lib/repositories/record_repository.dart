@@ -68,7 +68,7 @@ abstract class RecordRepository {
   Future<void> passPlan(String planId);
 
   /// 파트너 찌르기 (똑똑)
-  /// message: "똑똑... 혹시 잊으셨나요?" 등
+  /// message: "똑똑! 파트너가 기다리고 있어요." 등
   Future<void> pokePartner(String planId, {String? message});
 
   /// 찌르기 확인 (응답)
@@ -116,4 +116,11 @@ abstract class RecordRepository {
 
   /// 휴식권 사용 (주 1회, 스트릭 유지)
   Future<void> reportRest(String planId);
+
+  /// 4주 파일럿 정산 응답 기록.
+  Future<void> recordPilotSettlement(
+    String planId, {
+    required String nextPlanIntent,
+    String? exitReason,
+  });
 }

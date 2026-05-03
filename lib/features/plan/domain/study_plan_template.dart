@@ -38,6 +38,20 @@ class StudyPlanTemplate {
   int get weeklyCount => selectedDayIndexes.length;
 }
 
+class PlanDayPreset {
+  final String id;
+  final String label;
+  final String description;
+  final Set<int> selectedDayIndexes; // 0=Mon, 6=Sun
+
+  const PlanDayPreset({
+    required this.id,
+    required this.label,
+    required this.description,
+    required this.selectedDayIndexes,
+  });
+}
+
 const planCategories = <PlanCategory>[
   PlanCategory(
     id: planCategoryStudy,
@@ -130,3 +144,71 @@ final studyPlanTemplates = <StudyPlanTemplate>[
     notificationTime: NotificationTime.custom(21, 0),
   ),
 ];
+
+List<PlanDayPreset> dayPresetsForCategory(String categoryId) {
+  switch (categoryId) {
+    case planCategoryStudy:
+      return const [
+        PlanDayPreset(
+          id: 'study_three_days',
+          label: '주 3일',
+          description: '첫 주 3회 성공을 먼저 만들기',
+          selectedDayIndexes: {0, 2, 4},
+        ),
+        PlanDayPreset(
+          id: 'study_weekdays',
+          label: '평일',
+          description: '공부 흐름을 주중에 묶기',
+          selectedDayIndexes: {0, 1, 2, 3, 4},
+        ),
+        PlanDayPreset(
+          id: 'study_every_day',
+          label: '매일',
+          description: '짧게라도 매일 파트너에게 보이기',
+          selectedDayIndexes: {0, 1, 2, 3, 4, 5, 6},
+        ),
+      ];
+    case planCategoryExercise:
+      return const [
+        PlanDayPreset(
+          id: 'exercise_three_days',
+          label: '주 3일',
+          description: '월수금 리듬으로 시작하기',
+          selectedDayIndexes: {0, 2, 4},
+        ),
+        PlanDayPreset(
+          id: 'exercise_weekend',
+          label: '주말',
+          description: '주말에 움직임을 남기기',
+          selectedDayIndexes: {5, 6},
+        ),
+        PlanDayPreset(
+          id: 'exercise_every_day',
+          label: '매일',
+          description: '짧은 스트레칭처럼 매일 확인받기',
+          selectedDayIndexes: {0, 1, 2, 3, 4, 5, 6},
+        ),
+      ];
+    default:
+      return const [
+        PlanDayPreset(
+          id: 'custom_three_days',
+          label: '주 3일',
+          description: '부담을 낮추는 기본값',
+          selectedDayIndexes: {0, 2, 4},
+        ),
+        PlanDayPreset(
+          id: 'custom_weekdays',
+          label: '평일',
+          description: '주중 루틴으로 고정하기',
+          selectedDayIndexes: {0, 1, 2, 3, 4},
+        ),
+        PlanDayPreset(
+          id: 'custom_every_day',
+          label: '매일',
+          description: '작은 행동을 매일 남기기',
+          selectedDayIndexes: {0, 1, 2, 3, 4, 5, 6},
+        ),
+      ];
+  }
+}

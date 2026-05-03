@@ -11,6 +11,8 @@
 - `items`: PlanItem 목록
 - `promise`: 보상/벌칙 약속 (선택)
 - `completedDates`, `verifiedDates`: 완료/확인 날짜 추적
+- `lastMissedNotifiedAt`, `lastMissedItemTitle`: 놓친 약속 자동 전달 메타데이터
+- `pilotNextPlanIntent`, `pilotExitReason`, `pilotSettledAt`: 4주 파일럿 정산 응답
 
 ### PlanItem 구조
 - `title`: 실천 내용 (예: "30분 운동하기")
@@ -30,12 +32,11 @@
 | `rejected` | 매니저가 거절 (수정 필요) |
 | `stopped` | 사용자가 조기 중단 |
 
-## 플랜 생성 흐름 (4단계 위자드)
+## 플랜 생성 흐름 (3단계 위자드)
 
-1. **행동 단계**: 실천할 행동 입력 (필수, 빈 값 불가)
-2. **요일 선택 단계**: 월~일 중 실천 요일 선택
-3. **알림 설정 단계**: 알림 시간 설정 (프리셋/커스텀/없음)
-4. **설명 단계** (선택): 추가 메모 작성
+1. **행동 단계**: 공부/운동/직접 입력 카테고리와 추천 약속 또는 직접 입력
+2. **설명 단계**: 파트너가 확인할 수 있는 선택 메모
+3. **요일/알림 단계**: 주 3일/평일/매일 등 추천 빈도, 요일 직접 선택, 파트너에게 보일 시간, 파트너 프리뷰
 
 ## 플랜 승인 흐름
 
@@ -54,6 +55,7 @@
 ### 자동 완료
 - 종료일(`endDate`)이 지난 `active`/`pending_approval` 플랜은 `completeOverduePlans()`에 의해 자동 완료
 - 상태: `active` → `completed`, `pending_approval` → `completed`
+- 완료된 파일럿 플랜은 Now 탭에서 4주 정산 카드로 노출하며, 다음 4주 의향 또는 종료 사유를 기록한다.
 
 ### 수동 중단
 - 사용자가 직접 플랜 조기 중단 가능

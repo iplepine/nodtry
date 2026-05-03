@@ -20,9 +20,9 @@ ID: `R-001-study-sprint-prep`
 
 ## 진행률
 
-진행률: 65%
+진행률: 85%
 
-근거: thin slice 대조와 스터디 템플릿/기본값 구현은 완료됐다. 파일럿 시작 전 파트너 압박 가시성, 4주 정산, 모집 운영 준비가 남아 있다.
+근거: thin slice 대조, 스터디 템플릿/기본값, 파트너 압박 가시성, 4주 정산 카드는 구현됐다. 파일럿 시작 전 모집 운영 준비와 실제 기기 smoke 검증이 남아 있다.
 
 ## Milestones
 
@@ -30,17 +30,15 @@ ID: `R-001-study-sprint-prep`
 |---:|---|---|---|
 | 1 | 파일럿 문서 고정 | 실행 계획, 지표, 가격 의향 질문 완료 | `Done` |
 | 2 | 제품 thin slice 대조 | 빠진 흐름이 task로 분리됨 | `Done` |
-| 3 | 파일럿 필수 구현 보완 | 파트너 압박 가시성과 4주 정산 준비 | `Active` |
-| 4 | 파일럿 모집 준비 | 안내 문구와 시작 전 질문 확정 | `Ready` |
+| 3 | 파일럿 필수 구현 보완 | 파트너 압박 가시성과 4주 정산 준비 | `Done` |
+| 4 | 파일럿 모집 준비 | 안내 문구와 시작 전 질문 확정 | `Active` |
 
 ## Active Tasks
 
-- `BT-002-partner-pressure-visibility`
-- `BT-003-four-week-settlement`
+- `BT-004-pilot-recruitment-ops`
 
 ## Backlog Tasks
 
-- 파일럿 모집 폼 작성
 - 1주차 수동 집계 시트 작성
 
 ## 제외

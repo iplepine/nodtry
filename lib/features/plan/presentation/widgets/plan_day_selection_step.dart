@@ -2,20 +2,33 @@ import 'package:flutter/material.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
+import '../../domain/study_plan_template.dart';
 import 'notification_setting_editor.dart';
 
 class PlanDaySelectionStep extends StatelessWidget {
   final Set<int> selectedDays;
   final ValueChanged<int> onDayToggle;
+  final ValueChanged<Set<int>> onDayPresetSelected;
   final NotificationTime notificationTime;
   final ValueChanged<NotificationTime> onTimeChanged;
+  final String selectedCategoryId;
+  final String action;
+  final String? partnerName;
+  final bool hasPartner;
+  final VoidCallback? onConnectPartner;
 
   const PlanDaySelectionStep({
     super.key,
     required this.selectedDays,
     required this.onDayToggle,
+    required this.onDayPresetSelected,
     required this.notificationTime,
     required this.onTimeChanged,
+    required this.selectedCategoryId,
+    required this.action,
+    this.partnerName,
+    this.hasPartner = false,
+    this.onConnectPartner,
   });
 
   @override
@@ -59,6 +72,8 @@ class PlanDaySelectionStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        _buildPresetChips(context),
+        const SizedBox(height: 16),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -67,13 +82,67 @@ class PlanDaySelectionStep extends StatelessWidget {
             return _buildDayChip(context, index, dayNames[index], isSelected);
           }),
         ),
-        const SizedBox(height: 48),
+        const SizedBox(height: 32),
 
         NotificationSettingEditor(
           notificationTime: notificationTime,
           onTimeChanged: onTimeChanged,
         ),
+        const SizedBox(height: 24),
+        _PartnerPreviewCard(
+          action: action,
+          selectedDays: selectedDays,
+          notificationTime: notificationTime,
+          partnerName: partnerName,
+          hasPartner: hasPartner,
+          onConnectPartner: onConnectPartner,
+        ),
         const SizedBox(height: 32),
+      ],
+    );
+  }
+
+  Widget _buildPresetChips(BuildContext context) {
+    final presets = dayPresetsForCategory(selectedCategoryId);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '추천 빈도',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: presets.map((preset) {
+            final isSelected =
+                selectedDays.length == preset.selectedDayIndexes.length &&
+                selectedDays.containsAll(preset.selectedDayIndexes);
+            return ChoiceChip(
+              selected: isSelected,
+              onSelected: (_) => onDayPresetSelected(preset.selectedDayIndexes),
+              label: Text(preset.label),
+              tooltip: preset.description,
+              selectedColor: AppColors.primary.withValues(alpha: 0.1),
+              backgroundColor: AppColors.surface,
+              labelStyle: TextStyle(
+                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              ),
+              side: BorderSide(
+                color: isSelected ? AppColors.primary : AppColors.divider,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            );
+          }).toList(),
+        ),
       ],
     );
   }
@@ -112,5 +181,121 @@ class PlanDaySelectionStep extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _PartnerPreviewCard extends StatelessWidget {
+  final String action;
+  final Set<int> selectedDays;
+  final NotificationTime notificationTime;
+  final String? partnerName;
+  final bool hasPartner;
+  final VoidCallback? onConnectPartner;
+
+  const _PartnerPreviewCard({
+    required this.action,
+    required this.selectedDays,
+    required this.notificationTime,
+    this.partnerName,
+    required this.hasPartner,
+    this.onConnectPartner,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final targetName = partnerName?.trim().isNotEmpty == true
+        ? partnerName!.trim()
+        : '파트너';
+    final promise = action.trim().isEmpty ? '내 약속' : action.trim();
+    final previewText = hasPartner
+        ? '$targetName님에게 "$promise"를 28일 동안 놓치지 않게 당겨달라고 보냅니다.'
+        : '파트너 없이 시작하면 똑똑을 받을 사람이 없어요. 저장 전 파트너를 연결하면 압박이 강해져요.';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.visibility_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '파트너에게 이렇게 보여요',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            previewText,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.45,
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '${_daysLabel(selectedDays)} · ${_timeLabel(notificationTime)} · 28일',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+          if (!hasPartner && onConnectPartner != null) ...[
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: onConnectPartner,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                padding: EdgeInsets.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
+              label: const Text('파트너 연결하기'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  static String _daysLabel(Set<int> selectedDays) {
+    if (selectedDays.isEmpty || selectedDays.length == 7) {
+      return '매일';
+    }
+    if (selectedDays.length == 5 && selectedDays.containsAll({0, 1, 2, 3, 4})) {
+      return '평일';
+    }
+    return '주 ${selectedDays.length}일';
+  }
+
+  static String _timeLabel(NotificationTime notificationTime) {
+    final targetTotal =
+        notificationTime.hour * 60 +
+        notificationTime.minute +
+        notificationTime.alertOffset;
+    final normalized = targetTotal % 1440;
+    final hour = normalized ~/ 60;
+    final minute = normalized % 60;
+    final period = hour < 12 ? '오전' : '오후';
+    final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    final minuteText = minute == 0
+        ? ''
+        : ' ${minute.toString().padLeft(2, '0')}분';
+    return '$period $displayHour시$minuteText';
   }
 }

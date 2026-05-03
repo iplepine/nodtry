@@ -66,9 +66,14 @@ class Plan {
   final String? lastPokeMessage; // 마지막 똑똑 메시지
   final DateTime? lastPokeAt; // 마지막 똑똑 시간
   final DateTime? lastPokeAcknowledgedAt; // 마지막 똑똑 확인 시간
+  final DateTime? lastMissedNotifiedAt; // 시스템이 놓친 약속을 알린 시간
+  final String? lastMissedItemTitle; // 마지막 놓친 약속 제목
   final String? lastActionNote; // 마지막 실천 한마디 (실천자)
   final String? lastComment; // 마지막 피드백/응원 메시지 (매니저)
   final String? lastUpdatedBy; // 마지막으로 문서를 수정한 사람의 UID
+  final String? pilotNextPlanIntent; // 4주 정산 후 다음 4주 의향
+  final String? pilotExitReason; // 4주 정산 후 종료 사유
+  final DateTime? pilotSettledAt; // 파일럿 정산 응답 시간
   final Promise? promise; // 보상/벌칙 약속
 
   Plan({
@@ -91,9 +96,14 @@ class Plan {
     this.lastPokeMessage,
     this.lastPokeAt,
     this.lastPokeAcknowledgedAt,
+    this.lastMissedNotifiedAt,
+    this.lastMissedItemTitle,
     this.lastActionNote,
     this.lastComment,
     this.lastUpdatedBy,
+    this.pilotNextPlanIntent,
+    this.pilotExitReason,
+    this.pilotSettledAt,
     this.promise,
   });
 
@@ -117,9 +127,14 @@ class Plan {
     String? lastPokeMessage,
     DateTime? lastPokeAt,
     DateTime? lastPokeAcknowledgedAt,
+    DateTime? lastMissedNotifiedAt,
+    String? lastMissedItemTitle,
     String? lastActionNote,
     String? lastComment,
     String? lastUpdatedBy,
+    String? pilotNextPlanIntent,
+    String? pilotExitReason,
+    DateTime? pilotSettledAt,
     Promise? promise,
   }) {
     return Plan(
@@ -143,9 +158,14 @@ class Plan {
       lastPokeAt: lastPokeAt ?? this.lastPokeAt,
       lastPokeAcknowledgedAt:
           lastPokeAcknowledgedAt ?? this.lastPokeAcknowledgedAt,
+      lastMissedNotifiedAt: lastMissedNotifiedAt ?? this.lastMissedNotifiedAt,
+      lastMissedItemTitle: lastMissedItemTitle ?? this.lastMissedItemTitle,
       lastActionNote: lastActionNote ?? this.lastActionNote,
       lastComment: lastComment ?? this.lastComment,
       lastUpdatedBy: lastUpdatedBy ?? this.lastUpdatedBy,
+      pilotNextPlanIntent: pilotNextPlanIntent ?? this.pilotNextPlanIntent,
+      pilotExitReason: pilotExitReason ?? this.pilotExitReason,
+      pilotSettledAt: pilotSettledAt ?? this.pilotSettledAt,
       promise: promise ?? this.promise,
     );
   }
@@ -173,9 +193,18 @@ class Plan {
       if (lastPokeAt != null) 'lastPokeAt': Timestamp.fromDate(lastPokeAt!),
       if (lastPokeAcknowledgedAt != null)
         'lastPokeAcknowledgedAt': Timestamp.fromDate(lastPokeAcknowledgedAt!),
+      if (lastMissedNotifiedAt != null)
+        'lastMissedNotifiedAt': Timestamp.fromDate(lastMissedNotifiedAt!),
+      if (lastMissedItemTitle != null)
+        'lastMissedItemTitle': lastMissedItemTitle,
       if (lastActionNote != null) 'lastActionNote': lastActionNote,
       if (lastComment != null) 'lastComment': lastComment,
       if (lastUpdatedBy != null) 'lastUpdatedBy': lastUpdatedBy,
+      if (pilotNextPlanIntent != null)
+        'pilotNextPlanIntent': pilotNextPlanIntent,
+      if (pilotExitReason != null) 'pilotExitReason': pilotExitReason,
+      if (pilotSettledAt != null)
+        'pilotSettledAt': Timestamp.fromDate(pilotSettledAt!),
       if (promise != null) 'promise': promise!.toMap(),
     };
   }
@@ -240,9 +269,15 @@ class Plan {
       lastPokeAcknowledgedAt:
           (map['lastPokeAcknowledgedAt'] as Timestamp?)?.toDate() ??
           (rawLastCheerType == 'poke_acked' ? rawLastCheerAt : null),
+      lastMissedNotifiedAt: (map['lastMissedNotifiedAt'] as Timestamp?)
+          ?.toDate(),
+      lastMissedItemTitle: map['lastMissedItemTitle'] as String?,
       lastActionNote: map['lastActionNote'],
       lastComment: effectiveLastComment,
       lastUpdatedBy: map['lastUpdatedBy'],
+      pilotNextPlanIntent: map['pilotNextPlanIntent'] as String?,
+      pilotExitReason: map['pilotExitReason'] as String?,
+      pilotSettledAt: (map['pilotSettledAt'] as Timestamp?)?.toDate(),
       promise: map['promise'] != null
           ? Promise.fromMap(map['promise'] as Map<String, dynamic>)
           : null,

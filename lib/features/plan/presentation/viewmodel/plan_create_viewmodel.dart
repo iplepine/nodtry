@@ -60,9 +60,12 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         newDays.add(intent.dayIndex);
       }
       state = AsyncValue.data(
+        prevState.copyWith(selectedDays: newDays, selectedTemplateId: null),
+      );
+    } else if (intent is UpdateSelectedDaysIntent) {
+      state = AsyncValue.data(
         prevState.copyWith(
-          selectedDays: newDays,
-          selectedCategoryId: planCategoryCustom,
+          selectedDays: Set<int>.from(intent.selectedDays),
           selectedTemplateId: null,
         ),
       );
@@ -70,7 +73,6 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       state = AsyncValue.data(
         prevState.copyWith(
           notificationTime: intent.notificationTime,
-          selectedCategoryId: planCategoryCustom,
           selectedTemplateId: null,
         ),
       );
@@ -225,11 +227,26 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         lastPokeAcknowledgedAt: prevState.existingPlanId != null
             ? prevState.originalPlan?.lastPokeAcknowledgedAt
             : null,
+        lastMissedNotifiedAt: prevState.existingPlanId != null
+            ? prevState.originalPlan?.lastMissedNotifiedAt
+            : null,
+        lastMissedItemTitle: prevState.existingPlanId != null
+            ? prevState.originalPlan?.lastMissedItemTitle
+            : null,
         lastActionNote: prevState.existingPlanId != null
             ? prevState.originalPlan?.lastActionNote
             : null,
         lastComment: prevState.existingPlanId != null
             ? prevState.originalPlan?.lastComment
+            : null,
+        pilotNextPlanIntent: prevState.existingPlanId != null
+            ? prevState.originalPlan?.pilotNextPlanIntent
+            : null,
+        pilotExitReason: prevState.existingPlanId != null
+            ? prevState.originalPlan?.pilotExitReason
+            : null,
+        pilotSettledAt: prevState.existingPlanId != null
+            ? prevState.originalPlan?.pilotSettledAt
             : null,
       );
 

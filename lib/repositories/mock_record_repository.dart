@@ -34,7 +34,7 @@ class MockRecordRepository implements RecordRepository {
         partnerName: '지민',
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
-        headerMessage: '기다리는 중',
+        headerMessage: '똑똑 보낼 차례',
       ),
       HomeCardModel(
         state: HomeCardState.partnerPlanCreate,
@@ -684,13 +684,22 @@ class MockRecordRepository implements RecordRepository {
         final planId = plan.id;
         if (planId != null) {
           completedPlanIds.add(planId);
+          _mockHomeCardModels.add(
+            HomeCardModel(
+              state: HomeCardState.pilotSettlement,
+              plan: _mockPlans[i],
+              headerMessage: '4주 정산이 필요해요',
+            ),
+          );
         }
       }
     }
 
     if (completedPlanIds.isNotEmpty) {
       _mockHomeCardModels.removeWhere(
-        (model) => completedPlanIds.contains(model.plan?.id),
+        (model) =>
+            completedPlanIds.contains(model.plan?.id) &&
+            model.state != HomeCardState.pilotSettlement,
       );
       _notifyPlansStream();
       _notifyStream();
@@ -733,5 +742,25 @@ class MockRecordRepository implements RecordRepository {
   @override
   Future<void> reportRest(String planId) async {
     print('Mock: Report rest for plan $planId');
+  }
+
+  @override
+  Future<void> recordPilotSettlement(
+    String planId, {
+    required String nextPlanIntent,
+    String? exitReason,
+  }) async {
+    final index = _mockPlans.indexWhere((p) => p.id == planId);
+    if (index != -1) {
+      _mockPlans[index] = _mockPlans[index].copyWith(
+        pilotNextPlanIntent: nextPlanIntent,
+        pilotExitReason: exitReason,
+        pilotSettledAt: DateTime.now(),
+      );
+      _notifyPlansStream();
+    }
+
+    _mockHomeCardModels.removeWhere((model) => model.plan?.id == planId);
+    _notifyStream();
   }
 }

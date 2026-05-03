@@ -17,7 +17,8 @@
 |------|------|
 | morning (아침) | 08:00 |
 | lunch (점심) | 12:00 |
-| dinner (저녁, 기본값) | 20:00 |
+| dinner (저녁) | 20:00 |
+| study sprint default | 21:00 |
 | bedtime (취침 전) | 23:00 |
 
 ### 커스텀
@@ -58,6 +59,7 @@
 - 플랜에 `lastMissedNotifiedAt`, `lastMissedItemTitle`, `lastUpdatedBy: system_missed_action`을 기록한다.
 - 같은 플랜의 미실천 푸시는 하루 1회만 보낸다.
 - 이 업데이트 자체는 일반 플랜 변경 알림으로 재전파하지 않는다.
+- 앱은 `lastMissedNotifiedAt`을 읽어 Now 탭에서 실천자에게 "똑똑! 오늘 약속이 파트너에게 놓친 약속으로 남았어요.", 파트너에게 "놓친 약속이 떴어요" 상태를 보여준다.
 
 ## 알림 수명주기
 

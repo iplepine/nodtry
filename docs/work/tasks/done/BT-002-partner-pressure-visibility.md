@@ -4,7 +4,7 @@ ID: `BT-002-partner-pressure-visibility`
 
 유형: `Build`
 
-상태: `Active`
+상태: `Done`
 
 연결 Roadmap: `R-001-study-sprint-prep`
 
@@ -35,10 +35,10 @@ ID: `BT-002-partner-pressure-visibility`
 
 ## 완료 기준
 
-- [ ] 첫 주 파트너 압박 상태가 Now 탭에서 묻히지 않음
-- [ ] missed/poke/confirmation 상태별 CTA가 구분됨
-- [ ] 관련 테스트 또는 smoke 검증 추가
-- [ ] `notification_policy.md`, `now_tab_policy.md`, `poke_policy.md` 갱신
+- [x] 첫 주 파트너 압박 상태가 Now 탭에서 묻히지 않음
+- [x] missed/poke/confirmation 상태별 CTA가 구분됨
+- [x] 관련 테스트 또는 smoke 검증 추가
+- [x] `notification_policy.md`, `now_tab_policy.md`, `poke_policy.md` 갱신
 
 ## 검증 계획
 

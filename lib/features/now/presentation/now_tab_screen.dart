@@ -342,11 +342,16 @@ class _NowTabState extends ConsumerState<NowTab>
     try {
       await ref
           .read(nowTabViewModelProvider.notifier)
-          .dispatch(PokeUserIntent(model.partnerUid!));
+          .dispatch(
+            PokeUserIntent(
+              model.partnerUid!,
+              message: '똑똑! 약속을 기다리는 사람이 있어요. 오늘 약속을 만들어볼까요?',
+            ),
+          );
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('파트너를 똑똑! 찔렀습니다.')));
+        ).showSnackBar(const SnackBar(content: Text('똑똑 신호를 보냈어요.')));
       }
     } catch (_) {
       if (mounted) {
@@ -362,11 +367,16 @@ class _NowTabState extends ConsumerState<NowTab>
     try {
       await ref
           .read(nowTabViewModelProvider.notifier)
-          .dispatch(PokePartnerIntent(model.plan!.id!));
+          .dispatch(
+            PokePartnerIntent(
+              model.plan!.id!,
+              message: '똑똑! 파트너가 기다리고 있어요. 지금 약속을 정리해볼까요?',
+            ),
+          );
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('똑똑, 문을 두드렸어요!')));
+        ).showSnackBar(const SnackBar(content: Text('똑똑, 약속을 다시 당겼어요.')));
       }
     } catch (_) {
       if (mounted) {
@@ -375,6 +385,124 @@ class _NowTabState extends ConsumerState<NowTab>
         ).showSnackBar(const SnackBar(content: Text('똑똑 전송에 실패했어요.')));
       }
     }
+  }
+
+  Future<void> _handleContinueAfterSettlement(HomeCardModel card) async {
+    if (card.plan?.id == null) return;
+
+    await ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(
+          RecordPilotSettlementIntent(
+            card.plan!.id!,
+            nextPlanIntent: 'continue',
+          ),
+        );
+
+    if (!mounted) return;
+    context.push(AppRoutes.planCreate, extra: _planAsNewTemplate(card.plan!));
+  }
+
+  Plan _planAsNewTemplate(Plan plan) {
+    return Plan(
+      userId: plan.userId,
+      managerId: plan.managerId,
+      startDate: plan.startDate,
+      endDate: plan.endDate,
+      state: plan.state,
+      items: plan.items,
+      createdAt: plan.createdAt,
+      completedDates: plan.completedDates,
+      skippedDates: plan.skippedDates,
+      verifiedDates: plan.verifiedDates,
+      rescuedDates: plan.rescuedDates,
+      restedDates: plan.restedDates,
+      lastActionNote: plan.lastActionNote,
+      lastComment: plan.lastComment,
+    );
+  }
+
+  Future<void> _handleExitAfterSettlement(HomeCardModel card) async {
+    if (card.plan?.id == null) return;
+
+    final reason = await _showPilotExitReasonDialog(context);
+    if (reason == null || reason.trim().isEmpty) return;
+
+    await ref
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(
+          RecordPilotSettlementIntent(
+            card.plan!.id!,
+            nextPlanIntent: 'stop',
+            exitReason: reason,
+          ),
+        );
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('4주 정산을 남겼어요.')));
+  }
+
+  Future<String?> _showPilotExitReasonDialog(BuildContext context) {
+    final customController = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: const Text('이번 4주는 여기서 멈출까요?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildExitReasonOption(context, '똑똑 압박이 약했어요'),
+              const SizedBox(height: 8),
+              _buildExitReasonOption(context, '목표가 너무 컸어요'),
+              const SizedBox(height: 8),
+              _buildExitReasonOption(context, '파트너 확인이 부담됐어요'),
+              const SizedBox(height: 12),
+              TextField(
+                controller: customController,
+                decoration: const InputDecoration(
+                  labelText: '직접 입력',
+                  hintText: '멈추는 이유를 짧게 남기기',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                '취소',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(
+                context,
+                customController.text.trim().isEmpty
+                    ? '직접 사유 없음'
+                    : customController.text.trim(),
+              ),
+              child: Text('남기기', style: TextStyle(color: AppColors.primary)),
+            ),
+          ],
+        );
+      },
+    ).whenComplete(customController.dispose);
+  }
+
+  Widget _buildExitReasonOption(BuildContext context, String reason) {
+    return OutlinedButton(
+      onPressed: () => Navigator.pop(context, reason),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: AppColors.divider),
+        alignment: Alignment.centerLeft,
+      ),
+      child: Text(reason),
+    );
   }
 
   Future<void> _handleRest() async {
@@ -918,6 +1046,14 @@ class _NowTabState extends ConsumerState<NowTab>
                                             primaryExecutorCard,
                                             false,
                                           ),
+                                      onContinueAfterSettlement: () =>
+                                          _handleContinueAfterSettlement(
+                                            primaryExecutorCard,
+                                          ),
+                                      onExitAfterSettlement: () =>
+                                          _handleExitAfterSettlement(
+                                            primaryExecutorCard,
+                                          ),
                                       onTap: () =>
                                           _handleCardTap(primaryExecutorCard),
                                       timeChipText: _getTimeChipText(
@@ -1098,7 +1234,7 @@ class _NowTabState extends ConsumerState<NowTab>
       builder: (context) => ActionNoteDialog(
         title: card.plan?.items.firstOrNull?.title ?? "파트너의 실천",
         hintText: "따뜻한 피드백을 남겨주세요 (선택)",
-        buttonLabel: "그래",
+        buttonLabel: "확인하고 보내기",
       ),
     );
 
@@ -1380,6 +1516,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final VoidCallback? onPokeAck; // Added
   final VoidCallback? onAcceptPromise;
   final VoidCallback? onRejectPromise;
+  final VoidCallback? onContinueAfterSettlement;
+  final VoidCallback? onExitAfterSettlement;
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? recordGazeText;
@@ -1395,6 +1533,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
     this.onPokeAck, // Added
     this.onAcceptPromise,
     this.onRejectPromise,
+    this.onContinueAfterSettlement,
+    this.onExitAfterSettlement,
     this.onTap,
     this.timeChipText,
     this.timeChipType,
@@ -1554,13 +1694,17 @@ class _PrimaryExecutorCard extends StatelessWidget {
           // Next Action usually uses headerMessage or defaults to nothing special
           break;
         case HomeCardState.poked: // Type 1-8: 찌르기 받음
-          statusMessage = '똑똑... 혹시 잊으셨나요?'; // Fallback message
+          statusMessage = '똑똑! 파트너가 기다리고 있어요';
           break;
         case HomeCardState.promiseProposed:
           statusMessage = '약속 제안이 도착했어요';
           break;
         case HomeCardState.promiseSettled:
           statusMessage = '약속 결과가 나왔어요';
+          break;
+        case HomeCardState.pilotSettlement:
+          statusMessage = '4주 정산이 필요해요';
+          subMessage = '똑똑이 실제로 약속을 당겼는지 확인하고 다음 4주를 정해요.';
           break;
         default:
           break;
@@ -1681,11 +1825,107 @@ class _PrimaryExecutorCard extends StatelessWidget {
       }
     }
 
+    if (model.state == HomeCardState.pilotSettlement && model.plan != null) {
+      children.add(const SizedBox(height: 12));
+      children.add(_buildPilotSettlementDetail(context, model.plan!));
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: children,
     );
+  }
+
+  Widget _buildPilotSettlementDetail(BuildContext context, Plan plan) {
+    final totalScheduled = _scheduledDaysCount(plan);
+    final completed = plan.completedDates.length;
+    final feedback = _partnerFeedbackCount(plan);
+    final missed = (totalScheduled - completed).clamp(0, totalScheduled);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _buildSettlementMetric('완료', '$completed일')),
+              Expanded(child: _buildSettlementMetric('파트너 반응', '$feedback회')),
+              Expanded(child: _buildSettlementMetric('놓친 날', '$missed일')),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            completed >= 12
+                ? '의미 있는 완료 기준인 12일을 넘겼어요. 다음 4주를 이어갈지 바로 정할 차례예요.'
+                : '완주보다 중요한 건 어디서 끊겼는지 남기는 거예요. 다음 실험을 줄일 수 있게 사유를 남겨요.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettlementMetric(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w800,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+        ),
+      ],
+    );
+  }
+
+  int _scheduledDaysCount(Plan plan) {
+    final scheduledWeekdays = plan.items.expand((item) => item.days).toSet();
+    if (scheduledWeekdays.isEmpty) {
+      return plan.endDate.difference(plan.startDate).inDays + 1;
+    }
+
+    var count = 0;
+    var day = DateTime(
+      plan.startDate.year,
+      plan.startDate.month,
+      plan.startDate.day,
+    );
+    final end = DateTime(
+      plan.endDate.year,
+      plan.endDate.month,
+      plan.endDate.day,
+    );
+    while (!day.isAfter(end)) {
+      if (scheduledWeekdays.contains(day.weekday)) count++;
+      day = day.add(const Duration(days: 1));
+    }
+    return count;
+  }
+
+  int _partnerFeedbackCount(Plan plan) {
+    var count = plan.verifiedDates.length + plan.rescuedDates.length;
+    if (plan.lastCheerAt != null) count++;
+    if (plan.lastPokeAt != null) count++;
+    return count;
   }
 
   Widget _buildPromiseDetail(BuildContext context, Promise promise) {
@@ -1856,6 +2096,103 @@ class _PrimaryExecutorCard extends StatelessWidget {
     VoidCallback? onPressed;
     String buttonText;
 
+    if (model.state == HomeCardState.poked) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onDidIt ?? onPokeAck,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: buttonTextColor,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                '지금 처리하기',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: buttonTextColor,
+                ),
+              ),
+            ),
+          ),
+          if (onPokeAck != null) ...[
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: onPokeAck,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textSecondary,
+                minimumSize: const Size(double.infinity, 32),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text(
+                '똑똑 확인만 하기',
+                style: TextStyle(
+                  fontSize: 13,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+
+    if (model.state == HomeCardState.pilotSettlement) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onContinueAfterSettlement,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                '다음 4주 시작하기',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: onExitAfterSettlement,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              minimumSize: const Size(double.infinity, 32),
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              '이번 4주는 여기서 멈추기',
+              style: TextStyle(
+                fontSize: 13,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     if (model.state == HomeCardState.nowAction) {
       buttonText = l10n.homeDidIt;
       onPressed = onDidIt;
@@ -1868,9 +2205,6 @@ class _PrimaryExecutorCard extends StatelessWidget {
     } else if (model.state == HomeCardState.rejected) {
       buttonText = '수정하기'; // "Modify"
       onPressed = onModify;
-    } else if (model.state == HomeCardState.poked) {
-      buttonText = '네'; // "Yes" (Ack)
-      onPressed = onPokeAck;
     } else if (model.state == HomeCardState.promiseProposed) {
       return _buildPromiseProposedButtons(context);
     } else if (model.state == HomeCardState.promiseSettled) {
@@ -2364,7 +2698,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
 
     switch (model.state) {
       case HomeCardState.partnerAction:
-        statusMessage = '${l10n.homeChecked} · ${l10n.homeThankYou}';
+        statusMessage = '확인 대기 · 응원 필요';
         break;
       case HomeCardState.todayEmpty:
         statusMessage = l10n.nowQuietRest;
@@ -2441,7 +2775,7 @@ class _ManagerQuickCard extends StatelessWidget {
 
     String headerText;
     if (model.state == HomeCardState.partnerAction) {
-      headerText = l10n.nowPartnerDidIt;
+      headerText = '확인하고 당겨줄 차례';
     } else if (model.state == HomeCardState.partnerPlanCreate ||
         model.state == HomeCardState.partnerPlanModify) {
       if (model.headerMessage == '조정 중' ||
@@ -2569,7 +2903,6 @@ class _ManagerQuickCard extends StatelessWidget {
                 model.state == HomeCardState.partnerPlanModify) ...[
               if (model.headerMessage != '함께하는 중') ...[
                 const SizedBox(height: 20),
-                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
@@ -2643,7 +2976,7 @@ class _ManagerQuickCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: Text(
-                  '상대방이 아직 새로운 약속을 만들지 않았어요. 똑똑! 신호를 보내볼까요?',
+                  '상대방이 아직 새로운 약속을 만들지 않았어요. 약속이 묻히기 전에 똑똑으로 불러볼까요?',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 16,
@@ -2668,7 +3001,7 @@ class _ManagerQuickCard extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    "똑똑! 하기",
+                    "똑똑! 약속 만들라고 하기",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -2678,7 +3011,9 @@ class _ManagerQuickCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: Text(
-                  '${partnerName ?? "파트너"}님이 아직 소식이 없어요. 똑똑! 하고 깨워볼까요?',
+                  model.headerMessage == '놓친 약속이 떴어요'
+                      ? '${partnerName ?? "파트너"}님의 약속이 놓친 약속으로 남았어요. 똑똑으로 다시 당겨주세요.'
+                      : '${partnerName ?? "파트너"}님의 약속이 아직 조용해요. 묻히기 전에 똑똑으로 당겨주세요.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 16,
@@ -2703,7 +3038,7 @@ class _ManagerQuickCard extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    "똑똑! 하기",
+                    "똑똑! 당기기",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -2758,7 +3093,7 @@ class _ManagerQuickCard extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    "그래",
+                    "확인하고 응원 보내기",
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                 ),

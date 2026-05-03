@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
+import '../../../../providers/repository_provider.dart';
+import '../../../../routes/app_router.dart';
 import '../../../../services/notification_service.dart';
 import '../../domain/study_plan_template.dart';
 // No repository_provider or home_provider needed here if only using the viewModel state
@@ -177,6 +179,8 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
     final planCreateState =
         ref.watch(planCreateViewModelProvider).value ??
         PlanCreateState(notificationTime: NotificationTime.preset('dinner'));
+    final connectedProfiles = ref.watch(connectedProfilesProvider).value ?? [];
+    final partnerName = connectedProfiles.firstOrNull?.user.displayName;
     final currentStep = planCreateState.currentStep;
     const totalSteps = 3;
 
@@ -327,12 +331,22 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                               .read(planCreateViewModelProvider.notifier)
                               .dispatch(ToggleDayIntent(dayIndex));
                         },
+                        onDayPresetSelected: (selectedDays) {
+                          ref
+                              .read(planCreateViewModelProvider.notifier)
+                              .dispatch(UpdateSelectedDaysIntent(selectedDays));
+                        },
                         notificationTime: planCreateState.notificationTime,
                         onTimeChanged: (newTime) {
                           ref
                               .read(planCreateViewModelProvider.notifier)
                               .dispatch(UpdateNotificationTimeIntent(newTime));
                         },
+                        selectedCategoryId: planCreateState.selectedCategoryId,
+                        action: planCreateState.action,
+                        partnerName: partnerName,
+                        hasPartner: connectedProfiles.isNotEmpty,
+                        onConnectPartner: () => context.push(AppRoutes.connect),
                       ),
                     ),
                   ],

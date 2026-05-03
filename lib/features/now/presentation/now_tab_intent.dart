@@ -280,3 +280,29 @@ class RestPlanIntent extends NowTabIntent {
   @override
   int get hashCode => planId.hashCode;
 }
+
+/// 4주 파일럿 정산 응답 기록
+class RecordPilotSettlementIntent extends NowTabIntent {
+  final String planId;
+  final String nextPlanIntent;
+  final String? exitReason;
+
+  const RecordPilotSettlementIntent(
+    this.planId, {
+    required this.nextPlanIntent,
+    this.exitReason,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RecordPilotSettlementIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId &&
+          nextPlanIntent == other.nextPlanIntent &&
+          exitReason == other.exitReason;
+
+  @override
+  int get hashCode =>
+      planId.hashCode ^ nextPlanIntent.hashCode ^ (exitReason?.hashCode ?? 0);
+}

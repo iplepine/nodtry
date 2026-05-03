@@ -87,6 +87,11 @@ class ToggleDayIntent extends PlanCreateIntent {
   const ToggleDayIntent(this.dayIndex);
 }
 
+class UpdateSelectedDaysIntent extends PlanCreateIntent {
+  final Set<int> selectedDays;
+  const UpdateSelectedDaysIntent(this.selectedDays);
+}
+
 class UpdateNotificationTimeIntent extends PlanCreateIntent {
   final NotificationTime notificationTime;
   const UpdateNotificationTimeIntent(this.notificationTime);
