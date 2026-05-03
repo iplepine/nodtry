@@ -48,6 +48,8 @@
   - `lastCheerType` (string?): 'poke' | 'cheer' | 'poke_acked'
   - `lastCheerAt` (timestamp?): 마지막 응원/찌르기 일시
   - `lastCheerMessage` (string?): 응원 메시지
+  - `lastMissedNotifiedAt` (timestamp?): 오늘 미실천 자동 전달을 마지막으로 보낸 시각
+  - `lastMissedItemTitle` (string?): 마지막 미실천 자동 전달 대상 항목명
 
 ### `actions`
 매일의 수행 기록 (History Tab의 소스).

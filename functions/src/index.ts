@@ -3,6 +3,27 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+const MISSED_ACTION_GRACE_MINUTES = 30;
+
+type KstDateParts = {
+    year: number;
+    month: number;
+    day: number;
+    weekday: number;
+    minutes: number;
+};
+
+type PlanItemData = {
+    title?: string;
+    days?: number[];
+    notificationTime?: {
+        type?: string;
+        hour?: number;
+        minute?: number;
+    };
+};
+
 function buildMessagePayload(
     token: string,
     title: string,
@@ -31,6 +52,75 @@ function buildMessagePayload(
             },
         },
     };
+}
+
+function toKstParts(date: Date): KstDateParts {
+    const shifted = new Date(date.getTime() + KST_OFFSET_MS);
+    const jsDay = shifted.getUTCDay();
+    const weekday = jsDay === 0 ? 7 : jsDay;
+    return {
+        year: shifted.getUTCFullYear(),
+        month: shifted.getUTCMonth() + 1,
+        day: shifted.getUTCDate(),
+        weekday,
+        minutes: shifted.getUTCHours() * 60 + shifted.getUTCMinutes(),
+    };
+}
+
+function isSameKstDay(value: admin.firestore.Timestamp | undefined, target: KstDateParts): boolean {
+    if (!value) return false;
+    const parts = toKstParts(value.toDate());
+    return parts.year === target.year &&
+        parts.month === target.month &&
+        parts.day === target.day;
+}
+
+function isBeforeKstDay(value: admin.firestore.Timestamp | undefined, target: KstDateParts): boolean {
+    if (!value) return false;
+    const parts = toKstParts(value.toDate());
+    if (parts.year !== target.year) return parts.year < target.year;
+    if (parts.month !== target.month) return parts.month < target.month;
+    return parts.day < target.day;
+}
+
+function isAfterKstDay(value: admin.firestore.Timestamp | undefined, target: KstDateParts): boolean {
+    if (!value) return false;
+    const parts = toKstParts(value.toDate());
+    if (parts.year !== target.year) return parts.year > target.year;
+    if (parts.month !== target.month) return parts.month > target.month;
+    return parts.day > target.day;
+}
+
+function hasCoveredToday(plan: admin.firestore.DocumentData, today: KstDateParts): boolean {
+    const fields = ["completedDates", "skippedDates", "restedDates", "rescuedDates"];
+    return fields.some((field) => {
+        const values = plan[field] as admin.firestore.Timestamp[] | undefined;
+        return values?.some((value) => isSameKstDay(value, today)) ?? false;
+    });
+}
+
+function dueItemForMissedNotice(plan: admin.firestore.DocumentData, today: KstDateParts): PlanItemData | null {
+    const items = (plan.items ?? []) as PlanItemData[];
+    const dueItems = items.filter((item) => {
+        const notificationTime = item.notificationTime;
+        if (!item.days?.includes(today.weekday)) return false;
+        if (!notificationTime || notificationTime.type === "none") return false;
+
+        const hour = notificationTime.hour ?? 23;
+        const minute = notificationTime.minute ?? 59;
+        const dueMinutes = hour * 60 + minute + MISSED_ACTION_GRACE_MINUTES;
+        return today.minutes >= dueMinutes;
+    });
+
+    dueItems.sort((a, b) => {
+        const aTime = a.notificationTime;
+        const bTime = b.notificationTime;
+        const aMinutes = (aTime?.hour ?? 23) * 60 + (aTime?.minute ?? 59);
+        const bMinutes = (bTime?.hour ?? 23) * 60 + (bTime?.minute ?? 59);
+        return bMinutes - aMinutes;
+    });
+
+    return dueItems[0] ?? null;
 }
 
 export const onCheerCreated = functions.firestore
@@ -206,6 +296,69 @@ export const onActionCompleted = functions.firestore
         }
     });
 
+export const notifyMissedActions = functions.pubsub
+    .schedule("every 30 minutes")
+    .timeZone("Asia/Seoul")
+    .onRun(async () => {
+        const today = toKstParts(new Date());
+        const plansSnapshot = await admin.firestore()
+            .collection("plans")
+            .where("state", "==", "active")
+            .get();
+
+        let sentCount = 0;
+        for (const planDoc of plansSnapshot.docs) {
+            const plan = planDoc.data();
+            const userId = plan.userId as string | undefined;
+            const managerId = plan.managerId as string | undefined;
+            if (!userId || !managerId) continue;
+
+            const startDate = plan.startDate as admin.firestore.Timestamp | undefined;
+            const endDate = plan.endDate as admin.firestore.Timestamp | undefined;
+            if (isAfterKstDay(startDate, today) || isBeforeKstDay(endDate, today)) continue;
+            if (hasCoveredToday(plan, today)) continue;
+
+            const lastMissedNotifiedAt = plan.lastMissedNotifiedAt as admin.firestore.Timestamp | undefined;
+            if (isSameKstDay(lastMissedNotifiedAt, today)) continue;
+
+            const dueItem = dueItemForMissedNotice(plan, today);
+            if (!dueItem) continue;
+
+            const managerDoc = await admin.firestore().collection("users").doc(managerId).get();
+            const fcmToken = managerDoc.data()?.fcmToken;
+            if (!fcmToken) continue;
+
+            const userDoc = await admin.firestore().collection("users").doc(userId).get();
+            const senderName = userDoc.exists ? userDoc.data()?.displayName || "파트너" : "파트너";
+            const itemTitle = dueItem.title || "오늘 약속";
+
+            const title = "약속 시간이 지났어요";
+            const body = `${senderName}님이 아직 '${itemTitle}' 약속을 처리하지 않았어요. 한 번 물어봐 주세요.`;
+
+            await planDoc.ref.update({
+                lastMissedNotifiedAt: admin.firestore.FieldValue.serverTimestamp(),
+                lastMissedItemTitle: itemTitle,
+                lastUpdatedBy: "system_missed_action",
+            });
+
+            await admin.messaging().send(buildMessagePayload(
+                fcmToken,
+                title,
+                body,
+                {
+                    type: "action_missed",
+                    planId: planDoc.id,
+                    userId,
+                    senderName,
+                    itemTitle,
+                },
+            ));
+            sentCount++;
+        }
+
+        console.log(`notifyMissedActions sent ${sentCount} missed action notifications`);
+    });
+
 export const onPlanUpdated = functions.firestore
     .document("plans/{planId}")
     .onUpdate(async (change: functions.Change<functions.firestore.QueryDocumentSnapshot>, context: functions.EventContext) => {
@@ -239,10 +392,16 @@ export const onPlanUpdated = functions.firestore
             let body = "";
             let type = "plan_updated";
 
+            const hasNewPoke =
+                after.lastPokeAt?.seconds !== before.lastPokeAt?.seconds ||
+                (after.lastCheerType === "poke" && before.lastCheerType !== "poke");
+
             // A. 찌르기 (Poke) 감지
-            if (after.lastCheerType === "poke" && before.lastCheerType !== "poke") {
+            if (hasNewPoke) {
                 title = "똑똑! ✊";
-                body = after.lastCheerMessage || `${senderName}님이 똑똑! 신호를 보냈어요.`;
+                body = after.lastPokeMessage ||
+                    after.lastCheerMessage ||
+                    `${senderName}님이 똑똑! 신호를 보냈어요.`;
                 type = "poke";
             }
             // B. 계획 승인 감지
