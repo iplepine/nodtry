@@ -6,6 +6,9 @@ import '../../domain/study_plan_template.dart';
 class PlanActionStep extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
+  final List<PlanCategory> categories;
+  final String selectedCategoryId;
+  final ValueChanged<PlanCategory> onCategorySelected;
   final List<StudyPlanTemplate> templates;
   final String? selectedTemplateId;
   final ValueChanged<StudyPlanTemplate> onTemplateSelected;
@@ -14,6 +17,9 @@ class PlanActionStep extends StatelessWidget {
     super.key,
     required this.controller,
     required this.focusNode,
+    required this.categories,
+    required this.selectedCategoryId,
+    required this.onCategorySelected,
     required this.templates,
     required this.selectedTemplateId,
     required this.onTemplateSelected,
@@ -22,6 +28,13 @@ class PlanActionStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final selectedCategory = categories.firstWhere(
+      (category) => category.id == selectedCategoryId,
+      orElse: () => categories.first,
+    );
+    final categoryTemplates = templates
+        .where((template) => template.categoryId == selectedCategoryId)
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,7 +54,7 @@ class PlanActionStep extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          '스터디 템플릿',
+          '주로 미루는 약속',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -52,14 +65,14 @@ class PlanActionStep extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: templates.map((template) {
-            final isSelected = selectedTemplateId == template.id;
+          children: categories.map((category) {
+            final isSelected = selectedCategoryId == category.id;
             return ChoiceChip(
               selected: isSelected,
-              onSelected: (_) => onTemplateSelected(template),
-              label: Text('${template.label} · 주 ${template.weeklyCount}'),
+              onSelected: (_) => onCategorySelected(category),
+              label: Text(category.label),
               avatar: Icon(
-                Icons.school_rounded,
+                _iconForCategory(category.id),
                 size: 16,
                 color: isSelected ? AppColors.primary : AppColors.textSecondary,
               ),
@@ -78,7 +91,64 @@ class PlanActionStep extends StatelessWidget {
             );
           }).toList(),
         ),
+        const SizedBox(height: 8),
+        Text(
+          selectedCategory.description,
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+        ),
+        if (categoryTemplates.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          Text(
+            '추천 약속',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: categoryTemplates.map((template) {
+              final isSelected = selectedTemplateId == template.id;
+              return ChoiceChip(
+                selected: isSelected,
+                onSelected: (_) => onTemplateSelected(template),
+                label: Text('${template.label} · 주 ${template.weeklyCount}'),
+                avatar: Icon(
+                  Icons.bolt_rounded,
+                  size: 16,
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.textSecondary,
+                ),
+                selectedColor: AppColors.primary.withValues(alpha: 0.1),
+                backgroundColor: AppColors.surface,
+                labelStyle: TextStyle(
+                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                ),
+                side: BorderSide(
+                  color: isSelected ? AppColors.primary : AppColors.divider,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
         const SizedBox(height: 20),
+        Text(
+          '내 약속',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
         TextField(
           controller: controller,
           focusNode: focusNode,
@@ -113,5 +183,18 @@ class PlanActionStep extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  IconData _iconForCategory(String categoryId) {
+    switch (categoryId) {
+      case planCategoryStudy:
+        return Icons.menu_book_rounded;
+      case planCategoryExercise:
+        return Icons.fitness_center_rounded;
+      case planCategoryCustom:
+        return Icons.edit_rounded;
+      default:
+        return Icons.circle_rounded;
+    }
   }
 }

@@ -272,6 +272,20 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                       child: PlanActionStep(
                         controller: _actionController,
                         focusNode: _actionFocus,
+                        categories: planCategories,
+                        selectedCategoryId: planCreateState.selectedCategoryId,
+                        onCategorySelected: (category) {
+                          _actionController.clear();
+                          _descriptionController.clear();
+                          ref
+                              .read(planCreateViewModelProvider.notifier)
+                              .dispatch(SelectPlanCategoryIntent(category));
+                          if (category.id == planCategoryCustom) {
+                            _actionFocus.requestFocus();
+                          } else {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                          }
+                        },
                         templates: studyPlanTemplates,
                         selectedTemplateId: planCreateState.selectedTemplateId,
                         onTemplateSelected: (template) {

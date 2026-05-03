@@ -79,10 +79,11 @@ void main() {
     expect(state.notificationTime.hour, 21);
     expect(state.notificationTime.minute, 0);
     expect(state.currentStep, 1);
+    expect(state.selectedCategoryId, planCategoryStudy);
   });
 
   test(
-    'apply study template fills action, description, days, and reminder',
+    'apply recommendation fills action, category, days, and reminder',
     () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -97,6 +98,7 @@ void main() {
           .dispatch(ApplyStudyTemplateIntent(template));
 
       final state = container.read(planCreateViewModelProvider).value!;
+      expect(state.selectedCategoryId, planCategoryStudy);
       expect(state.selectedTemplateId, 'english_sentences');
       expect(state.action, '영어 문장 10개 소리내어 읽기');
       expect(state.description, contains('영어'));
@@ -105,6 +107,80 @@ void main() {
       expect(state.notificationTime.minute, 0);
     },
   );
+
+  test(
+    'selecting exercise category clears action and waits for a choice',
+    () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await container.read(planCreateViewModelProvider.future);
+
+      await container
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(const UpdateActionIntent('이전 입력'));
+      final category = planCategories.firstWhere(
+        (category) => category.id == planCategoryExercise,
+      );
+
+      await container
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(SelectPlanCategoryIntent(category));
+
+      final state = container.read(planCreateViewModelProvider).value!;
+      expect(state.selectedCategoryId, planCategoryExercise);
+      expect(state.selectedTemplateId, isNull);
+      expect(state.action, isEmpty);
+      expect(state.selectedDays, {0, 2, 4});
+      expect(state.notificationTime.hour, 21);
+    },
+  );
+
+  test(
+    'selecting direct input clears recommendations and focuses custom flow',
+    () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await container.read(planCreateViewModelProvider.future);
+
+      final template = studyPlanTemplates.first;
+      await container
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(ApplyStudyTemplateIntent(template));
+      final category = planCategories.firstWhere(
+        (category) => category.id == planCategoryCustom,
+      );
+
+      await container
+          .read(planCreateViewModelProvider.notifier)
+          .dispatch(SelectPlanCategoryIntent(category));
+
+      final state = container.read(planCreateViewModelProvider).value!;
+      expect(state.selectedCategoryId, planCategoryCustom);
+      expect(state.selectedTemplateId, isNull);
+      expect(state.action, isEmpty);
+      expect(state.description, isEmpty);
+    },
+  );
+
+  test('exercise recommendation uses exercise category', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await container.read(planCreateViewModelProvider.future);
+
+    final template = studyPlanTemplates.firstWhere(
+      (template) => template.id == 'walking',
+    );
+
+    await container
+        .read(planCreateViewModelProvider.notifier)
+        .dispatch(ApplyStudyTemplateIntent(template));
+
+    final state = container.read(planCreateViewModelProvider).value!;
+    expect(state.selectedCategoryId, planCategoryExercise);
+    expect(state.selectedTemplateId, 'walking');
+    expect(state.action, '30분 걷기');
+    expect(state.selectedDays, {0, 2, 4});
+  });
 
   test('manual edits clear the selected template marker', () async {
     final container = ProviderContainer();
@@ -121,6 +197,7 @@ void main() {
 
     final state = container.read(planCreateViewModelProvider).value!;
     expect(state.action, '내 방식으로 바꾼 공부');
+    expect(state.selectedCategoryId, planCategoryCustom);
     expect(state.selectedTemplateId, isNull);
   });
 

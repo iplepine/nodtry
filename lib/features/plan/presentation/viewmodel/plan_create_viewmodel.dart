@@ -4,6 +4,7 @@ import '../plan_create_state.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../providers/home_provider.dart';
+import '../../domain/study_plan_template.dart';
 
 final planCreateViewModelProvider =
     AsyncNotifierProvider<PlanCreateViewModel, PlanCreateState>(
@@ -37,12 +38,17 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       state = AsyncValue.data(_initialState());
     } else if (intent is UpdateActionIntent) {
       state = AsyncValue.data(
-        prevState.copyWith(action: intent.action, selectedTemplateId: null),
+        prevState.copyWith(
+          action: intent.action,
+          selectedCategoryId: planCategoryCustom,
+          selectedTemplateId: null,
+        ),
       );
     } else if (intent is UpdateDescriptionIntent) {
       state = AsyncValue.data(
         prevState.copyWith(
           description: intent.description,
+          selectedCategoryId: planCategoryCustom,
           selectedTemplateId: null,
         ),
       );
@@ -54,12 +60,17 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         newDays.add(intent.dayIndex);
       }
       state = AsyncValue.data(
-        prevState.copyWith(selectedDays: newDays, selectedTemplateId: null),
+        prevState.copyWith(
+          selectedDays: newDays,
+          selectedCategoryId: planCategoryCustom,
+          selectedTemplateId: null,
+        ),
       );
     } else if (intent is UpdateNotificationTimeIntent) {
       state = AsyncValue.data(
         prevState.copyWith(
           notificationTime: intent.notificationTime,
+          selectedCategoryId: planCategoryCustom,
           selectedTemplateId: null,
         ),
       );
@@ -70,9 +81,34 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           description: intent.template.description,
           selectedDays: Set<int>.from(intent.template.selectedDayIndexes),
           notificationTime: intent.template.notificationTime,
+          selectedCategoryId: intent.template.categoryId,
           selectedTemplateId: intent.template.id,
         ),
       );
+    } else if (intent is SelectPlanCategoryIntent) {
+      if (intent.category.id == planCategoryCustom) {
+        state = AsyncValue.data(
+          prevState.copyWith(
+            action: '',
+            description: '',
+            selectedDays: _defaultSelectedDays,
+            notificationTime: _defaultNotificationTime(),
+            selectedCategoryId: planCategoryCustom,
+            selectedTemplateId: null,
+          ),
+        );
+      } else {
+        state = AsyncValue.data(
+          prevState.copyWith(
+            action: '',
+            description: '',
+            selectedDays: _defaultSelectedDays,
+            notificationTime: _defaultNotificationTime(),
+            selectedCategoryId: intent.category.id,
+            selectedTemplateId: null,
+          ),
+        );
+      }
     } else if (intent is NextStepIntent) {
       if (prevState.currentStep < 3) {
         state = AsyncValue.data(
@@ -88,6 +124,9 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
     } else if (intent is InitializePlanIntent) {
       final plan = intent.plan;
       final item = plan.items.first;
+      final matchingTemplate = studyPlanTemplates
+          .where((template) => template.action == item.title)
+          .firstOrNull;
       state = AsyncValue.data(
         prevState.copyWith(
           existingPlanId: plan.id,
@@ -96,6 +135,9 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           description: item.description ?? '',
           selectedDays: item.days.map((d) => d - 1).toSet(), // 1-7 -> 0-6
           notificationTime: item.notificationTime ?? _defaultNotificationTime(),
+          selectedCategoryId:
+              matchingTemplate?.categoryId ?? planCategoryCustom,
+          selectedTemplateId: matchingTemplate?.id,
         ),
       );
     } else if (intent is SavePlanIntent) {

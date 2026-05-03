@@ -11,6 +11,7 @@ class PlanCreateState {
   final String description;
   final Set<int> selectedDays;
   final NotificationTime notificationTime;
+  final String selectedCategoryId;
   final String? selectedTemplateId;
   final bool isSaving;
   final String? errorMessage;
@@ -23,6 +24,7 @@ class PlanCreateState {
     this.description = '',
     this.selectedDays = const {},
     required this.notificationTime,
+    this.selectedCategoryId = planCategoryStudy,
     this.selectedTemplateId,
     this.isSaving = false,
     this.errorMessage,
@@ -36,6 +38,7 @@ class PlanCreateState {
     String? description,
     Set<int>? selectedDays,
     NotificationTime? notificationTime,
+    String? selectedCategoryId,
     Object? selectedTemplateId = _unset,
     bool? isSaving,
     String? errorMessage,
@@ -48,6 +51,7 @@ class PlanCreateState {
       description: description ?? this.description,
       selectedDays: selectedDays ?? this.selectedDays,
       notificationTime: notificationTime ?? this.notificationTime,
+      selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
       selectedTemplateId: selectedTemplateId == _unset
           ? this.selectedTemplateId
           : selectedTemplateId as String?,
@@ -91,6 +95,11 @@ class UpdateNotificationTimeIntent extends PlanCreateIntent {
 class ApplyStudyTemplateIntent extends PlanCreateIntent {
   final StudyPlanTemplate template;
   const ApplyStudyTemplateIntent(this.template);
+}
+
+class SelectPlanCategoryIntent extends PlanCreateIntent {
+  final PlanCategory category;
+  const SelectPlanCategoryIntent(this.category);
 }
 
 class NextStepIntent extends PlanCreateIntent {
