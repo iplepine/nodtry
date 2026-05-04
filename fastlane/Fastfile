@@ -7,10 +7,10 @@ lane :deploy_all do
   # Upload in parallel
   threads = []
   threads << Thread.new do
-    sh("cd ../android && bundle exec fastlane internal")
+    sh("cd ../android && fastlane internal")
   end
   threads << Thread.new do
-    sh("cd ../ios && bundle exec fastlane beta")
+    sh("cd ../ios && fastlane beta")
   end
   threads.each(&:join)
 end
@@ -18,14 +18,13 @@ end
 desc "Build and upload Android (production) + iOS (release) simultaneously"
 lane :release_all do
   sh("cd .. && flutter build appbundle --release")
-  sh("cd .. && flutter build ipa --release --export-options-plist=ios/ExportOptions.plist")
 
   threads = []
   threads << Thread.new do
-    sh("cd ../android && bundle exec fastlane production")
+    sh("cd ../android && fastlane production")
   end
   threads << Thread.new do
-    sh("cd ../ios && bundle exec fastlane release")
+    sh("cd ../ios && fastlane release")
   end
   threads.each(&:join)
 end
@@ -34,10 +33,10 @@ desc "Upload only (skip build) - Android internal + iOS beta"
 lane :upload_all do
   threads = []
   threads << Thread.new do
-    sh("cd ../android && bundle exec fastlane internal")
+    sh("cd ../android && fastlane internal")
   end
   threads << Thread.new do
-    sh("cd ../ios && bundle exec fastlane beta")
+    sh("cd ../ios && fastlane beta")
   end
   threads.each(&:join)
 end
