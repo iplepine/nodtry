@@ -6,11 +6,11 @@ ID: `R-001-study-sprint-prep`
 
 연결 Goal: `G-001-study-sprint-pilot`
 
-마지막 갱신일: 2026-05-03
+마지막 갱신일: 2026-05-05
 
 ## 목적
 
-4주 스터디 책임 스프린트를 10쌍 파일럿으로 운영할 수 있도록 제품 흐름, 지표, 문서를 준비한다.
+4주 스터디 책임 스프린트를 10쌍 파일럿으로 운영할 수 있도록 제품 흐름, 지표, 문서를 준비한다. 이후 확장은 공개 그룹이 아니라 약속별 책임망으로 둔다.
 
 ## 기간
 
@@ -39,6 +39,8 @@ ID: `R-001-study-sprint-prep`
 
 ## Backlog Tasks
 
+- `BT-005-week-one-pilot-ops-review`
+- `BT-006-responsibility-network-thin-slice`
 - 1주차 수동 집계 시트 작성
 
 ## 제외
@@ -46,8 +48,7 @@ ID: `R-001-study-sprint-prep`
 이번 roadmap에서 하지 않는 일:
 
 - 결제 구현
-- 다인 그룹
-- 공개 랭킹
+- 공개 다인 그룹/랭킹
 - 공부 타이머
 
 ## 검증 계획

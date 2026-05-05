@@ -1,6 +1,6 @@
 # 작업 관리
 
-마지막 갱신일: 2026-05-03
+마지막 갱신일: 2026-05-05
 
 ## 현재 집중
 
@@ -9,6 +9,10 @@
 현재 active roadmap: `R-001-study-sprint-prep`
 
 현재 active task: `BT-004-pilot-recruitment-ops`
+
+다음 후보 task: `BT-005-week-one-pilot-ops-review`
+
+이후 후보 task: `BT-006-responsibility-network-thin-slice`
 
 ## 읽는 순서
 

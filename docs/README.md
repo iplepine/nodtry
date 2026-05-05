@@ -21,4 +21,5 @@ Nodtry는 혼자 유지하기 어려운 작은 실천을 파트너와 함께 약
 - [go-to-market/STUDY_SPRINT_PILOT_PLAN.md](./go-to-market/STUDY_SPRINT_PILOT_PLAN.md): 다음 실행 단위
 - [go-to-market/VERTICAL_SELECTION.md](./go-to-market/VERTICAL_SELECTION.md): 1차 vertical 결정
 - [product/4_WEEK_PROGRAM_SPEC.md](./product/4_WEEK_PROGRAM_SPEC.md): 4주 스터디 프로그램 사양
+- [product/RESPONSIBILITY_NETWORK.md](./product/RESPONSIBILITY_NETWORK.md): 다대다 책임망 확장 원칙
 - [go-to-market/RETENTION_METRICS.md](./go-to-market/RETENTION_METRICS.md): 파일럿 성공 기준
