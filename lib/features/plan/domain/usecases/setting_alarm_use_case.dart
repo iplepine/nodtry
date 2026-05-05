@@ -25,6 +25,7 @@ class SettingAlarmUseCase {
 
     await _notificationService.schedulePlanReminder(
       planId: planNotificationId,
+      planIdentifier: plan.id,
       title: item.title,
       hour: notificationTime.hour,
       minute: notificationTime.minute,

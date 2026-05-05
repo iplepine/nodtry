@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -9,14 +10,33 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 const String _snoozeActionId = 'snooze_10m';
+const String _didItActionId = 'did_it_now';
+const String _skipTodayActionId = 'skip_today';
 const String _snoozeDarwinCategoryId = 'snooze_reminder';
 const int _planNotificationIdModulo = 200000000;
+
+@immutable
+class NotificationInputRequest {
+  final String? planId;
+  final String? title;
+
+  const NotificationInputRequest({this.planId, this.title});
+}
+
+@immutable
+class NotificationSkipRequest {
+  final String? planId;
+  final String? title;
+
+  const NotificationSkipRequest({this.planId, this.title});
+}
 
 abstract class PlanReminderScheduler {
   Future<void> requestPermissions();
 
   Future<void> schedulePlanReminder({
     required int planId,
+    String? planIdentifier,
     required String title,
     required int hour,
     required int minute,
@@ -43,7 +63,31 @@ class NotificationService implements PlanReminderScheduler {
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  final StreamController<NotificationInputRequest> _inputRequestController =
+      StreamController<NotificationInputRequest>.broadcast();
+  final StreamController<NotificationSkipRequest> _skipRequestController =
+      StreamController<NotificationSkipRequest>.broadcast();
+
   bool _isInitialized = false;
+  NotificationInputRequest? _pendingInputRequest;
+  NotificationSkipRequest? _pendingSkipRequest;
+
+  Stream<NotificationInputRequest> get inputRequests =>
+      _inputRequestController.stream;
+  Stream<NotificationSkipRequest> get skipRequests =>
+      _skipRequestController.stream;
+
+  NotificationInputRequest? takePendingInputRequest() {
+    final request = _pendingInputRequest;
+    _pendingInputRequest = null;
+    return request;
+  }
+
+  NotificationSkipRequest? takePendingSkipRequest() {
+    final request = _pendingSkipRequest;
+    _pendingSkipRequest = null;
+    return request;
+  }
 
   Future<void> init() async {
     if (_isInitialized) {
@@ -69,6 +113,20 @@ class NotificationService implements PlanReminderScheduler {
             DarwinNotificationCategory(
               _snoozeDarwinCategoryId,
               actions: <DarwinNotificationAction>[
+                DarwinNotificationAction.plain(
+                  _didItActionId,
+                  '했어',
+                  options: <DarwinNotificationActionOption>{
+                    DarwinNotificationActionOption.foreground,
+                  },
+                ),
+                DarwinNotificationAction.plain(
+                  _skipTodayActionId,
+                  '오늘은 패스',
+                  options: <DarwinNotificationActionOption>{
+                    DarwinNotificationActionOption.foreground,
+                  },
+                ),
                 DarwinNotificationAction.plain(_snoozeActionId, '10분 후 다시 묻기'),
               ],
             ),
@@ -87,6 +145,14 @@ class NotificationService implements PlanReminderScheduler {
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
     _isInitialized = true;
+
+    final launchDetails = await flutterLocalNotificationsPlugin
+        .getNotificationAppLaunchDetails();
+    final launchResponse = launchDetails?.notificationResponse;
+    if (launchDetails?.didNotificationLaunchApp == true &&
+        launchResponse != null) {
+      await handleNotificationResponse(launchResponse);
+    }
   }
 
   @override
@@ -127,6 +193,7 @@ class NotificationService implements PlanReminderScheduler {
   @override
   Future<void> schedulePlanReminder({
     required int planId, // Using plan.hashCode or similar as base
+    String? planIdentifier,
     required String title,
     required int hour,
     required int minute,
@@ -156,6 +223,7 @@ class NotificationService implements PlanReminderScheduler {
         minute: minute,
         day: day,
         scheduledDate: scheduledDate,
+        planIdentifier: planIdentifier,
       );
     }
   }
@@ -168,11 +236,13 @@ class NotificationService implements PlanReminderScheduler {
     required int minute,
     required int day, // 1=Mon, 7=Sun
     required tz.TZDateTime scheduledDate,
+    String? planIdentifier,
   }) async {
     final notificationDetails = _buildNotificationDetails(
       channelId: 'plan_reminders',
       channelName: 'Plan Reminders',
       channelDescription: 'Notifications for your daily plans',
+      includeReminderActions: true,
     );
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
@@ -185,7 +255,13 @@ class NotificationService implements PlanReminderScheduler {
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-      payload: _buildPayload(originalId: id, title: title, body: body),
+      payload: _buildPayload(
+        originalId: id,
+        title: title,
+        body: body,
+        planId: planIdentifier,
+        opensInput: true,
+      ),
     );
   }
 
@@ -264,6 +340,8 @@ class NotificationService implements PlanReminderScheduler {
         message.data['title'] ?? message.notification?.title ?? '새 알림';
     final body = message.data['body'] ?? message.notification?.body ?? '';
     final notificationId = _notificationIdForRemoteMessage(message);
+    final planId = message.data['planId'];
+    final opensInput = _remoteMessageOpensInput(message);
 
     await flutterLocalNotificationsPlugin.show(
       notificationId,
@@ -274,11 +352,14 @@ class NotificationService implements PlanReminderScheduler {
         channelName: 'General Notifications',
         channelDescription:
             'Notifications for cheer messages and partner actions',
+        includeReminderActions: opensInput,
       ),
       payload: _buildPayload(
         originalId: notificationId,
         title: title,
         body: body,
+        planId: planId,
+        opensInput: opensInput,
       ),
     );
   }
@@ -289,11 +370,14 @@ class NotificationService implements PlanReminderScheduler {
     required String title,
     required String body,
     required DateTime scheduledDate,
+    String? planId,
+    bool opensInput = false,
   }) async {
     final notificationDetails = _buildNotificationDetails(
       channelId: 'scheduled_notifications',
       channelName: 'Scheduled Notifications',
       channelDescription: 'Specific time notifications',
+      includeReminderActions: opensInput,
     );
     final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
 
@@ -310,7 +394,13 @@ class NotificationService implements PlanReminderScheduler {
       androidScheduleMode: await canScheduleExactAlarms()
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
-      payload: _buildPayload(originalId: id, title: title, body: body),
+      payload: _buildPayload(
+        originalId: id,
+        title: title,
+        body: body,
+        planId: planId,
+        opensInput: opensInput,
+      ),
     );
   }
 
@@ -336,13 +426,35 @@ class NotificationService implements PlanReminderScheduler {
   }
 
   Future<void> handleNotificationResponse(NotificationResponse response) async {
+    await _ensureInitializedForActionHandling();
+
+    final payload = _parsePayload(response.payload);
+    if (response.actionId == _didItActionId ||
+        (response.actionId == null &&
+            _payloadOpensInputOnNotificationTap(payload))) {
+      _emitInputRequest(
+        NotificationInputRequest(
+          planId: payload['planId'] as String?,
+          title: payload['title'] as String?,
+        ),
+      );
+      return;
+    }
+
+    if (response.actionId == _skipTodayActionId) {
+      _emitSkipRequest(
+        NotificationSkipRequest(
+          planId: payload['planId'] as String?,
+          title: payload['title'] as String?,
+        ),
+      );
+      return;
+    }
+
     if (response.actionId != _snoozeActionId) {
       return;
     }
 
-    await _ensureInitializedForActionHandling();
-
-    final payload = _parsePayload(response.payload);
     final title = payload['title'] as String?;
     final body = payload['body'] as String?;
     final originalId = payload['originalId'] as int?;
@@ -365,7 +477,27 @@ class NotificationService implements PlanReminderScheduler {
       title: title,
       body: body,
       scheduledDate: scheduledDate,
+      planId: payload['planId'] as String?,
+      opensInput: _payloadOpensInput(payload),
     );
+  }
+
+  void _emitInputRequest(NotificationInputRequest request) {
+    if (_inputRequestController.hasListener) {
+      _inputRequestController.add(request);
+      return;
+    }
+
+    _pendingInputRequest = request;
+  }
+
+  void _emitSkipRequest(NotificationSkipRequest request) {
+    if (_skipRequestController.hasListener) {
+      _skipRequestController.add(request);
+      return;
+    }
+
+    _pendingSkipRequest = request;
   }
 
   Future<void> _ensureInitializedForActionHandling() async {
@@ -378,6 +510,7 @@ class NotificationService implements PlanReminderScheduler {
     required String channelId,
     required String channelName,
     required String channelDescription,
+    bool includeReminderActions = false,
   }) {
     return NotificationDetails(
       android: AndroidNotificationDetails(
@@ -386,13 +519,27 @@ class NotificationService implements PlanReminderScheduler {
         channelDescription: channelDescription,
         importance: Importance.max,
         priority: Priority.high,
-        actions: const <AndroidNotificationAction>[
-          AndroidNotificationAction(_snoozeActionId, '10분 후 다시 묻기'),
-        ],
+        actions: includeReminderActions
+            ? const <AndroidNotificationAction>[
+                AndroidNotificationAction(
+                  _didItActionId,
+                  '했어',
+                  showsUserInterface: true,
+                ),
+                AndroidNotificationAction(
+                  _skipTodayActionId,
+                  '오늘은 패스',
+                  showsUserInterface: true,
+                ),
+                AndroidNotificationAction(_snoozeActionId, '10분 후 다시 묻기'),
+              ]
+            : null,
       ),
-      iOS: const DarwinNotificationDetails(
-        categoryIdentifier: _snoozeDarwinCategoryId,
-      ),
+      iOS: includeReminderActions
+          ? const DarwinNotificationDetails(
+              categoryIdentifier: _snoozeDarwinCategoryId,
+            )
+          : null,
     );
   }
 
@@ -400,11 +547,15 @@ class NotificationService implements PlanReminderScheduler {
     required int originalId,
     required String title,
     required String body,
+    String? planId,
+    bool opensInput = false,
   }) {
-    return jsonEncode(<String, Object>{
+    return jsonEncode(<String, Object?>{
       'originalId': originalId,
       'title': title,
       'body': body,
+      if (planId != null && planId.isNotEmpty) 'planId': planId,
+      'opensInput': opensInput,
     });
   }
 
@@ -443,5 +594,19 @@ class NotificationService implements PlanReminderScheduler {
         message.messageId ??
         '${message.data['type'] ?? ''}:${message.data['planId'] ?? ''}:${message.sentTime?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}';
     return source.hashCode & 0x7fffffff;
+  }
+
+  bool _remoteMessageOpensInput(RemoteMessage message) {
+    final type = message.data['type'];
+    final planId = message.data['planId'];
+    return type == 'poke' && planId != null && planId.isNotEmpty;
+  }
+
+  bool _payloadOpensInputOnNotificationTap(Map<String, Object?> payload) {
+    return _payloadOpensInput(payload) && payload['planId'] is String;
+  }
+
+  bool _payloadOpensInput(Map<String, Object?> payload) {
+    return payload['opensInput'] == true;
   }
 }

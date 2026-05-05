@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -13,9 +14,11 @@ import '../../../routes/app_router.dart';
 import '../../../utils/time_formatter.dart';
 import '../../../models/promise_model.dart';
 import 'now_tab_intent.dart';
+import 'now_tab_state.dart';
 import 'now_tab_viewmodel.dart';
 import 'now_tab_fake_states.dart';
 import '../../../widgets/action_note_dialog.dart';
+import '../../../services/notification_service.dart' as local_notifications;
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 class NowTab extends ConsumerStatefulWidget {
@@ -32,6 +35,14 @@ class _NowTabState extends ConsumerState<NowTab>
   late Animation<double> _primaryScaleAnimation;
   late Animation<double> _secondaryFadeAnimation;
   late Animation<double> _managerFadeAnimation;
+  StreamSubscription<local_notifications.NotificationInputRequest>?
+  _notificationInputSubscription;
+  StreamSubscription<local_notifications.NotificationSkipRequest>?
+  _notificationSkipSubscription;
+  local_notifications.NotificationInputRequest? _pendingNotificationInput;
+  local_notifications.NotificationSkipRequest? _pendingNotificationSkip;
+  bool _isHandlingNotificationInput = false;
+  bool _isHandlingNotificationSkip = false;
 
   @override
   void initState() {
@@ -59,10 +70,31 @@ class _NowTabState extends ConsumerState<NowTab>
     _managerFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
+
+    final notificationService = local_notifications.NotificationService();
+    _notificationInputSubscription = notificationService.inputRequests.listen(
+      _queueNotificationInput,
+    );
+    _notificationSkipSubscription = notificationService.skipRequests.listen(
+      _queueNotificationSkip,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pendingRequest = notificationService.takePendingInputRequest();
+      if (pendingRequest != null) {
+        _queueNotificationInput(pendingRequest);
+      }
+
+      final pendingSkipRequest = notificationService.takePendingSkipRequest();
+      if (pendingSkipRequest != null) {
+        _queueNotificationSkip(pendingSkipRequest);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _notificationInputSubscription?.cancel();
+    _notificationSkipSubscription?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -75,15 +107,26 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   Future<void> _handleDidIt() async {
-    final l10n = AppLocalizations.of(context)!;
     final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
-    if (primaryCard == null || primaryCard.plan?.id == null) return;
+    if (primaryCard == null) return;
+    await _handleDidItForCard(primaryCard);
+  }
+
+  Future<void> _handleDidItForCard(
+    HomeCardModel targetCard, {
+    String? dialogTitle,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (targetCard.plan?.id == null) return;
 
     // 1. Show Dialog to input note
     final note = await showDialog<String>(
       context: context,
       builder: (context) => ActionNoteDialog(
-        title: primaryCard.plan?.items.firstOrNull?.title ?? l10n.homeDidIt,
+        title:
+            targetCard.plan?.items.firstOrNull?.title ??
+            dialogTitle ??
+            l10n.homeDidIt,
         showEmoji: false,
       ),
     );
@@ -106,7 +149,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
     // 3. Dispatch Intent with note
     try {
-      final planId = primaryCard.plan?.id;
+      final planId = targetCard.plan?.id;
       if (planId != null) {
         await ref
             .read(nowTabViewModelProvider.notifier)
@@ -116,6 +159,181 @@ class _NowTabState extends ConsumerState<NowTab>
       // Error handling (restore animation if failed)
       if (mounted) _animationController.forward();
     }
+  }
+
+  void _queueNotificationInput(
+    local_notifications.NotificationInputRequest request,
+  ) {
+    if (!mounted) return;
+
+    _pendingNotificationInput = request;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openPendingNotificationInputIfReady();
+    });
+  }
+
+  void _openPendingNotificationInputIfReady() {
+    if (!mounted ||
+        _isHandlingNotificationInput ||
+        _isHandlingNotificationSkip) {
+      return;
+    }
+
+    final request = _pendingNotificationInput;
+    if (request == null) return;
+
+    final nowState = ref.read(nowTabViewModelProvider).value;
+    if (nowState == null) return;
+
+    final targetCard = _findNotificationTargetCard(
+      nowState,
+      planId: request.planId,
+    );
+    if (targetCard == null) return;
+
+    _pendingNotificationInput = null;
+    _isHandlingNotificationInput = true;
+    unawaited(
+      _handleDidItForCard(targetCard, dialogTitle: request.title).whenComplete(
+        () {
+          _isHandlingNotificationInput = false;
+          if (_pendingNotificationInput != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _openPendingNotificationInputIfReady();
+            });
+          }
+          if (_pendingNotificationSkip != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _openPendingNotificationSkipIfReady();
+            });
+          }
+        },
+      ),
+    );
+  }
+
+  void _queueNotificationSkip(
+    local_notifications.NotificationSkipRequest request,
+  ) {
+    if (!mounted) return;
+
+    _pendingNotificationSkip = request;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openPendingNotificationSkipIfReady();
+    });
+  }
+
+  void _openPendingNotificationSkipIfReady() {
+    if (!mounted ||
+        _isHandlingNotificationInput ||
+        _isHandlingNotificationSkip) {
+      return;
+    }
+
+    final request = _pendingNotificationSkip;
+    if (request == null) return;
+
+    final nowState = ref.read(nowTabViewModelProvider).value;
+    if (nowState == null) return;
+
+    final targetCard = _findNotificationTargetCard(
+      nowState,
+      planId: request.planId,
+    );
+    if (targetCard == null) return;
+
+    _pendingNotificationSkip = null;
+    _isHandlingNotificationSkip = true;
+    unawaited(
+      _confirmAndSkipFromNotification(
+        targetCard,
+        dialogTitle: request.title,
+      ).whenComplete(() {
+        _isHandlingNotificationSkip = false;
+        if (_pendingNotificationSkip != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _openPendingNotificationSkipIfReady();
+          });
+        }
+        if (_pendingNotificationInput != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _openPendingNotificationInputIfReady();
+          });
+        }
+      }),
+    );
+  }
+
+  HomeCardModel? _findNotificationTargetCard(
+    NowTabState state, {
+    String? planId,
+  }) {
+    if (planId != null && planId.isNotEmpty) {
+      for (final card in state.allCards) {
+        if (card.plan?.id == planId && _canOpenInputFromNotification(card)) {
+          return card;
+        }
+      }
+      return null;
+    }
+
+    final primaryCard = state.primaryCard;
+    if (primaryCard != null && _canOpenInputFromNotification(primaryCard)) {
+      return primaryCard;
+    }
+
+    for (final card in state.allCards) {
+      if (_canOpenInputFromNotification(card)) {
+        return card;
+      }
+    }
+
+    return null;
+  }
+
+  bool _canOpenInputFromNotification(HomeCardModel card) {
+    if (card.plan?.id == null) return false;
+
+    return card.state == HomeCardState.nowAction ||
+        card.state == HomeCardState.overdue ||
+        card.state == HomeCardState.poked;
+  }
+
+  Future<void> _confirmAndSkipFromNotification(
+    HomeCardModel targetCard, {
+    String? dialogTitle,
+  }) async {
+    if (targetCard.plan?.id == null) return;
+
+    final planTitle =
+        targetCard.plan?.items.firstOrNull?.title ?? dialogTitle ?? '오늘 약속';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('오늘은 패스할까요?'),
+        content: Text('$planTitle 약속을 오늘은 건너뜀으로 정리합니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('오늘은 패스', style: TextStyle(color: AppColors.primary)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final skipped = await _skipCard(targetCard);
+    if (!skipped || !mounted) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('오늘 약속을 건너뛰었어요.')));
   }
 
   Future<void> _handleCheckIt(HomeCardModel managerCard) async {
@@ -580,6 +798,12 @@ class _NowTabState extends ConsumerState<NowTab>
     final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
     if (primaryCard?.plan?.id == null) return;
 
+    await _skipCard(primaryCard!);
+  }
+
+  Future<bool> _skipCard(HomeCardModel targetCard) async {
+    if (targetCard.plan?.id == null) return false;
+
     // 1. Shrink animation (optional, maybe fade out?)
     // For Skip, maybe just standard refresh or specific animation.
     // Let's reuse reverse animation for consistency.
@@ -589,9 +813,11 @@ class _NowTabState extends ConsumerState<NowTab>
     try {
       await ref
           .read(nowTabViewModelProvider.notifier)
-          .dispatch(SkipPlanIntent(primaryCard!.plan!.id!));
+          .dispatch(SkipPlanIntent(targetCard.plan!.id!));
+      return true;
     } catch (e) {
       if (mounted) _animationController.forward();
+      return false;
     }
   }
 
@@ -870,6 +1096,17 @@ class _NowTabState extends ConsumerState<NowTab>
     // 데이터 변경 감지하여 애니메이션 트리거
     ref.listen(nowTabViewModelProvider, (previous, next) {
       if (!next.hasValue) return;
+
+      if (_pendingNotificationInput != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openPendingNotificationInputIfReady();
+        });
+      }
+      if (_pendingNotificationSkip != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openPendingNotificationSkipIfReady();
+        });
+      }
 
       if (previous?.value == null) {
         _onDataLoaded();
