@@ -1,42 +1,61 @@
+require "shellwords"
+
+project_root = File.expand_path("..", __dir__)
+
+def normalize_ios_ipa_name(project_root)
+  ipa_dir = File.join(project_root, "build/ios/ipa")
+  target = File.join(ipa_dir, "nodtry.ipa")
+  ipa = Dir[File.join(ipa_dir, "*.ipa")]
+    .reject { |path| File.basename(path) == "nodtry.ipa" }
+    .max_by { |path| File.mtime(path) }
+
+  return if ipa.nil?
+
+  sh("cp #{Shellwords.escape(ipa)} #{Shellwords.escape(target)}")
+end
+
 desc "Build and upload Android (internal) + iOS (beta) simultaneously"
 lane :deploy_all do
   # Build sequentially (Flutter single process)
-  sh("cd .. && flutter build appbundle --release")
-  sh("cd .. && flutter build ipa --release --export-options-plist=ios/ExportOptions.plist")
+  sh("cd #{Shellwords.escape(project_root)} && flutter build appbundle --release")
+  sh("cd #{Shellwords.escape(project_root)} && flutter build ipa --release")
+  normalize_ios_ipa_name(project_root)
 
   # Upload in parallel
   threads = []
   threads << Thread.new do
-    sh("cd ../android && fastlane internal")
+    sh("cd #{Shellwords.escape(File.join(project_root, "android"))} && fastlane internal")
   end
   threads << Thread.new do
-    sh("cd ../ios && fastlane beta")
+    sh("cd #{Shellwords.escape(File.join(project_root, "ios"))} && fastlane beta")
   end
   threads.each(&:join)
 end
 
 desc "Build and upload Android (production) + iOS (release) simultaneously"
 lane :release_all do
-  sh("cd .. && flutter build appbundle --release")
+  sh("cd #{Shellwords.escape(project_root)} && flutter build appbundle --release")
 
   threads = []
   threads << Thread.new do
-    sh("cd ../android && fastlane production")
+    sh("cd #{Shellwords.escape(File.join(project_root, "android"))} && fastlane production")
   end
   threads << Thread.new do
-    sh("cd ../ios && fastlane release")
+    sh("cd #{Shellwords.escape(File.join(project_root, "ios"))} && fastlane release")
   end
   threads.each(&:join)
 end
 
 desc "Upload only (skip build) - Android internal + iOS beta"
 lane :upload_all do
+  normalize_ios_ipa_name(project_root)
+
   threads = []
   threads << Thread.new do
-    sh("cd ../android && fastlane internal")
+    sh("cd #{Shellwords.escape(File.join(project_root, "android"))} && fastlane internal")
   end
   threads << Thread.new do
-    sh("cd ../ios && fastlane beta")
+    sh("cd #{Shellwords.escape(File.join(project_root, "ios"))} && fastlane beta")
   end
   threads.each(&:join)
 end
