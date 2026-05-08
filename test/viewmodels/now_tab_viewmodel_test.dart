@@ -173,6 +173,7 @@ class FakePlanReminderScheduler implements PlanReminderScheduler {
   @override
   Future<void> schedulePlanReminder({
     required int planId,
+    String? planIdentifier,
     required String title,
     required int hour,
     required int minute,

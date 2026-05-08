@@ -7,6 +7,7 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
   final List<String> calls = [];
   int? canceledPlanId;
   int? scheduledPlanId;
+  String? scheduledPlanIdentifier;
   String? scheduledTitle;
   int? scheduledHour;
   int? scheduledMinute;
@@ -27,6 +28,7 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
   @override
   Future<void> schedulePlanReminder({
     required int planId,
+    String? planIdentifier,
     required String title,
     required int hour,
     required int minute,
@@ -34,6 +36,7 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
     bool skipToday = false,
   }) async {
     scheduledPlanId = planId;
+    scheduledPlanIdentifier = planIdentifier;
     scheduledTitle = title;
     scheduledHour = hour;
     scheduledMinute = minute;
@@ -107,6 +110,7 @@ void main() {
       'schedule:$expectedId',
     ]);
     expect(scheduler.scheduledTitle, '물 마시기');
+    expect(scheduler.scheduledPlanIdentifier, 'plan-on');
     expect(scheduler.scheduledHour, 7);
     expect(scheduler.scheduledMinute, 30);
     expect(scheduler.scheduledDays, [2, 4]);

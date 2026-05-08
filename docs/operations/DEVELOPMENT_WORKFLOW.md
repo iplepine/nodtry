@@ -36,3 +36,14 @@
 - 수동 확인한 핵심 시나리오
 - 갱신한 문서
 - 커밋/푸시 여부
+
+## 로컬 Android 테스트 빌드
+
+- `.env`는 gitignore된 로컬 파일로 둔다.
+- Android 테스트용 값은 `android/app/google-services.json` 기준으로 채운다.
+- 디버그 APK 빌드: `flutter build apk --debug`
+- APK 경로: `build/app/outputs/flutter-apk/app-debug.apk`
+- 에뮬레이터 smoke 확인 예시:
+  - `android emulator start small_phone`
+  - `adb -s emulator-5554 install -r build/app/outputs/flutter-apk/app-debug.apk`
+  - `adb -s emulator-5554 shell monkey -p com.devho.nodtry.app -c android.intent.category.LAUNCHER 1`
