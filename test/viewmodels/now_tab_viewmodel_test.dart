@@ -26,6 +26,12 @@ class MockRecordRepository extends Fake implements RecordRepository {
   String? lastPassedPlanId;
   int rejectPlanCallCount = 0;
   String? lastRejectedPlanId;
+  int pokePartnerCallCount = 0;
+  String? lastPokedPlanId;
+  String? lastPokePartnerMessage;
+  int pokeUserCallCount = 0;
+  String? lastPokedUserId;
+  String? lastPokeUserMessage;
   int recordPilotSettlementCallCount = 0;
   String? lastSettlementPlanId;
   String? lastNextPlanIntent;
@@ -77,6 +83,20 @@ class MockRecordRepository extends Fake implements RecordRepository {
     rejectPlanCallCount++;
     lastRejectedPlanId = planId;
     emit(_currentValue);
+  }
+
+  @override
+  Future<void> pokePartner(String planId, {String? message}) async {
+    pokePartnerCallCount++;
+    lastPokedPlanId = planId;
+    lastPokePartnerMessage = message;
+  }
+
+  @override
+  Future<void> pokeUser(String userId, {String? message}) async {
+    pokeUserCallCount++;
+    lastPokedUserId = userId;
+    lastPokeUserMessage = message;
   }
 
   @override
@@ -180,6 +200,27 @@ class FakePlanReminderScheduler implements PlanReminderScheduler {
     required List<int> days,
     bool skipToday = false,
   }) async {}
+}
+
+Plan testPlan(String id) {
+  final now = DateTime.now();
+  return Plan(
+    id: id,
+    userId: 'partner-user',
+    managerId: 'me',
+    startDate: now.subtract(const Duration(days: 1)),
+    endDate: now.add(const Duration(days: 7)),
+    state: PlanState.active,
+    items: [
+      PlanItem(
+        title: '테스트 약속',
+        days: [now.weekday],
+        count: 1,
+        notificationTime: NotificationTime.custom(now.hour, now.minute),
+      ),
+    ],
+    createdAt: now.subtract(const Duration(days: 1)),
+  );
 }
 
 void main() {
@@ -336,6 +377,58 @@ void main() {
 
     expect(mockRecordRepository.rejectPlanCallCount, 1);
     expect(mockRecordRepository.lastRejectedPlanId, 'plan-reject-123');
+  });
+
+  test(
+    'PokePartnerIntent should call repository and hide partner poke card',
+    () async {
+      final card = HomeCardModel(
+        state: HomeCardState.partnerPoke,
+        plan: testPlan('plan-poke-123'),
+        partnerUid: 'partner-user',
+      );
+      mockGetNowCardsUseCase.emit([card]);
+      await readNowState();
+
+      await container
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(
+            const PokePartnerIntent(
+              'plan-poke-123',
+              message: '똑똑! 파트너가 기다리고 있어요.',
+            ),
+          );
+
+      final state = container.read(nowTabViewModelProvider).value!;
+      expect(mockRecordRepository.pokePartnerCallCount, 1);
+      expect(mockRecordRepository.lastPokedPlanId, 'plan-poke-123');
+      expect(mockRecordRepository.lastPokePartnerMessage, '똑똑! 파트너가 기다리고 있어요.');
+      expect(state.managerCards, isEmpty);
+    },
+  );
+
+  test('PokeUserIntent should call repository and hide no-plan card', () async {
+    const card = HomeCardModel(
+      state: HomeCardState.partnerNoPlan,
+      partnerUid: 'partner-user',
+    );
+    mockGetNowCardsUseCase.emit([card]);
+    await readNowState();
+
+    await container
+        .read(nowTabViewModelProvider.notifier)
+        .dispatch(
+          const PokeUserIntent(
+            'partner-user',
+            message: '똑똑! 약속을 기다리는 사람이 있어요.',
+          ),
+        );
+
+    final state = container.read(nowTabViewModelProvider).value!;
+    expect(mockRecordRepository.pokeUserCallCount, 1);
+    expect(mockRecordRepository.lastPokedUserId, 'partner-user');
+    expect(mockRecordRepository.lastPokeUserMessage, '똑똑! 약속을 기다리는 사람이 있어요.');
+    expect(state.managerCards, isEmpty);
   });
 
   test('RecordPilotSettlementIntent should call repository', () async {

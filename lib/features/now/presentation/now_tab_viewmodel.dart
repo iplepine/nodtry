@@ -12,6 +12,8 @@ import '../domain/usecases/feedback_to_partner_use_case.dart';
 /// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel
 /// MVI 패턴의 'Model' (State Holder) 역할
 class NowTabViewModel extends StreamNotifier<NowTabState> {
+  final Set<String> _dismissedPartnerPromptKeys = {};
+
   @override
   Stream<NowTabState> build() {
     // 앱 시작 시 기간 만료된 계획 정리
@@ -44,16 +46,21 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     return useCase.executeStream().map((models) {
       // 헤더 정보 계산
       HeaderPeriodState periodState = HeaderPeriodState.noPlan;
+      final visibleModels = _filterDismissedPartnerPrompts(models);
 
       // 개별 카드들에 주차 정보 주입 및 헤더 상태 결정
-      final updatedModels = models.map((m) {
+      for (final model in models) {
+        if (model.plan != null && model.plan!.state == PlanState.active) {
+          periodState = HeaderPeriodState.inProgress;
+          break;
+        }
+      }
+
+      final updatedModels = visibleModels.map((m) {
         int? cWeek;
         int? tWeeks;
 
         if (m.plan != null && m.plan!.state == PlanState.active) {
-          periodState =
-              HeaderPeriodState.inProgress; // 하나라도 활성이면 헤더는 inProgress
-
           final plan = m.plan!;
           final now = DateTime.now();
           final diff = now.difference(plan.startDate).inDays;
@@ -150,6 +157,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _pokeUser(String userId, [String? message]) async {
     await ref.read(recordRepositoryProvider).pokeUser(userId, message: message);
+    _dismissPartnerPrompt(_partnerNoPlanPromptKey(userId));
   }
 
   Future<void> _pokePartner(
@@ -161,6 +169,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     await ref
         .read(recordRepositoryProvider)
         .pokePartner(planId, message: message);
+    _dismissPartnerPrompt(_partnerPokePromptKey(planId));
     if (reward != null || penalty != null) {
       await ref
           .read(recordRepositoryProvider)
@@ -256,6 +265,61 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _acknowledgePoke(String planId) async {
     await ref.read(recordRepositoryProvider).acknowledgePoke(planId);
+  }
+
+  List<HomeCardModel> _filterDismissedPartnerPrompts(
+    List<HomeCardModel> models,
+  ) {
+    if (_dismissedPartnerPromptKeys.isEmpty) {
+      return models;
+    }
+
+    return models.where((model) {
+      final key = _partnerPromptKey(model);
+      return key == null || !_dismissedPartnerPromptKeys.contains(key);
+    }).toList();
+  }
+
+  String? _partnerPromptKey(HomeCardModel model) {
+    switch (model.state) {
+      case HomeCardState.partnerNoPlan:
+        final partnerUid = model.partnerUid;
+        return partnerUid == null ? null : _partnerNoPlanPromptKey(partnerUid);
+      case HomeCardState.partnerPoke:
+        final planId = model.plan?.id;
+        return planId == null ? null : _partnerPokePromptKey(planId);
+      default:
+        return null;
+    }
+  }
+
+  String _partnerNoPlanPromptKey(String partnerUid) {
+    return 'partnerNoPlan:${_todayKey()}:$partnerUid';
+  }
+
+  String _partnerPokePromptKey(String planId) {
+    return 'partnerPoke:${_todayKey()}:$planId';
+  }
+
+  String _todayKey() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month}-${now.day}';
+  }
+
+  void _dismissPartnerPrompt(String key) {
+    _dismissedPartnerPromptKeys.add(key);
+
+    final currentState = state.asData?.value;
+    if (currentState == null) return;
+
+    final visibleModels = _filterDismissedPartnerPrompts(currentState.allCards);
+    final nextState = NowTabState.fromModels(visibleModels).copyWith(
+      partnerProfile: currentState.partnerProfile,
+      headerPeriodState: currentState.headerPeriodState,
+      currentWeek: currentState.currentWeek,
+      totalWeeks: currentState.totalWeeks,
+    );
+    state = AsyncValue.data(nextState);
   }
 
   Future<void> _rescuePlan(String planId) async {

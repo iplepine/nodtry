@@ -32,6 +32,10 @@ function buildMessagePayload(
 ): admin.messaging.Message {
     return {
         token,
+        notification: {
+            title,
+            body,
+        },
         data: {
             ...data,
             title,
@@ -39,15 +43,23 @@ function buildMessagePayload(
         },
         android: {
             priority: "high",
+            notification: {
+                channelId: "general_notifications",
+                sound: "default",
+            },
         },
         apns: {
             headers: {
-                "apns-priority": "5",
-                "apns-push-type": "background",
+                "apns-priority": "10",
+                "apns-push-type": "alert",
             },
             payload: {
                 aps: {
-                    contentAvailable: true,
+                    alert: {
+                        title,
+                        body,
+                    },
+                    sound: "default",
                 },
             },
         },
@@ -132,8 +144,7 @@ export const onCheerCreated = functions.firestore
         const toUserId = cheer.toUserId;
         const fromUserId = cheer.fromUserId;
         const message = cheer.message;
-        // reactionType might be used for constructing body or data
-        // const reactionType = cheer.reactionType;
+        const reactionType = cheer.reactionType;
 
         try {
             // 1. Get Target User's FCM Token
@@ -159,14 +170,17 @@ export const onCheerCreated = functions.firestore
             }
 
             // 3. Construct Message
-            const title = "응원이 도착했어요! 🎉";
-            const body = message ? `${senderName}: ${message}` : `${senderName}님이 응원을 보냈어요!`;
+            const isPoke = reactionType === "poke";
+            const title = isPoke ? "똑똑!" : "응원이 도착했어요! 🎉";
+            const body = isPoke ?
+                (message || `${senderName}님이 똑똑! 신호를 보냈어요.`) :
+                (message ? `${senderName}: ${message}` : `${senderName}님이 응원을 보냈어요!`);
             const messagePayload = buildMessagePayload(
                 fcmToken,
                 title,
                 body,
                 {
-                    type: "cheer",
+                    type: isPoke ? "poke" : "cheer",
                     planId: cheer.planId || "",
                     senderName,
                     message: message || "",

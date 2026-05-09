@@ -344,14 +344,38 @@ class RealRecordRepository implements RecordRepository {
           for (var plan in partnerPlans) {
             if (plan.state != PlanState.active) continue;
 
-            final hasCompletedToday = plan.completedDates.any(
+            final isCompletedToday = plan.completedDates.any(
               (d) =>
                   d.year == today.year &&
                   d.month == today.month &&
                   d.day == today.day,
             );
+            final isSkippedToday = plan.skippedDates.any(
+              (d) =>
+                  d.year == today.year &&
+                  d.month == today.month &&
+                  d.day == today.day,
+            );
+            final isRestedToday = plan.restedDates.any(
+              (d) =>
+                  d.year == today.year &&
+                  d.month == today.month &&
+                  d.day == today.day,
+            );
+            final isRescuedToday = plan.rescuedDates.any(
+              (d) =>
+                  d.year == today.year &&
+                  d.month == today.month &&
+                  d.day == today.day,
+            );
+            final isHandledToday =
+                isCompletedToday ||
+                isSkippedToday ||
+                isRestedToday ||
+                isRescuedToday;
+            final hasPokedToday = _isSameDay(plan.lastPokeAt, today);
 
-            if (!hasCompletedToday) {
+            if (!isHandledToday && !hasPokedToday) {
               final hasTodayItem = plan.items.any(
                 (item) => item.days.contains(todayWeekday),
               );

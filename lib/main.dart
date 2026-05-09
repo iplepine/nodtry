@@ -21,6 +21,9 @@ import 'package:intl/date_symbol_data_local.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   debugPrint("Handling a background message: ${message.messageId}");
+  if (message.notification != null) {
+    return;
+  }
   await local_notifications.NotificationService().init();
   await local_notifications.NotificationService().showRemoteMessageNotification(
     message,
