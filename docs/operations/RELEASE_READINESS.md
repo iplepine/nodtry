@@ -23,6 +23,8 @@
 - 개인정보 처리방침, 이용약관, 문의 채널을 준비했다.
 
 ## 최근 내부 테스트 배포
+- 2026-05-09: `1.0.30+49` Android internal track 업로드 완료.
+- 2026-05-09: `1.0.30+49` iOS TestFlight 업로드 완료. App Store Connect 처리 완료까지는 몇 분 지연될 수 있다.
 - 2026-05-09: `1.0.29+48` Android internal track 업로드 완료.
 - 2026-05-09: `1.0.29+48` iOS TestFlight 업로드 완료. App Store Connect 처리 완료까지는 몇 분 지연될 수 있다.
 - 배포 전 사용자 수동 smoke 확인: 가입/연결/플랜/실천/파트너 반응 흐름 정상.
