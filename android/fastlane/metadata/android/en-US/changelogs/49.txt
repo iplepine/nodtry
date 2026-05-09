@@ -1,0 +1,3 @@
+Improved partner poke notifications so they arrive more reliably on real devices.
+Fixed the Now tab so poke cards clear immediately after sending.
+Strengthened missed-action reminders and partner follow-up flows.
