@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
 import '../action_note_dialog.dart';
+import '../app_underlined_text.dart';
 import '../../features/history/presentation/history_viewmodel.dart';
 import '../../features/history/presentation/history_state.dart';
 
@@ -277,12 +278,11 @@ class HistoryCard extends ConsumerWidget {
                     // Reconcile Hint
                     if (canReconcile) ...[
                       const SizedBox(height: 12),
-                      Text(
+                      AppUnderlinedText(
                         AppLocalizations.of(context)!.historyTapToChange,
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,
-                          decoration: TextDecoration.underline,
                         ),
                       ),
                     ],
@@ -377,16 +377,9 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (imageUrl == null || imageUrl!.isEmpty) {
-      return CircleAvatar(
-        radius: 18,
-        backgroundColor: AppColors.surface,
-        child: Text(
-          name?.isNotEmpty == true ? name![0] : '?',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-        ),
-      );
-    }
+    final fallback = _FallbackAvatar(name: name);
+
+    if (imageUrl == null || imageUrl!.trim().isEmpty) return fallback;
 
     return CachedNetworkImage(
       imageUrl: imageUrl!,
@@ -397,15 +390,43 @@ class _Avatar extends StatelessWidget {
         highlightColor: Colors.white,
         child: const CircleAvatar(radius: 18, backgroundColor: Colors.white),
       ),
-      errorWidget: (context, url, error) => CircleAvatar(
-        radius: 18,
-        backgroundColor: AppColors.surface,
-        child: Icon(
-          Icons.error_outline,
-          size: 16,
-          color: AppColors.textDisabled,
-        ),
-      ),
+      errorWidget: (context, url, error) => fallback,
     );
+  }
+}
+
+class _FallbackAvatar extends StatelessWidget {
+  final String? name;
+
+  const _FallbackAvatar({this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    final initial = _initial(name);
+
+    return CircleAvatar(
+      radius: 18,
+      backgroundColor: AppColors.primarySoft,
+      child: initial != null
+          ? Text(
+              initial,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryPressed,
+              ),
+            )
+          : Icon(
+              Icons.person_rounded,
+              size: 18,
+              color: AppColors.primaryPressed,
+            ),
+    );
+  }
+
+  String? _initial(String? value) {
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return String.fromCharCode(trimmed.runes.first);
   }
 }

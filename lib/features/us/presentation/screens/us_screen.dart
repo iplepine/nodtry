@@ -11,6 +11,7 @@ import '../../../../routes/app_router.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../models/connected_user.dart';
 import '../../../../models/plan_model.dart';
+import '../../../../widgets/app_underlined_text.dart';
 import '../../../../widgets/plan/plan_card.dart';
 import '../../../../providers/plan_list_provider.dart';
 import '../us_state.dart';
@@ -553,12 +554,11 @@ class _MeSection extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                               child: Padding(
                                 padding: const EdgeInsets.all(4),
-                                child: Text(
+                                child: AppUnderlinedText(
                                   l10n.usProfileEdit,
                                   style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
                                         color: AppColors.textSecondary,
-                                        decoration: TextDecoration.underline,
                                       ),
                                 ),
                               ),

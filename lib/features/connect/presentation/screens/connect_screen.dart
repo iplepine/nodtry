@@ -6,6 +6,7 @@ import '../connect_state.dart';
 import '../viewmodel/connect_viewmodel.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../widgets/app_underlined_text.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../providers/repository_provider.dart';
@@ -221,12 +222,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                         vertical: 16,
                       ),
                     ),
-                    child: Text(
+                    child: AppUnderlinedText(
                       AppLocalizations.of(context)!.startSolo,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ),
@@ -296,7 +296,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
               counterText: '',
               hintText: 'ABCD1234',
               hintStyle: TextStyle(
-                color: AppColors.textSecondary.withOpacity(0.3),
+                color: AppColors.textSecondary.withValues(alpha: 0.3),
                 letterSpacing: 4,
               ),
               filled: true,

@@ -1052,10 +1052,10 @@ abstract class AppLocalizations {
   /// **'Color Theme'**
   String get settingsTheme;
 
-  /// Smoky Plum theme option
+  /// Mint and Orange theme option
   ///
   /// In en, this message translates to:
-  /// **'Smoky Plum × Warm Stone'**
+  /// **'Mint × Orange'**
   String get settingsThemeSmokyPlum;
 
   /// Deep Olive theme option

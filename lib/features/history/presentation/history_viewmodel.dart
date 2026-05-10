@@ -36,6 +36,10 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         ? connectedUsers.first.user.uid
         : null;
     final userIds = [myUid, if (partnerUid != null) partnerUid];
+    final connectedProfilesByUid = {
+      for (final connectedUser in connectedUsers)
+        connectedUser.user.uid: connectedUser.user,
+    };
 
     final recordRepo = ref.watch(recordRepositoryProvider);
 
@@ -55,8 +59,28 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         allPlans.addAll(partnerPlans);
       }
 
-      // 3. Apply Filtering
-      List<HistoryItem> filteredItems = List<HistoryItem>.from(allItems);
+      // 3. Join connected profile info needed by partner-side history cards.
+      final enrichedItems = allItems.map((item) {
+        final executorProfile = connectedProfilesByUid[item.executorId];
+        if (executorProfile == null) {
+          return item;
+        }
+
+        final existingName = _nonBlank(item.partnerName);
+        final existingImageUrl = _nonBlank(item.partnerImageUrl);
+        final profileName =
+            _nonBlank(executorProfile.displayName) ??
+            _nonBlank(executorProfile.email);
+
+        return item.copyWith(
+          partnerName: existingName ?? profileName,
+          partnerImageUrl:
+              existingImageUrl ?? _nonBlank(executorProfile.profileImageUrl),
+        );
+      }).toList();
+
+      // 4. Apply Filtering
+      List<HistoryItem> filteredItems = List<HistoryItem>.from(enrichedItems);
       final currentFilter = state.asData?.value.filter ?? HistoryFilter.all;
 
       if (currentFilter == HistoryFilter.me) {
@@ -71,7 +95,7 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
 
       filteredItems.sort((a, b) => b.date.compareTo(a.date));
 
-      // 4. Prepare summaries for completed plans
+      // 5. Prepare summaries for completed plans
       final finishedPlanSummaries = <PlanSummary>[];
       final completedPlans = allPlans.where(
         (p) => p.state == PlanState.completed,
@@ -100,7 +124,7 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         );
       }
 
-      // 5. Calculate Header Data
+      // 6. Calculate Header Data
       HeaderPeriodState periodState = HeaderPeriodState.noPlan;
       int? currentWeekNum;
       int? totalWeeksNum;
@@ -189,3 +213,9 @@ final historyViewModelProvider =
     StreamNotifierProvider<HistoryViewModel, HistoryState>(
       () => HistoryViewModel(),
     );
+
+String? _nonBlank(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) return null;
+  return trimmed;
+}

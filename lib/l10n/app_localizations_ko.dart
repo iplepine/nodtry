@@ -510,7 +510,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsTheme => '색상 테마';
 
   @override
-  String get settingsThemeSmokyPlum => 'Smoky Plum × Warm Stone';
+  String get settingsThemeSmokyPlum => 'Mint × Orange';
 
   @override
   String get settingsThemeDeepOlive => 'Deep Olive × Sand';

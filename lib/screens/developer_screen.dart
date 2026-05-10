@@ -287,7 +287,7 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
               ),
             ],
           ),
-          Divider(height: 1, color: AppColors.divider.withOpacity(0.5)),
+          Divider(height: 1, color: AppColors.divider.withValues(alpha: 0.5)),
         ],
       ),
     );
@@ -344,10 +344,12 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
 
                   try {
                     await ref.read(recordRepositoryProvider).createPlan(plan);
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('약속 생성 완료! 잠시 후 푸시가 도착합니다.')),
                     );
                   } catch (e) {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(
                       context,
                     ).showSnackBar(SnackBar(content: Text('에러 발생: $e')));
@@ -374,10 +376,12 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
                       'planId': 'test_plan_id',
                       'createdAt': FieldValue.serverTimestamp(),
                     });
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('응원 생성 완료! 잠시 후 푸시가 도착합니다.')),
                     );
                   } catch (e) {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(
                       context,
                     ).showSnackBar(SnackBar(content: Text('에러 발생: $e')));
@@ -401,6 +405,7 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
                         .limit(1)
                         .get();
 
+                    if (!context.mounted) return;
                     if (plans.docs.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('매니저로 등록된 계획이 없습니다.')),
@@ -423,10 +428,12 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
                       'createdAt': FieldValue.serverTimestamp(),
                     });
 
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('실천 기록 생성 완료! 푸시를 확인하세요.')),
                     );
                   } catch (e) {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(
                       context,
                     ).showSnackBar(SnackBar(content: Text('에러 발생: $e')));
@@ -450,6 +457,7 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
                         .limit(1)
                         .get();
 
+                    if (!context.mounted) return;
                     if (plans.docs.isEmpty) {
                       ScaffoldMessenger.of(
                         context,
@@ -471,10 +479,12 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
                       'updatedAt': FieldValue.serverTimestamp(),
                     });
 
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('계획 수정 완료! 푸시를 확인하세요.')),
                     );
                   } catch (e) {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(
                       context,
                     ).showSnackBar(SnackBar(content: Text('에러 발생: $e')));
@@ -497,7 +507,7 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
   }) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: AppColors.primary.withOpacity(0.1),
+        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
         child: Icon(icon, color: AppColors.primary, size: 20),
       ),
       title: Text(

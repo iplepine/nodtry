@@ -77,7 +77,7 @@
 | `onPlanUpdated` | plan 변경, 승인, 반려, 확인, 똑똑 푸시 |
 | `onActionCompleted` | 완료/건너뜀/휴식 푸시 |
 | `notifyMissedActions` | 30분 주기 놓친 약속 전달 |
-| 최신 Android 배포 | `1.0.30+49` production |
+| 최신 Android 배포 | `1.0.32+51` production |
 | 최신 iOS 배포 | `1.0.30+49` TestFlight |
 
 ## 알림 수명주기

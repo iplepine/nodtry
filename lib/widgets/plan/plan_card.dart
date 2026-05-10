@@ -99,6 +99,8 @@ class PlanCard extends StatelessWidget {
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -124,43 +126,52 @@ class PlanCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Text(
-                            daysString,
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 13,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            child: Text(
-                              '·',
-                              style: TextStyle(color: AppColors.textDisabled),
-                            ),
-                          ),
-                          if (isAlarmOn) ...[
-                            Icon(
-                              Icons.notifications_active_rounded,
-                              size: 14,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          Text(
-                            displayTime,
-                            style: TextStyle(
-                              color: isAlarmOn
-                                  ? AppColors.primary
-                                  : AppColors.textSecondary,
-                              fontSize: 13,
-                              fontWeight: isAlarmOn
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ],
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: constraints.maxWidth,
+                                ),
+                                child: Text(
+                                  daysString,
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Text(
+                                '·',
+                                style: TextStyle(color: AppColors.textDisabled),
+                              ),
+                              if (isAlarmOn)
+                                Icon(
+                                  Icons.notifications_active_rounded,
+                                  size: 14,
+                                  color: AppColors.primary,
+                                ),
+                              Text(
+                                displayTime,
+                                style: TextStyle(
+                                  color: isAlarmOn
+                                      ? AppColors.primary
+                                      : AppColors.textSecondary,
+                                  fontSize: 13,
+                                  fontWeight: isAlarmOn
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 4),
                       Text(

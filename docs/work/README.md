@@ -1,6 +1,6 @@
 # 작업 관리
 
-마지막 갱신일: 2026-05-10
+마지막 갱신일: 2026-05-11
 
 ## 현재 집중
 
@@ -17,6 +17,7 @@
 최근 완료:
 
 - `BT-007-notification-production-hardening`: 똑똑/놓친 약속 푸시 안정화, Now 탭 똑똑 카드 정리, Cloud Functions Node 22 전환, Android production 배포.
+- Android production 최신 배포: `1.0.32+51` (기록 탭 상대 프로필, 민트/주황 테마, 새 아이콘/스플래시, 커스텀 밑줄, 약속 카드 overflow 수정).
 
 ## 현재 남은 To-do
 

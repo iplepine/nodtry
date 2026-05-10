@@ -10,7 +10,7 @@
 
 | 테마 | 설명 |
 |------|------|
-| Smoky Plum (기본) | 보라/자두 색상 팔레트 |
+| Mint × Orange (기본) | 민트 중심, 주황 행동 강조 색상 팔레트 |
 | Deep Olive | 초록/올리브 색상 팔레트 |
 
 - `AppTheme` enum + `ThemeData` 정의

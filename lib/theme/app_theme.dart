@@ -107,14 +107,14 @@ class AppTheme {
     switch (themeType) {
       case AppThemeType.smokyPlum:
         return _ThemeColors(
-          background: const Color(0xFFEEEAE6), // Dark Warm Stone
-          surface: const Color(0xFFDFD9D4), // Soft Dark Stone
-          primary: const Color(0xFF552A3E), // Velvet Wine Plum
-          secondary: const Color(0xFFC9C1BB), // Secondary
-          outline: const Color(0xFFCCC4BE), // Outline
-          divider: const Color(0xFFD2CBC6), // Stone Line
-          textPrimary: const Color(0xFF201A1D),
-          textSecondary: const Color(0xFF6E6469),
+          background: const Color(0xFFF8FAF7),
+          surface: const Color(0xFFFFFFFF),
+          primary: const Color(0xFF18B7A0),
+          secondary: const Color(0xFFFF8A3D),
+          outline: const Color(0xFFD9E4DF),
+          divider: const Color(0xFFE3ECE8),
+          textPrimary: const Color(0xFF1D2B27),
+          textSecondary: const Color(0xFF66736F),
         );
       case AppThemeType.deepOlive:
         return _ThemeColors(
@@ -130,7 +130,7 @@ class AppTheme {
     }
   }
 
-  /// Smoky Plum 테마
+  /// Mint & Orange 테마
   static ThemeData get smokyPlumTheme => _buildTheme(AppThemeType.smokyPlum);
 
   /// Deep Olive 테마

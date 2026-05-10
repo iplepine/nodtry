@@ -1,4 +1,7 @@
 import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+
 import '../models/home_state.dart';
 import '../models/history_item.dart';
 import '../models/plan_model.dart';
@@ -559,8 +562,7 @@ class MockRecordRepository implements RecordRepository {
     String reactionType, {
     String? message,
   }) async {
-    // ignore: avoid_print
-    print(
+    debugPrint(
       'Mock: Partner cheered for plan $planId with reaction $reactionType, message: $message',
     );
     await Future.delayed(const Duration(milliseconds: 500));
@@ -579,8 +581,7 @@ class MockRecordRepository implements RecordRepository {
 
   @override
   Future<void> passPlan(String planId) async {
-    // ignore: avoid_print
-    print('Mock: Plan passed for $planId');
+    debugPrint('Mock: Plan passed for $planId');
     await Future.delayed(const Duration(milliseconds: 300));
     // Mock passing logic
     _notifyStream();
@@ -617,16 +618,14 @@ class MockRecordRepository implements RecordRepository {
 
   @override
   Future<void> pokePartner(String planId, {String? message}) async {
-    // ignore: avoid_print
-    print('Mock: Poke partner for plan $planId with message: $message');
+    debugPrint('Mock: Poke partner for plan $planId with message: $message');
     await Future.delayed(const Duration(milliseconds: 500));
     // 실제 로직: 파트너의 HomeCardState에 'poked' 상태의 카드를 추가하거나 알림 전송
   }
 
   @override
   Future<void> acknowledgePoke(String planId) async {
-    // ignore: avoid_print
-    print('Mock: Acknowledge poke for plan $planId');
+    debugPrint('Mock: Acknowledge poke for plan $planId');
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
@@ -710,8 +709,7 @@ class MockRecordRepository implements RecordRepository {
 
   @override
   Future<void> pokeUser(String userId, {String? message}) async {
-    // ignore: avoid_print
-    print('Mock: Poke user $userId generally with message: $message');
+    debugPrint('Mock: Poke user $userId generally with message: $message');
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
@@ -721,27 +719,27 @@ class MockRecordRepository implements RecordRepository {
     PromiseReward? reward,
     PromisePenalty? penalty,
   }) async {
-    print('Mock: Propose promise for plan $planId');
+    debugPrint('Mock: Propose promise for plan $planId');
   }
 
   @override
   Future<void> respondPromise(String planId, {required bool accept}) async {
-    print('Mock: Respond promise for plan $planId, accept: $accept');
+    debugPrint('Mock: Respond promise for plan $planId, accept: $accept');
   }
 
   @override
   Future<void> settlePromise(String planId) async {
-    print('Mock: Settle promise for plan $planId');
+    debugPrint('Mock: Settle promise for plan $planId');
   }
 
   @override
   Future<void> rescuePlan(String planId, {DateTime? date}) async {
-    print('Mock: Rescue plan $planId');
+    debugPrint('Mock: Rescue plan $planId');
   }
 
   @override
   Future<void> reportRest(String planId) async {
-    print('Mock: Report rest for plan $planId');
+    debugPrint('Mock: Report rest for plan $planId');
   }
 
   @override

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nod_try/features/history/presentation/history_viewmodel.dart';
 import 'package:nod_try/features/history/presentation/history_state.dart';
+import 'package:nod_try/models/connected_user.dart';
 import 'package:nod_try/models/history_item.dart';
 import 'package:nod_try/models/plan_model.dart';
 import 'package:nod_try/models/user_model.dart';
@@ -108,6 +109,16 @@ void main() {
     updatedAt: DateTime.now(),
   );
 
+  final mockPartner = UserModel(
+    uid: 'partner',
+    email: 'partner@example.com',
+    displayName: '지민',
+    profileImageUrl: 'https://example.com/partner.png',
+    loginType: LoginType.email,
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  );
+
   setUp(() {
     mockRecordRepository = MockRecordRepository();
     mockRecordRepository.mockItems = [itemMe, itemPartner];
@@ -117,7 +128,15 @@ void main() {
       overrides: [
         recordRepositoryProvider.overrideWithValue(mockRecordRepository),
         myProfileProvider.overrideWith((ref) => Stream.value(mockUser)),
-        connectedProfilesProvider.overrideWith((ref) => Future.value([])),
+        connectedProfilesProvider.overrideWith(
+          (ref) => Future.value([
+            ConnectedUser(
+              user: mockPartner,
+              isSupported: true,
+              isCheering: true,
+            ),
+          ]),
+        ),
       ],
     );
   });
@@ -148,6 +167,19 @@ void main() {
     expect(result.activeItems.length, 2);
     expect(mockRecordRepository.getHistoryItemsCallCount, greaterThan(0));
     expect(mockRecordRepository.getPlansCallCount, greaterThan(0));
+  });
+
+  test('partner history items should include connected profile info', () async {
+    // Act
+    final result = await readHistoryState();
+
+    // Assert
+    final partnerItem = result.activeItems.firstWhere(
+      (item) => item.executorId == 'partner',
+    );
+    expect(partnerItem.partnerName, '지민');
+    expect(partnerItem.partnerImageUrl, 'https://example.com/partner.png');
+    expect(result.partnerName, '지민');
   });
 
   test('reconcile should call repository and refresh', () async {

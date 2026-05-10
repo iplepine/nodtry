@@ -23,8 +23,9 @@
 - 개인정보 처리방침, 이용약관, 문의 채널을 준비했다.
 
 ## 최근 내부 테스트 배포
+- 2026-05-11: `1.0.32+51` Android production 배포 완료. 기록 탭 상대 프로필 표시, 민트/주황 테마와 새 아이콘/스플래시, 커스텀 밑줄 텍스트, 우리 탭 약속 카드 overflow 수정을 포함한다.
 - 2026-05-10: `1.0.31+50` Android production 배포 완료. 약속걸기 바텀시트/응원 입력 UI 수정, Google Play 설명/출시노트 갱신을 포함한다.
-- 2026-05-10: 문서/로드맵 갱신. 현재 파일럿용 최신 배포는 Android production `1.0.31+50`, iOS TestFlight `1.0.30+49`.
+- 2026-05-10: 문서/로드맵 갱신. 현재 파일럿용 최신 배포는 Android production `1.0.32+51`, iOS TestFlight `1.0.30+49`.
 - 2026-05-09: `1.0.30+49` Android production track 배포 완료. 출시노트 `ko-KR`, `en-US` 업로드 완료.
 - 2026-05-09: `1.0.30+49` Android internal track 업로드 완료.
 - 2026-05-09: `1.0.30+49` iOS TestFlight 업로드 완료. App Store Connect 처리 완료까지는 몇 분 지연될 수 있다.

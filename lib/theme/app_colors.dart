@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'app_theme_enum.dart';
 
-/// OnMyBehalf Color System — Multi-Theme Support
+/// Nodtry Color System - Multi-Theme Support
 ///
-/// Theme A: Smoky Plum × Warm Stone
-/// "우리가 서로를 맡기는 관계"의 색
+/// Theme A: Mint & Orange
+/// "차분하게 유지하고, 필요한 순간에 행동을 당기는" 색
 ///
 /// Theme B: Deep Olive × Sand
 /// 단단함 · 책임감 · 안정적인 섹시함
 class AppColors {
   AppColors._();
 
-  // 현재 선택된 테마 (기본값: Smoky Plum)
+  // 현재 선택된 테마 (기본값: Mint × Orange)
   static AppThemeType _currentTheme = AppThemeType.smokyPlum;
 
   /// 현재 테마 설정
@@ -23,33 +23,22 @@ class AppColors {
   }
 
   // ============================================
-  // Theme A: Velvet Wine Plum × Dark Stone
-  // "집중하게 만드는 관리자 색"
+  // Theme A: Mint & Orange
   // ============================================
-  static const Color _smokyPlumBackground = Color(
-    0xFFEEEAE6,
-  ); // Dark Warm Stone
-  static const Color _smokyPlumSurface = Color(0xFFDFD9D4); // Soft Dark Stone
-  static const Color _smokyPlumPrimary = Color(0xFF552A3E); // Velvet Wine Plum
-  static const Color _smokyPlumPrimaryPressed = Color(
-    0xFF462232,
-  ); // Deep Velvet Wine
-  static const Color _smokyPlumPrimarySoft = Color(
-    0xFF6E4156,
-  ); // Muted Wine Plum (≤5%)
-  static const Color _smokyPlumSecondary = Color(0xFFC9C1BB); // Secondary
-  static const Color _smokyPlumOutline = Color(0xFFCCC4BE); // Outline
-  static const Color _smokyPlumDivider = Color(0xFFD2CBC6); // Stone Line
-  static const Color _smokyPlumDisabled = Color(0xFFB5ADA8); // Disabled
-  static const Color _smokyPlumTextPrimary = Color(0xFF201A1D);
-  static const Color _smokyPlumTextSecondary = Color(0xFF6E6469);
-  static const Color _smokyPlumTextDisabled = Color(0xFFA29A9E);
-  static const Color _smokyPlumAccentWine = Color(
-    0xFF6A1F2B,
-  ); // Accent Wine (≤5%)
-  static const Color _smokyPlumAccentInkViolet = Color(
-    0xFF3A2A46,
-  ); // Accent Ink Violet (포커스/전환, ≤400ms)
+  static const Color _smokyPlumBackground = Color(0xFFF8FAF7);
+  static const Color _smokyPlumSurface = Color(0xFFFFFFFF);
+  static const Color _smokyPlumPrimary = Color(0xFF18B7A0);
+  static const Color _smokyPlumPrimaryPressed = Color(0xFF0E7F70);
+  static const Color _smokyPlumPrimarySoft = Color(0xFFDDF8F2);
+  static const Color _smokyPlumSecondary = Color(0xFFFF8A3D);
+  static const Color _smokyPlumOutline = Color(0xFFD9E4DF);
+  static const Color _smokyPlumDivider = Color(0xFFE3ECE8);
+  static const Color _smokyPlumDisabled = Color(0xFFC5D0CC);
+  static const Color _smokyPlumTextPrimary = Color(0xFF1D2B27);
+  static const Color _smokyPlumTextSecondary = Color(0xFF66736F);
+  static const Color _smokyPlumTextDisabled = Color(0xFF97A4A0);
+  static const Color _smokyPlumAccentWine = Color(0xFFC85A1E);
+  static const Color _smokyPlumAccentInkViolet = Color(0xFFFFF0E5);
 
   // ============================================
   // Theme B: Deep Olive × Sand
@@ -172,10 +161,10 @@ class AppColors {
   }
 
   // ============================================
-  // Accent Colors (Theme A only)
+  // Accent Colors
   // ============================================
 
-  /// Accent Wine - 아이콘·선택 상태 (≤5%)
+  /// Accent Orange Dark - 선택 상태와 강한 행동 강조
   static Color get accentWine {
     switch (_currentTheme) {
       case AppThemeType.smokyPlum:
@@ -185,7 +174,7 @@ class AppColors {
     }
   }
 
-  /// Accent Ink Violet - 포커스/전환 순간 (≤400ms)
+  /// Orange Soft - 행동 힌트 배경
   static Color get accentInkViolet {
     switch (_currentTheme) {
       case AppThemeType.smokyPlum:
@@ -195,7 +184,7 @@ class AppColors {
     }
   }
 
-  /// Primary Soft - 배지·포커스 (제한적, ≤5%)
+  /// Primary Soft - 배지·포커스
   static Color get primarySoft {
     switch (_currentTheme) {
       case AppThemeType.smokyPlum:

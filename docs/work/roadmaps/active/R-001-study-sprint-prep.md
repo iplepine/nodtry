@@ -6,7 +6,7 @@ ID: `R-001-study-sprint-prep`
 
 연결 Goal: `G-001-study-sprint-pilot`
 
-마지막 갱신일: 2026-05-10
+마지막 갱신일: 2026-05-11
 
 ## 목적
 
@@ -22,7 +22,7 @@ ID: `R-001-study-sprint-prep`
 
 진행률: 95%
 
-근거: thin slice 대조, 스터디 템플릿/기본값, 파트너 압박 가시성, 4주 정산 카드, 똑똑/놓친 약속 푸시 안정화, Cloud Functions 배포, Android production 배포, iOS TestFlight 업로드가 완료됐다. 파일럿 시작 전 모집 운영 준비와 수동 집계 위치 확정이 남아 있다.
+근거: thin slice 대조, 스터디 템플릿/기본값, 파트너 압박 가시성, 4주 정산 카드, 똑똑/놓친 약속 푸시 안정화, Cloud Functions 배포, Android production `1.0.32+51` 배포, iOS TestFlight 업로드가 완료됐다. 파일럿 시작 전 모집 운영 준비와 수동 집계 위치 확정이 남아 있다.
 
 ## Milestones
 

@@ -1,7 +1,7 @@
 /// 앱 테마 타입
 enum AppThemeType {
-  /// Theme A: Smoky Plum × Warm Stone
-  /// Warm · Mature · Intimate · Trust-based · Low-pressure · Moody but calm
+  /// Theme A: Mint × Orange
+  /// Calm · Clear · Action-forward · Partner-accountability
   smokyPlum,
 
   /// Theme B: Deep Olive × Sand

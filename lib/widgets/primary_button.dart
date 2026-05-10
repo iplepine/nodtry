@@ -21,9 +21,9 @@ class PrimaryButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style:
             ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary, // Smoky Plum
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              disabledBackgroundColor: AppColors.secondary, // Pale Stone
+              disabledBackgroundColor: AppColors.disabled,
               disabledForegroundColor: AppColors.textDisabled, // 비활성 텍스트
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -31,12 +31,12 @@ class PrimaryButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12), // Soft radius (8~12dp)
               ),
             ).copyWith(
-              // Pressed state: Deep Plum
+              // Pressed state
               overlayColor: WidgetStateProperty.resolveWith<Color?>((
                 Set<WidgetState> states,
               ) {
                 if (states.contains(WidgetState.pressed)) {
-                  return AppColors.primaryPressed; // Deep Plum (#5A4658)
+                  return AppColors.primaryPressed;
                 }
                 return null;
               }),

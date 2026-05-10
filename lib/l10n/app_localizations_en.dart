@@ -522,7 +522,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTheme => 'Color Theme';
 
   @override
-  String get settingsThemeSmokyPlum => 'Smoky Plum × Warm Stone';
+  String get settingsThemeSmokyPlum => 'Mint × Orange';
 
   @override
   String get settingsThemeDeepOlive => 'Deep Olive × Sand';

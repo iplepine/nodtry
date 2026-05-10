@@ -1,0 +1,4 @@
+Fixed partner profile names and images in the History tab.
+Added the new mint-and-orange theme, refreshed app icon, and updated splash screen.
+Improved underlined text buttons with a custom underline that renders better for Korean text.
+Fixed long promise card text overflow in the Us tab and splash icon clipping.

@@ -60,13 +60,13 @@ class TimeChip extends StatelessWidget {
       case TimeChipType.upcoming:
         // 스펙: Light Sand (Opacity 80%)
         // Theme A Surface를 사용하되, 스펙의 Light Sand 색상 사용
-        return const Color(0xFFF2ECE7).withOpacity(0.8);
+        return const Color(0xFFF2ECE7).withValues(alpha: 0.8);
       case TimeChipType.soon:
         // 스펙: Light Sand (Opacity 60%)
-        return const Color(0xFFF2ECE7).withOpacity(0.6);
+        return const Color(0xFFF2ECE7).withValues(alpha: 0.6);
       case TimeChipType.past:
         // 과거 시간: 더 약한 색상 (Opacity 50%)
-        return const Color(0xFFF2ECE7).withOpacity(0.5);
+        return const Color(0xFFF2ECE7).withValues(alpha: 0.5);
     }
   }
 

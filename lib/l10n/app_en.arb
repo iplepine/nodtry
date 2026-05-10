@@ -663,9 +663,9 @@
   "@settingsTheme": {
     "description": "Theme setting label"
   },
-  "settingsThemeSmokyPlum": "Smoky Plum × Warm Stone",
+  "settingsThemeSmokyPlum": "Mint × Orange",
   "@settingsThemeSmokyPlum": {
-    "description": "Smoky Plum theme option"
+    "description": "Mint and Orange theme option"
   },
   "settingsThemeDeepOlive": "Deep Olive × Sand",
   "@settingsThemeDeepOlive": {

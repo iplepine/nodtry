@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../widgets/app_underlined_text.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../../providers/repository_provider.dart';
 import '../auth_state.dart';
@@ -180,12 +181,9 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                       _formKey.currentState?.reset();
                     });
                   },
-                  child: Text(
+                  child: AppUnderlinedText(
                     _isLoginMode ? "계정이 없으신가요? 회원가입" : "이미 계정이 있으신가요? 로그인",
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      decoration: TextDecoration.underline,
-                    ),
+                    style: TextStyle(color: AppColors.textSecondary),
                   ),
                 ),
               ],

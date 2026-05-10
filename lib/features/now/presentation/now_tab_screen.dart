@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_colors.dart';
+import '../../../widgets/app_underlined_text.dart';
 import '../../../widgets/quiet_header.dart';
 import '../../../widgets/time_chip.dart';
 import '../../../models/home_state.dart';
@@ -1171,12 +1172,9 @@ class _NowTabState extends ConsumerState<NowTab>
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
-                    SelectableText(
+                    AppUnderlinedText.selectable(
                       errorUrl,
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
+                      style: const TextStyle(color: Colors.blue),
                     ),
                   ],
                 ],
@@ -2375,12 +2373,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text(
+              child: const AppUnderlinedText(
                 '똑똑 확인만 하기',
-                style: TextStyle(
-                  fontSize: 13,
-                  decoration: TextDecoration.underline,
-                ),
+                style: TextStyle(fontSize: 13),
               ),
             ),
           ],
@@ -2420,12 +2415,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text(
+            child: const AppUnderlinedText(
               '이번 4주는 여기서 멈추기',
-              style: TextStyle(
-                fontSize: 13,
-                decoration: TextDecoration.underline,
-              ),
+              style: TextStyle(fontSize: 13),
             ),
           ),
         ],
@@ -2464,12 +2456,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              AppUnderlinedText(
                 l10n.nowAddMorePlan,
-                style: const TextStyle(
-                  fontSize: 14,
-                  decoration: TextDecoration.underline,
-                ),
+                style: const TextStyle(fontSize: 14),
               ),
               const SizedBox(width: 4),
               const Icon(Icons.arrow_forward_ios, size: 10),
@@ -2533,12 +2522,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text(
+            child: const AppUnderlinedText(
               '오늘은 쉬어갈게요 (휴식권)',
-              style: TextStyle(
-                fontSize: 13,
-                decoration: TextDecoration.underline,
-              ),
+              style: TextStyle(fontSize: 13),
             ),
           ),
         ],
@@ -2554,12 +2540,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text(
+              child: const AppUnderlinedText(
                 '오늘은 쉬어갈게요 (휴식권)',
-                style: TextStyle(
-                  fontSize: 13,
-                  decoration: TextDecoration.underline,
-                ),
+                style: TextStyle(fontSize: 13),
               ),
             )
           else
@@ -2571,12 +2554,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: Text(
+              child: AppUnderlinedText(
                 l10n.nowActionSkipToday,
-                style: const TextStyle(
-                  fontSize: 13,
-                  decoration: TextDecoration.underline,
-                ),
+                style: const TextStyle(fontSize: 13),
               ),
             ),
         ],
@@ -3228,8 +3208,8 @@ class _ManagerQuickCard extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: onPokeUser,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.textPrimary,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
@@ -3265,8 +3245,8 @@ class _ManagerQuickCard extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: onPokePartner,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.textPrimary,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
@@ -3303,12 +3283,11 @@ class _ManagerQuickCard extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 4),
-                        Text(
+                        AppUnderlinedText(
                           '어제 실천 인정해주기',
                           style: TextStyle(
                             fontSize: 14,
                             color: AppColors.textSecondary,
-                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ],
@@ -3365,7 +3344,7 @@ class _ManagerQuickCard extends StatelessWidget {
                 child: TextButton(
                   onPressed: onProposePromise,
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.textSecondary,
+                    foregroundColor: AppColors.secondary,
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                   child: Row(
@@ -3375,15 +3354,14 @@ class _ManagerQuickCard extends StatelessWidget {
                       Icon(
                         Icons.handshake_outlined,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: AppColors.secondary,
                       ),
                       const SizedBox(width: 4),
-                      Text(
+                      AppUnderlinedText(
                         '약속 걸기',
                         style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.textSecondary,
-                          decoration: TextDecoration.underline,
+                          color: AppColors.secondary,
                         ),
                       ),
                     ],
@@ -3751,8 +3729,8 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.secondary,
+                  foregroundColor: AppColors.textPrimary,
                   disabledBackgroundColor: AppColors.disabled,
                   disabledForegroundColor: Colors.white70,
                   elevation: 0,

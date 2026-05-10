@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 import 'user_repository.dart';
 
@@ -80,6 +81,6 @@ class MockUserRepository implements UserRepository {
   @override
   Future<void> updateFcmToken(String uid, String token) async {
     // Mock implementation - do nothing or log
-    print('MockUserRepository: FCM token updated for $uid: $token');
+    debugPrint('MockUserRepository: FCM token updated for $uid: $token');
   }
 }

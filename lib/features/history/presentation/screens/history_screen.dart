@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:nod_try/theme/app_colors.dart';
+import '../../../../widgets/app_underlined_text.dart';
 import '../../../../widgets/quiet_header.dart';
 import '../../../../models/history_item.dart';
 import '../../../../widgets/history/history_card.dart';
@@ -65,12 +66,9 @@ class HistoryScreen extends ConsumerWidget {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
-                    SelectableText(
+                    AppUnderlinedText.selectable(
                       errorUrl,
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
+                      style: const TextStyle(color: Colors.blue),
                     ),
                   ],
                 ],
