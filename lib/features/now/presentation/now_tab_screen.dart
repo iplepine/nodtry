@@ -869,8 +869,10 @@ class _NowTabState extends ConsumerState<NowTab>
         >(
           context: context,
           isScrollControlled: true,
+          useRootNavigator: true,
           backgroundColor: Colors.transparent,
-          builder: (context) => const _PromiseProposalSheet(),
+          builder: (context) =>
+              const SafeArea(top: false, child: _PromiseProposalSheet()),
         );
 
     if (result == null) return;
@@ -3595,7 +3597,14 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final keyboardInset = mediaQuery.viewInsets.bottom;
+    final bottomInset = keyboardInset > 0
+        ? keyboardInset
+        : mediaQuery.viewPadding.bottom;
+
     return Container(
+      constraints: BoxConstraints(maxHeight: mediaQuery.size.height * 0.9),
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -3604,7 +3613,7 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
         left: 24,
         right: 24,
         top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: bottomInset + 24,
       ),
       child: SingleChildScrollView(
         child: Column(
