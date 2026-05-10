@@ -1,6 +1,6 @@
 # 작업 관리
 
-마지막 갱신일: 2026-05-05
+마지막 갱신일: 2026-05-10
 
 ## 현재 집중
 
@@ -13,6 +13,18 @@
 다음 후보 task: `BT-005-week-one-pilot-ops-review`
 
 이후 후보 task: `BT-006-responsibility-network-thin-slice`
+
+최근 완료:
+
+- `BT-007-notification-production-hardening`: 똑똑/놓친 약속 푸시 안정화, Now 탭 똑똑 카드 정리, Cloud Functions Node 22 전환, Android production 배포.
+
+## 현재 남은 To-do
+
+1. `BT-004`: 모집 링크 또는 폼을 확정한다.
+2. `BT-004`: 시작 전/종료 후 질문을 운영자가 바로 보낼 수 있는 형태로 한 곳에 모은다.
+3. `BT-004`: `pilot_joined`, `partner_connected`, `study_plan_created`, `partner_feedback_sent` 수동 집계 위치를 확정한다.
+4. `BT-004`: 1쌍 기준으로 앱 설치, 파트너 연결, 첫 플랜 생성, 똑똑/확인 리허설을 한다.
+5. `BT-005`: 파일럿 시작 후 첫 주 지표 집계와 부담/동기 반응 회수로 넘어간다.
 
 ## 읽는 순서
 

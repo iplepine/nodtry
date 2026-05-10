@@ -15,10 +15,12 @@
 
 ### 2. partnerPoke (파트너 실천 지연)
 - **조건**: 파트너에게 오늘 해야 할 일이 있는데 아직 완료/휴식/건너뜀 처리하지 않았을 때
+- **반복 제한**: 같은 플랜은 오늘 이미 `lastPokeAt`이 있으면 다시 노출하지 않음
 - **노출 위치**: 지금 탭 > Manager Card
 - **메시지**: "{파트너명}님의 약속이 아직 조용해요. 묻히기 전에 똑똑으로 당겨주세요."
 - **버튼**: "똑똑! 당기기"
 - **수신자 카드**: "똑똑! 파트너가 기다리고 있어요." / "지금 처리하기"
+- **전송자 카드 처리**: 똑똑 전송 성공 후 Now 탭에서 해당 카드 즉시 제거
 
 ### 3. action_missed (자동 미실천 전달)
 - **조건**: 파트너의 약속 시간이 지나고 30분이 지났는데 오늘 행동이 아직 미처리일 때
@@ -41,6 +43,12 @@
 - 카드 생성: `real_record_repository.dart` > `_processPlans()` > Part 3
 - UI 렌더링: `now_tab_screen.dart` > `_ManagerQuickCard`
 - Intent 처리: `now_tab_viewmodel.dart` > `PokeUserIntent`, `PokePartnerIntent`
+- 원격 푸시: `functions/src/index.ts` > `onCheerCreated`, `onPlanUpdated`
+
+## 운영 상태
+
+- `1.0.30+49`부터 Android production과 iOS TestFlight에 똑똑 카드 정리 및 OS 표시 푸시가 반영됐다.
+- 실제 수신은 상대방 알림 권한과 `users/{uid}.fcmToken` 저장 여부에 의존한다.
 
 ## 노출 위치 참고
 - **지금 탭**: Manager Card에서 똑똑 버튼 노출 (O)

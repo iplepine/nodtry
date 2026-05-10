@@ -55,6 +55,18 @@
 - `next_plan_intent_recorded`: 다음 4주 의향 기록
 - `paid_intent_recorded`: 유료/보증금 의향 기록
 
+## 1주차 수동 집계 To-do
+
+- [ ] 집계 위치 확정
+- [ ] 참여자/파트너 쌍 ID 규칙 확정
+- [ ] `pilot_joined` 기록
+- [ ] `partner_connected` 기록
+- [ ] `study_plan_created` 기록
+- [ ] `study_action_completed`를 날짜별로 기록
+- [ ] `partner_feedback_sent`를 확인/응원/똑똑으로 구분해 기록
+- [ ] `action_missed` 노출 여부와 똑똑 후 복귀 여부 기록
+- [ ] 똑똑이 동기였는지 부담이었는지 최소 5명 이상 회수
+
 ## 앱에 남는 파일럿 정산 필드
 
 완료 플랜의 Now 탭 정산 카드에서 최소한 아래 필드를 남긴다.

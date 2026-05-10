@@ -10,7 +10,7 @@ ID: `BT-004-pilot-recruitment-ops`
 
 연결 Goal: `G-001-study-sprint-pilot`
 
-마지막 갱신일: 2026-05-03
+마지막 갱신일: 2026-05-10
 
 ## 목표
 
@@ -18,7 +18,7 @@ ID: `BT-004-pilot-recruitment-ops`
 
 ## 배경
 
-제품 thin slice는 카테고리 기반 플랜 생성, 파트너 똑똑 압박, 4주 정산 카드까지 준비됐다. 다음 병목은 제품 기능이 아니라 모집과 운영 증거 수집이다.
+제품 thin slice는 카테고리 기반 플랜 생성, 파트너 똑똑 압박, 놓친 약속 자동 전달, 4주 정산 카드까지 준비됐다. `1.0.30+49`는 Android production과 iOS TestFlight까지 배포됐다. 다음 병목은 제품 기능이 아니라 모집과 운영 증거 수집이다.
 
 ## 포함
 
@@ -40,6 +40,20 @@ ID: `BT-004-pilot-recruitment-ops`
 - [ ] `pilot_joined`, `partner_connected`, `study_plan_created`, `partner_feedback_sent` 수동 집계 위치가 정해짐
 - [ ] 파일럿 시작 안내 문구가 확정됨
 
+## 현재 To-do
+
+- [ ] 모집 링크 또는 모집 폼 생성
+- [ ] 시작 전 질문 5개와 종료 후 질문 6개를 폼/문서 한 곳에 정리
+- [ ] 수동 집계 시트 컬럼 확정: `pilot_joined`, `partner_connected`, `study_plan_created`, `study_action_completed`, `partner_feedback_sent`, `poke_sent`, `action_missed_seen`
+- [ ] 내부 테스트/프로덕션 설치 안내 문구 확정
+- [ ] 1쌍 리허설: 설치 → 가입 → 연결 → 플랜 생성 → 똑똑/확인 → 히스토리 확인
+
 ## 검증 계획
 
 - 운영자가 참여자 1쌍을 수동 등록한다고 가정하고 모집부터 앱 설치 안내까지 리허설한다.
+
+## 준비 완료 항목
+
+- Android production: `1.0.30+49`
+- iOS TestFlight: `1.0.30+49`
+- Cloud Functions: Node.js 22, `notifyMissedActions`, `onPlanUpdated`, `onCheerCreated` 배포 완료
