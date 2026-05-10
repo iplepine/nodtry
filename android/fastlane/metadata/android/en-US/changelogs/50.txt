@@ -1,0 +1,3 @@
+Improved the check-and-cheer flow so long cheer messages and button labels no longer break the UI.
+Fixed the promise proposal bottom sheet so it stays clear of the bottom navigation bar.
+Updated the Google Play description with knock-knock reminders, check-and-cheer, and reward/penalty promises.

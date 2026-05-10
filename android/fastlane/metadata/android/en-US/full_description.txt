@@ -1,0 +1,28 @@
+Nodtry is a mutual accountability app for keeping small promises with a partner.
+
+Personal to-do and routine apps are easy to ignore. Nodtry connects your promise to a real relationship, so today's action, partner check-ins, encouragement, and follow-up reminders stay in one clear loop.
+
+Key features
+
+- 1:1 partner connection
+Connect with someone close through an invite code and keep each other aware of progress.
+
+- 4-week action promises
+Set repeatable actions for study, exercise, recovery, or daily life with days, counts, and reminder times.
+
+- Now tab
+Handle today's action, delayed actions, completed actions, and partner status from one focused screen.
+
+- Knock-knock reminders
+Send a knock-knock when your partner has not made a new promise or when today's action is still quiet. Missed actions can be surfaced so they do not disappear silently.
+
+- Check and cheer
+When your partner reports an action, confirm it and send a short cheer message or reaction.
+
+- Rewards and penalties
+Agree on a reward for success and a penalty for missed commitments, so motivation is clear before the week gets busy.
+
+- History
+Review completed actions, skips, partner confirmations, cheers, and notes in one place.
+
+Nodtry focuses on one thing: making sure small promises do not vanish alone. Start small, check in with your partner, and pull missed actions back into view.
