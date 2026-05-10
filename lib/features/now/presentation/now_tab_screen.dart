@@ -3331,9 +3331,16 @@ class _ManagerQuickCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    "확인하고 응원 보내기",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      "확인하고 응원 보내기",
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
