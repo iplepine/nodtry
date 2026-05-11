@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
 // Removed unused AuthService import
@@ -128,17 +129,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   child: Column(
                     children: [
                       // 로고 영역
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Image.asset(
-                          'assets/images/app_icon.png',
-                          width: 60,
-                          height: 60,
+                      SizedBox(
+                        width: 96,
+                        height: 96,
+                        child: Lottie.asset(
+                          'assets/animations/nodtry_icon_loop.json',
+                          repeat: true,
+                          animate: true,
+                          fit: BoxFit.contain,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -215,13 +213,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                               backgroundColor: Colors.black,
                                               foregroundColor: Colors.white,
                                               shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(12),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
                                               ),
                                               padding: EdgeInsets.zero,
                                               elevation: 0,
                                             ),
                                             child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
                                               children: [
                                                 Icon(
                                                   Icons.apple,
@@ -230,7 +230,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                                 ),
                                                 const SizedBox(width: 10),
                                                 Text(
-                                                  AppLocalizations.of(context)!.loginWithApple,
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.loginWithApple,
                                                   style: const TextStyle(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.w500,
@@ -263,16 +265,22 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                           onPressed: _handleGoogleLogin,
                                           style: OutlinedButton.styleFrom(
                                             backgroundColor: Colors.white,
-                                            foregroundColor: const Color(0xFF1F1F1F),
-                                            side: const BorderSide(color: Color(0xFF747775)),
+                                            foregroundColor: const Color(
+                                              0xFF1F1F1F,
+                                            ),
+                                            side: const BorderSide(
+                                              color: Color(0xFF747775),
+                                            ),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
                                             padding: EdgeInsets.zero,
                                             elevation: 0,
                                           ),
                                           child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
                                             children: [
                                               Image.asset(
                                                 'assets/images/google_logo.png',
@@ -281,7 +289,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                               ),
                                               const SizedBox(width: 10),
                                               Text(
-                                                AppLocalizations.of(context)!.loginWithGoogle,
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.loginWithGoogle,
                                                 style: const TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w500,
@@ -311,7 +321,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                       ),
                                     ),
                                     child: Text(
-                                      AppLocalizations.of(context)!.loginWithEmail,
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.loginWithEmail,
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,

@@ -12,6 +12,7 @@ import 'package:nod_try/features/plan/domain/usecases/setting_alarm_use_case.dar
 import 'package:nod_try/models/plan_model.dart';
 import 'package:nod_try/models/history_item.dart';
 import 'package:nod_try/models/connected_user.dart';
+import 'package:nod_try/models/user_model.dart';
 import 'package:nod_try/services/notification_service.dart';
 import 'dart:async';
 
@@ -227,10 +228,12 @@ void main() {
   late MockRecordRepository mockRecordRepository;
   late MockGetNowCardsUseCase mockGetNowCardsUseCase;
   late ProviderContainer container;
+  late List<ConnectedUser> connectedUsers;
 
   setUp(() {
     mockRecordRepository = MockRecordRepository();
     mockGetNowCardsUseCase = MockGetNowCardsUseCase();
+    connectedUsers = [];
     container = ProviderContainer(
       overrides: [
         recordRepositoryProvider.overrideWithValue(mockRecordRepository),
@@ -238,9 +241,7 @@ void main() {
         settingAlarmUseCaseProvider.overrideWithValue(
           SettingAlarmUseCase(FakePlanReminderScheduler()),
         ),
-        connectedProfilesProvider.overrideWith(
-          (ref) async => <ConnectedUser>[],
-        ),
+        connectedProfilesProvider.overrideWith((ref) async => connectedUsers),
       ],
     );
   });
@@ -430,6 +431,47 @@ void main() {
     expect(mockRecordRepository.lastPokeUserMessage, '똑똑! 약속을 기다리는 사람이 있어요.');
     expect(state.managerCards, isEmpty);
   });
+
+  test(
+    'partnerTodayComplete card should appear in manager cards with partner profile',
+    () async {
+      final now = DateTime.now();
+      connectedUsers = [
+        ConnectedUser(
+          user: UserModel(
+            uid: 'partner-user',
+            displayName: '민지',
+            profileImageUrl: 'https://example.com/minji.png',
+            createdAt: now,
+            updatedAt: now,
+          ),
+          isSupported: false,
+          isCheering: true,
+        ),
+      ];
+      await container.read(connectedProfilesProvider.future);
+
+      final card = HomeCardModel(
+        state: HomeCardState.partnerTodayComplete,
+        plan: testPlan('plan-complete-today'),
+      );
+      mockGetNowCardsUseCase.emit([card]);
+
+      final state = await readNowState();
+
+      expect(state.managerCards, hasLength(1));
+      expect(
+        state.managerCards.single.state,
+        HomeCardState.partnerTodayComplete,
+      );
+      expect(state.managerCards.single.partnerUid, 'partner-user');
+      expect(state.managerCards.single.partnerName, '민지');
+      expect(
+        state.managerCards.single.partnerImageUrl,
+        'https://example.com/minji.png',
+      );
+    },
+  );
 
   test('RecordPilotSettlementIntent should call repository', () async {
     mockGetNowCardsUseCase.emit([]);

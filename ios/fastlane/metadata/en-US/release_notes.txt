@@ -1,6 +1,6 @@
 What's New
 
-- Start faster with Study, Workout, and Custom categories.
+- Start promises faster with categories and custom input.
 - Added a clear button for custom input.
 - Improved follow-up for missed commitments.
 - Refined the core plan-to-action flow.

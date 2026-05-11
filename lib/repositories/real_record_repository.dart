@@ -85,30 +85,65 @@ class RealRecordRepository implements RecordRepository {
     final List<HomeCardModel> yoursCards = [];
 
     // --- Part 1: Partner Actions (Manager Role) -> Yours ---
-    final managerPlans = plans.where((p) => p.managerId == myUid);
+    final managerPlans = plans.where((p) => p.managerId == myUid).toList();
+    final managerPlansByPartnerUid = <String, List<Plan>>{};
+    for (final plan in managerPlans) {
+      managerPlansByPartnerUid.putIfAbsent(plan.userId, () => []).add(plan);
+    }
+
+    final partnersWithAllTodayPlansCompleted = <String>{};
+    for (final entry in managerPlansByPartnerUid.entries) {
+      final todayActivePlans = entry.value
+          .where(
+            (plan) =>
+                plan.state == PlanState.active &&
+                _isPlanActiveOn(plan, today) &&
+                _hasScheduledItemOn(plan, todayWeekday),
+          )
+          .toList();
+      if (todayActivePlans.isEmpty) continue;
+
+      final allCompletedToday = todayActivePlans.every(
+        (plan) => _containsDate(plan.completedDates, today),
+      );
+      if (!allCompletedToday) continue;
+
+      final unverifiedCompletedPlans = todayActivePlans
+          .where(
+            (plan) =>
+                _containsDate(plan.completedDates, today) &&
+                !_containsDate(plan.verifiedDates, today),
+          )
+          .toList();
+      if (unverifiedCompletedPlans.isEmpty) continue;
+
+      partnersWithAllTodayPlansCompleted.add(entry.key);
+      yoursCards.add(
+        HomeCardModel(
+          state: HomeCardState.partnerTodayComplete,
+          plan: unverifiedCompletedPlans.first,
+          partnerUid: entry.key,
+          headerMessage: '오늘 약속을 다 지켰어요',
+        ),
+      );
+    }
+
     for (var plan in managerPlans) {
       if (plan.state == PlanState.rejected) {
         continue;
       }
 
-      final hasCompletedToday = plan.completedDates.any(
-        (d) =>
-            d.year == today.year &&
-            d.month == today.month &&
-            d.day == today.day,
-      );
-      final hasVerifiedToday = plan.verifiedDates.any(
-        (d) =>
-            d.year == today.year &&
-            d.month == today.month &&
-            d.day == today.day,
-      );
+      final hasCompletedToday = _containsDate(plan.completedDates, today);
+      final hasVerifiedToday = _containsDate(plan.verifiedDates, today);
 
-      if (hasCompletedToday && !hasVerifiedToday) {
+      if (hasCompletedToday &&
+          !hasVerifiedToday &&
+          !partnersWithAllTodayPlansCompleted.contains(plan.userId)) {
         yoursCards.add(
           HomeCardModel(
             state: HomeCardState.partnerAction,
             plan: plan,
+            partnerUid: plan.userId,
             headerMessage: '전달받은 말이 있어요',
           ),
         );
@@ -119,6 +154,7 @@ class RealRecordRepository implements RecordRepository {
           HomeCardModel(
             state: HomeCardState.partnerPlanCreate, // 계획 제안
             plan: plan,
+            partnerUid: plan.userId,
             headerMessage: '새로운 계획 제안이 있어요',
           ),
         );
@@ -132,6 +168,7 @@ class RealRecordRepository implements RecordRepository {
           HomeCardModel(
             state: HomeCardState.partnerPromiseProposed,
             plan: plan,
+            partnerUid: plan.userId,
             headerMessage: '약속 수락을 기다리고 있어요',
           ),
         );
@@ -144,6 +181,7 @@ class RealRecordRepository implements RecordRepository {
           HomeCardModel(
             state: HomeCardState.promiseSettled,
             plan: plan,
+            partnerUid: plan.userId,
             headerMessage: '약속 결과가 나왔어요',
           ),
         );
@@ -601,6 +639,30 @@ class RealRecordRepository implements RecordRepository {
     return value.year == target.year &&
         value.month == target.month &&
         value.day == target.day;
+  }
+
+  bool _containsDate(List<DateTime> values, DateTime target) {
+    return values.any((value) => _isSameDay(value, target));
+  }
+
+  bool _hasScheduledItemOn(Plan plan, int weekday) {
+    return plan.items.any((item) => item.days.contains(weekday));
+  }
+
+  bool _isPlanActiveOn(Plan plan, DateTime target) {
+    final targetDate = DateTime(target.year, target.month, target.day);
+    final startDate = DateTime(
+      plan.startDate.year,
+      plan.startDate.month,
+      plan.startDate.day,
+    );
+    final endDate = DateTime(
+      plan.endDate.year,
+      plan.endDate.month,
+      plan.endDate.day,
+    );
+
+    return !targetDate.isBefore(startDate) && !targetDate.isAfter(endDate);
   }
 
   @override
@@ -1154,6 +1216,7 @@ class RealRecordRepository implements RecordRepository {
         'lastCheerType': reactionType,
         'lastCheerAt': Timestamp.fromDate(now),
         'lastUpdatedBy': user.uid,
+        'verifiedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
       });
 
       // 3. Update Action (HistoryItem) to verify and add message
@@ -1183,11 +1246,6 @@ class RealRecordRepository implements RecordRepository {
           updateData['partnerMessage'] = message;
         }
         batch.update(historyRef, updateData);
-
-        // Also update plan's verifiedDates (duplicate logic from verifyPlan but efficient in batch)
-        batch.update(planRef, {
-          'verifiedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
-        });
       }
 
       await batch.commit();
@@ -1434,6 +1492,22 @@ class RealRecordRepository implements RecordRepository {
         throw Exception('Plan is not in a valid state for promise proposal');
       }
 
+      final plan = Plan.fromMap(data, doc.id);
+      final now = DateTime.now();
+      final rewardDaysLimit = plan.rewardTargetDaysLimit(asOf: now);
+      final penaltyDaysLimit = plan.penaltyTargetDaysLimit(asOf: now);
+      final invalidReward =
+          reward != null &&
+          (reward.targetDays < 1 || reward.targetDays > rewardDaysLimit);
+      final invalidPenalty =
+          penalty != null &&
+          (penalty.targetDays < 1 || penalty.targetDays > penaltyDaysLimit);
+      if (invalidReward || invalidPenalty) {
+        throw Exception(
+          'Promise target days exceed the currently reachable limit',
+        );
+      }
+
       // 기존 약속이 active/settled이면 제안 불가
       if (data['promise'] != null) {
         final existingStatus = data['promise']['status'] as String?;
@@ -1442,7 +1516,6 @@ class RealRecordRepository implements RecordRepository {
         }
       }
 
-      final now = DateTime.now();
       final promise = {
         'status': PromiseStatus.proposed.toMap(),
         'proposerId': user.uid,

@@ -719,6 +719,32 @@ class MockRecordRepository implements RecordRepository {
     PromiseReward? reward,
     PromisePenalty? penalty,
   }) async {
+    Plan? plan;
+    for (final model in _mockHomeCardModels) {
+      if (model.plan?.id == planId) {
+        plan = model.plan;
+        break;
+      }
+    }
+    plan ??= _mockPlans
+        .where((candidate) => candidate.id == planId)
+        .firstOrNull;
+    if (plan != null) {
+      final now = DateTime.now();
+      final rewardDaysLimit = plan.rewardTargetDaysLimit(asOf: now);
+      final penaltyDaysLimit = plan.penaltyTargetDaysLimit(asOf: now);
+      final invalidReward =
+          reward != null &&
+          (reward.targetDays < 1 || reward.targetDays > rewardDaysLimit);
+      final invalidPenalty =
+          penalty != null &&
+          (penalty.targetDays < 1 || penalty.targetDays > penaltyDaysLimit);
+      if (invalidReward || invalidPenalty) {
+        throw Exception(
+          'Promise target days exceed the currently reachable limit',
+        );
+      }
+    }
     debugPrint('Mock: Propose promise for plan $planId');
   }
 

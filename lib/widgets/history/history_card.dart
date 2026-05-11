@@ -81,8 +81,10 @@ class HistoryCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Header: Date & Status
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           _formatDate(item.date),
@@ -91,35 +93,7 @@ class HistoryCard extends ConsumerWidget {
                             fontSize: 13,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusInfo.color,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                statusInfo.icon,
-                                size: 12,
-                                color: statusInfo.textColor,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                statusInfo.text,
-                                style: TextStyle(
-                                  color: statusInfo.textColor,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        _HistoryStatusBadge(statusInfo: statusInfo),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -367,6 +341,40 @@ class _StatusDisplayInfo {
     required this.textColor,
     required this.icon,
   });
+}
+
+class _HistoryStatusBadge extends StatelessWidget {
+  final _StatusDisplayInfo statusInfo;
+
+  const _HistoryStatusBadge({required this.statusInfo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: statusInfo.color,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(statusInfo.icon, size: 12, color: statusInfo.textColor),
+          const SizedBox(width: 4),
+          Text(
+            statusInfo.text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: statusInfo.textColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Avatar extends StatelessWidget {

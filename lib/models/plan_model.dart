@@ -357,6 +357,124 @@ class Plan {
 
     return usedThisWeek < 1;
   }
+
+  /// 플랜 시작일과 종료일을 포함한 전체 기간.
+  int get calendarDurationDays {
+    final start = _dateOnly(startDate);
+    final end = _dateOnly(endDate);
+    final days = end.difference(start).inDays + 1;
+    return days < 1 ? 1 : days;
+  }
+
+  /// 보상/벌칙 정산 기준이 되는 실천 예정일 수.
+  ///
+  /// 요일 정보가 없으면 전체 기간을 기준으로 삼아 기존 데이터도 안전하게
+  /// 처리한다.
+  int get scheduledDayCount {
+    final count = _scheduledDates.length;
+    return count < 1 ? 1 : count;
+  }
+
+  /// 상/벌 약속에서 선택할 수 있는 targetDays의 최대값.
+  int get promiseTargetDaysLimit => scheduledDayCount;
+
+  /// 현재까지 보상 조건에 반영되는 성공일 수.
+  int completedDayCount({DateTime? asOf}) {
+    final start = _dateOnly(startDate);
+    final cutoff = _cutoffDate(asOf);
+    return _uniqueDatesInRange(completedDates, start, cutoff).length;
+  }
+
+  /// 현재 시점에서 실패로 확정된 예정일 수.
+  int failedDayCount({DateTime? asOf}) {
+    final today = _dateOnly(asOf ?? DateTime.now());
+    final completed = _uniqueDatesInRange(
+      completedDates,
+      _dateOnly(startDate),
+      _dateOnly(endDate),
+    );
+    return _scheduledDates.where((date) {
+      return date.isBefore(today) && !completed.contains(date);
+    }).length;
+  }
+
+  /// 아직 성공/실패 어느 쪽으로도 갈 수 있는 남은 예정일 수.
+  int remainingScheduledDayCount({DateTime? asOf}) {
+    final today = _dateOnly(asOf ?? DateTime.now());
+    final completed = _uniqueDatesInRange(
+      completedDates,
+      _dateOnly(startDate),
+      _dateOnly(endDate),
+    );
+    return _scheduledDates.where((date) {
+      return !date.isBefore(today) && !completed.contains(date);
+    }).length;
+  }
+
+  /// 현재 상태에서 도달 가능한 보상 성공일 목표의 최대값.
+  int rewardTargetDaysLimit({DateTime? asOf}) {
+    final limit =
+        completedDayCount(asOf: asOf) + remainingScheduledDayCount(asOf: asOf);
+    return limit < 1 ? 1 : limit;
+  }
+
+  /// 현재 상태에서 도달 가능한 벌칙 실패일 목표의 최대값.
+  int penaltyTargetDaysLimit({DateTime? asOf}) {
+    final limit =
+        failedDayCount(asOf: asOf) + remainingScheduledDayCount(asOf: asOf);
+    return limit < 1 ? 1 : limit;
+  }
+
+  DateTime _cutoffDate(DateTime? asOf) {
+    final cutoff = _dateOnly(asOf ?? DateTime.now());
+    final start = _dateOnly(startDate);
+    final end = _dateOnly(endDate);
+    if (cutoff.isBefore(start)) return start.subtract(const Duration(days: 1));
+    if (cutoff.isAfter(end)) return end;
+    return cutoff;
+  }
+
+  List<DateTime> get _scheduledDates {
+    final scheduledWeekdays = items
+        .expand((item) => item.days)
+        .where((day) => day >= DateTime.monday && day <= DateTime.sunday)
+        .toSet();
+    final start = _dateOnly(startDate);
+    final end = _dateOnly(endDate);
+    final dates = <DateTime>[];
+
+    if (scheduledWeekdays.isEmpty) {
+      var day = start;
+      while (!day.isAfter(end)) {
+        dates.add(day);
+        day = day.add(const Duration(days: 1));
+      }
+      return dates;
+    }
+
+    var day = start;
+    while (!day.isAfter(end)) {
+      if (scheduledWeekdays.contains(day.weekday)) dates.add(day);
+      day = day.add(const Duration(days: 1));
+    }
+    return dates;
+  }
+
+  static Set<DateTime> _uniqueDatesInRange(
+    List<DateTime> dates,
+    DateTime start,
+    DateTime end,
+  ) {
+    if (end.isBefore(start)) return {};
+    return dates
+        .map(_dateOnly)
+        .where((date) => !date.isBefore(start) && !date.isAfter(end))
+        .toSet();
+  }
+
+  static DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
 }
 
 class PlanItem {

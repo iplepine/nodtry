@@ -364,7 +364,8 @@ class _NowTabState extends ConsumerState<NowTab>
           ).showSnackBar(const SnackBar(content: Text('승인에 실패했어요.')));
         }
       }
-    } else if (managerCard.state == HomeCardState.partnerAction) {
+    } else if (managerCard.state == HomeCardState.partnerAction ||
+        managerCard.state == HomeCardState.partnerTodayComplete) {
       // 실천 확인
       try {
         await ref
@@ -862,7 +863,8 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   Future<void> _handleProposePromise(HomeCardModel card) async {
-    if (card.plan?.id == null) return;
+    final plan = card.plan;
+    if (plan?.id == null) return;
 
     final result =
         await showModalBottomSheet<
@@ -873,7 +875,7 @@ class _NowTabState extends ConsumerState<NowTab>
           useRootNavigator: true,
           backgroundColor: Colors.transparent,
           builder: (context) =>
-              const SafeArea(top: false, child: _PromiseProposalSheet()),
+              SafeArea(top: false, child: PromiseProposalSheet(plan: plan!)),
         );
 
     if (result == null) return;
@@ -1504,7 +1506,7 @@ class _NowTabState extends ConsumerState<NowTab>
   void _showReactionBottomSheet(BuildContext context, String planId) {
     final l10n = AppLocalizations.of(context)!;
     final messageController = TextEditingController();
-    String selectedReaction = 'fire'; // Default
+    String selectedReaction = '🔥';
 
     showModalBottomSheet(
       context: context,
@@ -1513,9 +1515,14 @@ class _NowTabState extends ConsumerState<NowTab>
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
+            final mediaQuery = MediaQuery.of(context);
+            final bottomInset = mediaQuery.viewInsets.bottom > 0
+                ? mediaQuery.viewInsets.bottom
+                : mediaQuery.viewPadding.bottom;
+
             return Container(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
+              constraints: BoxConstraints(
+                maxHeight: mediaQuery.size.height * 0.9,
               ),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -1523,12 +1530,23 @@ class _NowTabState extends ConsumerState<NowTab>
                   top: Radius.circular(24),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.fromLTRB(24, 24, 24, bottomInset + 24),
+              child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.disabled,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     Text(
                       l10n.cheerSheetTitle,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -1536,7 +1554,6 @@ class _NowTabState extends ConsumerState<NowTab>
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // Emoji Grid
                     Wrap(
                       spacing: 16,
                       runSpacing: 16,
@@ -1575,7 +1592,6 @@ class _NowTabState extends ConsumerState<NowTab>
                           .toList(),
                     ),
                     const SizedBox(height: 24),
-                    // TextField
                     TextField(
                       controller: messageController,
                       decoration: InputDecoration(
@@ -1591,10 +1607,10 @@ class _NowTabState extends ConsumerState<NowTab>
                           vertical: 14,
                         ),
                       ),
-                      maxLines: 2,
+                      minLines: 2,
+                      maxLines: 4,
                     ),
                     const SizedBox(height: 24),
-                    // Send Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -1644,7 +1660,7 @@ class _NowTabState extends ConsumerState<NowTab>
           },
         );
       },
-    );
+    ).whenComplete(messageController.dispose);
   }
 
   void _showFakeStateSelector(BuildContext context, WidgetRef ref) {
@@ -2135,27 +2151,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   }
 
   int _scheduledDaysCount(Plan plan) {
-    final scheduledWeekdays = plan.items.expand((item) => item.days).toSet();
-    if (scheduledWeekdays.isEmpty) {
-      return plan.endDate.difference(plan.startDate).inDays + 1;
-    }
-
-    var count = 0;
-    var day = DateTime(
-      plan.startDate.year,
-      plan.startDate.month,
-      plan.startDate.day,
-    );
-    final end = DateTime(
-      plan.endDate.year,
-      plan.endDate.month,
-      plan.endDate.day,
-    );
-    while (!day.isAfter(end)) {
-      if (scheduledWeekdays.contains(day.weekday)) count++;
-      day = day.add(const Duration(days: 1));
-    }
-    return count;
+    return plan.scheduledDayCount;
   }
 
   int _partnerFeedbackCount(Plan plan) {
@@ -2991,9 +2987,13 @@ class _ManagerQuickCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final isPartnerTodayComplete =
+        model.state == HomeCardState.partnerTodayComplete;
 
     String headerText;
-    if (model.state == HomeCardState.partnerAction) {
+    if (isPartnerTodayComplete) {
+      headerText = '오늘 약속을 다 지켰어요';
+    } else if (model.state == HomeCardState.partnerAction) {
       headerText = '확인하고 당겨줄 차례';
     } else if (model.state == HomeCardState.partnerPlanCreate ||
         model.state == HomeCardState.partnerPlanModify) {
@@ -3080,7 +3080,8 @@ class _ManagerQuickCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             // Title (Diff Aware)
-            if (model.plan?.items.firstOrNull?.title != null) ...[
+            if (!isPartnerTodayComplete &&
+                model.plan?.items.firstOrNull?.title != null) ...[
               SizedBox(
                 width: double.infinity,
                 child: _buildDiffText(
@@ -3097,11 +3098,12 @@ class _ManagerQuickCard extends StatelessWidget {
               const SizedBox(height: 4),
             ],
             // Scale & Period
-            if (model.plan != null)
+            if (!isPartnerTodayComplete && model.plan != null)
               _buildPlanDetails(context, model.plan!, l10n),
             const SizedBox(height: 8),
             // Description (Diff Aware)
-            if (model.plan?.items.firstOrNull?.description != null) ...[
+            if (!isPartnerTodayComplete &&
+                model.plan?.items.firstOrNull?.description != null) ...[
               SizedBox(
                 width: double.infinity,
                 child: _buildDiffText(
@@ -3116,6 +3118,9 @@ class _ManagerQuickCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
+            ],
+            if (isPartnerTodayComplete) ...[
+              _buildPartnerTodayCompleteMessage(context),
             ],
             // Button (Only for partnerActionShare/partnerPlanShare that needs action)
             if (model.state == HomeCardState.partnerPlanCreate ||
@@ -3295,7 +3300,8 @@ class _ManagerQuickCard extends StatelessWidget {
                   ),
                 ),
               ],
-            ] else if (model.state == HomeCardState.partnerAction) ...[
+            ] else if (model.state == HomeCardState.partnerAction ||
+                model.state == HomeCardState.partnerTodayComplete) ...[
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -3371,6 +3377,90 @@ class _ManagerQuickCard extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPartnerTodayCompleteMessage(BuildContext context) {
+    final resolvedPartnerName = (partnerName?.trim().isNotEmpty ?? false)
+        ? partnerName!.trim()
+        : '파트너';
+    final title = model.plan?.items.firstOrNull?.title;
+    final note = model.plan?.lastActionNote?.trim();
+
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                size: 20,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '$resolvedPartnerName님이 오늘 약속을 다 지켰어요.',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '짧게 확인해주면 내일도 이어가기 쉬워요.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.45,
+            ),
+          ),
+          if (title != null && title.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              '마지막 실천: $title',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
+          ],
+          if (note != null && note.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.background.withValues(alpha: 0.5),
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                  topLeft: Radius.circular(2),
+                ),
+              ),
+              child: Text(
+                note,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textPrimary,
+                  height: 1.45,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -3547,20 +3637,41 @@ class _ContextFooter extends StatelessWidget {
 
 // _ReconcileMenu removed per user request (was unused after UI updates)
 
-class _PromiseProposalSheet extends StatefulWidget {
-  const _PromiseProposalSheet();
+@visibleForTesting
+class PromiseProposalSheet extends StatefulWidget {
+  final Plan plan;
+  final DateTime? asOf;
+
+  const PromiseProposalSheet({super.key, required this.plan, this.asOf});
 
   @override
-  State<_PromiseProposalSheet> createState() => _PromiseProposalSheetState();
+  State<PromiseProposalSheet> createState() => _PromiseProposalSheetState();
 }
 
-class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
+class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
   bool _enableReward = true;
   bool _enablePenalty = false;
   final _rewardDescController = TextEditingController();
   final _penaltyDescController = TextEditingController();
-  int _rewardDays = 20;
-  int _penaltyDays = 10;
+  late int _rewardDays;
+  late int _penaltyDays;
+  late final DateTime _asOf;
+
+  int get _scheduledDays => widget.plan.scheduledDayCount;
+  int get _rewardDaysLimit => widget.plan.rewardTargetDaysLimit(asOf: _asOf);
+  int get _penaltyDaysLimit => widget.plan.penaltyTargetDaysLimit(asOf: _asOf);
+  int get _durationDays => widget.plan.calendarDurationDays;
+  int get _completedDays => widget.plan.completedDayCount(asOf: _asOf);
+  int get _failedDays => widget.plan.failedDayCount(asOf: _asOf);
+  int get _remainingDays => widget.plan.remainingScheduledDayCount(asOf: _asOf);
+
+  @override
+  void initState() {
+    super.initState();
+    _asOf = widget.asOf ?? DateTime.now();
+    _rewardDays = _defaultRewardDays();
+    _penaltyDays = _defaultPenaltyDays();
+  }
 
   @override
   void dispose() {
@@ -3577,7 +3688,62 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
     if (_enablePenalty && _penaltyDescController.text.trim().isEmpty) {
       return false;
     }
+    if (_enableReward && !_isTargetDaysValid(_rewardDays, _rewardDaysLimit)) {
+      return false;
+    }
+    if (_enablePenalty &&
+        !_isTargetDaysValid(_penaltyDays, _penaltyDaysLimit)) {
+      return false;
+    }
     return true;
+  }
+
+  bool _isTargetDaysValid(int days, int maxDays) {
+    return days >= 1 && days <= maxDays;
+  }
+
+  int _clampTargetDays(int days, int maxDays) {
+    if (days < 1) return 1;
+    if (days > maxDays) return maxDays;
+    return days;
+  }
+
+  int _defaultRewardDays() {
+    final additionalSuccesses = _remainingDays == 0
+        ? 0
+        : max(1, (_remainingDays * 0.7).ceil());
+    final target = _completedDays + additionalSuccesses;
+    final baseline = _completedDays == 0 ? min(20, target) : target;
+    return _clampTargetDays(baseline, _rewardDaysLimit);
+  }
+
+  int _defaultPenaltyDays() {
+    if (_failedDays == 0) {
+      return _clampTargetDays(min(10, _penaltyDaysLimit), _penaltyDaysLimit);
+    }
+
+    final additionalFailures = _remainingDays == 0
+        ? 0
+        : max(1, (_remainingDays * 0.3).ceil());
+    return _clampTargetDays(
+      _failedDays + additionalFailures,
+      _penaltyDaysLimit,
+    );
+  }
+
+  void _setRewardDays(int days) {
+    setState(() => _rewardDays = _clampTargetDays(days, _rewardDaysLimit));
+  }
+
+  void _setPenaltyDays(int days) {
+    setState(() => _penaltyDays = _clampTargetDays(days, _penaltyDaysLimit));
+  }
+
+  String get _durationSummary {
+    if (_durationDays == _scheduledDays) {
+      return '총 $_durationDays일짜리 약속이에요';
+    }
+    return '총 $_durationDays일짜리 약속 · 실천 예정 $_scheduledDays일';
   }
 
   @override
@@ -3630,6 +3796,46 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.18),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _durationSummary,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '현재 성공 $_completedDays일 · 실패 $_failedDays일 · 남은 예정 $_remainingDays일',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '보상은 최대 $_rewardDaysLimit일, 벌칙은 최대 $_penaltyDaysLimit일까지 정할 수 있어요.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 24),
 
             // 보상 섹션
@@ -3662,7 +3868,8 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
               _buildDaysPicker(
                 label: '성공 목표',
                 days: _rewardDays,
-                onChanged: (d) => setState(() => _rewardDays = d),
+                maxDays: _rewardDaysLimit,
+                onChanged: _setRewardDays,
               ),
             ],
 
@@ -3698,7 +3905,8 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
               _buildDaysPicker(
                 label: '실패 한도',
                 days: _penaltyDays,
-                onChanged: (d) => setState(() => _penaltyDays = d),
+                maxDays: _penaltyDaysLimit,
+                onChanged: _setPenaltyDays,
               ),
             ],
 
@@ -3779,6 +3987,7 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
   Widget _buildDaysPicker({
     required String label,
     required int days,
+    required int maxDays,
     required ValueChanged<int> onChanged,
   }) {
     return Row(
@@ -3811,11 +4020,18 @@ class _PromiseProposalSheetState extends State<_PromiseProposalSheet> {
           ),
         ),
         IconButton(
-          onPressed: () => onChanged(days + 1),
+          onPressed: days < maxDays ? () => onChanged(days + 1) : null,
           icon: const Icon(Icons.add_circle_outline, size: 20),
           color: AppColors.primary,
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '최대 $maxDays일',
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
         ),
       ],
     );

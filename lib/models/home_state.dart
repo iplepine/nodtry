@@ -39,6 +39,9 @@ enum HomeCardState {
   /// Type 2-3: Partner Action (실천 피드백)
   partnerAction,
 
+  /// Type 2-3-2: Partner Today Complete (오늘 예정 약속 전체 완료)
+  partnerTodayComplete,
+
   /// Type 2-4: Partner No Plan (상대방 계획 없음 - 똑똑/제안 유도)
   partnerNoPlan,
 
@@ -97,6 +100,7 @@ extension HomeCardStatePriority on HomeCardState {
       case HomeCardState.partnerPlanCreate:
       case HomeCardState.partnerPlanModify:
       case HomeCardState.partnerAction:
+      case HomeCardState.partnerTodayComplete:
       case HomeCardState.partnerNoPlan:
       case HomeCardState.partnerPoke:
       case HomeCardState.partnerPromiseProposed:

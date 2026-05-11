@@ -42,6 +42,9 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
   Stream<NowTabState> _fetchStateStream() {
     final useCase = ref.watch(getNowCardsUseCaseProvider);
     final profiles = ref.watch(connectedProfilesProvider).value ?? const [];
+    final profileByUid = {
+      for (final profile in profiles) profile.user.uid: profile.user,
+    };
 
     return useCase.executeStream().map((models) {
       // 헤더 정보 계산
@@ -59,6 +62,12 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
       final updatedModels = visibleModels.map((m) {
         int? cWeek;
         int? tWeeks;
+        final resolvedPartnerUid =
+            m.partnerUid ??
+            (m.state.role == CardRole.yours ? m.plan?.userId : null);
+        final resolvedPartnerProfile = resolvedPartnerUid == null
+            ? null
+            : profileByUid[resolvedPartnerUid];
 
         if (m.plan != null && m.plan!.state == PlanState.active) {
           final plan = m.plan!;
@@ -74,9 +83,13 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         return HomeCardModel(
           state: m.state,
           plan: m.plan,
-          partnerUid: m.partnerUid,
-          partnerName: m.partnerName,
-          partnerImageUrl: m.partnerImageUrl,
+          partnerUid: resolvedPartnerUid,
+          partnerName:
+              _nonBlank(m.partnerName) ??
+              _nonBlank(resolvedPartnerProfile?.displayName),
+          partnerImageUrl:
+              _nonBlank(m.partnerImageUrl) ??
+              _nonBlank(resolvedPartnerProfile?.profileImageUrl),
           headerMessage: m.headerMessage,
           previousPlan: m.previousPlan,
           currentWeek: cWeek,
@@ -96,6 +109,11 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         totalWeeks: null,
       );
     });
+  }
+
+  String? _nonBlank(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    return value;
   }
 
   /// 사용자 의도(Intent) 처리
