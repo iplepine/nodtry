@@ -18,7 +18,7 @@ ID: `BT-004-pilot-recruitment-ops`
 
 ## 배경
 
-제품 thin slice는 카테고리 기반 플랜 생성, 파트너 똑똑 압박, 놓친 약속 자동 전달, 4주 정산 카드까지 준비됐다. Android production `1.0.32+51`과 iOS TestFlight `1.0.30+49`까지 배포됐다. 다음 병목은 제품 기능이 아니라 모집과 운영 증거 수집이다.
+제품 thin slice는 카테고리 기반 플랜 생성, 파트너 똑똑 압박, 놓친 약속 자동 전달, 4주 정산 카드까지 준비됐다. Android production `1.0.33+52`와 iOS TestFlight `1.0.30+49`까지 배포됐다. 다음 병목은 제품 기능이 아니라 모집과 운영 증거 수집이다.
 
 ## 포함
 
@@ -54,6 +54,6 @@ ID: `BT-004-pilot-recruitment-ops`
 
 ## 준비 완료 항목
 
-- Android production: `1.0.32+51`
+- Android production: `1.0.33+52`
 - iOS TestFlight: `1.0.30+49`
 - Cloud Functions: Node.js 22, `notifyMissedActions`, `onPlanUpdated`, `onCheerCreated` 배포 완료
