@@ -9,8 +9,7 @@ import 'package:nod_try/main.dart' as app;
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  final screenshotDir =
-      '/Users/basil/Projects/flutter/nodtry/ios/fastlane/screenshots/ko';
+  final screenshotDir = '${Directory.current.path}/ios/fastlane/screenshots/ko';
 
   Future<void> saveScreenshot(WidgetTester tester, String name) async {
     await tester.pumpAndSettle();

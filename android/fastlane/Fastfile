@@ -20,8 +20,8 @@ platform :android do
       track: 'production',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
       release_status: 'completed',
-      skip_upload_screenshots: true,
-      skip_upload_images: true
+      skip_upload_screenshots: false,
+      skip_upload_images: false
     )
   end
 

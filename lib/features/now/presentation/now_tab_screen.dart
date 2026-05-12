@@ -9,10 +9,12 @@ import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/app_underlined_text.dart';
 import '../../../widgets/quiet_header.dart';
+import '../../../widgets/centered_emoji.dart';
 import '../../../widgets/time_chip.dart';
 import '../../../models/home_state.dart';
 import '../../../routes/app_router.dart';
 import '../../../utils/time_formatter.dart';
+import '../../../utils/build_flags.dart';
 import '../../../models/promise_model.dart';
 import 'now_tab_intent.dart';
 import 'now_tab_state.dart';
@@ -1426,7 +1428,7 @@ class _NowTabState extends ConsumerState<NowTab>
           ),
 
           // Debug Fake State Toggle Button (Debug Only)
-          if (kDebugMode)
+          if (kDebugMode && !BuildFlags.storeScreenshotMode)
             Positioned(
               bottom: 120, // Raised to avoid bottom nav overlap
               right: 16,
@@ -1581,11 +1583,7 @@ class _NowTabState extends ConsumerState<NowTab>
                                     width: 2,
                                   ),
                                 ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  emoji,
-                                  style: const TextStyle(fontSize: 28),
-                                ),
+                                child: CenteredEmoji(emoji, size: 28),
                               ),
                             );
                           })

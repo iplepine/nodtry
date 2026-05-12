@@ -1,0 +1,3 @@
+Updated the app icon and store screenshots to match the current design.
+Aligned cheer and reaction emoji buttons more consistently.
+Refreshed Korean font assets to improve text rendering reliability.

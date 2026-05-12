@@ -39,4 +39,29 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('centers emoji reactions with fixed text metrics', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ko'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(
+          body: ActionNoteDialog(
+            title: '파트너 실천',
+            hintText: '따뜻한 피드백을 남겨주세요 (선택)',
+          ),
+        ),
+      ),
+    );
+
+    final emojiText = tester.widget<Text>(find.text('👍'));
+
+    expect(emojiText.textAlign, TextAlign.center);
+    expect(emojiText.style?.height, 1);
+    expect(emojiText.strutStyle?.height, 1);
+    expect(emojiText.strutStyle?.forceStrutHeight, isTrue);
+  });
 }

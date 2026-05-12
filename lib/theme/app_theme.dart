@@ -88,7 +88,11 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12), // Soft radius (8~12dp)
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          textStyle: const TextStyle(
+            fontFamily: 'Pretendard',
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
       cardTheme: CardThemeData(

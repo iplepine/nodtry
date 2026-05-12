@@ -64,6 +64,15 @@ if grep -Eq 'sharpen study sprint product loop' <<< "$COMMITS_TEXT"; then
     "Refined the core plan-to-action flow."
 fi
 
+if grep -Eq '(store assets|store screenshots|app icon|reaction icon|emoji)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "새 앱 아이콘과 화면 디자인에 맞춰 스토어 이미지를 갱신했어요." \
+    "Updated store visuals to match the refreshed app icon and screen design."
+  add_note \
+    "응원과 반응 이모지가 더 깔끔하게 정렬되도록 다듬었어요." \
+    "Aligned cheer and reaction emojis more cleanly."
+fi
+
 if [ "${#KO_NOTES[@]}" -eq 0 ]; then
   add_note \
     "안정성 및 사용성을 개선했어요." \

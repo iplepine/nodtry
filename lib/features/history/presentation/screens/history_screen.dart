@@ -9,6 +9,7 @@ import '../../../../models/history_item.dart';
 import '../../../../widgets/history/history_card.dart';
 import '../../../../widgets/history/plan_summary_card.dart';
 import '../../../../providers/repository_provider.dart'; // for myProfileProvider
+import '../../../../utils/build_flags.dart';
 import '../history_state.dart';
 import '../history_viewmodel.dart';
 import '../history_fake_states.dart';
@@ -150,7 +151,7 @@ class HistoryScreen extends ConsumerWidget {
         ),
 
         // Debug Fake State Toggle Button (Debug Only)
-        if (kDebugMode)
+        if (kDebugMode && !BuildFlags.storeScreenshotMode)
           Positioned(
             bottom: 120, // Raised to avoid bottom nav overlap
             right: 16,

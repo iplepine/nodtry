@@ -51,7 +51,7 @@ platform :ios do
       ipa: "../build/ios/ipa/#{ipa_filename}",
       app_version: app_store_version,
       force: true,
-      skip_screenshots: true,
+      skip_screenshots: false,
       skip_metadata: false,
       copyright: copyright_text,
       precheck_include_in_app_purchases: false
@@ -71,7 +71,7 @@ platform :ios do
       app_version: app_store_version,
       force: true,
       skip_binary_upload: true,
-      skip_screenshots: true,
+      skip_screenshots: false,
       skip_metadata: false,
       skip_app_version_update: true,
       submit_for_review: true,

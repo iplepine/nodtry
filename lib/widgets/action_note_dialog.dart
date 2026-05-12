@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
+import 'centered_emoji.dart';
 
 class ActionNoteDialog extends StatefulWidget {
   final String title;
@@ -135,11 +136,7 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
                               width: 2,
                             ),
                           ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            emoji,
-                            style: const TextStyle(fontSize: 22),
-                          ),
+                          child: CenteredEmoji(emoji, size: 22),
                         ),
                       );
                     }).toList(),
