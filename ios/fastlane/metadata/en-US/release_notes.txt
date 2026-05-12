@@ -1,6 +1,4 @@
 What's New
 
-- Start promises faster with categories and custom input.
-- Added a clear button for custom input.
-- Improved follow-up for missed commitments.
-- Refined the core plan-to-action flow.
+- Updated store visuals to match the refreshed app icon and screen design.
+- Aligned cheer and reaction emojis more cleanly.
