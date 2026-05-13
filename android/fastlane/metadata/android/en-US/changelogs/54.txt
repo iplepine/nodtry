@@ -1,0 +1,3 @@
+- Fixed ANR issues for improved app startup performance
+- Improved splash screen icon display
+- Enhanced emoji alignment in partner feedback
