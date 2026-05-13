@@ -1,0 +1,1 @@
+- Fixed app launcher icon and store icon display
