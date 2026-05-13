@@ -132,10 +132,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       SizedBox(
                         width: 96,
                         height: 96,
-                        child: Lottie.asset(
-                          'assets/animations/nodtry_icon_loop.json',
-                          repeat: true,
-                          animate: true,
+                        child: Image.asset(
+                          'assets/images/app_icon.png',
                           fit: BoxFit.contain,
                         ),
                       ),

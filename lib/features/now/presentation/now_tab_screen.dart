@@ -2884,11 +2884,15 @@ class _SecondaryExecutorCard extends StatelessWidget {
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (model.plan?.lastCheerType != null) ...[
                     Text(
                       model.plan!.lastCheerType!,
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        height: 1.0,
+                      ),
                     ),
                     const SizedBox(width: 8),
                   ],
