@@ -1,5 +1,10 @@
 require "shellwords"
 
+# fastlane / CocoaPods / Flutter ipa 빌드 모두 UTF-8 locale을 요구한다.
+# 시스템 기본이 잡혀있지 않으면 pod이 "broken"으로 오판되어 ipa 빌드가 실패한다.
+ENV["LANG"] ||= "en_US.UTF-8"
+ENV["LC_ALL"] ||= "en_US.UTF-8"
+
 project_root = File.expand_path("..", __dir__)
 
 def normalize_ios_ipa_name(project_root)
