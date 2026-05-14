@@ -10,7 +10,7 @@ platform :ios do
   ipa_filename = "nodtry.ipa"
   copyright_text = "#{Time.now.year} Devho"
   pubspec_path = File.expand_path("../../pubspec.yaml", __dir__)
-  pubspec_version = File.read(pubspec_path).match(/^version:\s*([^\s]+)/)[1]
+  pubspec_version = File.read(pubspec_path, encoding: "UTF-8").match(/^version:\s*([^\s]+)/)[1]
   app_version, build_number = pubspec_version.split("+")
   app_store_version = ENV["APP_STORE_VERSION"] || app_version
   release_notes_script = File.expand_path("../../scripts/generate_ios_release_notes.sh", __dir__)

@@ -73,6 +73,18 @@ if grep -Eq '(store assets|store screenshots|app icon|reaction icon|emoji)' <<< 
     "Aligned cheer and reaction emojis more cleanly."
 fi
 
+if grep -Eq '(집중 타이머|focus timer|focusTimer)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "약속 카드에 \"지금 할게! (집중 타이머)\" 버튼이 생겼어요. 5/10/25분 또는 직접 입력으로 즉석에서 집중 타이머를 켜고, 끝나면 노트 창이 자동으로 떠요." \
+    "New \"Start Now (Focus Timer)\" button on practice cards. Pick 5/10/25 min or enter a custom duration; when the timer ends, the done-note dialog opens automatically."
+fi
+
+if grep -Eq '(똑똑 UI|poke UI|poke ui|simplify poke)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "똑똑 알림 UI를 더 단순하게 정리했어요. 평소 카드 그대로 사용하고, 상단에 작은 똑똑 배지만 더 보여줘요." \
+    "Simplified the poke notification UI. Cards stay as usual with just a small poke badge added on top."
+fi
+
 if [ "${#KO_NOTES[@]}" -eq 0 ]; then
   add_note \
     "안정성 및 사용성을 개선했어요." \
