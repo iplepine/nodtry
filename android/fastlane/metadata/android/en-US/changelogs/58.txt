@@ -1,4 +1,2 @@
-What's New
-
 - Added "Start Now (Focus Timer)" on practice cards. Pick 5/10/25 min or enter a custom duration to run a focus timer right away. When it ends, the done-note dialog opens with "{N} min focus complete" pre-filled.
 - Simplified the poke notification UI. Cards stay as usual with just a small poke badge added on top.
