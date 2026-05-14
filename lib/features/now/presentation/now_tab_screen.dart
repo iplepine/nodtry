@@ -22,6 +22,8 @@ import 'now_tab_viewmodel.dart';
 import 'now_tab_fake_states.dart';
 import '../../../widgets/action_note_dialog.dart';
 import '../../../services/notification_service.dart' as local_notifications;
+import 'focus_timer/focus_timer_picker.dart';
+import 'focus_timer/focus_timer_screen.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 class NowTab extends ConsumerStatefulWidget {
@@ -46,6 +48,7 @@ class _NowTabState extends ConsumerState<NowTab>
   local_notifications.NotificationSkipRequest? _pendingNotificationSkip;
   bool _isHandlingNotificationInput = false;
   bool _isHandlingNotificationSkip = false;
+  final Set<String> _autoAcknowledgedPokes = {};
 
   @override
   void initState() {
@@ -115,9 +118,40 @@ class _NowTabState extends ConsumerState<NowTab>
     await _handleDidItForCard(primaryCard);
   }
 
+  Future<void> _handleFocusTimer() async {
+    final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
+    if (primaryCard == null || primaryCard.plan?.id == null) return;
+
+    final minutes = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => const FocusTimerPicker(),
+    );
+    if (minutes == null || !mounted) return;
+
+    final planTitle = primaryCard.plan?.items.firstOrNull?.title;
+    final completed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => FocusTimerScreen(
+          minutes: minutes,
+          planTitle: planTitle,
+        ),
+      ),
+    );
+    if (completed != true || !mounted) return;
+
+    await _handleDidItForCard(
+      primaryCard,
+      prefillNote: '$minutes분 집중 완료',
+    );
+  }
+
   Future<void> _handleDidItForCard(
     HomeCardModel targetCard, {
     String? dialogTitle,
+    String? prefillNote,
   }) async {
     final l10n = AppLocalizations.of(context)!;
     if (targetCard.plan?.id == null) return;
@@ -131,6 +165,7 @@ class _NowTabState extends ConsumerState<NowTab>
             dialogTitle ??
             l10n.homeDidIt,
         showEmoji: false,
+        initialText: prefillNote,
       ),
     );
 
@@ -837,11 +872,17 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
-  void _handlePokeAck(HomeCardModel card) {
-    if (card.plan?.id == null) return;
-    ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(AcknowledgePokeIntent(card.plan!.id!));
+  void _maybeAutoAcknowledgePoke(HomeCardModel? card) {
+    if (card == null || card.state != HomeCardState.poked) return;
+    final planId = card.plan?.id;
+    if (planId == null) return;
+    if (!_autoAcknowledgedPokes.add(planId)) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(AcknowledgePokeIntent(planId));
+    });
   }
 
   Future<void> _handleRespondPromise(HomeCardModel card, bool accept) async {
@@ -1216,6 +1257,7 @@ class _NowTabState extends ConsumerState<NowTab>
       final primaryExecutorCard = uiState.primaryCard;
       final secondaryExecutorCards = uiState.secondaryCards;
       final managerCards = uiState.managerCards;
+      _maybeAutoAcknowledgePoke(primaryExecutorCard);
 
       return Stack(
         children: [
@@ -1268,13 +1310,11 @@ class _NowTabState extends ConsumerState<NowTab>
                                     child: _PrimaryExecutorCard(
                                       model: primaryExecutorCard,
                                       onDidIt: _handleDidIt,
+                                      onFocusTimer: _handleFocusTimer,
                                       onSkip: _handleSkip,
                                       onRest: _handleRest,
                                       onCreatePlan: _handleCreatePlan,
                                       onModify: () => _handleModify(
-                                        primaryExecutorCard,
-                                      ), // Added
-                                      onPokeAck: () => _handlePokeAck(
                                         primaryExecutorCard,
                                       ), // Added
                                       onAcceptPromise: () =>
@@ -1760,11 +1800,11 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final HomeCardModel model;
   final VoidCallback? onTap;
   final VoidCallback? onDidIt;
+  final VoidCallback? onFocusTimer;
   final VoidCallback? onSkip;
   final VoidCallback? onRest; // 휴식권
   final VoidCallback? onCreatePlan;
   final VoidCallback? onModify; // Added
-  final VoidCallback? onPokeAck; // Added
   final VoidCallback? onAcceptPromise;
   final VoidCallback? onRejectPromise;
   final VoidCallback? onContinueAfterSettlement;
@@ -1777,11 +1817,11 @@ class _PrimaryExecutorCard extends StatelessWidget {
   const _PrimaryExecutorCard({
     required this.model,
     this.onDidIt,
+    this.onFocusTimer,
     this.onSkip,
     this.onRest,
     this.onCreatePlan,
     this.onModify, // Added
-    this.onPokeAck, // Added
     this.onAcceptPromise,
     this.onRejectPromise,
     this.onContinueAfterSettlement,
@@ -1816,6 +1856,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (model.state == HomeCardState.poked) ...[
+                _PokeBadge(partnerName: model.partnerName),
+                const SizedBox(height: 12),
+              ],
               if (timeChipText != null && timeChipType != null)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1944,8 +1988,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
         case HomeCardState.nextAction: // Type 1-3: 다음 일정
           // Next Action usually uses headerMessage or defaults to nothing special
           break;
-        case HomeCardState.poked: // Type 1-8: 찌르기 받음
-          statusMessage = '똑똑! 파트너가 기다리고 있어요';
+        case HomeCardState.poked:
+          // 똑똑 배지에서 안내하므로 별도 statusMessage 없음
           break;
         case HomeCardState.promiseProposed:
           statusMessage = '약속 제안이 도착했어요';
@@ -2327,56 +2371,6 @@ class _PrimaryExecutorCard extends StatelessWidget {
     VoidCallback? onPressed;
     String buttonText;
 
-    if (model.state == HomeCardState.poked) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onDidIt ?? onPokeAck,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: buttonTextColor,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                '지금 처리하기',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: buttonTextColor,
-                ),
-              ),
-            ),
-          ),
-          if (onPokeAck != null) ...[
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: onPokeAck,
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.textSecondary,
-                minimumSize: const Size(double.infinity, 32),
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const AppUnderlinedText(
-                '똑똑 확인만 하기',
-                style: TextStyle(fontSize: 13),
-              ),
-            ),
-          ],
-        ],
-      );
-    }
-
     if (model.state == HomeCardState.pilotSettlement) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -2418,7 +2412,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
       );
     }
 
-    if (model.state == HomeCardState.nowAction) {
+    if (model.state == HomeCardState.nowAction ||
+        model.state == HomeCardState.poked) {
       buttonText = l10n.homeDidIt;
       onPressed = onDidIt;
     } else if (model.state == HomeCardState.overdue) {
@@ -2503,8 +2498,41 @@ class _PrimaryExecutorCard extends StatelessWidget {
             ),
           ),
         ),
+        // 지금 할게! (집중 타이머)
+        if ((model.state == HomeCardState.nowAction ||
+                model.state == HomeCardState.poked) &&
+            onFocusTimer != null) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onFocusTimer,
+              icon: Icon(
+                Icons.timer_outlined,
+                size: 18,
+                color: AppColors.primary,
+              ),
+              label: Text(
+                '지금 할게! (집중 타이머)',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: AppColors.primary, width: 1.2),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
         // 휴식권 버튼 (nowAction에서 사용 가능 시)
-        if (model.state == HomeCardState.nowAction &&
+        if ((model.state == HomeCardState.nowAction ||
+                model.state == HomeCardState.poked) &&
             onRest != null &&
             model.plan?.canUseRestToday == true) ...[
           const SizedBox(height: 8),
@@ -4053,6 +4081,48 @@ extension GlassExtension on Widget {
           ),
         ),
         child: this,
+      ),
+    );
+  }
+}
+
+class _PokeBadge extends StatelessWidget {
+  final String? partnerName;
+
+  const _PokeBadge({this.partnerName});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = partnerName == null || partnerName!.isEmpty
+        ? '파트너가 똑똑을 보냈어요'
+        : '$partnerName님이 똑똑을 보냈어요';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.notifications_active_outlined,
+            size: 14,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }

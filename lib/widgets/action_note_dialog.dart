@@ -8,6 +8,7 @@ class ActionNoteDialog extends StatefulWidget {
   final String? hintText;
   final String? buttonLabel;
   final bool showEmoji;
+  final String? initialText;
 
   const ActionNoteDialog({
     super.key,
@@ -15,6 +16,7 @@ class ActionNoteDialog extends StatefulWidget {
     this.hintText,
     this.buttonLabel,
     this.showEmoji = true,
+    this.initialText,
   });
 
   @override
@@ -22,7 +24,9 @@ class ActionNoteDialog extends StatefulWidget {
 }
 
 class _ActionNoteDialogState extends State<ActionNoteDialog> {
-  final _controller = TextEditingController();
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialText,
+  );
 
   String? _selectedEmoji;
   final List<String> _emojis = ['🔥', '❤️', '👏', '👍', '😮', '😢', '💪', '✨'];
