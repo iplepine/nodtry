@@ -96,8 +96,8 @@ if grep -Eq '(focus timer UX|집중 타이머 UX|focus timer button|focusTimer C
     "집중 타이머에 \"했어! 지금 끝낼게\" 버튼이 생겼어요. 타이머 끝까지 안 기다려도 바로 완료 처리되고, 노트에 \"X분 Y초 동안 집중해서 완료했어요!\"가 자동으로 채워져요." \
     "Focus timer now has a \"Done now\" button — finish early without waiting for the timer, and the note auto-fills with \"Focused for X min Y sec!\"."
   add_note \
-    "집중 시간 선택 창이 안드로이드 하단 네비게이션바에 가리던 문제를 고쳤어요." \
-    "Fixed: the focus duration picker was being covered by the Android navigation bar."
+    "집중 시간 선택 창이 화면 하단 시스템 바에 가리던 문제를 고쳤어요." \
+    "Fixed: the focus duration picker was being clipped by the system navigation area at the bottom of the screen."
 fi
 
 if [ "${#KO_NOTES[@]}" -eq 0 ]; then

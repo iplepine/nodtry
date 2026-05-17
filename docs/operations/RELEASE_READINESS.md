@@ -23,7 +23,7 @@
 - 개인정보 처리방침, 이용약관, 문의 채널을 준비했다.
 
 ## 최근 내부 테스트 배포
-- 2026-05-17: `1.0.39+59` Android production + iOS App Store Connect 배포 진행. 집중 타이머 UX 보강 ("했어! 지금 끝낼게" CTA, 실제 경과 시간 prefill, Android 하단 네비게이션바 가림 수정), 진행 중 약속(active promise) 카드 chip 신규 도입 (보상/벌칙 임박을 액션 버튼 위에 한 줄로 노출, 탭 시 풀 조건 + 진행 바)을 포함한다.
+- 2026-05-17: `1.0.39+59` Android production + iOS App Store Connect 배포 완료. 집중 타이머 UX 보강 ("했어! 지금 끝낼게" CTA, 실제 경과 시간 prefill, 하단 시스템 바 가림 수정), 진행 중 약속(active promise) 카드 chip 신규 도입 (보상/벌칙 임박을 액션 버튼 위에 한 줄로 노출, 탭 시 풀 조건 + 진행 바)을 포함한다. iOS는 Apple 심사 진행 중. 초기 업로드 시 precheck가 EN release notes의 "Android" 단어를 잡아 경고했고, 즉시 `generate_ios_release_notes.sh`의 focus_timer 패턴을 platform 중립 표현으로 수정 → `metadata_only` lane으로 metadata만 재업로드 → precheck 전부 통과로 마무리.
 - 2026-05-15: `1.0.38+58` Android production + iOS App Store Connect 배포 완료. 지금 탭 약속 카드의 집중 타이머 ("지금 할게!" 버튼, 5/10/25분 또는 직접 입력, 종료 시 자동 "했어" 노트 `"{N}분 집중 완료"` prefill) 추가, 똑똑 수신 카드 UI 단순화 (별도 버튼 제거, 상단 배지 + 자동 lastPokeAcknowledgedAt 기록), iOS fastlane locale/encoding 견고화 (`LANG`이 비어있어도 빌드되도록)를 포함한다. iOS는 Apple 심사 대기.
 - 2026-05-12: `1.0.34+53` Android production 배포 완료 및 iOS App Store Connect 업로드 완료. 새 앱 아이콘/스토어 스크린샷, Pretendard 폰트 자산 수정, 응원/반응 이모지 중앙 정렬 개선을 포함한다.
 - 2026-05-12: 스토어 스크린샷 갱신 준비 완료. 새 민트/주황 디자인과 앱 아이콘 기준으로 iOS/Android 스크린샷과 Play Store 아이콘을 다시 생성했고, production/App Store metadata 업로드에서 스크린샷 업로드를 활성화했다.
