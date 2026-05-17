@@ -1,0 +1,3 @@
+- Focus timer now has a "Done now" button — finish early without waiting for the timer, and the note auto-fills with "Focused for X min Y sec!".
+- Fixed: the focus duration picker was being covered by the Android navigation bar.
+- While a reward/penalty promise is active, the practice card now shows a one-line chip like "1 more miss triggers the penalty" or "2 more days to the reward". Tap for full conditions and a progress bar.

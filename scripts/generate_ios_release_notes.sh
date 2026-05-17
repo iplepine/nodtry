@@ -85,6 +85,21 @@ if grep -Eq '(똑똑 UI|poke UI|poke ui|simplify poke)' <<< "$COMMITS_TEXT"; the
     "Simplified the poke notification UI. Cards stay as usual with just a small poke badge added on top."
 fi
 
+if grep -Eq '(active promise|promise chip|보상/벌칙 chip|진행 중 약속)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "보상/벌칙 약속이 진행 중인 동안, 약속 카드에서 \"1번만 더 실패하면 벌칙\" 같은 경고나 \"보상까지 2일\" 같은 진척을 한 줄로 바로 볼 수 있어요. 탭하면 자세한 조건과 진행 바가 나와요." \
+    "While a reward/penalty promise is active, the practice card now shows a one-line chip like \"1 more miss triggers the penalty\" or \"2 more days to the reward\". Tap for full conditions and a progress bar."
+fi
+
+if grep -Eq '(focus timer UX|집중 타이머 UX|focus timer button|focusTimer CTA|done now button)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "집중 타이머에 \"했어! 지금 끝낼게\" 버튼이 생겼어요. 타이머 끝까지 안 기다려도 바로 완료 처리되고, 노트에 \"X분 Y초 동안 집중해서 완료했어요!\"가 자동으로 채워져요." \
+    "Focus timer now has a \"Done now\" button — finish early without waiting for the timer, and the note auto-fills with \"Focused for X min Y sec!\"."
+  add_note \
+    "집중 시간 선택 창이 안드로이드 하단 네비게이션바에 가리던 문제를 고쳤어요." \
+    "Fixed: the focus duration picker was being covered by the Android navigation bar."
+fi
+
 if [ "${#KO_NOTES[@]}" -eq 0 ]; then
   add_note \
     "안정성 및 사용성을 개선했어요." \
