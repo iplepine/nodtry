@@ -44,11 +44,13 @@ class _FocusTimerPickerState extends State<FocusTimerPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final viewInsets = MediaQuery.of(context).viewInsets;
+    final mediaQuery = MediaQuery.of(context);
+    final keyboardInset = mediaQuery.viewInsets.bottom;
+    final systemNavInset = mediaQuery.viewPadding.bottom;
     final minutes = _resolveMinutes();
 
     return Padding(
-      padding: EdgeInsets.only(bottom: viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: keyboardInset),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.background,
@@ -56,7 +58,7 @@ class _FocusTimerPickerState extends State<FocusTimerPicker> {
             top: Radius.circular(24),
           ),
         ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + systemNavInset),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,

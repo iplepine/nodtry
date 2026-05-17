@@ -24,6 +24,7 @@ import '../../../widgets/action_note_dialog.dart';
 import '../../../services/notification_service.dart' as local_notifications;
 import 'focus_timer/focus_timer_picker.dart';
 import 'focus_timer/focus_timer_screen.dart';
+import 'promise/active_promise_chip.dart';
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 class NowTab extends ConsumerStatefulWidget {
@@ -131,7 +132,7 @@ class _NowTabState extends ConsumerState<NowTab>
     if (minutes == null || !mounted) return;
 
     final planTitle = primaryCard.plan?.items.firstOrNull?.title;
-    final completed = await Navigator.of(context).push<bool>(
+    final elapsed = await Navigator.of(context).push<Duration>(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => FocusTimerScreen(
@@ -140,12 +141,28 @@ class _NowTabState extends ConsumerState<NowTab>
         ),
       ),
     );
-    if (completed != true || !mounted) return;
+    if (elapsed == null || !mounted) return;
 
     await _handleDidItForCard(
       primaryCard,
-      prefillNote: '$minutes분 집중 완료',
+      prefillNote: _formatFocusCompletionNote(elapsed),
     );
+  }
+
+  String _formatFocusCompletionNote(Duration elapsed) {
+    final minutes = elapsed.inMinutes;
+    final seconds = elapsed.inSeconds.remainder(60);
+    final String duration;
+    if (minutes > 0 && seconds > 0) {
+      duration = '$minutes분 $seconds초';
+    } else if (minutes > 0) {
+      duration = '$minutes분';
+    } else if (seconds > 0) {
+      duration = '$seconds초';
+    } else {
+      return '집중해서 완료했어요!';
+    }
+    return '$duration 동안 집중해서 완료했어요!';
   }
 
   Future<void> _handleDidItForCard(
@@ -1891,6 +1908,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
                   textAlign: TextAlign.left,
                 ),
               ],
+              if (_shouldShowActivePromiseChip()) ...[
+                const SizedBox(height: 12),
+                ActivePromiseChip(plan: model.plan!),
+              ],
               const SizedBox(height: 20),
               _buildButton(context, l10n),
             ],
@@ -1898,6 +1919,16 @@ class _PrimaryExecutorCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  bool _shouldShowActivePromiseChip() {
+    final plan = model.plan;
+    final promise = plan?.promise;
+    if (plan == null || promise == null) return false;
+    if (promise.status != PromiseStatus.active) return false;
+    return model.state == HomeCardState.nowAction ||
+        model.state == HomeCardState.poked ||
+        model.state == HomeCardState.overdue;
   }
 
   Widget _buildMessage(BuildContext context, AppLocalizations l10n) {

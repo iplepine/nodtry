@@ -62,7 +62,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
     if (remaining <= Duration.zero) {
       _finished = true;
       _ticker?.cancel();
-      if (mounted) Navigator.of(context).pop(true);
+      if (mounted) Navigator.of(context).pop(_total);
     } else if (mounted) {
       setState(() {});
     }
@@ -72,6 +72,20 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
     if (_pausedRemaining != null) return _pausedRemaining!;
     final left = _endTime.difference(DateTime.now());
     return left.isNegative ? Duration.zero : left;
+  }
+
+  Duration _currentElapsed() {
+    final elapsed = _total - _currentRemaining();
+    if (elapsed.isNegative) return Duration.zero;
+    if (elapsed > _total) return _total;
+    return elapsed;
+  }
+
+  void _completeNow() {
+    if (_finished) return;
+    _finished = true;
+    _ticker?.cancel();
+    Navigator.of(context).pop(_currentElapsed());
   }
 
   void _togglePause() {
@@ -118,7 +132,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
     if (confirmed == true && mounted) {
       _finished = true;
       _ticker?.cancel();
-      Navigator.of(context).pop(false);
+      Navigator.of(context).pop(null);
     }
   }
 
@@ -213,42 +227,55 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
                   ),
                 ),
                 const Spacer(),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _completeNow,
+                    icon: const Icon(
+                      Icons.check_circle_outline,
+                      size: 22,
+                    ),
+                    label: const Text('했어! 지금 끝낼게'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      textStyle: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: _attemptGiveUp,
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(color: AppColors.textDisabled),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          '포기',
-                          style: TextStyle(color: AppColors.textSecondary),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
+                      child: TextButton(
                         onPressed: _togglePause,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textSecondary,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         child: Text(paused ? '재개' : '잠시 멈춤'),
                       ),
                     ),
+                    Expanded(
+                      child: TextButton(
+                        onPressed: _attemptGiveUp,
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textSecondary,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text('포기'),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 8),
               ],
             ),
           ),
