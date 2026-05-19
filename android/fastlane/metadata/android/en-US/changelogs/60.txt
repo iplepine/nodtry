@@ -1,4 +1,2 @@
-What's New
-
 - Translated the "Buy the developer a coffee" entry for English users.
 - Polished the app's display name and home-screen label so they stay consistent across regions.
