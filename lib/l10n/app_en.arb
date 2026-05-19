@@ -1092,5 +1092,21 @@
   "settingsNotifications": "Notifications",
   "notificationSettingsTitle": "Notification Manager",
   "noActiveAlarms": "No active alarms",
-  "historyTapToChange": "Tap to change status"
+  "historyTapToChange": "Tap to change status",
+  "settingsBuyDeveloperCoffee": "Buy the developer a coffee",
+  "@settingsBuyDeveloperCoffee": {
+    "description": "Title for the in-app tip / coffee support entry"
+  },
+  "settingsCoffeeSubtitle": "A warm cup of coffee goes a long way!",
+  "@settingsCoffeeSubtitle": {
+    "description": "Subtitle encouraging the user to tip the developer"
+  },
+  "settingsCoffeePurchasing": "Processing payment...",
+  "@settingsCoffeePurchasing": {
+    "description": "Subtitle shown while the coffee tip purchase is in progress"
+  },
+  "settingsStoreUnavailable": "Can't connect to the store. Please check your settings.",
+  "@settingsStoreUnavailable": {
+    "description": "Snackbar shown when the IAP store is unavailable"
+  }
 }

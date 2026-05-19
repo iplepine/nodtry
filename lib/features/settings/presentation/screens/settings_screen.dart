@@ -537,6 +537,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildDonationOption(BuildContext context, WidgetRef ref) {
     // Watch IAP State
     final iapState = ref.watch(iapServiceProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Material(
       color: Colors.transparent,
@@ -544,7 +545,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         onTap: () async {
           if (!iapState.isAvailable) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('스토어와 연결할 수 없어요. (설정 확인 필요)')),
+              SnackBar(content: Text(l10n.settingsStoreUnavailable)),
             );
             return;
           }
@@ -584,7 +585,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '개발자에게 커피 사주기',
+                        l10n.settingsBuyDeveloperCoffee,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -594,7 +595,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 4),
                       if (iapState.isPurchasing)
                         Text(
-                          '결제 처리 중...',
+                          l10n.settingsCoffeePurchasing,
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.primary,
@@ -602,7 +603,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         )
                       else
                         Text(
-                          '따뜻한 커피 한 잔이 큰 힘이 됩니다!',
+                          l10n.settingsCoffeeSubtitle,
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,

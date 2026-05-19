@@ -948,4 +948,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get historyTapToChange => '탭해서 상태 변경하기';
+
+  @override
+  String get settingsBuyDeveloperCoffee => '개발자에게 커피 사주기';
+
+  @override
+  String get settingsCoffeeSubtitle => '따뜻한 커피 한 잔이 큰 힘이 됩니다!';
+
+  @override
+  String get settingsCoffeePurchasing => '결제 처리 중...';
+
+  @override
+  String get settingsStoreUnavailable => '스토어와 연결할 수 없어요. (설정 확인 필요)';
 }

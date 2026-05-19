@@ -964,4 +964,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get historyTapToChange => 'Tap to change status';
+
+  @override
+  String get settingsBuyDeveloperCoffee => 'Buy the developer a coffee';
+
+  @override
+  String get settingsCoffeeSubtitle => 'A warm cup of coffee goes a long way!';
+
+  @override
+  String get settingsCoffeePurchasing => 'Processing payment...';
+
+  @override
+  String get settingsStoreUnavailable =>
+      'Can\'t connect to the store. Please check your settings.';
 }

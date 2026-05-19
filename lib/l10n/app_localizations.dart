@@ -1885,6 +1885,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to change status'**
   String get historyTapToChange;
+
+  /// Title for the in-app tip / coffee support entry
+  ///
+  /// In en, this message translates to:
+  /// **'Buy the developer a coffee'**
+  String get settingsBuyDeveloperCoffee;
+
+  /// Subtitle encouraging the user to tip the developer
+  ///
+  /// In en, this message translates to:
+  /// **'A warm cup of coffee goes a long way!'**
+  String get settingsCoffeeSubtitle;
+
+  /// Subtitle shown while the coffee tip purchase is in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Processing payment...'**
+  String get settingsCoffeePurchasing;
+
+  /// Snackbar shown when the IAP store is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t connect to the store. Please check your settings.'**
+  String get settingsStoreUnavailable;
 }
 
 class _AppLocalizationsDelegate
