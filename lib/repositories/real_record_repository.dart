@@ -6,9 +6,49 @@ import '../models/plan_model.dart';
 import '../models/promise_model.dart';
 import 'record_repository.dart';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rxdart/rxdart.dart';
 import '../models/relation_model.dart';
+
+/// HomeCardModel.headerMessage 텍스트를 디바이스 로케일에 맞춰 반환.
+/// Why: repository는 BuildContext 밖에서 동작하므로 AppLocalizations 접근 불가.
+String _headerMessage(String key) {
+  final locale =
+      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  final isKo = locale.startsWith('ko');
+  switch (key) {
+    case 'allDoneToday':
+      return isKo ? '오늘 약속을 다 지켰어요' : 'All today\'s promises kept';
+    case 'gotMessage':
+      return isKo ? '전달받은 말이 있어요' : 'A message arrived';
+    case 'newPlanProposed':
+      return isKo ? '새로운 계획 제안이 있어요' : 'New plan proposed';
+    case 'waitingPromiseAccept':
+      return isKo ? '약속 수락을 기다리고 있어요' : 'Waiting for promise acceptance';
+    case 'promiseResult':
+      return isKo ? '약속 결과가 나왔어요' : 'Promise result is out';
+    case 'partnerRequestedAdjust':
+      return isKo ? '파트너가 조율을 요청했어요' : 'Partner requested an adjustment';
+    case 'promiseProposalArrived':
+      return isKo ? '약속 제안이 도착했어요' : 'Promise proposal arrived';
+    case 'settlementNeeded':
+      return isKo ? '4주 정산이 필요해요' : '4-week settlement needed';
+    case 'pokeWaiting':
+      return isKo ? '똑똑! 파트너가 기다리고 있어요.' : 'Knock! Your partner is waiting.';
+    case 'todayMissed':
+      return isKo
+          ? '똑똑! 오늘 약속이 파트너에게 놓친 약속으로 남았어요.'
+          : "Knock! Today's promise is now a missed promise for your partner.";
+    case 'waitingForPromise':
+      return isKo ? '약속을 기다리고 있어요' : 'Waiting for a promise';
+    case 'missedAppeared':
+      return isKo ? '놓친 약속이 떴어요' : 'A missed promise appeared';
+    case 'pokeReadyTurn':
+      return isKo ? '똑똑 보낼 차례' : 'Time to send a knock';
+    default:
+      return key;
+  }
+}
 
 /// 실제 데이터 저장소 구현체 (Firestore 연동 예정)
 class RealRecordRepository implements RecordRepository {
@@ -123,7 +163,7 @@ class RealRecordRepository implements RecordRepository {
           state: HomeCardState.partnerTodayComplete,
           plan: unverifiedCompletedPlans.first,
           partnerUid: entry.key,
-          headerMessage: '오늘 약속을 다 지켰어요',
+          headerMessage: _headerMessage('allDoneToday'),
         ),
       );
     }
@@ -144,7 +184,7 @@ class RealRecordRepository implements RecordRepository {
             state: HomeCardState.partnerAction,
             plan: plan,
             partnerUid: plan.userId,
-            headerMessage: '전달받은 말이 있어요',
+            headerMessage: _headerMessage('gotMessage'),
           ),
         );
       }
@@ -155,7 +195,7 @@ class RealRecordRepository implements RecordRepository {
             state: HomeCardState.partnerPlanCreate, // 계획 제안
             plan: plan,
             partnerUid: plan.userId,
-            headerMessage: '새로운 계획 제안이 있어요',
+            headerMessage: _headerMessage('newPlanProposed'),
           ),
         );
       }
@@ -169,7 +209,7 @@ class RealRecordRepository implements RecordRepository {
             state: HomeCardState.partnerPromiseProposed,
             plan: plan,
             partnerUid: plan.userId,
-            headerMessage: '약속 수락을 기다리고 있어요',
+            headerMessage: _headerMessage('waitingPromiseAccept'),
           ),
         );
       }
@@ -182,7 +222,7 @@ class RealRecordRepository implements RecordRepository {
             state: HomeCardState.promiseSettled,
             plan: plan,
             partnerUid: plan.userId,
-            headerMessage: '약속 결과가 나왔어요',
+            headerMessage: _headerMessage('promiseResult'),
           ),
         );
       }
@@ -204,7 +244,7 @@ class RealRecordRepository implements RecordRepository {
           HomeCardModel(
             state: HomeCardState.rejected,
             plan: plan,
-            headerMessage: '파트너가 조율을 요청했어요',
+            headerMessage: _headerMessage('partnerRequestedAdjust'),
           ),
         );
         continue; // Skip other checks for this plan
@@ -218,7 +258,7 @@ class RealRecordRepository implements RecordRepository {
           HomeCardModel(
             state: HomeCardState.promiseProposed,
             plan: plan,
-            headerMessage: '약속 제안이 도착했어요',
+            headerMessage: _headerMessage('promiseProposalArrived'),
           ),
         );
       }
@@ -230,7 +270,7 @@ class RealRecordRepository implements RecordRepository {
           HomeCardModel(
             state: HomeCardState.promiseSettled,
             plan: plan,
-            headerMessage: '약속 결과가 나왔어요',
+            headerMessage: _headerMessage('promiseResult'),
           ),
         );
       }
@@ -241,7 +281,7 @@ class RealRecordRepository implements RecordRepository {
             HomeCardModel(
               state: HomeCardState.pilotSettlement,
               plan: plan,
-              headerMessage: '4주 정산이 필요해요',
+              headerMessage: _headerMessage('settlementNeeded'),
             ),
           );
         }
@@ -291,8 +331,8 @@ class RealRecordRepository implements RecordRepository {
             state: HomeCardState.poked,
             plan: plan,
             headerMessage: hasActivePoke
-                ? (plan.lastPokeMessage ?? '똑똑! 파트너가 기다리고 있어요.')
-                : '똑똑! 오늘 약속이 파트너에게 놓친 약속으로 남았어요.',
+                ? (plan.lastPokeMessage ?? _headerMessage('pokeWaiting'))
+                : _headerMessage('todayMissed'),
           ),
         );
       }
@@ -374,7 +414,7 @@ class RealRecordRepository implements RecordRepository {
             HomeCardModel(
               state: HomeCardState.partnerNoPlan,
               partnerUid: partnerUid,
-              headerMessage: '약속을 기다리고 있어요',
+              headerMessage: _headerMessage('waitingForPromise'),
             ),
           );
         } else {
@@ -453,7 +493,7 @@ class RealRecordRepository implements RecordRepository {
                     state: HomeCardState.partnerPoke,
                     plan: plan,
                     partnerUid: partnerUid,
-                    headerMessage: hasMissedNotice ? '놓친 약속이 떴어요' : '똑똑 보낼 차례',
+                    headerMessage: hasMissedNotice ? _headerMessage('missedAppeared') : _headerMessage('pokeReadyTurn'),
                     canRescue: missedYesterday && yesterdayScheduled,
                   ),
                 );

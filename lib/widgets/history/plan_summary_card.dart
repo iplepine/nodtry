@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/plan_summary.dart';
 import '../../theme/app_colors.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ class PlanSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       padding: const EdgeInsets.all(20),
@@ -69,16 +71,16 @@ class PlanSummaryCard extends StatelessWidget {
               _buildMetric(
                 context,
                 Icons.check_circle_outline,
-                '나의 완료',
-                '${summary.myCount}회',
+                l10n.planSummaryMyDone,
+                l10n.planSummaryCount(summary.myCount),
               ),
               if (summary.partnerCount != null) ...[
                 const Spacer(),
                 _buildMetric(
                   context,
                   Icons.favorite_outline,
-                  '파트너 확인',
-                  '${summary.partnerCount}회',
+                  l10n.planSummaryPartnerVerified,
+                  l10n.planSummaryCount(summary.partnerCount!),
                 ),
               ]
             ],

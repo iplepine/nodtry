@@ -1,7 +1,21 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+
+String _iapString(String key, [Object? arg]) {
+  final locale =
+      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  final isKo = locale.startsWith('ko');
+  switch (key) {
+    case 'purchaseRequestFailed':
+      return isKo ? '결제 요청 실패: $arg' : 'Purchase request failed: $arg';
+    case 'unknownError':
+      return isKo ? '알 수 없는 오류' : 'Unknown error';
+    default:
+      return key;
+  }
+}
 
 class IAPState {
   final bool isAvailable;
@@ -107,7 +121,7 @@ class IAPService extends Notifier<IAPState> {
     } catch (e) {
       state = state.copyWith(
         isPurchasing: false,
-        purchaseError: '결제 요청 실패: $e',
+        purchaseError: _iapString('purchaseRequestFailed', e),
       );
     }
   }
@@ -122,7 +136,7 @@ class IAPService extends Notifier<IAPState> {
         if (purchaseDetails.status == PurchaseStatus.error) {
           state = state.copyWith(
             isPurchasing: false,
-            purchaseError: purchaseDetails.error?.message ?? '알 수 없는 오류',
+            purchaseError: purchaseDetails.error?.message ?? _iapString('unknownError'),
           );
         } else if (purchaseDetails.status == PurchaseStatus.purchased ||
             purchaseDetails.status == PurchaseStatus.restored) {

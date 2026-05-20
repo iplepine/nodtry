@@ -126,9 +126,6 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
     } else if (intent is InitializePlanIntent) {
       final plan = intent.plan;
       final item = plan.items.first;
-      final matchingTemplate = studyPlanTemplates
-          .where((template) => template.action == item.title)
-          .firstOrNull;
       state = AsyncValue.data(
         prevState.copyWith(
           existingPlanId: plan.id,
@@ -137,9 +134,8 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           description: item.description ?? '',
           selectedDays: item.days.map((d) => d - 1).toSet(), // 1-7 -> 0-6
           notificationTime: item.notificationTime ?? _defaultNotificationTime(),
-          selectedCategoryId:
-              matchingTemplate?.categoryId ?? planCategoryCustom,
-          selectedTemplateId: matchingTemplate?.id,
+          selectedCategoryId: planCategoryCustom,
+          selectedTemplateId: null,
         ),
       );
     } else if (intent is SavePlanIntent) {

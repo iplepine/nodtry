@@ -16,6 +16,10 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   @override
   Stream<NowTabState> build() {
+    // Auth 변경 시 stream을 갈아끼우기 위해 watch.
+    // Why: 로그아웃 후 다른 계정으로 다시 로그인할 때 이전 uid로 잠긴 Firestore
+    // snapshot listener가 그대로 살아 있어서 새 계정의 plan이 안 보이는 버그가 있었다.
+    ref.watch(authStateChangesProvider);
     // 앱 시작 시 기간 만료된 계획 정리
     _completeOverduePlans();
     return _fetchStateStream();

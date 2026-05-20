@@ -87,6 +87,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
   Widget _buildPlanSwitchTile(BuildContext context, WidgetRef ref, Plan plan) {
     if (plan.items.isEmpty) return const SizedBox.shrink();
 
+    final l10n = AppLocalizations.of(context)!;
     final item = plan.items.first;
     final notificationTime = item.notificationTime;
 
@@ -95,7 +96,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
         notificationTime != null && notificationTime.type != 'none';
 
     // Display Time String
-    String timeString = '알림 없음';
+    String timeString = l10n.notificationSettingsNoAlarm;
     if (notificationTime != null) {
       final dt = DateTime(
         2020,
@@ -109,7 +110,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
 
     // If Alarm is OFF, subtext might say "OFF" or the scheduled time but grayed out.
     // Spec says: Subtitle: Alarm Time or "No Alarm"
-    final subtitle = isAlarmOn ? timeString : '알림 꺼짐 ($timeString)';
+    final subtitle = isAlarmOn ? timeString : l10n.notificationSettingsAlarmOff(timeString);
 
     return SwitchListTile(
       contentPadding: EdgeInsets.zero,
@@ -189,7 +190,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
       debugPrint('Failed to toggle alarm: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('알림 설정을 저장하지 못했어요. 이전 설정으로 되돌렸어요.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.notificationSettingsSaveFailed)),
         );
       }
     }

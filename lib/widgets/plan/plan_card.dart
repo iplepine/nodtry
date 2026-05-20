@@ -42,10 +42,10 @@ class PlanCard extends StatelessWidget {
     final isAlarmOn = time != null && time.type != 'none';
     final displayTime = time != null
         ? '${time.targetHour.toString().padLeft(2, '0')}:${time.targetMinute.toString().padLeft(2, '0')}'
-        : '시간 미정';
+        : l10n.planTimeUnset;
 
     // Status Badge Logic
-    final statusInfo = _getStatusInfo(plan.state);
+    final statusInfo = _getStatusInfo(plan.state, l10n);
 
     return GestureDetector(
       onTap: onTap,
@@ -227,41 +227,41 @@ class PlanCard extends StatelessWidget {
     );
   }
 
-  Map<String, dynamic> _getStatusInfo(PlanState state) {
+  Map<String, dynamic> _getStatusInfo(PlanState state, AppLocalizations l10n) {
     switch (state) {
       case PlanState.active:
         return {
-          'text': '진행 중',
+          'text': l10n.planStateActive,
           'color': AppColors.primary.withValues(alpha: 0.1),
           'textColor': AppColors.primary,
         };
       case PlanState.draft:
         return {
-          'text': '작성 중',
+          'text': l10n.planStateDraft,
           'color': AppColors.textDisabled.withValues(alpha: 0.2),
           'textColor': AppColors.textSecondary,
         };
       case PlanState.pendingApproval:
         return {
-          'text': '수락 대기',
+          'text': l10n.planStatePending,
           'color': const Color(0xFFFF9800).withValues(alpha: 0.1), // Orange
           'textColor': const Color(0xFFEF6C00),
         };
       case PlanState.rejected:
         return {
-          'text': '거절됨',
+          'text': l10n.planStateRejected,
           'color': const Color(0xFFF44336).withValues(alpha: 0.1), // Red
           'textColor': const Color(0xFFD32F2F),
         };
       case PlanState.completed:
         return {
-          'text': '종료됨',
+          'text': l10n.planStateCompleted,
           'color': AppColors.textSecondary.withValues(alpha: 0.1),
           'textColor': AppColors.textSecondary,
         };
       case PlanState.stopped:
         return {
-          'text': '중단됨',
+          'text': l10n.planStateStopped,
           'color': AppColors.error.withValues(alpha: 0.1),
           'textColor': AppColors.error,
         };

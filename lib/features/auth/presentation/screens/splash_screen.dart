@@ -107,7 +107,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             : next.value?.errorMessage;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('로그인 실패: $error')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.splashLoginFailed(error.toString()))));
       }
     });
 
@@ -174,7 +174,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             const CircularProgressIndicator(),
                             const SizedBox(height: 16),
                             Text(
-                              "로그인 중...",
+                              AppLocalizations.of(context)!.splashLoggingIn,
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(color: AppColors.textSecondary),

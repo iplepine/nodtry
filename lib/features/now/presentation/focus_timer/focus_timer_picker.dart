@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../theme/app_colors.dart';
 
 class FocusTimerPicker extends StatefulWidget {
@@ -44,6 +45,7 @@ class _FocusTimerPickerState extends State<FocusTimerPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final mediaQuery = MediaQuery.of(context);
     final keyboardInset = mediaQuery.viewInsets.bottom;
     final systemNavInset = mediaQuery.viewPadding.bottom;
@@ -75,7 +77,7 @@ class _FocusTimerPickerState extends State<FocusTimerPicker> {
             ),
             const SizedBox(height: 16),
             Text(
-              '얼마나 집중할까요?',
+              l10n.focusTimerPickerTitle,
               style: TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 18,
@@ -84,7 +86,7 @@ class _FocusTimerPickerState extends State<FocusTimerPicker> {
             ),
             const SizedBox(height: 4),
             Text(
-              '타이머가 끝나면 자동으로 "했어" 노트가 떠요.',
+              l10n.focusTimerPickerSubtitle,
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 13,
@@ -99,7 +101,7 @@ class _FocusTimerPickerState extends State<FocusTimerPicker> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: _PresetChip(
-                      label: '$m분',
+                      label: l10n.focusTimerPresetMin(m),
                       selected: selected,
                       onTap: () {
                         setState(() {
@@ -122,9 +124,9 @@ class _FocusTimerPickerState extends State<FocusTimerPicker> {
               ],
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
-                hintText: '직접 입력 ($_minMinutes~$_maxMinutes분)',
+                hintText: l10n.focusTimerCustomHint(_minMinutes, _maxMinutes),
                 hintStyle: TextStyle(color: AppColors.textDisabled),
-                suffixText: '분',
+                suffixText: l10n.focusTimerMinuteUnit,
                 filled: true,
                 fillColor: AppColors.surface.withValues(alpha: 0.5),
                 border: OutlineInputBorder(
@@ -150,7 +152,9 @@ class _FocusTimerPickerState extends State<FocusTimerPicker> {
                 ),
               ),
               child: Text(
-                minutes == null ? '시간을 골라주세요' : '$minutes분 시작하기',
+                minutes == null
+                    ? l10n.focusTimerPickFirst
+                    : l10n.focusTimerStart(minutes),
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,

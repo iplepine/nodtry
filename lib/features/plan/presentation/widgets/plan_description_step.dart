@@ -47,7 +47,7 @@ class PlanDescriptionStep extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Tip: "만약 ~하면, ~한다" 로 적어보세요',
+                l10n.planDescriptionTip,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -56,8 +56,7 @@ class PlanDescriptionStep extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                '예) "퇴근하고 집에 도착하면, 바로 운동복으로 갈아입는다"\n'
-                '예) "아이가 잠들면, 책을 30분 읽는다"',
+                l10n.planDescriptionExamples,
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,
@@ -66,7 +65,7 @@ class PlanDescriptionStep extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '구체적인 상황을 정하면 실천 확률이 2~3배 높아져요!',
+                l10n.planDescriptionTipFooter,
                 style: TextStyle(
                   fontSize: 11,
                   color: AppColors.textSecondary,

@@ -145,24 +145,24 @@ class _NowTabState extends ConsumerState<NowTab>
 
     await _handleDidItForCard(
       primaryCard,
-      prefillNote: _formatFocusCompletionNote(elapsed),
+      prefillNote: _formatFocusCompletionNote(elapsed, AppLocalizations.of(context)!),
     );
   }
 
-  String _formatFocusCompletionNote(Duration elapsed) {
+  String _formatFocusCompletionNote(Duration elapsed, AppLocalizations l10n) {
     final minutes = elapsed.inMinutes;
     final seconds = elapsed.inSeconds.remainder(60);
     final String duration;
     if (minutes > 0 && seconds > 0) {
-      duration = '$minutes분 $seconds초';
+      duration = l10n.nowFocusDurationMinSec(minutes, seconds);
     } else if (minutes > 0) {
-      duration = '$minutes분';
+      duration = l10n.nowFocusDurationMin(minutes);
     } else if (seconds > 0) {
-      duration = '$seconds초';
+      duration = l10n.nowFocusDurationSec(seconds);
     } else {
-      return '집중해서 완료했어요!';
+      return l10n.nowFocusNoteDoneJustNow;
     }
-    return '$duration 동안 집중해서 완료했어요!';
+    return l10n.nowFocusNoteDoneFor(duration);
   }
 
   Future<void> _handleDidItForCard(
@@ -360,25 +360,29 @@ class _NowTabState extends ConsumerState<NowTab>
   }) async {
     if (targetCard.plan?.id == null) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final planTitle =
-        targetCard.plan?.items.firstOrNull?.title ?? dialogTitle ?? '오늘 약속';
+        targetCard.plan?.items.firstOrNull?.title ?? dialogTitle ?? l10n.nowTodayPromiseFallback;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('오늘은 패스할까요?'),
-        content: Text('$planTitle 약속을 오늘은 건너뜀으로 정리합니다.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text('오늘은 패스', style: TextStyle(color: AppColors.primary)),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final dl10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: Text(dl10n.nowSkipDialogTitle),
+          content: Text(dl10n.nowSkipDialogBody(planTitle)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(dl10n.nowCancel, style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(dl10n.nowSkipToday, style: TextStyle(color: AppColors.primary)),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed != true) return;
@@ -388,7 +392,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('오늘 약속을 건너뛰었어요.')));
+    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowSkippedSnackbar)));
   }
 
   Future<void> _handleCheckIt(HomeCardModel managerCard) async {
@@ -405,9 +409,9 @@ class _NowTabState extends ConsumerState<NowTab>
             .dispatch(ApprovePlanIntent(planId));
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('시작을 응원해요!'),
-              duration: Duration(seconds: 2),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowApproveCheering),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
@@ -415,7 +419,7 @@ class _NowTabState extends ConsumerState<NowTab>
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('승인에 실패했어요.')));
+          ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowApproveFailed)));
         }
       }
     } else if (managerCard.state == HomeCardState.partnerAction ||
@@ -427,9 +431,9 @@ class _NowTabState extends ConsumerState<NowTab>
             .dispatch(VerifyPartnerPlanIntent(planId));
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('실천을 확인했어요!'),
-              duration: Duration(seconds: 2),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowVerifyDone),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
@@ -437,7 +441,7 @@ class _NowTabState extends ConsumerState<NowTab>
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('확인 처리에 실패했어요.')));
+          ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowVerifyFailed)));
         }
       }
     } else {
@@ -453,33 +457,36 @@ class _NowTabState extends ConsumerState<NowTab>
 
     final reason = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('조금 더 조율해볼까요?'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildRejectOption(context, '빈도를 조금 줄여보자'),
-            const SizedBox(height: 8),
-            _buildRejectOption(context, '다른 시간대가 좋을 것 같아'),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () async {
-                Navigator.pop(context, 'custom');
-              },
-              style: _rejectOptionStyle(),
-              child: const Text('직접 입력하기'),
+      builder: (context) {
+        final dl10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: Text(dl10n.nowRejectDialogTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildRejectOption(context, dl10n.nowRejectLessFrequent),
+              const SizedBox(height: 8),
+              _buildRejectOption(context, dl10n.nowRejectDifferentTime),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () async {
+                  Navigator.pop(context, 'custom');
+                },
+                style: _rejectOptionStyle(),
+                child: Text(dl10n.nowRejectCustom),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(dl10n.nowCancel, style: TextStyle(color: AppColors.textSecondary)),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-        ],
-      ),
+        );
+      },
     );
 
     if (reason == null) return;
@@ -501,7 +508,7 @@ class _NowTabState extends ConsumerState<NowTab>
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('조율을 요청했어요')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowRejectRequested)));
       }
     }
   }
@@ -510,28 +517,31 @@ class _NowTabState extends ConsumerState<NowTab>
     final controller = TextEditingController();
     return showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('어떤 점을 조율할까요?'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: '예: 주 3회로 시작해보는 건 어때?',
-            border: OutlineInputBorder(),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: Text(l10n.nowRejectCustomDialogTitle),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: l10n.nowRejectCustomHint,
+              border: const OutlineInputBorder(),
+            ),
+            autofocus: true,
           ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('보내기'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.nowCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, controller.text),
+              child: Text(l10n.nowSend),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -555,12 +565,13 @@ class _NowTabState extends ConsumerState<NowTab>
   Future<void> _handleCheer(HomeCardModel managerCard) async {
     if (managerCard.plan?.id == null) return;
 
+    final l10n = AppLocalizations.of(context)!;
     // 1. Random Reaction Selection
     final reactions = [
-      ('🔥', '열정적인 응원을 보냈어요! 🔥'),
-      ('❤️', '사랑을 담아 응원했어요! ❤️'),
-      ('👍', '멋지다고 전했어요! 👍'),
-      ('💪', '힘내라고 응원했어요! 💪'),
+      ('🔥', l10n.nowCheerExcited),
+      ('❤️', l10n.nowCheerLove),
+      ('👍', l10n.nowCheerProud),
+      ('💪', l10n.nowCheerStrength),
     ];
     final random = Random();
     final selected = reactions[random.nextInt(reactions.length)];
@@ -585,7 +596,7 @@ class _NowTabState extends ConsumerState<NowTab>
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('응원 전송에 실패했어요.')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowCheerFailed)));
       }
     }
   }
@@ -613,50 +624,52 @@ class _NowTabState extends ConsumerState<NowTab>
 
   Future<void> _handlePokeUser(HomeCardModel model) async {
     if (model.partnerUid == null) return;
+    final l10n = AppLocalizations.of(context)!;
     try {
       await ref
           .read(nowTabViewModelProvider.notifier)
           .dispatch(
             PokeUserIntent(
               model.partnerUid!,
-              message: '똑똑! 약속을 기다리는 사람이 있어요. 오늘 약속을 만들어볼까요?',
+              message: l10n.nowPokeNoActivityMessage,
             ),
           );
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('똑똑 신호를 보냈어요.')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeSent)));
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('똑똑 전송에 실패했어요.')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)));
       }
     }
   }
 
   Future<void> _handlePokePartner(HomeCardModel model) async {
     if (model.plan?.id == null) return;
+    final l10n = AppLocalizations.of(context)!;
     try {
       await ref
           .read(nowTabViewModelProvider.notifier)
           .dispatch(
             PokePartnerIntent(
               model.plan!.id!,
-              message: '똑똑! 파트너가 기다리고 있어요. 지금 약속을 정리해볼까요?',
+              message: l10n.nowPokeAgainMessage,
             ),
           );
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('똑똑, 약속을 다시 당겼어요.')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeAgainSent)));
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('똑똑 전송에 실패했어요.')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)));
       }
     }
   }
@@ -715,7 +728,7 @@ class _NowTabState extends ConsumerState<NowTab>
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('4주 정산을 남겼어요.')));
+    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowSettlementSaved)));
   }
 
   Future<String?> _showPilotExitReasonDialog(BuildContext context) {
@@ -723,24 +736,25 @@ class _NowTabState extends ConsumerState<NowTab>
     return showDialog<String>(
       context: context,
       builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         return AlertDialog(
           backgroundColor: AppColors.surface,
-          title: const Text('이번 4주는 여기서 멈출까요?'),
+          title: Text(l10n.nowExitDialogTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildExitReasonOption(context, '똑똑 압박이 약했어요'),
+              _buildExitReasonOption(context, l10n.nowExitReasonWeakPoke),
               const SizedBox(height: 8),
-              _buildExitReasonOption(context, '목표가 너무 컸어요'),
+              _buildExitReasonOption(context, l10n.nowExitReasonTooBig),
               const SizedBox(height: 8),
-              _buildExitReasonOption(context, '파트너 확인이 부담됐어요'),
+              _buildExitReasonOption(context, l10n.nowExitReasonPartnerBurden),
               const SizedBox(height: 12),
               TextField(
                 controller: customController,
-                decoration: const InputDecoration(
-                  labelText: '직접 입력',
-                  hintText: '멈추는 이유를 짧게 남기기',
+                decoration: InputDecoration(
+                  labelText: l10n.nowExitReasonCustomLabel,
+                  hintText: l10n.nowExitReasonCustomHint,
                 ),
               ),
             ],
@@ -749,7 +763,7 @@ class _NowTabState extends ConsumerState<NowTab>
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                '취소',
+                l10n.nowCancel,
                 style: TextStyle(color: AppColors.textSecondary),
               ),
             ),
@@ -757,10 +771,10 @@ class _NowTabState extends ConsumerState<NowTab>
               onPressed: () => Navigator.pop(
                 context,
                 customController.text.trim().isEmpty
-                    ? '직접 사유 없음'
+                    ? l10n.nowExitReasonNoCustom
                     : customController.text.trim(),
               ),
-              child: Text('남기기', style: TextStyle(color: AppColors.primary)),
+              child: Text(l10n.nowExitSubmit, style: TextStyle(color: AppColors.primary)),
             ),
           ],
         );
@@ -785,21 +799,24 @@ class _NowTabState extends ConsumerState<NowTab>
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('휴식권 사용'),
-        content: const Text('이번 주 1회 휴식권을 사용합니다.\n스트릭이 유지됩니다.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text('사용하기', style: TextStyle(color: AppColors.primary)),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: Text(l10n.nowRestPassTitle),
+          content: Text(l10n.nowRestPassBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.nowCancel, style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.nowRestPassConfirm, style: TextStyle(color: AppColors.primary)),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed != true) return;
@@ -811,18 +828,19 @@ class _NowTabState extends ConsumerState<NowTab>
           .dispatch(RestPlanIntent(primaryCard!.plan!.id!));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('오늘은 편히 쉬세요. 스트릭은 유지됩니다!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.nowRestPassUsed)),
         );
       }
     } catch (e) {
       if (mounted) {
         _animationController.forward();
+        final dl10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              e.toString().contains('이미 사용')
-                  ? '이번 주 휴식권을 이미 사용했어요.'
-                  : '오류가 발생했습니다.',
+              e.toString().contains('이미 사용') || e.toString().contains('already used')
+                  ? dl10n.nowRestPassAlreadyUsed
+                  : dl10n.nowRestPassError,
             ),
           ),
         );
@@ -838,14 +856,14 @@ class _NowTabState extends ConsumerState<NowTab>
           .dispatch(RescuePlanIntent(card.plan!.id!));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('실천을 인정해줬어요! 스트릭이 유지됩니다.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.nowRescuedSnackbar)),
         );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('실천 인정에 실패했어요.')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowRescueFailed)));
       }
     }
   }
@@ -909,15 +927,16 @@ class _NowTabState extends ConsumerState<NowTab>
           .read(nowTabViewModelProvider.notifier)
           .dispatch(RespondPromiseIntent(card.plan!.id!, accept: accept));
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(accept ? '약속을 수락했어요!' : '약속을 거절했어요.')),
+          SnackBar(content: Text(accept ? l10n.nowPromiseAccepted : l10n.nowPromiseDeclined)),
         );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('약속 응답에 실패했어요.')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPromiseResponseFailed)));
       }
     }
   }
@@ -954,13 +973,13 @@ class _NowTabState extends ConsumerState<NowTab>
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('약속을 제안했어요!')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPromiseProposed)));
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('약속 제안에 실패했어요.')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPromiseProposeFailed)));
       }
     }
   }
@@ -991,18 +1010,19 @@ class _NowTabState extends ConsumerState<NowTab>
           final diff = scheduledTime.difference(now);
           final absDiff = diff.abs();
 
+          final l10n = AppLocalizations.of(context)!;
           String suffix;
           if (diff.isNegative) {
             if (absDiff.inMinutes < 60) {
-              suffix = '${absDiff.inMinutes}분 전 알림'; // "22:47 · 30분 전 알림"
+              suffix = l10n.nowTimeMinBeforeAlert(absDiff.inMinutes);
             } else {
-              suffix = '${absDiff.inHours}시간 전 알림';
+              suffix = l10n.nowTimeHourBeforeAlert(absDiff.inHours);
             }
           } else {
             if (absDiff.inMinutes < 60) {
-              suffix = '${absDiff.inMinutes}분 후 알림';
+              suffix = l10n.nowTimeMinAfterAlert(absDiff.inMinutes);
             } else {
-              suffix = '${absDiff.inHours}시간 후 알림';
+              suffix = l10n.nowTimeHourAfterAlert(absDiff.inHours);
             }
           }
 
@@ -1093,9 +1113,21 @@ class _NowTabState extends ConsumerState<NowTab>
       return TimeChipType.now;
     } else if (text == l10n.timeChipJustNow) {
       return TimeChipType.past;
-    } else if (text.contains('지남') || text == '어제' || text.endsWith('전')) {
-      if (text.contains('지남') || text == '어제') return TimeChipType.past;
-      if (text.contains('전')) return TimeChipType.upcoming;
+    } else if (text.contains('지남') ||
+        text.contains('overdue') ||
+        text == l10n.nowYesterday ||
+        text.endsWith('전') ||
+        text.endsWith('ago') ||
+        text.endsWith('left')) {
+      if (text.contains('지남') ||
+          text.contains('overdue') ||
+          text == l10n.nowYesterday ||
+          text.endsWith('ago')) {
+        return TimeChipType.past;
+      }
+      if (text.endsWith('전') || text.endsWith('left')) {
+        return TimeChipType.upcoming;
+      }
       return TimeChipType.upcoming;
     } else {
       return TimeChipType.upcoming;
@@ -1129,25 +1161,30 @@ class _NowTabState extends ConsumerState<NowTab>
       return null;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     // 스트릭 기반 독려 메시지
     final streak = model.streakCount;
     if (streak != null && streak >= 5) {
-      return '대단해요! 이 흐름을 이어가봐요';
+      return l10n.nowKeepFlowing;
     }
 
     // description에 if-then 패턴이 있으면 리마인더로 활용
     final desc = model.plan?.items.firstOrNull?.description;
     if (desc != null && desc.isNotEmpty) {
-      if (desc.contains('하면') || desc.contains('되면') || desc.contains('나면')) {
+      if (desc.contains('하면') ||
+          desc.contains('되면') ||
+          desc.contains('나면') ||
+          desc.toLowerCase().contains('when ') ||
+          desc.toLowerCase().contains('if ')) {
         return desc;
       }
     }
 
     // if-then 팁 로테이션 (날짜 기반)
     final tips = [
-      '"언제 할지" 정하면 실천 확률이 올라가요',
-      '작게 시작해도 괜찮아요. 꾸준함이 힘이에요',
-      '어제보다 나은 오늘이면 충분해요',
+      l10n.nowGuideWhen,
+      l10n.nowGuideSmallStart,
+      l10n.nowGuideBetterToday,
     ];
     final dayIndex = DateTime.now().day % tips.length;
     return tips[dayIndex];
@@ -1199,12 +1236,13 @@ class _NowTabState extends ConsumerState<NowTab>
         // 화면 전체가 에러인 경우는 build()의 error 위젯이 처리
         if (previous.hasError != true) {
           final error = next.error;
-          String errorMessage = '알 수 없는 오류가 발생했습니다.';
+          final dl10n = AppLocalizations.of(context)!;
+          String errorMessage = dl10n.historyErrorUnknown;
           String? errorUrl;
 
           if (error.toString().contains('failed-precondition') ||
               error.toString().contains('requires an index')) {
-            errorMessage = '데이터 조회에 필요한 인덱스가 없습니다.\n개발자에게 이 화면을 캡처해서 보내주세요.';
+            errorMessage = dl10n.historyErrorIndexMissing;
 
             // Extract URL if possible (very rough regex)
             final urlRegExp = RegExp(
@@ -1221,7 +1259,7 @@ class _NowTabState extends ConsumerState<NowTab>
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('오류 발생'),
+              title: Text(dl10n.nowErrorTitle),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1229,9 +1267,9 @@ class _NowTabState extends ConsumerState<NowTab>
                   Text(errorMessage),
                   if (errorUrl != null) ...[
                     const SizedBox(height: 16),
-                    const Text(
-                      '생성 링크:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      dl10n.nowErrorCreationLink,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     AppUnderlinedText.selectable(
@@ -1244,7 +1282,7 @@ class _NowTabState extends ConsumerState<NowTab>
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('확인'),
+                  child: Text(dl10n.nowOk),
                 ),
               ],
             ),
@@ -1512,7 +1550,7 @@ class _NowTabState extends ConsumerState<NowTab>
             const Icon(Icons.error_outline, size: 48, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              "잠시 후 다시 시도해주세요",
+              AppLocalizations.of(context)!.nowRetryLater,
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
@@ -1527,12 +1565,13 @@ class _NowTabState extends ConsumerState<NowTab>
     if (card.plan?.id == null) return;
 
     // Show Dialog to input feedback (consistent with History tab)
+    final l10n = AppLocalizations.of(context)!;
     final feedback = await showDialog<String>(
       context: context,
       builder: (context) => ActionNoteDialog(
-        title: card.plan?.items.firstOrNull?.title ?? "파트너의 실천",
-        hintText: "따뜻한 피드백을 남겨주세요 (선택)",
-        buttonLabel: "확인하고 보내기",
+        title: card.plan?.items.firstOrNull?.title ?? l10n.nowPartnerActionFallback,
+        hintText: l10n.nowActionNoteHint,
+        buttonLabel: l10n.nowVerifyAndSend,
       ),
     );
 
@@ -1551,7 +1590,7 @@ class _NowTabState extends ConsumerState<NowTab>
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('응원 전송에 실패했어요.')));
+          ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowCheerFailed)));
         }
       }
     }
@@ -1686,7 +1725,7 @@ class _NowTabState extends ConsumerState<NowTab>
                           } catch (_) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('응원 전송에 실패했어요.')),
+                                SnackBar(content: Text(AppLocalizations.of(context)!.nowCheerFailed)),
                               );
                             }
                           }
@@ -1979,7 +2018,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            '${model.streakCount}회 연속 달성!',
+            l10n.nowStreakCount(model.streakCount!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.bold,
@@ -2014,7 +2053,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
           statusMessage = l10n.nowQuietRest;
           break;
         case HomeCardState.rejected: // Type 1-7: 반려됨
-          statusMessage = '조율이 필요해요'; // Fallback if headerMessage is null
+          statusMessage = l10n.nowHeaderAdjustNeeded;
           break;
         case HomeCardState.nextAction: // Type 1-3: 다음 일정
           // Next Action usually uses headerMessage or defaults to nothing special
@@ -2023,14 +2062,14 @@ class _PrimaryExecutorCard extends StatelessWidget {
           // 똑똑 배지에서 안내하므로 별도 statusMessage 없음
           break;
         case HomeCardState.promiseProposed:
-          statusMessage = '약속 제안이 도착했어요';
+          statusMessage = l10n.nowHeaderPromiseProposed;
           break;
         case HomeCardState.promiseSettled:
-          statusMessage = '약속 결과가 나왔어요';
+          statusMessage = l10n.nowHeaderPromiseSettled;
           break;
         case HomeCardState.pilotSettlement:
-          statusMessage = '4주 정산이 필요해요';
-          subMessage = '똑똑이 실제로 약속을 당겼는지 확인하고 다음 4주를 정해요.';
+          statusMessage = l10n.nowHeaderSettlementNeeded;
+          subMessage = l10n.nowHeaderSettlementSub;
           break;
         default:
           break;
@@ -2164,6 +2203,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   }
 
   Widget _buildPilotSettlementDetail(BuildContext context, Plan plan) {
+    final l10n = AppLocalizations.of(context)!;
     final totalScheduled = _scheduledDaysCount(plan);
     final completed = plan.completedDates.length;
     final feedback = _partnerFeedbackCount(plan);
@@ -2182,16 +2222,16 @@ class _PrimaryExecutorCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: _buildSettlementMetric('완료', '$completed일')),
-              Expanded(child: _buildSettlementMetric('파트너 반응', '$feedback회')),
-              Expanded(child: _buildSettlementMetric('놓친 날', '$missed일')),
+              Expanded(child: _buildSettlementMetric(l10n.nowMetricCompleted, l10n.nowMetricDaysSuffix(completed))),
+              Expanded(child: _buildSettlementMetric(l10n.nowMetricPartnerReact, l10n.nowMetricCountSuffix(feedback))),
+              Expanded(child: _buildSettlementMetric(l10n.nowMetricMissed, l10n.nowMetricDaysSuffix(missed))),
             ],
           ),
           const SizedBox(height: 10),
           Text(
             completed >= 12
-                ? '의미 있는 완료 기준인 12일을 넘겼어요. 다음 4주를 이어갈지 바로 정할 차례예요.'
-                : '완주보다 중요한 건 어디서 끊겼는지 남기는 거예요. 다음 실험을 줄일 수 있게 사유를 남겨요.',
+                ? l10n.nowSettlementWinMessage
+                : l10n.nowSettlementLoseMessage,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSecondary,
               height: 1.4,
@@ -2235,6 +2275,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   }
 
   Widget _buildPromiseDetail(BuildContext context, Promise promise) {
+    final l10n = AppLocalizations.of(context)!;
     final isSettled = promise.status == PromiseStatus.settled;
     return Container(
       width: double.infinity,
@@ -2254,7 +2295,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '${promise.reward!.targetDays}일 성공 시: ${promise.reward!.description}',
+                    l10n.nowRewardCondition(promise.reward!.targetDays, promise.reward!.description),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textPrimary,
                     ),
@@ -2274,7 +2315,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '${promise.penalty!.targetDays}일 실패 시: ${promise.penalty!.description}',
+                    l10n.nowPenaltyCondition(promise.penalty!.targetDays, promise.penalty!.description),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textPrimary,
                     ),
@@ -2288,7 +2329,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
           if (isSettled && promise.settledSuccessDays != null) ...[
             const SizedBox(height: 8),
             Text(
-              '성공 ${promise.settledSuccessDays}일 / 실패 ${promise.settledFailDays ?? 0}일',
+              l10n.nowPromiseResult(promise.settledSuccessDays!, promise.settledFailDays ?? 0),
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
@@ -2327,7 +2368,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        achieved ? (isReward ? '달성!' : '발동!') : '미달',
+        achieved ? (isReward ? AppLocalizations.of(context)!.nowAchieved : AppLocalizations.of(context)!.nowTriggered) : AppLocalizations.of(context)!.nowNotMet,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: achieved
               ? (isReward ? AppColors.success : AppColors.error)
@@ -2360,7 +2401,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  '거절',
+                  AppLocalizations.of(context)!.nowDecline,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -2385,9 +2426,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  '수락',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                child: Text(
+                  AppLocalizations.of(context)!.nowAccept,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -2419,9 +2460,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                '다음 4주 시작하기',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              child: Text(
+                l10n.nowContinueNext4Weeks,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -2434,9 +2475,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const AppUnderlinedText(
-              '이번 4주는 여기서 멈추기',
-              style: TextStyle(fontSize: 13),
+            child: AppUnderlinedText(
+              l10n.nowStopHere,
+              style: const TextStyle(fontSize: 13),
             ),
           ),
         ],
@@ -2454,7 +2495,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
       buttonText = l10n.nowCreatePlan;
       onPressed = onCreatePlan;
     } else if (model.state == HomeCardState.rejected) {
-      buttonText = '수정하기'; // "Modify"
+      buttonText = l10n.nowModify;
       onPressed = onModify;
     } else if (model.state == HomeCardState.promiseProposed) {
       return _buildPromiseProposedButtons(context);
@@ -2544,7 +2585,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 color: AppColors.primary,
               ),
               label: Text(
-                '지금 할게! (집중 타이머)',
+                l10n.nowStartFocusTimer,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -2575,9 +2616,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const AppUnderlinedText(
-              '오늘은 쉬어갈게요 (휴식권)',
-              style: TextStyle(fontSize: 13),
+            child: AppUnderlinedText(
+              l10n.nowRestToday,
+              style: const TextStyle(fontSize: 13),
             ),
           ),
         ],
@@ -2593,9 +2634,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const AppUnderlinedText(
-                '오늘은 쉬어갈게요 (휴식권)',
-                style: TextStyle(fontSize: 13),
+              child: AppUnderlinedText(
+                l10n.nowRestToday,
+                style: const TextStyle(fontSize: 13),
               ),
             )
           else
@@ -2710,7 +2751,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
   Widget _buildCheckedCard(BuildContext context, AppLocalizations l10n) {
     final title = model.plan?.items.firstOrNull?.title ?? '';
     final now = DateTime.now();
-    final dateStr = '${now.month}.${now.day} (${_getWeekdayStr(now.weekday)})';
+    final dateStr = '${now.month}.${now.day} (${_getWeekdayStr(now.weekday, l10n)})';
 
     // 긍정 메시지 중 하나 선택
     final messages = [
@@ -2770,7 +2811,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              title.isNotEmpty ? title : '지나간 약속',
+              title.isNotEmpty ? title : l10n.nowMissedPlanFallback,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
@@ -2804,22 +2845,22 @@ class _SecondaryExecutorCard extends StatelessWidget {
     );
   }
 
-  String _getWeekdayStr(int weekday) {
+  String _getWeekdayStr(int weekday, AppLocalizations l10n) {
     switch (weekday) {
       case 1:
-        return '월';
+        return l10n.planDetailDayMon;
       case 2:
-        return '화';
+        return l10n.planDetailDayTue;
       case 3:
-        return '수';
+        return l10n.planDetailDayWed;
       case 4:
-        return '목';
+        return l10n.planDetailDayThu;
       case 5:
-        return '금';
+        return l10n.planDetailDayFri;
       case 6:
-        return '토';
+        return l10n.planDetailDaySat;
       case 7:
-        return '일';
+        return l10n.planDetailDaySun;
       default:
         return '';
     }
@@ -2884,7 +2925,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
                   text: title,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                TextSpan(text: '${_particleEulReul(title ?? '')}\n'),
+                TextSpan(text: '${_particleEulReul(title ?? '', l10n.localeName)}\n'),
                 TextSpan(
                   text: l10n.nowPartnerDidIt,
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -2974,7 +3015,7 @@ class _SecondaryExecutorCard extends StatelessWidget {
 
     switch (model.state) {
       case HomeCardState.partnerAction:
-        statusMessage = '확인 대기 · 응원 필요';
+        statusMessage = l10n.nowVerifyingDeadline;
         break;
       case HomeCardState.todayEmpty:
         statusMessage = l10n.nowQuietRest;
@@ -3053,23 +3094,25 @@ class _ManagerQuickCard extends StatelessWidget {
 
     String headerText;
     if (isPartnerTodayComplete) {
-      headerText = '오늘 약속을 다 지켰어요';
+      headerText = l10n.nowHeaderTodayAllDone;
     } else if (model.state == HomeCardState.partnerAction) {
-      headerText = '확인하고 당겨줄 차례';
+      headerText = l10n.nowHeaderConfirmAndPull;
     } else if (model.state == HomeCardState.partnerPlanCreate ||
         model.state == HomeCardState.partnerPlanModify) {
       if (model.headerMessage == '조정 중' ||
-          model.headerMessage == '같이 맞춰보는 중이에요') {
+          model.headerMessage == '같이 맞춰보는 중이에요' ||
+          model.headerMessage == 'Adjusting' ||
+          model.headerMessage == 'Working it out together') {
         headerText = l10n.nowPartnerAdjusting;
       } else {
         headerText = l10n.nowPartnerProposed;
       }
     } else if (model.state == HomeCardState.partnerNoPlan) {
-      headerText = '기다리는 중';
+      headerText = l10n.nowHeaderWaiting;
     } else if (model.state == HomeCardState.partnerPromiseProposed) {
-      headerText = '약속 수락을 기다리는 중';
+      headerText = l10n.nowHeaderWaitingAccept;
     } else if (model.state == HomeCardState.promiseSettled) {
-      headerText = '약속 결과가 나왔어요';
+      headerText = l10n.nowHeaderPromiseResult;
     } else {
       headerText = model.headerMessage ?? l10n.homeReceivedMessage;
     }
@@ -3186,7 +3229,7 @@ class _ManagerQuickCard extends StatelessWidget {
             // Button (Only for partnerActionShare/partnerPlanShare that needs action)
             if (model.state == HomeCardState.partnerPlanCreate ||
                 model.state == HomeCardState.partnerPlanModify) ...[
-              if (model.headerMessage != '함께하는 중') ...[
+              if (model.headerMessage != '함께하는 중' && model.headerMessage != 'Working together') ...[
                 const SizedBox(height: 20),
                 Row(
                   children: [
@@ -3205,7 +3248,7 @@ class _ManagerQuickCard extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          "조율하기",
+                          l10n.nowAdjust,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -3241,9 +3284,9 @@ class _ManagerQuickCard extends StatelessWidget {
                                     return null;
                                   }),
                             ),
-                        child: const Text(
-                          "승인하기",
-                          style: TextStyle(
+                        child: Text(
+                          l10n.nowApprove,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -3261,7 +3304,7 @@ class _ManagerQuickCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: Text(
-                  '상대방이 아직 새로운 약속을 만들지 않았어요. 약속이 묻히기 전에 똑똑으로 불러볼까요?',
+                  l10n.nowPartnerNoNewPlanGuide,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 16,
@@ -3285,9 +3328,9 @@ class _ManagerQuickCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    "똑똑! 약속 만들라고 하기",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  child: Text(
+                    l10n.nowKnockMakePlan,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -3296,9 +3339,9 @@ class _ManagerQuickCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: Text(
-                  model.headerMessage == '놓친 약속이 떴어요'
-                      ? '${partnerName ?? "파트너"}님의 약속이 놓친 약속으로 남았어요. 똑똑으로 다시 당겨주세요.'
-                      : '${partnerName ?? "파트너"}님의 약속이 아직 조용해요. 묻히기 전에 똑똑으로 당겨주세요.',
+                  (model.headerMessage == '놓친 약속이 떴어요' || model.headerMessage == 'Missed promise appeared')
+                      ? l10n.nowPartnerMissedPokeBody(partnerName ?? l10n.nowPartnerFallback2)
+                      : l10n.nowPartnerQuietPokeBody(partnerName ?? l10n.nowPartnerFallback2),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 16,
@@ -3322,9 +3365,9 @@ class _ManagerQuickCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    "똑똑! 당기기",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  child: Text(
+                    l10n.nowKnockPull,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -3350,7 +3393,7 @@ class _ManagerQuickCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         AppUnderlinedText(
-                          '어제 실천 인정해주기',
+                          l10n.nowRescueYesterday,
                           style: TextStyle(
                             fontSize: 14,
                             color: AppColors.textSecondary,
@@ -3377,12 +3420,12 @@ class _ManagerQuickCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const FittedBox(
+                  child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      "확인하고 응원 보내기",
+                      l10n.nowVerifyAndCheer,
                       maxLines: 1,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -3425,7 +3468,7 @@ class _ManagerQuickCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       AppUnderlinedText(
-                        '약속 걸기',
+                        l10n.nowMakePromise,
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.secondary,
@@ -3443,9 +3486,10 @@ class _ManagerQuickCard extends StatelessWidget {
   }
 
   Widget _buildPartnerTodayCompleteMessage(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final resolvedPartnerName = (partnerName?.trim().isNotEmpty ?? false)
         ? partnerName!.trim()
-        : '파트너';
+        : l10n.nowPartnerFallback2;
     final title = model.plan?.items.firstOrNull?.title;
     final note = model.plan?.lastActionNote?.trim();
 
@@ -3465,7 +3509,7 @@ class _ManagerQuickCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '$resolvedPartnerName님이 오늘 약속을 다 지켰어요.',
+                  l10n.nowPartnerAllDone(resolvedPartnerName),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w700,
@@ -3477,7 +3521,7 @@ class _ManagerQuickCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '짧게 확인해주면 내일도 이어가기 쉬워요.',
+            l10n.nowQuickCheckHelp,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
               height: 1.45,
@@ -3486,7 +3530,7 @@ class _ManagerQuickCard extends StatelessWidget {
           if (title != null && title.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
-              '마지막 실천: $title',
+              l10n.nowLastAction(title),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -3527,6 +3571,7 @@ class _ManagerQuickCard extends StatelessWidget {
   }
 
   Widget _buildManagerPromiseDetail(BuildContext context, Promise promise) {
+    final l10n = AppLocalizations.of(context)!;
     final isSettled = promise.status == PromiseStatus.settled;
     return Container(
       width: double.infinity,
@@ -3540,7 +3585,7 @@ class _ManagerQuickCard extends StatelessWidget {
         children: [
           if (promise.reward != null) ...[
             Text(
-              '🏆 ${promise.reward!.targetDays}일 성공 시: ${promise.reward!.description}',
+              l10n.nowRewardLine(promise.reward!.targetDays, promise.reward!.description),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
@@ -3550,7 +3595,7 @@ class _ManagerQuickCard extends StatelessWidget {
             const SizedBox(height: 4),
           if (promise.penalty != null) ...[
             Text(
-              '⚡ ${promise.penalty!.targetDays}일 실패 시: ${promise.penalty!.description}',
+              l10n.nowPenaltyLine(promise.penalty!.targetDays, promise.penalty!.description),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
@@ -3559,7 +3604,7 @@ class _ManagerQuickCard extends StatelessWidget {
           if (isSettled && promise.settledSuccessDays != null) ...[
             const SizedBox(height: 8),
             Text(
-              '결과: 성공 ${promise.settledSuccessDays}일 / 실패 ${promise.settledFailDays ?? 0}일',
+              l10n.nowResultLine(promise.settledSuccessDays!, promise.settledFailDays ?? 0),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
@@ -3568,7 +3613,7 @@ class _ManagerQuickCard extends StatelessWidget {
             if (promise.settlementResult != null) ...[
               const SizedBox(height: 4),
               Text(
-                _settlementResultText(promise.settlementResult!),
+                _settlementResultText(promise.settlementResult!, l10n),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
@@ -3578,7 +3623,7 @@ class _ManagerQuickCard extends StatelessWidget {
           ] else ...[
             const SizedBox(height: 4),
             Text(
-              '수락 대기 중...',
+              l10n.nowWaitingApproval,
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
@@ -3589,16 +3634,16 @@ class _ManagerQuickCard extends StatelessWidget {
     );
   }
 
-  String _settlementResultText(SettlementResult result) {
+  String _settlementResultText(SettlementResult result, AppLocalizations l10n) {
     switch (result) {
       case SettlementResult.rewardAchieved:
-        return '🎉 보상 달성!';
+        return l10n.nowRewardAchievedTitle;
       case SettlementResult.penaltyTriggered:
-        return '⚡ 벌칙 발동!';
+        return l10n.nowPenaltyTriggeredTitle;
       case SettlementResult.bothMet:
-        return '🎉 보상 달성! + ⚡ 벌칙 발동!';
+        return l10n.nowBothTitle;
       case SettlementResult.neitherMet:
-        return '조건 미달';
+        return l10n.nowConditionNotMet;
     }
   }
 
@@ -3800,15 +3845,16 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
     setState(() => _penaltyDays = _clampTargetDays(days, _penaltyDaysLimit));
   }
 
-  String get _durationSummary {
+  String _durationSummary(AppLocalizations l10n) {
     if (_durationDays == _scheduledDays) {
-      return '총 $_durationDays일짜리 약속이에요';
+      return l10n.nowTotalDaysOnly(_durationDays);
     }
-    return '총 $_durationDays일짜리 약속 · 실천 예정 $_scheduledDays일';
+    return l10n.nowTotalDaysScheduled(_durationDays, _scheduledDays);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final mediaQuery = MediaQuery.of(context);
     final keyboardInset = mediaQuery.viewInsets.bottom;
     final bottomInset = keyboardInset > 0
@@ -3844,7 +3890,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
             ),
             const SizedBox(height: 20),
             Text(
-              '약속 걸기',
+              l10n.nowMakePromiseTitle,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -3852,7 +3898,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
             ),
             const SizedBox(height: 4),
             Text(
-              '상대가 수락하면 약속이 시작돼요',
+              l10n.nowMakePromiseSubtitle,
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
@@ -3872,7 +3918,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _durationSummary,
+                    _durationSummary(l10n),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -3880,7 +3926,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '현재 성공 $_completedDays일 · 실패 $_failedDays일 · 남은 예정 $_remainingDays일',
+                    l10n.nowProgressLine(_completedDays, _failedDays, _remainingDays),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                       height: 1.4,
@@ -3888,7 +3934,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '보상은 최대 $_rewardDaysLimit일, 벌칙은 최대 $_penaltyDaysLimit일까지 정할 수 있어요.',
+                    l10n.nowMaxLimitsLine(_rewardDaysLimit, _penaltyDaysLimit),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                       height: 1.4,
@@ -3901,7 +3947,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
 
             // 보상 섹션
             _buildSectionToggle(
-              title: '🏆 보상 (당근)',
+              title: l10n.nowRewardTitle,
               enabled: _enableReward,
               onToggle: (v) => setState(() => _enableReward = v),
             ),
@@ -3910,7 +3956,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
               TextField(
                 controller: _rewardDescController,
                 decoration: InputDecoration(
-                  hintText: '예: 치킨 사주기, 맛집 가기',
+                  hintText: l10n.nowRewardHint,
                   hintStyle: TextStyle(color: AppColors.textDisabled),
                   filled: true,
                   fillColor: AppColors.surface,
@@ -3927,7 +3973,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
                 onChanged: (_) => setState(() {}),
               ),
               _buildDaysPicker(
-                label: '성공 목표',
+                label: l10n.nowRewardTargetLabel,
                 days: _rewardDays,
                 maxDays: _rewardDaysLimit,
                 onChanged: _setRewardDays,
@@ -3938,7 +3984,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
 
             // 벌칙 섹션
             _buildSectionToggle(
-              title: '⚡ 벌칙 (채찍)',
+              title: l10n.nowPenaltyTitle,
               enabled: _enablePenalty,
               onToggle: (v) => setState(() => _enablePenalty = v),
             ),
@@ -3947,7 +3993,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
               TextField(
                 controller: _penaltyDescController,
                 decoration: InputDecoration(
-                  hintText: '예: 설거지 일주일, 커피 쏘기',
+                  hintText: l10n.nowPenaltyHint,
                   hintStyle: TextStyle(color: AppColors.textDisabled),
                   filled: true,
                   fillColor: AppColors.surface,
@@ -3964,7 +4010,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
                 onChanged: (_) => setState(() {}),
               ),
               _buildDaysPicker(
-                label: '실패 한도',
+                label: l10n.nowPenaltyTargetLabel,
                 days: _penaltyDays,
                 maxDays: _penaltyDaysLimit,
                 onChanged: _setPenaltyDays,
@@ -4008,9 +4054,9 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  '약속 제안하기',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                child: Text(
+                  l10n.nowProposePromise,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -4051,6 +4097,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
     required int maxDays,
     required ValueChanged<int> onChanged,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         Text(
@@ -4073,7 +4120,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            '$days일',
+            l10n.nowDaysSuffix(days),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
@@ -4089,7 +4136,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
         ),
         const SizedBox(width: 6),
         Text(
-          '최대 $maxDays일',
+          l10n.nowMaxDaysLabel(maxDays),
           style: Theme.of(
             context,
           ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
@@ -4124,9 +4171,10 @@ class _PokeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final label = partnerName == null || partnerName!.isEmpty
-        ? '파트너가 똑똑을 보냈어요'
-        : '$partnerName님이 똑똑을 보냈어요';
+        ? l10n.nowPokeReceived
+        : l10n.nowPokeReceivedFromName(partnerName!);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -4160,7 +4208,9 @@ class _PokeBadge extends StatelessWidget {
 }
 
 /// 한국어 조사 을/를 판별 (받침 유무 기준)
-String _particleEulReul(String text) {
+/// 영어 등 다른 로케일에서는 공백만 반환 (조사 개념 없음)
+String _particleEulReul(String text, [String locale = 'ko']) {
+  if (!locale.startsWith('ko')) return ' ';
   if (text.isEmpty) return '를';
   final lastChar = text.codeUnitAt(text.length - 1);
   // 한글 유니코드 범위: 0xAC00 ~ 0xD7A3

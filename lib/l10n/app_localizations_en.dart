@@ -140,7 +140,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabUs => 'Us';
 
   @override
-  String get historyEmpty => 'No history yet';
+  String get historyEmpty => 'No promises recorded yet';
 
   @override
   String get usMeTitle => 'Me';
@@ -977,4 +977,1305 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsStoreUnavailable =>
       'Can\'t connect to the store. Please check your settings.';
+
+  @override
+  String get planMostlyProcrastinated => 'What you usually put off';
+
+  @override
+  String get planRecommendedPromises => 'Suggested promises';
+
+  @override
+  String get planMine => 'My promise';
+
+  @override
+  String get planClearAction => 'Clear';
+
+  @override
+  String get planRecommendedFrequency => 'Suggested frequency';
+
+  @override
+  String get planNoDayMeansDaily =>
+      'Without picking days, this becomes a daily promise.';
+
+  @override
+  String get planPartnerFallback => 'your partner';
+
+  @override
+  String get planActionFallback => 'my promise';
+
+  @override
+  String get planPartnerPreviewLabel => 'Here\'s how your partner sees it';
+
+  @override
+  String planPartnerPreviewWith(String name, String promise) {
+    return '$name will be asked to nudge you on \"$promise\" without missing a beat for 28 days.';
+  }
+
+  @override
+  String get planPartnerPreviewWithout =>
+      'Without a partner there\'s no one to receive the poke. Connect one before saving for stronger pressure.';
+
+  @override
+  String get planConnectPartner => 'Connect a partner';
+
+  @override
+  String get planDayEveryDay => 'Every day';
+
+  @override
+  String get planDayWeekdays => 'Weekdays';
+
+  @override
+  String planDayCountFormat(int count) {
+    return '$count days/week';
+  }
+
+  @override
+  String planPreviewMeta(String days, String time) {
+    return '$days · $time · 28 days';
+  }
+
+  @override
+  String get planTimeAM => 'AM';
+
+  @override
+  String get planTimePM => 'PM';
+
+  @override
+  String planTimeFormatNoMinute(String period, int hour) {
+    return '$period $hour';
+  }
+
+  @override
+  String planTimeFormatWithMinute(String period, int hour, String minute) {
+    return '$period $hour:$minute';
+  }
+
+  @override
+  String planTemplatePerWeek(String label, int count) {
+    return '$label · $count/wk';
+  }
+
+  @override
+  String get planCategoryStudyLabel => 'Study';
+
+  @override
+  String get planCategoryStudyDescription =>
+      'Self-study you keep putting off — English, certifications, coding';
+
+  @override
+  String get planCategoryExerciseLabel => 'Exercise';
+
+  @override
+  String get planCategoryExerciseDescription =>
+      'Movement that\'s hard to start — walking, gym, stretching';
+
+  @override
+  String get planCategoryCustomLabel => 'Custom';
+
+  @override
+  String get planCategoryCustomDescription =>
+      'Write your own promise without picking a template';
+
+  @override
+  String get planTemplateEnglishLabel => 'English';
+
+  @override
+  String get planTemplateEnglishAction => 'Read 10 English sentences aloud';
+
+  @override
+  String get planTemplateEnglishDescription =>
+      'Aim for low-pressure daily exposure to English.';
+
+  @override
+  String get planTemplateCertificateLabel => 'Certification';
+
+  @override
+  String get planTemplateCertificateAction => 'Solve 10 past exam questions';
+
+  @override
+  String get planTemplateCertificateDescription =>
+      'Repeat a fixed count without breaking the streak instead of cramming.';
+
+  @override
+  String get planTemplateCodingLabel => 'Coding';
+
+  @override
+  String get planTemplateCodingAction => '30 min of coding or one problem';
+
+  @override
+  String get planTemplateCodingDescription =>
+      'Secure the days you actually touch code before chasing big goals.';
+
+  @override
+  String get planTemplateReadingLabel => 'Reading';
+
+  @override
+  String get planTemplateReadingAction => 'Read 10 pages and log one line';
+
+  @override
+  String get planTemplateReadingDescription =>
+      'Leave a one-line trace so your partner can check in easily.';
+
+  @override
+  String get planTemplateWritingLabel => 'Writing';
+
+  @override
+  String get planTemplateWritingAction => 'Write for 15 min or 300 characters';
+
+  @override
+  String get planTemplateWritingDescription =>
+      'Focus on starting days, not finished pieces.';
+
+  @override
+  String get planTemplateWalkingLabel => 'Walking';
+
+  @override
+  String get planTemplateWalkingAction => 'Walk 30 minutes';
+
+  @override
+  String get planTemplateWalkingDescription =>
+      'Commit to stepping outside before worrying about gear.';
+
+  @override
+  String get planTemplateGymLabel => 'Gym';
+
+  @override
+  String get planTemplateGymAction => 'Go to the gym and work out for 30 min';
+
+  @override
+  String get planTemplateGymDescription =>
+      'Increase days you arrive at the gym rather than perfect workouts.';
+
+  @override
+  String get planTemplateStretchingLabel => 'Stretching';
+
+  @override
+  String get planTemplateStretchingAction => 'Stretch for 10 minutes';
+
+  @override
+  String get planTemplateStretchingDescription =>
+      'Show your partner even a short loosen-up.';
+
+  @override
+  String get planDayPresetThreeDaysLabel => '3 days/wk';
+
+  @override
+  String get planDayPresetWeekdaysLabel => 'Weekdays';
+
+  @override
+  String get planDayPresetEveryDayLabel => 'Every day';
+
+  @override
+  String get planDayPresetWeekendLabel => 'Weekend';
+
+  @override
+  String get planDayPresetStudyThreeDaysDesc =>
+      'Build three wins in the first week';
+
+  @override
+  String get planDayPresetStudyWeekdaysDesc =>
+      'Anchor your study to the weekdays';
+
+  @override
+  String get planDayPresetStudyEveryDayDesc =>
+      'Show your partner something each day, even briefly';
+
+  @override
+  String get planDayPresetExerciseThreeDaysDesc =>
+      'Start with a Mon/Wed/Fri rhythm';
+
+  @override
+  String get planDayPresetExerciseWeekendDesc =>
+      'Leave a movement trace on weekends';
+
+  @override
+  String get planDayPresetExerciseEveryDayDesc =>
+      'Get daily check-ins like a short stretch';
+
+  @override
+  String get planDayPresetCustomThreeDaysDesc => 'A low-pressure default';
+
+  @override
+  String get planDayPresetCustomWeekdaysDesc =>
+      'Lock it in as a weekday routine';
+
+  @override
+  String get planDayPresetCustomEveryDayDesc =>
+      'Leave a small action every day';
+
+  @override
+  String planStepHeader(int current, int total) {
+    return 'Preparing promise · $current/$total';
+  }
+
+  @override
+  String get planTellUsActionFirst => 'Tell us what you want to promise!';
+
+  @override
+  String get planProposalSaved =>
+      'Proposal saved.\nGo chat about it with your partner!';
+
+  @override
+  String planSaveError(String error) {
+    return 'An error occurred while saving: $error';
+  }
+
+  @override
+  String get focusTimerPickerTitle => 'How long do you want to focus?';
+
+  @override
+  String get focusTimerPickerSubtitle =>
+      'When the timer ends, the \"Done\" note opens automatically.';
+
+  @override
+  String focusTimerPresetMin(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String focusTimerCustomHint(int min, int max) {
+    return 'Custom ($min–$max min)';
+  }
+
+  @override
+  String get focusTimerMinuteUnit => 'min';
+
+  @override
+  String get focusTimerPickFirst => 'Pick a duration';
+
+  @override
+  String focusTimerStart(int minutes) {
+    return 'Start $minutes min';
+  }
+
+  @override
+  String get focusTimerGiveUpTitle => 'Give up the timer?';
+
+  @override
+  String get focusTimerGiveUpBody =>
+      'Progress isn\'t saved. The promise stays as not done.';
+
+  @override
+  String get focusTimerKeepGoing => 'Keep going';
+
+  @override
+  String get focusTimerGiveUp => 'Give up';
+
+  @override
+  String get focusTimerGiveUpShort => 'Stop';
+
+  @override
+  String focusTimerHeader(int minutes) {
+    return 'Focus $minutes min';
+  }
+
+  @override
+  String focusTimerHeaderWithPlan(String title, int minutes) {
+    return '$title · $minutes min';
+  }
+
+  @override
+  String get focusTimerPaused => 'Paused';
+
+  @override
+  String get focusTimerDoneNow => 'Done now';
+
+  @override
+  String get focusTimerResume => 'Resume';
+
+  @override
+  String get focusTimerPause => 'Pause';
+
+  @override
+  String get actionNoteHintDefault => 'Share your thoughts (optional)';
+
+  @override
+  String get planTimeUnset => 'Time not set';
+
+  @override
+  String get planStateActive => 'Active';
+
+  @override
+  String get planStateDraft => 'Draft';
+
+  @override
+  String get planStatePending => 'Awaiting approval';
+
+  @override
+  String get planStateRejected => 'Declined';
+
+  @override
+  String get planStateCompleted => 'Ended';
+
+  @override
+  String get planStateStopped => 'Stopped';
+
+  @override
+  String get planDescriptionTip => 'Tip: try \"If X, then Y\"';
+
+  @override
+  String get planDescriptionExamples =>
+      'e.g. \"When I get home from work, I change into workout clothes\"\ne.g. \"When the kids fall asleep, I read for 30 minutes\"';
+
+  @override
+  String get planDescriptionTipFooter =>
+      'A specific situation makes you 2–3× more likely to follow through!';
+
+  @override
+  String get notifyEditorTitle => 'Notifications';
+
+  @override
+  String get notifyEditorSubtitleOn => 'Pick when we should poke you.';
+
+  @override
+  String get notifyEditorSubtitleOff => 'Track without notifications.';
+
+  @override
+  String get notifyEditorPromiseTime => 'Promise time visible to your partner';
+
+  @override
+  String get notifyEditorDefaultTimeHint =>
+      '9 PM by default is a good time for your partner to check before the day slips by.';
+
+  @override
+  String get notifyEditorPrealert => 'Pre-alert';
+
+  @override
+  String get notifyEditorOnTime => 'On time';
+
+  @override
+  String get notifyEditor5MinBefore => '5 min before';
+
+  @override
+  String get notifyEditor10MinBefore => '10 min before';
+
+  @override
+  String get notifyEditor30MinBefore => '30 min before';
+
+  @override
+  String get notifyEditor1HourBefore => '1 hr before';
+
+  @override
+  String promiseChipPenaltyTriggered(String description) {
+    return '⚡ Penalty locked in — $description';
+  }
+
+  @override
+  String promiseChipPenaltyImminentOne(String description) {
+    return '⚡ Just one more miss triggers the penalty — $description';
+  }
+
+  @override
+  String promiseChipPenaltyImminent(int count, String description) {
+    return '⚡ $count more misses triggers the penalty — $description';
+  }
+
+  @override
+  String promiseChipRewardAchieved(String description) {
+    return '🏆 Reward earned! — $description';
+  }
+
+  @override
+  String promiseChipRewardImminent(int days, String description) {
+    return '🏆 $days more day(s) to the reward — $description';
+  }
+
+  @override
+  String promiseChipSafeBoth(int rewardDays, int penaltyBuffer) {
+    return '🏆 $rewardDays days to reward · ⚡ $penaltyBuffer misses safe';
+  }
+
+  @override
+  String promiseChipSafeRewardOnly(int days, String description) {
+    return '🏆 $days days to reward — $description';
+  }
+
+  @override
+  String promiseChipSafePenaltyOnly(int buffer, String description) {
+    return '⚡ $buffer misses safe — $description';
+  }
+
+  @override
+  String get promiseSheetTitle => 'Promise terms';
+
+  @override
+  String promiseSheetSubtitle(int success, int failed, int remaining) {
+    return 'Settled when the plan ends. Currently $success done · $failed missed · $remaining days left.';
+  }
+
+  @override
+  String get promiseSheetRewardLabel => 'Reward';
+
+  @override
+  String get promiseSheetPenaltyLabel => 'Penalty';
+
+  @override
+  String promiseSheetRewardTarget(int target, int success) {
+    return '$target successful days to earn it — currently $success';
+  }
+
+  @override
+  String promiseSheetPenaltyImpossible(int target) {
+    return 'Needed $target successful days but you can no longer reach it — penalty locked in';
+  }
+
+  @override
+  String promiseSheetPenaltyJustOne(int target) {
+    return 'Triggers below $target successful days — you can\'t miss even once more';
+  }
+
+  @override
+  String promiseSheetPenaltyBuffer(int target, int buffer) {
+    return 'Triggers below $target successful days — $buffer more misses are safe';
+  }
+
+  @override
+  String get promiseSheetClose => 'Close';
+
+  @override
+  String splashLoginFailed(String error) {
+    return 'Login failed: $error';
+  }
+
+  @override
+  String get splashLoggingIn => 'Signing in…';
+
+  @override
+  String get emailLoginToggleSignUp => 'No account? Sign up';
+
+  @override
+  String get emailLoginToggleLogin => 'Already have an account? Log in';
+
+  @override
+  String get settingsSupport => 'Support';
+
+  @override
+  String get notificationSettingsNoAlarm => 'No alarm';
+
+  @override
+  String notificationSettingsAlarmOff(String timeString) {
+    return 'Alarm off ($timeString)';
+  }
+
+  @override
+  String get notificationSettingsSaveFailed =>
+      'Couldn\'t save notification setting. Reverted to the previous one.';
+
+  @override
+  String get historyCardFeedbackHint => 'Leave a warm note (optional)';
+
+  @override
+  String get historyCardFeedbackButton => 'OK';
+
+  @override
+  String get historyCardAcknowledgePractice => 'Acknowledge practice';
+
+  @override
+  String get planSummaryMyDone => 'My completions';
+
+  @override
+  String get planSummaryPartnerVerified => 'Partner verified';
+
+  @override
+  String planSummaryCount(int count) {
+    return '$count';
+  }
+
+  @override
+  String get connectInviteCodeDetectedTitle => 'Invite code detected';
+
+  @override
+  String connectInviteCodeDetectedBody(String code) {
+    return 'We found an invite code ($code) in your clipboard.\nPaste it?';
+  }
+
+  @override
+  String get connectCancel => 'Cancel';
+
+  @override
+  String get connectPaste => 'Paste';
+
+  @override
+  String get connectNotice => 'Notice';
+
+  @override
+  String get connectAlreadyConnectedBody =>
+      'You already have a connected partner.\nMultiple partners will be supported later.';
+
+  @override
+  String get connectOk => 'OK';
+
+  @override
+  String get connectSuccess => 'Connected!';
+
+  @override
+  String get allPlansTitleMine => 'My promises';
+
+  @override
+  String get allPlansTitlePartner => 'Partner\'s promises';
+
+  @override
+  String get allPlansEmpty => 'No promises yet';
+
+  @override
+  String get allPlansDeleteTitle => 'Delete this promise?';
+
+  @override
+  String get allPlansDeleteBody => 'This can\'t be undone.';
+
+  @override
+  String get allPlansDeleted => 'Promise deleted.';
+
+  @override
+  String allPlansDeleteFailed(String error) {
+    return 'Delete failed: $error';
+  }
+
+  @override
+  String get allPlansDelete => 'Delete';
+
+  @override
+  String get allPlansCancel => 'Cancel';
+
+  @override
+  String get historyErrorUnknown => 'An unknown error occurred.';
+
+  @override
+  String get historyErrorIndexMissing =>
+      'Database index missing for this query.\nPlease screenshot this and send it to the developer.';
+
+  @override
+  String get historyErrorAlreadyDeleted =>
+      'This record or promise was already deleted,\nso a reaction can\'t be left.';
+
+  @override
+  String get historyErrorTitle => 'Error';
+
+  @override
+  String get historyErrorCreationLink => 'Creation link:';
+
+  @override
+  String get historyOk => 'OK';
+
+  @override
+  String get historySectionActive => 'In progress';
+
+  @override
+  String get historySectionFinished => 'Finished';
+
+  @override
+  String get historyToday => 'Today';
+
+  @override
+  String get historyYesterday => 'Yesterday';
+
+  @override
+  String get historyDatePattern => 'EEEE, MMM d, yyyy';
+
+  @override
+  String get historyReconcileTitle => 'Reconcile past record';
+
+  @override
+  String get historyReconcileSubtitle => 'What actually happened on this day?';
+
+  @override
+  String get historyReconcileHold => 'Leave it';
+
+  @override
+  String get usNoticeTitle => 'Notice';
+
+  @override
+  String get usOk => 'OK';
+
+  @override
+  String usProfileSaveFailed(String error) {
+    return 'Profile save failed: $error';
+  }
+
+  @override
+  String get usEditProfile => 'Edit profile';
+
+  @override
+  String get usNameLabel => 'Name';
+
+  @override
+  String get usStatusLabel => 'Status message';
+
+  @override
+  String get usCancel => 'Cancel';
+
+  @override
+  String get usSave => 'Save';
+
+  @override
+  String get usSeeAll => 'See all >';
+
+  @override
+  String get usEmptyMine => 'No promises yet';
+
+  @override
+  String get usEmptyPartner => 'Partner has no active promises';
+
+  @override
+  String get usCreatePlanShort => '+ New promise';
+
+  @override
+  String get usCreatePlan => 'New promise';
+
+  @override
+  String get usDeletePlanTitle => 'Delete this promise?';
+
+  @override
+  String get usDeletePlanBody => 'This can\'t be undone.';
+
+  @override
+  String get usPlanDeleted => 'Promise deleted.';
+
+  @override
+  String usDeleteFailed(String error) {
+    return 'Delete failed: $error';
+  }
+
+  @override
+  String get usDelete => 'Delete';
+
+  @override
+  String get planDetailPracticeHistory => 'Practice log';
+
+  @override
+  String planDetailLoadFailed(String error) {
+    return 'Couldn\'t load records.\n$error';
+  }
+
+  @override
+  String get planDetailNoRecords => 'No records yet.';
+
+  @override
+  String get planDetailNotSavedPlan => 'Plan not saved.';
+
+  @override
+  String get planDetailRecordDone => 'Done';
+
+  @override
+  String get planDetailRecordSkipped => 'Skipped';
+
+  @override
+  String get planDetailRecordRested => 'Rested';
+
+  @override
+  String get planDetailRecordRescued => 'Acknowledged';
+
+  @override
+  String get planDetailPokeSent => 'Knock knock — door tapped!';
+
+  @override
+  String planDetailPokeFailed(String error) {
+    return 'Send failed: $error';
+  }
+
+  @override
+  String get planDetailPokeDoneToday => 'Knock sent for today';
+
+  @override
+  String get planDetailPokeSending => 'Sending…';
+
+  @override
+  String get planDetailPokeAsk => 'Knock knock… are you forgetting?';
+
+  @override
+  String get planDetailDayMon => 'Mon';
+
+  @override
+  String get planDetailDayTue => 'Tue';
+
+  @override
+  String get planDetailDayWed => 'Wed';
+
+  @override
+  String get planDetailDayThu => 'Thu';
+
+  @override
+  String get planDetailDayFri => 'Fri';
+
+  @override
+  String get planDetailDaySat => 'Sat';
+
+  @override
+  String get planDetailDaySun => 'Sun';
+
+  @override
+  String get planDetailEveryDay => 'Every day';
+
+  @override
+  String get planDetailTimeUnset => 'Time not set';
+
+  @override
+  String get planDetailNotificationSaved => 'Notification settings saved.';
+
+  @override
+  String get planDetailNotificationSaveFailed =>
+      'Couldn\'t save notification setting. Reverted to the previous one.';
+
+  @override
+  String get planDetailSave => 'Save';
+
+  @override
+  String get planDetailStopTitle => 'Stop this promise?';
+
+  @override
+  String get planDetailStopBody =>
+      'Even if you stop, your record so far is kept.';
+
+  @override
+  String get planDetailCancel => 'Cancel';
+
+  @override
+  String get planDetailStopped => 'Promise stopped.';
+
+  @override
+  String planDetailActionFailed(String error) {
+    return 'Action failed: $error';
+  }
+
+  @override
+  String get planDetailStop => 'Stop';
+
+  @override
+  String get planDetailRestartTitle => 'Restart with the same promise?';
+
+  @override
+  String get planDetailRestartBody =>
+      'We\'ll copy the previous promise as-is.\nYou can edit it before starting.';
+
+  @override
+  String get planDetailRestart => 'Restart';
+
+  @override
+  String get planDetailReplaceBody =>
+      'Your current promise will be stopped and you\'ll move to create a new one.\nExisting records are kept safe.';
+
+  @override
+  String get planDetailReport => 'Practice report';
+
+  @override
+  String get planDetailReportPeriod => 'Total period';
+
+  @override
+  String planDetailReportDays(int count) {
+    return '$count days';
+  }
+
+  @override
+  String get planDetailReportCompleted => 'Completions';
+
+  @override
+  String planDetailReportCount(int count) {
+    return '$count times';
+  }
+
+  @override
+  String get planDetailReportRate => 'Achievement rate';
+
+  @override
+  String get planDetailRestartWithScheduleTitle =>
+      'Restart with a new schedule?';
+
+  @override
+  String get nowFocusNoteDoneJustNow => 'Focused and completed!';
+
+  @override
+  String nowFocusNoteDoneFor(String duration) {
+    return 'Focused for $duration and completed!';
+  }
+
+  @override
+  String nowFocusDurationMinSec(int minutes, int seconds) {
+    return '$minutes min $seconds sec';
+  }
+
+  @override
+  String nowFocusDurationMin(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String nowFocusDurationSec(int seconds) {
+    return '$seconds sec';
+  }
+
+  @override
+  String get nowTodayPromiseFallback => 'Today\'s promise';
+
+  @override
+  String get nowSkipDialogTitle => 'Skip today?';
+
+  @override
+  String nowSkipDialogBody(String title) {
+    return 'We\'ll mark $title as skipped for today.';
+  }
+
+  @override
+  String get nowCancel => 'Cancel';
+
+  @override
+  String get nowSkipToday => 'Skip today';
+
+  @override
+  String get nowSkippedSnackbar => 'Skipped today\'s promise.';
+
+  @override
+  String get nowApproveCheering => 'Cheering you on!';
+
+  @override
+  String get nowApproveFailed => 'Approval failed.';
+
+  @override
+  String get nowVerifyDone => 'Practice verified!';
+
+  @override
+  String get nowVerifyFailed => 'Verification failed.';
+
+  @override
+  String get nowRejectDialogTitle => 'Want to adjust a bit more?';
+
+  @override
+  String get nowRejectLessFrequent => 'Lower the frequency';
+
+  @override
+  String get nowRejectDifferentTime => 'Try a different time slot';
+
+  @override
+  String get nowRejectCustom => 'Custom message';
+
+  @override
+  String get nowRejectRequested => 'Adjustment requested';
+
+  @override
+  String get nowRejectCustomDialogTitle => 'What would you like to adjust?';
+
+  @override
+  String get nowRejectCustomHint =>
+      'e.g. How about starting with 3 times a week?';
+
+  @override
+  String get nowSend => 'Send';
+
+  @override
+  String get nowCheerExcited => 'Sent excited support! 🔥';
+
+  @override
+  String get nowCheerLove => 'Sent your love! ❤️';
+
+  @override
+  String get nowCheerProud => 'Said you\'re awesome! 👍';
+
+  @override
+  String get nowCheerStrength => 'Said hang in there! 💪';
+
+  @override
+  String get nowCheerFailed => 'Couldn\'t send cheer.';
+
+  @override
+  String get nowPokeNoActivityMessage =>
+      'Knock knock! Someone\'s waiting for a promise. Want to make today\'s?';
+
+  @override
+  String get nowPokeSent => 'Sent a knock signal.';
+
+  @override
+  String get nowPokeFailed => 'Couldn\'t send the knock.';
+
+  @override
+  String get nowPokeAgainMessage =>
+      'Knock knock! Your partner is waiting. Want to firm up today\'s promise?';
+
+  @override
+  String get nowPokeAgainSent => 'Knock knock — pulled the promise again.';
+
+  @override
+  String get nowSettlementSaved => '4-week settlement saved.';
+
+  @override
+  String get nowExitDialogTitle => 'Stop here for this 4-week round?';
+
+  @override
+  String get nowExitReasonWeakPoke => 'The knock pressure was weak';
+
+  @override
+  String get nowExitReasonTooBig => 'The goal was too big';
+
+  @override
+  String get nowExitReasonPartnerBurden => 'Partner verification felt heavy';
+
+  @override
+  String get nowExitReasonCustomLabel => 'Other';
+
+  @override
+  String get nowExitReasonCustomHint => 'Briefly say why you\'re stopping';
+
+  @override
+  String get nowExitReasonNoCustom => 'No custom reason';
+
+  @override
+  String get nowExitSubmit => 'Submit';
+
+  @override
+  String get nowRestPassTitle => 'Use rest pass';
+
+  @override
+  String get nowRestPassBody =>
+      'Use one rest pass this week.\nYour streak stays intact.';
+
+  @override
+  String get nowRestPassConfirm => 'Use it';
+
+  @override
+  String get nowRestPassUsed => 'Rest well today. Your streak is safe!';
+
+  @override
+  String get nowRestPassAlreadyUsed =>
+      'You already used this week\'s rest pass.';
+
+  @override
+  String get nowRestPassError => 'An error occurred.';
+
+  @override
+  String get nowRescuedSnackbar =>
+      'Acknowledged the practice! Streak preserved.';
+
+  @override
+  String get nowRescueFailed => 'Couldn\'t acknowledge practice.';
+
+  @override
+  String get nowPromiseAccepted => 'Accepted the promise!';
+
+  @override
+  String get nowPromiseDeclined => 'Declined the promise.';
+
+  @override
+  String get nowPromiseResponseFailed => 'Couldn\'t send promise response.';
+
+  @override
+  String get nowPromiseProposed => 'Proposed the promise!';
+
+  @override
+  String get nowPromiseProposeFailed => 'Couldn\'t propose the promise.';
+
+  @override
+  String nowTimeMinBeforeAlert(int minutes) {
+    return '${minutes}m before alert';
+  }
+
+  @override
+  String nowTimeHourBeforeAlert(int hours) {
+    return '${hours}h before alert';
+  }
+
+  @override
+  String nowTimeMinAfterAlert(int minutes) {
+    return '${minutes}m after alert';
+  }
+
+  @override
+  String nowTimeHourAfterAlert(int hours) {
+    return '${hours}h after alert';
+  }
+
+  @override
+  String get nowKeepFlowing => 'Great! Keep this flow going';
+
+  @override
+  String get nowGuideWhen =>
+      'Setting \"when to do it\" raises your follow-through';
+
+  @override
+  String get nowGuideSmallStart => 'Starting small is fine. Consistency wins';
+
+  @override
+  String get nowGuideBetterToday => 'Better than yesterday is enough';
+
+  @override
+  String get nowErrorTitle => 'Error';
+
+  @override
+  String get nowErrorCreationLink => 'Creation link:';
+
+  @override
+  String get nowOk => 'OK';
+
+  @override
+  String get nowRetryLater => 'Please try again later';
+
+  @override
+  String get nowPartnerActionFallback => 'Partner\'s practice';
+
+  @override
+  String get nowActionNoteHint => 'Leave a warm note (optional)';
+
+  @override
+  String get nowVerifyAndSend => 'Verify and send';
+
+  @override
+  String nowStreakCount(int count) {
+    return '$count days in a row!';
+  }
+
+  @override
+  String get nowHeaderAdjustNeeded => 'Adjustment needed';
+
+  @override
+  String get nowHeaderPromiseProposed => 'Promise proposal arrived';
+
+  @override
+  String get nowHeaderPromiseSettled => 'Promise result is out';
+
+  @override
+  String get nowHeaderSettlementNeeded => '4-week settlement needed';
+
+  @override
+  String get nowHeaderSettlementSub =>
+      'Confirm whether the knock really pulled the promise and pick the next 4 weeks.';
+
+  @override
+  String get nowMetricCompleted => 'Completed';
+
+  @override
+  String get nowMetricPartnerReact => 'Partner reactions';
+
+  @override
+  String get nowMetricMissed => 'Missed days';
+
+  @override
+  String nowMetricDaysSuffix(int count) {
+    return '$count days';
+  }
+
+  @override
+  String nowMetricCountSuffix(int count) {
+    return '$count times';
+  }
+
+  @override
+  String get nowSettlementWinMessage =>
+      'You passed the meaningful 12-day mark. Time to decide on the next 4 weeks.';
+
+  @override
+  String get nowSettlementLoseMessage =>
+      'More important than finishing is noting where you stopped. Leave a reason to make the next attempt easier.';
+
+  @override
+  String nowRewardCondition(int days, String description) {
+    return '$days successful days: $description';
+  }
+
+  @override
+  String nowPenaltyCondition(int days, String description) {
+    return '$days failed days: $description';
+  }
+
+  @override
+  String nowPromiseResult(int success, int fail) {
+    return 'Successes $success / Failures $fail';
+  }
+
+  @override
+  String get nowAchieved => 'Achieved!';
+
+  @override
+  String get nowTriggered => 'Triggered!';
+
+  @override
+  String get nowNotMet => 'Not met';
+
+  @override
+  String get nowDecline => 'Decline';
+
+  @override
+  String get nowAccept => 'Accept';
+
+  @override
+  String get nowContinueNext4Weeks => 'Start the next 4 weeks';
+
+  @override
+  String get nowStopHere => 'Stop this 4-week round here';
+
+  @override
+  String get nowModify => 'Modify';
+
+  @override
+  String get nowStartFocusTimer => 'Start now! (Focus timer)';
+
+  @override
+  String get nowRestToday => 'Rest today (rest pass)';
+
+  @override
+  String get nowMissedPlanFallback => 'Past promise';
+
+  @override
+  String get nowVerifyingDeadline => 'Waiting for verification · cheer needed';
+
+  @override
+  String get nowHeaderTodayAllDone => 'All today\'s promises kept';
+
+  @override
+  String get nowHeaderConfirmAndPull => 'Time to verify and pull';
+
+  @override
+  String get nowHeaderWaiting => 'Waiting';
+
+  @override
+  String get nowHeaderWaitingAccept => 'Waiting for promise approval';
+
+  @override
+  String get nowHeaderPromiseResult => 'Promise result is out';
+
+  @override
+  String get nowAdjust => 'Adjust';
+
+  @override
+  String get nowApprove => 'Approve';
+
+  @override
+  String get nowPartnerNoNewPlanGuide =>
+      'The other person hasn\'t made a new promise. Want to knock before it gets buried?';
+
+  @override
+  String get nowKnockMakePlan => 'Knock! Ask to make a promise';
+
+  @override
+  String nowPartnerMissedPokeBody(String name) {
+    return '$name\'s promise is now a missed promise. Knock to pull it again.';
+  }
+
+  @override
+  String nowPartnerQuietPokeBody(String name) {
+    return '$name\'s promise is still quiet. Knock before it gets buried.';
+  }
+
+  @override
+  String get nowKnockPull => 'Knock! Pull';
+
+  @override
+  String get nowRescueYesterday => 'Acknowledge yesterday';
+
+  @override
+  String get nowVerifyAndCheer => 'Verify and cheer';
+
+  @override
+  String get nowMakePromise => 'Make a promise';
+
+  @override
+  String get nowPartnerFallback2 => 'partner';
+
+  @override
+  String nowPartnerAllDone(String name) {
+    return '$name kept all today\'s promises.';
+  }
+
+  @override
+  String get nowQuickCheckHelp =>
+      'A quick verification makes tomorrow easier too.';
+
+  @override
+  String nowLastAction(String title) {
+    return 'Last action: $title';
+  }
+
+  @override
+  String nowRewardLine(int days, String description) {
+    return '🏆 $days successful days: $description';
+  }
+
+  @override
+  String nowPenaltyLine(int days, String description) {
+    return '⚡ $days failed days: $description';
+  }
+
+  @override
+  String nowResultLine(int success, int fail) {
+    return 'Result: Successes $success / Failures $fail';
+  }
+
+  @override
+  String get nowWaitingApproval => 'Waiting for approval…';
+
+  @override
+  String get nowRewardAchievedTitle => '🎉 Reward earned!';
+
+  @override
+  String get nowPenaltyTriggeredTitle => '⚡ Penalty triggered!';
+
+  @override
+  String get nowBothTitle => '🎉 Reward earned! + ⚡ Penalty triggered!';
+
+  @override
+  String get nowConditionNotMet => 'Conditions not met';
+
+  @override
+  String nowTotalDaysOnly(int days) {
+    return 'A $days-day promise';
+  }
+
+  @override
+  String nowTotalDaysScheduled(int days, int scheduled) {
+    return 'A $days-day promise · $scheduled practice days planned';
+  }
+
+  @override
+  String get nowMakePromiseTitle => 'Make a promise';
+
+  @override
+  String get nowMakePromiseSubtitle => 'It starts once your partner accepts';
+
+  @override
+  String nowProgressLine(int success, int failed, int remaining) {
+    return 'Currently $success successes · $failed failures · $remaining days remaining';
+  }
+
+  @override
+  String nowMaxLimitsLine(int reward, int penalty) {
+    return 'Reward up to $reward days, penalty up to $penalty days.';
+  }
+
+  @override
+  String get nowRewardTitle => '🏆 Reward (carrot)';
+
+  @override
+  String get nowRewardHint => 'e.g. treat to chicken, fancy dinner';
+
+  @override
+  String get nowRewardTargetLabel => 'Success target';
+
+  @override
+  String get nowPenaltyTitle => '⚡ Penalty (stick)';
+
+  @override
+  String get nowPenaltyHint => 'e.g. dishes for a week, buy coffee';
+
+  @override
+  String get nowPenaltyTargetLabel => 'Failure limit';
+
+  @override
+  String get nowProposePromise => 'Propose promise';
+
+  @override
+  String nowDaysSuffix(int count) {
+    return '$count days';
+  }
+
+  @override
+  String nowMaxDaysLabel(int days) {
+    return 'Max $days days';
+  }
+
+  @override
+  String get nowPokeReceived => 'Your partner sent a knock';
+
+  @override
+  String nowPokeReceivedFromName(String name) {
+    return '$name sent a knock';
+  }
+
+  @override
+  String get nowYesterday => 'Yesterday';
 }

@@ -7,7 +7,30 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+/// Notification system strings localized by current device locale.
+/// Why: NotificationService runs outside the widget tree (incl. background
+/// isolates), so we can't reach AppLocalizations through BuildContext here.
+String _notifString(String key) {
+  final locale =
+      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  final isKo = locale.startsWith('ko');
+  switch (key) {
+    case 'actionDidIt':
+      return isKo ? '했어' : 'Done';
+    case 'actionSkipToday':
+      return isKo ? '오늘은 패스' : 'Skip today';
+    case 'actionSnooze':
+      return isKo ? '10분 후 다시 묻기' : 'Ask again in 10 min';
+    case 'reminderBody':
+      return isKo ? '오늘 약속, 같이 이어갈까요?' : "Today's promise — want to keep going together?";
+    case 'fallbackTitle':
+      return isKo ? '새 알림' : 'New notification';
+    default:
+      return key;
+  }
+}
 
 const String _snoozeActionId = 'snooze_10m';
 const String _didItActionId = 'did_it_now';
@@ -115,19 +138,19 @@ class NotificationService implements PlanReminderScheduler {
               actions: <DarwinNotificationAction>[
                 DarwinNotificationAction.plain(
                   _didItActionId,
-                  '했어',
+                  _notifString('actionDidIt'),
                   options: <DarwinNotificationActionOption>{
                     DarwinNotificationActionOption.foreground,
                   },
                 ),
                 DarwinNotificationAction.plain(
                   _skipTodayActionId,
-                  '오늘은 패스',
+                  _notifString('actionSkipToday'),
                   options: <DarwinNotificationActionOption>{
                     DarwinNotificationActionOption.foreground,
                   },
                 ),
-                DarwinNotificationAction.plain(_snoozeActionId, '10분 후 다시 묻기'),
+                DarwinNotificationAction.plain(_snoozeActionId, _notifString('actionSnooze')),
               ],
             ),
           ],
@@ -218,7 +241,7 @@ class NotificationService implements PlanReminderScheduler {
       await _scheduleWeekly(
         id: _buildPlanDayNotificationId(normalizedPlanId, day),
         title: title,
-        body: "오늘 약속, 같이 이어갈까요?", // Warm Accountability Copy
+        body: _notifString('reminderBody'),
         hour: hour,
         minute: minute,
         day: day,
@@ -337,7 +360,7 @@ class NotificationService implements PlanReminderScheduler {
     await _ensureInitializedForActionHandling();
 
     final title =
-        message.data['title'] ?? message.notification?.title ?? '새 알림';
+        message.data['title'] ?? message.notification?.title ?? _notifString('fallbackTitle');
     final body = message.data['body'] ?? message.notification?.body ?? '';
     final notificationId = _notificationIdForRemoteMessage(message);
     final planId = message.data['planId'];
@@ -520,18 +543,18 @@ class NotificationService implements PlanReminderScheduler {
         importance: Importance.max,
         priority: Priority.high,
         actions: includeReminderActions
-            ? const <AndroidNotificationAction>[
+            ? <AndroidNotificationAction>[
                 AndroidNotificationAction(
                   _didItActionId,
-                  '했어',
+                  _notifString('actionDidIt'),
                   showsUserInterface: true,
                 ),
                 AndroidNotificationAction(
                   _skipTodayActionId,
-                  '오늘은 패스',
+                  _notifString('actionSkipToday'),
                   showsUserInterface: true,
                 ),
-                AndroidNotificationAction(_snoozeActionId, '10분 후 다시 묻기'),
+                AndroidNotificationAction(_snoozeActionId, _notifString('actionSnooze')),
               ]
             : null,
       ),

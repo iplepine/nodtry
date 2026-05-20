@@ -347,7 +347,7 @@ abstract class AppLocalizations {
   /// Empty state message for history tab
   ///
   /// In en, this message translates to:
-  /// **'No history yet'**
+  /// **'No promises recorded yet'**
   String get historyEmpty;
 
   /// Us tab - Me section title
@@ -1909,6 +1909,2244 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Can\'t connect to the store. Please check your settings.'**
   String get settingsStoreUnavailable;
+
+  /// No description provided for @planMostlyProcrastinated.
+  ///
+  /// In en, this message translates to:
+  /// **'What you usually put off'**
+  String get planMostlyProcrastinated;
+
+  /// No description provided for @planRecommendedPromises.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested promises'**
+  String get planRecommendedPromises;
+
+  /// No description provided for @planMine.
+  ///
+  /// In en, this message translates to:
+  /// **'My promise'**
+  String get planMine;
+
+  /// No description provided for @planClearAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get planClearAction;
+
+  /// No description provided for @planRecommendedFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested frequency'**
+  String get planRecommendedFrequency;
+
+  /// No description provided for @planNoDayMeansDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Without picking days, this becomes a daily promise.'**
+  String get planNoDayMeansDaily;
+
+  /// No description provided for @planPartnerFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'your partner'**
+  String get planPartnerFallback;
+
+  /// No description provided for @planActionFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'my promise'**
+  String get planActionFallback;
+
+  /// No description provided for @planPartnerPreviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s how your partner sees it'**
+  String get planPartnerPreviewLabel;
+
+  /// No description provided for @planPartnerPreviewWith.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be asked to nudge you on \"{promise}\" without missing a beat for 28 days.'**
+  String planPartnerPreviewWith(String name, String promise);
+
+  /// No description provided for @planPartnerPreviewWithout.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a partner there\'s no one to receive the poke. Connect one before saving for stronger pressure.'**
+  String get planPartnerPreviewWithout;
+
+  /// No description provided for @planConnectPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect a partner'**
+  String get planConnectPartner;
+
+  /// No description provided for @planDayEveryDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get planDayEveryDay;
+
+  /// No description provided for @planDayWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays'**
+  String get planDayWeekdays;
+
+  /// No description provided for @planDayCountFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days/week'**
+  String planDayCountFormat(int count);
+
+  /// No description provided for @planPreviewMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} · {time} · 28 days'**
+  String planPreviewMeta(String days, String time);
+
+  /// No description provided for @planTimeAM.
+  ///
+  /// In en, this message translates to:
+  /// **'AM'**
+  String get planTimeAM;
+
+  /// No description provided for @planTimePM.
+  ///
+  /// In en, this message translates to:
+  /// **'PM'**
+  String get planTimePM;
+
+  /// No description provided for @planTimeFormatNoMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'{period} {hour}'**
+  String planTimeFormatNoMinute(String period, int hour);
+
+  /// No description provided for @planTimeFormatWithMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'{period} {hour}:{minute}'**
+  String planTimeFormatWithMinute(String period, int hour, String minute);
+
+  /// No description provided for @planTemplatePerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} · {count}/wk'**
+  String planTemplatePerWeek(String label, int count);
+
+  /// No description provided for @planCategoryStudyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Study'**
+  String get planCategoryStudyLabel;
+
+  /// No description provided for @planCategoryStudyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-study you keep putting off — English, certifications, coding'**
+  String get planCategoryStudyDescription;
+
+  /// No description provided for @planCategoryExerciseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise'**
+  String get planCategoryExerciseLabel;
+
+  /// No description provided for @planCategoryExerciseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Movement that\'s hard to start — walking, gym, stretching'**
+  String get planCategoryExerciseDescription;
+
+  /// No description provided for @planCategoryCustomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get planCategoryCustomLabel;
+
+  /// No description provided for @planCategoryCustomDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your own promise without picking a template'**
+  String get planCategoryCustomDescription;
+
+  /// No description provided for @planTemplateEnglishLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get planTemplateEnglishLabel;
+
+  /// No description provided for @planTemplateEnglishAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 10 English sentences aloud'**
+  String get planTemplateEnglishAction;
+
+  /// No description provided for @planTemplateEnglishDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Aim for low-pressure daily exposure to English.'**
+  String get planTemplateEnglishDescription;
+
+  /// No description provided for @planTemplateCertificateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Certification'**
+  String get planTemplateCertificateLabel;
+
+  /// No description provided for @planTemplateCertificateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 10 past exam questions'**
+  String get planTemplateCertificateAction;
+
+  /// No description provided for @planTemplateCertificateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat a fixed count without breaking the streak instead of cramming.'**
+  String get planTemplateCertificateDescription;
+
+  /// No description provided for @planTemplateCodingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Coding'**
+  String get planTemplateCodingLabel;
+
+  /// No description provided for @planTemplateCodingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'30 min of coding or one problem'**
+  String get planTemplateCodingAction;
+
+  /// No description provided for @planTemplateCodingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure the days you actually touch code before chasing big goals.'**
+  String get planTemplateCodingDescription;
+
+  /// No description provided for @planTemplateReadingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get planTemplateReadingLabel;
+
+  /// No description provided for @planTemplateReadingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 10 pages and log one line'**
+  String get planTemplateReadingAction;
+
+  /// No description provided for @planTemplateReadingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a one-line trace so your partner can check in easily.'**
+  String get planTemplateReadingDescription;
+
+  /// No description provided for @planTemplateWritingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing'**
+  String get planTemplateWritingLabel;
+
+  /// No description provided for @planTemplateWritingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Write for 15 min or 300 characters'**
+  String get planTemplateWritingAction;
+
+  /// No description provided for @planTemplateWritingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on starting days, not finished pieces.'**
+  String get planTemplateWritingDescription;
+
+  /// No description provided for @planTemplateWalkingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Walking'**
+  String get planTemplateWalkingLabel;
+
+  /// No description provided for @planTemplateWalkingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk 30 minutes'**
+  String get planTemplateWalkingAction;
+
+  /// No description provided for @planTemplateWalkingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Commit to stepping outside before worrying about gear.'**
+  String get planTemplateWalkingDescription;
+
+  /// No description provided for @planTemplateGymLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym'**
+  String get planTemplateGymLabel;
+
+  /// No description provided for @planTemplateGymAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the gym and work out for 30 min'**
+  String get planTemplateGymAction;
+
+  /// No description provided for @planTemplateGymDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase days you arrive at the gym rather than perfect workouts.'**
+  String get planTemplateGymDescription;
+
+  /// No description provided for @planTemplateStretchingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stretching'**
+  String get planTemplateStretchingLabel;
+
+  /// No description provided for @planTemplateStretchingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Stretch for 10 minutes'**
+  String get planTemplateStretchingAction;
+
+  /// No description provided for @planTemplateStretchingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Show your partner even a short loosen-up.'**
+  String get planTemplateStretchingDescription;
+
+  /// No description provided for @planDayPresetThreeDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'3 days/wk'**
+  String get planDayPresetThreeDaysLabel;
+
+  /// No description provided for @planDayPresetWeekdaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays'**
+  String get planDayPresetWeekdaysLabel;
+
+  /// No description provided for @planDayPresetEveryDayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get planDayPresetEveryDayLabel;
+
+  /// No description provided for @planDayPresetWeekendLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekend'**
+  String get planDayPresetWeekendLabel;
+
+  /// No description provided for @planDayPresetStudyThreeDaysDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Build three wins in the first week'**
+  String get planDayPresetStudyThreeDaysDesc;
+
+  /// No description provided for @planDayPresetStudyWeekdaysDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor your study to the weekdays'**
+  String get planDayPresetStudyWeekdaysDesc;
+
+  /// No description provided for @planDayPresetStudyEveryDayDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Show your partner something each day, even briefly'**
+  String get planDayPresetStudyEveryDayDesc;
+
+  /// No description provided for @planDayPresetExerciseThreeDaysDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with a Mon/Wed/Fri rhythm'**
+  String get planDayPresetExerciseThreeDaysDesc;
+
+  /// No description provided for @planDayPresetExerciseWeekendDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a movement trace on weekends'**
+  String get planDayPresetExerciseWeekendDesc;
+
+  /// No description provided for @planDayPresetExerciseEveryDayDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get daily check-ins like a short stretch'**
+  String get planDayPresetExerciseEveryDayDesc;
+
+  /// No description provided for @planDayPresetCustomThreeDaysDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A low-pressure default'**
+  String get planDayPresetCustomThreeDaysDesc;
+
+  /// No description provided for @planDayPresetCustomWeekdaysDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock it in as a weekday routine'**
+  String get planDayPresetCustomWeekdaysDesc;
+
+  /// No description provided for @planDayPresetCustomEveryDayDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a small action every day'**
+  String get planDayPresetCustomEveryDayDesc;
+
+  /// No description provided for @planStepHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing promise · {current}/{total}'**
+  String planStepHeader(int current, int total);
+
+  /// No description provided for @planTellUsActionFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what you want to promise!'**
+  String get planTellUsActionFirst;
+
+  /// No description provided for @planProposalSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposal saved.\nGo chat about it with your partner!'**
+  String get planProposalSaved;
+
+  /// No description provided for @planSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while saving: {error}'**
+  String planSaveError(String error);
+
+  /// No description provided for @focusTimerPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How long do you want to focus?'**
+  String get focusTimerPickerTitle;
+
+  /// No description provided for @focusTimerPickerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When the timer ends, the \"Done\" note opens automatically.'**
+  String get focusTimerPickerSubtitle;
+
+  /// No description provided for @focusTimerPresetMin.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String focusTimerPresetMin(int minutes);
+
+  /// No description provided for @focusTimerCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom ({min}–{max} min)'**
+  String focusTimerCustomHint(int min, int max);
+
+  /// No description provided for @focusTimerMinuteUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get focusTimerMinuteUnit;
+
+  /// No description provided for @focusTimerPickFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a duration'**
+  String get focusTimerPickFirst;
+
+  /// No description provided for @focusTimerStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start {minutes} min'**
+  String focusTimerStart(int minutes);
+
+  /// No description provided for @focusTimerGiveUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Give up the timer?'**
+  String get focusTimerGiveUpTitle;
+
+  /// No description provided for @focusTimerGiveUpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress isn\'t saved. The promise stays as not done.'**
+  String get focusTimerGiveUpBody;
+
+  /// No description provided for @focusTimerKeepGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going'**
+  String get focusTimerKeepGoing;
+
+  /// No description provided for @focusTimerGiveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Give up'**
+  String get focusTimerGiveUp;
+
+  /// No description provided for @focusTimerGiveUpShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get focusTimerGiveUpShort;
+
+  /// No description provided for @focusTimerHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus {minutes} min'**
+  String focusTimerHeader(int minutes);
+
+  /// No description provided for @focusTimerHeaderWithPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} · {minutes} min'**
+  String focusTimerHeaderWithPlan(String title, int minutes);
+
+  /// No description provided for @focusTimerPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get focusTimerPaused;
+
+  /// No description provided for @focusTimerDoneNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Done now'**
+  String get focusTimerDoneNow;
+
+  /// No description provided for @focusTimerResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get focusTimerResume;
+
+  /// No description provided for @focusTimerPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get focusTimerPause;
+
+  /// No description provided for @actionNoteHintDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your thoughts (optional)'**
+  String get actionNoteHintDefault;
+
+  /// No description provided for @planTimeUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Time not set'**
+  String get planTimeUnset;
+
+  /// No description provided for @planStateActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get planStateActive;
+
+  /// No description provided for @planStateDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get planStateDraft;
+
+  /// No description provided for @planStatePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting approval'**
+  String get planStatePending;
+
+  /// No description provided for @planStateRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get planStateRejected;
+
+  /// No description provided for @planStateCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get planStateCompleted;
+
+  /// No description provided for @planStateStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped'**
+  String get planStateStopped;
+
+  /// No description provided for @planDescriptionTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: try \"If X, then Y\"'**
+  String get planDescriptionTip;
+
+  /// No description provided for @planDescriptionExamples.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. \"When I get home from work, I change into workout clothes\"\ne.g. \"When the kids fall asleep, I read for 30 minutes\"'**
+  String get planDescriptionExamples;
+
+  /// No description provided for @planDescriptionTipFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'A specific situation makes you 2–3× more likely to follow through!'**
+  String get planDescriptionTipFooter;
+
+  /// No description provided for @notifyEditorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifyEditorTitle;
+
+  /// No description provided for @notifyEditorSubtitleOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick when we should poke you.'**
+  String get notifyEditorSubtitleOn;
+
+  /// No description provided for @notifyEditorSubtitleOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Track without notifications.'**
+  String get notifyEditorSubtitleOff;
+
+  /// No description provided for @notifyEditorPromiseTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise time visible to your partner'**
+  String get notifyEditorPromiseTime;
+
+  /// No description provided for @notifyEditorDefaultTimeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'9 PM by default is a good time for your partner to check before the day slips by.'**
+  String get notifyEditorDefaultTimeHint;
+
+  /// No description provided for @notifyEditorPrealert.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-alert'**
+  String get notifyEditorPrealert;
+
+  /// No description provided for @notifyEditorOnTime.
+  ///
+  /// In en, this message translates to:
+  /// **'On time'**
+  String get notifyEditorOnTime;
+
+  /// No description provided for @notifyEditor5MinBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'5 min before'**
+  String get notifyEditor5MinBefore;
+
+  /// No description provided for @notifyEditor10MinBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'10 min before'**
+  String get notifyEditor10MinBefore;
+
+  /// No description provided for @notifyEditor30MinBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'30 min before'**
+  String get notifyEditor30MinBefore;
+
+  /// No description provided for @notifyEditor1HourBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'1 hr before'**
+  String get notifyEditor1HourBefore;
+
+  /// No description provided for @promiseChipPenaltyTriggered.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ Penalty locked in — {description}'**
+  String promiseChipPenaltyTriggered(String description);
+
+  /// No description provided for @promiseChipPenaltyImminentOne.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ Just one more miss triggers the penalty — {description}'**
+  String promiseChipPenaltyImminentOne(String description);
+
+  /// No description provided for @promiseChipPenaltyImminent.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ {count} more misses triggers the penalty — {description}'**
+  String promiseChipPenaltyImminent(int count, String description);
+
+  /// No description provided for @promiseChipRewardAchieved.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 Reward earned! — {description}'**
+  String promiseChipRewardAchieved(String description);
+
+  /// No description provided for @promiseChipRewardImminent.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 {days} more day(s) to the reward — {description}'**
+  String promiseChipRewardImminent(int days, String description);
+
+  /// No description provided for @promiseChipSafeBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 {rewardDays} days to reward · ⚡ {penaltyBuffer} misses safe'**
+  String promiseChipSafeBoth(int rewardDays, int penaltyBuffer);
+
+  /// No description provided for @promiseChipSafeRewardOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 {days} days to reward — {description}'**
+  String promiseChipSafeRewardOnly(int days, String description);
+
+  /// No description provided for @promiseChipSafePenaltyOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ {buffer} misses safe — {description}'**
+  String promiseChipSafePenaltyOnly(int buffer, String description);
+
+  /// No description provided for @promiseSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise terms'**
+  String get promiseSheetTitle;
+
+  /// No description provided for @promiseSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled when the plan ends. Currently {success} done · {failed} missed · {remaining} days left.'**
+  String promiseSheetSubtitle(int success, int failed, int remaining);
+
+  /// No description provided for @promiseSheetRewardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward'**
+  String get promiseSheetRewardLabel;
+
+  /// No description provided for @promiseSheetPenaltyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty'**
+  String get promiseSheetPenaltyLabel;
+
+  /// No description provided for @promiseSheetRewardTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{target} successful days to earn it — currently {success}'**
+  String promiseSheetRewardTarget(int target, int success);
+
+  /// No description provided for @promiseSheetPenaltyImpossible.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed {target} successful days but you can no longer reach it — penalty locked in'**
+  String promiseSheetPenaltyImpossible(int target);
+
+  /// No description provided for @promiseSheetPenaltyJustOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggers below {target} successful days — you can\'t miss even once more'**
+  String promiseSheetPenaltyJustOne(int target);
+
+  /// No description provided for @promiseSheetPenaltyBuffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggers below {target} successful days — {buffer} more misses are safe'**
+  String promiseSheetPenaltyBuffer(int target, int buffer);
+
+  /// No description provided for @promiseSheetClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get promiseSheetClose;
+
+  /// No description provided for @splashLoginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Login failed: {error}'**
+  String splashLoginFailed(String error);
+
+  /// No description provided for @splashLoggingIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in…'**
+  String get splashLoggingIn;
+
+  /// No description provided for @emailLoginToggleSignUp.
+  ///
+  /// In en, this message translates to:
+  /// **'No account? Sign up'**
+  String get emailLoginToggleSignUp;
+
+  /// No description provided for @emailLoginToggleLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Log in'**
+  String get emailLoginToggleLogin;
+
+  /// No description provided for @settingsSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get settingsSupport;
+
+  /// No description provided for @notificationSettingsNoAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'No alarm'**
+  String get notificationSettingsNoAlarm;
+
+  /// No description provided for @notificationSettingsAlarmOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm off ({timeString})'**
+  String notificationSettingsAlarmOff(String timeString);
+
+  /// No description provided for @notificationSettingsSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save notification setting. Reverted to the previous one.'**
+  String get notificationSettingsSaveFailed;
+
+  /// No description provided for @historyCardFeedbackHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a warm note (optional)'**
+  String get historyCardFeedbackHint;
+
+  /// No description provided for @historyCardFeedbackButton.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get historyCardFeedbackButton;
+
+  /// No description provided for @historyCardAcknowledgePractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge practice'**
+  String get historyCardAcknowledgePractice;
+
+  /// No description provided for @planSummaryMyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'My completions'**
+  String get planSummaryMyDone;
+
+  /// No description provided for @planSummaryPartnerVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner verified'**
+  String get planSummaryPartnerVerified;
+
+  /// No description provided for @planSummaryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String planSummaryCount(int count);
+
+  /// No description provided for @connectInviteCodeDetectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code detected'**
+  String get connectInviteCodeDetectedTitle;
+
+  /// No description provided for @connectInviteCodeDetectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We found an invite code ({code}) in your clipboard.\nPaste it?'**
+  String connectInviteCodeDetectedBody(String code);
+
+  /// No description provided for @connectCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get connectCancel;
+
+  /// No description provided for @connectPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get connectPaste;
+
+  /// No description provided for @connectNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice'**
+  String get connectNotice;
+
+  /// No description provided for @connectAlreadyConnectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a connected partner.\nMultiple partners will be supported later.'**
+  String get connectAlreadyConnectedBody;
+
+  /// No description provided for @connectOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get connectOk;
+
+  /// No description provided for @connectSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected!'**
+  String get connectSuccess;
+
+  /// No description provided for @allPlansTitleMine.
+  ///
+  /// In en, this message translates to:
+  /// **'My promises'**
+  String get allPlansTitleMine;
+
+  /// No description provided for @allPlansTitlePartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner\'s promises'**
+  String get allPlansTitlePartner;
+
+  /// No description provided for @allPlansEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No promises yet'**
+  String get allPlansEmpty;
+
+  /// No description provided for @allPlansDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this promise?'**
+  String get allPlansDeleteTitle;
+
+  /// No description provided for @allPlansDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone.'**
+  String get allPlansDeleteBody;
+
+  /// No description provided for @allPlansDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise deleted.'**
+  String get allPlansDeleted;
+
+  /// No description provided for @allPlansDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String allPlansDeleteFailed(String error);
+
+  /// No description provided for @allPlansDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get allPlansDelete;
+
+  /// No description provided for @allPlansCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get allPlansCancel;
+
+  /// No description provided for @historyErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'An unknown error occurred.'**
+  String get historyErrorUnknown;
+
+  /// No description provided for @historyErrorIndexMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Database index missing for this query.\nPlease screenshot this and send it to the developer.'**
+  String get historyErrorIndexMissing;
+
+  /// No description provided for @historyErrorAlreadyDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'This record or promise was already deleted,\nso a reaction can\'t be left.'**
+  String get historyErrorAlreadyDeleted;
+
+  /// No description provided for @historyErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get historyErrorTitle;
+
+  /// No description provided for @historyErrorCreationLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Creation link:'**
+  String get historyErrorCreationLink;
+
+  /// No description provided for @historyOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get historyOk;
+
+  /// No description provided for @historySectionActive.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get historySectionActive;
+
+  /// No description provided for @historySectionFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get historySectionFinished;
+
+  /// No description provided for @historyToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get historyToday;
+
+  /// No description provided for @historyYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get historyYesterday;
+
+  /// No description provided for @historyDatePattern.
+  ///
+  /// In en, this message translates to:
+  /// **'EEEE, MMM d, yyyy'**
+  String get historyDatePattern;
+
+  /// No description provided for @historyReconcileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile past record'**
+  String get historyReconcileTitle;
+
+  /// No description provided for @historyReconcileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What actually happened on this day?'**
+  String get historyReconcileSubtitle;
+
+  /// No description provided for @historyReconcileHold.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave it'**
+  String get historyReconcileHold;
+
+  /// No description provided for @usNoticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice'**
+  String get usNoticeTitle;
+
+  /// No description provided for @usOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get usOk;
+
+  /// No description provided for @usProfileSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile save failed: {error}'**
+  String usProfileSaveFailed(String error);
+
+  /// No description provided for @usEditProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get usEditProfile;
+
+  /// No description provided for @usNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get usNameLabel;
+
+  /// No description provided for @usStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status message'**
+  String get usStatusLabel;
+
+  /// No description provided for @usCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get usCancel;
+
+  /// No description provided for @usSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get usSave;
+
+  /// No description provided for @usSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all >'**
+  String get usSeeAll;
+
+  /// No description provided for @usEmptyMine.
+  ///
+  /// In en, this message translates to:
+  /// **'No promises yet'**
+  String get usEmptyMine;
+
+  /// No description provided for @usEmptyPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner has no active promises'**
+  String get usEmptyPartner;
+
+  /// No description provided for @usCreatePlanShort.
+  ///
+  /// In en, this message translates to:
+  /// **'+ New promise'**
+  String get usCreatePlanShort;
+
+  /// No description provided for @usCreatePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'New promise'**
+  String get usCreatePlan;
+
+  /// No description provided for @usDeletePlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this promise?'**
+  String get usDeletePlanTitle;
+
+  /// No description provided for @usDeletePlanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone.'**
+  String get usDeletePlanBody;
+
+  /// No description provided for @usPlanDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise deleted.'**
+  String get usPlanDeleted;
+
+  /// No description provided for @usDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String usDeleteFailed(String error);
+
+  /// No description provided for @usDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get usDelete;
+
+  /// No description provided for @planDetailPracticeHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice log'**
+  String get planDetailPracticeHistory;
+
+  /// No description provided for @planDetailLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load records.\n{error}'**
+  String planDetailLoadFailed(String error);
+
+  /// No description provided for @planDetailNoRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'No records yet.'**
+  String get planDetailNoRecords;
+
+  /// No description provided for @planDetailNotSavedPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan not saved.'**
+  String get planDetailNotSavedPlan;
+
+  /// No description provided for @planDetailRecordDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get planDetailRecordDone;
+
+  /// No description provided for @planDetailRecordSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get planDetailRecordSkipped;
+
+  /// No description provided for @planDetailRecordRested.
+  ///
+  /// In en, this message translates to:
+  /// **'Rested'**
+  String get planDetailRecordRested;
+
+  /// No description provided for @planDetailRecordRescued.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged'**
+  String get planDetailRecordRescued;
+
+  /// No description provided for @planDetailPokeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Knock knock — door tapped!'**
+  String get planDetailPokeSent;
+
+  /// No description provided for @planDetailPokeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Send failed: {error}'**
+  String planDetailPokeFailed(String error);
+
+  /// No description provided for @planDetailPokeDoneToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Knock sent for today'**
+  String get planDetailPokeDoneToday;
+
+  /// No description provided for @planDetailPokeSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get planDetailPokeSending;
+
+  /// No description provided for @planDetailPokeAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Knock knock… are you forgetting?'**
+  String get planDetailPokeAsk;
+
+  /// No description provided for @planDetailDayMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get planDetailDayMon;
+
+  /// No description provided for @planDetailDayTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get planDetailDayTue;
+
+  /// No description provided for @planDetailDayWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get planDetailDayWed;
+
+  /// No description provided for @planDetailDayThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get planDetailDayThu;
+
+  /// No description provided for @planDetailDayFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get planDetailDayFri;
+
+  /// No description provided for @planDetailDaySat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get planDetailDaySat;
+
+  /// No description provided for @planDetailDaySun.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get planDetailDaySun;
+
+  /// No description provided for @planDetailEveryDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get planDetailEveryDay;
+
+  /// No description provided for @planDetailTimeUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Time not set'**
+  String get planDetailTimeUnset;
+
+  /// No description provided for @planDetailNotificationSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification settings saved.'**
+  String get planDetailNotificationSaved;
+
+  /// No description provided for @planDetailNotificationSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save notification setting. Reverted to the previous one.'**
+  String get planDetailNotificationSaveFailed;
+
+  /// No description provided for @planDetailSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get planDetailSave;
+
+  /// No description provided for @planDetailStopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop this promise?'**
+  String get planDetailStopTitle;
+
+  /// No description provided for @planDetailStopBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Even if you stop, your record so far is kept.'**
+  String get planDetailStopBody;
+
+  /// No description provided for @planDetailCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get planDetailCancel;
+
+  /// No description provided for @planDetailStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise stopped.'**
+  String get planDetailStopped;
+
+  /// No description provided for @planDetailActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed: {error}'**
+  String planDetailActionFailed(String error);
+
+  /// No description provided for @planDetailStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get planDetailStop;
+
+  /// No description provided for @planDetailRestartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart with the same promise?'**
+  String get planDetailRestartTitle;
+
+  /// No description provided for @planDetailRestartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll copy the previous promise as-is.\nYou can edit it before starting.'**
+  String get planDetailRestartBody;
+
+  /// No description provided for @planDetailRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get planDetailRestart;
+
+  /// No description provided for @planDetailReplaceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current promise will be stopped and you\'ll move to create a new one.\nExisting records are kept safe.'**
+  String get planDetailReplaceBody;
+
+  /// No description provided for @planDetailReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice report'**
+  String get planDetailReport;
+
+  /// No description provided for @planDetailReportPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Total period'**
+  String get planDetailReportPeriod;
+
+  /// No description provided for @planDetailReportDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String planDetailReportDays(int count);
+
+  /// No description provided for @planDetailReportCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completions'**
+  String get planDetailReportCompleted;
+
+  /// No description provided for @planDetailReportCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} times'**
+  String planDetailReportCount(int count);
+
+  /// No description provided for @planDetailReportRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement rate'**
+  String get planDetailReportRate;
+
+  /// No description provided for @planDetailRestartWithScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart with a new schedule?'**
+  String get planDetailRestartWithScheduleTitle;
+
+  /// No description provided for @nowFocusNoteDoneJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused and completed!'**
+  String get nowFocusNoteDoneJustNow;
+
+  /// No description provided for @nowFocusNoteDoneFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused for {duration} and completed!'**
+  String nowFocusNoteDoneFor(String duration);
+
+  /// No description provided for @nowFocusDurationMinSec.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min {seconds} sec'**
+  String nowFocusDurationMinSec(int minutes, int seconds);
+
+  /// No description provided for @nowFocusDurationMin.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String nowFocusDurationMin(int minutes);
+
+  /// No description provided for @nowFocusDurationSec.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} sec'**
+  String nowFocusDurationSec(int seconds);
+
+  /// No description provided for @nowTodayPromiseFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s promise'**
+  String get nowTodayPromiseFallback;
+
+  /// No description provided for @nowSkipDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip today?'**
+  String get nowSkipDialogTitle;
+
+  /// No description provided for @nowSkipDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll mark {title} as skipped for today.'**
+  String nowSkipDialogBody(String title);
+
+  /// No description provided for @nowCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get nowCancel;
+
+  /// No description provided for @nowSkipToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip today'**
+  String get nowSkipToday;
+
+  /// No description provided for @nowSkippedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped today\'s promise.'**
+  String get nowSkippedSnackbar;
+
+  /// No description provided for @nowApproveCheering.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheering you on!'**
+  String get nowApproveCheering;
+
+  /// No description provided for @nowApproveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval failed.'**
+  String get nowApproveFailed;
+
+  /// No description provided for @nowVerifyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice verified!'**
+  String get nowVerifyDone;
+
+  /// No description provided for @nowVerifyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed.'**
+  String get nowVerifyFailed;
+
+  /// No description provided for @nowRejectDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Want to adjust a bit more?'**
+  String get nowRejectDialogTitle;
+
+  /// No description provided for @nowRejectLessFrequent.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower the frequency'**
+  String get nowRejectLessFrequent;
+
+  /// No description provided for @nowRejectDifferentTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different time slot'**
+  String get nowRejectDifferentTime;
+
+  /// No description provided for @nowRejectCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom message'**
+  String get nowRejectCustom;
+
+  /// No description provided for @nowRejectRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustment requested'**
+  String get nowRejectRequested;
+
+  /// No description provided for @nowRejectCustomDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to adjust?'**
+  String get nowRejectCustomDialogTitle;
+
+  /// No description provided for @nowRejectCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. How about starting with 3 times a week?'**
+  String get nowRejectCustomHint;
+
+  /// No description provided for @nowSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get nowSend;
+
+  /// No description provided for @nowCheerExcited.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent excited support! 🔥'**
+  String get nowCheerExcited;
+
+  /// No description provided for @nowCheerLove.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent your love! ❤️'**
+  String get nowCheerLove;
+
+  /// No description provided for @nowCheerProud.
+  ///
+  /// In en, this message translates to:
+  /// **'Said you\'re awesome! 👍'**
+  String get nowCheerProud;
+
+  /// No description provided for @nowCheerStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Said hang in there! 💪'**
+  String get nowCheerStrength;
+
+  /// No description provided for @nowCheerFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send cheer.'**
+  String get nowCheerFailed;
+
+  /// No description provided for @nowPokeNoActivityMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Knock knock! Someone\'s waiting for a promise. Want to make today\'s?'**
+  String get nowPokeNoActivityMessage;
+
+  /// No description provided for @nowPokeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent a knock signal.'**
+  String get nowPokeSent;
+
+  /// No description provided for @nowPokeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send the knock.'**
+  String get nowPokeFailed;
+
+  /// No description provided for @nowPokeAgainMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Knock knock! Your partner is waiting. Want to firm up today\'s promise?'**
+  String get nowPokeAgainMessage;
+
+  /// No description provided for @nowPokeAgainSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Knock knock — pulled the promise again.'**
+  String get nowPokeAgainSent;
+
+  /// No description provided for @nowSettlementSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'4-week settlement saved.'**
+  String get nowSettlementSaved;
+
+  /// No description provided for @nowExitDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop here for this 4-week round?'**
+  String get nowExitDialogTitle;
+
+  /// No description provided for @nowExitReasonWeakPoke.
+  ///
+  /// In en, this message translates to:
+  /// **'The knock pressure was weak'**
+  String get nowExitReasonWeakPoke;
+
+  /// No description provided for @nowExitReasonTooBig.
+  ///
+  /// In en, this message translates to:
+  /// **'The goal was too big'**
+  String get nowExitReasonTooBig;
+
+  /// No description provided for @nowExitReasonPartnerBurden.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner verification felt heavy'**
+  String get nowExitReasonPartnerBurden;
+
+  /// No description provided for @nowExitReasonCustomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get nowExitReasonCustomLabel;
+
+  /// No description provided for @nowExitReasonCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Briefly say why you\'re stopping'**
+  String get nowExitReasonCustomHint;
+
+  /// No description provided for @nowExitReasonNoCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'No custom reason'**
+  String get nowExitReasonNoCustom;
+
+  /// No description provided for @nowExitSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get nowExitSubmit;
+
+  /// No description provided for @nowRestPassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use rest pass'**
+  String get nowRestPassTitle;
+
+  /// No description provided for @nowRestPassBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use one rest pass this week.\nYour streak stays intact.'**
+  String get nowRestPassBody;
+
+  /// No description provided for @nowRestPassConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Use it'**
+  String get nowRestPassConfirm;
+
+  /// No description provided for @nowRestPassUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest well today. Your streak is safe!'**
+  String get nowRestPassUsed;
+
+  /// No description provided for @nowRestPassAlreadyUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'You already used this week\'s rest pass.'**
+  String get nowRestPassAlreadyUsed;
+
+  /// No description provided for @nowRestPassError.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred.'**
+  String get nowRestPassError;
+
+  /// No description provided for @nowRescuedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged the practice! Streak preserved.'**
+  String get nowRescuedSnackbar;
+
+  /// No description provided for @nowRescueFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t acknowledge practice.'**
+  String get nowRescueFailed;
+
+  /// No description provided for @nowPromiseAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted the promise!'**
+  String get nowPromiseAccepted;
+
+  /// No description provided for @nowPromiseDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined the promise.'**
+  String get nowPromiseDeclined;
+
+  /// No description provided for @nowPromiseResponseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send promise response.'**
+  String get nowPromiseResponseFailed;
+
+  /// No description provided for @nowPromiseProposed.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed the promise!'**
+  String get nowPromiseProposed;
+
+  /// No description provided for @nowPromiseProposeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t propose the promise.'**
+  String get nowPromiseProposeFailed;
+
+  /// No description provided for @nowTimeMinBeforeAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m before alert'**
+  String nowTimeMinBeforeAlert(int minutes);
+
+  /// No description provided for @nowTimeHourBeforeAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h before alert'**
+  String nowTimeHourBeforeAlert(int hours);
+
+  /// No description provided for @nowTimeMinAfterAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m after alert'**
+  String nowTimeMinAfterAlert(int minutes);
+
+  /// No description provided for @nowTimeHourAfterAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h after alert'**
+  String nowTimeHourAfterAlert(int hours);
+
+  /// No description provided for @nowKeepFlowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Great! Keep this flow going'**
+  String get nowKeepFlowing;
+
+  /// No description provided for @nowGuideWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting \"when to do it\" raises your follow-through'**
+  String get nowGuideWhen;
+
+  /// No description provided for @nowGuideSmallStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting small is fine. Consistency wins'**
+  String get nowGuideSmallStart;
+
+  /// No description provided for @nowGuideBetterToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Better than yesterday is enough'**
+  String get nowGuideBetterToday;
+
+  /// No description provided for @nowErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get nowErrorTitle;
+
+  /// No description provided for @nowErrorCreationLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Creation link:'**
+  String get nowErrorCreationLink;
+
+  /// No description provided for @nowOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get nowOk;
+
+  /// No description provided for @nowRetryLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again later'**
+  String get nowRetryLater;
+
+  /// No description provided for @nowPartnerActionFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner\'s practice'**
+  String get nowPartnerActionFallback;
+
+  /// No description provided for @nowActionNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a warm note (optional)'**
+  String get nowActionNoteHint;
+
+  /// No description provided for @nowVerifyAndSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify and send'**
+  String get nowVerifyAndSend;
+
+  /// No description provided for @nowStreakCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days in a row!'**
+  String nowStreakCount(int count);
+
+  /// No description provided for @nowHeaderAdjustNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustment needed'**
+  String get nowHeaderAdjustNeeded;
+
+  /// No description provided for @nowHeaderPromiseProposed.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise proposal arrived'**
+  String get nowHeaderPromiseProposed;
+
+  /// No description provided for @nowHeaderPromiseSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise result is out'**
+  String get nowHeaderPromiseSettled;
+
+  /// No description provided for @nowHeaderSettlementNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'4-week settlement needed'**
+  String get nowHeaderSettlementNeeded;
+
+  /// No description provided for @nowHeaderSettlementSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm whether the knock really pulled the promise and pick the next 4 weeks.'**
+  String get nowHeaderSettlementSub;
+
+  /// No description provided for @nowMetricCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get nowMetricCompleted;
+
+  /// No description provided for @nowMetricPartnerReact.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner reactions'**
+  String get nowMetricPartnerReact;
+
+  /// No description provided for @nowMetricMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed days'**
+  String get nowMetricMissed;
+
+  /// No description provided for @nowMetricDaysSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String nowMetricDaysSuffix(int count);
+
+  /// No description provided for @nowMetricCountSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} times'**
+  String nowMetricCountSuffix(int count);
+
+  /// No description provided for @nowSettlementWinMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You passed the meaningful 12-day mark. Time to decide on the next 4 weeks.'**
+  String get nowSettlementWinMessage;
+
+  /// No description provided for @nowSettlementLoseMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'More important than finishing is noting where you stopped. Leave a reason to make the next attempt easier.'**
+  String get nowSettlementLoseMessage;
+
+  /// No description provided for @nowRewardCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} successful days: {description}'**
+  String nowRewardCondition(int days, String description);
+
+  /// No description provided for @nowPenaltyCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} failed days: {description}'**
+  String nowPenaltyCondition(int days, String description);
+
+  /// No description provided for @nowPromiseResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Successes {success} / Failures {fail}'**
+  String nowPromiseResult(int success, int fail);
+
+  /// No description provided for @nowAchieved.
+  ///
+  /// In en, this message translates to:
+  /// **'Achieved!'**
+  String get nowAchieved;
+
+  /// No description provided for @nowTriggered.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered!'**
+  String get nowTriggered;
+
+  /// No description provided for @nowNotMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not met'**
+  String get nowNotMet;
+
+  /// No description provided for @nowDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get nowDecline;
+
+  /// No description provided for @nowAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get nowAccept;
+
+  /// No description provided for @nowContinueNext4Weeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the next 4 weeks'**
+  String get nowContinueNext4Weeks;
+
+  /// No description provided for @nowStopHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop this 4-week round here'**
+  String get nowStopHere;
+
+  /// No description provided for @nowModify.
+  ///
+  /// In en, this message translates to:
+  /// **'Modify'**
+  String get nowModify;
+
+  /// No description provided for @nowStartFocusTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Start now! (Focus timer)'**
+  String get nowStartFocusTimer;
+
+  /// No description provided for @nowRestToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest today (rest pass)'**
+  String get nowRestToday;
+
+  /// No description provided for @nowMissedPlanFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Past promise'**
+  String get nowMissedPlanFallback;
+
+  /// No description provided for @nowVerifyingDeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for verification · cheer needed'**
+  String get nowVerifyingDeadline;
+
+  /// No description provided for @nowHeaderTodayAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All today\'s promises kept'**
+  String get nowHeaderTodayAllDone;
+
+  /// No description provided for @nowHeaderConfirmAndPull.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to verify and pull'**
+  String get nowHeaderConfirmAndPull;
+
+  /// No description provided for @nowHeaderWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get nowHeaderWaiting;
+
+  /// No description provided for @nowHeaderWaitingAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for promise approval'**
+  String get nowHeaderWaitingAccept;
+
+  /// No description provided for @nowHeaderPromiseResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise result is out'**
+  String get nowHeaderPromiseResult;
+
+  /// No description provided for @nowAdjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust'**
+  String get nowAdjust;
+
+  /// No description provided for @nowApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get nowApprove;
+
+  /// No description provided for @nowPartnerNoNewPlanGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'The other person hasn\'t made a new promise. Want to knock before it gets buried?'**
+  String get nowPartnerNoNewPlanGuide;
+
+  /// No description provided for @nowKnockMakePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Knock! Ask to make a promise'**
+  String get nowKnockMakePlan;
+
+  /// No description provided for @nowPartnerMissedPokeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s promise is now a missed promise. Knock to pull it again.'**
+  String nowPartnerMissedPokeBody(String name);
+
+  /// No description provided for @nowPartnerQuietPokeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s promise is still quiet. Knock before it gets buried.'**
+  String nowPartnerQuietPokeBody(String name);
+
+  /// No description provided for @nowKnockPull.
+  ///
+  /// In en, this message translates to:
+  /// **'Knock! Pull'**
+  String get nowKnockPull;
+
+  /// No description provided for @nowRescueYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge yesterday'**
+  String get nowRescueYesterday;
+
+  /// No description provided for @nowVerifyAndCheer.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify and cheer'**
+  String get nowVerifyAndCheer;
+
+  /// No description provided for @nowMakePromise.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a promise'**
+  String get nowMakePromise;
+
+  /// No description provided for @nowPartnerFallback2.
+  ///
+  /// In en, this message translates to:
+  /// **'partner'**
+  String get nowPartnerFallback2;
+
+  /// No description provided for @nowPartnerAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} kept all today\'s promises.'**
+  String nowPartnerAllDone(String name);
+
+  /// No description provided for @nowQuickCheckHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A quick verification makes tomorrow easier too.'**
+  String get nowQuickCheckHelp;
+
+  /// No description provided for @nowLastAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Last action: {title}'**
+  String nowLastAction(String title);
+
+  /// No description provided for @nowRewardLine.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 {days} successful days: {description}'**
+  String nowRewardLine(int days, String description);
+
+  /// No description provided for @nowPenaltyLine.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ {days} failed days: {description}'**
+  String nowPenaltyLine(int days, String description);
+
+  /// No description provided for @nowResultLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Result: Successes {success} / Failures {fail}'**
+  String nowResultLine(int success, int fail);
+
+  /// No description provided for @nowWaitingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval…'**
+  String get nowWaitingApproval;
+
+  /// No description provided for @nowRewardAchievedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Reward earned!'**
+  String get nowRewardAchievedTitle;
+
+  /// No description provided for @nowPenaltyTriggeredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ Penalty triggered!'**
+  String get nowPenaltyTriggeredTitle;
+
+  /// No description provided for @nowBothTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Reward earned! + ⚡ Penalty triggered!'**
+  String get nowBothTitle;
+
+  /// No description provided for @nowConditionNotMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions not met'**
+  String get nowConditionNotMet;
+
+  /// No description provided for @nowTotalDaysOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'A {days}-day promise'**
+  String nowTotalDaysOnly(int days);
+
+  /// No description provided for @nowTotalDaysScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'A {days}-day promise · {scheduled} practice days planned'**
+  String nowTotalDaysScheduled(int days, int scheduled);
+
+  /// No description provided for @nowMakePromiseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a promise'**
+  String get nowMakePromiseTitle;
+
+  /// No description provided for @nowMakePromiseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'It starts once your partner accepts'**
+  String get nowMakePromiseSubtitle;
+
+  /// No description provided for @nowProgressLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently {success} successes · {failed} failures · {remaining} days remaining'**
+  String nowProgressLine(int success, int failed, int remaining);
+
+  /// No description provided for @nowMaxLimitsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward up to {reward} days, penalty up to {penalty} days.'**
+  String nowMaxLimitsLine(int reward, int penalty);
+
+  /// No description provided for @nowRewardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 Reward (carrot)'**
+  String get nowRewardTitle;
+
+  /// No description provided for @nowRewardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. treat to chicken, fancy dinner'**
+  String get nowRewardHint;
+
+  /// No description provided for @nowRewardTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Success target'**
+  String get nowRewardTargetLabel;
+
+  /// No description provided for @nowPenaltyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ Penalty (stick)'**
+  String get nowPenaltyTitle;
+
+  /// No description provided for @nowPenaltyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. dishes for a week, buy coffee'**
+  String get nowPenaltyHint;
+
+  /// No description provided for @nowPenaltyTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Failure limit'**
+  String get nowPenaltyTargetLabel;
+
+  /// No description provided for @nowProposePromise.
+  ///
+  /// In en, this message translates to:
+  /// **'Propose promise'**
+  String get nowProposePromise;
+
+  /// No description provided for @nowDaysSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String nowDaysSuffix(int count);
+
+  /// No description provided for @nowMaxDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Max {days} days'**
+  String nowMaxDaysLabel(int days);
+
+  /// No description provided for @nowPokeReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Your partner sent a knock'**
+  String get nowPokeReceived;
+
+  /// No description provided for @nowPokeReceivedFromName.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} sent a knock'**
+  String nowPokeReceivedFromName(String name);
+
+  /// No description provided for @nowYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get nowYesterday;
 }
 
 class _AppLocalizationsDelegate

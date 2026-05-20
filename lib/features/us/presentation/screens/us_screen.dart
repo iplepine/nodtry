@@ -40,19 +40,22 @@ class _UsScreenState extends ConsumerState<UsScreen> {
       if (next.hasValue && next.value?.errorNotification != null) {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("안내"),
-            content: Text(next.value!.errorNotification!),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  ref.read(usViewModelProvider.notifier).clearError();
-                },
-                child: const Text("확인"),
-              ),
-            ],
-          ),
+          builder: (context) {
+            final dl10n = AppLocalizations.of(context)!;
+            return AlertDialog(
+              title: Text(dl10n.usNoticeTitle),
+              content: Text(next.value!.errorNotification!),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ref.read(usViewModelProvider.notifier).clearError();
+                  },
+                  child: Text(dl10n.usOk),
+                ),
+              ],
+            );
+          },
         );
       }
     });
@@ -1142,7 +1145,7 @@ class _EditProfileDialogContentState
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('프로필 저장 실패: $e')));
+        ).showSnackBar(SnackBar(content: Text(widget.l10n.usProfileSaveFailed(e.toString()))));
       }
     } finally {
       if (mounted) {
@@ -1158,7 +1161,7 @@ class _EditProfileDialogContentState
     return AlertDialog(
       scrollable: true,
       backgroundColor: AppColors.surface,
-      title: Text("프로필 편집", style: TextStyle(color: AppColors.textPrimary)),
+      title: Text(widget.l10n.usEditProfile, style: TextStyle(color: AppColors.textPrimary)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1261,7 +1264,7 @@ class _EditProfileDialogContentState
             controller: _nameController,
             enabled: !_isSaving,
             decoration: InputDecoration(
-              labelText: "이름",
+              labelText: widget.l10n.usNameLabel,
               labelStyle: TextStyle(color: AppColors.textSecondary),
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: AppColors.divider),
@@ -1278,7 +1281,7 @@ class _EditProfileDialogContentState
             controller: _statusController,
             enabled: !_isSaving,
             decoration: InputDecoration(
-              labelText: "상태 메시지",
+              labelText: widget.l10n.usStatusLabel,
               labelStyle: TextStyle(color: AppColors.textSecondary),
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: AppColors.divider),
@@ -1295,7 +1298,7 @@ class _EditProfileDialogContentState
         TextButton(
           onPressed: _isSaving ? null : () => Navigator.pop(context),
           child: Text(
-            "취소",
+            widget.l10n.usCancel,
             style: TextStyle(
               color: _isSaving
                   ? AppColors.textDisabled
@@ -1315,7 +1318,7 @@ class _EditProfileDialogContentState
         else
           TextButton(
             onPressed: _save,
-            child: Text("저장", style: TextStyle(color: AppColors.primary)),
+            child: Text(widget.l10n.usSave, style: TextStyle(color: AppColors.primary)),
           ),
       ],
     );
@@ -1335,8 +1338,8 @@ class _ActivePlanListSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final plansAsync = ref.watch(activePlansProvider(userId));
-    // final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1358,7 +1361,7 @@ class _ActivePlanListSection extends ConsumerWidget {
                   onPressed: () =>
                       context.pushNamed('all-plans', extra: userId),
                   child: Text(
-                    "전체보기 >",
+                    l10n.usSeeAll,
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
@@ -1387,7 +1390,7 @@ class _ActivePlanListSection extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isMe ? "아직 등록된 약속이 없어요" : "파트너가 진행 중인 약속이 없어요",
+                      isMe ? l10n.usEmptyMine : l10n.usEmptyPartner,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -1423,9 +1426,9 @@ class _ActivePlanListSection extends ConsumerWidget {
                                       return null;
                                     }),
                               ),
-                          child: const Text(
-                            "+ 새 약속 정하기",
-                            style: TextStyle(
+                          child: Text(
+                            l10n.usCreatePlanShort,
+                            style: const TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 16,
                             ),
@@ -1482,7 +1485,7 @@ class _ActivePlanListSection extends ConsumerWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              "새 약속 정하기",
+                              l10n.usCreatePlan,
                               style: TextStyle(
                                 color: AppColors.textSecondary,
                                 fontWeight: FontWeight.w600,
@@ -1511,45 +1514,48 @@ class _ActivePlanListSection extends ConsumerWidget {
   void _showDeletePlanDialog(BuildContext context, WidgetRef ref, Plan plan) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('약속을 삭제할까요?'),
-        content: const Text('삭제하면 되돌릴 수 없어요.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context); // Close Dialog
-              try {
-                if (plan.id != null) {
-                  // 1. Cancel related alarms
-                  await ref.read(settingAlarmUseCaseProvider).cancel(plan);
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(l10n.usDeletePlanTitle),
+          content: Text(l10n.usDeletePlanBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.usCancel, style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Close Dialog
+                try {
+                  if (plan.id != null) {
+                    // 1. Cancel related alarms
+                    await ref.read(settingAlarmUseCaseProvider).cancel(plan);
 
-                  // 2. Delete plan from repository
-                  await ref.read(recordRepositoryProvider).deletePlan(plan.id!);
+                    // 2. Delete plan from repository
+                    await ref.read(recordRepositoryProvider).deletePlan(plan.id!);
 
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(AppLocalizations.of(context)!.usPlanDeleted)),
+                      );
+                      // Refresh plans by invalidating the provider
+                      ref.invalidate(activePlansProvider(userId));
+                    }
+                  }
+                } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('약속이 삭제되었습니다.')),
-                    );
-                    // Refresh plans by invalidating the provider
-                    ref.invalidate(activePlansProvider(userId));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.usDeleteFailed(e.toString()))));
                   }
                 }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('삭제 실패: $e')));
-                }
-              }
-            },
-            child: Text('삭제', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
+              },
+              child: Text(l10n.usDelete, style: TextStyle(color: AppColors.error)),
+            ),
+          ],
+        );
+      },
     );
   }
 }

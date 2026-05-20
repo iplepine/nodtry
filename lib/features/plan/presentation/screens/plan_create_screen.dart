@@ -113,10 +113,11 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
   void _nextPage(int currentStep) {
     if (currentStep < 3) {
       if (currentStep == 1 && _actionController.text.trim().isEmpty) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("어떤 약속을 할지 알려주세요!"),
-            duration: Duration(seconds: 1),
+          SnackBar(
+            content: Text(l10n.planTellUsActionFirst),
+            duration: const Duration(seconds: 1),
           ),
         );
         return;
@@ -156,19 +157,21 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
           .dispatch(const SavePlanIntent());
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("계획 제안이 완료되었습니다.\n상대방과 대화해보세요!"),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(l10n.planProposalSaved),
+            duration: const Duration(seconds: 2),
           ),
         );
         context.pop();
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("저장 중 오류가 발생했습니다: $e")));
+        ).showSnackBar(SnackBar(content: Text(l10n.planSaveError(e.toString()))));
       }
     }
   }
@@ -210,7 +213,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
           ),
           titleSpacing: 0,
           title: Text(
-            "약속 준비 중 · $currentStep/$totalSteps",
+            l10n.planStepHeader(currentStep, totalSteps),
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 16,
@@ -225,9 +228,9 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                   if (currentStep == 1 &&
                       _actionController.text.trim().isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("어떤 약속을 할지 알려주세요!"),
-                        duration: Duration(seconds: 1),
+                      SnackBar(
+                        content: Text(l10n.planTellUsActionFirst),
+                        duration: const Duration(seconds: 1),
                       ),
                     );
                     return;
@@ -248,7 +251,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    currentStep == totalSteps ? l10n.planSummarySend : "다음",
+                    currentStep == totalSteps ? l10n.planSummarySend : l10n.planNext,
                     style: TextStyle(
                       color:
                           (currentStep == 1 &&
@@ -276,7 +279,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                       child: PlanActionStep(
                         controller: _actionController,
                         focusNode: _actionFocus,
-                        categories: planCategories,
+                        categories: planCategoriesFor(l10n),
                         selectedCategoryId: planCreateState.selectedCategoryId,
                         onCategorySelected: (category) {
                           _actionController.clear();
@@ -290,7 +293,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                             FocusManager.instance.primaryFocus?.unfocus();
                           }
                         },
-                        templates: studyPlanTemplates,
+                        templates: studyPlanTemplatesFor(l10n),
                         selectedTemplateId: planCreateState.selectedTemplateId,
                         onTemplateSelected: (template) {
                           _actionController.text = template.action;
@@ -305,7 +308,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                         onActionCleared: () {
                           _actionController.clear();
                           _descriptionController.clear();
-                          final customCategory = planCategories.firstWhere(
+                          final customCategory = planCategoriesFor(l10n).firstWhere(
                             (category) => category.id == planCategoryCustom,
                           );
                           ref

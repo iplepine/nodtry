@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nod_try/l10n/app_localizations.dart';
 import 'package:nod_try/theme/app_colors.dart';
 
 class PlanStepHeader extends StatelessWidget {
@@ -17,13 +18,14 @@ class PlanStepHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
       color: AppColors.background,
       child: Row(
         children: [
           Text(
-            "약속 준비 중 · $currentStep/$totalSteps",
+            l10n.planStepHeader(currentStep, totalSteps),
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 14,
@@ -44,7 +46,7 @@ class PlanStepHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  "다음",
+                  l10n.planNext,
                   style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 14,

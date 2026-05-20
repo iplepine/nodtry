@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../widgets/plan/plan_card.dart';
@@ -14,6 +15,7 @@ class AllPlansScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final allPlansAsync = ref.watch(allPlansProvider(userId));
     final myProfile = ref.watch(myProfileProvider).value;
     final isMe = myProfile?.uid == userId;
@@ -28,7 +30,7 @@ class AllPlansScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          isMe ? "나의 모든 약속" : "파트너의 모든 약속",
+          isMe ? l10n.allPlansTitleMine : l10n.allPlansTitlePartner,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
@@ -40,7 +42,7 @@ class AllPlansScreen extends ConsumerWidget {
           if (plans.isEmpty) {
             return Center(
               child: Text(
-                "등록된 약속이 없어요",
+                l10n.allPlansEmpty,
                 style: TextStyle(color: AppColors.textSecondary),
               ),
             );
@@ -89,38 +91,41 @@ class AllPlansScreen extends ConsumerWidget {
   void _showDeletePlanDialog(BuildContext context, WidgetRef ref, Plan plan) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('약속을 삭제할까요?'),
-        content: const Text('삭제하면 되돌릴 수 없어요.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                if (plan.id != null) {
-                  await ref.read(recordRepositoryProvider).deletePlan(plan.id!);
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(l10n.allPlansDeleteTitle),
+          content: Text(l10n.allPlansDeleteBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.allPlansCancel, style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                try {
+                  if (plan.id != null) {
+                    await ref.read(recordRepositoryProvider).deletePlan(plan.id!);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(AppLocalizations.of(context)!.allPlansDeleted)),
+                      );
+                    }
+                  }
+                } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('약속이 삭제되었습니다.')),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.allPlansDeleteFailed(e.toString()))));
                   }
                 }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('삭제 실패: $e')));
-                }
-              }
-            },
-            child: Text('삭제', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
+              },
+              child: Text(l10n.allPlansDelete, style: TextStyle(color: AppColors.error)),
+            ),
+          ],
+        );
+      },
     );
   }
 }

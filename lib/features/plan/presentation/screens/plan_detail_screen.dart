@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../utils/time_formatter.dart';
@@ -174,13 +175,13 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                     _buildInfoRow(
                       context,
                       icon: Icons.calendar_today,
-                      label: _getDaysText(days),
+                      label: _getDaysText(days, AppLocalizations.of(context)!),
                     ),
                     const SizedBox(height: 24),
                     _buildInfoRow(
                       context,
                       icon: Icons.access_time,
-                      label: _getTimeText(time),
+                      label: _getTimeText(time, AppLocalizations.of(context)!),
                       trailing: isMine
                           ? Icon(
                               Icons.edit,
@@ -209,7 +210,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
 
                     // History Header
                     Text(
-                      '실천 기록',
+                      AppLocalizations.of(context)!.planDetailPracticeHistory,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -245,7 +246,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Text(
-                              '기록을 불러오지 못했어요.\n${snapshot.error}',
+                              AppLocalizations.of(context)!.planDetailLoadFailed(snapshot.error.toString()),
                               textAlign: TextAlign.center,
                               style: TextStyle(color: AppColors.error),
                             ),
@@ -262,7 +263,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                         height: 200,
                         child: Center(
                           child: Text(
-                            '아직 기록이 없어요.',
+                            AppLocalizations.of(context)!.planDetailNoRecords,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(color: AppColors.textSecondary),
                           ),
@@ -290,7 +291,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                   height: 200,
                   child: Center(
                     child: Text(
-                      '저장된 계획이 아닙니다.',
+                      AppLocalizations.of(context)!.planDetailNotSavedPlan,
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
                   ),
@@ -337,7 +338,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: color),
       title: Text(
-        _getHistoryStatusText(item.status),
+        _getHistoryStatusText(item.status, AppLocalizations.of(context)!),
         style: TextStyle(
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
@@ -353,18 +354,18 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
     );
   }
 
-  String _getHistoryStatusText(HistoryStatus status) {
+  String _getHistoryStatusText(HistoryStatus status, AppLocalizations l10n) {
     switch (status) {
       case HistoryStatus.done:
       case HistoryStatus.actuallyDone:
       case HistoryStatus.verified:
-        return '완료';
+        return l10n.planDetailRecordDone;
       case HistoryStatus.skipped:
-        return '건너뜀';
+        return l10n.planDetailRecordSkipped;
       case HistoryStatus.rested:
-        return '휴식';
+        return l10n.planDetailRecordRested;
       case HistoryStatus.rescued:
-        return '실천 인정';
+        return l10n.planDetailRecordRescued;
     }
   }
 
@@ -421,7 +422,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                     });
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('똑똑, 문을 두드렸어요!')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.planDetailPokeSent)),
                     );
                   }
                 } catch (e) {
@@ -429,7 +430,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                   if (context.mounted) {
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(SnackBar(content: Text('전송 실패: $e')));
+                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailPokeFailed(e.toString()))));
                   }
                 }
               },
@@ -442,8 +443,8 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
             : const Icon(Icons.touch_app, size: 18),
         label: Text(
           isPokedToday
-              ? '오늘의 똑똑 완료'
-              : (_isPoking ? '전송 중...' : '똑똑... 혹시 잊으셨나요?'),
+              ? AppLocalizations.of(context)!.planDetailPokeDoneToday
+              : (_isPoking ? AppLocalizations.of(context)!.planDetailPokeSending : AppLocalizations.of(context)!.planDetailPokeAsk),
         ),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -490,34 +491,32 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
     );
   }
 
-  String _getDaysText(List<int> days) {
+  String _getDaysText(List<int> days, AppLocalizations l10n) {
     // 1=Mon, 7=Sun
-    const weekDays = ['월', '화', '수', '목', '금', '토', '일'];
-    if (days.length == 7) return '매일';
+    final weekDays = [
+      l10n.planDetailDayMon,
+      l10n.planDetailDayTue,
+      l10n.planDetailDayWed,
+      l10n.planDetailDayThu,
+      l10n.planDetailDayFri,
+      l10n.planDetailDaySat,
+      l10n.planDetailDaySun,
+    ];
+    if (days.length == 7) return l10n.planDetailEveryDay;
 
     // Sort just in case
     final sortedDays = List<int>.from(days)..sort();
     return sortedDays.map((d) => weekDays[d - 1]).join(', ');
   }
 
-  String _getTimeText(NotificationTime? time) {
+  String _getTimeText(NotificationTime? time, AppLocalizations l10n) {
     if (time == null || time.type == 'none') {
-      // Show target time (which is the goal time) even if alarm is off
-      // But if time is null, just show Undecided.
-      // Wait, current logic: if type == 'none', return '시간 미정'?
-      // The User wants "Time is set, Notification is optional".
-      // So if type == 'none' BUT time is set (hour/minute non zero or we trust hour/min), we should show time.
-      // NotificationTime.none() has 0:0.
-      // If I update logic to preserve time even if type='none', I should display it.
       if (time != null && (time.hour != 0 || time.minute != 0)) {
-        // We have a time, but alarm is off.
-        // Display time.
         final dt = DateTime(2020, 1, 1, time.targetHour, time.targetMinute);
         return TimeFormatter.formatExactTime(dt);
       }
-      return '시간 미정';
+      return l10n.planDetailTimeUnset;
     }
-    // Alarm ON
     final dt = DateTime(2020, 1, 1, time.targetHour, time.targetMinute);
     return TimeFormatter.formatExactTime(dt);
   }
@@ -620,7 +619,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
 
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('알림 설정이 저장되었어요.')),
+                                SnackBar(content: Text(AppLocalizations.of(context)!.planDetailNotificationSaved)),
                               );
                             }
                           } catch (e) {
@@ -639,11 +638,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
 
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    '알림 설정을 저장하지 못했어요. 이전 설정으로 되돌렸어요.',
-                                  ),
-                                ),
+                                SnackBar(content: Text(AppLocalizations.of(context)!.planDetailNotificationSaveFailed)),
                               );
                             }
                           }
@@ -657,9 +652,9 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
-                          '저장',
-                          style: TextStyle(
+                        child: Text(
+                          AppLocalizations.of(context)!.planDetailSave,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -680,140 +675,136 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
   void _showStopCurrentPlanDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('약속을 그만할까요?'),
-        content: const Text('그만하더라도 지금까지의 실천 기록은 유지돼요.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context); // Close Dialog
-              try {
-                if (widget.plan.id != null) {
-                  // 1. Cancel related alarms
-                  await ref
-                      .read(settingAlarmUseCaseProvider)
-                      .cancel(widget.plan);
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(l10n.planDetailStopTitle),
+          content: Text(l10n.planDetailStopBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.planDetailCancel, style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Close Dialog
+                try {
+                  if (widget.plan.id != null) {
+                    await ref
+                        .read(settingAlarmUseCaseProvider)
+                        .cancel(widget.plan);
 
-                  // 2. Stop plan
-                  await ref
-                      .read(recordRepositoryProvider)
-                      .stopPlan(widget.plan.id!);
+                    await ref
+                        .read(recordRepositoryProvider)
+                        .stopPlan(widget.plan.id!);
 
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(AppLocalizations.of(context)!.planDetailStopped)),
+                      );
+                      context.pop();
+                    }
+                  }
+                } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('약속이 중단되었습니다.')),
-                    );
-                    context.pop();
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailActionFailed(e.toString()))));
                   }
                 }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('처리 실패: $e')));
-                }
-              }
-            },
-            child: Text('그만하기', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
+              },
+              child: Text(l10n.planDetailStop, style: TextStyle(color: AppColors.error)),
+            ),
+          ],
+        );
+      },
     );
   }
 
   void _showCreateFromCompletedDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('같은 약속으로 다시 시작할까요?'),
-        content: const Text('이전 약속 내용을 그대로 가져와요.\n시작 전에 수정할 수 있어요.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (context.mounted) {
-                context.pushNamed(
-                  'plan-create',
-                  extra: widget.plan.copyWith(id: null),
-                  queryParameters: {'startAtLastStep': 'true'},
-                );
-              }
-            },
-            child: Text('다시 시작', style: TextStyle(color: AppColors.primary)),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(l10n.planDetailRestartTitle),
+          content: Text(l10n.planDetailRestartBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.planDetailCancel, style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                if (context.mounted) {
+                  context.pushNamed(
+                    'plan-create',
+                    extra: widget.plan.copyWith(id: null),
+                    queryParameters: {'startAtLastStep': 'true'},
+                  );
+                }
+              },
+              child: Text(l10n.planDetailRestart, style: TextStyle(color: AppColors.primary)),
+            ),
+          ],
+        );
+      },
     );
   }
 
   void _showRestartPlanDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('새 스케줄로 다시 시작할까요?'), // 25자 이내 권장
-        content: const Text(
-          '현재 약속은 중단 처리되고\n새로운 약속 만들기로 이동해요.\n기존 기록은 안전하게 보관돼요.',
-        ), // 줄바꿈으로 가독성 확보
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context); // Close Dialog
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(l10n.planDetailRestartWithScheduleTitle),
+          content: Text(l10n.planDetailReplaceBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.planDetailCancel, style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Close Dialog
 
-              try {
-                if (widget.plan.id != null) {
-                  // 1. Cancel Alarms
-                  await ref
-                      .read(settingAlarmUseCaseProvider)
-                      .cancel(widget.plan);
+                try {
+                  if (widget.plan.id != null) {
+                    await ref
+                        .read(settingAlarmUseCaseProvider)
+                        .cancel(widget.plan);
 
-                  // 2. Stop Current Plan
-                  await ref
-                      .read(recordRepositoryProvider)
-                      .stopPlan(widget.plan.id!);
-                }
+                    await ref
+                        .read(recordRepositoryProvider)
+                        .stopPlan(widget.plan.id!);
+                  }
 
-                if (context.mounted) {
-                  // 3. Navigate to Create Screen with 'template'
-                  // We pass the plan BUT verify in ViewModel to treat it as new if needed
-                  // Or manually strip ID here if ViewModel logic relies on ID presence
-                  // Let's pass it, and rely on PlanCreateViewModel treating it as template logic
-                  // Actually, PlanCreateViewModel logic: "if (intent is InitializePlanIntent) has ID -> Existing"
-                  // So we must pass a COPY without ID to treat as NEW.
-                  context.pushNamed(
-                    'plan-create',
-                    extra: widget.plan.copyWith(
-                      id: null,
-                    ), // ID 제거하여 전달 -> 신규 생성 모드
-                  );
+                  if (context.mounted) {
+                    context.pushNamed(
+                      'plan-create',
+                      extra: widget.plan.copyWith(id: null),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailActionFailed(e.toString()))));
+                  }
                 }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('처리 실패: $e')));
-                }
-              }
-            },
-            child: Text('다시 시작', style: TextStyle(color: AppColors.primary)),
-          ),
-        ],
-      ),
+              },
+              child: Text(l10n.planDetailRestart, style: TextStyle(color: AppColors.primary)),
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildSummaryReport(BuildContext context, Plan plan) {
+    final l10n = AppLocalizations.of(context)!;
     final totalDays = plan.endDate.difference(plan.startDate).inDays + 1;
     final completedCount = plan.completedDates.length;
 
@@ -832,7 +823,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
               Icon(Icons.insights, color: AppColors.primary),
               const SizedBox(width: 12),
               Text(
-                '실천 리포트',
+                l10n.planDetailReport,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -845,10 +836,10 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildReportItem('총 기간', '$totalDays일'),
-              _buildReportItem('완료 횟수', '$completedCount회'),
+              _buildReportItem(l10n.planDetailReportPeriod, l10n.planDetailReportDays(totalDays)),
+              _buildReportItem(l10n.planDetailReportCompleted, l10n.planDetailReportCount(completedCount)),
               _buildReportItem(
-                '달성률',
+                l10n.planDetailReportRate,
                 '${(completedCount / totalDays * 100).toStringAsFixed(0)}%',
               ),
             ],

@@ -158,7 +158,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
               // 지원 (New)
               Text(
-                '지원', // l10n.settingsSupport (Need to add to l10n later, hardcode for now or generic)
+                l10n.settingsSupport,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

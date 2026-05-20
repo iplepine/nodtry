@@ -59,7 +59,7 @@ class PlanDaySelectionStep extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           selectedDays.isEmpty
-              ? "요일을 선택하지 않으면 매일 하는 약속이 돼요."
+              ? l10n.planNoDayMeansDaily
               : l10n.planDaySubtitle,
           style: TextStyle(
             fontSize: 14,
@@ -103,12 +103,13 @@ class PlanDaySelectionStep extends StatelessWidget {
   }
 
   Widget _buildPresetChips(BuildContext context) {
-    final presets = dayPresetsForCategory(selectedCategoryId);
+    final l10n = AppLocalizations.of(context)!;
+    final presets = dayPresetsForCategory(l10n, selectedCategoryId);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '추천 빈도',
+          l10n.planRecommendedFrequency,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -203,13 +204,14 @@ class _PartnerPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final targetName = partnerName?.trim().isNotEmpty == true
         ? partnerName!.trim()
-        : '파트너';
-    final promise = action.trim().isEmpty ? '내 약속' : action.trim();
+        : l10n.planPartnerFallback;
+    final promise = action.trim().isEmpty ? l10n.planActionFallback : action.trim();
     final previewText = hasPartner
-        ? '$targetName님에게 "$promise"를 28일 동안 놓치지 않게 당겨달라고 보냅니다.'
-        : '파트너 없이 시작하면 똑똑을 받을 사람이 없어요. 저장 전 파트너를 연결하면 압박이 강해져요.';
+        ? l10n.planPartnerPreviewWith(targetName, promise)
+        : l10n.planPartnerPreviewWithout;
 
     return Container(
       width: double.infinity,
@@ -231,7 +233,7 @@ class _PartnerPreviewCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '파트너에게 이렇게 보여요',
+                l10n.planPartnerPreviewLabel,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -252,7 +254,7 @@ class _PartnerPreviewCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            '${_daysLabel(selectedDays)} · ${_timeLabel(notificationTime)} · 28일',
+            l10n.planPreviewMeta(_daysLabel(l10n, selectedDays), _timeLabel(l10n, notificationTime)),
             style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           if (!hasPartner && onConnectPartner != null) ...[
@@ -265,7 +267,7 @@ class _PartnerPreviewCard extends StatelessWidget {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
-              label: const Text('파트너 연결하기'),
+              label: Text(l10n.planConnectPartner),
             ),
           ],
         ],
@@ -273,17 +275,17 @@ class _PartnerPreviewCard extends StatelessWidget {
     );
   }
 
-  static String _daysLabel(Set<int> selectedDays) {
+  static String _daysLabel(AppLocalizations l10n, Set<int> selectedDays) {
     if (selectedDays.isEmpty || selectedDays.length == 7) {
-      return '매일';
+      return l10n.planDayEveryDay;
     }
     if (selectedDays.length == 5 && selectedDays.containsAll({0, 1, 2, 3, 4})) {
-      return '평일';
+      return l10n.planDayWeekdays;
     }
-    return '주 ${selectedDays.length}일';
+    return l10n.planDayCountFormat(selectedDays.length);
   }
 
-  static String _timeLabel(NotificationTime notificationTime) {
+  static String _timeLabel(AppLocalizations l10n, NotificationTime notificationTime) {
     final targetTotal =
         notificationTime.hour * 60 +
         notificationTime.minute +
@@ -291,11 +293,12 @@ class _PartnerPreviewCard extends StatelessWidget {
     final normalized = targetTotal % 1440;
     final hour = normalized ~/ 60;
     final minute = normalized % 60;
-    final period = hour < 12 ? '오전' : '오후';
+    final period = hour < 12 ? l10n.planTimeAM : l10n.planTimePM;
     final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
-    final minuteText = minute == 0
-        ? ''
-        : ' ${minute.toString().padLeft(2, '0')}분';
-    return '$period $displayHour시$minuteText';
+    if (minute == 0) {
+      return l10n.planTimeFormatNoMinute(period, displayHour);
+    }
+    final minuteText = minute.toString().padLeft(2, '0');
+    return l10n.planTimeFormatWithMinute(period, displayHour, minuteText);
   }
 }

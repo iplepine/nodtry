@@ -138,7 +138,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tabUs => '우리';
 
   @override
-  String get historyEmpty => '아직 기록이 없어요';
+  String get historyEmpty => '아직 기록된 약속이 없어요';
 
   @override
   String get usMeTitle => '나';
@@ -960,4 +960,1272 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsStoreUnavailable => '스토어와 연결할 수 없어요. (설정 확인 필요)';
+
+  @override
+  String get planMostlyProcrastinated => '주로 미루는 약속';
+
+  @override
+  String get planRecommendedPromises => '추천 약속';
+
+  @override
+  String get planMine => '내 약속';
+
+  @override
+  String get planClearAction => '비우기';
+
+  @override
+  String get planRecommendedFrequency => '추천 빈도';
+
+  @override
+  String get planNoDayMeansDaily => '요일을 선택하지 않으면 매일 하는 약속이 돼요.';
+
+  @override
+  String get planPartnerFallback => '파트너';
+
+  @override
+  String get planActionFallback => '내 약속';
+
+  @override
+  String get planPartnerPreviewLabel => '파트너에게 이렇게 보여요';
+
+  @override
+  String planPartnerPreviewWith(String name, String promise) {
+    return '$name님에게 \"$promise\"를 28일 동안 놓치지 않게 당겨달라고 보냅니다.';
+  }
+
+  @override
+  String get planPartnerPreviewWithout =>
+      '파트너 없이 시작하면 똑똑을 받을 사람이 없어요. 저장 전 파트너를 연결하면 압박이 강해져요.';
+
+  @override
+  String get planConnectPartner => '파트너 연결하기';
+
+  @override
+  String get planDayEveryDay => '매일';
+
+  @override
+  String get planDayWeekdays => '평일';
+
+  @override
+  String planDayCountFormat(int count) {
+    return '주 $count일';
+  }
+
+  @override
+  String planPreviewMeta(String days, String time) {
+    return '$days · $time · 28일';
+  }
+
+  @override
+  String get planTimeAM => '오전';
+
+  @override
+  String get planTimePM => '오후';
+
+  @override
+  String planTimeFormatNoMinute(String period, int hour) {
+    return '$period $hour시';
+  }
+
+  @override
+  String planTimeFormatWithMinute(String period, int hour, String minute) {
+    return '$period $hour시 $minute분';
+  }
+
+  @override
+  String planTemplatePerWeek(String label, int count) {
+    return '$label · 주 $count';
+  }
+
+  @override
+  String get planCategoryStudyLabel => '공부';
+
+  @override
+  String get planCategoryStudyDescription => '영어, 자격증, 코딩처럼 혼자 미루는 학습';
+
+  @override
+  String get planCategoryExerciseLabel => '운동';
+
+  @override
+  String get planCategoryExerciseDescription => '걷기, 헬스장, 스트레칭처럼 시작이 어려운 움직임';
+
+  @override
+  String get planCategoryCustomLabel => '직접 입력';
+
+  @override
+  String get planCategoryCustomDescription => '추천 없이 내 약속을 직접 쓰기';
+
+  @override
+  String get planTemplateEnglishLabel => '영어';
+
+  @override
+  String get planTemplateEnglishAction => '영어 문장 10개 소리내어 읽기';
+
+  @override
+  String get planTemplateEnglishDescription => '부담 없이 매일 영어에 노출되는 것을 목표로 해요.';
+
+  @override
+  String get planTemplateCertificateLabel => '자격증';
+
+  @override
+  String get planTemplateCertificateAction => '기출 10문제 풀기';
+
+  @override
+  String get planTemplateCertificateDescription =>
+      '많이 풀기보다 정해진 문제 수를 끊기지 않게 반복해요.';
+
+  @override
+  String get planTemplateCodingLabel => '코딩';
+
+  @override
+  String get planTemplateCodingAction => '30분 코딩 공부 또는 문제 1개';
+
+  @override
+  String get planTemplateCodingDescription => '과한 목표 대신 손을 대는 날을 먼저 확보해요.';
+
+  @override
+  String get planTemplateReadingLabel => '독서';
+
+  @override
+  String get planTemplateReadingAction => '10쪽 읽고 한 줄 기록';
+
+  @override
+  String get planTemplateReadingDescription =>
+      '읽은 흔적을 한 줄로 남겨 파트너가 확인하기 쉽게 해요.';
+
+  @override
+  String get planTemplateWritingLabel => '글쓰기';
+
+  @override
+  String get planTemplateWritingAction => '15분 쓰기 또는 300자 작성';
+
+  @override
+  String get planTemplateWritingDescription => '완성보다 쓰기 시작한 날을 만드는 데 집중해요.';
+
+  @override
+  String get planTemplateWalkingLabel => '걷기';
+
+  @override
+  String get planTemplateWalkingAction => '30분 걷기';
+
+  @override
+  String get planTemplateWalkingDescription =>
+      '운동복을 갖추는 것보다 밖에 나가는 약속을 먼저 만들어요.';
+
+  @override
+  String get planTemplateGymLabel => '헬스장';
+
+  @override
+  String get planTemplateGymAction => '헬스장 가서 30분 운동하기';
+
+  @override
+  String get planTemplateGymDescription => '완벽한 운동보다 헬스장에 도착하는 날을 늘려요.';
+
+  @override
+  String get planTemplateStretchingLabel => '스트레칭';
+
+  @override
+  String get planTemplateStretchingAction => '10분 스트레칭하기';
+
+  @override
+  String get planTemplateStretchingDescription =>
+      '짧게라도 몸을 푸는 약속을 파트너에게 보이게 해요.';
+
+  @override
+  String get planDayPresetThreeDaysLabel => '주 3일';
+
+  @override
+  String get planDayPresetWeekdaysLabel => '평일';
+
+  @override
+  String get planDayPresetEveryDayLabel => '매일';
+
+  @override
+  String get planDayPresetWeekendLabel => '주말';
+
+  @override
+  String get planDayPresetStudyThreeDaysDesc => '첫 주 3회 성공을 먼저 만들기';
+
+  @override
+  String get planDayPresetStudyWeekdaysDesc => '공부 흐름을 주중에 묶기';
+
+  @override
+  String get planDayPresetStudyEveryDayDesc => '짧게라도 매일 파트너에게 보이기';
+
+  @override
+  String get planDayPresetExerciseThreeDaysDesc => '월수금 리듬으로 시작하기';
+
+  @override
+  String get planDayPresetExerciseWeekendDesc => '주말에 움직임을 남기기';
+
+  @override
+  String get planDayPresetExerciseEveryDayDesc => '짧은 스트레칭처럼 매일 확인받기';
+
+  @override
+  String get planDayPresetCustomThreeDaysDesc => '부담을 낮추는 기본값';
+
+  @override
+  String get planDayPresetCustomWeekdaysDesc => '주중 루틴으로 고정하기';
+
+  @override
+  String get planDayPresetCustomEveryDayDesc => '작은 행동을 매일 남기기';
+
+  @override
+  String planStepHeader(int current, int total) {
+    return '약속 준비 중 · $current/$total';
+  }
+
+  @override
+  String get planTellUsActionFirst => '어떤 약속을 할지 알려주세요!';
+
+  @override
+  String get planProposalSaved => '계획 제안이 완료되었습니다.\n상대방과 대화해보세요!';
+
+  @override
+  String planSaveError(String error) {
+    return '저장 중 오류가 발생했습니다: $error';
+  }
+
+  @override
+  String get focusTimerPickerTitle => '얼마나 집중할까요?';
+
+  @override
+  String get focusTimerPickerSubtitle => '타이머가 끝나면 자동으로 \"했어\" 노트가 떠요.';
+
+  @override
+  String focusTimerPresetMin(int minutes) {
+    return '$minutes분';
+  }
+
+  @override
+  String focusTimerCustomHint(int min, int max) {
+    return '직접 입력 ($min~$max분)';
+  }
+
+  @override
+  String get focusTimerMinuteUnit => '분';
+
+  @override
+  String get focusTimerPickFirst => '시간을 골라주세요';
+
+  @override
+  String focusTimerStart(int minutes) {
+    return '$minutes분 시작하기';
+  }
+
+  @override
+  String get focusTimerGiveUpTitle => '타이머를 그만둘까요?';
+
+  @override
+  String get focusTimerGiveUpBody => '진행 기록은 따로 남지 않아요. 약속은 미처리 상태로 남아요.';
+
+  @override
+  String get focusTimerKeepGoing => '계속하기';
+
+  @override
+  String get focusTimerGiveUp => '그만두기';
+
+  @override
+  String get focusTimerGiveUpShort => '포기';
+
+  @override
+  String focusTimerHeader(int minutes) {
+    return '$minutes분 집중';
+  }
+
+  @override
+  String focusTimerHeaderWithPlan(String title, int minutes) {
+    return '$title · $minutes분';
+  }
+
+  @override
+  String get focusTimerPaused => '잠시 멈춤';
+
+  @override
+  String get focusTimerDoneNow => '했어! 지금 끝낼게';
+
+  @override
+  String get focusTimerResume => '재개';
+
+  @override
+  String get focusTimerPause => '잠시 멈춤';
+
+  @override
+  String get actionNoteHintDefault => '실천 소감을 남겨보세요 (선택)';
+
+  @override
+  String get planTimeUnset => '시간 미정';
+
+  @override
+  String get planStateActive => '진행 중';
+
+  @override
+  String get planStateDraft => '작성 중';
+
+  @override
+  String get planStatePending => '수락 대기';
+
+  @override
+  String get planStateRejected => '거절됨';
+
+  @override
+  String get planStateCompleted => '종료됨';
+
+  @override
+  String get planStateStopped => '중단됨';
+
+  @override
+  String get planDescriptionTip => 'Tip: \"만약 ~하면, ~한다\" 로 적어보세요';
+
+  @override
+  String get planDescriptionExamples =>
+      '예) \"퇴근하고 집에 도착하면, 바로 운동복으로 갈아입는다\"\n예) \"아이가 잠들면, 책을 30분 읽는다\"';
+
+  @override
+  String get planDescriptionTipFooter => '구체적인 상황을 정하면 실천 확률이 2~3배 높아져요!';
+
+  @override
+  String get notifyEditorTitle => '알림 설정';
+
+  @override
+  String get notifyEditorSubtitleOn => '똑똑이 살아날 시간을 정해요.';
+
+  @override
+  String get notifyEditorSubtitleOff => '알림 없이 기록만 할게요.';
+
+  @override
+  String get notifyEditorPromiseTime => '파트너에게 보일 약속 시간';
+
+  @override
+  String get notifyEditorDefaultTimeHint =>
+      '기본 저녁 9시는 하루가 묻히기 전에 파트너가 확인하기 좋은 시간이에요.';
+
+  @override
+  String get notifyEditorPrealert => '알림 미리받기';
+
+  @override
+  String get notifyEditorOnTime => '제 시간에';
+
+  @override
+  String get notifyEditor5MinBefore => '5분 전';
+
+  @override
+  String get notifyEditor10MinBefore => '10분 전';
+
+  @override
+  String get notifyEditor30MinBefore => '30분 전';
+
+  @override
+  String get notifyEditor1HourBefore => '1시간 전';
+
+  @override
+  String promiseChipPenaltyTriggered(String description) {
+    return '⚡ 벌칙 발동 확정 — $description';
+  }
+
+  @override
+  String promiseChipPenaltyImminentOne(String description) {
+    return '⚡ 한 번만 더 실패하면 벌칙 — $description';
+  }
+
+  @override
+  String promiseChipPenaltyImminent(int count, String description) {
+    return '⚡ $count번만 더 실패하면 벌칙 — $description';
+  }
+
+  @override
+  String promiseChipRewardAchieved(String description) {
+    return '🏆 보상 달성! — $description';
+  }
+
+  @override
+  String promiseChipRewardImminent(int days, String description) {
+    return '🏆 보상까지 $days일 더 성공하면 — $description';
+  }
+
+  @override
+  String promiseChipSafeBoth(int rewardDays, int penaltyBuffer) {
+    return '🏆 보상까지 $rewardDays일 · ⚡ 벌칙까지 $penaltyBuffer번 여유';
+  }
+
+  @override
+  String promiseChipSafeRewardOnly(int days, String description) {
+    return '🏆 보상까지 $days일 — $description';
+  }
+
+  @override
+  String promiseChipSafePenaltyOnly(int buffer, String description) {
+    return '⚡ 벌칙까지 $buffer번 여유 — $description';
+  }
+
+  @override
+  String get promiseSheetTitle => '약속 조건';
+
+  @override
+  String promiseSheetSubtitle(int success, int failed, int remaining) {
+    return '플랜 종료 시 정산돼요. 현재 성공 $success일 · 실패 $failed일 · 남은 예정 $remaining일.';
+  }
+
+  @override
+  String get promiseSheetRewardLabel => '보상';
+
+  @override
+  String get promiseSheetPenaltyLabel => '벌칙';
+
+  @override
+  String promiseSheetRewardTarget(int target, int success) {
+    return '$target일 성공하면 달성 — 지금 $success일';
+  }
+
+  @override
+  String promiseSheetPenaltyImpossible(int target) {
+    return '$target일 성공이 필요한데 더 이상 도달할 수 없어요 — 벌칙 발동 확정';
+  }
+
+  @override
+  String promiseSheetPenaltyJustOne(int target) {
+    return '$target일 성공 미만 시 발동 — 한 번도 더 실패할 수 없음';
+  }
+
+  @override
+  String promiseSheetPenaltyBuffer(int target, int buffer) {
+    return '$target일 성공 미만 시 발동 — $buffer번 더 실패해도 안전';
+  }
+
+  @override
+  String get promiseSheetClose => '닫기';
+
+  @override
+  String splashLoginFailed(String error) {
+    return '로그인 실패: $error';
+  }
+
+  @override
+  String get splashLoggingIn => '로그인 중...';
+
+  @override
+  String get emailLoginToggleSignUp => '계정이 없으신가요? 회원가입';
+
+  @override
+  String get emailLoginToggleLogin => '이미 계정이 있으신가요? 로그인';
+
+  @override
+  String get settingsSupport => '지원';
+
+  @override
+  String get notificationSettingsNoAlarm => '알림 없음';
+
+  @override
+  String notificationSettingsAlarmOff(String timeString) {
+    return '알림 꺼짐 ($timeString)';
+  }
+
+  @override
+  String get notificationSettingsSaveFailed =>
+      '알림 설정을 저장하지 못했어요. 이전 설정으로 되돌렸어요.';
+
+  @override
+  String get historyCardFeedbackHint => '따뜻한 피드백을 남겨주세요 (선택)';
+
+  @override
+  String get historyCardFeedbackButton => '그래';
+
+  @override
+  String get historyCardAcknowledgePractice => '실천 인정';
+
+  @override
+  String get planSummaryMyDone => '나의 완료';
+
+  @override
+  String get planSummaryPartnerVerified => '파트너 확인';
+
+  @override
+  String planSummaryCount(int count) {
+    return '$count회';
+  }
+
+  @override
+  String get connectInviteCodeDetectedTitle => '초대 코드 감지';
+
+  @override
+  String connectInviteCodeDetectedBody(String code) {
+    return '클립보드에서 초대 코드($code)를 발견했습니다.\n붙여넣으시겠습니까?';
+  }
+
+  @override
+  String get connectCancel => '취소';
+
+  @override
+  String get connectPaste => '붙여넣기';
+
+  @override
+  String get connectNotice => '알림';
+
+  @override
+  String get connectAlreadyConnectedBody =>
+      '현재 연결된 파트너가 있어요.\n더 많은 파트너와의 연결은 추후 지원될 예정이에요.';
+
+  @override
+  String get connectOk => '확인';
+
+  @override
+  String get connectSuccess => '연결되었습니다!';
+
+  @override
+  String get allPlansTitleMine => '나의 모든 약속';
+
+  @override
+  String get allPlansTitlePartner => '파트너의 모든 약속';
+
+  @override
+  String get allPlansEmpty => '등록된 약속이 없어요';
+
+  @override
+  String get allPlansDeleteTitle => '약속을 삭제할까요?';
+
+  @override
+  String get allPlansDeleteBody => '삭제하면 되돌릴 수 없어요.';
+
+  @override
+  String get allPlansDeleted => '약속이 삭제되었습니다.';
+
+  @override
+  String allPlansDeleteFailed(String error) {
+    return '삭제 실패: $error';
+  }
+
+  @override
+  String get allPlansDelete => '삭제';
+
+  @override
+  String get allPlansCancel => '취소';
+
+  @override
+  String get historyErrorUnknown => '알 수 없는 오류가 발생했습니다.';
+
+  @override
+  String get historyErrorIndexMissing =>
+      '데이터 조회에 필요한 인덱스가 없습니다.\n개발자에게 이 화면을 캡처해서 보내주세요.';
+
+  @override
+  String get historyErrorAlreadyDeleted => '이미 삭제된 기록이거나 약속이라\n리액션을 남길 수 없어요.';
+
+  @override
+  String get historyErrorTitle => '오류 발생';
+
+  @override
+  String get historyErrorCreationLink => '생성 링크:';
+
+  @override
+  String get historyOk => '확인';
+
+  @override
+  String get historySectionActive => '진행 중인 약속';
+
+  @override
+  String get historySectionFinished => '종료된 약속';
+
+  @override
+  String get historyToday => '오늘';
+
+  @override
+  String get historyYesterday => '어제';
+
+  @override
+  String get historyDatePattern => 'yyyy년 M월 d일 (E)';
+
+  @override
+  String get historyReconcileTitle => '지난 기록 소명하기';
+
+  @override
+  String get historyReconcileSubtitle => '이 날의 약속, 사실 어땠나요?';
+
+  @override
+  String get historyReconcileHold => '보류할게요';
+
+  @override
+  String get usNoticeTitle => '안내';
+
+  @override
+  String get usOk => '확인';
+
+  @override
+  String usProfileSaveFailed(String error) {
+    return '프로필 저장 실패: $error';
+  }
+
+  @override
+  String get usEditProfile => '프로필 편집';
+
+  @override
+  String get usNameLabel => '이름';
+
+  @override
+  String get usStatusLabel => '상태 메시지';
+
+  @override
+  String get usCancel => '취소';
+
+  @override
+  String get usSave => '저장';
+
+  @override
+  String get usSeeAll => '전체보기 >';
+
+  @override
+  String get usEmptyMine => '아직 등록된 약속이 없어요';
+
+  @override
+  String get usEmptyPartner => '파트너가 진행 중인 약속이 없어요';
+
+  @override
+  String get usCreatePlanShort => '+ 새 약속 정하기';
+
+  @override
+  String get usCreatePlan => '새 약속 정하기';
+
+  @override
+  String get usDeletePlanTitle => '약속을 삭제할까요?';
+
+  @override
+  String get usDeletePlanBody => '삭제하면 되돌릴 수 없어요.';
+
+  @override
+  String get usPlanDeleted => '약속이 삭제되었습니다.';
+
+  @override
+  String usDeleteFailed(String error) {
+    return '삭제 실패: $error';
+  }
+
+  @override
+  String get usDelete => '삭제';
+
+  @override
+  String get planDetailPracticeHistory => '실천 기록';
+
+  @override
+  String planDetailLoadFailed(String error) {
+    return '기록을 불러오지 못했어요.\n$error';
+  }
+
+  @override
+  String get planDetailNoRecords => '아직 기록이 없어요.';
+
+  @override
+  String get planDetailNotSavedPlan => '저장된 계획이 아닙니다.';
+
+  @override
+  String get planDetailRecordDone => '완료';
+
+  @override
+  String get planDetailRecordSkipped => '건너뜀';
+
+  @override
+  String get planDetailRecordRested => '휴식';
+
+  @override
+  String get planDetailRecordRescued => '실천 인정';
+
+  @override
+  String get planDetailPokeSent => '똑똑, 문을 두드렸어요!';
+
+  @override
+  String planDetailPokeFailed(String error) {
+    return '전송 실패: $error';
+  }
+
+  @override
+  String get planDetailPokeDoneToday => '오늘의 똑똑 완료';
+
+  @override
+  String get planDetailPokeSending => '전송 중...';
+
+  @override
+  String get planDetailPokeAsk => '똑똑... 혹시 잊으셨나요?';
+
+  @override
+  String get planDetailDayMon => '월';
+
+  @override
+  String get planDetailDayTue => '화';
+
+  @override
+  String get planDetailDayWed => '수';
+
+  @override
+  String get planDetailDayThu => '목';
+
+  @override
+  String get planDetailDayFri => '금';
+
+  @override
+  String get planDetailDaySat => '토';
+
+  @override
+  String get planDetailDaySun => '일';
+
+  @override
+  String get planDetailEveryDay => '매일';
+
+  @override
+  String get planDetailTimeUnset => '시간 미정';
+
+  @override
+  String get planDetailNotificationSaved => '알림 설정이 저장되었어요.';
+
+  @override
+  String get planDetailNotificationSaveFailed =>
+      '알림 설정을 저장하지 못했어요. 이전 설정으로 되돌렸어요.';
+
+  @override
+  String get planDetailSave => '저장';
+
+  @override
+  String get planDetailStopTitle => '약속을 그만할까요?';
+
+  @override
+  String get planDetailStopBody => '그만하더라도 지금까지의 실천 기록은 유지돼요.';
+
+  @override
+  String get planDetailCancel => '취소';
+
+  @override
+  String get planDetailStopped => '약속이 중단되었습니다.';
+
+  @override
+  String planDetailActionFailed(String error) {
+    return '처리 실패: $error';
+  }
+
+  @override
+  String get planDetailStop => '그만하기';
+
+  @override
+  String get planDetailRestartTitle => '같은 약속으로 다시 시작할까요?';
+
+  @override
+  String get planDetailRestartBody => '이전 약속 내용을 그대로 가져와요.\n시작 전에 수정할 수 있어요.';
+
+  @override
+  String get planDetailRestart => '다시 시작';
+
+  @override
+  String get planDetailReplaceBody =>
+      '현재 약속은 중단 처리되고\n새로운 약속 만들기로 이동해요.\n기존 기록은 안전하게 보관돼요.';
+
+  @override
+  String get planDetailReport => '실천 리포트';
+
+  @override
+  String get planDetailReportPeriod => '총 기간';
+
+  @override
+  String planDetailReportDays(int count) {
+    return '$count일';
+  }
+
+  @override
+  String get planDetailReportCompleted => '완료 횟수';
+
+  @override
+  String planDetailReportCount(int count) {
+    return '$count회';
+  }
+
+  @override
+  String get planDetailReportRate => '달성률';
+
+  @override
+  String get planDetailRestartWithScheduleTitle => '새 스케줄로 다시 시작할까요?';
+
+  @override
+  String get nowFocusNoteDoneJustNow => '집중해서 완료했어요!';
+
+  @override
+  String nowFocusNoteDoneFor(String duration) {
+    return '$duration 동안 집중해서 완료했어요!';
+  }
+
+  @override
+  String nowFocusDurationMinSec(int minutes, int seconds) {
+    return '$minutes분 $seconds초';
+  }
+
+  @override
+  String nowFocusDurationMin(int minutes) {
+    return '$minutes분';
+  }
+
+  @override
+  String nowFocusDurationSec(int seconds) {
+    return '$seconds초';
+  }
+
+  @override
+  String get nowTodayPromiseFallback => '오늘 약속';
+
+  @override
+  String get nowSkipDialogTitle => '오늘은 패스할까요?';
+
+  @override
+  String nowSkipDialogBody(String title) {
+    return '$title 약속을 오늘은 건너뜀으로 정리합니다.';
+  }
+
+  @override
+  String get nowCancel => '취소';
+
+  @override
+  String get nowSkipToday => '오늘은 패스';
+
+  @override
+  String get nowSkippedSnackbar => '오늘 약속을 건너뛰었어요.';
+
+  @override
+  String get nowApproveCheering => '시작을 응원해요!';
+
+  @override
+  String get nowApproveFailed => '승인에 실패했어요.';
+
+  @override
+  String get nowVerifyDone => '실천을 확인했어요!';
+
+  @override
+  String get nowVerifyFailed => '확인 처리에 실패했어요.';
+
+  @override
+  String get nowRejectDialogTitle => '조금 더 조율해볼까요?';
+
+  @override
+  String get nowRejectLessFrequent => '빈도를 조금 줄여보자';
+
+  @override
+  String get nowRejectDifferentTime => '다른 시간대가 좋을 것 같아';
+
+  @override
+  String get nowRejectCustom => '직접 입력하기';
+
+  @override
+  String get nowRejectRequested => '조율을 요청했어요';
+
+  @override
+  String get nowRejectCustomDialogTitle => '어떤 점을 조율할까요?';
+
+  @override
+  String get nowRejectCustomHint => '예: 주 3회로 시작해보는 건 어때?';
+
+  @override
+  String get nowSend => '보내기';
+
+  @override
+  String get nowCheerExcited => '열정적인 응원을 보냈어요! 🔥';
+
+  @override
+  String get nowCheerLove => '사랑을 담아 응원했어요! ❤️';
+
+  @override
+  String get nowCheerProud => '멋지다고 전했어요! 👍';
+
+  @override
+  String get nowCheerStrength => '힘내라고 응원했어요! 💪';
+
+  @override
+  String get nowCheerFailed => '응원 전송에 실패했어요.';
+
+  @override
+  String get nowPokeNoActivityMessage => '똑똑! 약속을 기다리는 사람이 있어요. 오늘 약속을 만들어볼까요?';
+
+  @override
+  String get nowPokeSent => '똑똑 신호를 보냈어요.';
+
+  @override
+  String get nowPokeFailed => '똑똑 전송에 실패했어요.';
+
+  @override
+  String get nowPokeAgainMessage => '똑똑! 파트너가 기다리고 있어요. 지금 약속을 정리해볼까요?';
+
+  @override
+  String get nowPokeAgainSent => '똑똑, 약속을 다시 당겼어요.';
+
+  @override
+  String get nowSettlementSaved => '4주 정산을 남겼어요.';
+
+  @override
+  String get nowExitDialogTitle => '이번 4주는 여기서 멈출까요?';
+
+  @override
+  String get nowExitReasonWeakPoke => '똑똑 압박이 약했어요';
+
+  @override
+  String get nowExitReasonTooBig => '목표가 너무 컸어요';
+
+  @override
+  String get nowExitReasonPartnerBurden => '파트너 확인이 부담됐어요';
+
+  @override
+  String get nowExitReasonCustomLabel => '직접 입력';
+
+  @override
+  String get nowExitReasonCustomHint => '멈추는 이유를 짧게 남기기';
+
+  @override
+  String get nowExitReasonNoCustom => '직접 사유 없음';
+
+  @override
+  String get nowExitSubmit => '남기기';
+
+  @override
+  String get nowRestPassTitle => '휴식권 사용';
+
+  @override
+  String get nowRestPassBody => '이번 주 1회 휴식권을 사용합니다.\n스트릭이 유지됩니다.';
+
+  @override
+  String get nowRestPassConfirm => '사용하기';
+
+  @override
+  String get nowRestPassUsed => '오늘은 편히 쉬세요. 스트릭은 유지됩니다!';
+
+  @override
+  String get nowRestPassAlreadyUsed => '이번 주 휴식권을 이미 사용했어요.';
+
+  @override
+  String get nowRestPassError => '오류가 발생했습니다.';
+
+  @override
+  String get nowRescuedSnackbar => '실천을 인정해줬어요! 스트릭이 유지됩니다.';
+
+  @override
+  String get nowRescueFailed => '실천 인정에 실패했어요.';
+
+  @override
+  String get nowPromiseAccepted => '약속을 수락했어요!';
+
+  @override
+  String get nowPromiseDeclined => '약속을 거절했어요.';
+
+  @override
+  String get nowPromiseResponseFailed => '약속 응답에 실패했어요.';
+
+  @override
+  String get nowPromiseProposed => '약속을 제안했어요!';
+
+  @override
+  String get nowPromiseProposeFailed => '약속 제안에 실패했어요.';
+
+  @override
+  String nowTimeMinBeforeAlert(int minutes) {
+    return '$minutes분 전 알림';
+  }
+
+  @override
+  String nowTimeHourBeforeAlert(int hours) {
+    return '$hours시간 전 알림';
+  }
+
+  @override
+  String nowTimeMinAfterAlert(int minutes) {
+    return '$minutes분 후 알림';
+  }
+
+  @override
+  String nowTimeHourAfterAlert(int hours) {
+    return '$hours시간 후 알림';
+  }
+
+  @override
+  String get nowKeepFlowing => '대단해요! 이 흐름을 이어가봐요';
+
+  @override
+  String get nowGuideWhen => '\"언제 할지\" 정하면 실천 확률이 올라가요';
+
+  @override
+  String get nowGuideSmallStart => '작게 시작해도 괜찮아요. 꾸준함이 힘이에요';
+
+  @override
+  String get nowGuideBetterToday => '어제보다 나은 오늘이면 충분해요';
+
+  @override
+  String get nowErrorTitle => '오류 발생';
+
+  @override
+  String get nowErrorCreationLink => '생성 링크:';
+
+  @override
+  String get nowOk => '확인';
+
+  @override
+  String get nowRetryLater => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get nowPartnerActionFallback => '파트너의 실천';
+
+  @override
+  String get nowActionNoteHint => '따뜻한 피드백을 남겨주세요 (선택)';
+
+  @override
+  String get nowVerifyAndSend => '확인하고 보내기';
+
+  @override
+  String nowStreakCount(int count) {
+    return '$count회 연속 달성!';
+  }
+
+  @override
+  String get nowHeaderAdjustNeeded => '조율이 필요해요';
+
+  @override
+  String get nowHeaderPromiseProposed => '약속 제안이 도착했어요';
+
+  @override
+  String get nowHeaderPromiseSettled => '약속 결과가 나왔어요';
+
+  @override
+  String get nowHeaderSettlementNeeded => '4주 정산이 필요해요';
+
+  @override
+  String get nowHeaderSettlementSub => '똑똑이 실제로 약속을 당겼는지 확인하고 다음 4주를 정해요.';
+
+  @override
+  String get nowMetricCompleted => '완료';
+
+  @override
+  String get nowMetricPartnerReact => '파트너 반응';
+
+  @override
+  String get nowMetricMissed => '놓친 날';
+
+  @override
+  String nowMetricDaysSuffix(int count) {
+    return '$count일';
+  }
+
+  @override
+  String nowMetricCountSuffix(int count) {
+    return '$count회';
+  }
+
+  @override
+  String get nowSettlementWinMessage =>
+      '의미 있는 완료 기준인 12일을 넘겼어요. 다음 4주를 이어갈지 바로 정할 차례예요.';
+
+  @override
+  String get nowSettlementLoseMessage =>
+      '완주보다 중요한 건 어디서 끊겼는지 남기는 거예요. 다음 실험을 줄일 수 있게 사유를 남겨요.';
+
+  @override
+  String nowRewardCondition(int days, String description) {
+    return '$days일 성공 시: $description';
+  }
+
+  @override
+  String nowPenaltyCondition(int days, String description) {
+    return '$days일 실패 시: $description';
+  }
+
+  @override
+  String nowPromiseResult(int success, int fail) {
+    return '성공 $success일 / 실패 $fail일';
+  }
+
+  @override
+  String get nowAchieved => '달성!';
+
+  @override
+  String get nowTriggered => '발동!';
+
+  @override
+  String get nowNotMet => '미달';
+
+  @override
+  String get nowDecline => '거절';
+
+  @override
+  String get nowAccept => '수락';
+
+  @override
+  String get nowContinueNext4Weeks => '다음 4주 시작하기';
+
+  @override
+  String get nowStopHere => '이번 4주는 여기서 멈추기';
+
+  @override
+  String get nowModify => '수정하기';
+
+  @override
+  String get nowStartFocusTimer => '지금 할게! (집중 타이머)';
+
+  @override
+  String get nowRestToday => '오늘은 쉬어갈게요 (휴식권)';
+
+  @override
+  String get nowMissedPlanFallback => '지나간 약속';
+
+  @override
+  String get nowVerifyingDeadline => '확인 대기 · 응원 필요';
+
+  @override
+  String get nowHeaderTodayAllDone => '오늘 약속을 다 지켰어요';
+
+  @override
+  String get nowHeaderConfirmAndPull => '확인하고 당겨줄 차례';
+
+  @override
+  String get nowHeaderWaiting => '기다리는 중';
+
+  @override
+  String get nowHeaderWaitingAccept => '약속 수락을 기다리는 중';
+
+  @override
+  String get nowHeaderPromiseResult => '약속 결과가 나왔어요';
+
+  @override
+  String get nowAdjust => '조율하기';
+
+  @override
+  String get nowApprove => '승인하기';
+
+  @override
+  String get nowPartnerNoNewPlanGuide =>
+      '상대방이 아직 새로운 약속을 만들지 않았어요. 약속이 묻히기 전에 똑똑으로 불러볼까요?';
+
+  @override
+  String get nowKnockMakePlan => '똑똑! 약속 만들라고 하기';
+
+  @override
+  String nowPartnerMissedPokeBody(String name) {
+    return '$name님의 약속이 놓친 약속으로 남았어요. 똑똑으로 다시 당겨주세요.';
+  }
+
+  @override
+  String nowPartnerQuietPokeBody(String name) {
+    return '$name님의 약속이 아직 조용해요. 묻히기 전에 똑똑으로 당겨주세요.';
+  }
+
+  @override
+  String get nowKnockPull => '똑똑! 당기기';
+
+  @override
+  String get nowRescueYesterday => '어제 실천 인정해주기';
+
+  @override
+  String get nowVerifyAndCheer => '확인하고 응원 보내기';
+
+  @override
+  String get nowMakePromise => '약속 걸기';
+
+  @override
+  String get nowPartnerFallback2 => '파트너';
+
+  @override
+  String nowPartnerAllDone(String name) {
+    return '$name님이 오늘 약속을 다 지켰어요.';
+  }
+
+  @override
+  String get nowQuickCheckHelp => '짧게 확인해주면 내일도 이어가기 쉬워요.';
+
+  @override
+  String nowLastAction(String title) {
+    return '마지막 실천: $title';
+  }
+
+  @override
+  String nowRewardLine(int days, String description) {
+    return '🏆 $days일 성공 시: $description';
+  }
+
+  @override
+  String nowPenaltyLine(int days, String description) {
+    return '⚡ $days일 실패 시: $description';
+  }
+
+  @override
+  String nowResultLine(int success, int fail) {
+    return '결과: 성공 $success일 / 실패 $fail일';
+  }
+
+  @override
+  String get nowWaitingApproval => '수락 대기 중...';
+
+  @override
+  String get nowRewardAchievedTitle => '🎉 보상 달성!';
+
+  @override
+  String get nowPenaltyTriggeredTitle => '⚡ 벌칙 발동!';
+
+  @override
+  String get nowBothTitle => '🎉 보상 달성! + ⚡ 벌칙 발동!';
+
+  @override
+  String get nowConditionNotMet => '조건 미달';
+
+  @override
+  String nowTotalDaysOnly(int days) {
+    return '총 $days일짜리 약속이에요';
+  }
+
+  @override
+  String nowTotalDaysScheduled(int days, int scheduled) {
+    return '총 $days일짜리 약속 · 실천 예정 $scheduled일';
+  }
+
+  @override
+  String get nowMakePromiseTitle => '약속 걸기';
+
+  @override
+  String get nowMakePromiseSubtitle => '상대가 수락하면 약속이 시작돼요';
+
+  @override
+  String nowProgressLine(int success, int failed, int remaining) {
+    return '현재 성공 $success일 · 실패 $failed일 · 남은 예정 $remaining일';
+  }
+
+  @override
+  String nowMaxLimitsLine(int reward, int penalty) {
+    return '보상은 최대 $reward일, 벌칙은 최대 $penalty일까지 정할 수 있어요.';
+  }
+
+  @override
+  String get nowRewardTitle => '🏆 보상 (당근)';
+
+  @override
+  String get nowRewardHint => '예: 치킨 사주기, 맛집 가기';
+
+  @override
+  String get nowRewardTargetLabel => '성공 목표';
+
+  @override
+  String get nowPenaltyTitle => '⚡ 벌칙 (채찍)';
+
+  @override
+  String get nowPenaltyHint => '예: 설거지 일주일, 커피 쏘기';
+
+  @override
+  String get nowPenaltyTargetLabel => '실패 한도';
+
+  @override
+  String get nowProposePromise => '약속 제안하기';
+
+  @override
+  String nowDaysSuffix(int count) {
+    return '$count일';
+  }
+
+  @override
+  String nowMaxDaysLabel(int days) {
+    return '최대 $days일';
+  }
+
+  @override
+  String get nowPokeReceived => '파트너가 똑똑을 보냈어요';
+
+  @override
+  String nowPokeReceivedFromName(String name) {
+    return '$name님이 똑똑을 보냈어요';
+  }
+
+  @override
+  String get nowYesterday => '어제';
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'dart:io';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +6,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../models/user_model.dart';
 import 'user_repository.dart';
+
+String _defaultDisplayName() {
+  final locale =
+      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  return locale.startsWith('ko') ? '나' : 'Me';
+}
 
 class RealUserRepository implements UserRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -81,7 +87,7 @@ class RealUserRepository implements UserRepository {
     final newUser = UserModel(
       uid: user.uid,
       email: user.email,
-      displayName: user.displayName ?? '나', // Default name
+      displayName: user.displayName ?? _defaultDisplayName(),
       profileImageUrl: user.photoURL,
       loginType: loginType,
       inviteCode: inviteCode,
@@ -245,7 +251,7 @@ class RealUserRepository implements UserRepository {
     };
 
     if (name != null) {
-      updates['displayName'] = name.isEmpty ? '나' : name;
+      updates['displayName'] = name.isEmpty ? _defaultDisplayName() : name;
     }
     if (statusMessage != null) updates['statusMessage'] = statusMessage;
 

@@ -1108,5 +1108,744 @@
   "settingsStoreUnavailable": "Can't connect to the store. Please check your settings.",
   "@settingsStoreUnavailable": {
     "description": "Snackbar shown when the IAP store is unavailable"
-  }
+  },
+  "planMostlyProcrastinated": "What you usually put off",
+  "planRecommendedPromises": "Suggested promises",
+  "planMine": "My promise",
+  "planClearAction": "Clear",
+  "planRecommendedFrequency": "Suggested frequency",
+  "planNoDayMeansDaily": "Without picking days, this becomes a daily promise.",
+  "planPartnerFallback": "your partner",
+  "planActionFallback": "my promise",
+  "planPartnerPreviewLabel": "Here's how your partner sees it",
+  "planPartnerPreviewWith": "{name} will be asked to nudge you on \"{promise}\" without missing a beat for 28 days.",
+  "@planPartnerPreviewWith": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "promise": { "type": "String" }
+    }
+  },
+  "planPartnerPreviewWithout": "Without a partner there's no one to receive the poke. Connect one before saving for stronger pressure.",
+  "planConnectPartner": "Connect a partner",
+  "planDayEveryDay": "Every day",
+  "planDayWeekdays": "Weekdays",
+  "planDayCountFormat": "{count} days/week",
+  "@planDayCountFormat": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planPreviewMeta": "{days} · {time} · 28 days",
+  "@planPreviewMeta": {
+    "placeholders": {
+      "days": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+  "planTimeAM": "AM",
+  "planTimePM": "PM",
+  "planTimeFormatNoMinute": "{period} {hour}",
+  "@planTimeFormatNoMinute": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "hour": { "type": "int" }
+    }
+  },
+  "planTimeFormatWithMinute": "{period} {hour}:{minute}",
+  "@planTimeFormatWithMinute": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "hour": { "type": "int" },
+      "minute": { "type": "String" }
+    }
+  },
+  "planTemplatePerWeek": "{label} · {count}/wk",
+  "@planTemplatePerWeek": {
+    "placeholders": {
+      "label": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "planCategoryStudyLabel": "Study",
+  "planCategoryStudyDescription": "Self-study you keep putting off — English, certifications, coding",
+  "planCategoryExerciseLabel": "Exercise",
+  "planCategoryExerciseDescription": "Movement that's hard to start — walking, gym, stretching",
+  "planCategoryCustomLabel": "Custom",
+  "planCategoryCustomDescription": "Write your own promise without picking a template",
+  "planTemplateEnglishLabel": "English",
+  "planTemplateEnglishAction": "Read 10 English sentences aloud",
+  "planTemplateEnglishDescription": "Aim for low-pressure daily exposure to English.",
+  "planTemplateCertificateLabel": "Certification",
+  "planTemplateCertificateAction": "Solve 10 past exam questions",
+  "planTemplateCertificateDescription": "Repeat a fixed count without breaking the streak instead of cramming.",
+  "planTemplateCodingLabel": "Coding",
+  "planTemplateCodingAction": "30 min of coding or one problem",
+  "planTemplateCodingDescription": "Secure the days you actually touch code before chasing big goals.",
+  "planTemplateReadingLabel": "Reading",
+  "planTemplateReadingAction": "Read 10 pages and log one line",
+  "planTemplateReadingDescription": "Leave a one-line trace so your partner can check in easily.",
+  "planTemplateWritingLabel": "Writing",
+  "planTemplateWritingAction": "Write for 15 min or 300 characters",
+  "planTemplateWritingDescription": "Focus on starting days, not finished pieces.",
+  "planTemplateWalkingLabel": "Walking",
+  "planTemplateWalkingAction": "Walk 30 minutes",
+  "planTemplateWalkingDescription": "Commit to stepping outside before worrying about gear.",
+  "planTemplateGymLabel": "Gym",
+  "planTemplateGymAction": "Go to the gym and work out for 30 min",
+  "planTemplateGymDescription": "Increase days you arrive at the gym rather than perfect workouts.",
+  "planTemplateStretchingLabel": "Stretching",
+  "planTemplateStretchingAction": "Stretch for 10 minutes",
+  "planTemplateStretchingDescription": "Show your partner even a short loosen-up.",
+  "planDayPresetThreeDaysLabel": "3 days/wk",
+  "planDayPresetWeekdaysLabel": "Weekdays",
+  "planDayPresetEveryDayLabel": "Every day",
+  "planDayPresetWeekendLabel": "Weekend",
+  "planDayPresetStudyThreeDaysDesc": "Build three wins in the first week",
+  "planDayPresetStudyWeekdaysDesc": "Anchor your study to the weekdays",
+  "planDayPresetStudyEveryDayDesc": "Show your partner something each day, even briefly",
+  "planDayPresetExerciseThreeDaysDesc": "Start with a Mon/Wed/Fri rhythm",
+  "planDayPresetExerciseWeekendDesc": "Leave a movement trace on weekends",
+  "planDayPresetExerciseEveryDayDesc": "Get daily check-ins like a short stretch",
+  "planDayPresetCustomThreeDaysDesc": "A low-pressure default",
+  "planDayPresetCustomWeekdaysDesc": "Lock it in as a weekday routine",
+  "planDayPresetCustomEveryDayDesc": "Leave a small action every day",
+  "planStepHeader": "Preparing promise · {current}/{total}",
+  "@planStepHeader": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "planTellUsActionFirst": "Tell us what you want to promise!",
+  "planProposalSaved": "Proposal saved.\nGo chat about it with your partner!",
+  "planSaveError": "An error occurred while saving: {error}",
+  "@planSaveError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "planNext": "Next",
+  "focusTimerPickerTitle": "How long do you want to focus?",
+  "focusTimerPickerSubtitle": "When the timer ends, the \"Done\" note opens automatically.",
+  "focusTimerPresetMin": "{minutes} min",
+  "@focusTimerPresetMin": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "focusTimerCustomHint": "Custom ({min}–{max} min)",
+  "@focusTimerCustomHint": {
+    "placeholders": {
+      "min": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "focusTimerMinuteUnit": "min",
+  "focusTimerPickFirst": "Pick a duration",
+  "focusTimerStart": "Start {minutes} min",
+  "@focusTimerStart": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "focusTimerGiveUpTitle": "Give up the timer?",
+  "focusTimerGiveUpBody": "Progress isn't saved. The promise stays as not done.",
+  "focusTimerKeepGoing": "Keep going",
+  "focusTimerGiveUp": "Give up",
+  "focusTimerGiveUpShort": "Stop",
+  "focusTimerHeader": "Focus {minutes} min",
+  "@focusTimerHeader": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "focusTimerHeaderWithPlan": "{title} · {minutes} min",
+  "@focusTimerHeaderWithPlan": {
+    "placeholders": {
+      "title": { "type": "String" },
+      "minutes": { "type": "int" }
+    }
+  },
+  "focusTimerPaused": "Paused",
+  "focusTimerDoneNow": "Done now",
+  "focusTimerResume": "Resume",
+  "focusTimerPause": "Pause",
+  "actionNoteHintDefault": "Share your thoughts (optional)",
+  "planTimeUnset": "Time not set",
+  "planStateActive": "Active",
+  "planStateDraft": "Draft",
+  "planStatePending": "Awaiting approval",
+  "planStateRejected": "Declined",
+  "planStateCompleted": "Ended",
+  "planStateStopped": "Stopped",
+  "planDescriptionTip": "Tip: try \"If X, then Y\"",
+  "planDescriptionExamples": "e.g. \"When I get home from work, I change into workout clothes\"\ne.g. \"When the kids fall asleep, I read for 30 minutes\"",
+  "planDescriptionTipFooter": "A specific situation makes you 2–3× more likely to follow through!",
+  "notifyEditorTitle": "Notifications",
+  "notifyEditorSubtitleOn": "Pick when we should poke you.",
+  "notifyEditorSubtitleOff": "Track without notifications.",
+  "notifyEditorPromiseTime": "Promise time visible to your partner",
+  "notifyEditorDefaultTimeHint": "9 PM by default is a good time for your partner to check before the day slips by.",
+  "notifyEditorPrealert": "Pre-alert",
+  "notifyEditorOnTime": "On time",
+  "notifyEditor5MinBefore": "5 min before",
+  "notifyEditor10MinBefore": "10 min before",
+  "notifyEditor30MinBefore": "30 min before",
+  "notifyEditor1HourBefore": "1 hr before",
+  "promiseChipPenaltyTriggered": "⚡ Penalty locked in — {description}",
+  "@promiseChipPenaltyTriggered": {
+    "placeholders": {
+      "description": { "type": "String" }
+    }
+  },
+  "promiseChipPenaltyImminentOne": "⚡ Just one more miss triggers the penalty — {description}",
+  "@promiseChipPenaltyImminentOne": {
+    "placeholders": {
+      "description": { "type": "String" }
+    }
+  },
+  "promiseChipPenaltyImminent": "⚡ {count} more misses triggers the penalty — {description}",
+  "@promiseChipPenaltyImminent": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "description": { "type": "String" }
+    }
+  },
+  "promiseChipRewardAchieved": "🏆 Reward earned! — {description}",
+  "@promiseChipRewardAchieved": {
+    "placeholders": {
+      "description": { "type": "String" }
+    }
+  },
+  "promiseChipRewardImminent": "🏆 {days} more day(s) to the reward — {description}",
+  "@promiseChipRewardImminent": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "description": { "type": "String" }
+    }
+  },
+  "promiseChipSafeBoth": "🏆 {rewardDays} days to reward · ⚡ {penaltyBuffer} misses safe",
+  "@promiseChipSafeBoth": {
+    "placeholders": {
+      "rewardDays": { "type": "int" },
+      "penaltyBuffer": { "type": "int" }
+    }
+  },
+  "promiseChipSafeRewardOnly": "🏆 {days} days to reward — {description}",
+  "@promiseChipSafeRewardOnly": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "description": { "type": "String" }
+    }
+  },
+  "promiseChipSafePenaltyOnly": "⚡ {buffer} misses safe — {description}",
+  "@promiseChipSafePenaltyOnly": {
+    "placeholders": {
+      "buffer": { "type": "int" },
+      "description": { "type": "String" }
+    }
+  },
+  "promiseSheetTitle": "Promise terms",
+  "promiseSheetSubtitle": "Settled when the plan ends. Currently {success} done · {failed} missed · {remaining} days left.",
+  "@promiseSheetSubtitle": {
+    "placeholders": {
+      "success": { "type": "int" },
+      "failed": { "type": "int" },
+      "remaining": { "type": "int" }
+    }
+  },
+  "promiseSheetRewardLabel": "Reward",
+  "promiseSheetPenaltyLabel": "Penalty",
+  "promiseSheetRewardTarget": "{target} successful days to earn it — currently {success}",
+  "@promiseSheetRewardTarget": {
+    "placeholders": {
+      "target": { "type": "int" },
+      "success": { "type": "int" }
+    }
+  },
+  "promiseSheetPenaltyImpossible": "Needed {target} successful days but you can no longer reach it — penalty locked in",
+  "@promiseSheetPenaltyImpossible": {
+    "placeholders": {
+      "target": { "type": "int" }
+    }
+  },
+  "promiseSheetPenaltyJustOne": "Triggers below {target} successful days — you can't miss even once more",
+  "@promiseSheetPenaltyJustOne": {
+    "placeholders": {
+      "target": { "type": "int" }
+    }
+  },
+  "promiseSheetPenaltyBuffer": "Triggers below {target} successful days — {buffer} more misses are safe",
+  "@promiseSheetPenaltyBuffer": {
+    "placeholders": {
+      "target": { "type": "int" },
+      "buffer": { "type": "int" }
+    }
+  },
+  "promiseSheetClose": "Close",
+  "splashLoginFailed": "Login failed: {error}",
+  "@splashLoginFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "splashLoggingIn": "Signing in…",
+  "emailLoginToggleSignUp": "No account? Sign up",
+  "emailLoginToggleLogin": "Already have an account? Log in",
+  "settingsSupport": "Support",
+  "notificationSettingsNoAlarm": "No alarm",
+  "notificationSettingsAlarmOff": "Alarm off ({timeString})",
+  "@notificationSettingsAlarmOff": {
+    "placeholders": {
+      "timeString": { "type": "String" }
+    }
+  },
+  "notificationSettingsSaveFailed": "Couldn't save notification setting. Reverted to the previous one.",
+  "historyCardFeedbackHint": "Leave a warm note (optional)",
+  "historyCardFeedbackButton": "OK",
+  "historyCardAcknowledgePractice": "Acknowledge practice",
+  "planSummaryMyDone": "My completions",
+  "planSummaryPartnerVerified": "Partner verified",
+  "planSummaryCount": "{count}",
+  "@planSummaryCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "connectInviteCodeDetectedTitle": "Invite code detected",
+  "connectInviteCodeDetectedBody": "We found an invite code ({code}) in your clipboard.\nPaste it?",
+  "@connectInviteCodeDetectedBody": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "connectCancel": "Cancel",
+  "connectPaste": "Paste",
+  "connectNotice": "Notice",
+  "connectAlreadyConnectedBody": "You already have a connected partner.\nMultiple partners will be supported later.",
+  "connectOk": "OK",
+  "connectSuccess": "Connected!",
+  "allPlansTitleMine": "My promises",
+  "allPlansTitlePartner": "Partner's promises",
+  "allPlansEmpty": "No promises yet",
+  "allPlansDeleteTitle": "Delete this promise?",
+  "allPlansDeleteBody": "This can't be undone.",
+  "allPlansDeleted": "Promise deleted.",
+  "allPlansDeleteFailed": "Delete failed: {error}",
+  "@allPlansDeleteFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "allPlansDelete": "Delete",
+  "allPlansCancel": "Cancel",
+  "historyErrorUnknown": "An unknown error occurred.",
+  "historyErrorIndexMissing": "Database index missing for this query.\nPlease screenshot this and send it to the developer.",
+  "historyErrorAlreadyDeleted": "This record or promise was already deleted,\nso a reaction can't be left.",
+  "historyErrorTitle": "Error",
+  "historyErrorCreationLink": "Creation link:",
+  "historyOk": "OK",
+  "historySectionActive": "In progress",
+  "historySectionFinished": "Finished",
+  "historyToday": "Today",
+  "historyYesterday": "Yesterday",
+  "historyDatePattern": "EEEE, MMM d, yyyy",
+  "historyReconcileTitle": "Reconcile past record",
+  "historyReconcileSubtitle": "What actually happened on this day?",
+  "historyReconcileHold": "Leave it",
+  "historyEmpty": "No promises recorded yet",
+  "usNoticeTitle": "Notice",
+  "usOk": "OK",
+  "usProfileSaveFailed": "Profile save failed: {error}",
+  "@usProfileSaveFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "usEditProfile": "Edit profile",
+  "usNameLabel": "Name",
+  "usStatusLabel": "Status message",
+  "usCancel": "Cancel",
+  "usSave": "Save",
+  "usSeeAll": "See all >",
+  "usEmptyMine": "No promises yet",
+  "usEmptyPartner": "Partner has no active promises",
+  "usCreatePlanShort": "+ New promise",
+  "usCreatePlan": "New promise",
+  "usDeletePlanTitle": "Delete this promise?",
+  "usDeletePlanBody": "This can't be undone.",
+  "usPlanDeleted": "Promise deleted.",
+  "usDeleteFailed": "Delete failed: {error}",
+  "@usDeleteFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "usDelete": "Delete",
+  "planDetailPracticeHistory": "Practice log",
+  "planDetailLoadFailed": "Couldn't load records.\n{error}",
+  "@planDetailLoadFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "planDetailNoRecords": "No records yet.",
+  "planDetailNotSavedPlan": "Plan not saved.",
+  "planDetailRecordDone": "Done",
+  "planDetailRecordSkipped": "Skipped",
+  "planDetailRecordRested": "Rested",
+  "planDetailRecordRescued": "Acknowledged",
+  "planDetailPokeSent": "Knock knock — door tapped!",
+  "planDetailPokeFailed": "Send failed: {error}",
+  "@planDetailPokeFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "planDetailPokeDoneToday": "Knock sent for today",
+  "planDetailPokeSending": "Sending…",
+  "planDetailPokeAsk": "Knock knock… are you forgetting?",
+  "planDetailDayMon": "Mon",
+  "planDetailDayTue": "Tue",
+  "planDetailDayWed": "Wed",
+  "planDetailDayThu": "Thu",
+  "planDetailDayFri": "Fri",
+  "planDetailDaySat": "Sat",
+  "planDetailDaySun": "Sun",
+  "planDetailEveryDay": "Every day",
+  "planDetailTimeUnset": "Time not set",
+  "planDetailNotificationSaved": "Notification settings saved.",
+  "planDetailNotificationSaveFailed": "Couldn't save notification setting. Reverted to the previous one.",
+  "planDetailSave": "Save",
+  "planDetailStopTitle": "Stop this promise?",
+  "planDetailStopBody": "Even if you stop, your record so far is kept.",
+  "planDetailCancel": "Cancel",
+  "planDetailStopped": "Promise stopped.",
+  "planDetailActionFailed": "Action failed: {error}",
+  "@planDetailActionFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "planDetailStop": "Stop",
+  "planDetailRestartTitle": "Restart with the same promise?",
+  "planDetailRestartBody": "We'll copy the previous promise as-is.\nYou can edit it before starting.",
+  "planDetailRestart": "Restart",
+  "planDetailReplaceBody": "Your current promise will be stopped and you'll move to create a new one.\nExisting records are kept safe.",
+  "planDetailReport": "Practice report",
+  "planDetailReportPeriod": "Total period",
+  "planDetailReportDays": "{count} days",
+  "@planDetailReportDays": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planDetailReportCompleted": "Completions",
+  "planDetailReportCount": "{count} times",
+  "@planDetailReportCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planDetailReportRate": "Achievement rate",
+  "planDetailRestartWithScheduleTitle": "Restart with a new schedule?",
+  "nowFocusNoteDoneJustNow": "Focused and completed!",
+  "nowFocusNoteDoneFor": "Focused for {duration} and completed!",
+  "@nowFocusNoteDoneFor": {
+    "placeholders": {
+      "duration": { "type": "String" }
+    }
+  },
+  "nowFocusDurationMinSec": "{minutes} min {seconds} sec",
+  "@nowFocusDurationMinSec": {
+    "placeholders": {
+      "minutes": { "type": "int" },
+      "seconds": { "type": "int" }
+    }
+  },
+  "nowFocusDurationMin": "{minutes} min",
+  "@nowFocusDurationMin": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "nowFocusDurationSec": "{seconds} sec",
+  "@nowFocusDurationSec": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "nowTodayPromiseFallback": "Today's promise",
+  "nowSkipDialogTitle": "Skip today?",
+  "nowSkipDialogBody": "We'll mark {title} as skipped for today.",
+  "@nowSkipDialogBody": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "nowCancel": "Cancel",
+  "nowSkipToday": "Skip today",
+  "nowSkippedSnackbar": "Skipped today's promise.",
+  "nowApproveCheering": "Cheering you on!",
+  "nowApproveFailed": "Approval failed.",
+  "nowVerifyDone": "Practice verified!",
+  "nowVerifyFailed": "Verification failed.",
+  "nowRejectDialogTitle": "Want to adjust a bit more?",
+  "nowRejectLessFrequent": "Lower the frequency",
+  "nowRejectDifferentTime": "Try a different time slot",
+  "nowRejectCustom": "Custom message",
+  "nowRejectRequested": "Adjustment requested",
+  "nowRejectCustomDialogTitle": "What would you like to adjust?",
+  "nowRejectCustomHint": "e.g. How about starting with 3 times a week?",
+  "nowSend": "Send",
+  "nowCheerExcited": "Sent excited support! 🔥",
+  "nowCheerLove": "Sent your love! ❤️",
+  "nowCheerProud": "Said you're awesome! 👍",
+  "nowCheerStrength": "Said hang in there! 💪",
+  "nowCheerFailed": "Couldn't send cheer.",
+  "nowPokeNoActivityMessage": "Knock knock! Someone's waiting for a promise. Want to make today's?",
+  "nowPokeSent": "Sent a knock signal.",
+  "nowPokeFailed": "Couldn't send the knock.",
+  "nowPokeAgainMessage": "Knock knock! Your partner is waiting. Want to firm up today's promise?",
+  "nowPokeAgainSent": "Knock knock — pulled the promise again.",
+  "nowSettlementSaved": "4-week settlement saved.",
+  "nowExitDialogTitle": "Stop here for this 4-week round?",
+  "nowExitReasonWeakPoke": "The knock pressure was weak",
+  "nowExitReasonTooBig": "The goal was too big",
+  "nowExitReasonPartnerBurden": "Partner verification felt heavy",
+  "nowExitReasonCustomLabel": "Other",
+  "nowExitReasonCustomHint": "Briefly say why you're stopping",
+  "nowExitReasonNoCustom": "No custom reason",
+  "nowExitSubmit": "Submit",
+  "nowRestPassTitle": "Use rest pass",
+  "nowRestPassBody": "Use one rest pass this week.\nYour streak stays intact.",
+  "nowRestPassConfirm": "Use it",
+  "nowRestPassUsed": "Rest well today. Your streak is safe!",
+  "nowRestPassAlreadyUsed": "You already used this week's rest pass.",
+  "nowRestPassError": "An error occurred.",
+  "nowRescuedSnackbar": "Acknowledged the practice! Streak preserved.",
+  "nowRescueFailed": "Couldn't acknowledge practice.",
+  "nowPromiseAccepted": "Accepted the promise!",
+  "nowPromiseDeclined": "Declined the promise.",
+  "nowPromiseResponseFailed": "Couldn't send promise response.",
+  "nowPromiseProposed": "Proposed the promise!",
+  "nowPromiseProposeFailed": "Couldn't propose the promise.",
+  "nowTimeMinBeforeAlert": "{minutes}m before alert",
+  "@nowTimeMinBeforeAlert": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "nowTimeHourBeforeAlert": "{hours}h before alert",
+  "@nowTimeHourBeforeAlert": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "nowTimeMinAfterAlert": "{minutes}m after alert",
+  "@nowTimeMinAfterAlert": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "nowTimeHourAfterAlert": "{hours}h after alert",
+  "@nowTimeHourAfterAlert": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "nowKeepFlowing": "Great! Keep this flow going",
+  "nowGuideWhen": "Setting \"when to do it\" raises your follow-through",
+  "nowGuideSmallStart": "Starting small is fine. Consistency wins",
+  "nowGuideBetterToday": "Better than yesterday is enough",
+  "nowErrorTitle": "Error",
+  "nowErrorCreationLink": "Creation link:",
+  "nowOk": "OK",
+  "nowRetryLater": "Please try again later",
+  "nowPartnerActionFallback": "Partner's practice",
+  "nowActionNoteHint": "Leave a warm note (optional)",
+  "nowVerifyAndSend": "Verify and send",
+  "nowStreakCount": "{count} days in a row!",
+  "@nowStreakCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "nowHeaderAdjustNeeded": "Adjustment needed",
+  "nowHeaderPromiseProposed": "Promise proposal arrived",
+  "nowHeaderPromiseSettled": "Promise result is out",
+  "nowHeaderSettlementNeeded": "4-week settlement needed",
+  "nowHeaderSettlementSub": "Confirm whether the knock really pulled the promise and pick the next 4 weeks.",
+  "nowMetricCompleted": "Completed",
+  "nowMetricPartnerReact": "Partner reactions",
+  "nowMetricMissed": "Missed days",
+  "nowMetricDaysSuffix": "{count} days",
+  "@nowMetricDaysSuffix": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "nowMetricCountSuffix": "{count} times",
+  "@nowMetricCountSuffix": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "nowSettlementWinMessage": "You passed the meaningful 12-day mark. Time to decide on the next 4 weeks.",
+  "nowSettlementLoseMessage": "More important than finishing is noting where you stopped. Leave a reason to make the next attempt easier.",
+  "nowRewardCondition": "{days} successful days: {description}",
+  "@nowRewardCondition": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "description": { "type": "String" }
+    }
+  },
+  "nowPenaltyCondition": "{days} failed days: {description}",
+  "@nowPenaltyCondition": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "description": { "type": "String" }
+    }
+  },
+  "nowPromiseResult": "Successes {success} / Failures {fail}",
+  "@nowPromiseResult": {
+    "placeholders": {
+      "success": { "type": "int" },
+      "fail": { "type": "int" }
+    }
+  },
+  "nowAchieved": "Achieved!",
+  "nowTriggered": "Triggered!",
+  "nowNotMet": "Not met",
+  "nowDecline": "Decline",
+  "nowAccept": "Accept",
+  "nowContinueNext4Weeks": "Start the next 4 weeks",
+  "nowStopHere": "Stop this 4-week round here",
+  "nowModify": "Modify",
+  "nowStartFocusTimer": "Start now! (Focus timer)",
+  "nowRestToday": "Rest today (rest pass)",
+  "nowMissedPlanFallback": "Past promise",
+  "nowVerifyingDeadline": "Waiting for verification · cheer needed",
+  "nowHeaderTodayAllDone": "All today's promises kept",
+  "nowHeaderConfirmAndPull": "Time to verify and pull",
+  "nowHeaderWaiting": "Waiting",
+  "nowHeaderWaitingAccept": "Waiting for promise approval",
+  "nowHeaderPromiseResult": "Promise result is out",
+  "nowAdjust": "Adjust",
+  "nowApprove": "Approve",
+  "nowPartnerNoNewPlanGuide": "The other person hasn't made a new promise. Want to knock before it gets buried?",
+  "nowKnockMakePlan": "Knock! Ask to make a promise",
+  "nowPartnerMissedPokeBody": "{name}'s promise is now a missed promise. Knock to pull it again.",
+  "@nowPartnerMissedPokeBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "nowPartnerQuietPokeBody": "{name}'s promise is still quiet. Knock before it gets buried.",
+  "@nowPartnerQuietPokeBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "nowKnockPull": "Knock! Pull",
+  "nowRescueYesterday": "Acknowledge yesterday",
+  "nowVerifyAndCheer": "Verify and cheer",
+  "nowMakePromise": "Make a promise",
+  "nowPartnerFallback2": "partner",
+  "nowPartnerAllDone": "{name} kept all today's promises.",
+  "@nowPartnerAllDone": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "nowQuickCheckHelp": "A quick verification makes tomorrow easier too.",
+  "nowLastAction": "Last action: {title}",
+  "@nowLastAction": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "nowRewardLine": "🏆 {days} successful days: {description}",
+  "@nowRewardLine": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "description": { "type": "String" }
+    }
+  },
+  "nowPenaltyLine": "⚡ {days} failed days: {description}",
+  "@nowPenaltyLine": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "description": { "type": "String" }
+    }
+  },
+  "nowResultLine": "Result: Successes {success} / Failures {fail}",
+  "@nowResultLine": {
+    "placeholders": {
+      "success": { "type": "int" },
+      "fail": { "type": "int" }
+    }
+  },
+  "nowWaitingApproval": "Waiting for approval…",
+  "nowRewardAchievedTitle": "🎉 Reward earned!",
+  "nowPenaltyTriggeredTitle": "⚡ Penalty triggered!",
+  "nowBothTitle": "🎉 Reward earned! + ⚡ Penalty triggered!",
+  "nowConditionNotMet": "Conditions not met",
+  "nowTotalDaysOnly": "A {days}-day promise",
+  "@nowTotalDaysOnly": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "nowTotalDaysScheduled": "A {days}-day promise · {scheduled} practice days planned",
+  "@nowTotalDaysScheduled": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "scheduled": { "type": "int" }
+    }
+  },
+  "nowMakePromiseTitle": "Make a promise",
+  "nowMakePromiseSubtitle": "It starts once your partner accepts",
+  "nowProgressLine": "Currently {success} successes · {failed} failures · {remaining} days remaining",
+  "@nowProgressLine": {
+    "placeholders": {
+      "success": { "type": "int" },
+      "failed": { "type": "int" },
+      "remaining": { "type": "int" }
+    }
+  },
+  "nowMaxLimitsLine": "Reward up to {reward} days, penalty up to {penalty} days.",
+  "@nowMaxLimitsLine": {
+    "placeholders": {
+      "reward": { "type": "int" },
+      "penalty": { "type": "int" }
+    }
+  },
+  "nowRewardTitle": "🏆 Reward (carrot)",
+  "nowRewardHint": "e.g. treat to chicken, fancy dinner",
+  "nowRewardTargetLabel": "Success target",
+  "nowPenaltyTitle": "⚡ Penalty (stick)",
+  "nowPenaltyHint": "e.g. dishes for a week, buy coffee",
+  "nowPenaltyTargetLabel": "Failure limit",
+  "nowProposePromise": "Propose promise",
+  "nowDaysSuffix": "{count} days",
+  "@nowDaysSuffix": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "nowMaxDaysLabel": "Max {days} days",
+  "@nowMaxDaysLabel": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "nowPokeReceived": "Your partner sent a knock",
+  "nowPokeReceivedFromName": "{name} sent a knock",
+  "@nowPokeReceivedFromName": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "nowYesterday": "Yesterday"
 }

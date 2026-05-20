@@ -55,20 +55,21 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       showDialog(
         context: context,
         builder: (context) {
+          final l10n = AppLocalizations.of(context)!;
           return AlertDialog(
-            title: const Text('초대 코드 감지'),
-            content: Text('클립보드에서 초대 코드($text)를 발견했습니다.\n붙여넣으시겠습니까?'),
+            title: Text(l10n.connectInviteCodeDetectedTitle),
+            content: Text(l10n.connectInviteCodeDetectedBody(text)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('취소'),
+                child: Text(l10n.connectCancel),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   _fillCode(text);
                 },
-                child: const Text('붙여넣기'),
+                child: Text(l10n.connectPaste),
               ),
             ],
           );
@@ -122,18 +123,19 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
         if (!mounted) return;
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('알림'),
-            content: const Text(
-              '현재 연결된 파트너가 있어요.\n더 많은 파트너와의 연결은 추후 지원될 예정이에요.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('확인', style: TextStyle(color: AppColors.primary)),
-              ),
-            ],
-          ),
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            return AlertDialog(
+              title: Text(l10n.connectNotice),
+              content: Text(l10n.connectAlreadyConnectedBody),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(l10n.connectOk, style: TextStyle(color: AppColors.primary)),
+                ),
+              ],
+            );
+          },
         );
         return;
       }
@@ -156,7 +158,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
           previous?.value?.flowState != ConnectFlowState.connected) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('연결되었습니다!'),
+            content: Text(AppLocalizations.of(context)!.connectSuccess),
             backgroundColor: AppColors.primary,
           ),
         );

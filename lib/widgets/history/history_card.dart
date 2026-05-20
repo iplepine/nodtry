@@ -216,8 +216,8 @@ class HistoryCard extends ConsumerWidget {
                               context: context,
                               builder: (context) => ActionNoteDialog(
                                 title: item.title,
-                                hintText: "따뜻한 피드백을 남겨주세요 (선택)",
-                                buttonLabel: "그래",
+                                hintText: AppLocalizations.of(context)!.historyCardFeedbackHint,
+                                buttonLabel: AppLocalizations.of(context)!.historyCardFeedbackButton,
                               ),
                             );
 
@@ -241,9 +241,9 @@ class HistoryCard extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text(
-                            "그래",
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          child: Text(
+                            AppLocalizations.of(context)!.historyCardFeedbackButton,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -320,7 +320,7 @@ class HistoryCard extends ConsumerWidget {
         );
       case HistoryStatus.rescued:
         return _StatusDisplayInfo(
-          text: '실천 인정',
+          text: AppLocalizations.of(context)!.historyCardAcknowledgePractice,
           color: AppColors.secondary.withValues(alpha: 0.1),
           textColor: AppColors.secondary,
           icon: Icons.volunteer_activism,

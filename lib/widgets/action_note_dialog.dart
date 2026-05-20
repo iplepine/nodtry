@@ -158,7 +158,7 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
                   keyboardType: TextInputType.multiline,
                   decoration: InputDecoration(
                     hintMaxLines: 2,
-                    hintText: widget.hintText ?? "실천 소감을 남겨보세요 (선택)",
+                    hintText: widget.hintText ?? l10n.actionNoteHintDefault,
                     hintStyle: TextStyle(color: AppColors.textDisabled),
                     filled: true,
                     fillColor: AppColors.surface.withValues(alpha: 0.5),

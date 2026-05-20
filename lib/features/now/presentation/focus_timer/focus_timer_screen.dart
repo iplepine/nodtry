@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../theme/app_colors.dart';
 
 class FocusTimerScreen extends StatefulWidget {
@@ -102,29 +103,30 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
   }
 
   Future<void> _attemptGiveUp() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.background,
         title: Text(
-          '타이머를 그만둘까요?',
+          l10n.focusTimerGiveUpTitle,
           style: TextStyle(color: AppColors.textPrimary),
         ),
         content: Text(
-          '진행 기록은 따로 남지 않아요. 약속은 미처리 상태로 남아요.',
+          l10n.focusTimerGiveUpBody,
           style: TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('계속하기'),
+            child: Text(l10n.focusTimerKeepGoing),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
             ),
-            child: const Text('그만두기'),
+            child: Text(l10n.focusTimerGiveUp),
           ),
         ],
       ),
@@ -144,6 +146,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final remaining = _currentRemaining();
     final progress = _total.inMilliseconds == 0
         ? 0.0
@@ -168,8 +171,8 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
           ),
           title: Text(
             widget.planTitle == null
-                ? '${widget.minutes}분 집중'
-                : '${widget.planTitle} · ${widget.minutes}분',
+                ? l10n.focusTimerHeader(widget.minutes)
+                : l10n.focusTimerHeaderWithPlan(widget.planTitle!, widget.minutes),
             style: TextStyle(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
@@ -214,7 +217,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
                               child: Text(
-                                '잠시 멈춤',
+                                l10n.focusTimerPaused,
                                 style: TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: 14,
@@ -235,7 +238,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
                       Icons.check_circle_outline,
                       size: 22,
                     ),
-                    label: const Text('했어! 지금 끝낼게'),
+                    label: Text(l10n.focusTimerDoneNow),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
@@ -260,7 +263,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
                           foregroundColor: AppColors.textSecondary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        child: Text(paused ? '재개' : '잠시 멈춤'),
+                        child: Text(paused ? l10n.focusTimerResume : l10n.focusTimerPause),
                       ),
                     ),
                     Expanded(
@@ -270,7 +273,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
                           foregroundColor: AppColors.textSecondary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        child: const Text('포기'),
+                        child: Text(l10n.focusTimerGiveUpShort),
                       ),
                     ),
                   ],

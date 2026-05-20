@@ -31,12 +31,12 @@ class HistoryScreen extends ConsumerWidget {
       if (next.hasError && !next.isLoading) {
         if (previous?.hasError != true) {
           final error = next.error;
-          String errorMessage = '알 수 없는 오류가 발생했습니다.';
+          String errorMessage = l10n.historyErrorUnknown;
           String? errorUrl;
 
           if (error.toString().contains('failed-precondition') ||
               error.toString().contains('requires an index')) {
-            errorMessage = '데이터 조회에 필요한 인덱스가 없습니다.\n개발자에게 이 화면을 캡처해서 보내주세요.';
+            errorMessage = l10n.historyErrorIndexMissing;
             final urlRegExp = RegExp(
               r'https://console\.firebase\.google\.com[^\s]*',
             );
@@ -46,41 +46,44 @@ class HistoryScreen extends ConsumerWidget {
             }
           } else if (error.toString().contains('not-found') ||
               error.toString().contains('No document to update')) {
-            errorMessage = '이미 삭제된 기록이거나 약속이라\n리액션을 남길 수 없어요.';
+            errorMessage = l10n.historyErrorAlreadyDeleted;
           } else {
             errorMessage = error.toString();
           }
 
           showDialog(
             context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('오류 발생'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(errorMessage),
-                  if (errorUrl != null) ...[
-                    const SizedBox(height: 16),
-                    const Text(
-                      '생성 링크:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 4),
-                    AppUnderlinedText.selectable(
-                      errorUrl,
-                      style: const TextStyle(color: Colors.blue),
-                    ),
+            builder: (context) {
+              final dl10n = AppLocalizations.of(context)!;
+              return AlertDialog(
+                title: Text(dl10n.historyErrorTitle),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(errorMessage),
+                    if (errorUrl != null) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        dl10n.historyErrorCreationLink,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      AppUnderlinedText.selectable(
+                        errorUrl,
+                        style: const TextStyle(color: Colors.blue),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('확인'),
                 ),
-              ],
-            ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(dl10n.historyOk),
+                  ),
+                ],
+              );
+            },
           );
         }
       }
@@ -118,17 +121,18 @@ class HistoryScreen extends ConsumerWidget {
                     slivers: [
                       // 1. 진행 중인 약속 섹션
                       if (state.activeItems.isNotEmpty) ...[
-                        _buildSectionHeader(context, '진행 중인 약속'),
+                        _buildSectionHeader(context, l10n.historySectionActive),
                         ..._buildGroupedActiveItems(
                           state.activeItems,
                           myUid,
                           ref,
+                          l10n,
                         ),
                       ],
 
                       // 2. 종료된 약속 섹션
                       if (state.finishedPlanSummaries.isNotEmpty) ...[
-                        _buildSectionHeader(context, '종료된 약속'),
+                        _buildSectionHeader(context, l10n.historySectionFinished),
                         SliverList(
                           delegate: SliverChildBuilderDelegate((
                             context,
@@ -189,6 +193,7 @@ class HistoryScreen extends ConsumerWidget {
     List<HistoryItem> items,
     String myUid,
     WidgetRef ref,
+    AppLocalizations l10n,
   ) {
     final grouped = <DateTime, List<HistoryItem>>{};
     for (var item in items) {
@@ -212,7 +217,7 @@ class HistoryScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Text(
-                _formatSectionDate(date),
+                _formatSectionDate(date, l10n),
                 style: TextStyle(color: AppColors.textDisabled, fontSize: 11),
               ),
             ),
@@ -241,14 +246,14 @@ class HistoryScreen extends ConsumerWidget {
     return widgets;
   }
 
-  String _formatSectionDate(DateTime date) {
+  String _formatSectionDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
 
-    if (date == today) return '오늘';
-    if (date == yesterday) return '어제';
-    return DateFormat('yyyy년 M월 d일 (E)', 'ko').format(date);
+    if (date == today) return l10n.historyToday;
+    if (date == yesterday) return l10n.historyYesterday;
+    return DateFormat(l10n.historyDatePattern, l10n.localeName).format(date);
   }
 
   void _showReconcileSheet(
@@ -271,14 +276,14 @@ class HistoryScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '지난 기록 소명하기',
+                l10n.historyReconcileTitle,
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Text(
-                '이 날의 약속, 사실 어땠나요?',
+                l10n.historyReconcileSubtitle,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -299,7 +304,7 @@ class HistoryScreen extends ConsumerWidget {
                 },
               ),
               const SizedBox(height: 12),
-              _buildActionButton(context, '보류할게요', AppColors.textSecondary, () {
+              _buildActionButton(context, l10n.historyReconcileHold, AppColors.textSecondary, () {
                 ref
                     .read(historyViewModelProvider.notifier)
                     .dispatch(ReconcileIntent(item.id, HistoryStatus.rested));
@@ -316,7 +321,7 @@ class HistoryScreen extends ConsumerWidget {
   Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
     return Center(
       child: Text(
-        "아직 기록된 약속이 없어요",
+        l10n.historyEmpty,
         style: TextStyle(color: AppColors.textDisabled),
       ),
     );

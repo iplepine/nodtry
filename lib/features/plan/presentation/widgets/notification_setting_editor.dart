@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../theme/app_colors.dart';
 
@@ -14,6 +15,7 @@ class NotificationSettingEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentAlertOffset = notificationTime.alertOffset;
     final currentTriggerTotal =
         notificationTime.hour * 60 + notificationTime.minute;
@@ -35,7 +37,7 @@ class NotificationSettingEditor extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '알림 설정',
+                  l10n.notifyEditorTitle,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -44,7 +46,7 @@ class NotificationSettingEditor extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  isAlarmOn ? "똑똑이 살아날 시간을 정해요." : "알림 없이 기록만 할게요.",
+                  isAlarmOn ? l10n.notifyEditorSubtitleOn : l10n.notifyEditorSubtitleOff,
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
@@ -80,7 +82,7 @@ class NotificationSettingEditor extends StatelessWidget {
         const SizedBox(height: 24),
 
         Text(
-          '파트너에게 보일 약속 시간',
+          l10n.notifyEditorPromiseTime,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -181,14 +183,14 @@ class NotificationSettingEditor extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '기본 저녁 9시는 하루가 묻히기 전에 파트너가 확인하기 좋은 시간이에요.',
+          l10n.notifyEditorDefaultTimeHint,
           style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 24),
 
         if (isAlarmOn) ...[
           Text(
-            '알림 미리받기',
+            l10n.notifyEditorPrealert,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -202,7 +204,7 @@ class NotificationSettingEditor extends StatelessWidget {
               children: [
                 _buildOffsetChip(
                   0,
-                  '제 시간에',
+                  l10n.notifyEditorOnTime,
                   currentAlertOffset,
                   targetHour,
                   targetMinute,
@@ -211,7 +213,7 @@ class NotificationSettingEditor extends StatelessWidget {
                 const SizedBox(width: 8),
                 _buildOffsetChip(
                   5,
-                  '5분 전',
+                  l10n.notifyEditor5MinBefore,
                   currentAlertOffset,
                   targetHour,
                   targetMinute,
@@ -220,7 +222,7 @@ class NotificationSettingEditor extends StatelessWidget {
                 const SizedBox(width: 8),
                 _buildOffsetChip(
                   10,
-                  '10분 전',
+                  l10n.notifyEditor10MinBefore,
                   currentAlertOffset,
                   targetHour,
                   targetMinute,
@@ -229,7 +231,7 @@ class NotificationSettingEditor extends StatelessWidget {
                 const SizedBox(width: 8),
                 _buildOffsetChip(
                   30,
-                  '30분 전',
+                  l10n.notifyEditor30MinBefore,
                   currentAlertOffset,
                   targetHour,
                   targetMinute,
@@ -238,7 +240,7 @@ class NotificationSettingEditor extends StatelessWidget {
                 const SizedBox(width: 8),
                 _buildOffsetChip(
                   60,
-                  '1시간 전',
+                  l10n.notifyEditor1HourBefore,
                   currentAlertOffset,
                   targetHour,
                   targetMinute,

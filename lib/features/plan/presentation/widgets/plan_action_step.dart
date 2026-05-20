@@ -56,7 +56,7 @@ class PlanActionStep extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          '주로 미루는 약속',
+          l10n.planMostlyProcrastinated,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -101,7 +101,7 @@ class PlanActionStep extends StatelessWidget {
         if (categoryTemplates.isNotEmpty) ...[
           const SizedBox(height: 20),
           Text(
-            '추천 약속',
+            l10n.planRecommendedPromises,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -117,7 +117,7 @@ class PlanActionStep extends StatelessWidget {
               return ChoiceChip(
                 selected: isSelected,
                 onSelected: (_) => onTemplateSelected(template),
-                label: Text('${template.label} · 주 ${template.weeklyCount}'),
+                label: Text(l10n.planTemplatePerWeek(template.label, template.weeklyCount)),
                 avatar: Icon(
                   Icons.bolt_rounded,
                   size: 16,
@@ -143,7 +143,7 @@ class PlanActionStep extends StatelessWidget {
         ],
         const SizedBox(height: 20),
         Text(
-          '내 약속',
+          l10n.planMine,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -178,7 +178,7 @@ class PlanActionStep extends StatelessWidget {
             suffixIcon: controller.text.isEmpty
                 ? null
                 : IconButton(
-                    tooltip: '비우기',
+                    tooltip: l10n.planClearAction,
                     icon: Icon(
                       Icons.close_rounded,
                       color: AppColors.textSecondary,

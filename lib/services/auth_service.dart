@@ -4,8 +4,81 @@ import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
+/// Auth error messages — service runs without BuildContext, so we localize by
+/// device locale. Why: error strings end up in SnackBars via splash_screen
+/// listen; localizing here keeps the service self-contained.
+String _authString(String key) {
+  final locale =
+      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  final isKo = locale.startsWith('ko');
+  switch (key) {
+    case 'appleDisabled':
+      return isKo
+          ? 'Firebase Auth에서 Apple 로그인이 비활성화되어 있습니다. Firebase Console에서 Apple 제공업체를 켜 주세요.'
+          : 'Apple sign-in is disabled in Firebase Auth. Enable the Apple provider in the Firebase Console.';
+    case 'appleInvalidCredential':
+      return isKo
+          ? 'Apple 로그인 자격 증명이 유효하지 않습니다. Apple 로그인 Capability, Bundle ID, Firebase Apple provider 설정을 확인해 주세요.'
+          : 'Apple sign-in credentials are invalid. Check the Apple sign-in capability, Bundle ID, and Firebase Apple provider settings.';
+    case 'appleNonceFailed':
+      return isKo
+          ? 'Apple 로그인 nonce 검증에 실패했습니다. 다시 시도해 주세요.'
+          : 'Apple sign-in nonce verification failed. Please try again.';
+    case 'appleGenericCode':
+      return isKo
+          ? 'Apple 로그인 중 오류가 발생했습니다.'
+          : 'An error occurred during Apple sign-in.';
+    case 'appleCancelled':
+      return isKo
+          ? 'Apple 로그인이 취소되었습니다.'
+          : 'Apple sign-in was cancelled.';
+    case 'appleExportFailed':
+      return isKo
+          ? 'Apple 로그인 자격 증명을 내보내는 중 오류가 발생했습니다.'
+          : 'An error occurred while exporting Apple sign-in credentials.';
+    case 'appleImportFailed':
+      return isKo
+          ? 'Apple 로그인 자격 증명을 가져오는 중 오류가 발생했습니다.'
+          : 'An error occurred while importing Apple sign-in credentials.';
+    case 'appleFailed':
+      return isKo
+          ? 'Apple 로그인에 실패했습니다. 기기 Apple ID 상태를 확인해 주세요.'
+          : 'Apple sign-in failed. Please check your device Apple ID status.';
+    case 'appleBadResponse':
+      return isKo
+          ? 'Apple 로그인 응답이 올바르지 않습니다.'
+          : 'Apple sign-in response is not valid.';
+    case 'appleRequestFailed':
+      return isKo
+          ? 'Apple 로그인 요청을 처리하지 못했습니다.'
+          : "Couldn't process the Apple sign-in request.";
+    case 'appleNotInteractive':
+      return isKo
+          ? 'Apple 로그인 UI를 표시할 수 없는 상태입니다.'
+          : "Can't show the Apple sign-in UI right now.";
+    case 'appleUnknown':
+      return isKo
+          ? 'Apple 로그인 중 알 수 없는 오류가 발생했습니다.'
+          : 'An unknown error occurred during Apple sign-in.';
+    case 'appleUnavailable':
+      return isKo
+          ? '이 기기에서는 Apple 로그인을 사용할 수 없습니다. iOS 설정의 Apple ID 로그인 상태와 Sign in with Apple 지원 여부를 확인해 주세요.'
+          : "Apple sign-in isn't available on this device. Check your iOS Apple ID sign-in status and Sign in with Apple support.";
+    case 'appleNoToken':
+      return isKo
+          ? 'Apple identity token을 받지 못했습니다. 다시 시도해 주세요.'
+          : "Couldn't get the Apple identity token. Please try again.";
+    case 'applePlatformError':
+      return isKo
+          ? 'Apple 로그인 플랫폼 처리 중 오류가 발생했습니다.'
+          : 'A platform error occurred during Apple sign-in.';
+    default:
+      return key;
+  }
+}
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -72,19 +145,15 @@ class AuthService {
   Exception _mapAppleFirebaseException(FirebaseAuthException e) {
     switch (e.code) {
       case 'operation-not-allowed':
-        return Exception(
-          'Firebase Auth에서 Apple 로그인이 비활성화되어 있습니다. Firebase Console에서 Apple 제공업체를 켜 주세요.',
-        );
+        return Exception(_authString('appleDisabled'));
       case 'invalid-credential':
       case 'invalid-oauth-response':
       case 'credential-already-in-use':
-        return Exception(
-          'Apple 로그인 자격 증명이 유효하지 않습니다. Apple 로그인 Capability, Bundle ID, Firebase Apple provider 설정을 확인해 주세요.',
-        );
+        return Exception(_authString('appleInvalidCredential'));
       case 'missing-or-invalid-nonce':
-        return Exception('Apple 로그인 nonce 검증에 실패했습니다. 다시 시도해 주세요.');
+        return Exception(_authString('appleNonceFailed'));
       default:
-        return Exception(e.message ?? 'Apple 로그인 중 오류가 발생했습니다. (${e.code})');
+        return Exception(e.message ?? '${_authString('appleGenericCode')} (${e.code})');
     }
   }
 
@@ -93,23 +162,23 @@ class AuthService {
   ) {
     switch (e.code) {
       case AuthorizationErrorCode.canceled:
-        return Exception('Apple 로그인이 취소되었습니다.');
+        return Exception(_authString('appleCancelled'));
       case AuthorizationErrorCode.credentialExport:
-        return Exception('Apple 로그인 자격 증명을 내보내는 중 오류가 발생했습니다.');
+        return Exception(_authString('appleExportFailed'));
       case AuthorizationErrorCode.credentialImport:
-        return Exception('Apple 로그인 자격 증명을 가져오는 중 오류가 발생했습니다.');
+        return Exception(_authString('appleImportFailed'));
       case AuthorizationErrorCode.failed:
-        return Exception('Apple 로그인에 실패했습니다. 기기 Apple ID 상태를 확인해 주세요.');
+        return Exception(_authString('appleFailed'));
       case AuthorizationErrorCode.invalidResponse:
-        return Exception('Apple 로그인 응답이 올바르지 않습니다.');
+        return Exception(_authString('appleBadResponse'));
       case AuthorizationErrorCode.notHandled:
-        return Exception('Apple 로그인 요청을 처리하지 못했습니다.');
+        return Exception(_authString('appleRequestFailed'));
       case AuthorizationErrorCode.notInteractive:
-        return Exception('Apple 로그인 UI를 표시할 수 없는 상태입니다.');
+        return Exception(_authString('appleNotInteractive'));
       case AuthorizationErrorCode.unknown:
-        return Exception('Apple 로그인 중 알 수 없는 오류가 발생했습니다.');
+        return Exception(_authString('appleUnknown'));
       default:
-        return Exception('Apple 로그인 중 오류가 발생했습니다. (${e.code.name})');
+        return Exception('${_authString('appleGenericCode')} (${e.code.name})');
     }
   }
 
@@ -118,9 +187,7 @@ class AuthService {
     try {
       final isAvailable = await SignInWithApple.isAvailable();
       if (!isAvailable) {
-        throw Exception(
-          '이 기기에서는 Apple 로그인을 사용할 수 없습니다. iOS 설정의 Apple ID 로그인 상태와 Sign in with Apple 지원 여부를 확인해 주세요.',
-        );
+        throw Exception(_authString('appleUnavailable'));
       }
 
       final rawNonce = _generateNonce();
@@ -136,7 +203,7 @@ class AuthService {
 
       final identityToken = appleCredential.identityToken;
       if (identityToken == null || identityToken.isEmpty) {
-        throw Exception('Apple identity token을 받지 못했습니다. 다시 시도해 주세요.');
+        throw Exception(_authString('appleNoToken'));
       }
 
       final oauthCredential = AppleAuthProvider.credentialWithIDToken(
@@ -179,7 +246,7 @@ class AuthService {
     } on PlatformException catch (e) {
       debugPrint("Error signing in with Apple: $e");
       throw Exception(
-        e.message ?? 'Apple 로그인 플랫폼 처리 중 오류가 발생했습니다. (${e.code})',
+        e.message ?? '${_authString('applePlatformError')} (${e.code})',
       );
     } catch (e) {
       debugPrint("Error signing in with Apple: $e");
@@ -195,9 +262,7 @@ class AuthService {
 
       final isAvailable = await SignInWithApple.isAvailable();
       if (!isAvailable) {
-        throw Exception(
-          '이 기기에서는 Apple 로그인을 사용할 수 없습니다. iOS 설정의 Apple ID 로그인 상태와 Sign in with Apple 지원 여부를 확인해 주세요.',
-        );
+        throw Exception(_authString('appleUnavailable'));
       }
 
       final rawNonce = _generateNonce();
@@ -213,7 +278,7 @@ class AuthService {
 
       final identityToken = appleCredential.identityToken;
       if (identityToken == null || identityToken.isEmpty) {
-        throw Exception('Apple identity token을 받지 못했습니다. 다시 시도해 주세요.');
+        throw Exception(_authString('appleNoToken'));
       }
 
       final oauthCredential = AppleAuthProvider.credentialWithIDToken(
@@ -238,7 +303,7 @@ class AuthService {
     } on PlatformException catch (e) {
       debugPrint("Error linking with Apple: $e");
       throw Exception(
-        e.message ?? 'Apple 로그인 플랫폼 처리 중 오류가 발생했습니다. (${e.code})',
+        e.message ?? '${_authString('applePlatformError')} (${e.code})',
       );
     } catch (e) {
       debugPrint("Error linking with Apple: $e");

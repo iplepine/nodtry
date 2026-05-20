@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../models/promise_model.dart';
 import '../../../../theme/app_colors.dart';
@@ -14,11 +15,12 @@ class ActivePromiseChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final promise = plan.promise;
     if (promise == null || promise.status != PromiseStatus.active) {
       return const SizedBox.shrink();
     }
-    final summary = _summarize(plan, promise);
+    final summary = _summarize(l10n, plan, promise);
     if (summary == null) return const SizedBox.shrink();
 
     return InkWell(
@@ -77,7 +79,7 @@ class _Summary {
   });
 }
 
-_Summary? _summarize(Plan plan, Promise promise) {
+_Summary? _summarize(AppLocalizations l10n, Plan plan, Promise promise) {
   final reward = promise.reward;
   final penalty = promise.penalty;
   if (reward == null && penalty == null) return null;
@@ -105,31 +107,31 @@ _Summary? _summarize(Plan plan, Promise promise) {
   // ===== 우선순위 =====
   // 1) 이미 벌칙 확정
   if (failureBuffer != null && failureBuffer < 0) {
-    return _penaltyTriggered(penalty!);
+    return _penaltyTriggered(l10n, penalty!);
   }
 
   // 2) 벌칙 임박 (≤1번 여유)
   if (failureBuffer != null && failureBuffer <= 1) {
-    return _penaltyImminent(penalty!, failureBuffer);
+    return _penaltyImminent(l10n, penalty!, failureBuffer);
   }
 
   // 3) 보상 이미 달성
   if (rewardNeeded != null && rewardNeeded == 0) {
-    return _rewardAchieved(reward!);
+    return _rewardAchieved(l10n, reward!);
   }
 
   // 4) 보상 임박 (≤2일)
   if (rewardNeeded != null && rewardNeeded <= 2) {
-    return _rewardImminent(reward!, rewardNeeded);
+    return _rewardImminent(l10n, reward!, rewardNeeded);
   }
 
   // 5) 양쪽 안전권 — 정보성 한 줄
-  return _safe(reward, rewardNeeded, penalty, failureBuffer);
+  return _safe(l10n, reward, rewardNeeded, penalty, failureBuffer);
 }
 
-_Summary _penaltyTriggered(PromisePenalty penalty) {
+_Summary _penaltyTriggered(AppLocalizations l10n, PromisePenalty penalty) {
   return _Summary(
-    text: '⚡ 벌칙 발동 확정 — ${penalty.description}',
+    text: l10n.promiseChipPenaltyTriggered(penalty.description),
     background: const Color(0xFFFFF1E6),
     border: const Color(0xFFFF8A3D),
     foreground: const Color(0xFFB54708),
@@ -137,10 +139,16 @@ _Summary _penaltyTriggered(PromisePenalty penalty) {
   );
 }
 
-_Summary _penaltyImminent(PromisePenalty penalty, int buffer) {
-  final count = buffer == 0 ? '한 번' : '$buffer번';
+_Summary _penaltyImminent(
+  AppLocalizations l10n,
+  PromisePenalty penalty,
+  int buffer,
+) {
+  final text = buffer == 0
+      ? l10n.promiseChipPenaltyImminentOne(penalty.description)
+      : l10n.promiseChipPenaltyImminent(buffer, penalty.description);
   return _Summary(
-    text: '⚡ $count만 더 실패하면 벌칙 — ${penalty.description}',
+    text: text,
     background: const Color(0xFFFFF1E6),
     border: const Color(0xFFFF8A3D),
     foreground: const Color(0xFFB54708),
@@ -148,9 +156,9 @@ _Summary _penaltyImminent(PromisePenalty penalty, int buffer) {
   );
 }
 
-_Summary _rewardAchieved(PromiseReward reward) {
+_Summary _rewardAchieved(AppLocalizations l10n, PromiseReward reward) {
   return _Summary(
-    text: '🏆 보상 달성! — ${reward.description}',
+    text: l10n.promiseChipRewardAchieved(reward.description),
     background: AppColors.primary.withValues(alpha: 0.12),
     border: AppColors.primary,
     foreground: AppColors.primary,
@@ -158,9 +166,13 @@ _Summary _rewardAchieved(PromiseReward reward) {
   );
 }
 
-_Summary _rewardImminent(PromiseReward reward, int needed) {
+_Summary _rewardImminent(
+  AppLocalizations l10n,
+  PromiseReward reward,
+  int needed,
+) {
   return _Summary(
-    text: '🏆 보상까지 $needed일 더 성공하면 — ${reward.description}',
+    text: l10n.promiseChipRewardImminent(needed, reward.description),
     background: AppColors.primary.withValues(alpha: 0.12),
     border: AppColors.primary,
     foreground: AppColors.primary,
@@ -169,6 +181,7 @@ _Summary _rewardImminent(PromiseReward reward, int needed) {
 }
 
 _Summary _safe(
+  AppLocalizations l10n,
   PromiseReward? reward,
   int? rewardNeeded,
   PromisePenalty? penalty,
@@ -176,11 +189,11 @@ _Summary _safe(
 ) {
   String text;
   if (rewardNeeded != null && failureBuffer != null) {
-    text = '🏆 보상까지 $rewardNeeded일 · ⚡ 벌칙까지 $failureBuffer번 여유';
+    text = l10n.promiseChipSafeBoth(rewardNeeded, failureBuffer);
   } else if (rewardNeeded != null) {
-    text = '🏆 보상까지 $rewardNeeded일 — ${reward!.description}';
+    text = l10n.promiseChipSafeRewardOnly(rewardNeeded, reward!.description);
   } else if (failureBuffer != null) {
-    text = '⚡ 벌칙까지 $failureBuffer번 여유 — ${penalty!.description}';
+    text = l10n.promiseChipSafePenaltyOnly(failureBuffer, penalty!.description);
   } else {
     text = '';
   }
@@ -214,6 +227,7 @@ class _PromiseDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final mediaQuery = MediaQuery.of(context);
     final systemNavInset = mediaQuery.viewPadding.bottom;
     final success = plan.completedDayCount();
@@ -244,7 +258,7 @@ class _PromiseDetailSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '약속 조건',
+            l10n.promiseSheetTitle,
             style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 18,
@@ -253,7 +267,7 @@ class _PromiseDetailSheet extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '플랜 종료 시 정산돼요. 현재 성공 $success일 · 실패 $failed일 · 남은 예정 $remaining일.',
+            l10n.promiseSheetSubtitle(success, failed, remaining),
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 13,
@@ -263,10 +277,12 @@ class _PromiseDetailSheet extends StatelessWidget {
           if (promise.reward != null)
             _RewardOrPenaltyBlock(
               emoji: '🏆',
-              title: '보상',
+              title: l10n.promiseSheetRewardLabel,
               description: promise.reward!.description,
-              targetText:
-                  '${promise.reward!.targetDays}일 성공하면 달성 — 지금 $success일',
+              targetText: l10n.promiseSheetRewardTarget(
+                promise.reward!.targetDays,
+                success,
+              ),
               progress: (success / promise.reward!.targetDays).clamp(0.0, 1.0),
               progressColor: AppColors.primary,
             ),
@@ -275,9 +291,10 @@ class _PromiseDetailSheet extends StatelessWidget {
           if (promise.penalty != null)
             _RewardOrPenaltyBlock(
               emoji: '⚡',
-              title: '벌칙',
+              title: l10n.promiseSheetPenaltyLabel,
               description: promise.penalty!.description,
               targetText: _penaltyDescription(
+                l10n: l10n,
                 penalty: promise.penalty!,
                 success: success,
                 remaining: remaining,
@@ -294,7 +311,7 @@ class _PromiseDetailSheet extends StatelessWidget {
                 foregroundColor: AppColors.textSecondary,
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              child: const Text('닫기'),
+              child: Text(l10n.promiseSheetClose),
             ),
           ),
         ],
@@ -304,6 +321,7 @@ class _PromiseDetailSheet extends StatelessWidget {
 }
 
 String _penaltyDescription({
+  required AppLocalizations l10n,
   required PromisePenalty penalty,
   required int success,
   required int remaining,
@@ -311,12 +329,12 @@ String _penaltyDescription({
   final maxPossible = success + remaining;
   final buffer = maxPossible - penalty.targetDays;
   if (buffer < 0) {
-    return '${penalty.targetDays}일 성공이 필요한데 더 이상 도달할 수 없어요 — 벌칙 발동 확정';
+    return l10n.promiseSheetPenaltyImpossible(penalty.targetDays);
   }
   if (buffer == 0) {
-    return '${penalty.targetDays}일 성공 미만 시 발동 — 한 번도 더 실패할 수 없음';
+    return l10n.promiseSheetPenaltyJustOne(penalty.targetDays);
   }
-  return '${penalty.targetDays}일 성공 미만 시 발동 — $buffer번 더 실패해도 안전';
+  return l10n.promiseSheetPenaltyBuffer(penalty.targetDays, buffer);
 }
 
 class _RewardOrPenaltyBlock extends StatelessWidget {
