@@ -1,8 +1,10 @@
 require "shellwords"
 
-# CocoaPods/Flutter ipa 빌드는 UTF-8 locale을 요구한다.
-ENV["LANG"] ||= "en_US.UTF-8"
-ENV["LC_ALL"] ||= "en_US.UTF-8"
+# CocoaPods/Flutter ipa 빌드와 deliver의 한국어 메타데이터 처리는 UTF-8 locale을 요구한다.
+# `||=`는 빈 문자열("")을 truthy로 보고 덮어쓰지 않으므로, 명시적으로 force해야
+# LANG/LC_ALL이 비어있을 때 deliver의 `String#strip`가 invalid byte sequence로 터지지 않는다.
+ENV["LANG"] = "en_US.UTF-8" if ENV["LANG"].nil? || ENV["LANG"].empty?
+ENV["LC_ALL"] = "en_US.UTF-8" if ENV["LC_ALL"].nil? || ENV["LC_ALL"].empty?
 
 default_platform(:ios)
 
@@ -57,6 +59,28 @@ platform :ios do
       force: true,
       skip_screenshots: false,
       skip_metadata: false,
+      copyright: copyright_text,
+      precheck_include_in_app_purchases: false
+    )
+  end
+
+  desc "Upload screenshots + metadata only, do NOT submit for review"
+  lane :upload_assets do
+    api_key = app_store_connect_api_key(
+      key_id: "XXU6VU63TR",
+      issuer_id: "6b17b540-3b79-4d8c-beaf-ca1c83e566f1",
+      key_filepath: "./fastlane/AuthKey_XXU6VU63TR.p8"
+    )
+    prepare_release_notes
+    upload_to_app_store(
+      api_key: api_key,
+      app_version: app_store_version,
+      force: true,
+      skip_binary_upload: true,
+      skip_screenshots: false,
+      skip_metadata: false,
+      skip_app_version_update: true,
+      submit_for_review: false,
       copyright: copyright_text,
       precheck_include_in_app_purchases: false
     )

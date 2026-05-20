@@ -1,4 +1,6 @@
 What's New
 
-- Translated the "Buy the developer a coffee" entry for English users.
-- Polished the app's display name and home-screen label so they stay consistent across regions.
+- New "Start Now (Focus Timer)" button on practice cards. Pick 5/10/25 min or enter a custom duration; when the timer ends, the done-note dialog opens automatically.
+- While a reward/penalty promise is active, the practice card now shows a one-line chip like "1 more miss triggers the penalty" or "2 more days to the reward". Tap for full conditions and a progress bar.
+- Focus timer now has a "Done now" button — finish early without waiting for the timer, and the note auto-fills with "Focused for X min Y sec!".
+- Fixed: the focus duration picker was being clipped by the system navigation area at the bottom of the screen.
