@@ -25,10 +25,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final settingsState =
         ref.watch(settingsViewModelProvider).value ??
-        SettingsState(
-          currentLocale: const Locale('ko', ''),
-          currentTheme: AppThemeType.smokyPlum,
-        );
+        const SettingsState(currentTheme: AppThemeType.smokyPlum);
+    // When the user hasn't explicitly chosen a language, resolve which chip to
+    // highlight from the actual locale Flutter is rendering with.
+    final effectiveLocale =
+        settingsState.currentLocale ?? Localizations.localeOf(context);
 
     // 연결 끊기 성공 시 토스트 처리 등 (Listen)
     ref.listen(settingsViewModelProvider, (previous, next) {
@@ -89,7 +90,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 context,
                 l10n.settingsLanguageKorean,
                 const Locale('ko', ''),
-                settingsState.currentLocale,
+                effectiveLocale,
                 () => ref
                     .read(settingsViewModelProvider.notifier)
                     .dispatch(const ChangeLocaleIntent(Locale('ko', ''))),
@@ -99,7 +100,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 context,
                 l10n.settingsLanguageEnglish,
                 const Locale('en', ''),
-                settingsState.currentLocale,
+                effectiveLocale,
                 () => ref
                     .read(settingsViewModelProvider.notifier)
                     .dispatch(const ChangeLocaleIntent(Locale('en', ''))),

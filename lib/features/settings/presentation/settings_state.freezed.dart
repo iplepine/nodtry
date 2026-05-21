@@ -14,7 +14,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SettingsState {
 
- Locale get currentLocale; AppThemeType get currentTheme; bool get isWithdrawing; String? get errorMessage;
+// null = follow system locale (no explicit user override).
+ Locale? get currentLocale; AppThemeType get currentTheme; bool get isWithdrawing; String? get errorMessage;
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +46,7 @@ abstract mixin class $SettingsStateCopyWith<$Res>  {
   factory $SettingsStateCopyWith(SettingsState value, $Res Function(SettingsState) _then) = _$SettingsStateCopyWithImpl;
 @useResult
 $Res call({
- Locale currentLocale, AppThemeType currentTheme, bool isWithdrawing, String? errorMessage
+ Locale? currentLocale, AppThemeType currentTheme, bool isWithdrawing, String? errorMessage
 });
 
 
@@ -62,10 +63,10 @@ class _$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currentLocale = null,Object? currentTheme = null,Object? isWithdrawing = null,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currentLocale = freezed,Object? currentTheme = null,Object? isWithdrawing = null,Object? errorMessage = freezed,}) {
   return _then(_self.copyWith(
-currentLocale: null == currentLocale ? _self.currentLocale : currentLocale // ignore: cast_nullable_to_non_nullable
-as Locale,currentTheme: null == currentTheme ? _self.currentTheme : currentTheme // ignore: cast_nullable_to_non_nullable
+currentLocale: freezed == currentLocale ? _self.currentLocale : currentLocale // ignore: cast_nullable_to_non_nullable
+as Locale?,currentTheme: null == currentTheme ? _self.currentTheme : currentTheme // ignore: cast_nullable_to_non_nullable
 as AppThemeType,isWithdrawing: null == isWithdrawing ? _self.isWithdrawing : isWithdrawing // ignore: cast_nullable_to_non_nullable
 as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -153,7 +154,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Locale currentLocale,  AppThemeType currentTheme,  bool isWithdrawing,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Locale? currentLocale,  AppThemeType currentTheme,  bool isWithdrawing,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
 return $default(_that.currentLocale,_that.currentTheme,_that.isWithdrawing,_that.errorMessage);case _:
@@ -174,7 +175,7 @@ return $default(_that.currentLocale,_that.currentTheme,_that.isWithdrawing,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Locale currentLocale,  AppThemeType currentTheme,  bool isWithdrawing,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Locale? currentLocale,  AppThemeType currentTheme,  bool isWithdrawing,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState():
 return $default(_that.currentLocale,_that.currentTheme,_that.isWithdrawing,_that.errorMessage);case _:
@@ -194,7 +195,7 @@ return $default(_that.currentLocale,_that.currentTheme,_that.isWithdrawing,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Locale currentLocale,  AppThemeType currentTheme,  bool isWithdrawing,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Locale? currentLocale,  AppThemeType currentTheme,  bool isWithdrawing,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
 return $default(_that.currentLocale,_that.currentTheme,_that.isWithdrawing,_that.errorMessage);case _:
@@ -209,10 +210,11 @@ return $default(_that.currentLocale,_that.currentTheme,_that.isWithdrawing,_that
 
 
 class _SettingsState implements SettingsState {
-  const _SettingsState({required this.currentLocale, required this.currentTheme, this.isWithdrawing = false, this.errorMessage});
+  const _SettingsState({this.currentLocale, required this.currentTheme, this.isWithdrawing = false, this.errorMessage});
   
 
-@override final  Locale currentLocale;
+// null = follow system locale (no explicit user override).
+@override final  Locale? currentLocale;
 @override final  AppThemeType currentTheme;
 @override@JsonKey() final  bool isWithdrawing;
 @override final  String? errorMessage;
@@ -247,7 +249,7 @@ abstract mixin class _$SettingsStateCopyWith<$Res> implements $SettingsStateCopy
   factory _$SettingsStateCopyWith(_SettingsState value, $Res Function(_SettingsState) _then) = __$SettingsStateCopyWithImpl;
 @override @useResult
 $Res call({
- Locale currentLocale, AppThemeType currentTheme, bool isWithdrawing, String? errorMessage
+ Locale? currentLocale, AppThemeType currentTheme, bool isWithdrawing, String? errorMessage
 });
 
 
@@ -264,10 +266,10 @@ class __$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currentLocale = null,Object? currentTheme = null,Object? isWithdrawing = null,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currentLocale = freezed,Object? currentTheme = null,Object? isWithdrawing = null,Object? errorMessage = freezed,}) {
   return _then(_SettingsState(
-currentLocale: null == currentLocale ? _self.currentLocale : currentLocale // ignore: cast_nullable_to_non_nullable
-as Locale,currentTheme: null == currentTheme ? _self.currentTheme : currentTheme // ignore: cast_nullable_to_non_nullable
+currentLocale: freezed == currentLocale ? _self.currentLocale : currentLocale // ignore: cast_nullable_to_non_nullable
+as Locale?,currentTheme: null == currentTheme ? _self.currentTheme : currentTheme // ignore: cast_nullable_to_non_nullable
 as AppThemeType,isWithdrawing: null == isWithdrawing ? _self.isWithdrawing : isWithdrawing // ignore: cast_nullable_to_non_nullable
 as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,

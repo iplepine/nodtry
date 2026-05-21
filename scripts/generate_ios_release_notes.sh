@@ -100,6 +100,21 @@ if grep -Eq '(focus timer UX|집중 타이머 UX|focus timer button|focusTimer C
     "Fixed: the focus duration picker was being clipped by the system navigation area at the bottom of the screen."
 fi
 
+if grep -Eq '(system locale|follow.*locale|follow.*system|device language|persist.*locale|locale.*persist|nullable locale)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "앱을 처음 실행할 때 기기 언어 설정을 따라가요. 한국어 기기는 한국어로, 영어 기기는 영어로 자동 시작합니다." \
+    "The app now starts in your device's language on first launch — Korean for Korean devices, English for English devices."
+  add_note \
+    "설정에서 직접 바꾼 언어는 다음 실행에서도 그대로 유지돼요." \
+    "Any language you pick in Settings is remembered for next time."
+fi
+
+if grep -Eq '(full English localization|English translation|i18n|localize|localization)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "약속 만들기, 알림, 집중 타이머 등 앱 곳곳의 텍스트를 영어로도 자연스럽게 번역했어요." \
+    "Polished the English translation across plan creation, notifications, focus timer, and more."
+fi
+
 if [ "${#KO_NOTES[@]}" -eq 0 ]; then
   add_note \
     "안정성 및 사용성을 개선했어요." \

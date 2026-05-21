@@ -3,14 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme_enum.dart';
+import 'repository_provider.dart';
 
 part 'app_settings_provider.freezed.dart';
+
+/// SharedPreferences key for the user's explicit locale override.
+/// Stored as the language code ("ko", "en"). Absent or empty = follow system.
+const _kLocaleOverrideKey = 'app.locale_override';
 
 @freezed
 abstract class AppSettingsState with _$AppSettingsState {
   const factory AppSettingsState({
     @Default(AppThemeType.smokyPlum) AppThemeType currentTheme,
-    @Default(Locale('ko', '')) Locale currentLocale,
+    // null = follow device locale (resolved by Flutter via supportedLocales).
+    // non-null = user explicitly overrode in Settings (persisted to prefs).
+    @Default(null) Locale? currentLocale,
   }) = _AppSettingsState;
 }
 
@@ -18,7 +25,13 @@ abstract class AppSettingsState with _$AppSettingsState {
 class AppSettingsNotifier extends Notifier<AppSettingsState> {
   @override
   AppSettingsState build() {
-    return const AppSettingsState();
+    final prefs = ref.read(sharedPreferencesProvider);
+    final stored = prefs.getString(_kLocaleOverrideKey);
+    Locale? initialLocale;
+    if (stored != null && stored.isNotEmpty) {
+      initialLocale = Locale(stored, '');
+    }
+    return AppSettingsState(currentLocale: initialLocale);
   }
 
   /// 테마 변경
@@ -29,10 +42,16 @@ class AppSettingsNotifier extends Notifier<AppSettingsState> {
     }
   }
 
-  /// 언어 변경
-  void setLocale(Locale locale) {
-    if (state.currentLocale != locale) {
-      state = state.copyWith(currentLocale: locale);
+  /// 언어 변경 — 사용자가 명시적으로 고른 값을 prefs에 persist 한다.
+  /// null을 넘기면 override를 비우고 시스템 로케일을 따라가도록 한다.
+  void setLocale(Locale? locale) {
+    if (state.currentLocale == locale) return;
+    state = state.copyWith(currentLocale: locale);
+    final prefs = ref.read(sharedPreferencesProvider);
+    if (locale == null) {
+      prefs.remove(_kLocaleOverrideKey);
+    } else {
+      prefs.setString(_kLocaleOverrideKey, locale.languageCode);
     }
   }
 }

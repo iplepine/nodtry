@@ -14,7 +14,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppSettingsState {
 
- AppThemeType get currentTheme; Locale get currentLocale;
+ AppThemeType get currentTheme;// null = follow device locale (resolved by Flutter via supportedLocales).
+// non-null = user explicitly overrode in Settings (persisted to prefs).
+ Locale? get currentLocale;
 /// Create a copy of AppSettingsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +47,7 @@ abstract mixin class $AppSettingsStateCopyWith<$Res>  {
   factory $AppSettingsStateCopyWith(AppSettingsState value, $Res Function(AppSettingsState) _then) = _$AppSettingsStateCopyWithImpl;
 @useResult
 $Res call({
- AppThemeType currentTheme, Locale currentLocale
+ AppThemeType currentTheme, Locale? currentLocale
 });
 
 
@@ -62,11 +64,11 @@ class _$AppSettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of AppSettingsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currentTheme = null,Object? currentLocale = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currentTheme = null,Object? currentLocale = freezed,}) {
   return _then(_self.copyWith(
 currentTheme: null == currentTheme ? _self.currentTheme : currentTheme // ignore: cast_nullable_to_non_nullable
-as AppThemeType,currentLocale: null == currentLocale ? _self.currentLocale : currentLocale // ignore: cast_nullable_to_non_nullable
-as Locale,
+as AppThemeType,currentLocale: freezed == currentLocale ? _self.currentLocale : currentLocale // ignore: cast_nullable_to_non_nullable
+as Locale?,
   ));
 }
 
@@ -151,7 +153,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppThemeType currentTheme,  Locale currentLocale)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppThemeType currentTheme,  Locale? currentLocale)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppSettingsState() when $default != null:
 return $default(_that.currentTheme,_that.currentLocale);case _:
@@ -172,7 +174,7 @@ return $default(_that.currentTheme,_that.currentLocale);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppThemeType currentTheme,  Locale currentLocale)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppThemeType currentTheme,  Locale? currentLocale)  $default,) {final _that = this;
 switch (_that) {
 case _AppSettingsState():
 return $default(_that.currentTheme,_that.currentLocale);case _:
@@ -192,7 +194,7 @@ return $default(_that.currentTheme,_that.currentLocale);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppThemeType currentTheme,  Locale currentLocale)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppThemeType currentTheme,  Locale? currentLocale)?  $default,) {final _that = this;
 switch (_that) {
 case _AppSettingsState() when $default != null:
 return $default(_that.currentTheme,_that.currentLocale);case _:
@@ -207,11 +209,13 @@ return $default(_that.currentTheme,_that.currentLocale);case _:
 
 
 class _AppSettingsState implements AppSettingsState {
-  const _AppSettingsState({this.currentTheme = AppThemeType.smokyPlum, this.currentLocale = const Locale('ko', '')});
+  const _AppSettingsState({this.currentTheme = AppThemeType.smokyPlum, this.currentLocale = null});
   
 
 @override@JsonKey() final  AppThemeType currentTheme;
-@override@JsonKey() final  Locale currentLocale;
+// null = follow device locale (resolved by Flutter via supportedLocales).
+// non-null = user explicitly overrode in Settings (persisted to prefs).
+@override@JsonKey() final  Locale? currentLocale;
 
 /// Create a copy of AppSettingsState
 /// with the given fields replaced by the non-null parameter values.
@@ -243,7 +247,7 @@ abstract mixin class _$AppSettingsStateCopyWith<$Res> implements $AppSettingsSta
   factory _$AppSettingsStateCopyWith(_AppSettingsState value, $Res Function(_AppSettingsState) _then) = __$AppSettingsStateCopyWithImpl;
 @override @useResult
 $Res call({
- AppThemeType currentTheme, Locale currentLocale
+ AppThemeType currentTheme, Locale? currentLocale
 });
 
 
@@ -260,11 +264,11 @@ class __$AppSettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of AppSettingsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currentTheme = null,Object? currentLocale = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currentTheme = null,Object? currentLocale = freezed,}) {
   return _then(_AppSettingsState(
 currentTheme: null == currentTheme ? _self.currentTheme : currentTheme // ignore: cast_nullable_to_non_nullable
-as AppThemeType,currentLocale: null == currentLocale ? _self.currentLocale : currentLocale // ignore: cast_nullable_to_non_nullable
-as Locale,
+as AppThemeType,currentLocale: freezed == currentLocale ? _self.currentLocale : currentLocale // ignore: cast_nullable_to_non_nullable
+as Locale?,
   ));
 }
 

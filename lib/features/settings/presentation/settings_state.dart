@@ -7,7 +7,8 @@ part 'settings_state.freezed.dart';
 @freezed
 abstract class SettingsState with _$SettingsState {
   const factory SettingsState({
-    required Locale currentLocale,
+    // null = follow system locale (no explicit user override).
+    Locale? currentLocale,
     required AppThemeType currentTheme,
     @Default(false) bool isWithdrawing,
     String? errorMessage,
