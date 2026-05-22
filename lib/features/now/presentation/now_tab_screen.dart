@@ -1970,7 +1970,102 @@ class _PrimaryExecutorCard extends StatelessWidget {
         model.state == HomeCardState.overdue;
   }
 
+  /// TodayComplete + 다중 플랜용 메시지 영역.
+  /// 카운트 헤드라인 + 각 플랜의 체크리스트 row(스트릭이 있으면 작은 뱃지).
+  Widget _buildMultiPlanCompleteMessage(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    final plans = model.completedPlans;
+    final children = <Widget>[
+      Text(
+        l10n.nowTodayAllDone(plans.length),
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.bold,
+          height: 1.5,
+        ),
+        textAlign: TextAlign.left,
+      ),
+      const SizedBox(height: 12),
+    ];
+
+    for (var i = 0; i < plans.length; i++) {
+      if (i > 0) children.add(const SizedBox(height: 8));
+      children.add(_buildCompletedPlanRow(context, plans[i]));
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
+    );
+  }
+
+  Widget _buildCompletedPlanRow(BuildContext context, Plan plan) {
+    final title = plan.items.firstOrNull?.title ?? '';
+    final streak = plan.currentStreak;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(
+            Icons.check_circle,
+            size: 18,
+            color: AppColors.primary,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppColors.textPrimary,
+              height: 1.4,
+            ),
+          ),
+        ),
+        if (streak >= 2) ...[
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.local_fire_department,
+                  size: 12,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  '$streak',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildMessage(BuildContext context, AppLocalizations l10n) {
+    // 오늘 완료한 플랜이 둘 이상이면 체크리스트로 보여줘 성취의 규모가 드러나게 한다.
+    if (model.state == HomeCardState.todayComplete &&
+        model.completedPlans.length >= 2) {
+      return _buildMultiPlanCompleteMessage(context, l10n);
+    }
+
     final title = model.plan?.items.firstOrNull?.title;
     final List<Widget> children = [];
 

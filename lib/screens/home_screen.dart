@@ -52,40 +52,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: SafeArea(
               top: false,
-              child: BottomNavigationBar(
-                currentIndex: _currentIndex,
-                onTap: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                selectedItemColor: AppColors.primary,
-                unselectedItemColor: AppColors.textDisabled,
-                selectedLabelStyle: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              child: NavigationBarTheme(
+                data: NavigationBarThemeData(
+                  backgroundColor: Colors.transparent,
+                  indicatorColor: AppColors.primary.withValues(alpha: 0.15),
+                  labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                    final selected = states.contains(WidgetState.selected);
+                    return TextStyle(
+                      fontSize: 12,
+                      fontWeight: selected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                      color: selected
+                          ? AppColors.primary
+                          : AppColors.textDisabled,
+                    );
+                  }),
+                  iconTheme: WidgetStateProperty.resolveWith((states) {
+                    final selected = states.contains(WidgetState.selected);
+                    return IconThemeData(
+                      color: selected
+                          ? AppColors.primary
+                          : AppColors.textDisabled,
+                    );
+                  }),
                 ),
-                unselectedLabelStyle: const TextStyle(fontSize: 12),
-                items: [
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.today_outlined),
-                    activeIcon: const Icon(Icons.today),
-                    label: l10n.tabNow,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.history_outlined),
-                    activeIcon: const Icon(Icons.history),
-                    label: l10n.tabHistory,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.favorite_outline),
-                    activeIcon: const Icon(Icons.favorite),
-                    label: l10n.tabUs,
-                  ),
-                ],
+                child: NavigationBar(
+                  selectedIndex: _currentIndex,
+                  onDestinationSelected: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  height: 68,
+                  labelBehavior:
+                      NavigationDestinationLabelBehavior.alwaysShow,
+                  destinations: [
+                    NavigationDestination(
+                      icon: const Icon(Icons.bolt_outlined),
+                      selectedIcon: const Icon(Icons.bolt),
+                      label: l10n.tabNow,
+                    ),
+                    NavigationDestination(
+                      icon: const Icon(Icons.history_outlined),
+                      selectedIcon: const Icon(Icons.history),
+                      label: l10n.tabHistory,
+                    ),
+                    NavigationDestination(
+                      icon: const Icon(Icons.favorite_outline),
+                      selectedIcon: const Icon(Icons.favorite),
+                      label: l10n.tabUs,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

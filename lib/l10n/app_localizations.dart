@@ -626,6 +626,12 @@ abstract class AppLocalizations {
   /// **'Took care of everything today 🙌'**
   String get nowTodayDone;
 
+  /// Headline when multiple plans were completed today
+  ///
+  /// In en, this message translates to:
+  /// **'Took care of all {count} today 🙌'**
+  String nowTodayAllDone(int count);
+
   /// Partner plan share - proposed
   ///
   /// In en, this message translates to:

@@ -361,6 +361,13 @@
   "@nowTodayDone": {
     "description": "Message when all tasks are done"
   },
+  "nowTodayAllDone": "Took care of all {count} today 🙌",
+  "@nowTodayAllDone": {
+    "description": "Headline when multiple plans were completed today",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "nowPartnerProposed": "Proposed this promise",
   "@nowPartnerProposed": {
     "description": "Partner plan share - proposed"

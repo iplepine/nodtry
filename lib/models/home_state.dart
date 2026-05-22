@@ -250,6 +250,10 @@ class HomeCardModel {
   final int? streakCount; // 연속 달성 횟수
   final bool canRescue; // 파트너가 실천 인정 가능 여부
 
+  /// 오늘 완료한 모든 플랜 (todayComplete 상태일 때만 채워짐).
+  /// 길이가 2 이상이면 체크리스트 형태로 렌더링.
+  final List<Plan> completedPlans;
+
   const HomeCardModel({
     required this.state,
     this.plan,
@@ -262,6 +266,7 @@ class HomeCardModel {
     this.totalWeeks,
     this.streakCount,
     this.canRescue = false,
+    this.completedPlans = const [],
   });
 
   HomeCardModel copyWith({
@@ -276,6 +281,7 @@ class HomeCardModel {
     int? totalWeeks,
     int? streakCount,
     bool? canRescue,
+    List<Plan>? completedPlans,
   }) {
     return HomeCardModel(
       state: state ?? this.state,
@@ -289,6 +295,7 @@ class HomeCardModel {
       totalWeeks: totalWeeks ?? this.totalWeeks,
       streakCount: streakCount ?? this.streakCount,
       canRescue: canRescue ?? this.canRescue,
+      completedPlans: completedPlans ?? this.completedPlans,
     );
   }
 
@@ -307,7 +314,8 @@ class HomeCardModel {
           currentWeek == other.currentWeek &&
           totalWeeks == other.totalWeeks &&
           streakCount == other.streakCount &&
-          canRescue == other.canRescue;
+          canRescue == other.canRescue &&
+          _listEquals(completedPlans, other.completedPlans);
 
   @override
   int get hashCode =>
@@ -321,5 +329,15 @@ class HomeCardModel {
       currentWeek.hashCode ^
       totalWeeks.hashCode ^
       streakCount.hashCode ^
-      canRescue.hashCode;
+      canRescue.hashCode ^
+      Object.hashAll(completedPlans.map((p) => p.id));
+}
+
+bool _listEquals(List<Plan> a, List<Plan> b) {
+  if (identical(a, b)) return true;
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i].id != b[i].id) return false;
+  }
+  return true;
 }

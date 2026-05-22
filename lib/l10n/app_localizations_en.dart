@@ -295,6 +295,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowTodayDone => 'Took care of everything today 🙌';
 
   @override
+  String nowTodayAllDone(int count) {
+    return 'Took care of all $count today 🙌';
+  }
+
+  @override
   String get nowPartnerProposed => 'Proposed this promise';
 
   @override

@@ -291,6 +291,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowTodayDone => '오늘 약속은 다 챙겼어요 🙌';
 
   @override
+  String nowTodayAllDone(int count) {
+    return '오늘 $count개 다 챙겼어요 🙌';
+  }
+
+  @override
   String get nowPartnerProposed => '이런 약속을 제안했어요';
 
   @override

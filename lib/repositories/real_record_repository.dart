@@ -511,16 +511,28 @@ class RealRecordRepository implements RecordRepository {
         mineCards.add(const HomeCardModel(state: HomeCardState.emptyPlan));
       } else if (hasAnyPlanToday) {
         // 오늘 계획은 있었는데 모두 완료함 -> TodayComplete
-        // 스트릭 계산하여 주입
-        final activePlan = myPlans
-            .where((p) => p.state == PlanState.active)
-            .firstOrNull;
-        final streak = activePlan?.currentStreak ?? 0;
+        // 오늘 일정이 있던 모든 플랜 중 완료된 것을 모두 수집해서
+        // 체크리스트로 보여줄 수 있도록 completedPlans에 담는다.
+        final completedToday = myPlans
+            .where(
+              (p) =>
+                  p.state == PlanState.active &&
+                  _hasScheduledItemOn(p, todayWeekday) &&
+                  _isPlanActiveOn(p, today) &&
+                  _containsDate(p.completedDates, today),
+            )
+            .toList();
+
+        // 단일 플랜 케이스 호환: 기존 plan/streak 표시 로직을 유지한다.
+        final headlinePlan = completedToday.firstOrNull
+            ?? myPlans.where((p) => p.state == PlanState.active).firstOrNull;
+        final streak = headlinePlan?.currentStreak ?? 0;
         mineCards.add(
           HomeCardModel(
             state: HomeCardState.todayComplete,
-            plan: activePlan,
+            plan: headlinePlan,
             streakCount: streak >= 2 ? streak : null,
+            completedPlans: completedToday,
           ),
         );
       } else {
