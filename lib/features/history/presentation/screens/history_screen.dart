@@ -119,10 +119,21 @@ class HistoryScreen extends ConsumerWidget {
 
                   return CustomScrollView(
                     slivers: [
+                      // 0. 주간 펄스 카드 — 진행 중인 약속이 하나라도 있을 때.
+                      if (state.activeItems.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: _WeeklyPulseCard(
+                            items: state.activeItems,
+                            myUid: myUid,
+                            l10n: l10n,
+                          ),
+                        ),
+
                       // 1. 진행 중인 약속 섹션
                       if (state.activeItems.isNotEmpty) ...[
                         _buildSectionHeader(context, l10n.historySectionActive),
                         ..._buildGroupedActiveItems(
+                          context,
                           state.activeItems,
                           myUid,
                           ref,
@@ -190,6 +201,7 @@ class HistoryScreen extends ConsumerWidget {
   }
 
   List<Widget> _buildGroupedActiveItems(
+    BuildContext context,
     List<HistoryItem> items,
     String myUid,
     WidgetRef ref,
@@ -203,6 +215,11 @@ class HistoryScreen extends ConsumerWidget {
 
     final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
     final widgets = <Widget>[];
+
+    // 직전 카드의 plan id를 추적해서 같은 plan이 이어질 때 제목 반복을 생략한다.
+    // (날짜 그룹 경계는 무시: 같은 약속이 연속 며칠이면 제목 노이즈가 크기 때문.)
+    String? prevPlanId;
+    bool isFirstItem = true;
 
     for (var date in sortedDates) {
       // 날짜 헤더
@@ -225,22 +242,26 @@ class HistoryScreen extends ConsumerWidget {
         ),
       );
 
-      // 해당 날짜의 아이템들
+      // 해당 날짜의 아이템들 — 직전 비교를 위해 SliverToBoxAdapter로 풀어서 추가.
       final dateItems = grouped[date]!;
-      widgets.add(
-        SliverList(
-          delegate: SliverChildBuilderDelegate((context, index) {
-            final item = dateItems[index];
-            final isMe = item.executorId == myUid || item.executorId == 'me';
+      for (var item in dateItems) {
+        final isMe = item.executorId == myUid || item.executorId == 'me';
+        final showTitle = isFirstItem || item.planId != prevPlanId || item.planId == null;
 
-            return HistoryCard(
+        widgets.add(
+          SliverToBoxAdapter(
+            child: HistoryCard(
               item: item,
               isMe: isMe,
+              showTitle: showTitle,
               onReconcile: () => _showReconcileSheet(context, ref, item),
-            );
-          }, childCount: dateItems.length),
-        ),
-      );
+            ),
+          ),
+        );
+
+        prevPlanId = item.planId;
+        isFirstItem = false;
+      }
     }
 
     return widgets;
@@ -444,6 +465,256 @@ class HistoryScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// 상단 주간 펄스 카드.
+/// 이번 주(월~일)에 나/파트너가 한 행동을 작은 dot row로 시각화한다.
+/// 행동 디자이너 페르소나 김민서가 권한 "ledger → milestone" 전환의 핵심.
+class _WeeklyPulseCard extends StatelessWidget {
+  final List<HistoryItem> items;
+  final String myUid;
+  final AppLocalizations l10n;
+
+  const _WeeklyPulseCard({
+    required this.items,
+    required this.myUid,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    // 월요일 시작 (한국 관례)
+    final today = DateTime(now.year, now.month, now.day);
+    final monday = today.subtract(Duration(days: today.weekday - 1));
+
+    // 7일 × [내 done, 파트너 done] 도트 계산
+    final myDots = <bool>[];
+    final partnerDots = <bool>[];
+    for (var i = 0; i < 7; i++) {
+      final day = monday.add(Duration(days: i));
+      myDots.add(_hasDoneOn(day, myUid: true));
+      partnerDots.add(_hasDoneOn(day, myUid: false));
+    }
+
+    final myCount = myDots.where((d) => d).length;
+    final partnerCount = partnerDots.where((d) => d).length;
+    final hasPartnerData = items.any((it) => it.executorId != myUid);
+    final todayIndex = today.difference(monday).inDays.clamp(0, 6);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.outline.withValues(alpha: 0.5),
+          width: 0.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            spreadRadius: -2,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 헤드라인: "이번 주" + 작은 카운트 (나 / 파트너)
+          Row(
+            children: [
+              Text(
+                l10n.historyWeeklyPulseTitle,
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              if (hasPartnerData) ...[
+                _CountChip(
+                  label: l10n.historyWeeklyMeLabel,
+                  count: myCount,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: 6),
+                _CountChip(
+                  label: l10n.historyWeeklyPartnerLabel,
+                  count: partnerCount,
+                  color: AppColors.secondary,
+                ),
+              ] else ...[
+                _CountChip(
+                  label: l10n.historyWeeklyMeLabel,
+                  count: myCount,
+                  color: AppColors.primary,
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 14),
+          // 요일 라벨
+          _WeekdayLabels(monday: monday, todayIndex: todayIndex),
+          const SizedBox(height: 6),
+          // 내 도트 행
+          _PulseDotRow(
+            dots: myDots,
+            todayIndex: todayIndex,
+            color: AppColors.primary,
+          ),
+          if (hasPartnerData) ...[
+            const SizedBox(height: 6),
+            _PulseDotRow(
+              dots: partnerDots,
+              todayIndex: todayIndex,
+              color: AppColors.secondary,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  bool _hasDoneOn(DateTime day, {required bool myUid}) {
+    return items.any((it) {
+      final sameDay =
+          it.date.year == day.year &&
+          it.date.month == day.month &&
+          it.date.day == day.day;
+      if (!sameDay) return false;
+      final isMine = it.executorId == this.myUid || it.executorId == 'me';
+      if (myUid != isMine) return false;
+      return it.status == HistoryStatus.done ||
+          it.status == HistoryStatus.verified ||
+          it.status == HistoryStatus.actuallyDone ||
+          it.status == HistoryStatus.rescued;
+    });
+  }
+}
+
+class _WeekdayLabels extends StatelessWidget {
+  final DateTime monday;
+  final int todayIndex;
+
+  const _WeekdayLabels({required this.monday, required this.todayIndex});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final formatter = DateFormat('E', l10n.localeName);
+    return Row(
+      children: List.generate(7, (i) {
+        final day = monday.add(Duration(days: i));
+        final isToday = i == todayIndex;
+        return Expanded(
+          child: Center(
+            child: Text(
+              formatter.format(day),
+              style: TextStyle(
+                color: isToday
+                    ? AppColors.textPrimary
+                    : AppColors.textDisabled,
+                fontSize: 11,
+                fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _PulseDotRow extends StatelessWidget {
+  final List<bool> dots;
+  final int todayIndex;
+  final Color color;
+
+  const _PulseDotRow({
+    required this.dots,
+    required this.todayIndex,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: List.generate(7, (i) {
+        final filled = dots[i];
+        final isToday = i == todayIndex;
+        return Expanded(
+          child: Center(
+            child: Container(
+              width: 14,
+              height: 14,
+              decoration: BoxDecoration(
+                color: filled ? color : Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: filled
+                      ? color
+                      : (isToday
+                            ? color.withValues(alpha: 0.5)
+                            : AppColors.outline.withValues(alpha: 0.6)),
+                  width: isToday && !filled ? 1.5 : 1,
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _CountChip extends StatelessWidget {
+  final String label;
+  final int count;
+  final Color color;
+
+  const _CountChip({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '$count/7',
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

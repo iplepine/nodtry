@@ -2915,8 +2915,32 @@ abstract class AppLocalizations {
   /// No description provided for @historyDatePattern.
   ///
   /// In en, this message translates to:
-  /// **'EEEE, MMM d, yyyy'**
+  /// **'MMM d (EEE)'**
   String get historyDatePattern;
+
+  /// No description provided for @historyCardDatePattern.
+  ///
+  /// In en, this message translates to:
+  /// **'M/d (EEE)'**
+  String get historyCardDatePattern;
+
+  /// No description provided for @historyWeeklyPulseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get historyWeeklyPulseTitle;
+
+  /// No description provided for @historyWeeklyMeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get historyWeeklyMeLabel;
+
+  /// No description provided for @historyWeeklyPartnerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner'**
+  String get historyWeeklyPartnerLabel;
 
   /// No description provided for @historyReconcileTitle.
   ///

@@ -16,11 +16,16 @@ class HistoryCard extends ConsumerWidget {
   final bool isMe;
   final VoidCallback? onReconcile;
 
+  /// 직전 카드와 같은 plan에 속해 제목을 반복 표시할 필요가 없을 때 false.
+  /// 메모/상태가 시각적 주인공이 되도록 제목 라인을 생략한다.
+  final bool showTitle;
+
   const HistoryCard({
     super.key,
     required this.item,
     required this.isMe,
     this.onReconcile,
+    this.showTitle = true,
   });
 
   @override
@@ -64,18 +69,20 @@ class HistoryCard extends ConsumerWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 16,
+                      spreadRadius: -2,
+                      offset: const Offset(0, 4),
                     ),
                   ],
-                  // Highlight reconcilable items slightly??
-                  border: canReconcile
-                      ? Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          width: 1,
-                        )
-                      : null,
+                  // 평시에도 hairline outline으로 카드를 배경에서 분리.
+                  // reconcilable 상태는 primary tint로 강조.
+                  border: Border.all(
+                    color: canReconcile
+                        ? AppColors.primary.withValues(alpha: 0.3)
+                        : AppColors.outline.withValues(alpha: 0.5),
+                    width: canReconcile ? 1 : 0.5,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,7 +94,7 @@ class HistoryCard extends ConsumerWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          _formatDate(item.date),
+                          _formatDate(context, item.date),
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13,
@@ -96,17 +103,18 @@ class HistoryCard extends ConsumerWidget {
                         _HistoryStatusBadge(statusInfo: statusInfo),
                       ],
                     ),
-                    const SizedBox(height: 8),
-
-                    // Title
-                    Text(
-                      item.title,
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                    // Title — 직전 카드와 같은 plan이면 생략해서 노이즈 줄임.
+                    if (showTitle) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        item.title,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
+                    ],
 
                     // note (실천자 소감)
                     if (item.note != null && item.note!.isNotEmpty) ...[
@@ -125,7 +133,7 @@ class HistoryCard extends ConsumerWidget {
                       const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
+                          horizontal: 10,
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
@@ -137,17 +145,17 @@ class HistoryCard extends ConsumerWidget {
                           children: [
                             Icon(
                               Icons.favorite_rounded,
-                              size: 16,
-                              color: AppColors.primary,
+                              size: 14,
+                              color: AppColors.primaryPressed,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 item.comment!,
                                 style: TextStyle(
-                                  color: AppColors.primary,
+                                  color: AppColors.primaryPressed,
                                   fontSize: 15,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
@@ -157,28 +165,64 @@ class HistoryCard extends ConsumerWidget {
                     ],
 
                     // Verification Badge
-                    // My Item: Verified by Partner
+                    // My Item: Verified by Partner — 작은 감정 mini-card로 격상.
+                    // 파트너 아바타 + "확인했어요" + (옵션) 파트너 메시지.
                     if (isMe && item.isVerifiedByPartner) ...[
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.thumb_up_alt_rounded,
-                            size: 14,
-                            color: AppColors.primary,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.25),
+                            width: 0.8,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            AppLocalizations.of(
-                              context,
-                            )!.historyPartnerVerified,
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _Avatar(
+                              imageUrl: item.partnerImageUrl,
+                              name: item.partnerName,
+                              radius: 12,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.historyPartnerVerified,
+                                    style: TextStyle(
+                                      color: AppColors.primaryPressed,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (item.partnerMessage != null &&
+                                      item.partnerMessage!.isNotEmpty &&
+                                      item.partnerMessage != item.comment) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      item.partnerMessage!,
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                     // Partner Item: Verified by Me
@@ -274,8 +318,9 @@ class HistoryCard extends ConsumerWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return DateFormat('M/d (E)', 'ko').format(date);
+  String _formatDate(BuildContext context, DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
+    return DateFormat(l10n.historyCardDatePattern, l10n.localeName).format(date);
   }
 
   _StatusDisplayInfo _getStatusInfo(
@@ -351,16 +396,16 @@ class _HistoryStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: statusInfo.color,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(statusInfo.icon, size: 12, color: statusInfo.textColor),
-          const SizedBox(width: 4),
+          Icon(statusInfo.icon, size: 11, color: statusInfo.textColor),
+          const SizedBox(width: 5),
           Text(
             statusInfo.text,
             maxLines: 1,
@@ -380,23 +425,24 @@ class _HistoryStatusBadge extends StatelessWidget {
 class _Avatar extends StatelessWidget {
   final String? imageUrl;
   final String? name;
+  final double radius;
 
-  const _Avatar({this.imageUrl, this.name});
+  const _Avatar({this.imageUrl, this.name, this.radius = 18});
 
   @override
   Widget build(BuildContext context) {
-    final fallback = _FallbackAvatar(name: name);
+    final fallback = _FallbackAvatar(name: name, radius: radius);
 
     if (imageUrl == null || imageUrl!.trim().isEmpty) return fallback;
 
     return CachedNetworkImage(
       imageUrl: imageUrl!,
       imageBuilder: (context, imageProvider) =>
-          CircleAvatar(radius: 18, backgroundImage: imageProvider),
+          CircleAvatar(radius: radius, backgroundImage: imageProvider),
       placeholder: (context, url) => Shimmer.fromColors(
         baseColor: AppColors.surface,
         highlightColor: Colors.white,
-        child: const CircleAvatar(radius: 18, backgroundColor: Colors.white),
+        child: CircleAvatar(radius: radius, backgroundColor: Colors.white),
       ),
       errorWidget: (context, url, error) => fallback,
     );
@@ -405,28 +451,29 @@ class _Avatar extends StatelessWidget {
 
 class _FallbackAvatar extends StatelessWidget {
   final String? name;
+  final double radius;
 
-  const _FallbackAvatar({this.name});
+  const _FallbackAvatar({this.name, this.radius = 18});
 
   @override
   Widget build(BuildContext context) {
     final initial = _initial(name);
 
     return CircleAvatar(
-      radius: 18,
+      radius: radius,
       backgroundColor: AppColors.primarySoft,
       child: initial != null
           ? Text(
               initial,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: radius * 0.66,
                 fontWeight: FontWeight.w700,
                 color: AppColors.primaryPressed,
               ),
             )
           : Icon(
               Icons.person_rounded,
-              size: 18,
+              size: radius,
               color: AppColors.primaryPressed,
             ),
     );

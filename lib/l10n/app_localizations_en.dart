@@ -1575,7 +1575,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyYesterday => 'Yesterday';
 
   @override
-  String get historyDatePattern => 'EEEE, MMM d, yyyy';
+  String get historyDatePattern => 'MMM d (EEE)';
+
+  @override
+  String get historyCardDatePattern => 'M/d (EEE)';
+
+  @override
+  String get historyWeeklyPulseTitle => 'This week';
+
+  @override
+  String get historyWeeklyMeLabel => 'Me';
+
+  @override
+  String get historyWeeklyPartnerLabel => 'Partner';
 
   @override
   String get historyReconcileTitle => 'Reconcile past record';

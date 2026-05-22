@@ -1537,7 +1537,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get historyYesterday => '어제';
 
   @override
-  String get historyDatePattern => 'yyyy년 M월 d일 (E)';
+  String get historyDatePattern => 'M월 d일 (E)';
+
+  @override
+  String get historyCardDatePattern => 'M/d (E)';
+
+  @override
+  String get historyWeeklyPulseTitle => '이번 주';
+
+  @override
+  String get historyWeeklyMeLabel => '나';
+
+  @override
+  String get historyWeeklyPartnerLabel => '파트너';
 
   @override
   String get historyReconcileTitle => '지난 기록 소명하기';
