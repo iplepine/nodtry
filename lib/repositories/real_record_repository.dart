@@ -513,10 +513,11 @@ class RealRecordRepository implements RecordRepository {
         // 오늘 계획은 있었는데 모두 완료함 -> TodayComplete
         // 오늘 일정이 있던 모든 플랜 중 완료된 것을 모두 수집해서
         // 체크리스트로 보여줄 수 있도록 completedPlans에 담는다.
+        // state는 active 외에 pendingApproval 등도 올 수 있어 제한하지 않는다.
+        // (메인 루프가 PlanState.completed/rejected는 이미 걸러냈으므로 안전하다.)
         final completedToday = myPlans
             .where(
               (p) =>
-                  p.state == PlanState.active &&
                   _hasScheduledItemOn(p, todayWeekday) &&
                   _isPlanActiveOn(p, today) &&
                   _containsDate(p.completedDates, today),
@@ -525,7 +526,8 @@ class RealRecordRepository implements RecordRepository {
 
         // 단일 플랜 케이스 호환: 기존 plan/streak 표시 로직을 유지한다.
         final headlinePlan = completedToday.firstOrNull
-            ?? myPlans.where((p) => p.state == PlanState.active).firstOrNull;
+            ?? myPlans.where((p) => p.state == PlanState.active).firstOrNull
+            ?? myPlans.firstOrNull;
         final streak = headlinePlan?.currentStreak ?? 0;
         mineCards.add(
           HomeCardModel(

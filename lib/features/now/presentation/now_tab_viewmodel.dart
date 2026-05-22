@@ -100,6 +100,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
           totalWeeks: tWeeks,
           streakCount: m.streakCount,
           canRescue: m.canRescue,
+          completedPlans: m.completedPlans,
         );
       }).toList();
 
