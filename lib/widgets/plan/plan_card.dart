@@ -26,7 +26,9 @@ class PlanCard extends StatelessWidget {
     final item = plan.items.first;
     final time = item.notificationTime;
 
-    // 요일 문자열 변환 (예: 월, 수, 금)
+    // 요일 문자열 변환 — 7일=매일, 평일(월화수목금)=평일, 주말(토일)=주말,
+    // 그 외는 짧은 요일 join. 풀 텍스트 "Mon, Tue, Wed, Thu, Fri, Sat, Sun"이
+    // 한 줄을 다 차지하면 시간/기간 정보가 시각적으로 뒤로 밀린다.
     final l10n = AppLocalizations.of(context)!;
     final weekDays = [
       l10n.weekdayMon,
@@ -37,7 +39,20 @@ class PlanCard extends StatelessWidget {
       l10n.weekdaySat,
       l10n.weekdaySun,
     ];
-    final daysString = item.days.map((d) => weekDays[d - 1]).join(', ');
+    final daysSet = item.days.toSet();
+    final String daysString;
+    if (daysSet.length == 7) {
+      daysString = l10n.planDaysEveryday;
+    } else if (daysSet.length == 5 &&
+        daysSet.containsAll({1, 2, 3, 4, 5})) {
+      daysString = l10n.planDaysWeekdays;
+    } else if (daysSet.length == 2 && daysSet.containsAll({6, 7})) {
+      daysString = l10n.planDaysWeekend;
+    } else {
+      // 입력 순서가 아니라 월→일 순서로 정렬해서 표기.
+      final sorted = item.days.toList()..sort();
+      daysString = sorted.map((d) => weekDays[d - 1]).join(', ');
+    }
 
     final isAlarmOn = time != null && time.type != 'none';
     final displayTime = time != null

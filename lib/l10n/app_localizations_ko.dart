@@ -147,7 +147,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usDefaultNameMe => '나';
 
   @override
-  String get usYouTitle => '너';
+  String get usYouTitle => '파트너';
 
   @override
   String get usProfileEdit => '편집';
@@ -1260,6 +1260,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get planTimeUnset => '시간 미정';
+
+  @override
+  String get planDaysEveryday => '매일';
+
+  @override
+  String get planDaysWeekdays => '평일';
+
+  @override
+  String get planDaysWeekend => '주말';
 
   @override
   String get planStateActive => '진행 중';

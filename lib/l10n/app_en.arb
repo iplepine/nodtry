@@ -194,7 +194,7 @@
   "@usDefaultNameMe": {
     "description": "Us tab - Default user name"
   },
-  "usYouTitle": "You",
+  "usYouTitle": "Partner",
   "@usYouTitle": {
     "description": "Us tab - You section title"
   },
@@ -1279,6 +1279,9 @@
   "focusTimerPause": "Pause",
   "actionNoteHintDefault": "Share your thoughts (optional)",
   "planTimeUnset": "Time not set",
+  "planDaysEveryday": "Everyday",
+  "planDaysWeekdays": "Weekdays",
+  "planDaysWeekend": "Weekend",
   "planStateActive": "Active",
   "planStateDraft": "Draft",
   "planStatePending": "Awaiting approval",

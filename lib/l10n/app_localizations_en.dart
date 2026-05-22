@@ -149,7 +149,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usDefaultNameMe => 'Me';
 
   @override
-  String get usYouTitle => 'You';
+  String get usYouTitle => 'Partner';
 
   @override
   String get usProfileEdit => 'Edit';
@@ -1296,6 +1296,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planTimeUnset => 'Time not set';
+
+  @override
+  String get planDaysEveryday => 'Everyday';
+
+  @override
+  String get planDaysWeekdays => 'Weekdays';
+
+  @override
+  String get planDaysWeekend => 'Weekend';
 
   @override
   String get planStateActive => 'Active';

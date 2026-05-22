@@ -365,7 +365,7 @@ abstract class AppLocalizations {
   /// Us tab - You section title
   ///
   /// In en, this message translates to:
-  /// **'You'**
+  /// **'Partner'**
   String get usYouTitle;
 
   /// Us tab - Profile edit button
@@ -2443,6 +2443,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Time not set'**
   String get planTimeUnset;
+
+  /// No description provided for @planDaysEveryday.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyday'**
+  String get planDaysEveryday;
+
+  /// No description provided for @planDaysWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays'**
+  String get planDaysWeekdays;
+
+  /// No description provided for @planDaysWeekend.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekend'**
+  String get planDaysWeekend;
 
   /// No description provided for @planStateActive.
   ///

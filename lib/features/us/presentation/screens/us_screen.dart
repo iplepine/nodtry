@@ -994,10 +994,40 @@ class _PersonCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.link_off, color: Colors.redAccent),
-                  onPressed: onDisconnect,
+                // 5명 페르소나 합의: destructive 액션이 카드에 직노출되면
+                // 관계 화면의 첫인상이 "끊을 수 있다"로 프레이밍됨. 더보기 메뉴로 격리.
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: AppColors.textDisabled,
+                    size: 20,
+                  ),
                   tooltip: l10n.usDisconnectTooltip,
+                  position: PopupMenuPosition.under,
+                  itemBuilder: (context) => [
+                    PopupMenuItem<String>(
+                      value: 'disconnect',
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.link_off,
+                            color: Colors.redAccent,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            l10n.usDisconnectTooltip,
+                            style: const TextStyle(color: Colors.redAccent),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) {
+                    if (value == 'disconnect') {
+                      onDisconnect();
+                    }
+                  },
                 ),
               ],
             ),
