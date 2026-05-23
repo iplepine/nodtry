@@ -178,6 +178,12 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       final connectedProfiles = ref.read(connectedProfilesProvider).value;
       final managerId = connectedProfiles?.firstOrNull?.user.uid;
 
+      // 파트너가 없으면 승인 받을 사람이 없으므로 즉시 active 로 시작한다.
+      // 파트너가 생긴 뒤 새로 만드는 약속은 기존대로 pendingApproval 로 가서 승인 흐름을 탄다.
+      final initialState = managerId == null
+          ? PlanState.active
+          : PlanState.pendingApproval;
+
       final plan = Plan(
         id: prevState.existingPlanId, // null for restart/new
         userId: userId,
@@ -186,8 +192,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         endDate: endOfStartDay.add(
           const Duration(days: _studySprintDurationDays - 1),
         ),
-        state: PlanState
-            .pendingApproval, // Always reset to pendingApproval on save, even if editing
+        state: initialState,
         items: [planItem],
         createdAt: now, // Reset created
         completedDates: prevState.existingPlanId != null

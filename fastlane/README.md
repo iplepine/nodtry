@@ -13,39 +13,29 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 # Available Actions
 
-## iOS
-
-### ios beta
+### deploy_all
 
 ```sh
-[bundle exec] fastlane ios beta
+[bundle exec] fastlane deploy_all
 ```
 
-Push a new beta build to TestFlight
+Build and upload Android (internal) + iOS (beta) simultaneously
 
-### ios release
+### release_all
 
 ```sh
-[bundle exec] fastlane ios release
+[bundle exec] fastlane release_all
 ```
 
-Push a new release build to the App Store
+Build and upload Android (production) + iOS (release) simultaneously
 
-### ios upload_assets
+### upload_all
 
 ```sh
-[bundle exec] fastlane ios upload_assets
+[bundle exec] fastlane upload_all
 ```
 
-Upload screenshots + metadata only, do NOT submit for review
-
-### ios metadata_only
-
-```sh
-[bundle exec] fastlane ios metadata_only
-```
-
-Update App Store metadata only
+Upload only (skip build) - Android internal + iOS beta
 
 ----
 

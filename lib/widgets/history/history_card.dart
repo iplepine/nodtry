@@ -129,9 +129,15 @@ class HistoryCard extends ConsumerWidget {
                     ],
 
                     // comment (매니저 피드백)
+                    // 칩 배경 자체가 응원 신호 역할을 하고, 본문에 사용자가 넣은
+                    // 이모지(👏 🙌 ❤️ 등)가 시각적 hook이라 하트 Icon을 따로 두면
+                    // Material 글리프/컬러 이모지/한글 텍스트가 각자 다른 baseline을
+                    // 가져 세로 정렬이 본질적으로 안 맞는다. Icon을 빼고 텍스트
+                    // 한 줄로 두면 정렬 문제가 발생할 자리 자체가 사라진다.
                     if (item.comment != null && item.comment!.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       Container(
+                        width: double.infinity,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 8,
@@ -140,26 +146,13 @@ class HistoryCard extends ConsumerWidget {
                           color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.favorite_rounded,
-                              size: 14,
-                              color: AppColors.primaryPressed,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                item.comment!,
-                                style: TextStyle(
-                                  color: AppColors.primaryPressed,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          item.comment!,
+                          style: TextStyle(
+                            color: AppColors.primaryPressed,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ],

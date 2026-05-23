@@ -2241,6 +2241,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
     if (model.plan?.lastComment != null &&
         model.plan!.lastComment!.isNotEmpty) {
       children.add(const SizedBox(height: 8));
+      // lastCheerType(👍/❤️/💪 같은 리액션 이모지)과 lastComment를 나란히
+      // 놓으면 ① 파트너가 보통 코멘트에도 이모지를 같이 치기 때문에 의미가
+      // 중복되고 ② 두 Text의 fontSize/strut이 달라 윗선이 어긋난다. 칩 배경이
+      // 이미 "응원" 시그널 역할이라 코멘트만 깔끔히 보여주는 게 자연스럽다.
       children.add(
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -2248,26 +2252,12 @@ class _PrimaryExecutorCard extends StatelessWidget {
             color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (model.plan?.lastCheerType != null) ...[
-                Text(
-                  model.plan!.lastCheerType!,
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Flexible(
-                child: Text(
-                  model.plan!.lastComment!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
+          child: Text(
+            model.plan!.lastComment!,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       );
@@ -3071,36 +3061,20 @@ class _SecondaryExecutorCard extends StatelessWidget {
           if (model.plan?.lastComment != null &&
               model.plan!.lastComment!.isNotEmpty) ...[
             const SizedBox(height: 8),
+            // 위 응원 pill과 동일: lastCheerType은 코멘트 내 이모지와 중복되고
+            // 두 Text의 strut이 달라 정렬이 어긋난다. 코멘트만 그대로 보여준다.
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  if (model.plan?.lastCheerType != null) ...[
-                    Text(
-                      model.plan!.lastCheerType!,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        height: 1.0,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  Flexible(
-                    child: Text(
-                      model.plan!.lastComment!,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+              child: Text(
+                model.plan!.lastComment!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

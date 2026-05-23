@@ -1,0 +1,2 @@
+- Fixed an issue where the notification permission prompt could appear over the loading screen on first launch, preventing the app from opening.
+- Notification permission is now requested only when you set a reminder on a plan.

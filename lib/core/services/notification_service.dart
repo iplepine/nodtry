@@ -17,35 +17,40 @@ class NotificationService {
 
   NotificationService(this._ref);
 
-  Future<void> initialize() async {
-    // 1. Request Permission
-    NotificationSettings settings = await _messaging.requestPermission(
+  /// `runApp` 직후에 호출하는 비차단 초기화.
+  /// 권한 다이얼로그를 띄우지 않고, 이미 권한이 grant된 경우에만 토큰을 등록한다.
+  /// (Play Pre-launch / 첫 진입 시 권한 팝업이 splash 위에 떠 앱 로딩을 막는 문제 회피)
+  Future<void> setupListenersAndMaybeRegister() async {
+    _messaging.onTokenRefresh.listen(_saveTokenToFirestore);
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('Got a message whilst in the foreground!');
+      debugPrint('Message data: ${message.data}');
+      _showLocalNotification(message);
+    });
+
+    final settings = await _messaging.getNotificationSettings();
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
+      final token = await _messaging.getToken();
+      _saveTokenToFirestore(token);
+    }
+  }
+
+  /// 알림이 의미 있는 시점(예: 약속 알림 설정)에 명시 호출.
+  /// 권한이 새로 grant되면 토큰도 등록한다.
+  Future<void> requestPermissionAndRegister() async {
+    final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
       provisional: false,
     );
-
     debugPrint('User granted permission: ${settings.authorizationStatus}');
-
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
-      // 2. Get Token
-      String? token = await _messaging.getToken();
-      debugPrint('FCM Token: $token');
-
-      // 3. Save Token if user is logged in
+      final token = await _messaging.getToken();
       _saveTokenToFirestore(token);
-
-      // 4. Listen for token refresh
-      _messaging.onTokenRefresh.listen(_saveTokenToFirestore);
-
-      // 5. Handle foreground messages
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint('Got a message whilst in the foreground!');
-        debugPrint('Message data: ${message.data}');
-        _showLocalNotification(message);
-      });
     }
   }
 

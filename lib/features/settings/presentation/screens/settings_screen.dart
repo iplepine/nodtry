@@ -11,6 +11,14 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../providers/repository_provider.dart';
 
+// App Store Review rejected submission bd240493-bbc3-425f-a286-a8343a50f34f
+// (May 23, 2026, Guideline 2.1(b)) because the in-app "buy the dev a coffee"
+// IAP product (`donation_coffee`) had not been submitted alongside the binary
+// in App Store Connect. Hide the entry point in shipped builds until the IAP
+// is created + approved there; flip this to true and submit IAP metadata
+// (incl. App Review screenshot) at the same time as the next release.
+const bool _kShowCoffeeDonation = false;
+
 /// 설정 화면 - 언어 및 테마 변경
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -157,18 +165,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _buildNotificationSettingsOption(context),
               const SizedBox(height: 32),
 
-              // 지원 (New)
-              Text(
-                l10n.settingsSupport,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              // 지원 (Support) 섹션은 커피 후원 IAP가 App Store Connect에서
+              // 승인된 뒤에만 표시한다. 미승인 상태에서 진입점을 노출하면
+              // Apple Review가 Guideline 2.1(b)로 거부함.
+              if (_kShowCoffeeDonation) ...[
+                Text(
+                  l10n.settingsSupport,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _buildDonationOption(context, ref),
-              const SizedBox(height: 32),
+                const SizedBox(height: 16),
+                _buildDonationOption(context, ref),
+                const SizedBox(height: 32),
+              ],
 
               // 계정 관리
               Text(
