@@ -69,6 +69,29 @@ class _UsScreenState extends ConsumerState<UsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 0. Us Hero (파트너 연결됨일 때만) — 공동 정체성 시각화
+              usStateAsync.maybeWhen(
+                data: (state) {
+                  final partner = state.connectedProfiles.isNotEmpty
+                      ? state.connectedProfiles.first.user
+                      : null;
+                  final me = state.myProfile;
+                  if (partner == null || me == null) {
+                    return const SizedBox.shrink();
+                  }
+                  return _UsHeroCard(
+                    myName: (me.displayName?.isNotEmpty ?? false)
+                        ? me.displayName!
+                        : l10n.usDefaultNameMe,
+                    myImageUrl: me.profileImageUrl,
+                    partnerName: partner.displayName ?? '',
+                    partnerImageUrl: partner.profileImageUrl,
+                    l10n: l10n,
+                  );
+                },
+                orElse: () => const SizedBox.shrink(),
+              ),
+
               // 1. Me Section
               usStateAsync.when(
                 data: (state) {
@@ -171,6 +194,7 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                           user?.profileImageUrl,
                         ),
                         inviteCode: user?.inviteCode,
+                        hasConnectedPartner: state.connectedProfiles.isNotEmpty,
                       ),
 
                       if (user != null) ...[
@@ -206,6 +230,13 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                             previousUser.profileImageUrl,
                           ),
                           inviteCode: previousUser.inviteCode,
+                          // 에러 fallback 경로 — 가능하면 마지막으로 알려진 connectedProfiles 사용.
+                          hasConnectedPartner: ref
+                                  .read(usViewModelProvider)
+                                  .value
+                                  ?.connectedProfiles
+                                  .isNotEmpty ??
+                              false,
                         ),
                         const SizedBox(height: 24),
                         _ActivePlanListSection(
@@ -424,6 +455,10 @@ class _MeSection extends StatelessWidget {
   final String? inviteCode;
   final VoidCallback onEditProfile;
 
+  /// 파트너가 이미 연결된 상태인지. 연결됨이면 초대 코드 행을 카드에서 숨김
+  /// (페르소나 합의: 사용자가 더 안 쓸 정보가 큰 자리 차지하는 것 해소).
+  final bool hasConnectedPartner;
+
   const _MeSection({
     required this.l10n,
     required this.name,
@@ -431,6 +466,7 @@ class _MeSection extends StatelessWidget {
     this.profileImageUrl,
     this.inviteCode,
     required this.onEditProfile,
+    this.hasConnectedPartner = false,
   });
 
   @override
@@ -461,16 +497,21 @@ class _MeSection extends StatelessWidget {
         ),
         const SizedBox(height: 20),
 
-        // 프로필 카드
+        // 프로필 카드 — 그림자/border를 Promise 카드와 같은 호흡으로 통일.
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppColors.outline.withValues(alpha: 0.5),
+              width: 0.5,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 16,
+                spreadRadius: -2,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -587,38 +628,45 @@ class _MeSection extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              Divider(height: 1, color: AppColors.divider),
-              const SizedBox(height: 16),
-
-              _MeActionButton(
-                icon: Icons.qr_code,
-                label: l10n.usMyInviteCode,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      inviteCode ?? l10n.usNoInviteCode,
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13,
+              // 파트너 연결 안 됨 → 초대 코드를 큰 자리에 노출.
+              // 연결됨 → 카드에서 빼서 인지 부하 줄임 (필요시 설정 안에).
+              if (!hasConnectedPartner) ...[
+                const SizedBox(height: 20),
+                Divider(height: 1, color: AppColors.divider),
+                const SizedBox(height: 16),
+                _MeActionButton(
+                  icon: Icons.qr_code,
+                  label: l10n.usMyInviteCode,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        inviteCode ?? l10n.usNoInviteCode,
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(Icons.copy, size: 16, color: AppColors.textSecondary),
-                  ],
-                ),
-                onTap: () {
-                  if (inviteCode != null) {
-                    Clipboard.setData(ClipboardData(text: inviteCode!));
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.copy,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    if (inviteCode != null) {
+                      Clipboard.setData(ClipboardData(text: inviteCode!));
 
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(l10n.codeCopied)));
-                  }
-                },
-              ),
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(l10n.codeCopied)));
+                    }
+                  },
+                ),
+              ],
             ],
           ),
         ),
@@ -1487,6 +1535,18 @@ class _ActivePlanListSection extends ConsumerWidget {
                     onDelete: isMe
                         ? () => _showDeletePlanDialog(context, ref, plan)
                         : null,
+                    // 파트너 약속에만 응원 액션 노출. 백엔드 dispatch는 후속 작업,
+                    // 지금은 즉각적인 SnackBar로 피드백 루프만 시각화.
+                    onCheer: !isMe
+                        ? () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.usCheerSent),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        : null,
                   ),
                 ),
                 if (isMe)
@@ -1586,6 +1646,168 @@ class _ActivePlanListSection extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Us 헤더 카드 — 두 사람의 공동 정체성을 시각화하는 진입 카드.
+/// 김민서 페르소나의 권고: "Me / You가 병렬로 나열되어 '우리'가 어디에도 없다.
+/// 두 거실을 잇는 같이 보는 창문 하나가 필요하다."
+class _UsHeroCard extends StatelessWidget {
+  final String myName;
+  final String? myImageUrl;
+  final String partnerName;
+  final String? partnerImageUrl;
+  final AppLocalizations l10n;
+
+  const _UsHeroCard({
+    required this.myName,
+    required this.myImageUrl,
+    required this.partnerName,
+    required this.partnerImageUrl,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary.withValues(alpha: 0.08),
+            AppColors.primary.withValues(alpha: 0.02),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.15),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        children: [
+          // 두 아바타 겹침 — 시각적 공동 정체성의 핵심 모티프.
+          SizedBox(
+            width: 80,
+            height: 44,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 0,
+                  child: _HeroAvatar(
+                    imageUrl: myImageUrl,
+                    name: myName,
+                  ),
+                ),
+                Positioned(
+                  left: 36,
+                  child: _HeroAvatar(
+                    imageUrl: partnerImageUrl,
+                    name: partnerName,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$myName · $partnerName',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.usHeroSubtitle,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroAvatar extends StatelessWidget {
+  final String? imageUrl;
+  final String? name;
+
+  const _HeroAvatar({required this.imageUrl, required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    const radius = 22.0;
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.background, width: 2),
+        ),
+        child: CachedNetworkImage(
+          imageUrl: imageUrl!,
+          imageBuilder: (context, imageProvider) => CircleAvatar(
+            radius: radius,
+            backgroundImage: imageProvider,
+          ),
+          placeholder: (context, url) => CircleAvatar(
+            radius: radius,
+            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+          ),
+          errorWidget: (context, url, error) => _initialAvatar(radius),
+        ),
+      );
+    }
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.background, width: 2),
+      ),
+      child: _initialAvatar(radius),
+    );
+  }
+
+  Widget _initialAvatar(double radius) {
+    final initial = (name?.trim().isNotEmpty ?? false)
+        ? String.fromCharCode(name!.trim().runes.first)
+        : null;
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+      child: initial != null
+          ? Text(
+              initial,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryPressed,
+              ),
+            )
+          : Icon(
+              Icons.person_rounded,
+              size: 20,
+              color: AppColors.primaryPressed,
+            ),
     );
   }
 }

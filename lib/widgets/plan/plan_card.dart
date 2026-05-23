@@ -11,6 +11,10 @@ class PlanCard extends StatelessWidget {
   final VoidCallback? onDelete;
   final bool isOwner;
 
+  /// 파트너 약속 카드에 응원 액션을 노출할 때 전달.
+  /// 페르소나 권고(김민서·박상우): "보는 약속"에서 "참여하는 약속"으로 격상.
+  final VoidCallback? onCheer;
+
   const PlanCard({
     super.key,
     required this.plan,
@@ -18,6 +22,7 @@ class PlanCard extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.isOwner = false,
+    this.onCheer,
   });
 
   @override
@@ -70,12 +75,16 @@ class PlanCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
+          border: Border.all(
+            color: AppColors.outline.withValues(alpha: 0.5),
+            width: 0.5,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 16,
+              spreadRadius: -2,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -199,45 +208,70 @@ class PlanCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (onTap != null) ...[
+                // 파트너 약속 + 응원 콜백 있으면 chevron 자리에 응원 버튼.
+                // 평시 outline 하트, 평탄한 list 안에서도 살짝 눈에 띄도록 primary tint.
+                if (!isOwner && onCheer != null) ...[
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: Icon(
+                      Icons.favorite_border_rounded,
+                      color: AppColors.primary,
+                    ),
+                    iconSize: 22,
+                    visualDensity: VisualDensity.compact,
+                    tooltip: l10n.usCheerTooltip,
+                    onPressed: onCheer,
+                  ),
+                ] else if (onTap != null) ...[
                   const SizedBox(width: 12),
                   Icon(Icons.chevron_right, color: AppColors.textDisabled),
                 ],
               ],
             ),
 
-            // Progress Placeholder (Mock Data for Visual)
-            // if (plan.state == PlanState.active) ...[
-            //   const SizedBox(height: 12),
-            //   Divider(height: 1, color: AppColors.divider.withOpacity(0.5)),
-            //   const SizedBox(height: 12),
-            //   Row(
-            //     children: [
-            //       Expanded(
-            //         child: ClipRRect(
-            //           borderRadius: BorderRadius.circular(4),
-            //           child: LinearProgressIndicator(
-            //             value: 0.6, // Mock Value (3/5)
-            //             backgroundColor: AppColors.divider,
-            //             valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-            //             minHeight: 6,
-            //           ),
-            //         ),
-            //       ),
-            //       const SizedBox(width: 12),
-            //       Text(
-            //         "이번 주 3/5", // Mock Status
-            //         style: TextStyle(
-            //           color: AppColors.textSecondary,
-            //           fontSize: 12,
-            //           fontWeight: FontWeight.w500,
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ]
+            // 진척 미니바 — 활성 약속만. 페르소나 권고: 카드가 "관리 list"에서
+            // "성취 시각화"로 격상되는 핵심.
+            if (plan.state == PlanState.active) _buildProgressBar(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProgressBar() {
+    final completed = plan.completedDayCount();
+    final failed = plan.failedDayCount();
+    final remaining = plan.remainingScheduledDayCount();
+    final total = completed + failed + remaining;
+    if (total <= 0) return const SizedBox.shrink();
+    final ratio = (completed / total).clamp(0.0, 1.0);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: ratio,
+                backgroundColor: AppColors.outline.withValues(alpha: 0.3),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                minHeight: 6,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '$completed/$total',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -246,9 +280,10 @@ class PlanCard extends StatelessWidget {
     switch (state) {
       case PlanState.active:
         return {
+          // 페르소나 합의: outline-처럼 보이는 약한 tint → primarySoft로 filled 톤
           'text': l10n.planStateActive,
-          'color': AppColors.primary.withValues(alpha: 0.1),
-          'textColor': AppColors.primary,
+          'color': AppColors.primarySoft,
+          'textColor': AppColors.primaryPressed,
         };
       case PlanState.draft:
         return {

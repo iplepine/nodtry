@@ -368,6 +368,24 @@ abstract class AppLocalizations {
   /// **'Partner'**
   String get usYouTitle;
 
+  /// No description provided for @usHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Promises you\'re building together'**
+  String get usHeroSubtitle;
+
+  /// No description provided for @usCheerSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheer sent ⚡'**
+  String get usCheerSent;
+
+  /// No description provided for @usCheerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Send cheer'**
+  String get usCheerTooltip;
+
   /// Us tab - Profile edit button
   ///
   /// In en, this message translates to:
@@ -2585,49 +2603,49 @@ abstract class AppLocalizations {
   /// No description provided for @promiseChipPenaltyTriggered.
   ///
   /// In en, this message translates to:
-  /// **'⚡ Penalty locked in — {description}'**
+  /// **'Penalty locked in — {description}'**
   String promiseChipPenaltyTriggered(String description);
 
   /// No description provided for @promiseChipPenaltyImminentOne.
   ///
   /// In en, this message translates to:
-  /// **'⚡ Just one more miss triggers the penalty — {description}'**
+  /// **'Just one more miss triggers the penalty — {description}'**
   String promiseChipPenaltyImminentOne(String description);
 
   /// No description provided for @promiseChipPenaltyImminent.
   ///
   /// In en, this message translates to:
-  /// **'⚡ {count} more misses triggers the penalty — {description}'**
+  /// **'{count} more misses triggers the penalty — {description}'**
   String promiseChipPenaltyImminent(int count, String description);
 
   /// No description provided for @promiseChipRewardAchieved.
   ///
   /// In en, this message translates to:
-  /// **'🏆 Reward earned! — {description}'**
+  /// **'Reward earned! — {description}'**
   String promiseChipRewardAchieved(String description);
 
   /// No description provided for @promiseChipRewardImminent.
   ///
   /// In en, this message translates to:
-  /// **'🏆 {days} more day(s) to the reward — {description}'**
+  /// **'{days} more day(s) to the reward — {description}'**
   String promiseChipRewardImminent(int days, String description);
 
   /// No description provided for @promiseChipSafeBoth.
   ///
   /// In en, this message translates to:
-  /// **'🏆 {rewardDays} days to reward · ⚡ {penaltyBuffer} misses safe'**
+  /// **'{rewardDays} days to reward · {penaltyBuffer} misses safe'**
   String promiseChipSafeBoth(int rewardDays, int penaltyBuffer);
 
   /// No description provided for @promiseChipSafeRewardOnly.
   ///
   /// In en, this message translates to:
-  /// **'🏆 {days} days to reward — {description}'**
+  /// **'{days} days to reward — {description}'**
   String promiseChipSafeRewardOnly(int days, String description);
 
   /// No description provided for @promiseChipSafePenaltyOnly.
   ///
   /// In en, this message translates to:
-  /// **'⚡ {buffer} misses safe — {description}'**
+  /// **'{buffer} misses safe — {description}'**
   String promiseChipSafePenaltyOnly(int buffer, String description);
 
   /// No description provided for @promiseSheetTitle.

@@ -11,11 +11,13 @@ import 'firebase_options.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/repository_provider.dart';
+import 'repositories/real_record_repository.dart' show setRepositoryLocaleCode;
 import 'core/services/notification_service.dart';
 import 'services/notification_service.dart' as local_notifications;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'dart:async';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -31,9 +33,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final binding = WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ko', null);
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint('dotenv load error (ignored): $e');
+  }
 
   // Edge-to-edge를 위한 시스템 UI 오버레이 설정
   SystemChrome.setSystemUIOverlayStyle(
@@ -65,11 +71,7 @@ void main() async {
     overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
   );
 
-  // Initialize Notification Service (FCM)
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  // Initialize Local Notification Service (Plan Reminders)
-  await local_notifications.NotificationService().init();
-  await container.read(notificationServiceProvider).initialize();
 
   runApp(
     UncontrolledProviderScope(
@@ -77,6 +79,16 @@ void main() async {
       child: const OnMyBehalfApp(),
     ),
   );
+
+  // 첫 프레임이 뜬 뒤 백그라운드에서 알림 초기화 (권한 다이얼로그는 띄우지 않음).
+  // - 권한 요청은 약속 알림 설정 시점(SettingAlarmUseCase)에서 명시 호출한다.
+  // - 권한이 이미 grant된 상태면 FCM 토큰만 등록한다.
+  binding.addPostFrameCallback((_) {
+    unawaited(local_notifications.NotificationService().init());
+    unawaited(
+      container.read(notificationServiceProvider).setupListenersAndMaybeRegister(),
+    );
+  });
 }
 
 class OnMyBehalfApp extends ConsumerWidget {
@@ -86,6 +98,11 @@ class OnMyBehalfApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(appSettingsProvider);
     final settingsNotifier = ref.read(appSettingsProvider.notifier);
+
+    // Repository가 BuildContext 밖에서도 사용자의 명시적 locale 선택을 따르도록
+    // 매 빌드마다 현재 locale 코드를 모듈 전역에 동기화한다.
+    // null이면 repository 쪽에서 시스템 로케일로 fallback.
+    setRepositoryLocaleCode(settingsState.currentLocale?.languageCode);
 
     // 현재 테마에 따라 ThemeData 가져오기
     final themeData = settingsState.currentTheme == AppThemeType.smokyPlum

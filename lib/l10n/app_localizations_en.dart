@@ -152,6 +152,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usYouTitle => 'Partner';
 
   @override
+  String get usHeroSubtitle => 'Promises you\'re building together';
+
+  @override
+  String get usCheerSent => 'Cheer sent ⚡';
+
+  @override
+  String get usCheerTooltip => 'Send cheer';
+
+  @override
   String get usProfileEdit => 'Edit';
 
   @override
@@ -1371,42 +1380,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String promiseChipPenaltyTriggered(String description) {
-    return '⚡ Penalty locked in — $description';
+    return 'Penalty locked in — $description';
   }
 
   @override
   String promiseChipPenaltyImminentOne(String description) {
-    return '⚡ Just one more miss triggers the penalty — $description';
+    return 'Just one more miss triggers the penalty — $description';
   }
 
   @override
   String promiseChipPenaltyImminent(int count, String description) {
-    return '⚡ $count more misses triggers the penalty — $description';
+    return '$count more misses triggers the penalty — $description';
   }
 
   @override
   String promiseChipRewardAchieved(String description) {
-    return '🏆 Reward earned! — $description';
+    return 'Reward earned! — $description';
   }
 
   @override
   String promiseChipRewardImminent(int days, String description) {
-    return '🏆 $days more day(s) to the reward — $description';
+    return '$days more day(s) to the reward — $description';
   }
 
   @override
   String promiseChipSafeBoth(int rewardDays, int penaltyBuffer) {
-    return '🏆 $rewardDays days to reward · ⚡ $penaltyBuffer misses safe';
+    return '$rewardDays days to reward · $penaltyBuffer misses safe';
   }
 
   @override
   String promiseChipSafeRewardOnly(int days, String description) {
-    return '🏆 $days days to reward — $description';
+    return '$days days to reward — $description';
   }
 
   @override
   String promiseChipSafePenaltyOnly(int buffer, String description) {
-    return '⚡ $buffer misses safe — $description';
+    return '$buffer misses safe — $description';
   }
 
   @override

@@ -150,6 +150,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usYouTitle => '파트너';
 
   @override
+  String get usHeroSubtitle => '함께 만들어가는 약속들';
+
+  @override
+  String get usCheerSent => '응원을 보냈어요 ⚡';
+
+  @override
+  String get usCheerTooltip => '응원하기';
+
+  @override
   String get usProfileEdit => '편집';
 
   @override
@@ -1334,42 +1343,42 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String promiseChipPenaltyTriggered(String description) {
-    return '⚡ 벌칙 발동 확정 — $description';
+    return '벌칙 발동 확정 — $description';
   }
 
   @override
   String promiseChipPenaltyImminentOne(String description) {
-    return '⚡ 한 번만 더 실패하면 벌칙 — $description';
+    return '한 번만 더 실패하면 벌칙 — $description';
   }
 
   @override
   String promiseChipPenaltyImminent(int count, String description) {
-    return '⚡ $count번만 더 실패하면 벌칙 — $description';
+    return '$count번만 더 실패하면 벌칙 — $description';
   }
 
   @override
   String promiseChipRewardAchieved(String description) {
-    return '🏆 보상 달성! — $description';
+    return '보상 달성! — $description';
   }
 
   @override
   String promiseChipRewardImminent(int days, String description) {
-    return '🏆 보상까지 $days일 더 성공하면 — $description';
+    return '보상까지 $days일 더 성공하면 — $description';
   }
 
   @override
   String promiseChipSafeBoth(int rewardDays, int penaltyBuffer) {
-    return '🏆 보상까지 $rewardDays일 · ⚡ 벌칙까지 $penaltyBuffer번 여유';
+    return '보상까지 $rewardDays일 · 벌칙까지 $penaltyBuffer번 여유';
   }
 
   @override
   String promiseChipSafeRewardOnly(int days, String description) {
-    return '🏆 보상까지 $days일 — $description';
+    return '보상까지 $days일 — $description';
   }
 
   @override
   String promiseChipSafePenaltyOnly(int buffer, String description) {
-    return '⚡ 벌칙까지 $buffer번 여유 — $description';
+    return '벌칙까지 $buffer번 여유 — $description';
   }
 
   @override
@@ -2095,7 +2104,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowHeaderTodayAllDone => '오늘 약속을 다 지켰어요';
 
   @override
-  String get nowHeaderConfirmAndPull => '확인하고 당겨줄 차례';
+  String get nowHeaderConfirmAndPull => '확인하고 응원할 차례';
 
   @override
   String get nowHeaderWaiting => '기다리는 중';
@@ -2136,7 +2145,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowRescueYesterday => '어제 실천 인정해주기';
 
   @override
-  String get nowVerifyAndCheer => '확인하고 응원 보내기';
+  String get nowVerifyAndCheer => '확인하고 응원하기';
 
   @override
   String get nowMakePromise => '약속 걸기';

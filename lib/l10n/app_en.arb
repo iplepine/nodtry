@@ -195,6 +195,9 @@
     "description": "Us tab - Default user name"
   },
   "usYouTitle": "Partner",
+  "usHeroSubtitle": "Promises you're building together",
+  "usCheerSent": "Cheer sent ⚡",
+  "usCheerTooltip": "Send cheer",
   "@usYouTitle": {
     "description": "Us tab - You section title"
   },
@@ -1302,53 +1305,53 @@
   "notifyEditor10MinBefore": "10 min before",
   "notifyEditor30MinBefore": "30 min before",
   "notifyEditor1HourBefore": "1 hr before",
-  "promiseChipPenaltyTriggered": "⚡ Penalty locked in — {description}",
+  "promiseChipPenaltyTriggered": "Penalty locked in — {description}",
   "@promiseChipPenaltyTriggered": {
     "placeholders": {
       "description": { "type": "String" }
     }
   },
-  "promiseChipPenaltyImminentOne": "⚡ Just one more miss triggers the penalty — {description}",
+  "promiseChipPenaltyImminentOne": "Just one more miss triggers the penalty — {description}",
   "@promiseChipPenaltyImminentOne": {
     "placeholders": {
       "description": { "type": "String" }
     }
   },
-  "promiseChipPenaltyImminent": "⚡ {count} more misses triggers the penalty — {description}",
+  "promiseChipPenaltyImminent": "{count} more misses triggers the penalty — {description}",
   "@promiseChipPenaltyImminent": {
     "placeholders": {
       "count": { "type": "int" },
       "description": { "type": "String" }
     }
   },
-  "promiseChipRewardAchieved": "🏆 Reward earned! — {description}",
+  "promiseChipRewardAchieved": "Reward earned! — {description}",
   "@promiseChipRewardAchieved": {
     "placeholders": {
       "description": { "type": "String" }
     }
   },
-  "promiseChipRewardImminent": "🏆 {days} more day(s) to the reward — {description}",
+  "promiseChipRewardImminent": "{days} more day(s) to the reward — {description}",
   "@promiseChipRewardImminent": {
     "placeholders": {
       "days": { "type": "int" },
       "description": { "type": "String" }
     }
   },
-  "promiseChipSafeBoth": "🏆 {rewardDays} days to reward · ⚡ {penaltyBuffer} misses safe",
+  "promiseChipSafeBoth": "{rewardDays} days to reward · {penaltyBuffer} misses safe",
   "@promiseChipSafeBoth": {
     "placeholders": {
       "rewardDays": { "type": "int" },
       "penaltyBuffer": { "type": "int" }
     }
   },
-  "promiseChipSafeRewardOnly": "🏆 {days} days to reward — {description}",
+  "promiseChipSafeRewardOnly": "{days} days to reward — {description}",
   "@promiseChipSafeRewardOnly": {
     "placeholders": {
       "days": { "type": "int" },
       "description": { "type": "String" }
     }
   },
-  "promiseChipSafePenaltyOnly": "⚡ {buffer} misses safe — {description}",
+  "promiseChipSafePenaltyOnly": "{buffer} misses safe — {description}",
   "@promiseChipSafePenaltyOnly": {
     "placeholders": {
       "buffer": { "type": "int" },

@@ -10,10 +10,22 @@ import 'package:flutter/widgets.dart';
 import 'package:rxdart/rxdart.dart';
 import '../models/relation_model.dart';
 
+/// 앱 설정에서 사용자가 명시적으로 고른 로케일.
+/// main.dart에서 appSettingsProvider를 listen해 매번 set한다.
+/// null이면 시스템 로케일(platformDispatcher)을 따른다.
+String? _currentAppLocaleCode;
+
+/// 앱 설정 변경 시 호출되어 repository 전체에서 사용할 locale 코드를 갱신.
+void setRepositoryLocaleCode(String? code) {
+  _currentAppLocaleCode = code;
+}
+
 /// HomeCardModel.headerMessage 텍스트를 디바이스 로케일에 맞춰 반환.
 /// Why: repository는 BuildContext 밖에서 동작하므로 AppLocalizations 접근 불가.
+/// 사용자가 앱 내 설정에서 ko로 고른 경우도 OS 로케일과 무관하게 ko로 반환되도록
+/// _currentAppLocaleCode를 우선 본다.
 String _headerMessage(String key) {
-  final locale =
+  final locale = _currentAppLocaleCode ??
       WidgetsBinding.instance.platformDispatcher.locale.languageCode;
   final isKo = locale.startsWith('ko');
   switch (key) {
