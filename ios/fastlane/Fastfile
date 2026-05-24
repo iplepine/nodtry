@@ -59,6 +59,8 @@ platform :ios do
       force: true,
       skip_screenshots: false,
       skip_metadata: false,
+      submit_for_review: true,
+      automatic_release: true,
       copyright: copyright_text,
       precheck_include_in_app_purchases: false
     )
