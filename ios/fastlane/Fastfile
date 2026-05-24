@@ -61,6 +61,10 @@ platform :ios do
       skip_metadata: false,
       submit_for_review: true,
       automatic_release: true,
+      # Apple Review 거부 후 닫히지 않은 채로 남은 이전 제출이 있으면
+      # "review submission already in progress"로 새 제출이 막힌다.
+      # 자동으로 reject한 뒤 새 빌드로 다시 제출하도록 둔다.
+      reject_if_possible: true,
       copyright: copyright_text,
       precheck_include_in_app_purchases: false
     )
@@ -106,6 +110,7 @@ platform :ios do
       skip_app_version_update: true,
       submit_for_review: true,
       automatic_release: true,
+      reject_if_possible: true,
       copyright: copyright_text,
       precheck_include_in_app_purchases: false
     )
