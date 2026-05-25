@@ -630,6 +630,21 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
+  Future<void> acknowledgePromiseSettlement(
+    String planId, {
+    String? comment,
+  }) async {
+    debugPrint(
+      'Mock: Acknowledge promise settlement for $planId, comment: $comment',
+    );
+    await Future.delayed(const Duration(milliseconds: 300));
+    _mockHomeCardModels.removeWhere(
+      (m) => m.plan?.id == planId && m.state == HomeCardState.promiseSettled,
+    );
+    _notifyStream();
+  }
+
+  @override
   Future<void> verifyPlan(String planId) async {
     await Future.delayed(const Duration(milliseconds: 500));
     // Verify Logic for Mock

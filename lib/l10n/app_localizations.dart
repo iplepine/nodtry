@@ -3800,6 +3800,120 @@ abstract class AppLocalizations {
   /// **'Promise result is out'**
   String get nowHeaderPromiseSettled;
 
+  /// No description provided for @nowPromiseAckButton.
+  ///
+  /// In en, this message translates to:
+  /// **'See the result'**
+  String get nowPromiseAckButton;
+
+  /// No description provided for @nowPromiseAckWithNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a word and close'**
+  String get nowPromiseAckWithNote;
+
+  /// No description provided for @nowPromiseAckDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise result'**
+  String get nowPromiseAckDialogTitle;
+
+  /// No description provided for @nowPromiseAckDialogHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop a quick word for your partner (optional)'**
+  String get nowPromiseAckDialogHint;
+
+  /// No description provided for @nowPromiseAckDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get nowPromiseAckDialogConfirm;
+
+  /// No description provided for @nowPromiseAckSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Result acknowledged'**
+  String get nowPromiseAckSnackbar;
+
+  /// No description provided for @nowPromiseAckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not acknowledge the result'**
+  String get nowPromiseAckFailed;
+
+  /// No description provided for @planDetailViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get planDetailViewList;
+
+  /// No description provided for @planDetailViewCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get planDetailViewCalendar;
+
+  /// No description provided for @planDetailViewGraph.
+  ///
+  /// In en, this message translates to:
+  /// **'Graph'**
+  String get planDetailViewGraph;
+
+  /// No description provided for @planDetailLegendDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get planDetailLegendDone;
+
+  /// No description provided for @planDetailLegendRested.
+  ///
+  /// In en, this message translates to:
+  /// **'Rested'**
+  String get planDetailLegendRested;
+
+  /// No description provided for @planDetailLegendRescued.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescued'**
+  String get planDetailLegendRescued;
+
+  /// No description provided for @planDetailLegendSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get planDetailLegendSkipped;
+
+  /// No description provided for @planDetailLegendMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get planDetailLegendMissed;
+
+  /// No description provided for @planDetailLegendScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get planDetailLegendScheduled;
+
+  /// No description provided for @planDetailWeekLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Week {week}'**
+  String planDetailWeekLabel(int week);
+
+  /// No description provided for @planDetailGraphCompletionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly completion rate'**
+  String get planDetailGraphCompletionRate;
+
+  /// No description provided for @planDetailGraphEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to plot yet.'**
+  String get planDetailGraphEmpty;
+
   /// No description provided for @nowHeaderSettlementNeeded.
   ///
   /// In en, this message translates to:

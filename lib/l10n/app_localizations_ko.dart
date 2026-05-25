@@ -2017,6 +2017,65 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowHeaderPromiseSettled => '약속 결과가 나왔어요';
 
   @override
+  String get nowPromiseAckButton => '결과 확인하기';
+
+  @override
+  String get nowPromiseAckWithNote => '한마디 남기고 닫기';
+
+  @override
+  String get nowPromiseAckDialogTitle => '약속 결과 확인';
+
+  @override
+  String get nowPromiseAckDialogHint => '상대에게 짧게 한마디 남겨주세요 (선택)';
+
+  @override
+  String get nowPromiseAckDialogConfirm => '확인했어';
+
+  @override
+  String get nowPromiseAckSnackbar => '결과를 확인했어요';
+
+  @override
+  String get nowPromiseAckFailed => '결과 확인에 실패했어요';
+
+  @override
+  String get planDetailViewList => '목록';
+
+  @override
+  String get planDetailViewCalendar => '캘린더';
+
+  @override
+  String get planDetailViewGraph => '그래프';
+
+  @override
+  String get planDetailLegendDone => '실천';
+
+  @override
+  String get planDetailLegendRested => '휴식';
+
+  @override
+  String get planDetailLegendRescued => '인정';
+
+  @override
+  String get planDetailLegendSkipped => '건너뜀';
+
+  @override
+  String get planDetailLegendMissed => '놓침';
+
+  @override
+  String get planDetailLegendScheduled => '예정';
+
+  @override
+  String planDetailWeekLabel(int week) {
+    return '$week주차';
+  }
+
+  @override
+  String get planDetailGraphCompletionRate => '주별 실천율';
+
+  @override
+  String get planDetailGraphEmpty => '표시할 기록이 없어요.';
+
+  @override
   String get nowHeaderSettlementNeeded => '4주 정산이 필요해요';
 
   @override

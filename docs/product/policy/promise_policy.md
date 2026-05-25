@@ -41,6 +41,7 @@ proposed → rejected (거절됨)
 - 플랜 완료(`completed`) 또는 중단(`stopped`) 시 자동 계산
 - `completedDates` 대비 전체 플랜 기간으로 산정
 - 결과는 양측 모두에게 `promiseSettled` 카드로 표시
+- 카드의 "결과 확인하기"를 누르면 한마디(선택)와 함께 `promise.settlementAcknowledgedBy`에 본인 UID를 추가한다. 해당 사용자에게는 카드가 사라지고, 한마디를 남기면 `lastComment` / `lastCheerAt`로 상대에게 전달된다.
 
 ## 제안 시점
 - 어느 쪽이든 제안 가능

@@ -129,6 +129,8 @@ class Promise {
   final int? settledSuccessDays;
   final int? settledFailDays;
   final SettlementResult? settlementResult;
+  // 정산 결과를 각자 확인 처리한 사용자 UID 목록. 양쪽 모두 확인하면 카드가 사라진다.
+  final List<String> settlementAcknowledgedBy;
 
   Promise({
     required this.status,
@@ -141,6 +143,7 @@ class Promise {
     this.settledSuccessDays,
     this.settledFailDays,
     this.settlementResult,
+    this.settlementAcknowledgedBy = const [],
   });
 
   Promise copyWith({
@@ -154,6 +157,7 @@ class Promise {
     int? settledSuccessDays,
     int? settledFailDays,
     SettlementResult? settlementResult,
+    List<String>? settlementAcknowledgedBy,
   }) {
     return Promise(
       status: status ?? this.status,
@@ -166,7 +170,13 @@ class Promise {
       settledSuccessDays: settledSuccessDays ?? this.settledSuccessDays,
       settledFailDays: settledFailDays ?? this.settledFailDays,
       settlementResult: settlementResult ?? this.settlementResult,
+      settlementAcknowledgedBy:
+          settlementAcknowledgedBy ?? this.settlementAcknowledgedBy,
     );
+  }
+
+  bool isSettlementAcknowledgedBy(String uid) {
+    return settlementAcknowledgedBy.contains(uid);
   }
 
   Map<String, dynamic> toMap() {
@@ -182,6 +192,8 @@ class Promise {
       if (settledFailDays != null) 'settledFailDays': settledFailDays,
       if (settlementResult != null)
         'settlementResult': settlementResult!.toMap(),
+      if (settlementAcknowledgedBy.isNotEmpty)
+        'settlementAcknowledgedBy': settlementAcknowledgedBy,
     };
   }
 
@@ -207,6 +219,11 @@ class Promise {
       settlementResult: map['settlementResult'] != null
           ? SettlementResult.fromMap(map['settlementResult'])
           : null,
+      settlementAcknowledgedBy:
+          (map['settlementAcknowledgedBy'] as List<dynamic>?)
+                  ?.map((e) => e.toString())
+                  .toList() ??
+              const [],
     );
   }
 }

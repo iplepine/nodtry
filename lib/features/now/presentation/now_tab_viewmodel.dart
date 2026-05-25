@@ -172,6 +172,8 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
           nextPlanIntent: intent.nextPlanIntent,
           exitReason: intent.exitReason,
         );
+      } else if (intent is AcknowledgePromiseSettlementIntent) {
+        await _acknowledgePromiseSettlement(intent.planId, intent.comment);
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -352,6 +354,15 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
   Future<void> _restPlan(String planId) async {
     await ref.read(recordRepositoryProvider).reportRest(planId);
     await _updateAlarmToSkipToday(planId);
+  }
+
+  Future<void> _acknowledgePromiseSettlement(
+    String planId,
+    String? comment,
+  ) async {
+    await ref
+        .read(recordRepositoryProvider)
+        .acknowledgePromiseSettlement(planId, comment: comment);
   }
 
   Future<void> _recordPilotSettlement(

@@ -1,0 +1,2 @@
+- Added a "See the result" button to settled promise cards on the Now tab. Leave a short note (optional) to dismiss the card.
+- Plan detail now lets you switch the practice log between list, calendar, and graph views.

@@ -9,6 +9,9 @@ import '../widgets/notification_setting_editor.dart';
 // import '../../../../features/plan/domain/usecases/setting_alarm_use_case.dart'; // Unused
 import '../../../../models/history_item.dart';
 import 'package:nod_try/providers/repository_provider.dart';
+import '../widgets/plan_history_views.dart';
+
+enum _HistoryViewMode { list, calendar, graph }
 
 class PlanDetailScreen extends ConsumerStatefulWidget {
   final Plan plan;
@@ -26,6 +29,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
   bool _isPoking = false; // Local loading state for Poke action
   DateTime? _optimisticLastPokeAt; // Optimistic UI state
   DateTime? _optimisticLastPokeAcknowledgedAt; // Optimistic UI state
+  _HistoryViewMode _historyView = _HistoryViewMode.list;
 
   @override
   void initState() {
@@ -216,75 +220,17 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                         color: AppColors.textPrimary,
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    _buildViewToggle(context),
                     const SizedBox(height: 8),
                   ],
                 ),
               ),
             ),
 
-            // History List
+            // History Content (List / Calendar / Graph)
             if (plan.id != null)
-              StreamBuilder<List<HistoryItem>>(
-                stream: ref
-                    .watch(getPlanHistoryUseCaseProvider)
-                    .execute(plan.id!),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 200,
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    );
-                  }
-                  if (snapshot.hasError) {
-                    debugPrint('History Stream Error: ${snapshot.error}');
-                    return SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 200,
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              AppLocalizations.of(context)!.planDetailLoadFailed(snapshot.error.toString()),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: AppColors.error),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  final items = snapshot.data ?? [];
-                  if (items.isEmpty) {
-                    return SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 200,
-                        child: Center(
-                          child: Text(
-                            AppLocalizations.of(context)!.planDetailNoRecords,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.textSecondary),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  return SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        if (index.isOdd) return const Divider();
-                        final itemIndex = index ~/ 2;
-                        final item = items[itemIndex];
-                        return _buildHistoryItem(context, item);
-                      }, childCount: items.length * 2 - 1),
-                    ),
-                  );
-                },
-              )
+              _buildHistorySliver(context, ref, plan)
             else
               SliverToBoxAdapter(
                 child: SizedBox(
@@ -302,6 +248,134 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildViewToggle(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return SegmentedButton<_HistoryViewMode>(
+      segments: [
+        ButtonSegment(
+          value: _HistoryViewMode.list,
+          label: Text(l10n.planDetailViewList),
+          icon: const Icon(Icons.list_alt, size: 18),
+        ),
+        ButtonSegment(
+          value: _HistoryViewMode.calendar,
+          label: Text(l10n.planDetailViewCalendar),
+          icon: const Icon(Icons.calendar_month, size: 18),
+        ),
+        ButtonSegment(
+          value: _HistoryViewMode.graph,
+          label: Text(l10n.planDetailViewGraph),
+          icon: const Icon(Icons.bar_chart, size: 18),
+        ),
+      ],
+      selected: {_historyView},
+      showSelectedIcon: false,
+      onSelectionChanged: (selection) {
+        setState(() => _historyView = selection.first);
+      },
+      style: ButtonStyle(
+        visualDensity: VisualDensity.compact,
+        textStyle: WidgetStatePropertyAll(
+          Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHistorySliver(
+    BuildContext context,
+    WidgetRef ref,
+    Plan plan,
+  ) {
+    switch (_historyView) {
+      case _HistoryViewMode.list:
+        return _buildHistoryListSliver(context, ref, plan);
+      case _HistoryViewMode.calendar:
+        return SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverToBoxAdapter(
+            child: PlanHistoryCalendarView(plan: plan),
+          ),
+        );
+      case _HistoryViewMode.graph:
+        return SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverToBoxAdapter(
+            child: PlanHistoryGraphView(plan: plan),
+          ),
+        );
+    }
+  }
+
+  Widget _buildHistoryListSliver(
+    BuildContext context,
+    WidgetRef ref,
+    Plan plan,
+  ) {
+    return StreamBuilder<List<HistoryItem>>(
+      stream: ref.watch(getPlanHistoryUseCaseProvider).execute(plan.id!),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SliverToBoxAdapter(
+            child: SizedBox(
+              height: 200,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+        if (snapshot.hasError) {
+          debugPrint('History Stream Error: ${snapshot.error}');
+          return SliverToBoxAdapter(
+            child: SizedBox(
+              height: 200,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    AppLocalizations.of(context)!
+                        .planDetailLoadFailed(snapshot.error.toString()),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.error),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        final items = snapshot.data ?? [];
+        if (items.isEmpty) {
+          return SliverToBoxAdapter(
+            child: SizedBox(
+              height: 200,
+              child: Center(
+                child: Text(
+                  AppLocalizations.of(context)!.planDetailNoRecords,
+                  style: Theme.of(context).textTheme.bodyMedium
+                      ?.copyWith(color: AppColors.textSecondary),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              if (index.isOdd) return const Divider();
+              final itemIndex = index ~/ 2;
+              final item = items[itemIndex];
+              return _buildHistoryItem(context, item);
+            }, childCount: items.length * 2 - 1),
+          ),
+        );
+      },
     );
   }
 

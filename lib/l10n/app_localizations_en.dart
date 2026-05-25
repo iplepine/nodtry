@@ -2065,6 +2065,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowHeaderPromiseSettled => 'Promise result is out';
 
   @override
+  String get nowPromiseAckButton => 'See the result';
+
+  @override
+  String get nowPromiseAckWithNote => 'Leave a word and close';
+
+  @override
+  String get nowPromiseAckDialogTitle => 'Promise result';
+
+  @override
+  String get nowPromiseAckDialogHint =>
+      'Drop a quick word for your partner (optional)';
+
+  @override
+  String get nowPromiseAckDialogConfirm => 'Got it';
+
+  @override
+  String get nowPromiseAckSnackbar => 'Result acknowledged';
+
+  @override
+  String get nowPromiseAckFailed => 'Could not acknowledge the result';
+
+  @override
+  String get planDetailViewList => 'List';
+
+  @override
+  String get planDetailViewCalendar => 'Calendar';
+
+  @override
+  String get planDetailViewGraph => 'Graph';
+
+  @override
+  String get planDetailLegendDone => 'Done';
+
+  @override
+  String get planDetailLegendRested => 'Rested';
+
+  @override
+  String get planDetailLegendRescued => 'Rescued';
+
+  @override
+  String get planDetailLegendSkipped => 'Skipped';
+
+  @override
+  String get planDetailLegendMissed => 'Missed';
+
+  @override
+  String get planDetailLegendScheduled => 'Scheduled';
+
+  @override
+  String planDetailWeekLabel(int week) {
+    return 'Week $week';
+  }
+
+  @override
+  String get planDetailGraphCompletionRate => 'Weekly completion rate';
+
+  @override
+  String get planDetailGraphEmpty => 'Nothing to plot yet.';
+
+  @override
   String get nowHeaderSettlementNeeded => '4-week settlement needed';
 
   @override

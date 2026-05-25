@@ -674,6 +674,46 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
+  Future<void> _handleAcknowledgePromiseSettled(HomeCardModel card) async {
+    if (card.plan?.id == null) return;
+    final l10n = AppLocalizations.of(context)!;
+
+    final comment = await showDialog<String>(
+      context: context,
+      builder: (context) => ActionNoteDialog(
+        title: l10n.nowPromiseAckDialogTitle,
+        hintText: l10n.nowPromiseAckDialogHint,
+        buttonLabel: l10n.nowPromiseAckDialogConfirm,
+        showEmoji: false,
+      ),
+    );
+
+    // Cancelled
+    if (comment == null) return;
+
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(
+            AcknowledgePromiseSettlementIntent(
+              card.plan!.id!,
+              comment: comment.trim().isEmpty ? null : comment.trim(),
+            ),
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.nowPromiseAckSnackbar)),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.nowPromiseAckFailed)),
+        );
+      }
+    }
+  }
+
   Future<void> _handleContinueAfterSettlement(HomeCardModel card) async {
     if (card.plan?.id == null) return;
 
@@ -1390,6 +1430,10 @@ class _NowTabState extends ConsumerState<NowTab>
                                           _handleExitAfterSettlement(
                                             primaryExecutorCard,
                                           ),
+                                      onAcknowledgePromiseSettled: () =>
+                                          _handleAcknowledgePromiseSettled(
+                                            primaryExecutorCard,
+                                          ),
                                       onTap: () =>
                                           _handleCardTap(primaryExecutorCard),
                                       timeChipText: _getTimeChipText(
@@ -1497,6 +1541,8 @@ class _NowTabState extends ConsumerState<NowTab>
                                       onRescue: () => _handleRescue(card),
                                       onProposePromise: () =>
                                           _handleProposePromise(card),
+                                      onAcknowledgePromiseSettled: () =>
+                                          _handleAcknowledgePromiseSettled(card),
                                       timeChipText: _getManagerTimeChipText(
                                         card,
                                       ),
@@ -1865,6 +1911,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final VoidCallback? onRejectPromise;
   final VoidCallback? onContinueAfterSettlement;
   final VoidCallback? onExitAfterSettlement;
+  final VoidCallback? onAcknowledgePromiseSettled;
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? recordGazeText;
@@ -1882,6 +1929,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     this.onRejectPromise,
     this.onContinueAfterSettlement,
     this.onExitAfterSettlement,
+    this.onAcknowledgePromiseSettled,
     this.onTap,
     this.timeChipText,
     this.timeChipType,
@@ -2523,6 +2571,37 @@ class _PrimaryExecutorCard extends StatelessWidget {
     );
   }
 
+  Widget _buildPromiseSettledButton(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: onAcknowledgePromiseSettled,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              l10n.nowPromiseAckButton,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildButton(BuildContext context, AppLocalizations l10n) {
     final buttonTextColor = Colors.white;
     VoidCallback? onPressed;
@@ -2585,7 +2664,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     } else if (model.state == HomeCardState.promiseProposed) {
       return _buildPromiseProposedButtons(context);
     } else if (model.state == HomeCardState.promiseSettled) {
-      return const SizedBox.shrink();
+      return _buildPromiseSettledButton(context, l10n);
     } else if (model.state == HomeCardState.todayComplete ||
         model.state == HomeCardState.todayEmpty) {
       // "작은 버튼" 요청: TextButton으로 구현
@@ -3133,6 +3212,7 @@ class _ManagerQuickCard extends StatelessWidget {
   final VoidCallback? onPokePartner; // Added
   final VoidCallback? onRescue; // 실천 인정
   final VoidCallback? onProposePromise;
+  final VoidCallback? onAcknowledgePromiseSettled;
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? exactTimeText;
@@ -3150,6 +3230,7 @@ class _ManagerQuickCard extends StatelessWidget {
     this.onPokePartner,
     this.onRescue,
     this.onProposePromise,
+    this.onAcknowledgePromiseSettled,
     this.timeChipText,
     this.timeChipType,
     this.exactTimeText,
@@ -3510,6 +3591,29 @@ class _ManagerQuickCard extends StatelessWidget {
               const SizedBox(height: 12),
               if (model.plan?.promise != null)
                 _buildManagerPromiseDetail(context, model.plan!.promise!),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onAcknowledgePromiseSettled,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.nowPromiseAckButton,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
             ],
             // "약속 걸기" 버튼 (partnerPoke, partnerPlanCreate에서 약속 없을 때)
             if ((model.state == HomeCardState.partnerPoke ||

@@ -281,6 +281,24 @@ class RestPlanIntent extends NowTabIntent {
   int get hashCode => planId.hashCode;
 }
 
+/// 약속 정산 결과 확인 (선택적으로 한마디 코멘트 첨부)
+class AcknowledgePromiseSettlementIntent extends NowTabIntent {
+  final String planId;
+  final String? comment;
+  const AcknowledgePromiseSettlementIntent(this.planId, {this.comment});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AcknowledgePromiseSettlementIntent &&
+          runtimeType == other.runtimeType &&
+          planId == other.planId &&
+          comment == other.comment;
+
+  @override
+  int get hashCode => planId.hashCode ^ (comment?.hashCode ?? 0);
+}
+
 /// 4주 파일럿 정산 응답 기록
 class RecordPilotSettlementIntent extends NowTabIntent {
   final String planId;

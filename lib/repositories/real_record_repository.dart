@@ -226,9 +226,10 @@ class RealRecordRepository implements RecordRepository {
         );
       }
 
-      // Promise: 정산 결과 (매니저 측)
+      // Promise: 정산 결과 (매니저 측). 본인이 이미 확인 처리한 카드는 숨긴다.
       if (plan.promise != null &&
-          plan.promise!.status == PromiseStatus.settled) {
+          plan.promise!.status == PromiseStatus.settled &&
+          !plan.promise!.isSettlementAcknowledgedBy(myUid)) {
         yoursCards.add(
           HomeCardModel(
             state: HomeCardState.promiseSettled,
@@ -275,9 +276,10 @@ class RealRecordRepository implements RecordRepository {
         );
       }
 
-      // Promise: 정산 결과 (실행자 측)
+      // Promise: 정산 결과 (실행자 측). 본인이 확인하면 카드가 사라진다.
       if (plan.promise != null &&
-          plan.promise!.status == PromiseStatus.settled) {
+          plan.promise!.status == PromiseStatus.settled &&
+          !plan.promise!.isSettlementAcknowledgedBy(myUid)) {
         mineCards.add(
           HomeCardModel(
             state: HomeCardState.promiseSettled,
@@ -1727,6 +1729,36 @@ class RealRecordRepository implements RecordRepository {
       );
     } catch (e) {
       debugPrint('[RealRecordRepository] Error settling promise: $e');
+    }
+  }
+
+  @override
+  Future<void> acknowledgePromiseSettlement(
+    String planId, {
+    String? comment,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final trimmed = comment?.trim();
+      final updates = <String, dynamic>{
+        'promise.settlementAcknowledgedBy': FieldValue.arrayUnion([user.uid]),
+        'lastUpdatedBy': user.uid,
+      };
+      if (trimmed != null && trimmed.isNotEmpty) {
+        updates['lastComment'] = trimmed;
+        updates['lastCheerAt'] = FieldValue.serverTimestamp();
+      }
+      await _firestore.collection('plans').doc(planId).update(updates);
+      debugPrint(
+        '[RealRecordRepository] Promise settlement acknowledged for plan $planId',
+      );
+    } catch (e) {
+      debugPrint(
+        '[RealRecordRepository] Error acknowledging promise settlement: $e',
+      );
+      rethrow;
     }
   }
 

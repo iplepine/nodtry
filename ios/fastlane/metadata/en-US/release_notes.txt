@@ -1,4 +1,3 @@
 What's New
 
-- The app now starts in your device's language on first launch — Korean for Korean devices, English for English devices.
-- Any language you pick in Settings is remembered for next time.
+- Stability and usability improvements.

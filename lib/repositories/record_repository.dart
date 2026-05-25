@@ -111,6 +111,12 @@ abstract class RecordRepository {
   /// 약속 정산. Plan 종료/중단 시 내부적으로 호출.
   Future<void> settlePromise(String planId);
 
+  /// 정산 결과 카드를 현재 사용자가 확인 처리(닫기). 한마디 코멘트를 함께 남길 수 있다.
+  Future<void> acknowledgePromiseSettlement(
+    String planId, {
+    String? comment,
+  });
+
   /// 파트너 실천 인정 (스트릭 구제)
   Future<void> rescuePlan(String planId, {DateTime? date});
 
