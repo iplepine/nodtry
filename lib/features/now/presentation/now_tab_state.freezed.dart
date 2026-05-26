@@ -16,7 +16,9 @@ mixin _$NowTabState {
 
 /// 전체 카드 리스트 (Raw Data)
  List<HomeCardModel> get allCards;/// 메인 실행 카드 (가장 큰 카드)
- HomeCardModel? get primaryCard;/// 서브 실행 카드 리스트 (우측 정렬 작은 카드들)
+ HomeCardModel? get primaryCard;/// 메인 카드 슬롯에서 좌우 스와이프로 순회할 오늘의 실천 카드 리스트.
+/// primaryCard 가 항상 [0]번째이며 비어있거나 1개면 스와이프 비활성.
+ List<HomeCardModel> get primaryCarouselCards;/// 서브 실행 카드 리스트 (우측 정렬 작은 카드들)
  List<HomeCardModel> get secondaryCards;/// 관리자/파트너 카드 리스트 (좌측 정렬)
  List<HomeCardModel> get managerCards;/// 헤더용 데이터
  UserModel? get partnerProfile; HeaderPeriodState get headerPeriodState; int? get currentWeek; int? get totalWeeks;
@@ -30,16 +32,16 @@ $NowTabStateCopyWith<NowTabState> get copyWith => _$NowTabStateCopyWithImpl<NowT
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NowTabState&&const DeepCollectionEquality().equals(other.allCards, allCards)&&(identical(other.primaryCard, primaryCard) || other.primaryCard == primaryCard)&&const DeepCollectionEquality().equals(other.secondaryCards, secondaryCards)&&const DeepCollectionEquality().equals(other.managerCards, managerCards)&&(identical(other.partnerProfile, partnerProfile) || other.partnerProfile == partnerProfile)&&(identical(other.headerPeriodState, headerPeriodState) || other.headerPeriodState == headerPeriodState)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.totalWeeks, totalWeeks) || other.totalWeeks == totalWeeks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NowTabState&&const DeepCollectionEquality().equals(other.allCards, allCards)&&(identical(other.primaryCard, primaryCard) || other.primaryCard == primaryCard)&&const DeepCollectionEquality().equals(other.primaryCarouselCards, primaryCarouselCards)&&const DeepCollectionEquality().equals(other.secondaryCards, secondaryCards)&&const DeepCollectionEquality().equals(other.managerCards, managerCards)&&(identical(other.partnerProfile, partnerProfile) || other.partnerProfile == partnerProfile)&&(identical(other.headerPeriodState, headerPeriodState) || other.headerPeriodState == headerPeriodState)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.totalWeeks, totalWeeks) || other.totalWeeks == totalWeeks));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(allCards),primaryCard,const DeepCollectionEquality().hash(secondaryCards),const DeepCollectionEquality().hash(managerCards),partnerProfile,headerPeriodState,currentWeek,totalWeeks);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(allCards),primaryCard,const DeepCollectionEquality().hash(primaryCarouselCards),const DeepCollectionEquality().hash(secondaryCards),const DeepCollectionEquality().hash(managerCards),partnerProfile,headerPeriodState,currentWeek,totalWeeks);
 
 @override
 String toString() {
-  return 'NowTabState(allCards: $allCards, primaryCard: $primaryCard, secondaryCards: $secondaryCards, managerCards: $managerCards, partnerProfile: $partnerProfile, headerPeriodState: $headerPeriodState, currentWeek: $currentWeek, totalWeeks: $totalWeeks)';
+  return 'NowTabState(allCards: $allCards, primaryCard: $primaryCard, primaryCarouselCards: $primaryCarouselCards, secondaryCards: $secondaryCards, managerCards: $managerCards, partnerProfile: $partnerProfile, headerPeriodState: $headerPeriodState, currentWeek: $currentWeek, totalWeeks: $totalWeeks)';
 }
 
 
@@ -50,7 +52,7 @@ abstract mixin class $NowTabStateCopyWith<$Res>  {
   factory $NowTabStateCopyWith(NowTabState value, $Res Function(NowTabState) _then) = _$NowTabStateCopyWithImpl;
 @useResult
 $Res call({
- List<HomeCardModel> allCards, HomeCardModel? primaryCard, List<HomeCardModel> secondaryCards, List<HomeCardModel> managerCards, UserModel? partnerProfile, HeaderPeriodState headerPeriodState, int? currentWeek, int? totalWeeks
+ List<HomeCardModel> allCards, HomeCardModel? primaryCard, List<HomeCardModel> primaryCarouselCards, List<HomeCardModel> secondaryCards, List<HomeCardModel> managerCards, UserModel? partnerProfile, HeaderPeriodState headerPeriodState, int? currentWeek, int? totalWeeks
 });
 
 
@@ -67,11 +69,12 @@ class _$NowTabStateCopyWithImpl<$Res>
 
 /// Create a copy of NowTabState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? allCards = null,Object? primaryCard = freezed,Object? secondaryCards = null,Object? managerCards = null,Object? partnerProfile = freezed,Object? headerPeriodState = null,Object? currentWeek = freezed,Object? totalWeeks = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? allCards = null,Object? primaryCard = freezed,Object? primaryCarouselCards = null,Object? secondaryCards = null,Object? managerCards = null,Object? partnerProfile = freezed,Object? headerPeriodState = null,Object? currentWeek = freezed,Object? totalWeeks = freezed,}) {
   return _then(_self.copyWith(
 allCards: null == allCards ? _self.allCards : allCards // ignore: cast_nullable_to_non_nullable
 as List<HomeCardModel>,primaryCard: freezed == primaryCard ? _self.primaryCard : primaryCard // ignore: cast_nullable_to_non_nullable
-as HomeCardModel?,secondaryCards: null == secondaryCards ? _self.secondaryCards : secondaryCards // ignore: cast_nullable_to_non_nullable
+as HomeCardModel?,primaryCarouselCards: null == primaryCarouselCards ? _self.primaryCarouselCards : primaryCarouselCards // ignore: cast_nullable_to_non_nullable
+as List<HomeCardModel>,secondaryCards: null == secondaryCards ? _self.secondaryCards : secondaryCards // ignore: cast_nullable_to_non_nullable
 as List<HomeCardModel>,managerCards: null == managerCards ? _self.managerCards : managerCards // ignore: cast_nullable_to_non_nullable
 as List<HomeCardModel>,partnerProfile: freezed == partnerProfile ? _self.partnerProfile : partnerProfile // ignore: cast_nullable_to_non_nullable
 as UserModel?,headerPeriodState: null == headerPeriodState ? _self.headerPeriodState : headerPeriodState // ignore: cast_nullable_to_non_nullable
@@ -162,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> secondaryCards,  List<HomeCardModel> managerCards,  UserModel? partnerProfile,  HeaderPeriodState headerPeriodState,  int? currentWeek,  int? totalWeeks)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> primaryCarouselCards,  List<HomeCardModel> secondaryCards,  List<HomeCardModel> managerCards,  UserModel? partnerProfile,  HeaderPeriodState headerPeriodState,  int? currentWeek,  int? totalWeeks)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NowTabState() when $default != null:
-return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.managerCards,_that.partnerProfile,_that.headerPeriodState,_that.currentWeek,_that.totalWeeks);case _:
+return $default(_that.allCards,_that.primaryCard,_that.primaryCarouselCards,_that.secondaryCards,_that.managerCards,_that.partnerProfile,_that.headerPeriodState,_that.currentWeek,_that.totalWeeks);case _:
   return orElse();
 
 }
@@ -183,10 +186,10 @@ return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.mana
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> secondaryCards,  List<HomeCardModel> managerCards,  UserModel? partnerProfile,  HeaderPeriodState headerPeriodState,  int? currentWeek,  int? totalWeeks)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> primaryCarouselCards,  List<HomeCardModel> secondaryCards,  List<HomeCardModel> managerCards,  UserModel? partnerProfile,  HeaderPeriodState headerPeriodState,  int? currentWeek,  int? totalWeeks)  $default,) {final _that = this;
 switch (_that) {
 case _NowTabState():
-return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.managerCards,_that.partnerProfile,_that.headerPeriodState,_that.currentWeek,_that.totalWeeks);case _:
+return $default(_that.allCards,_that.primaryCard,_that.primaryCarouselCards,_that.secondaryCards,_that.managerCards,_that.partnerProfile,_that.headerPeriodState,_that.currentWeek,_that.totalWeeks);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +206,10 @@ return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.mana
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> secondaryCards,  List<HomeCardModel> managerCards,  UserModel? partnerProfile,  HeaderPeriodState headerPeriodState,  int? currentWeek,  int? totalWeeks)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HomeCardModel> allCards,  HomeCardModel? primaryCard,  List<HomeCardModel> primaryCarouselCards,  List<HomeCardModel> secondaryCards,  List<HomeCardModel> managerCards,  UserModel? partnerProfile,  HeaderPeriodState headerPeriodState,  int? currentWeek,  int? totalWeeks)?  $default,) {final _that = this;
 switch (_that) {
 case _NowTabState() when $default != null:
-return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.managerCards,_that.partnerProfile,_that.headerPeriodState,_that.currentWeek,_that.totalWeeks);case _:
+return $default(_that.allCards,_that.primaryCard,_that.primaryCarouselCards,_that.secondaryCards,_that.managerCards,_that.partnerProfile,_that.headerPeriodState,_that.currentWeek,_that.totalWeeks);case _:
   return null;
 
 }
@@ -218,7 +221,7 @@ return $default(_that.allCards,_that.primaryCard,_that.secondaryCards,_that.mana
 
 
 class _NowTabState extends NowTabState {
-  const _NowTabState({required final  List<HomeCardModel> allCards, this.primaryCard, final  List<HomeCardModel> secondaryCards = const [], final  List<HomeCardModel> managerCards = const [], this.partnerProfile = null, this.headerPeriodState = HeaderPeriodState.inProgress, this.currentWeek = null, this.totalWeeks = null}): _allCards = allCards,_secondaryCards = secondaryCards,_managerCards = managerCards,super._();
+  const _NowTabState({required final  List<HomeCardModel> allCards, this.primaryCard, final  List<HomeCardModel> primaryCarouselCards = const [], final  List<HomeCardModel> secondaryCards = const [], final  List<HomeCardModel> managerCards = const [], this.partnerProfile = null, this.headerPeriodState = HeaderPeriodState.inProgress, this.currentWeek = null, this.totalWeeks = null}): _allCards = allCards,_primaryCarouselCards = primaryCarouselCards,_secondaryCards = secondaryCards,_managerCards = managerCards,super._();
   
 
 /// 전체 카드 리스트 (Raw Data)
@@ -232,6 +235,17 @@ class _NowTabState extends NowTabState {
 
 /// 메인 실행 카드 (가장 큰 카드)
 @override final  HomeCardModel? primaryCard;
+/// 메인 카드 슬롯에서 좌우 스와이프로 순회할 오늘의 실천 카드 리스트.
+/// primaryCard 가 항상 [0]번째이며 비어있거나 1개면 스와이프 비활성.
+ final  List<HomeCardModel> _primaryCarouselCards;
+/// 메인 카드 슬롯에서 좌우 스와이프로 순회할 오늘의 실천 카드 리스트.
+/// primaryCard 가 항상 [0]번째이며 비어있거나 1개면 스와이프 비활성.
+@override@JsonKey() List<HomeCardModel> get primaryCarouselCards {
+  if (_primaryCarouselCards is EqualUnmodifiableListView) return _primaryCarouselCards;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_primaryCarouselCards);
+}
+
 /// 서브 실행 카드 리스트 (우측 정렬 작은 카드들)
  final  List<HomeCardModel> _secondaryCards;
 /// 서브 실행 카드 리스트 (우측 정렬 작은 카드들)
@@ -266,16 +280,16 @@ _$NowTabStateCopyWith<_NowTabState> get copyWith => __$NowTabStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NowTabState&&const DeepCollectionEquality().equals(other._allCards, _allCards)&&(identical(other.primaryCard, primaryCard) || other.primaryCard == primaryCard)&&const DeepCollectionEquality().equals(other._secondaryCards, _secondaryCards)&&const DeepCollectionEquality().equals(other._managerCards, _managerCards)&&(identical(other.partnerProfile, partnerProfile) || other.partnerProfile == partnerProfile)&&(identical(other.headerPeriodState, headerPeriodState) || other.headerPeriodState == headerPeriodState)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.totalWeeks, totalWeeks) || other.totalWeeks == totalWeeks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NowTabState&&const DeepCollectionEquality().equals(other._allCards, _allCards)&&(identical(other.primaryCard, primaryCard) || other.primaryCard == primaryCard)&&const DeepCollectionEquality().equals(other._primaryCarouselCards, _primaryCarouselCards)&&const DeepCollectionEquality().equals(other._secondaryCards, _secondaryCards)&&const DeepCollectionEquality().equals(other._managerCards, _managerCards)&&(identical(other.partnerProfile, partnerProfile) || other.partnerProfile == partnerProfile)&&(identical(other.headerPeriodState, headerPeriodState) || other.headerPeriodState == headerPeriodState)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.totalWeeks, totalWeeks) || other.totalWeeks == totalWeeks));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_allCards),primaryCard,const DeepCollectionEquality().hash(_secondaryCards),const DeepCollectionEquality().hash(_managerCards),partnerProfile,headerPeriodState,currentWeek,totalWeeks);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_allCards),primaryCard,const DeepCollectionEquality().hash(_primaryCarouselCards),const DeepCollectionEquality().hash(_secondaryCards),const DeepCollectionEquality().hash(_managerCards),partnerProfile,headerPeriodState,currentWeek,totalWeeks);
 
 @override
 String toString() {
-  return 'NowTabState(allCards: $allCards, primaryCard: $primaryCard, secondaryCards: $secondaryCards, managerCards: $managerCards, partnerProfile: $partnerProfile, headerPeriodState: $headerPeriodState, currentWeek: $currentWeek, totalWeeks: $totalWeeks)';
+  return 'NowTabState(allCards: $allCards, primaryCard: $primaryCard, primaryCarouselCards: $primaryCarouselCards, secondaryCards: $secondaryCards, managerCards: $managerCards, partnerProfile: $partnerProfile, headerPeriodState: $headerPeriodState, currentWeek: $currentWeek, totalWeeks: $totalWeeks)';
 }
 
 
@@ -286,7 +300,7 @@ abstract mixin class _$NowTabStateCopyWith<$Res> implements $NowTabStateCopyWith
   factory _$NowTabStateCopyWith(_NowTabState value, $Res Function(_NowTabState) _then) = __$NowTabStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<HomeCardModel> allCards, HomeCardModel? primaryCard, List<HomeCardModel> secondaryCards, List<HomeCardModel> managerCards, UserModel? partnerProfile, HeaderPeriodState headerPeriodState, int? currentWeek, int? totalWeeks
+ List<HomeCardModel> allCards, HomeCardModel? primaryCard, List<HomeCardModel> primaryCarouselCards, List<HomeCardModel> secondaryCards, List<HomeCardModel> managerCards, UserModel? partnerProfile, HeaderPeriodState headerPeriodState, int? currentWeek, int? totalWeeks
 });
 
 
@@ -303,11 +317,12 @@ class __$NowTabStateCopyWithImpl<$Res>
 
 /// Create a copy of NowTabState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? allCards = null,Object? primaryCard = freezed,Object? secondaryCards = null,Object? managerCards = null,Object? partnerProfile = freezed,Object? headerPeriodState = null,Object? currentWeek = freezed,Object? totalWeeks = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? allCards = null,Object? primaryCard = freezed,Object? primaryCarouselCards = null,Object? secondaryCards = null,Object? managerCards = null,Object? partnerProfile = freezed,Object? headerPeriodState = null,Object? currentWeek = freezed,Object? totalWeeks = freezed,}) {
   return _then(_NowTabState(
 allCards: null == allCards ? _self._allCards : allCards // ignore: cast_nullable_to_non_nullable
 as List<HomeCardModel>,primaryCard: freezed == primaryCard ? _self.primaryCard : primaryCard // ignore: cast_nullable_to_non_nullable
-as HomeCardModel?,secondaryCards: null == secondaryCards ? _self._secondaryCards : secondaryCards // ignore: cast_nullable_to_non_nullable
+as HomeCardModel?,primaryCarouselCards: null == primaryCarouselCards ? _self._primaryCarouselCards : primaryCarouselCards // ignore: cast_nullable_to_non_nullable
+as List<HomeCardModel>,secondaryCards: null == secondaryCards ? _self._secondaryCards : secondaryCards // ignore: cast_nullable_to_non_nullable
 as List<HomeCardModel>,managerCards: null == managerCards ? _self._managerCards : managerCards // ignore: cast_nullable_to_non_nullable
 as List<HomeCardModel>,partnerProfile: freezed == partnerProfile ? _self.partnerProfile : partnerProfile // ignore: cast_nullable_to_non_nullable
 as UserModel?,headerPeriodState: null == headerPeriodState ? _self.headerPeriodState : headerPeriodState // ignore: cast_nullable_to_non_nullable

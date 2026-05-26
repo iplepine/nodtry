@@ -376,21 +376,22 @@ class RealRecordRepository implements RecordRepository {
           .where((i) => i.timeInMin < nowInMinutes)
           .toList();
 
-      // Primary: 현재 이후 가장 가까운 것 1개
-      if (upcomingItems.isNotEmpty) {
-        final primary = upcomingItems.first;
-        final streak = primary.plan.currentStreak;
+      // Primary 캐러셀: 오늘 남은 모든 upcoming 항목 (시간 오름차순)
+      // 첫번째가 selectPrimaryExecutorCard 우선순위로 primary가 된다.
+      for (var upcoming in upcomingItems) {
+        final streak = upcoming.plan.currentStreak;
         mineCards.add(
           HomeCardModel(
             state: HomeCardState.nowAction,
-            plan: _createSingleItemPlan(primary.plan, primary.item),
+            plan: _createSingleItemPlan(upcoming.plan, upcoming.item),
             streakCount: streak >= 2 ? streak : null,
           ),
         );
       }
 
-      // Secondary: 지나간 것들 (최대 3개)
-      final sortedPastItems = pastItems.reversed.take(3).toList();
+      // 지난 항목 (overdue): 최신순(가장 최근에 지난 것부터)으로 전체 노출.
+      // UI 카드 캐러셀에서 같이 스와이프된다.
+      final sortedPastItems = pastItems.reversed.toList();
       for (var past in sortedPastItems) {
         mineCards.add(
           HomeCardModel(

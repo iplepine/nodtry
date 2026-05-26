@@ -51,6 +51,10 @@ class _NowTabState extends ConsumerState<NowTab>
   bool _isHandlingNotificationSkip = false;
   final Set<String> _autoAcknowledgedPokes = {};
 
+  // Primary 카드 캐러셀: 좌우 스와이프로 오늘의 다른 실천을 순회한다.
+  int _primaryActiveIndex = 0;
+  String? _carouselSignature;
+
   @override
   void initState() {
     super.initState();
@@ -113,14 +117,43 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
+  void _handleCarouselSwipe(DragEndDetails details, int count) {
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity.abs() < 200) return;
+    final delta = velocity < 0 ? 1 : -1; // 왼쪽으로 스와이프 → 다음 카드
+    final next = (_primaryActiveIndex + delta).clamp(0, count - 1);
+    if (next == _primaryActiveIndex) return;
+    setState(() {
+      _primaryActiveIndex = next;
+    });
+    // 카드 교체 애니메이션 재생 (이전과 동일한 페이드/슬라이드).
+    _animationController.forward(from: 0.0);
+  }
+
+  /// 현재 캐러셀에서 스와이프로 선택된 카드. 비어있으면 기존 primaryCard 폴백.
+  HomeCardModel? _activePrimaryCard() {
+    final state = ref.read(nowTabViewModelProvider).value;
+    if (state == null) return null;
+    final carousel = state.primaryCarouselCards;
+    if (carousel.isEmpty) return state.primaryCard;
+    final idx = _primaryActiveIndex.clamp(0, carousel.length - 1);
+    return carousel[idx];
+  }
+
+  String _carouselSignatureFor(List<HomeCardModel> cards) {
+    return cards
+        .map((c) => '${c.state.name}:${c.plan?.id ?? ""}')
+        .join('|');
+  }
+
   Future<void> _handleDidIt() async {
-    final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
+    final primaryCard = _activePrimaryCard();
     if (primaryCard == null) return;
     await _handleDidItForCard(primaryCard);
   }
 
   Future<void> _handleFocusTimer() async {
-    final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
+    final primaryCard = _activePrimaryCard();
     if (primaryCard == null || primaryCard.plan?.id == null) return;
 
     final minutes = await showModalBottomSheet<int>(
@@ -834,7 +867,7 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   Future<void> _handleRest() async {
-    final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
+    final primaryCard = _activePrimaryCard();
     if (primaryCard?.plan?.id == null) return;
 
     final confirmed = await showDialog<bool>(
@@ -909,7 +942,7 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   Future<void> _handleSkip() async {
-    final primaryCard = ref.read(nowTabViewModelProvider).value?.primaryCard;
+    final primaryCard = _activePrimaryCard();
     if (primaryCard?.plan?.id == null) return;
 
     await _skipCard(primaryCard!);
@@ -1334,6 +1367,19 @@ class _NowTabState extends ConsumerState<NowTab>
       if (managerChanged || primaryChanged) {
         _onDataLoaded();
       }
+
+      // Primary 캐러셀 구성이 바뀌면 active index 를 첫번째로 리셋한다.
+      final nextSignature = _carouselSignatureFor(
+        nextUiState.primaryCarouselCards,
+      );
+      if (nextSignature != _carouselSignature) {
+        if (mounted) {
+          setState(() {
+            _carouselSignature = nextSignature;
+            _primaryActiveIndex = 0;
+          });
+        }
+      }
     });
 
     // 첫 진입 시에도 실행되도록 보장
@@ -1349,7 +1395,11 @@ class _NowTabState extends ConsumerState<NowTab>
     if (homeStateAsync.hasValue) {
       final uiState = homeStateAsync.value!;
       // 기존 data: (...) 블록 내용 사용
-      final primaryExecutorCard = uiState.primaryCard;
+      final carouselCards = uiState.primaryCarouselCards;
+      // 캐러셀에서 현재 선택된 카드. 없으면 기존 primaryCard 폴백.
+      final HomeCardModel? primaryExecutorCard = carouselCards.isNotEmpty
+          ? carouselCards[_primaryActiveIndex.clamp(0, carouselCards.length - 1)]
+          : uiState.primaryCard;
       final secondaryExecutorCards = uiState.secondaryCards;
       final managerCards = uiState.managerCards;
       _maybeAutoAcknowledgePoke(primaryExecutorCard);
@@ -1398,63 +1448,87 @@ class _NowTabState extends ConsumerState<NowTab>
                                         curve: Curves.easeIn,
                                       ),
                                     ),
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: FractionallySizedBox(
-                                    widthFactor: 0.9,
-                                    child: _PrimaryExecutorCard(
-                                      model: primaryExecutorCard,
-                                      onDidIt: _handleDidIt,
-                                      onFocusTimer: _handleFocusTimer,
-                                      onSkip: _handleSkip,
-                                      onRest: _handleRest,
-                                      onCreatePlan: _handleCreatePlan,
-                                      onModify: () => _handleModify(
-                                        primaryExecutorCard,
-                                      ), // Added
-                                      onAcceptPromise: () =>
-                                          _handleRespondPromise(
-                                            primaryExecutorCard,
-                                            true,
-                                          ),
-                                      onRejectPromise: () =>
-                                          _handleRespondPromise(
-                                            primaryExecutorCard,
-                                            false,
-                                          ),
-                                      onContinueAfterSettlement: () =>
-                                          _handleContinueAfterSettlement(
-                                            primaryExecutorCard,
-                                          ),
-                                      onExitAfterSettlement: () =>
-                                          _handleExitAfterSettlement(
-                                            primaryExecutorCard,
-                                          ),
-                                      onAcknowledgePromiseSettled: () =>
-                                          _handleAcknowledgePromiseSettled(
-                                            primaryExecutorCard,
-                                          ),
-                                      onTap: () =>
-                                          _handleCardTap(primaryExecutorCard),
-                                      timeChipText: _getTimeChipText(
-                                        primaryExecutorCard,
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.translucent,
+                                  onHorizontalDragEnd: carouselCards.length > 1
+                                      ? (details) =>
+                                            _handleCarouselSwipe(
+                                              details,
+                                              carouselCards.length,
+                                            )
+                                      : null,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: FractionallySizedBox(
+                                      widthFactor: 0.9,
+                                      child: _PrimaryExecutorCard(
+                                        // 키를 부여해 스와이프 시 위젯 상태가 새 카드로 재구성되게 한다.
+                                        key: ValueKey(
+                                          '${primaryExecutorCard.state.name}:${primaryExecutorCard.plan?.id ?? ""}',
+                                        ),
+                                        model: primaryExecutorCard,
+                                        onDidIt: _handleDidIt,
+                                        onFocusTimer: _handleFocusTimer,
+                                        onSkip: _handleSkip,
+                                        onRest: _handleRest,
+                                        onCreatePlan: _handleCreatePlan,
+                                        onModify: () => _handleModify(
+                                          primaryExecutorCard,
+                                        ), // Added
+                                        onAcceptPromise: () =>
+                                            _handleRespondPromise(
+                                              primaryExecutorCard,
+                                              true,
+                                            ),
+                                        onRejectPromise: () =>
+                                            _handleRespondPromise(
+                                              primaryExecutorCard,
+                                              false,
+                                            ),
+                                        onContinueAfterSettlement: () =>
+                                            _handleContinueAfterSettlement(
+                                              primaryExecutorCard,
+                                            ),
+                                        onExitAfterSettlement: () =>
+                                            _handleExitAfterSettlement(
+                                              primaryExecutorCard,
+                                            ),
+                                        onAcknowledgePromiseSettled: () =>
+                                            _handleAcknowledgePromiseSettled(
+                                              primaryExecutorCard,
+                                            ),
+                                        onTap: () =>
+                                            _handleCardTap(primaryExecutorCard),
+                                        timeChipText: _getTimeChipText(
+                                          primaryExecutorCard,
+                                        ),
+                                        timeChipType: _getTimeChipType(
+                                          primaryExecutorCard,
+                                        ),
+                                        recordGazeText: _getRecordGazeText(
+                                          primaryExecutorCard,
+                                        ),
+                                        exactTimeText: _getExactTimeText(
+                                          primaryExecutorCard,
+                                        ),
                                       ),
-                                      timeChipType: _getTimeChipType(
-                                        primaryExecutorCard,
-                                      ),
-                                      recordGazeText: _getRecordGazeText(
-                                        primaryExecutorCard,
-                                      ),
-                                      exactTimeText: _getExactTimeText(
-                                        primaryExecutorCard,
-                                      ),
-                                    ),
-                                    // Glassmorphism wrapper
-                                  ).wrapWithGlass(),
+                                      // Glassmorphism wrapper
+                                    ).wrapWithGlass(),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
+                          if (carouselCards.length > 1) ...[
+                            const SizedBox(height: 8),
+                            _PrimaryCarouselIndicator(
+                              count: carouselCards.length,
+                              activeIndex: _primaryActiveIndex.clamp(
+                                0,
+                                carouselCards.length - 1,
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 16),
                         ] else if (secondaryExecutorCards.isEmpty &&
                             managerCards.isEmpty) ...[
@@ -1918,6 +1992,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final String? exactTimeText;
 
   const _PrimaryExecutorCard({
+    super.key,
     required this.model,
     this.onDidIt,
     this.onFocusTimer,
@@ -4439,4 +4514,37 @@ String _particleEulReul(String text, [String locale = 'ko']) {
     return (lastChar - 0xAC00) % 28 == 0 ? '를' : '을';
   }
   return '를';
+}
+
+/// Primary 카드 캐러셀의 페이지 인디케이터 (점 + 카운터).
+class _PrimaryCarouselIndicator extends StatelessWidget {
+  final int count;
+  final int activeIndex;
+
+  const _PrimaryCarouselIndicator({
+    required this.count,
+    required this.activeIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (int i = 0; i < count; i++)
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            width: i == activeIndex ? 18 : 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: i == activeIndex
+                  ? AppColors.primary
+                  : AppColors.textDisabled.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+      ],
+    );
+  }
 }
