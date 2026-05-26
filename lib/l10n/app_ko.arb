@@ -922,5 +922,6 @@
   "nowMaxDaysLabel": "최대 {days}일",
   "nowPokeReceived": "파트너가 똑똑을 보냈어요",
   "nowPokeReceivedFromName": "{name}님이 똑똑을 보냈어요",
-  "nowYesterday": "어제"
+  "nowYesterday": "어제",
+  "nowNoteDateToday": "오늘"
 }

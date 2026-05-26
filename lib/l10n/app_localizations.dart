@@ -4465,6 +4465,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Yesterday'**
   String get nowYesterday;
+
+  /// No description provided for @nowNoteDateToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get nowNoteDateToday;
 }
 
 class _AppLocalizationsDelegate

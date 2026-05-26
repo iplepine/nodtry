@@ -2455,4 +2455,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nowYesterday => 'Yesterday';
+
+  @override
+  String get nowNoteDateToday => 'Today';
 }

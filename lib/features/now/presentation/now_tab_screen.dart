@@ -2256,28 +2256,25 @@ class _PrimaryExecutorCard extends StatelessWidget {
 
     // ----------------------------------------------------
     // 1. lastActionNote (실천자 한마디 - 나/파트너 공통)
+    // 날짜 라벨을 위에 붙여 "오늘은 ..."이 어제 작성된 메모임을 분명히 한다.
     // ----------------------------------------------------
     if (model.plan?.lastActionNote != null &&
         model.plan!.lastActionNote!.isNotEmpty) {
       children.add(const SizedBox(height: 12));
       children.add(
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: AppColors.background.withValues(alpha: 0.5),
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(12),
-              bottomLeft: Radius.circular(12),
-              bottomRight: Radius.circular(12),
-              topLeft: Radius.circular(2),
-            ),
-          ),
-          child: Text(
-            model.plan!.lastActionNote!,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textPrimary,
-              fontStyle: FontStyle.italic,
-            ),
+        _buildDatedNoteBubble(
+          context,
+          l10n: l10n,
+          text: model.plan!.lastActionNote!,
+          date: _lastActionNoteDate(model.plan!),
+          background: AppColors.background.withValues(alpha: 0.5),
+          noteColor: AppColors.textPrimary,
+          noteItalic: true,
+          radius: const BorderRadius.only(
+            topRight: Radius.circular(12),
+            bottomLeft: Radius.circular(12),
+            bottomRight: Radius.circular(12),
+            topLeft: Radius.circular(2),
           ),
         ),
       );
@@ -2285,28 +2282,25 @@ class _PrimaryExecutorCard extends StatelessWidget {
 
     // ----------------------------------------------------
     // 2. lastComment (매니저 피드백/응원)
+    // lastCheerAt 기준으로 날짜 라벨을 붙인다.
+    // lastCheerType(👍/❤️/💪 같은 리액션 이모지)과 lastComment를 나란히
+    // 놓으면 ① 파트너가 보통 코멘트에도 이모지를 같이 치기 때문에 의미가
+    // 중복되고 ② 두 Text의 fontSize/strut이 달라 윗선이 어긋난다.
     // ----------------------------------------------------
     if (model.plan?.lastComment != null &&
         model.plan!.lastComment!.isNotEmpty) {
       children.add(const SizedBox(height: 8));
-      // lastCheerType(👍/❤️/💪 같은 리액션 이모지)과 lastComment를 나란히
-      // 놓으면 ① 파트너가 보통 코멘트에도 이모지를 같이 치기 때문에 의미가
-      // 중복되고 ② 두 Text의 fontSize/strut이 달라 윗선이 어긋난다. 칩 배경이
-      // 이미 "응원" 시그널 역할이라 코멘트만 깔끔히 보여주는 게 자연스럽다.
       children.add(
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            model.plan!.lastComment!,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        _buildDatedNoteBubble(
+          context,
+          l10n: l10n,
+          text: model.plan!.lastComment!,
+          date: model.plan!.lastCheerAt,
+          background: AppColors.primary.withValues(alpha: 0.1),
+          noteColor: AppColors.primary,
+          dateLabelColor: AppColors.primary.withValues(alpha: 0.75),
+          noteWeight: FontWeight.w600,
+          radius: BorderRadius.circular(12),
         ),
       );
     }
@@ -3109,52 +3103,43 @@ class _SecondaryExecutorCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           // ----------------------------------------------------
-          // 1. lastActionNote (실천자 한마디)
+          // 1. lastActionNote (실천자 한마디) — 날짜 라벨 포함
           // ----------------------------------------------------
           if (model.plan?.lastActionNote != null &&
               model.plan!.lastActionNote!.isNotEmpty) ...[
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.background.withValues(alpha: 0.5),
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                  topLeft: Radius.circular(2),
-                ),
-              ),
-              child: Text(
-                model.plan!.lastActionNote!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontStyle: FontStyle.italic,
-                ),
+            _buildDatedNoteBubble(
+              context,
+              l10n: l10n,
+              text: model.plan!.lastActionNote!,
+              date: _lastActionNoteDate(model.plan!),
+              background: AppColors.background.withValues(alpha: 0.5),
+              noteColor: AppColors.textPrimary,
+              noteItalic: true,
+              radius: const BorderRadius.only(
+                topRight: Radius.circular(12),
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+                topLeft: Radius.circular(2),
               ),
             ),
           ],
           // ----------------------------------------------------
-          // 2. lastComment (매니저 피드백)
+          // 2. lastComment (매니저 피드백) — lastCheerAt 기준 날짜 라벨
           // ----------------------------------------------------
           if (model.plan?.lastComment != null &&
               model.plan!.lastComment!.isNotEmpty) ...[
             const SizedBox(height: 8),
-            // 위 응원 pill과 동일: lastCheerType은 코멘트 내 이모지와 중복되고
-            // 두 Text의 strut이 달라 정렬이 어긋난다. 코멘트만 그대로 보여준다.
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                model.plan!.lastComment!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+            _buildDatedNoteBubble(
+              context,
+              l10n: l10n,
+              text: model.plan!.lastComment!,
+              date: model.plan!.lastCheerAt,
+              background: AppColors.primary.withValues(alpha: 0.1),
+              noteColor: AppColors.primary,
+              dateLabelColor: AppColors.primary.withValues(alpha: 0.75),
+              noteWeight: FontWeight.w600,
+              radius: BorderRadius.circular(12),
             ),
           ],
         ],
@@ -3714,27 +3699,19 @@ class _ManagerQuickCard extends StatelessWidget {
           ],
           if (note != null && note.isNotEmpty) ...[
             const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.background.withValues(alpha: 0.5),
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                  topLeft: Radius.circular(2),
-                ),
-              ),
-              child: Text(
-                note,
-                maxLines: 4,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  height: 1.45,
-                  fontStyle: FontStyle.italic,
-                ),
+            _buildDatedNoteBubble(
+              context,
+              l10n: l10n,
+              text: note,
+              date: model.plan != null ? _lastActionNoteDate(model.plan!) : null,
+              background: AppColors.background.withValues(alpha: 0.5),
+              noteColor: AppColors.textPrimary,
+              noteItalic: true,
+              radius: const BorderRadius.only(
+                topRight: Radius.circular(12),
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+                topLeft: Radius.circular(2),
               ),
             ),
           ],
@@ -4378,6 +4355,77 @@ class _PokeBadge extends StatelessWidget {
       ),
     );
   }
+}
+
+/// lastActionNote가 작성된 시점 추정. reportCompletion에서 completedDates와
+/// lastActionNote가 함께 갱신되므로, 가장 최근 completedDate를 노트 작성일로
+/// 본다. 비어있으면 null.
+DateTime? _lastActionNoteDate(Plan plan) {
+  if (plan.completedDates.isEmpty) return null;
+  return plan.completedDates.reduce((a, b) => a.isAfter(b) ? a : b);
+}
+
+/// "오늘 / 어제 / N일 전 / M월 D일" 같은 짧은 날짜 라벨.
+/// 노트·코멘트 풍선의 상단에 작은 글씨로 박아 시간 맥락을 명시한다.
+String? _formatNoteDateLabel(AppLocalizations l10n, DateTime? date) {
+  if (date == null) return null;
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final target = DateTime(date.year, date.month, date.day);
+  final diffDays = today.difference(target).inDays;
+  if (diffDays <= 0) return l10n.nowNoteDateToday;
+  if (diffDays == 1) return l10n.timeChipYesterday;
+  if (diffDays <= 6) return l10n.timeChipDaysAgo(diffDays);
+  return l10n.timeChipDate(date.month, date.day);
+}
+
+/// 노트/코멘트 풍선을 그리는 공통 빌더. 날짜가 있으면 작은 라벨을 위에 붙인다.
+Widget _buildDatedNoteBubble(
+  BuildContext context, {
+  required AppLocalizations l10n,
+  required String text,
+  required DateTime? date,
+  required Color background,
+  required Color noteColor,
+  Color? dateLabelColor,
+  FontWeight noteWeight = FontWeight.w500,
+  bool noteItalic = false,
+  BorderRadius? radius,
+}) {
+  final dateLabel = _formatNoteDateLabel(l10n, date);
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: radius ?? BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (dateLabel != null) ...[
+          Text(
+            dateLabel,
+            style: TextStyle(
+              color: dateLabelColor ?? AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+            ),
+          ),
+          const SizedBox(height: 3),
+        ],
+        Text(
+          text,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: noteColor,
+                fontWeight: noteWeight,
+                fontStyle: noteItalic ? FontStyle.italic : FontStyle.normal,
+              ),
+        ),
+      ],
+    ),
+  );
 }
 
 /// 한국어 조사 을/를 판별 (받침 유무 기준)

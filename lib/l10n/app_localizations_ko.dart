@@ -2403,4 +2403,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nowYesterday => '어제';
+
+  @override
+  String get nowNoteDateToday => '오늘';
 }

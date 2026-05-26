@@ -1933,5 +1933,6 @@
       "name": { "type": "String" }
     }
   },
-  "nowYesterday": "Yesterday"
+  "nowYesterday": "Yesterday",
+  "nowNoteDateToday": "Today"
 }
