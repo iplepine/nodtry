@@ -2190,6 +2190,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDetailPromisePenaltyTriggered => '⚡ Penalty triggered';
 
   @override
+  String get planDetailMoreMenu => 'More';
+
+  @override
+  String get planDetailMenuRestartCompleted => 'Make a new plan from this';
+
+  @override
+  String get planDetailMenuRestartActive => 'Restart with new schedule';
+
+  @override
+  String get planDetailMenuStop => 'Stop plan';
+
+  @override
   String planDetailPromiseSuccessFailBreakdown(int success, int fail) {
     return '$success done · $fail missed';
   }

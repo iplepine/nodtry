@@ -1749,6 +1749,10 @@
   },
   "planDetailPromisePenaltyImminent": "One more miss triggers penalty",
   "planDetailPromisePenaltyTriggered": "⚡ Penalty triggered",
+  "planDetailMoreMenu": "More",
+  "planDetailMenuRestartCompleted": "Make a new plan from this",
+  "planDetailMenuRestartActive": "Restart with new schedule",
+  "planDetailMenuStop": "Stop plan",
   "planDetailPromiseSuccessFailBreakdown": "{success} done · {fail} missed",
   "@planDetailPromiseSuccessFailBreakdown": {
     "placeholders": {

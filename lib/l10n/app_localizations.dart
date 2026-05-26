@@ -4022,6 +4022,30 @@ abstract class AppLocalizations {
   /// **'⚡ Penalty triggered'**
   String get planDetailPromisePenaltyTriggered;
 
+  /// No description provided for @planDetailMoreMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get planDetailMoreMenu;
+
+  /// No description provided for @planDetailMenuRestartCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a new plan from this'**
+  String get planDetailMenuRestartCompleted;
+
+  /// No description provided for @planDetailMenuRestartActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart with new schedule'**
+  String get planDetailMenuRestartActive;
+
+  /// No description provided for @planDetailMenuStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop plan'**
+  String get planDetailMenuStop;
+
   /// No description provided for @planDetailPromiseSuccessFailBreakdown.
   ///
   /// In en, this message translates to:

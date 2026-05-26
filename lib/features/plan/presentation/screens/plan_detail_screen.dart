@@ -14,6 +14,8 @@ import '../widgets/plan_progress_card.dart';
 
 enum _HistoryViewMode { list, calendar, graph }
 
+enum _PlanMenuAction { restartCompleted, restartActive, stop }
+
 class PlanDetailScreen extends ConsumerStatefulWidget {
   final Plan plan;
 
@@ -115,24 +117,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           onPressed: () => context.pop(),
         ),
         actions: [
-          if (isMine) ...[
-            if (plan.state == PlanState.completed ||
-                plan.state == PlanState.stopped)
-              IconButton(
-                icon: Icon(Icons.refresh, color: AppColors.textPrimary),
-                onPressed: () => _showCreateFromCompletedDialog(context, ref),
-              )
-            else if (plan.state == PlanState.active) ...[
-              IconButton(
-                icon: Icon(Icons.refresh, color: AppColors.textPrimary),
-                onPressed: () => _showRestartPlanDialog(context, ref),
-              ),
-              IconButton(
-                icon: Icon(Icons.stop_circle_outlined, color: AppColors.error),
-                onPressed: () => _showStopCurrentPlanDialog(context, ref),
-              ),
-            ],
-          ],
+          if (isMine) _buildPlanMenu(context, ref, plan),
         ],
       ),
       body: SafeArea(
@@ -375,6 +360,93 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
             }, childCount: items.length * 2 - 1),
           ),
         );
+      },
+    );
+  }
+
+  /// 약속 상세 우상단 메뉴. 빨간 정지 아이콘이 톤에 안 맞는다는 피드백을 반영해
+  /// 재시작 / 중단 두 액션을 하나의 PopupMenuButton으로 모은다.
+  /// - active: "새 스케줄로 다시 시작" + "약속 중단"(빨강 텍스트)
+  /// - completed/stopped: "이 약속으로 다시 만들기"
+  Widget _buildPlanMenu(BuildContext context, WidgetRef ref, Plan plan) {
+    if (plan.state != PlanState.active &&
+        plan.state != PlanState.completed &&
+        plan.state != PlanState.stopped) {
+      return const SizedBox.shrink();
+    }
+
+    final l10n = AppLocalizations.of(context)!;
+
+    return PopupMenuButton<_PlanMenuAction>(
+      tooltip: l10n.planDetailMoreMenu,
+      icon: Icon(Icons.more_vert, color: AppColors.textPrimary),
+      onSelected: (action) {
+        switch (action) {
+          case _PlanMenuAction.restartCompleted:
+            _showCreateFromCompletedDialog(context, ref);
+            break;
+          case _PlanMenuAction.restartActive:
+            _showRestartPlanDialog(context, ref);
+            break;
+          case _PlanMenuAction.stop:
+            _showStopCurrentPlanDialog(context, ref);
+            break;
+        }
+      },
+      itemBuilder: (context) {
+        if (plan.state == PlanState.completed ||
+            plan.state == PlanState.stopped) {
+          return [
+            PopupMenuItem(
+              value: _PlanMenuAction.restartCompleted,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.refresh,
+                    size: 18,
+                    color: AppColors.textPrimary,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(l10n.planDetailMenuRestartCompleted),
+                ],
+              ),
+            ),
+          ];
+        }
+        // active
+        return [
+          PopupMenuItem(
+            value: _PlanMenuAction.restartActive,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.refresh,
+                  size: 18,
+                  color: AppColors.textPrimary,
+                ),
+                const SizedBox(width: 12),
+                Text(l10n.planDetailMenuRestartActive),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: _PlanMenuAction.stop,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.flag_outlined,
+                  size: 18,
+                  color: AppColors.error,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  l10n.planDetailMenuStop,
+                  style: TextStyle(color: AppColors.error),
+                ),
+              ],
+            ),
+          ),
+        ];
       },
     );
   }

@@ -2140,6 +2140,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailPromisePenaltyTriggered => '⚡ 벌칙 발동 확정';
 
   @override
+  String get planDetailMoreMenu => '더보기';
+
+  @override
+  String get planDetailMenuRestartCompleted => '이 약속으로 다시 만들기';
+
+  @override
+  String get planDetailMenuRestartActive => '새 스케줄로 다시 시작';
+
+  @override
+  String get planDetailMenuStop => '약속 중단';
+
+  @override
   String planDetailPromiseSuccessFailBreakdown(int success, int fail) {
     return '성공 $success일 · 실패 $fail일';
   }
