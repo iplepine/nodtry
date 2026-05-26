@@ -4,7 +4,11 @@ import '../../../../models/plan_model.dart';
 import '../../../../theme/app_colors.dart';
 
 /// 실천 기록을 캘린더 격자로 표시한다. plan.startDate ~ plan.endDate 구간을
-/// 월별로 끊어 한 칸씩 색으로 상태를 나타낸다.
+/// 월별로 끊어 한 칸씩 (배경색 + 아이콘 + 테두리 패턴) 조합으로 상태를 나타낸다.
+///
+/// 색깔만으로 구분하면 시인성이 떨어진다는 피드백을 반영해, 성공/놓침은
+/// 강한 대비 색 + 아이콘으로 또렷이 표시하고, 휴식·인정·건너뜀·예정은
+/// 서로 다른 색조 또는 테두리 패턴으로 분기한다.
 class PlanHistoryCalendarView extends StatelessWidget {
   final Plan plan;
 
@@ -12,13 +16,12 @@ class PlanHistoryCalendarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final months = _monthsBetween(plan.startDate, plan.endDate);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLegend(context, l10n),
+        _buildLegend(context),
         const SizedBox(height: 16),
         for (final month in months) ...[
           _MonthGrid(plan: plan, month: month),
@@ -28,44 +31,34 @@ class PlanHistoryCalendarView extends StatelessWidget {
     );
   }
 
-  Widget _buildLegend(BuildContext context, AppLocalizations l10n) {
+  Widget _buildLegend(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
-      spacing: 12,
-      runSpacing: 8,
+      spacing: 14,
+      runSpacing: 10,
       children: [
-        _legendItem(context, AppColors.primary, l10n.planDetailLegendDone),
-        _legendItem(context, AppColors.secondary, l10n.planDetailLegendRested),
+        _legendItem(context, _DayStatus.done, l10n.planDetailLegendDone),
+        _legendItem(context, _DayStatus.missed, l10n.planDetailLegendMissed),
+        _legendItem(context, _DayStatus.rested, l10n.planDetailLegendRested),
+        _legendItem(context, _DayStatus.rescued, l10n.planDetailLegendRescued),
+        _legendItem(context, _DayStatus.skipped, l10n.planDetailLegendSkipped),
         _legendItem(
-          context,
-          AppColors.secondary.withValues(alpha: 0.6),
-          l10n.planDetailLegendRescued,
-        ),
-        _legendItem(
-          context,
-          AppColors.textDisabled.withValues(alpha: 0.6),
-          l10n.planDetailLegendSkipped,
-        ),
-        _legendItem(context, AppColors.error.withValues(alpha: 0.5),
-            l10n.planDetailLegendMissed),
-        _legendItem(
-          context,
-          AppColors.textDisabled.withValues(alpha: 0.2),
-          l10n.planDetailLegendScheduled,
-        ),
+            context, _DayStatus.scheduled, l10n.planDetailLegendScheduled),
       ],
     );
   }
 
-  Widget _legendItem(BuildContext context, Color color, String label) {
+  Widget _legendItem(BuildContext context, _DayStatus status, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(3),
+        SizedBox(
+          width: 22,
+          height: 22,
+          child: _DayCell(
+            day: null,
+            status: status,
+            compact: true,
           ),
         ),
         const SizedBox(width: 6),
@@ -148,7 +141,7 @@ class _MonthGrid extends StatelessWidget {
         today: today,
         scheduledWeekdays: scheduledWeekdays,
       );
-      children.add(_DayCell(day: day, status: status, date: date));
+      children.add(_DayCell(day: day, status: status));
     }
 
     return Column(
@@ -210,75 +203,153 @@ enum _DayStatus {
   outside,
 }
 
+/// 셀 시각 표현 규약:
+///
+/// - **done**: mint 솔리드 + 흰색 ✓ 아이콘 + 흰색 굵은 숫자. "성공" 강한 양성 시그널.
+/// - **missed**: coral(에러) 솔리드 + 흰색 ✕ 아이콘 + 흰색 굵은 숫자. "안 한 것" 강한 음성 시그널.
+/// - **rested**: 시안톤 솔리드 + 흰색 달 아이콘. 휴식권 사용 — 다른 색조로 분리.
+/// - **rescued**: 흰 배경 + mint 테두리(2px) + mint 작은 ✓. "파트너 인정" — done의 약한 버전.
+/// - **skipped**: 옅은 회색 솔리드 + 회색 빗금 아이콘 + 취소선 숫자.
+/// - **scheduled**: 옅은 mint 점선 테두리 + 보통 숫자. "예정/미래".
+/// - **notScheduled**: 배경/테두리 없음. 매우 옅은 숫자만.
+/// - **outside**: notScheduled와 동일 (플랜 기간 밖).
 class _DayCell extends StatelessWidget {
-  final int day;
+  final int? day;
   final _DayStatus status;
-  final DateTime date;
+  final bool compact;
 
   const _DayCell({
     required this.day,
     required this.status,
-    required this.date,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = _backgroundColor();
-    final textColor = _textColor();
+    final visuals = _visualsFor(status);
+    final numberStyle = TextStyle(
+      color: visuals.textColor,
+      fontWeight: visuals.bold ? FontWeight.w700 : FontWeight.w500,
+      fontSize: compact ? 9 : 12,
+      decoration:
+          visuals.strikethrough ? TextDecoration.lineThrough : TextDecoration.none,
+      decorationColor: visuals.textColor.withValues(alpha: 0.8),
+      decorationThickness: 2,
+    );
 
-    return Container(
+    final iconSize = compact ? 9.0 : 12.0;
+    final showIcon = visuals.icon != null;
+
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: color,
+        color: visuals.fill,
         borderRadius: BorderRadius.circular(6),
+        border: visuals.border,
       ),
-      alignment: Alignment.center,
-      child: Text(
-        '$day',
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-        ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (day != null)
+            Text('$day', style: numberStyle)
+          else if (showIcon)
+            // 범례에서는 숫자 없이 아이콘만 가운데에 보여준다.
+            Icon(visuals.icon, size: iconSize, color: visuals.iconColor),
+          if (day != null && showIcon)
+            Positioned(
+              top: 2,
+              right: 2,
+              child: Icon(
+                visuals.icon,
+                size: iconSize,
+                color: visuals.iconColor,
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  Color _backgroundColor() {
+  static _DayVisuals _visualsFor(_DayStatus status) {
     switch (status) {
       case _DayStatus.done:
-        return AppColors.primary;
-      case _DayStatus.rested:
-        return AppColors.secondary;
-      case _DayStatus.rescued:
-        return AppColors.secondary.withValues(alpha: 0.6);
-      case _DayStatus.skipped:
-        return AppColors.textDisabled.withValues(alpha: 0.6);
+        return _DayVisuals(
+          fill: AppColors.primary,
+          textColor: Colors.white,
+          icon: Icons.check,
+          iconColor: Colors.white,
+          bold: true,
+        );
       case _DayStatus.missed:
-        return AppColors.error.withValues(alpha: 0.5);
+        return _DayVisuals(
+          fill: AppColors.error,
+          textColor: Colors.white,
+          icon: Icons.close,
+          iconColor: Colors.white,
+          bold: true,
+        );
+      case _DayStatus.rested:
+        return _DayVisuals(
+          fill: const Color(0xFF7AB8C8), // 시안톤 — mint와 다른 색조
+          textColor: Colors.white,
+          icon: Icons.nightlight_round,
+          iconColor: Colors.white,
+        );
+      case _DayStatus.rescued:
+        return _DayVisuals(
+          fill: Colors.transparent,
+          textColor: AppColors.primary,
+          icon: Icons.check,
+          iconColor: AppColors.primary,
+          bold: true,
+          border: Border.all(color: AppColors.primary, width: 2),
+        );
+      case _DayStatus.skipped:
+        return _DayVisuals(
+          fill: AppColors.textDisabled.withValues(alpha: 0.25),
+          textColor: AppColors.textSecondary,
+          icon: Icons.remove,
+          iconColor: AppColors.textSecondary,
+          strikethrough: true,
+        );
       case _DayStatus.scheduled:
-        return AppColors.textDisabled.withValues(alpha: 0.2);
+        return _DayVisuals(
+          fill: Colors.transparent,
+          textColor: AppColors.textSecondary,
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.45),
+            width: 1,
+            strokeAlign: BorderSide.strokeAlignInside,
+            style: BorderStyle.solid,
+          ),
+        );
       case _DayStatus.notScheduled:
       case _DayStatus.outside:
-        return Colors.transparent;
+        return _DayVisuals(
+          fill: Colors.transparent,
+          textColor: AppColors.textDisabled.withValues(alpha: 0.6),
+        );
     }
   }
+}
 
-  Color _textColor() {
-    switch (status) {
-      case _DayStatus.done:
-      case _DayStatus.rested:
-      case _DayStatus.rescued:
-      case _DayStatus.missed:
-        return Colors.white;
-      case _DayStatus.skipped:
-        return AppColors.textPrimary;
-      case _DayStatus.scheduled:
-        return AppColors.textSecondary;
-      case _DayStatus.notScheduled:
-      case _DayStatus.outside:
-        return AppColors.textDisabled;
-    }
-  }
+class _DayVisuals {
+  final Color fill;
+  final Color textColor;
+  final IconData? icon;
+  final Color iconColor;
+  final bool bold;
+  final bool strikethrough;
+  final BoxBorder? border;
+
+  const _DayVisuals({
+    required this.fill,
+    required this.textColor,
+    this.icon,
+    this.iconColor = Colors.transparent,
+    this.bold = false,
+    this.strikethrough = false,
+    this.border,
+  });
 }
 
 /// 주별 실천율을 막대 그래프로 표시한다.
