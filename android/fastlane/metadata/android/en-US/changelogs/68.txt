@@ -1,0 +1,2 @@
+- Now-tab top card supports horizontal swipe: cycle through every one of today's promises and complete the 2nd or 3rd item directly without finishing the first.
+- Upcoming and overdue items are now reachable from the same slot in time order, with dots indicating where you are.
