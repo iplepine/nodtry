@@ -807,6 +807,49 @@
   },
   "planDetailGraphCompletionRate": "주별 실천율",
   "planDetailGraphEmpty": "표시할 기록이 없어요.",
+  "planDetailProgressTitle": "진행 현황",
+  "planDetailProgressSuccessRate": "성공률",
+  "planDetailProgressFractionDays": "{done}/{total}일",
+  "@planDetailProgressFractionDays": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "planDetailProgressStreakLabel": "연속 달성",
+  "planDetailProgressDoneLabel": "실천",
+  "planDetailProgressRemainingLabel": "남음",
+  "planDetailProgressMissedLabel": "놓침",
+  "planDetailProgressDayUnit": "{n}일",
+  "@planDetailProgressDayUnit": {
+    "placeholders": {"n": {"type": "int"}}
+  },
+  "planDetailProgressCountUnit": "{n}회",
+  "@planDetailProgressCountUnit": {
+    "placeholders": {"n": {"type": "int"}}
+  },
+  "planDetailProgressNoVerdictYet": "아직 결과 나온 날이 없어요",
+  "planDetailPromiseProgressTitle": "약속 진행률",
+  "planDetailPromiseRewardLabel": "🏆 보상",
+  "planDetailPromisePenaltyLabel": "⚡ 벌칙",
+  "planDetailPromiseRewardNeed": "보상까지 {days}일 더 필요",
+  "@planDetailPromiseRewardNeed": {
+    "placeholders": {"days": {"type": "int"}}
+  },
+  "planDetailPromiseRewardAchieved": "🎉 보상 달성!",
+  "planDetailPromisePenaltyBuffer": "벌칙까지 {buffer}번 여유",
+  "@planDetailPromisePenaltyBuffer": {
+    "placeholders": {"buffer": {"type": "int"}}
+  },
+  "planDetailPromisePenaltyImminent": "이번에 또 놓치면 벌칙",
+  "planDetailPromisePenaltyTriggered": "⚡ 벌칙 발동 확정",
+  "planDetailPromiseSuccessFailBreakdown": "성공 {success}일 · 실패 {fail}일",
+  "@planDetailPromiseSuccessFailBreakdown": {
+    "placeholders": {
+      "success": {"type": "int"},
+      "fail": {"type": "int"}
+    }
+  },
   "nowHeaderSettlementNeeded": "4주 정산이 필요해요",
   "nowHeaderSettlementSub": "똑똑이 실제로 약속을 당겼는지 확인하고 다음 4주를 정해요.",
   "nowMetricCompleted": "완료",

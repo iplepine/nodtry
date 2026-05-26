@@ -3914,6 +3914,120 @@ abstract class AppLocalizations {
   /// **'Nothing to plot yet.'**
   String get planDetailGraphEmpty;
 
+  /// No description provided for @planDetailProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get planDetailProgressTitle;
+
+  /// No description provided for @planDetailProgressSuccessRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Success rate'**
+  String get planDetailProgressSuccessRate;
+
+  /// No description provided for @planDetailProgressFractionDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} days'**
+  String planDetailProgressFractionDays(int done, int total);
+
+  /// No description provided for @planDetailProgressStreakLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get planDetailProgressStreakLabel;
+
+  /// No description provided for @planDetailProgressDoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get planDetailProgressDoneLabel;
+
+  /// No description provided for @planDetailProgressRemainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get planDetailProgressRemainingLabel;
+
+  /// No description provided for @planDetailProgressMissedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get planDetailProgressMissedLabel;
+
+  /// No description provided for @planDetailProgressDayUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}d'**
+  String planDetailProgressDayUnit(int n);
+
+  /// No description provided for @planDetailProgressCountUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}x'**
+  String planDetailProgressCountUnit(int n);
+
+  /// No description provided for @planDetailProgressNoVerdictYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No verdicts in yet'**
+  String get planDetailProgressNoVerdictYet;
+
+  /// No description provided for @planDetailPromiseProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise progress'**
+  String get planDetailPromiseProgressTitle;
+
+  /// No description provided for @planDetailPromiseRewardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 Reward'**
+  String get planDetailPromiseRewardLabel;
+
+  /// No description provided for @planDetailPromisePenaltyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ Penalty'**
+  String get planDetailPromisePenaltyLabel;
+
+  /// No description provided for @planDetailPromiseRewardNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} more day(s) to reward'**
+  String planDetailPromiseRewardNeed(int days);
+
+  /// No description provided for @planDetailPromiseRewardAchieved.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Reward achieved!'**
+  String get planDetailPromiseRewardAchieved;
+
+  /// No description provided for @planDetailPromisePenaltyBuffer.
+  ///
+  /// In en, this message translates to:
+  /// **'{buffer} miss(es) of room'**
+  String planDetailPromisePenaltyBuffer(int buffer);
+
+  /// No description provided for @planDetailPromisePenaltyImminent.
+  ///
+  /// In en, this message translates to:
+  /// **'One more miss triggers penalty'**
+  String get planDetailPromisePenaltyImminent;
+
+  /// No description provided for @planDetailPromisePenaltyTriggered.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ Penalty triggered'**
+  String get planDetailPromisePenaltyTriggered;
+
+  /// No description provided for @planDetailPromiseSuccessFailBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'{success} done · {fail} missed'**
+  String planDetailPromiseSuccessFailBreakdown(int success, int fail);
+
   /// No description provided for @nowHeaderSettlementNeeded.
   ///
   /// In en, this message translates to:

@@ -1713,6 +1713,49 @@
   },
   "planDetailGraphCompletionRate": "Weekly completion rate",
   "planDetailGraphEmpty": "Nothing to plot yet.",
+  "planDetailProgressTitle": "Progress",
+  "planDetailProgressSuccessRate": "Success rate",
+  "planDetailProgressFractionDays": "{done}/{total} days",
+  "@planDetailProgressFractionDays": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "planDetailProgressStreakLabel": "Streak",
+  "planDetailProgressDoneLabel": "Done",
+  "planDetailProgressRemainingLabel": "Left",
+  "planDetailProgressMissedLabel": "Missed",
+  "planDetailProgressDayUnit": "{n}d",
+  "@planDetailProgressDayUnit": {
+    "placeholders": {"n": {"type": "int"}}
+  },
+  "planDetailProgressCountUnit": "{n}x",
+  "@planDetailProgressCountUnit": {
+    "placeholders": {"n": {"type": "int"}}
+  },
+  "planDetailProgressNoVerdictYet": "No verdicts in yet",
+  "planDetailPromiseProgressTitle": "Promise progress",
+  "planDetailPromiseRewardLabel": "🏆 Reward",
+  "planDetailPromisePenaltyLabel": "⚡ Penalty",
+  "planDetailPromiseRewardNeed": "{days} more day(s) to reward",
+  "@planDetailPromiseRewardNeed": {
+    "placeholders": {"days": {"type": "int"}}
+  },
+  "planDetailPromiseRewardAchieved": "🎉 Reward achieved!",
+  "planDetailPromisePenaltyBuffer": "{buffer} miss(es) of room",
+  "@planDetailPromisePenaltyBuffer": {
+    "placeholders": {"buffer": {"type": "int"}}
+  },
+  "planDetailPromisePenaltyImminent": "One more miss triggers penalty",
+  "planDetailPromisePenaltyTriggered": "⚡ Penalty triggered",
+  "planDetailPromiseSuccessFailBreakdown": "{success} done · {fail} missed",
+  "@planDetailPromiseSuccessFailBreakdown": {
+    "placeholders": {
+      "success": {"type": "int"},
+      "fail": {"type": "int"}
+    }
+  },
   "nowHeaderSettlementNeeded": "4-week settlement needed",
   "nowHeaderSettlementSub": "Confirm whether the knock really pulled the promise and pick the next 4 weeks.",
   "nowMetricCompleted": "Completed",

@@ -10,6 +10,7 @@ import '../widgets/notification_setting_editor.dart';
 import '../../../../models/history_item.dart';
 import 'package:nod_try/providers/repository_provider.dart';
 import '../widgets/plan_history_views.dart';
+import '../widgets/plan_progress_card.dart';
 
 enum _HistoryViewMode { list, calendar, graph }
 
@@ -206,9 +207,8 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                       const SizedBox(height: 32),
                     ],
 
-                    // Completion Report Section
-                    if (plan.state == PlanState.completed)
-                      _buildSummaryReport(context, plan),
+                    // Progress / Success rate card (always visible)
+                    PlanProgressCard(plan: plan),
 
                     const SizedBox(height: 48),
 
@@ -877,69 +877,4 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
     );
   }
 
-  Widget _buildSummaryReport(BuildContext context, Plan plan) {
-    final l10n = AppLocalizations.of(context)!;
-    final totalDays = plan.endDate.difference(plan.startDate).inDays + 1;
-    final completedCount = plan.completedDates.length;
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.insights, color: AppColors.primary),
-              const SizedBox(width: 12),
-              Text(
-                l10n.planDetailReport,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildReportItem(l10n.planDetailReportPeriod, l10n.planDetailReportDays(totalDays)),
-              _buildReportItem(l10n.planDetailReportCompleted, l10n.planDetailReportCount(completedCount)),
-              _buildReportItem(
-                l10n.planDetailReportRate,
-                '${(completedCount / totalDays * 100).toStringAsFixed(0)}%',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReportItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: TextStyle(
-            color: AppColors.primary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
 }

@@ -2076,6 +2076,75 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailGraphEmpty => '표시할 기록이 없어요.';
 
   @override
+  String get planDetailProgressTitle => '진행 현황';
+
+  @override
+  String get planDetailProgressSuccessRate => '성공률';
+
+  @override
+  String planDetailProgressFractionDays(int done, int total) {
+    return '$done/$total일';
+  }
+
+  @override
+  String get planDetailProgressStreakLabel => '연속 달성';
+
+  @override
+  String get planDetailProgressDoneLabel => '실천';
+
+  @override
+  String get planDetailProgressRemainingLabel => '남음';
+
+  @override
+  String get planDetailProgressMissedLabel => '놓침';
+
+  @override
+  String planDetailProgressDayUnit(int n) {
+    return '$n일';
+  }
+
+  @override
+  String planDetailProgressCountUnit(int n) {
+    return '$n회';
+  }
+
+  @override
+  String get planDetailProgressNoVerdictYet => '아직 결과 나온 날이 없어요';
+
+  @override
+  String get planDetailPromiseProgressTitle => '약속 진행률';
+
+  @override
+  String get planDetailPromiseRewardLabel => '🏆 보상';
+
+  @override
+  String get planDetailPromisePenaltyLabel => '⚡ 벌칙';
+
+  @override
+  String planDetailPromiseRewardNeed(int days) {
+    return '보상까지 $days일 더 필요';
+  }
+
+  @override
+  String get planDetailPromiseRewardAchieved => '🎉 보상 달성!';
+
+  @override
+  String planDetailPromisePenaltyBuffer(int buffer) {
+    return '벌칙까지 $buffer번 여유';
+  }
+
+  @override
+  String get planDetailPromisePenaltyImminent => '이번에 또 놓치면 벌칙';
+
+  @override
+  String get planDetailPromisePenaltyTriggered => '⚡ 벌칙 발동 확정';
+
+  @override
+  String planDetailPromiseSuccessFailBreakdown(int success, int fail) {
+    return '성공 $success일 · 실패 $fail일';
+  }
+
+  @override
   String get nowHeaderSettlementNeeded => '4주 정산이 필요해요';
 
   @override

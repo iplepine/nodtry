@@ -2125,6 +2125,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDetailGraphEmpty => 'Nothing to plot yet.';
 
   @override
+  String get planDetailProgressTitle => 'Progress';
+
+  @override
+  String get planDetailProgressSuccessRate => 'Success rate';
+
+  @override
+  String planDetailProgressFractionDays(int done, int total) {
+    return '$done/$total days';
+  }
+
+  @override
+  String get planDetailProgressStreakLabel => 'Streak';
+
+  @override
+  String get planDetailProgressDoneLabel => 'Done';
+
+  @override
+  String get planDetailProgressRemainingLabel => 'Left';
+
+  @override
+  String get planDetailProgressMissedLabel => 'Missed';
+
+  @override
+  String planDetailProgressDayUnit(int n) {
+    return '${n}d';
+  }
+
+  @override
+  String planDetailProgressCountUnit(int n) {
+    return '${n}x';
+  }
+
+  @override
+  String get planDetailProgressNoVerdictYet => 'No verdicts in yet';
+
+  @override
+  String get planDetailPromiseProgressTitle => 'Promise progress';
+
+  @override
+  String get planDetailPromiseRewardLabel => '🏆 Reward';
+
+  @override
+  String get planDetailPromisePenaltyLabel => '⚡ Penalty';
+
+  @override
+  String planDetailPromiseRewardNeed(int days) {
+    return '$days more day(s) to reward';
+  }
+
+  @override
+  String get planDetailPromiseRewardAchieved => '🎉 Reward achieved!';
+
+  @override
+  String planDetailPromisePenaltyBuffer(int buffer) {
+    return '$buffer miss(es) of room';
+  }
+
+  @override
+  String get planDetailPromisePenaltyImminent =>
+      'One more miss triggers penalty';
+
+  @override
+  String get planDetailPromisePenaltyTriggered => '⚡ Penalty triggered';
+
+  @override
+  String planDetailPromiseSuccessFailBreakdown(int success, int fail) {
+    return '$success done · $fail missed';
+  }
+
+  @override
   String get nowHeaderSettlementNeeded => '4-week settlement needed';
 
   @override
