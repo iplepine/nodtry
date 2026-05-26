@@ -1,0 +1,4 @@
+- New "Progress" card on plan detail: success rate, streak, done/left/missed days, and promise (reward/penalty) progress in one view.
+- Calendar in the records section is easier to read — done vs missed stand out with strong color and icon, while rest/rescue/skip/scheduled use distinct patterns.
+- Cleaned up the plan detail top bar: the red stop icon moved into a quieter overflow (︙) menu.
+- Note and cheer bubbles on Now-tab cards now show a date label (Today / Yesterday / N days ago) so old notes no longer look like today's.
