@@ -231,14 +231,15 @@ class PlanCard extends StatelessWidget {
 
             // 진척 미니바 — 활성 약속만. 페르소나 권고: 카드가 "관리 list"에서
             // "성취 시각화"로 격상되는 핵심.
-            if (plan.state == PlanState.active) _buildProgressBar(),
+            if (plan.state == PlanState.active) _buildProgressBar(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProgressBar() {
+  Widget _buildProgressBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final completed = plan.completedDayCount();
     final failed = plan.failedDayCount();
     final remaining = plan.remainingScheduledDayCount();
@@ -263,7 +264,8 @@ class PlanCard extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            '$completed/$total',
+            '${l10n.planDetailProgressDoneLabel} '
+            '${l10n.planDetailProgressFractionDays(completed, total)}',
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 12,
