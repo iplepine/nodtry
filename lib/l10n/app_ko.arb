@@ -682,6 +682,7 @@
   "planDetailPokeDoneToday": "오늘의 똑똑 완료",
   "planDetailPokeSending": "전송 중...",
   "planDetailPokeAsk": "똑똑... 혹시 잊으셨나요?",
+  "planDetailPokeAlreadyDone": "오늘은 이미 실천했어요",
   "planDetailDayMon": "월",
   "planDetailDayTue": "화",
   "planDetailDayWed": "수",

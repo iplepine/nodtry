@@ -469,10 +469,16 @@ class RealRecordRepository implements RecordRepository {
             final hasPokedToday = _isSameDay(plan.lastPokeAt, today);
 
             if (!isHandledToday && !hasPokedToday) {
-              final hasTodayItem = plan.items.any(
-                (item) => item.days.contains(todayWeekday),
-              );
-              if (hasTodayItem) {
+              // 약속 시간이 10분 이상 지난 항목이 있어야 똑똑 노출
+              // (아침부터 저녁 약속까지 종일 똑똑이 떠 있는 것을 방지)
+              const pokeDelayMinutes = 10;
+              final hasOverdueTodayItem = plan.items.any((item) {
+                if (!item.days.contains(todayWeekday)) return false;
+                final nt = item.notificationTime;
+                if (nt == null) return true;
+                return nowInMinutes >= nt.hour * 60 + nt.minute + pokeDelayMinutes;
+              });
+              if (hasOverdueTodayItem) {
                 final hasMissedNotice = _isSameDay(
                   plan.lastMissedNotifiedAt,
                   today,

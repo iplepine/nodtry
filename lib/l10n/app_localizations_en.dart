@@ -1718,6 +1718,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDetailPokeAsk => 'Knock knock… are you forgetting?';
 
   @override
+  String get planDetailPokeAlreadyDone => 'Already done today';
+
+  @override
   String get planDetailDayMon => 'Mon';
 
   @override

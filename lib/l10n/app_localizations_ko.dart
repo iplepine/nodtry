@@ -1680,6 +1680,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailPokeAsk => '똑똑... 혹시 잊으셨나요?';
 
   @override
+  String get planDetailPokeAlreadyDone => '오늘은 이미 실천했어요';
+
+  @override
   String get planDetailDayMon => '월';
 
   @override

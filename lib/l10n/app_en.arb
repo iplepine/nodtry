@@ -1522,6 +1522,7 @@
   "planDetailPokeDoneToday": "Knock sent for today",
   "planDetailPokeSending": "Sending…",
   "planDetailPokeAsk": "Knock knock… are you forgetting?",
+  "planDetailPokeAlreadyDone": "Already done today",
   "planDetailDayMon": "Mon",
   "planDetailDayTue": "Tue",
   "planDetailDayWed": "Wed",

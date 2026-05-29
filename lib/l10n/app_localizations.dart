@@ -3182,6 +3182,12 @@ abstract class AppLocalizations {
   /// **'Knock knock… are you forgetting?'**
   String get planDetailPokeAsk;
 
+  /// No description provided for @planDetailPokeAlreadyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Already done today'**
+  String get planDetailPokeAlreadyDone;
+
   /// No description provided for @planDetailDayMon.
   ///
   /// In en, this message translates to:

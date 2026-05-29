@@ -537,6 +537,15 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
         isSameDay(effectiveLastPokeAt) &&
         !isSameDay(effectiveLastPokeAcknowledgedAt);
 
+    // 파트너가 오늘 이미 완료/스킵/휴식/실천인정한 경우 똑똑 불필요
+    final isHandledToday =
+        plan.completedDates.any(isSameDay) ||
+        plan.skippedDates.any(isSameDay) ||
+        plan.restedDates.any(isSameDay) ||
+        plan.rescuedDates.any(isSameDay);
+
+    final isPokeDisabled = isPokedToday || isHandledToday || _isPoking;
+
     // Debug Log
     debugPrint('[PlanDetail] Plan ID: ${plan.id}');
     debugPrint(
@@ -553,7 +562,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: (isPokedToday || _isPoking)
+        onPressed: isPokeDisabled
             ? null
             : () async {
                 setState(() => _isPoking = true); // Disable immediately
@@ -588,18 +597,20 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
               )
             : const Icon(Icons.touch_app, size: 18),
         label: Text(
-          isPokedToday
-              ? AppLocalizations.of(context)!.planDetailPokeDoneToday
-              : (_isPoking ? AppLocalizations.of(context)!.planDetailPokeSending : AppLocalizations.of(context)!.planDetailPokeAsk),
+          isHandledToday
+              ? AppLocalizations.of(context)!.planDetailPokeAlreadyDone
+              : isPokedToday
+                  ? AppLocalizations.of(context)!.planDetailPokeDoneToday
+                  : (_isPoking ? AppLocalizations.of(context)!.planDetailPokeSending : AppLocalizations.of(context)!.planDetailPokeAsk),
         ),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           side: BorderSide(
-            color: (isPokedToday || _isPoking)
+            color: isPokeDisabled
                 ? AppColors.textDisabled.withValues(alpha: 0.2)
                 : AppColors.primary.withValues(alpha: 0.5),
           ),
-          foregroundColor: (isPokedToday || _isPoking)
+          foregroundColor: isPokeDisabled
               ? AppColors.textDisabled
               : AppColors.primary,
         ),
