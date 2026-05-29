@@ -1,3 +1,4 @@
 What's New
 
-- Stability and usability improvements.
+- Updated store visuals to match the refreshed app icon and screen design.
+- Aligned cheer and reaction emojis more cleanly.
