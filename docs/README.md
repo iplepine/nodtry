@@ -17,6 +17,7 @@ Nodtry는 혼자 유지하기 어려운 작은 실천을 파트너와 함께 약
 - 변경이 필요한 경우 새 결정은 `decisions/DECISIONS.md`에 먼저 남긴다.
 
 ## 지금 읽을 문서
+- [product/ONE_PAGER.md](./product/ONE_PAGER.md): 컨셉·목표·현재 기능 한 장 요약
 - [work/README.md](./work/README.md): 현재 목표, 로드맵, 작업 티켓
 - [go-to-market/STUDY_SPRINT_PILOT_PLAN.md](./go-to-market/STUDY_SPRINT_PILOT_PLAN.md): 다음 실행 단위
 - [go-to-market/VERTICAL_SELECTION.md](./go-to-market/VERTICAL_SELECTION.md): 1차 vertical 결정
