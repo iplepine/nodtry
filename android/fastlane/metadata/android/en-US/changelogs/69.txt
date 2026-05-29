@@ -1,0 +1,2 @@
+- Plan progress label is clearer. Instead of a bare "11/28" next to the bar, the card now reads "Done 11/28 days" so it's obvious the numerator counts successful days.
+- Cheer reactions (fire, heart, clap, etc.) are now rendered as custom SVG icons. Vertical alignment and weight stay consistent across devices and the icons inline cleanly inside notes and cheer messages.
