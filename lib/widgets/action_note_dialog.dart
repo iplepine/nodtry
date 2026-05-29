@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
-import 'centered_emoji.dart';
+import 'reaction_icon.dart';
 
 class ActionNoteDialog extends StatefulWidget {
   final String title;
@@ -29,7 +29,7 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
   );
 
   String? _selectedEmoji;
-  final List<String> _emojis = ['🔥', '❤️', '👏', '👍', '😮', '😢', '💪', '✨'];
+  final List<String> _emojis = ReactionIcon.reactions;
 
   @override
   void dispose() {
@@ -140,7 +140,7 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
                               width: 2,
                             ),
                           ),
-                          child: CenteredEmoji(emoji, size: 22),
+                          child: ReactionIcon(emoji, size: 28),
                         ),
                       );
                     }).toList(),

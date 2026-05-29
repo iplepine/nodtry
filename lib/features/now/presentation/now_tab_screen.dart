@@ -9,7 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/app_underlined_text.dart';
 import '../../../widgets/quiet_header.dart';
-import '../../../widgets/centered_emoji.dart';
+import '../../../widgets/reaction_icon.dart';
 import '../../../widgets/time_chip.dart';
 import '../../../models/home_state.dart';
 import '../../../routes/app_router.dart';
@@ -1775,7 +1775,7 @@ class _NowTabState extends ConsumerState<NowTab>
                     Wrap(
                       spacing: 16,
                       runSpacing: 16,
-                      children: ['🔥', '❤️', '👏', '👍', '😮', '😢', '💪', '✨']
+                      children: ReactionIcon.reactions
                           .map((emoji) {
                             final isSelected = selectedReaction == emoji;
                             return GestureDetector(
@@ -1799,7 +1799,7 @@ class _NowTabState extends ConsumerState<NowTab>
                                     width: 2,
                                   ),
                                 ),
-                                child: CenteredEmoji(emoji, size: 28),
+                                child: ReactionIcon(emoji, size: 34),
                               ),
                             );
                           })
@@ -2297,7 +2297,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     if (statusMessage != null) {
       if (children.isNotEmpty) children.add(const SizedBox(height: 8));
       children.add(
-        Text(
+        ReactionText(
           statusMessage,
           style:
               (title != null
@@ -4490,7 +4490,7 @@ Widget _buildDatedNoteBubble(
           ),
           const SizedBox(height: 3),
         ],
-        Text(
+        ReactionText(
           text,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: noteColor,

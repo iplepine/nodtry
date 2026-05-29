@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
 import '../action_note_dialog.dart';
 import '../app_underlined_text.dart';
+import '../reaction_icon.dart';
 import '../../features/history/presentation/history_viewmodel.dart';
 import '../../features/history/presentation/history_state.dart';
 
@@ -146,7 +147,7 @@ class HistoryCard extends ConsumerWidget {
                           color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
+                        child: ReactionText(
                           item.comment!,
                           style: TextStyle(
                             color: AppColors.primaryPressed,
