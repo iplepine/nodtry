@@ -115,6 +115,12 @@ if grep -Eq '(full English localization|English translation|i18n|localize|locali
     "Polished the English translation across plan creation, notifications, focus timer, and more."
 fi
 
+if grep -Eq '(skip.?today|drop today reminder|cancel.*alarm.*(delete|complete)|reminder.*(skip|completed|deleted)|fix.*notifications?.*(plan|today))' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "오늘 약속을 수행하거나 삭제한 뒤에도 같은 시간에 알림이 오던 문제를 고쳤어요." \
+    "Fixed: reminders no longer fire today after the matching promise is completed or deleted."
+fi
+
 if [ "${#KO_NOTES[@]}" -eq 0 ]; then
   add_note \
     "안정성 및 사용성을 개선했어요." \
