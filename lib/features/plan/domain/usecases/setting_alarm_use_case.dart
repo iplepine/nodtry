@@ -4,7 +4,10 @@ import '../../../../models/plan_model.dart';
 import '../../../../services/notification_service.dart';
 
 class SettingAlarmUseCase {
-  static const int _planNotificationIdModulo = 200000000;
+  // Keep in sync with `_planNotificationIdModulo` in
+  // `lib/services/notification_service.dart` — the cancel/schedule pair derives
+  // the same id from the plan seed.
+  static const int _planNotificationIdModulo = 10000000;
   final PlanReminderScheduler _notificationService;
 
   SettingAlarmUseCase(this._notificationService);

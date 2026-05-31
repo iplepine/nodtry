@@ -36,7 +36,25 @@ const String _snoozeActionId = 'snooze_10m';
 const String _didItActionId = 'did_it_now';
 const String _skipTodayActionId = 'skip_today';
 const String _snoozeDarwinCategoryId = 'snooze_reminder';
-const int _planNotificationIdModulo = 200000000;
+
+// Plan-reminder ID layout
+// ----------------------
+// matchDateTimeComponents:dayOfWeekAndTime ignores the date portion of the
+// scheduledDate on both iOS (UNCalendarNotificationTrigger only uses the
+// extracted components) and Android (next-fire-date is rebuilt from "now").
+// That made skipToday a no-op — today's instance still fired. We now schedule
+// one-shot zonedSchedule entries for the next N weeks per day, so cancelling
+// or re-scheduling can actually drop today's instance.
+const int _planNotificationIdModulo = 10000000;
+const int _planNotificationWeeksAhead = 4;
+const int _planNotificationSlotsPerPlan = 100; // (day-1)*10 + week
+const int _planNotificationSnoozeOffset = 1500000000;
+const int _planNotificationSnoozeModulo = 200000000;
+// Legacy values kept so we can still cancel reminders scheduled by previous
+// versions that used a different id layout.
+const int _legacyPlanNotificationIdModulo = 200000000;
+const int _legacySnoozeOffset = 1000000000;
+const int _legacySnoozeModulo = 1000000000;
 
 @immutable
 class NotificationInputRequest {
@@ -210,12 +228,13 @@ class NotificationService implements PlanReminderScheduler {
   }
 
   /// Schedule a notification for a plan
-  /// [id] should be unique per plan-day combination or plan ID base
+  /// [planId] should be unique per plan (hash-derived)
   /// [days] 1=Mon, 7=Sun (compatible with DateTime.weekday)
-  /// [skipToday] if true, and the next instance is today, it will schedule for next week instead
+  /// [skipToday] if true and an instance falls on today, that single instance
+  /// is dropped while next week's and later remain scheduled.
   @override
   Future<void> schedulePlanReminder({
-    required int planId, // Using plan.hashCode or similar as base
+    required int planId,
     String? planIdentifier,
     required String title,
     required int hour,
@@ -225,39 +244,48 @@ class NotificationService implements PlanReminderScheduler {
   }) async {
     final normalizedPlanId = _normalizePlanNotificationBaseId(planId);
 
-    await cancelPlanReminders(normalizedPlanId);
+    await cancelPlanReminders(planId);
 
-    for (int day in days) {
-      final tz.TZDateTime scheduledDate = _nextInstanceOfDayAndTime(
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    final body = _notifString('reminderBody');
+
+    for (final int day in days) {
+      final tz.TZDateTime firstInstance = _firstInstanceOfDayAndTime(
+        now,
         day,
         hour,
         minute,
-        skipToday: skipToday,
       );
-      debugPrint(
-        '[Notification] Scheduling for plan $planId, day $day at $hour:$minute. Calculated time: $scheduledDate (Local now: ${tz.TZDateTime.now(tz.local)})',
-      );
+      for (int week = 0; week < _planNotificationWeeksAhead; week++) {
+        final tz.TZDateTime scheduledDate = firstInstance.add(
+          Duration(days: 7 * week),
+        );
+        if (scheduledDate.isBefore(now)) continue;
+        if (skipToday && _isSameLocalDay(scheduledDate, now)) continue;
 
-      await _scheduleWeekly(
-        id: _buildPlanDayNotificationId(normalizedPlanId, day),
-        title: title,
-        body: _notifString('reminderBody'),
-        hour: hour,
-        minute: minute,
-        day: day,
-        scheduledDate: scheduledDate,
-        planIdentifier: planIdentifier,
-      );
+        final int id = _buildPlanDayWeekNotificationId(
+          normalizedPlanId,
+          day,
+          week,
+        );
+        debugPrint(
+          '[Notification] Scheduling plan=$planId day=$day week=$week at $scheduledDate (id=$id)',
+        );
+        await _scheduleSinglePlanReminder(
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate: scheduledDate,
+          planIdentifier: planIdentifier,
+        );
+      }
     }
   }
 
-  Future<void> _scheduleWeekly({
+  Future<void> _scheduleSinglePlanReminder({
     required int id,
     required String title,
     required String body,
-    required int hour,
-    required int minute,
-    required int day, // 1=Mon, 7=Sun
     required tz.TZDateTime scheduledDate,
     String? planIdentifier,
   }) async {
@@ -277,7 +305,6 @@ class NotificationService implements PlanReminderScheduler {
       androidScheduleMode: await canScheduleExactAlarms()
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       payload: _buildPayload(
         originalId: id,
         title: title,
@@ -288,13 +315,12 @@ class NotificationService implements PlanReminderScheduler {
     );
   }
 
-  tz.TZDateTime _nextInstanceOfDayAndTime(
+  tz.TZDateTime _firstInstanceOfDayAndTime(
+    tz.TZDateTime now,
     int day,
     int hour,
-    int minute, {
-    bool skipToday = false,
-  }) {
-    tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    int minute,
+  ) {
     tz.TZDateTime scheduledDate = tz.TZDateTime(
       tz.local,
       now.year,
@@ -303,31 +329,43 @@ class NotificationService implements PlanReminderScheduler {
       hour,
       minute,
     );
-
     while (scheduledDate.weekday != day) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
-
-    if (scheduledDate.isBefore(now) ||
-        (skipToday &&
-            scheduledDate.year == now.year &&
-            scheduledDate.month == now.month &&
-            scheduledDate.day == now.day)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 7));
-    }
-
     return scheduledDate;
+  }
+
+  bool _isSameLocalDay(tz.TZDateTime a, tz.TZDateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   @override
   Future<void> cancelPlanReminders(int planId) async {
     final normalizedPlanId = _normalizePlanNotificationBaseId(planId);
 
-    for (int i = 1; i <= 7; i++) {
-      final notificationId = _buildPlanDayNotificationId(normalizedPlanId, i);
-      await flutterLocalNotificationsPlugin.cancel(notificationId);
+    for (int day = 1; day <= 7; day++) {
+      for (int week = 0; week < _planNotificationWeeksAhead; week++) {
+        final int id = _buildPlanDayWeekNotificationId(
+          normalizedPlanId,
+          day,
+          week,
+        );
+        await flutterLocalNotificationsPlugin.cancel(id);
+        await flutterLocalNotificationsPlugin.cancel(
+          _buildSnoozedNotificationId(id),
+        );
+      }
+    }
+
+    // Best-effort cleanup of any reminders left over from the previous id
+    // layout. Same plan seed but a different modulo, so the legacy id won't
+    // collide with the new one — safe to cancel unconditionally.
+    final int legacyPlanId = planId.abs() % _legacyPlanNotificationIdModulo;
+    for (int day = 1; day <= 7; day++) {
+      final int legacyId = legacyPlanId * 10 + day;
+      await flutterLocalNotificationsPlugin.cancel(legacyId);
       await flutterLocalNotificationsPlugin.cancel(
-        _buildSnoozedNotificationId(notificationId),
+        _buildLegacySnoozedNotificationId(legacyId),
       );
     }
   }
@@ -600,16 +638,27 @@ class NotificationService implements PlanReminderScheduler {
   }
 
   int _buildSnoozedNotificationId(int originalId) {
-    final normalizedId = originalId.abs() % 1000000000;
-    return 1000000000 + normalizedId;
+    final normalizedId = originalId.abs() % _planNotificationSnoozeModulo;
+    return _planNotificationSnoozeOffset + normalizedId;
+  }
+
+  int _buildLegacySnoozedNotificationId(int originalId) {
+    final normalizedId = originalId.abs() % _legacySnoozeModulo;
+    return _legacySnoozeOffset + normalizedId;
   }
 
   int _normalizePlanNotificationBaseId(int planId) {
     return planId.abs() % _planNotificationIdModulo;
   }
 
-  int _buildPlanDayNotificationId(int normalizedPlanId, int day) {
-    return normalizedPlanId * 10 + day;
+  int _buildPlanDayWeekNotificationId(
+    int normalizedPlanId,
+    int day, // 1..7
+    int week, // 0..(_planNotificationWeeksAhead - 1)
+  ) {
+    return normalizedPlanId * _planNotificationSlotsPerPlan +
+        (day - 1) * 10 +
+        week;
   }
 
   int _notificationIdForRemoteMessage(RemoteMessage message) {

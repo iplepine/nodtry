@@ -106,6 +106,9 @@ class AllPlansScreen extends ConsumerWidget {
                 Navigator.pop(context);
                 try {
                   if (plan.id != null) {
+                    await ref
+                        .read(settingAlarmUseCaseProvider)
+                        .cancel(plan);
                     await ref.read(recordRepositoryProvider).deletePlan(plan.id!);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(

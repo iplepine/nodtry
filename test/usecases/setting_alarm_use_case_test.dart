@@ -126,7 +126,7 @@ void main() {
     final expectedId = SettingAlarmUseCase.notificationBaseIdFromSeed(
       'plan-123',
     );
-    expect(expectedId, inInclusiveRange(0, 199999999));
+    expect(expectedId, inInclusiveRange(0, 9999999));
     expect(scheduler.canceledPlanId, expectedId);
     expect(scheduler.calls, ['cancel:$expectedId']);
   });

@@ -249,10 +249,13 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         }
       }
 
+      final settingAlarm = ref.read(settingAlarmUseCaseProvider);
       if (targetPlan != null) {
-        await ref
-            .read(settingAlarmUseCaseProvider)
-            .execute(targetPlan, skipToday: true);
+        await settingAlarm.execute(targetPlan, skipToday: true);
+      } else {
+        // Plan은 못 찾았지만 최소한 오늘 예약된 알림은 끄기 위해 cancel.
+        // 다음 plan 업데이트/앱 재시작에서 다시 schedule 된다.
+        await settingAlarm.cancelById(planId);
       }
     } catch (e) {
       // 알람 업데이트 실패가 실천 보고 자체를 방해하지 않도록 swallow
