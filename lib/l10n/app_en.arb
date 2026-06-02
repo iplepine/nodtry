@@ -681,6 +681,18 @@
   "@settingsThemeDeepOlive": {
     "description": "Deep Olive theme option"
   },
+  "settingsThemePacific": "Pacific",
+  "@settingsThemePacific": {
+    "description": "Pacific (Ocean Blue × Coral) theme option"
+  },
+  "settingsThemeRoseMocha": "Rose Mocha",
+  "@settingsThemeRoseMocha": {
+    "description": "Rose Mocha (Dusty Rose × Cream) theme option"
+  },
+  "settingsThemeLavenderDusk": "Lavender Dusk",
+  "@settingsThemeLavenderDusk": {
+    "description": "Lavender Dusk (Plum × Mustard Gold) theme option"
+  },
   "developerTitle": "Developer Screen",
   "@developerTitle": {
     "description": "Developer screen title"

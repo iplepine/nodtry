@@ -5,89 +5,82 @@ import 'app_theme_enum.dart';
 class AppTheme {
   AppTheme._();
 
-  /// 현재 테마에 따른 ThemeData 반환
-  static ThemeData get lightTheme {
-    return _buildTheme(AppColors.currentTheme);
-  }
+  /// 현재 테마(`AppColors.currentTheme`)에 따른 ThemeData.
+  static ThemeData get lightTheme => themeOf(AppColors.currentTheme);
 
-  /// 특정 테마의 ThemeData 반환
-  static ThemeData _buildTheme(AppThemeType themeType) {
-    // 테마 타입에 따라 직접 색상 가져오기
-    final colors = _getColorsForTheme(themeType);
+  /// 특정 테마의 ThemeData. main.dart에서 settingsState를 보고 직접 호출한다.
+  static ThemeData themeOf(AppThemeType type) =>
+      _buildTheme(AppColors.paletteFor(type));
 
-    // Material Design 3 ColorScheme 생성
-    // seed color를 기반으로 전체 색상 팔레트 자동 생성
+  static ThemeData _buildTheme(ThemePalette palette) {
+    // Material Design 3 ColorScheme — seed로 자동 팔레트 생성 후 우리 토큰으로 덮어쓴다.
     final baseColorScheme = ColorScheme.fromSeed(
-      seedColor: colors.primary,
+      seedColor: palette.primary,
       brightness: Brightness.light,
     );
 
-    // 디자인 스펙에 맞게 커스텀 색상으로 오버라이드
-    // Material Design 3: background는 deprecated, surface 사용
     final colorScheme = baseColorScheme.copyWith(
-      primary: colors.primary,
-      secondary: colors.secondary,
-      surface: colors.surface,
+      primary: palette.primary,
+      secondary: palette.secondary,
+      surface: palette.surface,
       onPrimary: Colors.white,
-      onSecondary: colors.textPrimary,
-      onSurface: colors.textPrimary,
-      outline: colors.outline,
-      outlineVariant: colors.divider,
-      error: baseColorScheme.error, // Material 3 기본 에러 색상 사용
+      onSecondary: palette.textPrimary,
+      onSurface: palette.textPrimary,
+      outline: palette.outline,
+      outlineVariant: palette.divider,
+      error: baseColorScheme.error,
       onError: baseColorScheme.onError,
     );
 
-    final themeData = ThemeData(
+    return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: colors.background, // 커스텀 배경색 유지
-      fontFamily: 'Pretendard', // 기본 한글 폰트
+      scaffoldBackgroundColor: palette.background,
+      fontFamily: 'Pretendard',
       textTheme: TextTheme(
         displayLarge: TextStyle(
-          color: colors.textPrimary,
+          color: palette.textPrimary,
           fontSize: 32,
           fontWeight: FontWeight.w400,
         ),
         displayMedium: TextStyle(
-          color: colors.textPrimary,
+          color: palette.textPrimary,
           fontSize: 28,
           fontWeight: FontWeight.w400,
         ),
         displaySmall: TextStyle(
-          color: colors.textPrimary,
+          color: palette.textPrimary,
           fontSize: 24,
           fontWeight: FontWeight.w400,
         ),
         headlineMedium: TextStyle(
-          color: colors.textPrimary,
+          color: palette.textPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w400,
         ),
         bodyLarge: TextStyle(
-          color: colors.textPrimary,
+          color: palette.textPrimary,
           fontSize: 16,
           fontWeight: FontWeight.w400,
         ),
         bodyMedium: TextStyle(
-          color: colors.textPrimary,
+          color: palette.textPrimary,
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
         bodySmall: TextStyle(
-          color: colors.textSecondary,
+          color: palette.textSecondary,
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: colors.primary,
+          backgroundColor: palette.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12), // Soft radius (8~12dp)
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
             fontFamily: 'Pretendard',
             fontSize: 16,
@@ -96,53 +89,23 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: colors.surface, // Soft Stone
-        elevation: 0, // 그림자 ❌
+        color: palette.surface,
+        elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
-      dividerTheme: DividerThemeData(color: colors.divider, thickness: 1),
+      dividerTheme: DividerThemeData(color: palette.divider, thickness: 1),
     );
-
-    return themeData;
   }
 
-  /// 특정 테마 타입에 대한 색상 팔레트 반환
-  static _ThemeColors _getColorsForTheme(AppThemeType themeType) {
-    switch (themeType) {
-      case AppThemeType.smokyPlum:
-        return _ThemeColors(
-          background: const Color(0xFFF8FAF7),
-          surface: const Color(0xFFFFFFFF),
-          primary: const Color(0xFF18B7A0),
-          secondary: const Color(0xFFFF8A3D),
-          outline: const Color(0xFFD9E4DF),
-          divider: const Color(0xFFE3ECE8),
-          textPrimary: const Color(0xFF1D2B27),
-          textSecondary: const Color(0xFF66736F),
-        );
-      case AppThemeType.deepOlive:
-        return _ThemeColors(
-          background: const Color(0xFFF3F1ED), // Soft Sand
-          surface: const Color(0xFFE7E3DC), // Warm Sand
-          primary: const Color(0xFF5F6F63), // Deep Olive
-          secondary: const Color(0xFFD2CCC3), // Pale Sand
-          outline: const Color(0xFFDED8D0), // Sand Line
-          divider: const Color(0xFFDED8D0), // Sand Line
-          textPrimary: const Color(0xFF2E2F2C),
-          textSecondary: const Color(0xFF767A74),
-        );
-    }
-  }
+  // --- Convenience accessors (각 테마의 ThemeData 단축 getter) ---
+  static ThemeData get smokyPlumTheme => themeOf(AppThemeType.smokyPlum);
+  static ThemeData get deepOliveTheme => themeOf(AppThemeType.deepOlive);
+  static ThemeData get pacificTheme => themeOf(AppThemeType.pacific);
+  static ThemeData get roseMochaTheme => themeOf(AppThemeType.roseMocha);
+  static ThemeData get lavenderDuskTheme => themeOf(AppThemeType.lavenderDusk);
 
-  /// Mint & Orange 테마
-  static ThemeData get smokyPlumTheme => _buildTheme(AppThemeType.smokyPlum);
-
-  /// Deep Olive 테마
-  static ThemeData get deepOliveTheme => _buildTheme(AppThemeType.deepOlive);
-
-  // Dark Mode Theme (향후 구현)
+  /// Dark mode (향후 구현)
   static ThemeData get darkTheme {
-    // Material Design 3 ColorScheme 생성 (다크 모드)
     final baseDarkColorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.dark,
@@ -151,7 +114,7 @@ class AppTheme {
     final darkColorScheme = baseDarkColorScheme.copyWith(
       primary: AppColors.primary,
       secondary: AppColors.secondary,
-      surface: AppColors.darkSurface, // #2A2328
+      surface: AppColors.darkSurface,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onSurface: Colors.white,
@@ -162,31 +125,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: darkColorScheme,
-      scaffoldBackgroundColor: AppColors.darkBackground, // 커스텀 배경색 유지
-      // ... 기타 다크 모드 설정
+      scaffoldBackgroundColor: AppColors.darkBackground,
     );
   }
-}
-
-/// 테마별 색상 팔레트
-class _ThemeColors {
-  final Color background;
-  final Color surface;
-  final Color primary;
-  final Color secondary;
-  final Color outline;
-  final Color divider;
-  final Color textPrimary;
-  final Color textSecondary;
-
-  _ThemeColors({
-    required this.background,
-    required this.surface,
-    required this.primary,
-    required this.secondary,
-    required this.outline,
-    required this.divider,
-    required this.textPrimary,
-    required this.textSecondary,
-  });
 }

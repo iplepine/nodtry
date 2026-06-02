@@ -125,25 +125,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildThemeOption(
-                context,
-                l10n.settingsThemeSmokyPlum,
-                AppThemeType.smokyPlum,
-                settingsState.currentTheme,
-                () => ref
-                    .read(settingsViewModelProvider.notifier)
-                    .dispatch(const ChangeThemeIntent(AppThemeType.smokyPlum)),
-              ),
-              const SizedBox(height: 12),
-              _buildThemeOption(
-                context,
-                l10n.settingsThemeDeepOlive,
-                AppThemeType.deepOlive,
-                settingsState.currentTheme,
-                () => ref
-                    .read(settingsViewModelProvider.notifier)
-                    .dispatch(const ChangeThemeIntent(AppThemeType.deepOlive)),
-              ),
+              ..._buildThemeOptions(context, ref, l10n, settingsState.currentTheme),
               const SizedBox(height: 32),
 
               if (kDebugMode) ...[
@@ -498,6 +480,40 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  /// 모든 테마 옵션 리스트. 각 row 사이 12px 간격이 자동으로 들어간다.
+  List<Widget> _buildThemeOptions(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    AppThemeType currentTheme,
+  ) {
+    final entries = <(AppThemeType, String)>[
+      (AppThemeType.smokyPlum, l10n.settingsThemeSmokyPlum),
+      (AppThemeType.deepOlive, l10n.settingsThemeDeepOlive),
+      (AppThemeType.pacific, l10n.settingsThemePacific),
+      (AppThemeType.roseMocha, l10n.settingsThemeRoseMocha),
+      (AppThemeType.lavenderDusk, l10n.settingsThemeLavenderDusk),
+    ];
+
+    final widgets = <Widget>[];
+    for (var i = 0; i < entries.length; i++) {
+      final (theme, label) = entries[i];
+      if (i > 0) widgets.add(const SizedBox(height: 12));
+      widgets.add(
+        _buildThemeOption(
+          context,
+          label,
+          theme,
+          currentTheme,
+          () => ref
+              .read(settingsViewModelProvider.notifier)
+              .dispatch(ChangeThemeIntent(theme)),
+        ),
+      );
+    }
+    return widgets;
+  }
+
   Widget _buildThemeOption(
     BuildContext context,
     String label,
@@ -506,6 +522,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     VoidCallback onTap,
   ) {
     final isSelected = theme == currentTheme;
+    final palette = AppColors.paletteFor(theme);
 
     return Material(
       color: Colors.transparent,
@@ -527,6 +544,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
+                // primary/secondary 색 미리보기 — 사용자가 어떤 톤인지
+                // 라벨만 보고 짐작하지 않아도 되도록.
+                _ThemeSwatch(primary: palette.primary, secondary: palette.secondary),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     label,
@@ -630,6 +651,53 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 테마 선택 row 좌측에 띄우는 2-tone 색 미리보기.
+///
+/// primary가 좌측 ⅔ + secondary가 우측 ⅓로 살짝 겹친 원형 칩. 사용자가 라벨만
+/// 보고 어떤 톤인지 모르는 일을 피하기 위함.
+class _ThemeSwatch extends StatelessWidget {
+  final Color primary;
+  final Color secondary;
+
+  const _ThemeSwatch({required this.primary, required this.secondary});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 36,
+      height: 24,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // primary (큰 원)
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: primary,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 1.5),
+            ),
+          ),
+          // secondary (살짝 겹친 원)
+          Positioned(
+            left: 14,
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                color: secondary,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 1.5),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

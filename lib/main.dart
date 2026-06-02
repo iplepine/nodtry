@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
-import 'theme/app_theme_enum.dart';
 import 'routes/app_router.dart';
 import 'providers/app_settings_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -104,10 +103,8 @@ class OnMyBehalfApp extends ConsumerWidget {
     // null이면 repository 쪽에서 시스템 로케일로 fallback.
     setRepositoryLocaleCode(settingsState.currentLocale?.languageCode);
 
-    // 현재 테마에 따라 ThemeData 가져오기
-    final themeData = settingsState.currentTheme == AppThemeType.smokyPlum
-        ? AppTheme.smokyPlumTheme
-        : AppTheme.deepOliveTheme;
+    // 현재 테마에 따라 ThemeData 가져오기 (5개 테마 모두 지원)
+    final themeData = AppTheme.themeOf(settingsState.currentTheme);
 
     return AppSettings(
       state: settingsState,

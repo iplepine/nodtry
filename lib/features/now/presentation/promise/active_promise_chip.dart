@@ -132,9 +132,9 @@ _Summary? _summarize(AppLocalizations l10n, Plan plan, Promise promise) {
 _Summary _penaltyTriggered(AppLocalizations l10n, PromisePenalty penalty) {
   return _Summary(
     text: l10n.promiseChipPenaltyTriggered(penalty.description),
-    background: const Color(0xFFFFF1E6),
-    border: const Color(0xFFFF8A3D),
-    foreground: const Color(0xFFB54708),
+    background: AppColors.warningSoft,
+    border: AppColors.warningBorder,
+    foreground: AppColors.warningStrong,
     emphasis: true,
   );
 }
@@ -149,9 +149,9 @@ _Summary _penaltyImminent(
       : l10n.promiseChipPenaltyImminent(buffer, penalty.description);
   return _Summary(
     text: text,
-    background: const Color(0xFFFFF1E6),
-    border: const Color(0xFFFF8A3D),
-    foreground: const Color(0xFFB54708),
+    background: AppColors.warningSoft,
+    border: AppColors.warningBorder,
+    foreground: AppColors.warningStrong,
     emphasis: true,
   );
 }
@@ -300,7 +300,7 @@ class _PromiseDetailSheet extends StatelessWidget {
                 remaining: remaining,
               ),
               progress: (success / promise.penalty!.targetDays).clamp(0.0, 1.0),
-              progressColor: const Color(0xFFFF8A3D),
+              progressColor: AppColors.warningBorder,
             ),
           const SizedBox(height: 20),
           SizedBox(

@@ -267,7 +267,7 @@ class _PromiseProgressBlock extends StatelessWidget {
             description: penalty.description,
             statusText: _penaltyStatusText(l10n, penalty, success, remaining),
             progress: _penaltyProgress(penalty, failed),
-            color: const Color(0xFFFF8A3D),
+            color: AppColors.warningBorder,
           ),
         ],
       ],

@@ -1088,6 +1088,24 @@ abstract class AppLocalizations {
   /// **'Deep Olive × Sand'**
   String get settingsThemeDeepOlive;
 
+  /// Pacific (Ocean Blue × Coral) theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Pacific'**
+  String get settingsThemePacific;
+
+  /// Rose Mocha (Dusty Rose × Cream) theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Rose Mocha'**
+  String get settingsThemeRoseMocha;
+
+  /// Lavender Dusk (Plum × Mustard Gold) theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Lavender Dusk'**
+  String get settingsThemeLavenderDusk;
+
   /// Developer screen title
   ///
   /// In en, this message translates to:

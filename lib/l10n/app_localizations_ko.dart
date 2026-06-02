@@ -530,6 +530,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsThemeDeepOlive => 'Deep Olive × Sand';
 
   @override
+  String get settingsThemePacific => 'Pacific';
+
+  @override
+  String get settingsThemeRoseMocha => 'Rose Mocha';
+
+  @override
+  String get settingsThemeLavenderDusk => 'Lavender Dusk';
+
+  @override
   String get developerTitle => '개발자 화면';
 
   @override

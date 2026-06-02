@@ -11,6 +11,10 @@ part 'app_settings_provider.freezed.dart';
 /// Stored as the language code ("ko", "en"). Absent or empty = follow system.
 const _kLocaleOverrideKey = 'app.locale_override';
 
+/// SharedPreferences key for the user's selected color theme.
+/// Stored as the enum's `storageKey` (e.g. "smokyPlum"). Absent = default.
+const _kThemeKey = 'app.theme';
+
 @freezed
 abstract class AppSettingsState with _$AppSettingsState {
   const factory AppSettingsState({
@@ -31,15 +35,24 @@ class AppSettingsNotifier extends Notifier<AppSettingsState> {
     if (stored != null && stored.isNotEmpty) {
       initialLocale = Locale(stored, '');
     }
-    return AppSettingsState(currentLocale: initialLocale);
+    // 저장된 테마가 있으면 그대로 복원, 없으면 default(smokyPlum).
+    final storedTheme = AppThemeType.fromStorageKey(prefs.getString(_kThemeKey));
+    final initialTheme = storedTheme ?? AppThemeType.smokyPlum;
+    // AppColors의 정적 palette도 동기화 — 첫 빌드에서 위젯들이 올바른 색을 읽도록.
+    AppColors.setTheme(initialTheme);
+    return AppSettingsState(
+      currentTheme: initialTheme,
+      currentLocale: initialLocale,
+    );
   }
 
-  /// 테마 변경
+  /// 테마 변경 — palette swap + prefs persist.
   void setTheme(AppThemeType theme) {
-    if (state.currentTheme != theme) {
-      state = state.copyWith(currentTheme: theme);
-      AppColors.setTheme(theme);
-    }
+    if (state.currentTheme == theme) return;
+    state = state.copyWith(currentTheme: theme);
+    AppColors.setTheme(theme);
+    final prefs = ref.read(sharedPreferencesProvider);
+    prefs.setString(_kThemeKey, theme.storageKey);
   }
 
   /// 언어 변경 — 사용자가 명시적으로 고른 값을 prefs에 persist 한다.

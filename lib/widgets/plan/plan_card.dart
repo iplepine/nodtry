@@ -296,14 +296,14 @@ class PlanCard extends StatelessWidget {
       case PlanState.pendingApproval:
         return {
           'text': l10n.planStatePending,
-          'color': const Color(0xFFFF9800).withValues(alpha: 0.1), // Orange
-          'textColor': const Color(0xFFEF6C00),
+          'color': AppColors.pendingBadgeFill,
+          'textColor': AppColors.pendingBadgeText,
         };
       case PlanState.rejected:
         return {
           'text': l10n.planStateRejected,
-          'color': const Color(0xFFF44336).withValues(alpha: 0.1), // Red
-          'textColor': const Color(0xFFD32F2F),
+          'color': AppColors.error.withValues(alpha: 0.1),
+          'textColor': AppColors.error,
         };
       case PlanState.completed:
         return {

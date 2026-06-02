@@ -104,18 +104,16 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                           margin: const EdgeInsets.only(bottom: 24),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFFFF4E5,
-                            ), // Soft Orange background
+                            color: AppColors.noticeBackground,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFFFD180)),
+                            border: Border.all(color: AppColors.noticeBorder),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.warning_amber_rounded,
-                                color: Color(0xFFFF9800), // Orange
+                                color: AppColors.warningBorder,
                                 size: 24,
                               ),
                               const SizedBox(width: 12),
@@ -129,7 +127,7 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                                           .textTheme
                                           .bodyMedium
                                           ?.copyWith(
-                                            color: const Color(0xFF5D4037),
+                                            color: AppColors.noticeText,
                                             height: 1.4,
                                           ),
                                     ),
@@ -141,12 +139,10 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Container(
-                                            decoration: const BoxDecoration(
+                                            decoration: BoxDecoration(
                                               border: Border(
                                                 bottom: BorderSide(
-                                                  color: Color(
-                                                    0xFFE65100,
-                                                  ), // Darker Orange
+                                                  color: AppColors.warningStrong,
                                                   width: 1.0,
                                                 ),
                                               ),
@@ -157,18 +153,16 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                                                   .textTheme
                                                   .bodyMedium
                                                   ?.copyWith(
-                                                    color: const Color(
-                                                      0xFFE65100,
-                                                    ), // Darker Orange
+                                                    color: AppColors.warningStrong,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                             ),
                                           ),
                                           const SizedBox(width: 4),
-                                          const Icon(
+                                          Icon(
                                             Icons.arrow_forward_ios_rounded,
                                             size: 12,
-                                            color: Color(0xFFE65100),
+                                            color: AppColors.warningStrong,
                                           ),
                                         ],
                                       ),
@@ -1025,7 +1019,7 @@ class _PersonCard extends StatelessWidget {
                             if (person.isSupported)
                               _RelationshipBadge(
                                 text: l10n.usBadgeSupported,
-                                color: const Color(0xFFEBE6E1), // Warm Sand
+                                color: AppColors.neutralBadge,
                                 textColor: AppColors.textSecondary,
                               ),
                             if (person.isCheering)

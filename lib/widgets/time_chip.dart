@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 /// Time Chip 타입
 enum TimeChipType {
@@ -17,8 +18,8 @@ enum TimeChipType {
 
 /// Time Chip 위젯
 ///
-/// 스펙: 시간은 메시지가 아니라 상태(state)다
-/// 상태는 칩(chip)으로 표현한다
+/// 스펙: 시간은 메시지가 아니라 상태(state)다 — 상태는 칩(chip)으로 표현한다.
+/// 모든 색은 현재 테마의 ThemePalette에서 가져온다.
 class TimeChip extends StatelessWidget {
   final String text;
   final TimeChipType type;
@@ -70,31 +71,24 @@ class TimeChip extends StatelessWidget {
   Color _getBackgroundColor() {
     switch (type) {
       case TimeChipType.now:
-        // 스펙: Warm Coral (#F28B82)
-        return const Color(0xFFF28B82);
+        return AppColors.timeChipNowBackground;
       case TimeChipType.upcoming:
-        // 스펙: Light Sand (Opacity 80%)
-        // Theme A Surface를 사용하되, 스펙의 Light Sand 색상 사용
-        return const Color(0xFFF2ECE7).withValues(alpha: 0.8);
+        return AppColors.timeChipNeutralBackground.withValues(alpha: 0.8);
       case TimeChipType.soon:
-        // 스펙: Light Sand (Opacity 60%)
-        return const Color(0xFFF2ECE7).withValues(alpha: 0.6);
+        return AppColors.timeChipNeutralBackground.withValues(alpha: 0.6);
       case TimeChipType.past:
-        // 과거 시간: 더 약한 색상 (Opacity 50%)
-        return const Color(0xFFF2ECE7).withValues(alpha: 0.5);
+        return AppColors.timeChipNeutralBackground.withValues(alpha: 0.5);
     }
   }
 
   Color _getTextColor() {
     switch (type) {
       case TimeChipType.now:
-        // 스펙: #3F3A36
-        return const Color(0xFF3F3A36);
+        return AppColors.timeChipNowText;
       case TimeChipType.upcoming:
       case TimeChipType.soon:
       case TimeChipType.past:
-        // 스펙: #7A726C
-        return const Color(0xFF7A726C);
+        return AppColors.timeChipMutedText;
     }
   }
 }

@@ -289,7 +289,7 @@ class _DayCell extends StatelessWidget {
         );
       case _DayStatus.rested:
         return _DayVisuals(
-          fill: const Color(0xFF7AB8C8), // 시안톤 — mint와 다른 색조
+          fill: AppColors.restTone, // mint/olive와 톤 구분된 휴식 표시
           textColor: Colors.white,
           icon: Icons.nightlight_round,
           iconColor: Colors.white,
