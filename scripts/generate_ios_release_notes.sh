@@ -121,6 +121,15 @@ if grep -Eq '(skip.?today|drop today reminder|cancel.*alarm.*(delete|complete)|r
     "Fixed: reminders no longer fire today after the matching promise is completed or deleted."
 fi
 
+if grep -Eq '(5 palettes|expand to 5|new theme|deepOlive contrast|theme.*persist|ThemePalette|Pacific|Rose Mocha|Lavender Dusk)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "색상 테마가 5개로 늘었어요. Pacific, Rose Mocha, Lavender Dusk가 새로 추가됐고, 기존 Deep Olive 테마의 글자 대비도 다듬었어요." \
+    "Five color themes are now available — Pacific, Rose Mocha, and Lavender Dusk join the existing two, and Deep Olive has been tuned for better text contrast."
+  add_note \
+    "선택한 테마가 앱을 다시 켜도 유지돼요." \
+    "Your theme choice is now remembered across launches."
+fi
+
 if [ "${#KO_NOTES[@]}" -eq 0 ]; then
   add_note \
     "안정성 및 사용성을 개선했어요." \
