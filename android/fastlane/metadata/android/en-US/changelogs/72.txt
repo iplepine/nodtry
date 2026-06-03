@@ -1,0 +1,1 @@
+- Polished the layout so long names, promise titles, and notes no longer run off the screen or overlap nearby buttons.

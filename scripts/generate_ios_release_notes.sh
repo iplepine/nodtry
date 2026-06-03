@@ -121,6 +121,12 @@ if grep -Eq '(skip.?today|drop today reminder|cancel.*alarm.*(delete|complete)|r
     "Fixed: reminders no longer fire today after the matching promise is completed or deleted."
 fi
 
+if grep -Eq '(text overflow|prevent text overflow|overflow when content|ellipsis|maxLines|Flexible|Expanded)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "이름이나 약속 제목, 메모 같은 글자가 길어졌을 때 화면 밖으로 잘리거나 다른 요소와 겹치던 문제를 다듬었어요." \
+    "Polished the layout so long names, promise titles, and notes no longer run off the screen or overlap nearby buttons."
+fi
+
 if grep -Eq '(5 palettes|expand to 5|new theme|deepOlive contrast|theme.*persist|ThemePalette|Pacific|Rose Mocha|Lavender Dusk)' <<< "$COMMITS_TEXT"; then
   add_note \
     "색상 테마가 5개로 늘었어요. Pacific, Rose Mocha, Lavender Dusk가 새로 추가됐고, 기존 Deep Olive 테마의 글자 대비도 다듬었어요." \
