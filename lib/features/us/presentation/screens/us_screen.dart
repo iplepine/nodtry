@@ -138,24 +138,28 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                bottom: BorderSide(
-                                                  color: AppColors.warningStrong,
-                                                  width: 1.0,
+                                          Flexible(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                border: Border(
+                                                  bottom: BorderSide(
+                                                    color: AppColors.warningStrong,
+                                                    width: 1.0,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            child: Text(
-                                              l10n.usGuestWarningAction,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium
-                                                  ?.copyWith(
-                                                    color: AppColors.warningStrong,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
+                                              child: Text(
+                                                l10n.usGuestWarningAction,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      color: AppColors.warningStrong,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                              ),
                                             ),
                                           ),
                                           const SizedBox(width: 4),
@@ -578,13 +582,17 @@ class _MeSection extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Text(
-                              name,
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  ),
+                            Flexible(
+                              child: Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                              ),
                             ),
                             const SizedBox(width: 8),
                             InkWell(
@@ -1420,11 +1428,15 @@ class _ActivePlanListSection extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
             Row(

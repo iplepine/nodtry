@@ -286,14 +286,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                                 height: 20,
                                               ),
                                               const SizedBox(width: 10),
-                                              Text(
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.loginWithGoogle,
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w500,
-                                                  letterSpacing: 0.0,
+                                              Flexible(
+                                                child: Text(
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.loginWithGoogle,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                    letterSpacing: 0.0,
+                                                  ),
                                                 ),
                                               ),
                                             ],

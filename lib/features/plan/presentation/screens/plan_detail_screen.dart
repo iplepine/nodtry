@@ -104,6 +104,8 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
               duration: const Duration(milliseconds: 200),
               child: Text(
                 item.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
@@ -634,11 +636,15 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           children: [
             Icon(icon, size: 24, color: AppColors.textSecondary),
             const SizedBox(width: 16),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w500,
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             if (trailing != null) ...[const SizedBox(width: 8), trailing],

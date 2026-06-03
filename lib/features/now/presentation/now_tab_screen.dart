@@ -4325,11 +4325,15 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
     final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
-        Text(
-          '$label: ',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+        Flexible(
+          child: Text(
+            '$label: ',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+          ),
         ),
         IconButton(
           onPressed: days > 1 ? () => onChanged(days - 1) : null,
@@ -4360,11 +4364,15 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
           constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
         ),
         const SizedBox(width: 6),
-        Text(
-          l10n.nowMaxDaysLabel(maxDays),
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        Flexible(
+          child: Text(
+            l10n.nowMaxDaysLabel(maxDays),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+          ),
         ),
       ],
     );
