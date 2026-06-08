@@ -3,6 +3,7 @@ import '../../../models/plan_model.dart';
 
 const planCategoryStudy = 'study';
 const planCategoryExercise = 'exercise';
+const planCategoryVerified = 'verified';
 const planCategoryCustom = 'custom';
 
 class PlanCategory {
@@ -64,6 +65,11 @@ List<PlanCategory> planCategoriesFor(AppLocalizations l10n) {
       id: planCategoryExercise,
       label: l10n.planCategoryExerciseLabel,
       description: l10n.planCategoryExerciseDescription,
+    ),
+    PlanCategory(
+      id: planCategoryVerified,
+      label: l10n.planCategoryVerifiedLabel,
+      description: l10n.planCategoryVerifiedDescription,
     ),
     PlanCategory(
       id: planCategoryCustom,
@@ -146,6 +152,56 @@ List<StudyPlanTemplate> studyPlanTemplatesFor(AppLocalizations l10n) {
       description: l10n.planTemplateStretchingDescription,
       selectedDayIndexes: const {0, 1, 2, 3, 4},
       notificationTime: NotificationTime.custom(21, 0),
+    ),
+  ];
+}
+
+List<StudyPlanTemplate> verifiedRoutinesFor(AppLocalizations l10n) {
+  return [
+    StudyPlanTemplate(
+      id: 'verified_morning_light',
+      categoryId: planCategoryVerified,
+      label: l10n.planTemplateMorningLightLabel,
+      action: l10n.planTemplateMorningLightAction,
+      description: l10n.planTemplateMorningLightDescription,
+      selectedDayIndexes: const {0, 1, 2, 3, 4, 5, 6},
+      notificationTime: NotificationTime.custom(7, 0),
+    ),
+    StudyPlanTemplate(
+      id: 'verified_caffeine_delay',
+      categoryId: planCategoryVerified,
+      label: l10n.planTemplateCaffeineDelayLabel,
+      action: l10n.planTemplateCaffeineDelayAction,
+      description: l10n.planTemplateCaffeineDelayDescription,
+      selectedDayIndexes: const {0, 1, 2, 3, 4, 5, 6},
+      notificationTime: NotificationTime.custom(9, 30),
+    ),
+    StudyPlanTemplate(
+      id: 'verified_physio_sigh',
+      categoryId: planCategoryVerified,
+      label: l10n.planTemplatePhysioSighLabel,
+      action: l10n.planTemplatePhysioSighAction,
+      description: l10n.planTemplatePhysioSighDescription,
+      selectedDayIndexes: const {0, 1, 2, 3, 4, 5, 6},
+      notificationTime: NotificationTime.preset('lunch'),
+    ),
+    StudyPlanTemplate(
+      id: 'verified_focus_90',
+      categoryId: planCategoryVerified,
+      label: l10n.planTemplateFocus90Label,
+      action: l10n.planTemplateFocus90Action,
+      description: l10n.planTemplateFocus90Description,
+      selectedDayIndexes: const {0, 1, 2, 3, 4},
+      notificationTime: NotificationTime.custom(10, 0),
+    ),
+    StudyPlanTemplate(
+      id: 'verified_sleep_env',
+      categoryId: planCategoryVerified,
+      label: l10n.planTemplateSleepEnvLabel,
+      action: l10n.planTemplateSleepEnvAction,
+      description: l10n.planTemplateSleepEnvDescription,
+      selectedDayIndexes: const {0, 1, 2, 3, 4, 5, 6},
+      notificationTime: NotificationTime.custom(22, 0),
     ),
   ];
 }

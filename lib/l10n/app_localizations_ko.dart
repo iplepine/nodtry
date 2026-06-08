@@ -1073,6 +1073,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planCategoryExerciseDescription => '걷기, 헬스장, 스트레칭처럼 시작이 어려운 움직임';
 
   @override
+  String get planCategoryVerifiedLabel => '검증된 루틴';
+
+  @override
+  String get planCategoryVerifiedDescription => '신경과학·수면 연구 기반 일상 습관';
+
+  @override
   String get planCategoryCustomLabel => '직접 입력';
 
   @override
@@ -1153,6 +1159,56 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get planTemplateStretchingDescription =>
       '짧게라도 몸을 푸는 약속을 파트너에게 보이게 해요.';
+
+  @override
+  String get planTemplateMorningLightLabel => '아침 햇빛';
+
+  @override
+  String get planTemplateMorningLightAction => '아침 햇빛 5~10분 보기';
+
+  @override
+  String get planTemplateMorningLightDescription =>
+      '아침 햇빛이 눈에 들어오면 뇌가 \'하루 시작\'을 인식해 저녁 멜라토닌 분비 타이밍이 맞춰져요. 그 결과 밤에 더 빨리, 더 깊이 잠들어요. 야외 5~10분이면 충분하고, 흐린 날엔 10~20분, 비 오는 날엔 20~30분으로 늘리세요. 창문 너머는 핵심 파장이 차단돼 효과가 약하고, 선글라스를 쓰면 빛 감지 세포가 충분히 활성화되지 않아요 (태양을 직접 쳐다보지는 마세요)';
+
+  @override
+  String get planTemplateCaffeineDelayLabel => '카페인 90분 뒤';
+
+  @override
+  String get planTemplateCaffeineDelayAction => '기상 90분 후 첫 카페인 마시기';
+
+  @override
+  String get planTemplateCaffeineDelayDescription =>
+      '기상 직후 마시면 졸음 신호(아데노신)가 나중에 한꺼번에 몰려와 오후에 갑자기 졸려요. 90분 기다린 뒤 마시면 효과도 오래 갑니다';
+
+  @override
+  String get planTemplatePhysioSighLabel => '생리적 한숨';
+
+  @override
+  String get planTemplatePhysioSighAction => '5분 생리적 한숨 호흡하기';
+
+  @override
+  String get planTemplatePhysioSighDescription =>
+      '코로 짧게 한 번, 이어서 한 번 더 들이쉬어 폐를 완전히 부풀린 뒤 입으로 길고 천천히 내쉬어요. 폐포에 갇힌 이산화탄소를 한꺼번에 비워서 심박수가 즉시 내려가요. 111명 대상 RCT에서 명상보다 스트레스·기분 개선 효과가 컸어요. 긴장될 때 한두 번만 해도 좋고, 예방 차원에서 매일 5분 권장';
+
+  @override
+  String get planTemplateFocus90Label => '90분 집중';
+
+  @override
+  String get planTemplateFocus90Action => '90분 집중 1세션';
+
+  @override
+  String get planTemplateFocus90Description =>
+      '뇌는 약 90분 주기로 집중력이 오르내려요(울트라디안 사이클). 오전엔 도파민·노르에피네프린이 가장 풍부해 깊은 몰입이 잘 일어나고, 90분이 지나면 자연스럽게 떨어지니 끝나면 10~30분 쉬는 게 다음 사이클에 좋아요. 사이클 중엔 알림·SNS를 끄고 한 가지에만 집중하세요';
+
+  @override
+  String get planTemplateSleepEnvLabel => '수면 환경';
+
+  @override
+  String get planTemplateSleepEnvAction => '자기 1시간 전 침실 정리';
+
+  @override
+  String get planTemplateSleepEnvDescription =>
+      '잠들기 1시간 전부터 머리 위 밝은 조명을 끄고 간접 조명으로 바꾸면 멜라토닌이 빨리 분비돼 입면이 빨라져요. 침실 온도는 18~20도가 적정 — 잠들 땐 체온이 살짝 떨어져야 깊은 잠과 REM이 늘어요. 자기 직전 뜨거운 샤워는 오히려 체온을 올려 입면을 늦추니, 잠 1~2시간 전에 끝내세요';
 
   @override
   String get planDayPresetThreeDaysLabel => '주 3일';

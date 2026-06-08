@@ -203,6 +203,8 @@ class PlanActionStep extends StatelessWidget {
         return Icons.menu_book_rounded;
       case planCategoryExercise:
         return Icons.fitness_center_rounded;
+      case planCategoryVerified:
+        return Icons.self_improvement_rounded;
       case planCategoryCustom:
         return Icons.edit_rounded;
       default:

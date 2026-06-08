@@ -2102,6 +2102,18 @@ abstract class AppLocalizations {
   /// **'Movement that\'s hard to start — walking, gym, stretching'**
   String get planCategoryExerciseDescription;
 
+  /// No description provided for @planCategoryVerifiedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified routines'**
+  String get planCategoryVerifiedLabel;
+
+  /// No description provided for @planCategoryVerifiedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily habits grounded in neuroscience and sleep research'**
+  String get planCategoryVerifiedDescription;
+
   /// No description provided for @planCategoryCustomLabel.
   ///
   /// In en, this message translates to:
@@ -2257,6 +2269,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show your partner even a short loosen-up.'**
   String get planTemplateStretchingDescription;
+
+  /// No description provided for @planTemplateMorningLightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning light'**
+  String get planTemplateMorningLightLabel;
+
+  /// No description provided for @planTemplateMorningLightAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Get 5–10 minutes of morning sunlight'**
+  String get planTemplateMorningLightAction;
+
+  /// No description provided for @planTemplateMorningLightDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning sunlight hitting your eyes tells the brain the day has started, locking in tonight\'s melatonin release so you fall asleep faster and deeper. 5–10 minutes outdoors is enough on clear days; stretch to 10–20 on cloudy ones, 20–30 in rain. Windows block the key wavelengths and sunglasses dampen the light-sensing cells (never stare directly at the sun)'**
+  String get planTemplateMorningLightDescription;
+
+  /// No description provided for @planTemplateCaffeineDelayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay caffeine'**
+  String get planTemplateCaffeineDelayLabel;
+
+  /// No description provided for @planTemplateCaffeineDelayAction.
+  ///
+  /// In en, this message translates to:
+  /// **'First caffeine 90 minutes after waking'**
+  String get planTemplateCaffeineDelayAction;
+
+  /// No description provided for @planTemplateCaffeineDelayDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Caffeine right after waking only blocks sleep-signal molecules (adenosine) for a while — they pile up and hit at once later, causing an afternoon slump. Wait 90 minutes for cleaner, longer-lasting energy'**
+  String get planTemplateCaffeineDelayDescription;
+
+  /// No description provided for @planTemplatePhysioSighLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Physiological sigh'**
+  String get planTemplatePhysioSighLabel;
+
+  /// No description provided for @planTemplatePhysioSighAction.
+  ///
+  /// In en, this message translates to:
+  /// **'5 minutes of physiological sighs'**
+  String get planTemplatePhysioSighAction;
+
+  /// No description provided for @planTemplatePhysioSighDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a short inhale through the nose, then a second one to fully inflate the lungs, and exhale slowly through the mouth. This dumps trapped CO₂ in one shot and drops heart rate immediately. An RCT (n=111) showed it beat meditation for stress and mood. Even one or two reps help in the moment; 5 minutes daily is the preventive dose'**
+  String get planTemplatePhysioSighDescription;
+
+  /// No description provided for @planTemplateFocus90Label.
+  ///
+  /// In en, this message translates to:
+  /// **'90-min focus'**
+  String get planTemplateFocus90Label;
+
+  /// No description provided for @planTemplateFocus90Action.
+  ///
+  /// In en, this message translates to:
+  /// **'One 90-minute focus session'**
+  String get planTemplateFocus90Action;
+
+  /// No description provided for @planTemplateFocus90Description.
+  ///
+  /// In en, this message translates to:
+  /// **'The brain runs on ~90-minute focus cycles (ultradian rhythm). Mornings are richest in dopamine and norepinephrine, so deep work lands best then, and attention naturally drops after 90 min — give yourself 10–30 minutes off before the next cycle. Kill notifications and stay on one task throughout'**
+  String get planTemplateFocus90Description;
+
+  /// No description provided for @planTemplateSleepEnvLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep environment'**
+  String get planTemplateSleepEnvLabel;
+
+  /// No description provided for @planTemplateSleepEnvAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Dim and cool the bedroom an hour before bed'**
+  String get planTemplateSleepEnvAction;
+
+  /// No description provided for @planTemplateSleepEnvDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'An hour before bed, switch off overhead lights and use indirect lamps — that\'s when melatonin starts to rise, speeding sleep onset. Keep the bedroom at 18–20°C; your body needs a slight temperature drop for deep sleep and REM. A hot shower right before bed actually delays sleep, so finish 1–2 hours earlier'**
+  String get planTemplateSleepEnvDescription;
 
   /// No description provided for @planDayPresetThreeDaysLabel.
   ///

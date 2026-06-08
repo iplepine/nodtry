@@ -293,7 +293,10 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                             FocusManager.instance.primaryFocus?.unfocus();
                           }
                         },
-                        templates: studyPlanTemplatesFor(l10n),
+                        templates: [
+                          ...studyPlanTemplatesFor(l10n),
+                          ...verifiedRoutinesFor(l10n),
+                        ],
                         selectedTemplateId: planCreateState.selectedTemplateId,
                         onTemplateSelected: (template) {
                           _actionController.text = template.action;

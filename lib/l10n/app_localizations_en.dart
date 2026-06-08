@@ -1093,6 +1093,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Movement that\'s hard to start — walking, gym, stretching';
 
   @override
+  String get planCategoryVerifiedLabel => 'Verified routines';
+
+  @override
+  String get planCategoryVerifiedDescription =>
+      'Daily habits grounded in neuroscience and sleep research';
+
+  @override
   String get planCategoryCustomLabel => 'Custom';
 
   @override
@@ -1178,6 +1185,59 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get planTemplateStretchingDescription =>
       'Show your partner even a short loosen-up.';
+
+  @override
+  String get planTemplateMorningLightLabel => 'Morning light';
+
+  @override
+  String get planTemplateMorningLightAction =>
+      'Get 5–10 minutes of morning sunlight';
+
+  @override
+  String get planTemplateMorningLightDescription =>
+      'Morning sunlight hitting your eyes tells the brain the day has started, locking in tonight\'s melatonin release so you fall asleep faster and deeper. 5–10 minutes outdoors is enough on clear days; stretch to 10–20 on cloudy ones, 20–30 in rain. Windows block the key wavelengths and sunglasses dampen the light-sensing cells (never stare directly at the sun)';
+
+  @override
+  String get planTemplateCaffeineDelayLabel => 'Delay caffeine';
+
+  @override
+  String get planTemplateCaffeineDelayAction =>
+      'First caffeine 90 minutes after waking';
+
+  @override
+  String get planTemplateCaffeineDelayDescription =>
+      'Caffeine right after waking only blocks sleep-signal molecules (adenosine) for a while — they pile up and hit at once later, causing an afternoon slump. Wait 90 minutes for cleaner, longer-lasting energy';
+
+  @override
+  String get planTemplatePhysioSighLabel => 'Physiological sigh';
+
+  @override
+  String get planTemplatePhysioSighAction => '5 minutes of physiological sighs';
+
+  @override
+  String get planTemplatePhysioSighDescription =>
+      'Take a short inhale through the nose, then a second one to fully inflate the lungs, and exhale slowly through the mouth. This dumps trapped CO₂ in one shot and drops heart rate immediately. An RCT (n=111) showed it beat meditation for stress and mood. Even one or two reps help in the moment; 5 minutes daily is the preventive dose';
+
+  @override
+  String get planTemplateFocus90Label => '90-min focus';
+
+  @override
+  String get planTemplateFocus90Action => 'One 90-minute focus session';
+
+  @override
+  String get planTemplateFocus90Description =>
+      'The brain runs on ~90-minute focus cycles (ultradian rhythm). Mornings are richest in dopamine and norepinephrine, so deep work lands best then, and attention naturally drops after 90 min — give yourself 10–30 minutes off before the next cycle. Kill notifications and stay on one task throughout';
+
+  @override
+  String get planTemplateSleepEnvLabel => 'Sleep environment';
+
+  @override
+  String get planTemplateSleepEnvAction =>
+      'Dim and cool the bedroom an hour before bed';
+
+  @override
+  String get planTemplateSleepEnvDescription =>
+      'An hour before bed, switch off overhead lights and use indirect lamps — that\'s when melatonin starts to rise, speeding sleep onset. Keep the bedroom at 18–20°C; your body needs a slight temperature drop for deep sleep and REM. A hot shower right before bed actually delays sleep, so finish 1–2 hours earlier';
 
   @override
   String get planDayPresetThreeDaysLabel => '3 days/wk';
