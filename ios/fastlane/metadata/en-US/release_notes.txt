@@ -1,4 +1,7 @@
 What's New
 
-- Updated store visuals to match the refreshed app icon and screen design.
-- Aligned cheer and reaction emojis more cleanly.
+- Added 5 science-backed routine templates to plan creation — morning light, delayed caffeine, physiological sigh, 90-min focus, and sleep environment. Pick one from the new "Verified routines" category and turn it into a promise instantly.
+- Fixed: reminders no longer fire today after the matching promise is completed or deleted.
+- Polished the layout so long names, promise titles, and notes no longer run off the screen or overlap nearby buttons.
+- Five color themes are now available — Pacific, Rose Mocha, and Lavender Dusk join the existing two, and Deep Olive has been tuned for better text contrast.
+- Your theme choice is now remembered across launches.

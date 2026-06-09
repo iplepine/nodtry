@@ -40,6 +40,12 @@ add_note() {
   EN_NOTES+=("$2")
 }
 
+if grep -Eq '(verified routines|science-backed|검증된 루틴|verified routine category)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "신경과학·수면 연구 기반 추천 루틴 5개를 약속 만들기에 추가했어요. 아침 햇빛, 카페인 90분 뒤, 생리적 한숨, 90분 집중, 수면 환경 — 새 \"검증된 루틴\" 카테고리에서 골라 바로 약속으로 만들 수 있어요." \
+    "Added 5 science-backed routine templates to plan creation — morning light, delayed caffeine, physiological sigh, 90-min focus, and sleep environment. Pick one from the new \"Verified routines\" category and turn it into a promise instantly."
+fi
+
 if grep -Eq '(add plan categories|add study sprint templates)' <<< "$COMMITS_TEXT"; then
   add_note \
     "공부/운동/직접 입력 카테고리로 계획 시작이 더 빨라졌어요." \
