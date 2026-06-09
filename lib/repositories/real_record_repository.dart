@@ -4,6 +4,7 @@ import '../models/home_state.dart';
 import '../models/history_item.dart';
 import '../models/plan_model.dart';
 import '../models/promise_model.dart';
+import '../utils/error_reporter.dart';
 import 'record_repository.dart';
 
 import 'package:flutter/widgets.dart';
@@ -1024,35 +1025,42 @@ class RealRecordRepository implements RecordRepository {
     if (user == null) return;
 
     try {
-      // 1. Update actions collection
-      final updateData = {
-        'verifiedBy': user.uid,
-        'verifiedAt': FieldValue.serverTimestamp(),
-      };
-      if (message != null && message.isNotEmpty) {
-        updateData['comment'] = message;
-      }
+      // Verify atomically and idempotently. Two managers (or a double-tap)
+      // could otherwise race: the old read-then-write could overwrite a
+      // different verifier and double-fire the "verified" notification. The
+      // transaction reads the action first, bails if it's already verified, and
+      // syncs the plan's verifiedDates in the same atomic unit.
+      await _firestore.runTransaction((tx) async {
+        final actionRef = _firestore.collection('actions').doc(historyId);
+        final snap = await tx.get(actionRef);
+        if (!snap.exists) return;
 
-      await _firestore.collection('actions').doc(historyId).update(updateData);
+        final data = snap.data()!;
+        final existingVerifier = data['verifiedBy'] as String?;
+        if (existingVerifier != null && existingVerifier.isNotEmpty) {
+          return; // already verified — idempotent no-op
+        }
 
-      // 2. Synchronize verifiedDates in plans collection for real-time Home Card sync
-      final historyDoc = await _firestore
-          .collection('actions')
-          .doc(historyId)
-          .get();
-      if (historyDoc.exists) {
-        final data = historyDoc.data();
-        final planId = data?['planId'] as String?;
-        final date = (data?['date'] as Timestamp?)?.toDate();
+        final updateData = <String, dynamic>{
+          'verifiedBy': user.uid,
+          'verifiedAt': FieldValue.serverTimestamp(),
+        };
+        if (message != null && message.isNotEmpty) {
+          updateData['comment'] = message;
+        }
+        tx.update(actionRef, updateData);
 
+        // Sync verifiedDates on the plan for real-time Home Card state.
+        final planId = data['planId'] as String?;
+        final date = (data['date'] as Timestamp?)?.toDate();
         if (planId != null && date != null) {
-          await _firestore.collection('plans').doc(planId).update({
+          tx.update(_firestore.collection('plans').doc(planId), {
             'verifiedDates': FieldValue.arrayUnion([Timestamp.fromDate(date)]),
           });
         }
-      }
-    } catch (e) {
-      debugPrint('[RealRecordRepository] Error verifying history item: $e');
+      });
+    } catch (e, s) {
+      ErrorReporter.record(e, s, reason: 'verifyHistoryItem');
       rethrow;
     }
   }

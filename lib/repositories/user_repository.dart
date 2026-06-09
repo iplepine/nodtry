@@ -30,4 +30,7 @@ abstract class UserRepository {
 
   /// FCM 토큰 업데이트
   Future<void> updateFcmToken(String uid, String token);
+
+  /// FCM 토큰 제거 (알림 권한 거부/철회 시, 죽은 토큰으로의 전송 방지)
+  Future<void> clearFcmToken(String uid);
 }

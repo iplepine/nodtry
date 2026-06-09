@@ -39,7 +39,13 @@ void main() {
               textScaler: TextScaler.linear(1.45),
             ),
             child: Scaffold(
-              body: Center(child: HistoryCard(item: item, isMe: false)),
+              // In production HistoryCard lives in a scrolling list, so it gets
+              // unbounded vertical space. Mirror that here; otherwise large
+              // text-scale content overflows the fixed viewport height (which
+              // never happens in the real, scrollable history tab).
+              body: SingleChildScrollView(
+                child: HistoryCard(item: item, isMe: false),
+              ),
             ),
           ),
         ),

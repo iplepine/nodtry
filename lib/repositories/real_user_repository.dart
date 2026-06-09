@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../models/user_model.dart';
+import '../utils/error_reporter.dart';
 import 'user_repository.dart';
 
 String _defaultDisplayName() {
@@ -167,8 +168,8 @@ class RealUserRepository implements UserRepository {
       if (doc.exists) {
         return UserModel.fromFirestore(doc);
       }
-    } catch (e) {
-      debugPrint('[RealUserRepository] getMyProfile Error: $e');
+    } catch (e, s) {
+      ErrorReporter.record(e, s, reason: 'getMyProfile');
     }
     return null;
   }
@@ -214,7 +215,8 @@ class RealUserRepository implements UserRepository {
         users.addAll(snapshot.docs.map((doc) => UserModel.fromFirestore(doc)));
       }
       return users;
-    } catch (e) {
+    } catch (e, s) {
+      ErrorReporter.record(e, s, reason: 'getUsersByIds');
       return [];
     }
   }
@@ -231,8 +233,8 @@ class RealUserRepository implements UserRepository {
       if (snapshot.docs.isNotEmpty) {
         return UserModel.fromFirestore(snapshot.docs.first);
       }
-    } catch (e) {
-      debugPrint('[RealUserRepository] getUserByInviteCode Error: $e');
+    } catch (e, s) {
+      ErrorReporter.record(e, s, reason: 'getUserByInviteCode');
     }
     return null;
   }
@@ -335,9 +337,23 @@ class RealUserRepository implements UserRepository {
         'updatedAt': FieldValue.serverTimestamp(),
       });
       debugPrint('[RealUserRepository] FCM Token updated for $uid');
-    } catch (e) {
-      debugPrint('[RealUserRepository] updateFcmToken Error: $e');
-      // FCM failed shouldn't crash app, just log
+    } catch (e, s) {
+      // FCM token persistence is best-effort, but a silent failure means the
+      // user stops receiving partner signals — surface it to Crashlytics.
+      ErrorReporter.record(e, s, reason: 'updateFcmToken');
+    }
+  }
+
+  @override
+  Future<void> clearFcmToken(String uid) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'fcmToken': FieldValue.delete(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      debugPrint('[RealUserRepository] FCM Token cleared for $uid');
+    } catch (e, s) {
+      ErrorReporter.record(e, s, reason: 'clearFcmToken');
     }
   }
 }

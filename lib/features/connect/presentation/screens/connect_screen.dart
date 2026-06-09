@@ -10,7 +10,21 @@ import '../../../../widgets/app_underlined_text.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../providers/repository_provider.dart';
+import '../../../../utils/ui_error_codes.dart';
 // removed unused connect_repository import
+
+/// Maps a locale-independent connect error code to a localized message.
+String _connectErrorText(AppLocalizations l10n, String code) {
+  switch (code) {
+    case ConnectErrorCode.selfCode:
+      return l10n.connectErrorSelfCode;
+    case ConnectErrorCode.disconnectFailed:
+      return l10n.connectErrorDisconnectFailed;
+    case ConnectErrorCode.connectFailed:
+    default:
+      return l10n.connectErrorFailed;
+  }
+}
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -344,7 +358,10 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: Text(
-                state.errorMessage!,
+                _connectErrorText(
+                  AppLocalizations.of(context)!,
+                  state.errorMessage!,
+                ),
                 style: TextStyle(color: AppColors.error, fontSize: 14),
                 textAlign: TextAlign.center,
               ),

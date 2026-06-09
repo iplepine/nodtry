@@ -34,7 +34,23 @@ class NotificationService {
         settings.authorizationStatus == AuthorizationStatus.provisional) {
       final token = await _messaging.getToken();
       _saveTokenToFirestore(token);
+    } else if (settings.authorizationStatus == AuthorizationStatus.denied) {
+      // The user has declined / revoked notifications. The app's core loop
+      // (knocks, cheers, missed-action nudges) is delivered via FCM, so a stale
+      // token left in Firestore would just generate dead sends. Clear it; the
+      // token re-registers automatically if the user re-enables notifications.
+      _clearTokenFromFirestore();
     }
+    // notDetermined: we haven't asked yet — leave it for the explicit
+    // permission request at the meaningful moment (e.g. setting a reminder).
+  }
+
+  /// Whether the OS currently grants notification permission. Lets the UI nudge
+  /// the user to re-enable, since partner signals depend on it.
+  Future<bool> hasPermission() async {
+    final settings = await _messaging.getNotificationSettings();
+    return settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
   }
 
   /// 알림이 의미 있는 시점(예: 약속 알림 설정)에 명시 호출.
@@ -69,6 +85,16 @@ class NotificationService {
       } catch (e) {
         debugPrint('Error saving FCM token: $e');
       }
+    }
+  }
+
+  Future<void> _clearTokenFromFirestore() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      await _ref.read(userRepositoryProvider).clearFcmToken(user.uid);
+    } catch (e) {
+      debugPrint('Error clearing FCM token: $e');
     }
   }
 }

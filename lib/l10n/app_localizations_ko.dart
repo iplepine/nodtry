@@ -2474,4 +2474,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nowNoteDateToday => '오늘';
+
+  @override
+  String get connectErrorSelfCode => '본인의 초대 코드는 사용할 수 없습니다.';
+
+  @override
+  String get connectErrorFailed => '코드가 올바르지 않거나 연결에 실패했습니다.';
+
+  @override
+  String get connectErrorDisconnectFailed => '연결을 해제하지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get accountLinkErrorAlreadyInUse => '이 계정은 이미 다른 사용자와 연결되어 있습니다.';
+
+  @override
+  String get accountLinkErrorInvalidCredential => '유효하지 않은 인증 정보입니다.';
+
+  @override
+  String get accountLinkErrorNotAllowed => '허용되지 않은 작업입니다.';
+
+  @override
+  String get accountLinkErrorGeneric => '계정 연동 중 오류가 발생했습니다.';
+
+  @override
+  String get planCreateErrorNoUser => '사용자 정보를 찾을 수 없어요. 다시 로그인해 주세요.';
 }

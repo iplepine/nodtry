@@ -8,6 +8,7 @@ import 'package:nod_try/models/plan_model.dart';
 
 void main() {
   testWidgets('shows a clear button when action text exists', (tester) async {
+    final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
     final controller = TextEditingController(text: '30분 걷기');
     final focusNode = FocusNode();
     var didClear = false;
@@ -24,10 +25,10 @@ void main() {
           body: PlanActionStep(
             controller: controller,
             focusNode: focusNode,
-            categories: planCategories,
+            categories: planCategoriesFor(l10n),
             selectedCategoryId: planCategoryExercise,
             onCategorySelected: (_) {},
-            templates: studyPlanTemplates,
+            templates: studyPlanTemplatesFor(l10n),
             selectedTemplateId: 'walking',
             onTemplateSelected: (_) {},
             onActionCleared: () {
@@ -46,6 +47,7 @@ void main() {
   });
 
   testWidgets('hides recommendations for direct input', (tester) async {
+    final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
     final controller = TextEditingController();
     final focusNode = FocusNode();
 
@@ -61,10 +63,10 @@ void main() {
           body: PlanActionStep(
             controller: controller,
             focusNode: focusNode,
-            categories: planCategories,
+            categories: planCategoriesFor(l10n),
             selectedCategoryId: planCategoryCustom,
             onCategorySelected: (_) {},
-            templates: studyPlanTemplates,
+            templates: studyPlanTemplatesFor(l10n),
             selectedTemplateId: null,
             onTemplateSelected: (_) {},
             onActionCleared: () {},

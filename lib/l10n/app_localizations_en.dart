@@ -2530,4 +2530,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nowNoteDateToday => 'Today';
+
+  @override
+  String get connectErrorSelfCode => 'You can\'t use your own invite code.';
+
+  @override
+  String get connectErrorFailed =>
+      'That code is invalid, or the connection failed.';
+
+  @override
+  String get connectErrorDisconnectFailed =>
+      'Couldn\'t disconnect. Please try again.';
+
+  @override
+  String get accountLinkErrorAlreadyInUse =>
+      'This account is already linked to another user.';
+
+  @override
+  String get accountLinkErrorInvalidCredential =>
+      'The credentials are invalid.';
+
+  @override
+  String get accountLinkErrorNotAllowed => 'This operation isn\'t allowed.';
+
+  @override
+  String get accountLinkErrorGeneric =>
+      'Something went wrong while linking your account.';
+
+  @override
+  String get planCreateErrorNoUser =>
+      'We couldn\'t find your account. Please sign in again.';
 }

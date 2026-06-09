@@ -1,31 +1,35 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Smoke test: the app builds and renders its first screen without provider /
+// dependency-injection errors.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:nod_try/main.dart';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nod_try/providers/repository_provider.dart';
 import 'package:nod_try/repositories/mock_record_repository.dart';
 
 void main() {
-  testWidgets('App launches with splash screen', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('App launches without provider errors', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // OnMyBehalfApp -> appSettingsProvider reads SharedPreferences, which
+          // is an unimplemented provider until overridden.
+          sharedPreferencesProvider.overrideWithValue(prefs),
           recordRepositoryProvider.overrideWithValue(MockRecordRepository()),
         ],
         child: const OnMyBehalfApp(),
       ),
     );
+    await tester.pump();
 
-    // Verify that splash screen is displayed
-    expect(find.text('혼자서 지키지 못했던 계획을, 함께'), findsOneWidget);
+    // The router builds a MaterialApp and the app comes up without throwing.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

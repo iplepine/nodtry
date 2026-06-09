@@ -1,7 +1,9 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nod_try/features/plan/domain/study_plan_template.dart';
 import 'package:nod_try/features/plan/domain/usecases/setting_alarm_use_case.dart';
+import 'package:nod_try/l10n/app_localizations.dart';
 import 'package:nod_try/features/plan/presentation/plan_create_state.dart';
 import 'package:nod_try/features/plan/presentation/viewmodel/plan_create_viewmodel.dart';
 import 'package:nod_try/models/connected_user.dart';
@@ -89,8 +91,9 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
       await container.read(planCreateViewModelProvider.future);
+      final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
 
-      final template = studyPlanTemplates.firstWhere(
+      final template = studyPlanTemplatesFor(l10n).firstWhere(
         (template) => template.id == 'english_sentences',
       );
 
@@ -115,11 +118,12 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
       await container.read(planCreateViewModelProvider.future);
+      final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
 
       await container
           .read(planCreateViewModelProvider.notifier)
           .dispatch(const UpdateActionIntent('이전 입력'));
-      final category = planCategories.firstWhere(
+      final category = planCategoriesFor(l10n).firstWhere(
         (category) => category.id == planCategoryExercise,
       );
 
@@ -142,12 +146,13 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
       await container.read(planCreateViewModelProvider.future);
+      final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
 
-      final template = studyPlanTemplates.first;
+      final template = studyPlanTemplatesFor(l10n).first;
       await container
           .read(planCreateViewModelProvider.notifier)
           .dispatch(ApplyStudyTemplateIntent(template));
-      final category = planCategories.firstWhere(
+      final category = planCategoriesFor(l10n).firstWhere(
         (category) => category.id == planCategoryCustom,
       );
 
@@ -167,8 +172,9 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     await container.read(planCreateViewModelProvider.future);
+    final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
 
-    final template = studyPlanTemplates.firstWhere(
+    final template = studyPlanTemplatesFor(l10n).firstWhere(
       (template) => template.id == 'walking',
     );
 
@@ -187,8 +193,9 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     await container.read(planCreateViewModelProvider.future);
+    final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
 
-    final template = studyPlanTemplates.first;
+    final template = studyPlanTemplatesFor(l10n).first;
     await container
         .read(planCreateViewModelProvider.notifier)
         .dispatch(ApplyStudyTemplateIntent(template));
@@ -208,8 +215,9 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
       await container.read(planCreateViewModelProvider.future);
+      final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
 
-      final template = studyPlanTemplates.firstWhere(
+      final template = studyPlanTemplatesFor(l10n).firstWhere(
         (template) => template.id == 'english_sentences',
       );
       await container
@@ -228,7 +236,8 @@ void main() {
   );
 
   test(
-    'save creates a 28-day pending study plan with sorted week days',
+    'save creates a 28-day study plan with sorted week days '
+    '(active when the user has no partner to approve it)',
     () async {
       final repository = _FakeRecordRepository();
       final scheduler = _FakePlanReminderScheduler();
@@ -246,9 +255,10 @@ void main() {
       );
       addTearDown(container.dispose);
       await container.read(planCreateViewModelProvider.future);
+      final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
       await container.read(myProfileProvider.future);
 
-      final template = studyPlanTemplates.firstWhere(
+      final template = studyPlanTemplatesFor(l10n).firstWhere(
         (template) => template.id == 'certificate_questions',
       );
       await container
@@ -272,7 +282,8 @@ void main() {
       );
 
       expect(plan.userId, 'user-1');
-      expect(plan.state, PlanState.pendingApproval);
+      // No connected partner → no one to approve, so the plan starts active.
+      expect(plan.state, PlanState.active);
       expect(endDay, startDay.add(const Duration(days: 27)));
       expect(plan.endDate.hour, 23);
       expect(plan.endDate.minute, 59);

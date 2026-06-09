@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../connect_state.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../repositories/connect_repository.dart';
+import '../../../../utils/error_reporter.dart';
+import '../../../../utils/ui_error_codes.dart';
 
 final connectViewModelProvider =
     AsyncNotifierProvider<ConnectViewModel, ConnectState>(ConnectViewModel.new);
@@ -51,7 +53,7 @@ class ConnectViewModel extends AsyncNotifier<ConnectState> {
 
     if (code == myCode) {
       state = AsyncValue.data(
-        prevState.copyWith(errorMessage: '본인의 초대 코드는 사용할 수 없습니다.'),
+        prevState.copyWith(errorMessage: ConnectErrorCode.selfCode),
       );
       return;
     }
@@ -77,12 +79,13 @@ class ConnectViewModel extends AsyncNotifier<ConnectState> {
       ref.invalidate(connectedProfilesProvider);
 
       state = AsyncValue.data(state.value!.copyWith(isProcessing: false));
-    } catch (e) {
+    } catch (e, s) {
+      ErrorReporter.record(e, s, reason: 'connectWithCode');
       state = AsyncValue.data(
         state.value!.copyWith(
           isProcessing: false,
           flowState: ConnectFlowState.initial,
-          errorMessage: '코드가 올바르지 않거나 연결에 실패했습니다.',
+          errorMessage: ConnectErrorCode.connectFailed,
         ),
       );
     }
@@ -107,11 +110,12 @@ class ConnectViewModel extends AsyncNotifier<ConnectState> {
         await ref.read(disconnectConnectionUseCaseProvider).execute(targetId);
       }
       state = AsyncValue.data(state.value!.copyWith(isProcessing: false));
-    } catch (e) {
+    } catch (e, s) {
+      ErrorReporter.record(e, s, reason: 'disconnectPartner');
       state = AsyncValue.data(
         state.value!.copyWith(
           isProcessing: false,
-          errorMessage: '연결 해제 실패: $e',
+          errorMessage: ConnectErrorCode.disconnectFailed,
         ),
       );
     }

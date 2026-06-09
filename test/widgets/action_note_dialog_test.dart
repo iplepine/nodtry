@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nod_try/l10n/app_localizations.dart';
 import 'package:nod_try/widgets/action_note_dialog.dart';
+import 'package:nod_try/widgets/reaction_icon.dart';
 
 void main() {
   testWidgets('keeps long cheer input and labels inside the dialog', (
@@ -40,7 +41,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('centers emoji reactions with fixed text metrics', (
+  testWidgets('renders the full set of reaction icons when emoji is enabled', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -57,11 +58,29 @@ void main() {
       ),
     );
 
-    final emojiText = tester.widget<Text>(find.text('👍'));
+    // Reactions are now SVG ReactionIcon widgets (was text emoji before
+    // commit 19d8611), one per entry in ReactionIcon.reactions.
+    expect(
+      find.byType(ReactionIcon),
+      findsNWidgets(ReactionIcon.reactions.length),
+    );
+  });
 
-    expect(emojiText.textAlign, TextAlign.center);
-    expect(emojiText.style?.height, 1);
-    expect(emojiText.strutStyle?.height, 1);
-    expect(emojiText.strutStyle?.forceStrutHeight, isTrue);
+  testWidgets('hides reactions when showEmoji is false', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ko'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(
+          body: ActionNoteDialog(
+            title: '파트너 실천',
+            showEmoji: false,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(ReactionIcon), findsNothing);
   });
 }

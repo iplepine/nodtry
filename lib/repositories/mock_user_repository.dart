@@ -83,4 +83,9 @@ class MockUserRepository implements UserRepository {
     // Mock implementation - do nothing or log
     debugPrint('MockUserRepository: FCM token updated for $uid: $token');
   }
+
+  @override
+  Future<void> clearFcmToken(String uid) async {
+    debugPrint('MockUserRepository: FCM token cleared for $uid');
+  }
 }

@@ -169,9 +169,12 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
+        final message = e is PlanCreateAuthException
+            ? l10n.planCreateErrorNoUser
+            : l10n.planSaveError(e.toString());
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.planSaveError(e.toString()))));
+        ).showSnackBar(SnackBar(content: Text(message)));
       }
     }
   }

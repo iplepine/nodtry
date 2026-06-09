@@ -16,8 +16,24 @@ import '../../../../widgets/plan/plan_card.dart';
 import '../../../../providers/plan_list_provider.dart';
 import '../us_state.dart';
 import '../us_viewmodel.dart';
+import '../../../../utils/ui_error_codes.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+
+/// Maps a locale-independent account-link error code to a localized message.
+String _accountLinkErrorText(AppLocalizations l10n, String code) {
+  switch (code) {
+    case AccountLinkErrorCode.alreadyInUse:
+      return l10n.accountLinkErrorAlreadyInUse;
+    case AccountLinkErrorCode.invalidCredential:
+      return l10n.accountLinkErrorInvalidCredential;
+    case AccountLinkErrorCode.notAllowed:
+      return l10n.accountLinkErrorNotAllowed;
+    case AccountLinkErrorCode.generic:
+    default:
+      return l10n.accountLinkErrorGeneric;
+  }
+}
 
 /// 우리 탭 - 안전 기지 & 연결 허브
 ///
@@ -44,7 +60,9 @@ class _UsScreenState extends ConsumerState<UsScreen> {
             final dl10n = AppLocalizations.of(context)!;
             return AlertDialog(
               title: Text(dl10n.usNoticeTitle),
-              content: Text(next.value!.errorNotification!),
+              content: Text(
+                _accountLinkErrorText(dl10n, next.value!.errorNotification!),
+              ),
               actions: [
                 TextButton(
                   onPressed: () {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nod_try/features/now/presentation/now_tab_screen.dart';
+import 'package:nod_try/features/now/presentation/widgets/promise_proposal_sheet.dart';
+import 'package:nod_try/l10n/app_localizations.dart';
 import 'package:nod_try/models/plan_model.dart';
 
 Plan _plan({
@@ -30,6 +31,9 @@ Future<void> _pumpSheet(
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      locale: const Locale('ko'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: PromiseProposalSheet(plan: plan, asOf: asOf),
       ),

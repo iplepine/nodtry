@@ -4597,6 +4597,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Today'**
   String get nowNoteDateToday;
+
+  /// No description provided for @connectErrorSelfCode.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t use your own invite code.'**
+  String get connectErrorSelfCode;
+
+  /// No description provided for @connectErrorFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is invalid, or the connection failed.'**
+  String get connectErrorFailed;
+
+  /// No description provided for @connectErrorDisconnectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t disconnect. Please try again.'**
+  String get connectErrorDisconnectFailed;
+
+  /// No description provided for @accountLinkErrorAlreadyInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is already linked to another user.'**
+  String get accountLinkErrorAlreadyInUse;
+
+  /// No description provided for @accountLinkErrorInvalidCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'The credentials are invalid.'**
+  String get accountLinkErrorInvalidCredential;
+
+  /// No description provided for @accountLinkErrorNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This operation isn\'t allowed.'**
+  String get accountLinkErrorNotAllowed;
+
+  /// No description provided for @accountLinkErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while linking your account.'**
+  String get accountLinkErrorGeneric;
+
+  /// No description provided for @planCreateErrorNoUser.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find your account. Please sign in again.'**
+  String get planCreateErrorNoUser;
 }
 
 class _AppLocalizationsDelegate

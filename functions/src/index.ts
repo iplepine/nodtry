@@ -5,6 +5,10 @@ admin.initializeApp();
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const MISSED_ACTION_GRACE_MINUTES = 30;
+// A 'done' proof waiting longer than this nudges the manager to verify it, once.
+const VERIFY_REMINDER_AFTER_MS = 24 * 60 * 60 * 1000;
+// Don't nudge for very old proofs (avoids re-nudging historical backlog).
+const VERIFY_REMINDER_WINDOW_MS = 72 * 60 * 60 * 1000;
 
 type KstDateParts = {
     year: number;
@@ -64,6 +68,42 @@ function buildMessagePayload(
             },
         },
     };
+}
+
+/**
+ * Sends a message and cleans up dead tokens.
+ *
+ * When FCM reports the token as unregistered/invalid we delete it from the
+ * recipient's user doc so we stop trying to deliver to it and the client
+ * re-registers a fresh token on next launch. Returns whether the send
+ * succeeded so callers can decide whether to mark dedupe state.
+ */
+async function sendAndCleanup(
+    message: admin.messaging.Message,
+    recipientUserId: string,
+): Promise<boolean> {
+    try {
+        await admin.messaging().send(message);
+        return true;
+    } catch (error) {
+        const code = (error as {code?: string})?.code ?? "";
+        const deadTokenCodes = [
+            "messaging/registration-token-not-registered",
+            "messaging/invalid-registration-token",
+            "messaging/invalid-argument",
+        ];
+        if (deadTokenCodes.includes(code)) {
+            await admin.firestore()
+                .collection("users")
+                .doc(recipientUserId)
+                .update({fcmToken: admin.firestore.FieldValue.delete()})
+                .catch(() => undefined);
+            console.warn(`Removed dead FCM token for user ${recipientUserId} (${code})`);
+        } else {
+            console.error("FCM send error:", error);
+        }
+        return false;
+    }
 }
 
 function toKstParts(date: Date): KstDateParts {
@@ -188,8 +228,7 @@ export const onCheerCreated = functions.firestore
             );
 
             // 4. Send Message
-            await admin.messaging().send(messagePayload);
-            console.log(`Successfully sent message to ${toUserId}`);
+            await sendAndCleanup(messagePayload, toUserId);
         } catch (error) {
             console.error("Error sending notification:", error);
         }
@@ -244,8 +283,7 @@ export const onPlanCreated = functions.firestore
             );
 
             // 4. 메시지 전송
-            await admin.messaging().send(messagePayload);
-            console.log(`Successfully sent plan notification to ${managerId}`);
+            await sendAndCleanup(messagePayload, managerId);
         } catch (error) {
             console.error("Error sending plan notification:", error);
         }
@@ -303,8 +341,7 @@ export const onActionCompleted = functions.firestore
                 },
             );
 
-            await admin.messaging().send(messagePayload);
-            console.log(`Successfully sent action notification (${type}) to ${managerId}`);
+            await sendAndCleanup(messagePayload, managerId);
         } catch (error) {
             console.error("Error sending completion notification:", error);
         }
@@ -349,28 +386,106 @@ export const notifyMissedActions = functions.pubsub
             const title = "약속 시간이 지났어요";
             const body = `${senderName}님이 아직 '${itemTitle}' 약속을 처리하지 않았어요. 한 번 물어봐 주세요.`;
 
+            // Send first, then mark dedupe state only on success — a failed send
+            // is retried on the next 30-min run instead of being silently lost.
+            const delivered = await sendAndCleanup(
+                buildMessagePayload(
+                    fcmToken,
+                    title,
+                    body,
+                    {
+                        type: "action_missed",
+                        planId: planDoc.id,
+                        userId,
+                        senderName,
+                        itemTitle,
+                    },
+                ),
+                managerId,
+            );
+            if (!delivered) continue;
+
             await planDoc.ref.update({
                 lastMissedNotifiedAt: admin.firestore.FieldValue.serverTimestamp(),
                 lastMissedItemTitle: itemTitle,
                 lastUpdatedBy: "system_missed_action",
             });
-
-            await admin.messaging().send(buildMessagePayload(
-                fcmToken,
-                title,
-                body,
-                {
-                    type: "action_missed",
-                    planId: planDoc.id,
-                    userId,
-                    senderName,
-                    itemTitle,
-                },
-            ));
             sentCount++;
         }
 
         console.log(`notifyMissedActions sent ${sentCount} missed action notifications`);
+    });
+
+// Nudges the manager when a partner's 'done' proof has waited too long for
+// verification. This is a reminder only — it never auto-verifies or skips,
+// since partner confirmation is intentionally a human, relational step. Each
+// proof is nudged at most once (tracked by `verifyReminderSentAt`).
+export const notifyUnverifiedActions = functions.pubsub
+    .schedule("every 60 minutes")
+    .timeZone("Asia/Seoul")
+    .onRun(async () => {
+        const nowMs = Date.now();
+        const newerThan = admin.firestore.Timestamp.fromMillis(
+            nowMs - VERIFY_REMINDER_WINDOW_MS,
+        );
+        const olderThan = admin.firestore.Timestamp.fromMillis(
+            nowMs - VERIFY_REMINDER_AFTER_MS,
+        );
+
+        const snap = await admin.firestore()
+            .collection("actions")
+            .where("type", "==", "done")
+            .where("createdAt", ">=", newerThan)
+            .where("createdAt", "<=", olderThan)
+            .get();
+
+        let sentCount = 0;
+        for (const actionDoc of snap.docs) {
+            const action = actionDoc.data();
+            if (action.verifiedBy) continue; // already verified
+            if (action.verifyReminderSentAt) continue; // already nudged once
+
+            const planId = action.planId as string | undefined;
+            const userId = action.userId as string | undefined;
+            if (!planId || !userId) continue;
+
+            const planDoc = await admin.firestore().collection("plans").doc(planId).get();
+            const managerId = planDoc.data()?.managerId as string | undefined;
+            if (!managerId) continue;
+
+            const managerDoc = await admin.firestore().collection("users").doc(managerId).get();
+            const fcmToken = managerDoc.data()?.fcmToken as string | undefined;
+            if (!fcmToken) continue;
+
+            const userDoc = await admin.firestore().collection("users").doc(userId).get();
+            const senderName = userDoc.exists ?
+                userDoc.data()?.displayName || "파트너" : "파트너";
+            const itemTitle = (action.title as string) || "오늘 약속";
+
+            const delivered = await sendAndCleanup(
+                buildMessagePayload(
+                    fcmToken,
+                    "확인을 기다리는 실천이 있어요",
+                    `${senderName}님의 '${itemTitle}' 실천이 아직 확인을 기다리고 있어요. 확인하고 응원을 보내주세요.`,
+                    {
+                        type: "verify_reminder",
+                        planId,
+                        userId,
+                        senderName,
+                        itemTitle,
+                    },
+                ),
+                managerId,
+            );
+            if (!delivered) continue;
+
+            await actionDoc.ref.update({
+                verifyReminderSentAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+            sentCount++;
+        }
+
+        console.log(`notifyUnverifiedActions sent ${sentCount} verify reminders`);
     });
 
 export const onPlanUpdated = functions.firestore
@@ -467,8 +582,7 @@ export const onPlanUpdated = functions.firestore
                 },
             );
 
-            await admin.messaging().send(messagePayload);
-            console.log(`Successfully sent ${type} notification to ${toUserId}`);
+            await sendAndCleanup(messagePayload, toUserId);
         } catch (error) {
             console.error("Error sending update notification:", error);
         }

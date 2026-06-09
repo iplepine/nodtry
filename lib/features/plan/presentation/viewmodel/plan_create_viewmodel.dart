@@ -6,6 +6,12 @@ import '../../../../providers/repository_provider.dart';
 import '../../../../providers/home_provider.dart';
 import '../../domain/study_plan_template.dart';
 
+/// Thrown when a plan save is attempted without a resolved signed-in user.
+/// The UI maps this to a localized message (view model has no l10n access).
+class PlanCreateAuthException implements Exception {
+  const PlanCreateAuthException();
+}
+
 final planCreateViewModelProvider =
     AsyncNotifierProvider<PlanCreateViewModel, PlanCreateState>(
       PlanCreateViewModel.new,
@@ -156,7 +162,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       final userId = userState.asData?.value?.uid;
 
       if (userId == null) {
-        throw Exception("사용자 정보를 찾을 수 없습니다.");
+        throw const PlanCreateAuthException();
       }
 
       final finalDays = prevState.selectedDays.isEmpty

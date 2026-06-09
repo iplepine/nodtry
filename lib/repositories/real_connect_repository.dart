@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math';
 import '../models/relation_model.dart';
+import '../utils/error_reporter.dart';
 import 'connect_repository.dart';
 
 /// Firestore 기반 실제 연결 데이터 저장소
@@ -120,7 +121,8 @@ class RealConnectRepository implements ConnectRepository {
       );
 
       return list;
-    } catch (e) {
+    } catch (e, s) {
+      ErrorReporter.record(e, s, reason: 'getConnections');
       return [];
     }
   }
@@ -197,7 +199,8 @@ class RealConnectRepository implements ConnectRepository {
         return ConnectionStatus.active;
       }
       return ConnectionStatus.none;
-    } catch (e) {
+    } catch (e, s) {
+      ErrorReporter.record(e, s, reason: 'getConnectionStatus');
       return ConnectionStatus.none;
     }
   }

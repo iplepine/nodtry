@@ -16,6 +16,7 @@ import 'services/notification_service.dart' as local_notifications;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'utils/error_reporter.dart';
 import 'dart:async';
 
 @pragma('vm:entry-point')
@@ -63,6 +64,9 @@ void main() async {
     // Ignore duplicate app initialization error
     debugPrint('Firebase init error (ignored): $e');
   }
+
+  // Capture uncaught Flutter + async errors in Crashlytics once Firebase is up.
+  await ErrorReporter.initialize();
 
   final prefs = await SharedPreferences.getInstance();
 

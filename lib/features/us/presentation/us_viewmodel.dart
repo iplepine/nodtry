@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'us_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../providers/repository_provider.dart';
+import '../../../utils/error_reporter.dart';
+import '../../../utils/ui_error_codes.dart';
 
 class UsViewModel extends AsyncNotifier<UsState> {
   @override
@@ -42,26 +44,28 @@ class UsViewModel extends AsyncNotifier<UsState> {
       if (intent is LinkGoogleIntent ||
           intent is UpdateProfileIntent ||
           intent is LinkEmailIntent) {
-        // 액션 중 에러는 전체 상태를 에러로 바꾸지 않고 알림만 설정
-        String errorMessage = e.toString();
+        // 액션 중 에러는 전체 상태를 에러로 바꾸지 않고 알림(코드)만 설정.
+        // 코드 → 사용자 메시지 변환은 위젯 레이어(l10n)에서 수행한다.
+        ErrorReporter.record(e, stack, reason: 'usLinkAction');
+        String errorCode = AccountLinkErrorCode.generic;
         if (e is FirebaseAuthException) {
           switch (e.code) {
             case 'credential-already-in-use':
-              errorMessage = "이 계정은 이미 다른 사용자와 연결되어 있습니다.";
+              errorCode = AccountLinkErrorCode.alreadyInUse;
               break;
             case 'invalid-credential':
-              errorMessage = "유효하지 않은 인증 정보입니다.";
+              errorCode = AccountLinkErrorCode.invalidCredential;
               break;
             case 'operation-not-allowed':
-              errorMessage = "허용되지 않은 작업입니다.";
+              errorCode = AccountLinkErrorCode.notAllowed;
               break;
             default:
-              errorMessage = e.message ?? "계정 연동 중 오류가 발생했습니다.";
+              errorCode = AccountLinkErrorCode.generic;
           }
         }
         state = AsyncValue.data(
           state.value!.copyWith(
-            errorNotification: errorMessage,
+            errorNotification: errorCode,
             isLinking: false,
             isUpdatingProfile: false,
           ),

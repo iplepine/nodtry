@@ -1964,5 +1964,13 @@
     }
   },
   "nowYesterday": "Yesterday",
-  "nowNoteDateToday": "Today"
+  "nowNoteDateToday": "Today",
+  "connectErrorSelfCode": "You can't use your own invite code.",
+  "connectErrorFailed": "That code is invalid, or the connection failed.",
+  "connectErrorDisconnectFailed": "Couldn't disconnect. Please try again.",
+  "accountLinkErrorAlreadyInUse": "This account is already linked to another user.",
+  "accountLinkErrorInvalidCredential": "The credentials are invalid.",
+  "accountLinkErrorNotAllowed": "This operation isn't allowed.",
+  "accountLinkErrorGeneric": "Something went wrong while linking your account.",
+  "planCreateErrorNoUser": "We couldn't find your account. Please sign in again."
 }

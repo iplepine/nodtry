@@ -1,0 +1,99 @@
+rules_version = '2';
+
+// Nodtry Firestore security rules.
+//
+// Threat model for the current pilot:
+//   - Block ALL access from unauthenticated callers (default-deny + isSignedIn()).
+//   - Lock every WRITE to the owning / participating user so nobody can
+//     impersonate another user, tamper with someone else's records, or delete
+//     data they don't own.
+//   - READS are intentionally broad (any signed-in user) on collections the app
+//     queries cross-user by design: a manager reads their partner's `users`,
+//     `plans` and `actions` via queries that filter on the *partner's* uid, so a
+//     statically-tight per-document read rule would reject those queries.
+//     Tightening reads requires denormalizing `managerId` onto every document
+//     and rewriting the cross-user queries — tracked as a follow-up data-model
+//     task (see docs/operations/SECURITY_RULES.md). For a closed pilot the
+//     write-side lockdown is the meaningful hardening.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // users/{uid}
+    // Read: any signed-in user (invite-code lookup + partner profiles need it).
+    // Write: only the owner of the document.
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isUser(userId);
+    }
+
+    // relations/{id}
+    // Bidirectional support links. A user may only touch a relation they are a
+    // participant of (executor or manager).
+    match /relations/{relationId} {
+      function relParticipant(data) {
+        return isSignedIn() &&
+          (request.auth.uid == data.executorId || request.auth.uid == data.managerId);
+      }
+      allow read: if relParticipant(resource.data);
+      allow create: if relParticipant(request.resource.data);
+      allow update: if relParticipant(resource.data) && relParticipant(request.resource.data);
+      allow delete: if relParticipant(resource.data);
+    }
+
+    // plans/{id}
+    // Owned by `userId`, managed by `managerId`. Reads are cross-user (manager
+    // streams the partner's plans); writes are participant-scoped and the owner
+    // can never be reassigned.
+    match /plans/{planId} {
+      function planParticipant(data) {
+        return isSignedIn() &&
+          (request.auth.uid == data.userId || request.auth.uid == data.managerId);
+      }
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId;
+      allow update: if planParticipant(resource.data)
+        && request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.userId;
+    }
+
+    // actions/{id}
+    // Daily proof records. The owner (`userId`) writes them; the plan's manager
+    // verifies them. get()/update() are single-document ops so we can safely
+    // resolve the plan's manager; list() stays broad because partner-history and
+    // plan-timeline queries filter cross-user.
+    match /actions/{actionId} {
+      function actionOwner() {
+        return isSignedIn() && request.auth.uid == resource.data.userId;
+      }
+      function actionPlanManager() {
+        return isSignedIn() &&
+          exists(/databases/$(database)/documents/plans/$(resource.data.planId)) &&
+          get(/databases/$(database)/documents/plans/$(resource.data.planId)).data.managerId == request.auth.uid;
+      }
+      allow get: if actionOwner() || actionPlanManager();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId;
+      allow update: if actionOwner() || actionPlanManager();
+      allow delete: if actionOwner();
+    }
+
+    // cheers/{id}
+    // Append-only cheer / poke signals. Created by the sender; read+processed
+    // server-side by Cloud Functions (admin SDK bypasses rules). Clients never
+    // mutate or query this collection.
+    match /cheers/{cheerId} {
+      allow read: if isSignedIn() &&
+        (request.auth.uid == resource.data.fromUserId || request.auth.uid == resource.data.toUserId);
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.fromUserId;
+      allow update, delete: if false;
+    }
+  }
+}
