@@ -38,8 +38,11 @@
    ```
 3. **규칙만 먼저 배포** (이번 변경의 핵심):
    ```bash
-   firebase deploy --only firestore:rules,storage:rules
+   firebase deploy --only firestore:rules,storage
    ```
+   > 스토리지는 `storage:rules`가 아니라 `storage`로 배포한다. `storage:<이름>`은
+   > 멀티버킷용 named target으로 해석돼 "Could not find rules for ... target: rules"
+   > 에러가 난다.
 4. **인덱스는 별도로**, 1번 비교 후 안전이 확인되면:
    ```bash
    firebase deploy --only firestore:indexes
