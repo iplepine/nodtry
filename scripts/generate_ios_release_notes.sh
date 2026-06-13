@@ -40,6 +40,30 @@ add_note() {
   EN_NOTES+=("$2")
 }
 
+if grep -Eq '(strength routine|strength training|근력운동)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "검증된 추천에 '주 2회 근력운동' 루틴을 추가했어요. WHO·미국 신체활동 지침이 권장하는 최소 효과 용량으로, 약속 만들기에서 바로 골라 시작할 수 있어요." \
+    "Added a \"strength training twice a week\" routine to Verified routines — the minimum effective dose recommended by WHO and US activity guidelines. Pick it during plan creation and start right away."
+fi
+
+if grep -Eq '(settlement accuracy|settlement card|정산 카드|4-week settlement)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "4주 정산 카드가 직접 정한 목표 달성 여부를 정확히 보여주도록 개선했어요. 목표를 채웠는데도 실패처럼 보이던 문제를 고쳤어요." \
+    "The 4-week settlement now reflects the goal you actually set instead of a fixed bar — no more reading as a failure when you hit your target."
+fi
+
+if grep -Eq '(card set-aside|set aside|set-aside|넘기기|잠시 후에)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "지금 탭 카드를 잠시 미뤄둘 수 있어요. 카드 오른쪽 위 버튼으로 '잠시 후에 할게'(나중에 다시 알림)나 '오늘은 안 할게'를 고르면 돼요." \
+    "You can now set a Now card aside — use the top-right control to choose \"I'll do it later\" (with a reminder) or \"Not today\"."
+fi
+
+if grep -Eq '(P0.?P2|reliability|crash reporting|crashlytics)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "오류 리포팅과 알림 전달 안정성을 개선했어요." \
+    "Improved crash reporting and notification delivery reliability."
+fi
+
 if grep -Eq '(verified routines|science-backed|검증된 루틴|verified routine category)' <<< "$COMMITS_TEXT"; then
   add_note \
     "신경과학·수면 연구 기반 추천 루틴 5개를 약속 만들기에 추가했어요. 아침 햇빛, 카페인 90분 뒤, 생리적 한숨, 90분 집중, 수면 환경 — 새 \"검증된 루틴\" 카테고리에서 골라 바로 약속으로 만들 수 있어요." \

@@ -1,0 +1,4 @@
+- Added a "strength training twice a week" template to verified routines.
+- The 4-week settlement now reflects your actual goal instead of a fixed bar.
+- On a Now card you can set a to-do aside: do it later (with a reminder) or skip today.
+- Improved crash reporting and notification reliability.

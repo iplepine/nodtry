@@ -1,7 +1,6 @@
 What's New
 
-- Added 5 science-backed routine templates to plan creation — morning light, delayed caffeine, physiological sigh, 90-min focus, and sleep environment. Pick one from the new "Verified routines" category and turn it into a promise instantly.
-- Fixed: reminders no longer fire today after the matching promise is completed or deleted.
-- Polished the layout so long names, promise titles, and notes no longer run off the screen or overlap nearby buttons.
-- Five color themes are now available — Pacific, Rose Mocha, and Lavender Dusk join the existing two, and Deep Olive has been tuned for better text contrast.
-- Your theme choice is now remembered across launches.
+- Added a "strength training twice a week" routine to Verified routines — the minimum effective dose recommended by WHO and US activity guidelines. Pick it during plan creation and start right away.
+- The 4-week settlement now reflects the goal you actually set instead of a fixed bar — no more reading as a failure when you hit your target.
+- You can now set a Now card aside — use the top-right control to choose "I'll do it later" (with a reminder) or "Not today".
+- Improved crash reporting and notification delivery reliability.
