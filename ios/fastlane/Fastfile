@@ -42,6 +42,13 @@ platform :ios do
       issuer_id: "6b17b540-3b79-4d8c-beaf-ca1c83e566f1",
       key_filepath: "./fastlane/AuthKey_XXU6VU63TR.p8"
     )
+    # Keep CocoaPods in sync before archiving. Without this, adding a new
+    # Flutter plugin that pulls a new pod (e.g. firebase_crashlytics) leaves the
+    # sandbox out of sync with Podfile.lock and `xcodebuild archive` fails with
+    # "The sandbox is not in sync with the Podfile.lock". gym's clean-archive
+    # does not run pod install itself. LANG/LC_ALL are forced to UTF-8 above so
+    # CocoaPods doesn't choke on the project's Korean strings.
+    cocoapods(try_repo_update_on_error: true)
     prepare_release_notes
     build_app(
       workspace: "Runner.xcworkspace",
