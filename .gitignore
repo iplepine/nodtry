@@ -55,3 +55,6 @@ firestore-debug.log
 firebase-debug.log
 ui-debug.log
 .firebase/
+
+# Vendored Ruby gems (fastlane) — regenerated via bundle install, never committed
+android/vendor/
