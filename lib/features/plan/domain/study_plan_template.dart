@@ -203,6 +203,16 @@ List<StudyPlanTemplate> verifiedRoutinesFor(AppLocalizations l10n) {
       selectedDayIndexes: const {0, 1, 2, 3, 4, 5, 6},
       notificationTime: NotificationTime.custom(22, 0),
     ),
+    StudyPlanTemplate(
+      id: 'verified_strength_2x',
+      categoryId: planCategoryVerified,
+      label: l10n.planTemplateStrength2xLabel,
+      action: l10n.planTemplateStrength2xAction,
+      description: l10n.planTemplateStrength2xDescription,
+      // Twice weekly, spaced for recovery (Tue / Thu).
+      selectedDayIndexes: const {1, 4},
+      notificationTime: NotificationTime.custom(18, 0),
+    ),
   ];
 }
 

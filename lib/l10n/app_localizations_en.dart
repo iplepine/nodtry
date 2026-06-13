@@ -324,6 +324,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowActionSkipToday => 'Let\'s skip today';
 
   @override
+  String get nowDeferMenuTooltip => 'Set aside';
+
+  @override
+  String get nowDeferLaterTitle => 'I\'ll do it later';
+
+  @override
+  String get nowDeferLaterSubtitle =>
+      'See your next to-do now; we\'ll nudge you again later';
+
+  @override
+  String get nowSkipTodayTitle => 'Not today';
+
+  @override
+  String get nowSkipTodaySubtitle => 'Skip this promise for today';
+
+  @override
+  String get nowSkipTodayDone => 'Skipped for today';
+
+  @override
+  String get nowDeferLaterDone => 'We\'ll nudge you again a bit later';
+
+  @override
+  String get nowDeferReminderTitle => 'Here\'s your nudge';
+
+  @override
+  String get nowDeferReminderBody => 'You set a promise aside for later';
+
+  @override
   String get nowAddMorePlan => 'Shall we make another promise?';
 
   @override
@@ -1240,6 +1268,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'An hour before bed, switch off overhead lights and use indirect lamps — that\'s when melatonin starts to rise, speeding sleep onset. Keep the bedroom at 18–20°C; your body needs a slight temperature drop for deep sleep and REM. A hot shower right before bed actually delays sleep, so finish 1–2 hours earlier';
 
   @override
+  String get planTemplateStrength2xLabel => 'Strength 2×/week';
+
+  @override
+  String get planTemplateStrength2xAction => 'One full-body strength session';
+
+  @override
+  String get planTemplateStrength2xDescription =>
+      'Strength training just twice a week is the \'minimum effective dose\' for preserving muscle, strength, and bone density — the bar set by the WHO and US physical-activity guidelines. It protects the muscle you naturally lose with age and supports metabolism, blood-sugar control, posture, and fall prevention. Favor compound moves — squat, hinge (deadlift), push, pull — for 3–4 sets of 6–10 reps, nudging the weight or reps up each week (progressive overload). The same muscles need 48+ hours to recover, so space the two sessions 2–3 days apart and back them with protein and sleep';
+
+  @override
   String get planDayPresetThreeDaysLabel => '3 days/wk';
 
   @override
@@ -2003,7 +2041,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowSettlementSaved => '4-week settlement saved.';
 
   @override
-  String get nowExitDialogTitle => 'Stop here for this 4-week round?';
+  String get nowExitDialogTitle => 'Wrap up this 4-week round here?';
 
   @override
   String get nowExitReasonWeakPoke => 'The knock pressure was weak';
@@ -2018,7 +2056,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowExitReasonCustomLabel => 'Other';
 
   @override
-  String get nowExitReasonCustomHint => 'Briefly say why you\'re stopping';
+  String get nowExitReasonCustomHint =>
+      'Optionally, a brief note on wrapping up';
 
   @override
   String get nowExitReasonNoCustom => 'No custom reason';
@@ -2306,11 +2345,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nowSettlementWinMessage =>
-      'You passed the meaningful 12-day mark. Time to decide on the next 4 weeks.';
+      'You hit the goal you set together. Nicely done! Time to decide whether to keep going for another 4 weeks.';
 
   @override
   String get nowSettlementLoseMessage =>
-      'More important than finishing is noting where you stopped. Leave a reason to make the next attempt easier.';
+      'You didn\'t quite reach the goal this time, but the 4 weeks you shared still count. Decide what to adjust for the next 4 weeks.';
+
+  @override
+  String get nowSettlementNeutralMessage =>
+      'You made it through the whole 4 weeks together. Time to decide whether to continue for another round.';
 
   @override
   String nowRewardCondition(int days, String description) {
@@ -2346,7 +2389,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowContinueNext4Weeks => 'Start the next 4 weeks';
 
   @override
-  String get nowStopHere => 'Stop this 4-week round here';
+  String get nowStopHere => 'Wrap up this 4-week round here';
 
   @override
   String get nowModify => 'Modify';

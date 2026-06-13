@@ -320,6 +320,33 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowActionSkipToday => '오늘은 넘어가자';
 
   @override
+  String get nowDeferMenuTooltip => '넘기기';
+
+  @override
+  String get nowDeferLaterTitle => '잠시 후에 할게';
+
+  @override
+  String get nowDeferLaterSubtitle => '다음 실천을 먼저 보고, 잠시 후 다시 알려드릴게요';
+
+  @override
+  String get nowSkipTodayTitle => '오늘은 안 할게';
+
+  @override
+  String get nowSkipTodaySubtitle => '오늘 이 약속은 넘어가요';
+
+  @override
+  String get nowSkipTodayDone => '오늘은 넘어갔어요';
+
+  @override
+  String get nowDeferLaterDone => '잠시 후에 다시 알려드릴게요';
+
+  @override
+  String get nowDeferReminderTitle => '다시 알려드려요';
+
+  @override
+  String get nowDeferReminderBody => '잠시 후에 하기로 한 약속이 있어요';
+
+  @override
   String get nowAddMorePlan => '다른 약속도 만들어볼까요?';
 
   @override
@@ -1211,6 +1238,16 @@ class AppLocalizationsKo extends AppLocalizations {
       '잠들기 1시간 전부터 머리 위 밝은 조명을 끄고 간접 조명으로 바꾸면 멜라토닌이 빨리 분비돼 입면이 빨라져요. 침실 온도는 18~20도가 적정 — 잠들 땐 체온이 살짝 떨어져야 깊은 잠과 REM이 늘어요. 자기 직전 뜨거운 샤워는 오히려 체온을 올려 입면을 늦추니, 잠 1~2시간 전에 끝내세요';
 
   @override
+  String get planTemplateStrength2xLabel => '주 2회 근력운동';
+
+  @override
+  String get planTemplateStrength2xAction => '전신 근력운동 1세션';
+
+  @override
+  String get planTemplateStrength2xDescription =>
+      '근력운동은 주 2회만 해도 근육·근력과 뼈 건강을 지키는 \'최소 효과 용량\'으로, WHO·미국 신체활동 지침이 권장하는 기준이에요. 나이가 들수록 자연히 줄어드는 근육량은 물론 대사·혈당 조절, 자세와 낙상 예방까지 폭넓게 도와요. 스쿼트·힌지(데드리프트)·밀기·당기기 같은 복합 동작 위주로 6~10회 3~4세트, 매주 무게나 횟수를 조금씩 올리세요(점진적 과부하). 같은 부위는 48시간 이상 회복이 필요하니 두 세션은 2~3일 간격을 두고, 충분한 단백질과 수면으로 회복을 채우세요';
+
+  @override
   String get planDayPresetThreeDaysLabel => '주 3일';
 
   @override
@@ -1955,7 +1992,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowSettlementSaved => '4주 정산을 남겼어요.';
 
   @override
-  String get nowExitDialogTitle => '이번 4주는 여기서 멈출까요?';
+  String get nowExitDialogTitle => '이번 4주를 여기서 마무리할까요?';
 
   @override
   String get nowExitReasonWeakPoke => '똑똑 압박이 약했어요';
@@ -1970,7 +2007,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowExitReasonCustomLabel => '직접 입력';
 
   @override
-  String get nowExitReasonCustomHint => '멈추는 이유를 짧게 남기기';
+  String get nowExitReasonCustomHint => '마무리하는 이유를 짧게 남기기 (선택)';
 
   @override
   String get nowExitReasonNoCustom => '직접 사유 없음';
@@ -2251,11 +2288,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nowSettlementWinMessage =>
-      '의미 있는 완료 기준인 12일을 넘겼어요. 다음 4주를 이어갈지 바로 정할 차례예요.';
+      '약속한 목표를 채웠어요. 잘하셨어요! 다음 4주를 이어갈지 정할 차례예요.';
 
   @override
   String get nowSettlementLoseMessage =>
-      '완주보다 중요한 건 어디서 끊겼는지 남기는 거예요. 다음 실험을 줄일 수 있게 사유를 남겨요.';
+      '이번엔 목표까지 닿지 못했지만, 함께한 4주는 그대로 남아요. 다음 4주를 어떻게 바꿔볼지 정해요.';
+
+  @override
+  String get nowSettlementNeutralMessage =>
+      '4주를 끝까지 함께했어요. 이제 다음 4주를 이어갈지 정할 차례예요.';
 
   @override
   String nowRewardCondition(int days, String description) {
@@ -2291,7 +2332,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowContinueNext4Weeks => '다음 4주 시작하기';
 
   @override
-  String get nowStopHere => '이번 4주는 여기서 멈추기';
+  String get nowStopHere => '이번 4주는 여기서 마무리하기';
 
   @override
   String get nowModify => '수정하기';

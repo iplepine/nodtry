@@ -52,7 +52,7 @@ class _NowTabState extends ConsumerState<NowTab>
   bool _isHandlingNotificationSkip = false;
   final Set<String> _autoAcknowledgedPokes = {};
 
-  // Primary 카드 캐러셀: 좌우 스와이프로 오늘의 다른 실천을 순회한다.
+  // Primary 카드 캐러셀: 점 인디케이터 탭 / '넘기기' 버튼으로 오늘의 다른 실천을 순회한다.
   int _primaryActiveIndex = 0;
   String? _carouselSignature;
 
@@ -118,16 +118,13 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
-  void _handleCarouselSwipe(DragEndDetails details, int count) {
-    final velocity = details.primaryVelocity ?? 0;
-    if (velocity.abs() < 200) return;
-    final delta = velocity < 0 ? 1 : -1; // 왼쪽으로 스와이프 → 다음 카드
-    final next = (_primaryActiveIndex + delta).clamp(0, count - 1);
+  /// 점 인디케이터를 탭하면 해당 카드로 바로 이동한다.
+  void _goToCarouselIndex(int index, int count) {
+    final next = index.clamp(0, count - 1);
     if (next == _primaryActiveIndex) return;
     setState(() {
       _primaryActiveIndex = next;
     });
-    // 카드 교체 애니메이션 재생 (이전과 동일한 페이드/슬라이드).
     _animationController.forward(from: 0.0);
   }
 
@@ -142,9 +139,7 @@ class _NowTabState extends ConsumerState<NowTab>
   }
 
   String _carouselSignatureFor(List<HomeCardModel> cards) {
-    return cards
-        .map((c) => '${c.state.name}:${c.plan?.id ?? ""}')
-        .join('|');
+    return cards.map((c) => '${c.state.name}:${c.plan?.id ?? ""}').join('|');
   }
 
   Future<void> _handleDidIt() async {
@@ -169,17 +164,18 @@ class _NowTabState extends ConsumerState<NowTab>
     final elapsed = await Navigator.of(context).push<Duration>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) => FocusTimerScreen(
-          minutes: minutes,
-          planTitle: planTitle,
-        ),
+        builder: (_) =>
+            FocusTimerScreen(minutes: minutes, planTitle: planTitle),
       ),
     );
     if (elapsed == null || !mounted) return;
 
     await _handleDidItForCard(
       primaryCard,
-      prefillNote: _formatFocusCompletionNote(elapsed, AppLocalizations.of(context)!),
+      prefillNote: _formatFocusCompletionNote(
+        elapsed,
+        AppLocalizations.of(context)!,
+      ),
     );
   }
 
@@ -396,7 +392,9 @@ class _NowTabState extends ConsumerState<NowTab>
 
     final l10n = AppLocalizations.of(context)!;
     final planTitle =
-        targetCard.plan?.items.firstOrNull?.title ?? dialogTitle ?? l10n.nowTodayPromiseFallback;
+        targetCard.plan?.items.firstOrNull?.title ??
+        dialogTitle ??
+        l10n.nowTodayPromiseFallback;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -408,11 +406,17 @@ class _NowTabState extends ConsumerState<NowTab>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(dl10n.nowCancel, style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                dl10n.nowCancel,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text(dl10n.nowSkipToday, style: TextStyle(color: AppColors.primary)),
+              child: Text(
+                dl10n.nowSkipToday,
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
           ],
         );
@@ -424,9 +428,9 @@ class _NowTabState extends ConsumerState<NowTab>
     final skipped = await _skipCard(targetCard);
     if (!skipped || !mounted) return;
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowSkippedSnackbar)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.nowSkippedSnackbar)),
+    );
   }
 
   Future<void> _handleCheckIt(HomeCardModel managerCard) async {
@@ -451,9 +455,11 @@ class _NowTabState extends ConsumerState<NowTab>
         }
       } catch (_) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowApproveFailed)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowApproveFailed),
+            ),
+          );
         }
       }
     } else if (managerCard.state == HomeCardState.partnerAction ||
@@ -473,9 +479,11 @@ class _NowTabState extends ConsumerState<NowTab>
         }
       } catch (_) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowVerifyFailed)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowVerifyFailed),
+            ),
+          );
         }
       }
     } else {
@@ -516,7 +524,10 @@ class _NowTabState extends ConsumerState<NowTab>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(dl10n.nowCancel, style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                dl10n.nowCancel,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
           ],
         );
@@ -540,9 +551,11 @@ class _NowTabState extends ConsumerState<NowTab>
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowRejectRequested)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.nowRejectRequested),
+          ),
+        );
       }
     }
   }
@@ -628,9 +641,9 @@ class _NowTabState extends ConsumerState<NowTab>
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowCheerFailed)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.nowCheerFailed)),
+        );
       }
     }
   }
@@ -669,15 +682,15 @@ class _NowTabState extends ConsumerState<NowTab>
             ),
           );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeSent)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeSent)),
+        );
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)),
+        );
       }
     }
   }
@@ -695,15 +708,17 @@ class _NowTabState extends ConsumerState<NowTab>
             ),
           );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeAgainSent)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.nowPokeAgainSent),
+          ),
+        );
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)),
+        );
       }
     }
   }
@@ -735,15 +750,15 @@ class _NowTabState extends ConsumerState<NowTab>
             ),
           );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.nowPromiseAckSnackbar)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.nowPromiseAckSnackbar)));
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.nowPromiseAckFailed)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.nowPromiseAckFailed)));
       }
     }
   }
@@ -800,9 +815,9 @@ class _NowTabState extends ConsumerState<NowTab>
         );
 
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowSettlementSaved)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.nowSettlementSaved)),
+    );
   }
 
   Future<String?> _showPilotExitReasonDialog(BuildContext context) {
@@ -848,7 +863,10 @@ class _NowTabState extends ConsumerState<NowTab>
                     ? l10n.nowExitReasonNoCustom
                     : customController.text.trim(),
               ),
-              child: Text(l10n.nowExitSubmit, style: TextStyle(color: AppColors.primary)),
+              child: Text(
+                l10n.nowExitSubmit,
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
           ],
         );
@@ -882,11 +900,17 @@ class _NowTabState extends ConsumerState<NowTab>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n.nowCancel, style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                l10n.nowCancel,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.nowRestPassConfirm, style: TextStyle(color: AppColors.primary)),
+              child: Text(
+                l10n.nowRestPassConfirm,
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
           ],
         );
@@ -902,7 +926,9 @@ class _NowTabState extends ConsumerState<NowTab>
           .dispatch(RestPlanIntent(primaryCard!.plan!.id!));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.nowRestPassUsed)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.nowRestPassUsed),
+          ),
         );
       }
     } catch (e) {
@@ -912,7 +938,8 @@ class _NowTabState extends ConsumerState<NowTab>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              e.toString().contains('이미 사용') || e.toString().contains('already used')
+              e.toString().contains('이미 사용') ||
+                      e.toString().contains('already used')
                   ? dl10n.nowRestPassAlreadyUsed
                   : dl10n.nowRestPassError,
             ),
@@ -930,14 +957,18 @@ class _NowTabState extends ConsumerState<NowTab>
           .dispatch(RescuePlanIntent(card.plan!.id!));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.nowRescuedSnackbar)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.nowRescuedSnackbar),
+          ),
         );
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowRescueFailed)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.nowRescueFailed),
+          ),
+        );
       }
     }
   }
@@ -966,6 +997,120 @@ class _NowTabState extends ConsumerState<NowTab>
     } catch (e) {
       if (mounted) _animationController.forward();
       return false;
+    }
+  }
+
+  /// 카드 우측 상단 '넘기기' → 잠시 후에 할지 / 오늘은 안 할지 고르는 시트.
+  Future<void> _showActionDeferSheet(HomeCardModel card) async {
+    if (card.plan?.id == null) return;
+
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx)!;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.outline,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                leading: Icon(Icons.schedule_rounded, color: AppColors.primary),
+                title: Text(l10n.nowDeferLaterTitle),
+                subtitle: Text(l10n.nowDeferLaterSubtitle),
+                onTap: () => Navigator.pop(ctx, 'later'),
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.remove_circle_outline,
+                  color: AppColors.textSecondary,
+                ),
+                title: Text(l10n.nowSkipTodayTitle),
+                subtitle: Text(l10n.nowSkipTodaySubtitle),
+                onTap: () => Navigator.pop(ctx, 'skip'),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (!mounted) return;
+    if (choice == 'later') {
+      await _handleDeferLater(card);
+    } else if (choice == 'skip') {
+      final ok = await _skipCard(card);
+      if (ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.nowSkipTodayDone),
+          ),
+        );
+      }
+    }
+  }
+
+  /// '잠시 후에 할게' — 다음 실천으로 넘기고, 잠시 후 다시 알림을 예약한다.
+  Future<void> _handleDeferLater(HomeCardModel card) async {
+    await _scheduleDeferReminder(card);
+
+    // 오늘의 실천 카드가 여러 개면 다음 카드로 넘긴다.
+    final state = ref.read(nowTabViewModelProvider).value;
+    final count = state?.primaryCarouselCards.length ?? 0;
+    if (count > 1) {
+      final next = (_primaryActiveIndex + 1).clamp(0, count - 1);
+      if (next != _primaryActiveIndex) {
+        setState(() {
+          _primaryActiveIndex = next;
+        });
+        _animationController.forward(from: 0.0);
+      }
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.nowDeferLaterDone),
+        ),
+      );
+    }
+  }
+
+  Future<void> _scheduleDeferReminder(HomeCardModel card) async {
+    final plan = card.plan;
+    if (plan?.id == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final itemTitle = plan!.items.firstOrNull?.title;
+    final when = DateTime.now().add(const Duration(hours: 1));
+    // 플랜 알림/스누즈 id 영역과 겹치지 않는 범위에서 안정적 id 생성.
+    final id = 1800000000 + (plan.id!.hashCode.abs() % 1000000);
+    try {
+      await local_notifications.NotificationService().scheduleNotificationAt(
+        id: id,
+        title: l10n.nowDeferReminderTitle,
+        body: (itemTitle != null && itemTitle.isNotEmpty)
+            ? itemTitle
+            : l10n.nowDeferReminderBody,
+        scheduledDate: when,
+        planId: plan.id,
+        opensInput: true,
+      );
+    } catch (e) {
+      // 알림 예약 실패는 치명적이지 않다(권한 거부 등) — 넘기기 자체는 진행.
+      debugPrint('[NowTab] scheduleDeferReminder failed (ignored): $e');
     }
   }
 
@@ -1003,14 +1148,22 @@ class _NowTabState extends ConsumerState<NowTab>
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(accept ? l10n.nowPromiseAccepted : l10n.nowPromiseDeclined)),
+          SnackBar(
+            content: Text(
+              accept ? l10n.nowPromiseAccepted : l10n.nowPromiseDeclined,
+            ),
+          ),
         );
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPromiseResponseFailed)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.nowPromiseResponseFailed,
+            ),
+          ),
+        );
       }
     }
   }
@@ -1045,15 +1198,21 @@ class _NowTabState extends ConsumerState<NowTab>
             ),
           );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPromiseProposed)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.nowPromiseProposed),
+          ),
+        );
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowPromiseProposeFailed)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.nowPromiseProposeFailed,
+            ),
+          ),
+        );
       }
     }
   }
@@ -1399,7 +1558,10 @@ class _NowTabState extends ConsumerState<NowTab>
       final carouselCards = uiState.primaryCarouselCards;
       // 캐러셀에서 현재 선택된 카드. 없으면 기존 primaryCard 폴백.
       final HomeCardModel? primaryExecutorCard = carouselCards.isNotEmpty
-          ? carouselCards[_primaryActiveIndex.clamp(0, carouselCards.length - 1)]
+          ? carouselCards[_primaryActiveIndex.clamp(
+              0,
+              carouselCards.length - 1,
+            )]
           : uiState.primaryCard;
       final secondaryExecutorCards = uiState.secondaryCards;
       final managerCards = uiState.managerCards;
@@ -1449,73 +1611,67 @@ class _NowTabState extends ConsumerState<NowTab>
                                         curve: Curves.easeIn,
                                       ),
                                     ),
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.translucent,
-                                  onHorizontalDragEnd: carouselCards.length > 1
-                                      ? (details) =>
-                                            _handleCarouselSwipe(
-                                              details,
-                                              carouselCards.length,
-                                            )
-                                      : null,
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: FractionallySizedBox(
-                                      widthFactor: 0.9,
-                                      child: _PrimaryExecutorCard(
-                                        // 키를 부여해 스와이프 시 위젯 상태가 새 카드로 재구성되게 한다.
-                                        key: ValueKey(
-                                          '${primaryExecutorCard.state.name}:${primaryExecutorCard.plan?.id ?? ""}',
-                                        ),
-                                        model: primaryExecutorCard,
-                                        onDidIt: _handleDidIt,
-                                        onFocusTimer: _handleFocusTimer,
-                                        onSkip: _handleSkip,
-                                        onRest: _handleRest,
-                                        onCreatePlan: _handleCreatePlan,
-                                        onModify: () => _handleModify(
-                                          primaryExecutorCard,
-                                        ), // Added
-                                        onAcceptPromise: () =>
-                                            _handleRespondPromise(
-                                              primaryExecutorCard,
-                                              true,
-                                            ),
-                                        onRejectPromise: () =>
-                                            _handleRespondPromise(
-                                              primaryExecutorCard,
-                                              false,
-                                            ),
-                                        onContinueAfterSettlement: () =>
-                                            _handleContinueAfterSettlement(
-                                              primaryExecutorCard,
-                                            ),
-                                        onExitAfterSettlement: () =>
-                                            _handleExitAfterSettlement(
-                                              primaryExecutorCard,
-                                            ),
-                                        onAcknowledgePromiseSettled: () =>
-                                            _handleAcknowledgePromiseSettled(
-                                              primaryExecutorCard,
-                                            ),
-                                        onTap: () =>
-                                            _handleCardTap(primaryExecutorCard),
-                                        timeChipText: _getTimeChipText(
-                                          primaryExecutorCard,
-                                        ),
-                                        timeChipType: _getTimeChipType(
-                                          primaryExecutorCard,
-                                        ),
-                                        recordGazeText: _getRecordGazeText(
-                                          primaryExecutorCard,
-                                        ),
-                                        exactTimeText: _getExactTimeText(
-                                          primaryExecutorCard,
-                                        ),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: FractionallySizedBox(
+                                    widthFactor: 0.9,
+                                    child: _PrimaryExecutorCard(
+                                      // 키를 부여해 스와이프 시 위젯 상태가 새 카드로 재구성되게 한다.
+                                      key: ValueKey(
+                                        '${primaryExecutorCard.state.name}:${primaryExecutorCard.plan?.id ?? ""}',
                                       ),
-                                      // Glassmorphism wrapper
-                                    ).wrapWithGlass(),
-                                  ),
+                                      model: primaryExecutorCard,
+                                      onDidIt: _handleDidIt,
+                                      onFocusTimer: _handleFocusTimer,
+                                      onSkip: _handleSkip,
+                                      onRest: _handleRest,
+                                      onCreatePlan: _handleCreatePlan,
+                                      onModify: () => _handleModify(
+                                        primaryExecutorCard,
+                                      ), // Added
+                                      onAcceptPromise: () =>
+                                          _handleRespondPromise(
+                                            primaryExecutorCard,
+                                            true,
+                                          ),
+                                      onRejectPromise: () =>
+                                          _handleRespondPromise(
+                                            primaryExecutorCard,
+                                            false,
+                                          ),
+                                      onContinueAfterSettlement: () =>
+                                          _handleContinueAfterSettlement(
+                                            primaryExecutorCard,
+                                          ),
+                                      onExitAfterSettlement: () =>
+                                          _handleExitAfterSettlement(
+                                            primaryExecutorCard,
+                                          ),
+                                      onAcknowledgePromiseSettled: () =>
+                                          _handleAcknowledgePromiseSettled(
+                                            primaryExecutorCard,
+                                          ),
+                                      onDismissOptions: () =>
+                                          _showActionDeferSheet(
+                                            primaryExecutorCard,
+                                          ),
+                                      onTap: () =>
+                                          _handleCardTap(primaryExecutorCard),
+                                      timeChipText: _getTimeChipText(
+                                        primaryExecutorCard,
+                                      ),
+                                      timeChipType: _getTimeChipType(
+                                        primaryExecutorCard,
+                                      ),
+                                      recordGazeText: _getRecordGazeText(
+                                        primaryExecutorCard,
+                                      ),
+                                      exactTimeText: _getExactTimeText(
+                                        primaryExecutorCard,
+                                      ),
+                                    ),
+                                    // Glassmorphism wrapper
+                                  ).wrapWithGlass(),
                                 ),
                               ),
                             ),
@@ -1528,6 +1684,8 @@ class _NowTabState extends ConsumerState<NowTab>
                                 0,
                                 carouselCards.length - 1,
                               ),
+                              onTap: (i) =>
+                                  _goToCarouselIndex(i, carouselCards.length),
                             ),
                           ],
                           const SizedBox(height: 16),
@@ -1617,7 +1775,9 @@ class _NowTabState extends ConsumerState<NowTab>
                                       onProposePromise: () =>
                                           _handleProposePromise(card),
                                       onAcknowledgePromiseSettled: () =>
-                                          _handleAcknowledgePromiseSettled(card),
+                                          _handleAcknowledgePromiseSettled(
+                                            card,
+                                          ),
                                       timeChipText: _getManagerTimeChipText(
                                         card,
                                       ),
@@ -1690,7 +1850,9 @@ class _NowTabState extends ConsumerState<NowTab>
     final feedback = await showDialog<String>(
       context: context,
       builder: (context) => ActionNoteDialog(
-        title: card.plan?.items.firstOrNull?.title ?? l10n.nowPartnerActionFallback,
+        title:
+            card.plan?.items.firstOrNull?.title ??
+            l10n.nowPartnerActionFallback,
         hintText: l10n.nowActionNoteHint,
         buttonLabel: l10n.nowVerifyAndSend,
       ),
@@ -1709,9 +1871,11 @@ class _NowTabState extends ConsumerState<NowTab>
             );
       } catch (_) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nowCheerFailed)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowCheerFailed),
+            ),
+          );
         }
       }
     }
@@ -1776,35 +1940,33 @@ class _NowTabState extends ConsumerState<NowTab>
                     Wrap(
                       spacing: 16,
                       runSpacing: 16,
-                      children: ReactionIcon.reactions
-                          .map((emoji) {
-                            final isSelected = selectedReaction == emoji;
-                            return GestureDetector(
-                              onTap: () {
-                                setSheetState(() {
-                                  selectedReaction = emoji;
-                                });
-                              },
-                              child: Container(
-                                width: 56,
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppColors.primary.withValues(alpha: 0.1)
-                                      : Colors.transparent,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? AppColors.primary
-                                        : Colors.grey.shade300,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: ReactionIcon(emoji, size: 34),
+                      children: ReactionIcon.reactions.map((emoji) {
+                        final isSelected = selectedReaction == emoji;
+                        return GestureDetector(
+                          onTap: () {
+                            setSheetState(() {
+                              selectedReaction = emoji;
+                            });
+                          },
+                          child: Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.primary.withValues(alpha: 0.1)
+                                  : Colors.transparent,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : Colors.grey.shade300,
+                                width: 2,
                               ),
-                            );
-                          })
-                          .toList(),
+                            ),
+                            child: ReactionIcon(emoji, size: 34),
+                          ),
+                        );
+                      }).toList(),
                     ),
                     const SizedBox(height: 24),
                     TextField(
@@ -1846,7 +2008,13 @@ class _NowTabState extends ConsumerState<NowTab>
                           } catch (_) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(AppLocalizations.of(context)!.nowCheerFailed)),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.nowCheerFailed,
+                                  ),
+                                ),
                               );
                             }
                           }
@@ -1987,6 +2155,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final VoidCallback? onContinueAfterSettlement;
   final VoidCallback? onExitAfterSettlement;
   final VoidCallback? onAcknowledgePromiseSettled;
+  // 우측 상단 '넘기기' 아이콘 — 잠시 후에 할지 / 오늘은 안 할지 고르는 시트를 연다.
+  final VoidCallback? onDismissOptions;
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? recordGazeText;
@@ -2006,6 +2176,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     this.onContinueAfterSettlement,
     this.onExitAfterSettlement,
     this.onAcknowledgePromiseSettled,
+    this.onDismissOptions,
     this.onTap,
     this.timeChipText,
     this.timeChipType,
@@ -2031,54 +2202,81 @@ class _PrimaryExecutorCard extends StatelessWidget {
             bottomRight: Radius.circular(4),
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (model.state == HomeCardState.poked) ...[
-                _PokeBadge(partnerName: model.partnerName),
-                const SizedBox(height: 12),
-              ],
-              if (timeChipText != null && timeChipType != null)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Week indicator removed per user request
-                    exactTimeText != null
-                        ? Tooltip(
-                            message: exactTimeText!,
-                            triggerMode: TooltipTriggerMode.longPress,
-                            child: TimeChip(
-                              text: timeChipText!,
-                              type: timeChipType!,
-                            ),
-                          )
-                        : TimeChip(text: timeChipText!, type: timeChipType!),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (model.state == HomeCardState.poked) ...[
+                    _PokeBadge(partnerName: model.partnerName),
+                    const SizedBox(height: 12),
                   ],
-                ),
-              if (timeChipText != null && timeChipType != null)
-                const SizedBox(height: 12),
-              _buildMessage(context, l10n),
-              if (recordGazeText != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  recordGazeText!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  if (timeChipText != null && timeChipType != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Week indicator removed per user request
+                        exactTimeText != null
+                            ? Tooltip(
+                                message: exactTimeText!,
+                                triggerMode: TooltipTriggerMode.longPress,
+                                child: TimeChip(
+                                  text: timeChipText!,
+                                  type: timeChipType!,
+                                ),
+                              )
+                            : TimeChip(
+                                text: timeChipText!,
+                                type: timeChipType!,
+                              ),
+                      ],
+                    ),
+                  if (timeChipText != null && timeChipType != null)
+                    const SizedBox(height: 12),
+                  _buildMessage(context, l10n),
+                  if (recordGazeText != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      recordGazeText!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ],
+                  if (_shouldShowActivePromiseChip()) ...[
+                    const SizedBox(height: 12),
+                    ActivePromiseChip(plan: model.plan!),
+                  ],
+                  const SizedBox(height: 20),
+                  _buildButton(context, l10n),
+                ],
+              ),
+            ),
+            if ((model.state == HomeCardState.nowAction ||
+                    model.state == HomeCardState.overdue ||
+                    model.state == HomeCardState.poked) &&
+                onDismissOptions != null)
+              Positioned(
+                top: 4,
+                right: 4,
+                child: IconButton(
+                  onPressed: onDismissOptions,
+                  iconSize: 20,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.all(6),
+                  constraints: const BoxConstraints(),
+                  tooltip: AppLocalizations.of(context)!.nowDeferMenuTooltip,
+                  icon: Icon(
+                    Icons.close_rounded,
                     color: AppColors.textSecondary,
-                    fontSize: 12,
                   ),
-                  textAlign: TextAlign.left,
                 ),
-              ],
-              if (_shouldShowActivePromiseChip()) ...[
-                const SizedBox(height: 12),
-                ActivePromiseChip(plan: model.plan!),
-              ],
-              const SizedBox(height: 20),
-              _buildButton(context, l10n),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
@@ -2134,11 +2332,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 2),
-          child: Icon(
-            Icons.check_circle,
-            size: 18,
-            color: AppColors.primary,
-          ),
+          child: Icon(Icons.check_circle, size: 18, color: AppColors.primary),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -2412,6 +2606,21 @@ class _PrimaryExecutorCard extends StatelessWidget {
     final feedback = _partnerFeedbackCount(plan);
     final missed = (totalScheduled - completed).clamp(0, totalScheduled);
 
+    // Judge the outcome against the goal the user actually set with their
+    // partner (the reward target) — not a fixed day count. A short plan (e.g.
+    // 2x/week → 8 scheduled days) can never reach an absolute threshold, so a
+    // perfect run used to read as a failure. With no reward promise there is no
+    // win/lose at all, so we show a neutral wrap-up message instead.
+    final rewardTarget = plan.promise?.reward?.targetDays;
+    final String settlementMessage;
+    if (rewardTarget == null) {
+      settlementMessage = l10n.nowSettlementNeutralMessage;
+    } else if (completed >= rewardTarget) {
+      settlementMessage = l10n.nowSettlementWinMessage;
+    } else {
+      settlementMessage = l10n.nowSettlementLoseMessage;
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -2425,16 +2634,29 @@ class _PrimaryExecutorCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: _buildSettlementMetric(l10n.nowMetricCompleted, l10n.nowMetricDaysSuffix(completed))),
-              Expanded(child: _buildSettlementMetric(l10n.nowMetricPartnerReact, l10n.nowMetricCountSuffix(feedback))),
-              Expanded(child: _buildSettlementMetric(l10n.nowMetricMissed, l10n.nowMetricDaysSuffix(missed))),
+              Expanded(
+                child: _buildSettlementMetric(
+                  l10n.nowMetricCompleted,
+                  l10n.nowMetricDaysSuffix(completed),
+                ),
+              ),
+              Expanded(
+                child: _buildSettlementMetric(
+                  l10n.nowMetricPartnerReact,
+                  l10n.nowMetricCountSuffix(feedback),
+                ),
+              ),
+              Expanded(
+                child: _buildSettlementMetric(
+                  l10n.nowMetricMissed,
+                  l10n.nowMetricDaysSuffix(missed),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           Text(
-            completed >= 12
-                ? l10n.nowSettlementWinMessage
-                : l10n.nowSettlementLoseMessage,
+            settlementMessage,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSecondary,
               height: 1.4,
@@ -2498,7 +2720,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    l10n.nowRewardCondition(promise.reward!.targetDays, promise.reward!.description),
+                    l10n.nowRewardCondition(
+                      promise.reward!.targetDays,
+                      promise.reward!.description,
+                    ),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textPrimary,
                     ),
@@ -2518,7 +2743,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    l10n.nowPenaltyCondition(promise.penalty!.targetDays, promise.penalty!.description),
+                    l10n.nowPenaltyCondition(
+                      promise.penalty!.targetDays,
+                      promise.penalty!.description,
+                    ),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textPrimary,
                     ),
@@ -2532,7 +2760,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
           if (isSettled && promise.settledSuccessDays != null) ...[
             const SizedBox(height: 8),
             Text(
-              l10n.nowPromiseResult(promise.settledSuccessDays!, promise.settledFailDays ?? 0),
+              l10n.nowPromiseResult(
+                promise.settledSuccessDays!,
+                promise.settledFailDays ?? 0,
+              ),
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
@@ -2571,7 +2802,11 @@ class _PrimaryExecutorCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        achieved ? (isReward ? AppLocalizations.of(context)!.nowAchieved : AppLocalizations.of(context)!.nowTriggered) : AppLocalizations.of(context)!.nowNotMet,
+        achieved
+            ? (isReward
+                  ? AppLocalizations.of(context)!.nowAchieved
+                  : AppLocalizations.of(context)!.nowTriggered)
+            : AppLocalizations.of(context)!.nowNotMet,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: achieved
               ? (isReward ? AppColors.success : AppColors.error)
@@ -2631,7 +2866,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
                 ),
                 child: Text(
                   AppLocalizations.of(context)!.nowAccept,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -2696,7 +2934,10 @@ class _PrimaryExecutorCard extends StatelessWidget {
               ),
               child: Text(
                 l10n.nowContinueNext4Weeks,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),
@@ -2985,7 +3226,8 @@ class _SecondaryExecutorCard extends StatelessWidget {
   Widget _buildCheckedCard(BuildContext context, AppLocalizations l10n) {
     final title = model.plan?.items.firstOrNull?.title ?? '';
     final now = DateTime.now();
-    final dateStr = '${now.month}.${now.day} (${_getWeekdayStr(now.weekday, l10n)})';
+    final dateStr =
+        '${now.month}.${now.day} (${_getWeekdayStr(now.weekday, l10n)})';
 
     // 긍정 메시지 중 하나 선택
     final messages = [
@@ -3159,7 +3401,9 @@ class _SecondaryExecutorCard extends StatelessWidget {
                   text: title,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                TextSpan(text: '${_particleEulReul(title ?? '', l10n.localeName)}\n'),
+                TextSpan(
+                  text: '${_particleEulReul(title ?? '', l10n.localeName)}\n',
+                ),
                 TextSpan(
                   text: l10n.nowPartnerDidIt,
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -3440,7 +3684,8 @@ class _ManagerQuickCard extends StatelessWidget {
             // Button (Only for partnerActionShare/partnerPlanShare that needs action)
             if (model.state == HomeCardState.partnerPlanCreate ||
                 model.state == HomeCardState.partnerPlanModify) ...[
-              if (model.headerMessage != '함께하는 중' && model.headerMessage != 'Working together') ...[
+              if (model.headerMessage != '함께하는 중' &&
+                  model.headerMessage != 'Working together') ...[
                 const SizedBox(height: 20),
                 Row(
                   children: [
@@ -3541,7 +3786,10 @@ class _ManagerQuickCard extends StatelessWidget {
                   ),
                   child: Text(
                     l10n.nowKnockMakePlan,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -3550,9 +3798,14 @@ class _ManagerQuickCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: Text(
-                  (model.headerMessage == '놓친 약속이 떴어요' || model.headerMessage == 'Missed promise appeared')
-                      ? l10n.nowPartnerMissedPokeBody(partnerName ?? l10n.nowPartnerFallback2)
-                      : l10n.nowPartnerQuietPokeBody(partnerName ?? l10n.nowPartnerFallback2),
+                  (model.headerMessage == '놓친 약속이 떴어요' ||
+                          model.headerMessage == 'Missed promise appeared')
+                      ? l10n.nowPartnerMissedPokeBody(
+                          partnerName ?? l10n.nowPartnerFallback2,
+                        )
+                      : l10n.nowPartnerQuietPokeBody(
+                          partnerName ?? l10n.nowPartnerFallback2,
+                        ),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 16,
@@ -3578,7 +3831,10 @@ class _ManagerQuickCard extends StatelessWidget {
                   ),
                   child: Text(
                     l10n.nowKnockPull,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -3779,7 +4035,9 @@ class _ManagerQuickCard extends StatelessWidget {
               context,
               l10n: l10n,
               text: note,
-              date: model.plan != null ? _lastActionNoteDate(model.plan!) : null,
+              date: model.plan != null
+                  ? _lastActionNoteDate(model.plan!)
+                  : null,
               background: AppColors.background.withValues(alpha: 0.5),
               noteColor: AppColors.textPrimary,
               noteItalic: true,
@@ -3811,7 +4069,10 @@ class _ManagerQuickCard extends StatelessWidget {
         children: [
           if (promise.reward != null) ...[
             Text(
-              l10n.nowRewardLine(promise.reward!.targetDays, promise.reward!.description),
+              l10n.nowRewardLine(
+                promise.reward!.targetDays,
+                promise.reward!.description,
+              ),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
@@ -3821,7 +4082,10 @@ class _ManagerQuickCard extends StatelessWidget {
             const SizedBox(height: 4),
           if (promise.penalty != null) ...[
             Text(
-              l10n.nowPenaltyLine(promise.penalty!.targetDays, promise.penalty!.description),
+              l10n.nowPenaltyLine(
+                promise.penalty!.targetDays,
+                promise.penalty!.description,
+              ),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
@@ -3830,7 +4094,10 @@ class _ManagerQuickCard extends StatelessWidget {
           if (isSettled && promise.settledSuccessDays != null) ...[
             const SizedBox(height: 8),
             Text(
-              l10n.nowResultLine(promise.settledSuccessDays!, promise.settledFailDays ?? 0),
+              l10n.nowResultLine(
+                promise.settledSuccessDays!,
+                promise.settledFailDays ?? 0,
+              ),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
@@ -4091,10 +4358,10 @@ Widget _buildDatedNoteBubble(
         ReactionText(
           text,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: noteColor,
-                fontWeight: noteWeight,
-                fontStyle: noteItalic ? FontStyle.italic : FontStyle.normal,
-              ),
+            color: noteColor,
+            fontWeight: noteWeight,
+            fontStyle: noteItalic ? FontStyle.italic : FontStyle.normal,
+          ),
         ),
       ],
     ),
@@ -4118,10 +4385,12 @@ String _particleEulReul(String text, [String locale = 'ko']) {
 class _PrimaryCarouselIndicator extends StatelessWidget {
   final int count;
   final int activeIndex;
+  final ValueChanged<int>? onTap;
 
   const _PrimaryCarouselIndicator({
     required this.count,
     required this.activeIndex,
+    this.onTap,
   });
 
   @override
@@ -4130,16 +4399,21 @@ class _PrimaryCarouselIndicator extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         for (int i = 0; i < count; i++)
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            width: i == activeIndex ? 18 : 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: i == activeIndex
-                  ? AppColors.primary
-                  : AppColors.textDisabled.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(3),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap == null ? null : () => onTap!(i),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              // Tap target stays comfortable while the dot itself is small.
+              margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
+              width: i == activeIndex ? 18 : 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: i == activeIndex
+                    ? AppColors.primary
+                    : AppColors.textDisabled.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(3),
+              ),
             ),
           ),
       ],

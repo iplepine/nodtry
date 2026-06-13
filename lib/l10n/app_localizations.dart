@@ -680,6 +680,60 @@ abstract class AppLocalizations {
   /// **'Let\'s skip today'**
   String get nowActionSkipToday;
 
+  /// No description provided for @nowDeferMenuTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside'**
+  String get nowDeferMenuTooltip;
+
+  /// No description provided for @nowDeferLaterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll do it later'**
+  String get nowDeferLaterTitle;
+
+  /// No description provided for @nowDeferLaterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See your next to-do now; we\'ll nudge you again later'**
+  String get nowDeferLaterSubtitle;
+
+  /// No description provided for @nowSkipTodayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not today'**
+  String get nowSkipTodayTitle;
+
+  /// No description provided for @nowSkipTodaySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this promise for today'**
+  String get nowSkipTodaySubtitle;
+
+  /// No description provided for @nowSkipTodayDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped for today'**
+  String get nowSkipTodayDone;
+
+  /// No description provided for @nowDeferLaterDone.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll nudge you again a bit later'**
+  String get nowDeferLaterDone;
+
+  /// No description provided for @nowDeferReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s your nudge'**
+  String get nowDeferReminderTitle;
+
+  /// No description provided for @nowDeferReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You set a promise aside for later'**
+  String get nowDeferReminderBody;
+
   /// Button to add more plans in TodayComplete/TodayEmpty state
   ///
   /// In en, this message translates to:
@@ -2360,6 +2414,24 @@ abstract class AppLocalizations {
   /// **'An hour before bed, switch off overhead lights and use indirect lamps — that\'s when melatonin starts to rise, speeding sleep onset. Keep the bedroom at 18–20°C; your body needs a slight temperature drop for deep sleep and REM. A hot shower right before bed actually delays sleep, so finish 1–2 hours earlier'**
   String get planTemplateSleepEnvDescription;
 
+  /// No description provided for @planTemplateStrength2xLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength 2×/week'**
+  String get planTemplateStrength2xLabel;
+
+  /// No description provided for @planTemplateStrength2xAction.
+  ///
+  /// In en, this message translates to:
+  /// **'One full-body strength session'**
+  String get planTemplateStrength2xAction;
+
+  /// No description provided for @planTemplateStrength2xDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength training just twice a week is the \'minimum effective dose\' for preserving muscle, strength, and bone density — the bar set by the WHO and US physical-activity guidelines. It protects the muscle you naturally lose with age and supports metabolism, blood-sugar control, posture, and fall prevention. Favor compound moves — squat, hinge (deadlift), push, pull — for 3–4 sets of 6–10 reps, nudging the weight or reps up each week (progressive overload). The same muscles need 48+ hours to recover, so space the two sessions 2–3 days apart and back them with protein and sleep'**
+  String get planTemplateStrength2xDescription;
+
   /// No description provided for @planDayPresetThreeDaysLabel.
   ///
   /// In en, this message translates to:
@@ -3689,7 +3761,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowExitDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'Stop here for this 4-week round?'**
+  /// **'Wrap up this 4-week round here?'**
   String get nowExitDialogTitle;
 
   /// No description provided for @nowExitReasonWeakPoke.
@@ -3719,7 +3791,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowExitReasonCustomHint.
   ///
   /// In en, this message translates to:
-  /// **'Briefly say why you\'re stopping'**
+  /// **'Optionally, a brief note on wrapping up'**
   String get nowExitReasonCustomHint;
 
   /// No description provided for @nowExitReasonNoCustom.
@@ -4223,14 +4295,20 @@ abstract class AppLocalizations {
   /// No description provided for @nowSettlementWinMessage.
   ///
   /// In en, this message translates to:
-  /// **'You passed the meaningful 12-day mark. Time to decide on the next 4 weeks.'**
+  /// **'You hit the goal you set together. Nicely done! Time to decide whether to keep going for another 4 weeks.'**
   String get nowSettlementWinMessage;
 
   /// No description provided for @nowSettlementLoseMessage.
   ///
   /// In en, this message translates to:
-  /// **'More important than finishing is noting where you stopped. Leave a reason to make the next attempt easier.'**
+  /// **'You didn\'t quite reach the goal this time, but the 4 weeks you shared still count. Decide what to adjust for the next 4 weeks.'**
   String get nowSettlementLoseMessage;
+
+  /// No description provided for @nowSettlementNeutralMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You made it through the whole 4 weeks together. Time to decide whether to continue for another round.'**
+  String get nowSettlementNeutralMessage;
 
   /// No description provided for @nowRewardCondition.
   ///
@@ -4289,7 +4367,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowStopHere.
   ///
   /// In en, this message translates to:
-  /// **'Stop this 4-week round here'**
+  /// **'Wrap up this 4-week round here'**
   String get nowStopHere;
 
   /// No description provided for @nowModify.
