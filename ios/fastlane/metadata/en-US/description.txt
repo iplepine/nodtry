@@ -1,25 +1,32 @@
-Nodtry is a mutual accountability app for keeping small promises and routines with a partner.
+Struggling to keep a study habit, exam prep, or language routine alive on your own? Nodtry is a study challenge app where you check in on small daily promises with a partner.
 
-Personal to-do and routine apps are easy to ignore. Nodtry connects your promise to a real relationship, so today's action, partner confirmations, encouragement, knock-knock reminders, and rewards or penalties stay in one clear loop.
+Whether it's TOEIC, TOEFL, coding practice, or reading, daily learning routines stick longer when a partner sees them. Nodtry connects today's action, partner confirmations, encouragement, knock-knock reminders, and rewards or penalties into one clear loop.
+
+Great for
+
+- Learners preparing for TOEIC, TOEFL, or other exams a little each day
+- Anyone who wants to keep an English, reading, or coding routine for 4+ weeks
+- People whose solo study planner keeps fizzling out
+- Study buddies and friends who want to motivate each other through check-ins
 
 Key features
 
 - 1:1 partner connection
-Connect with someone close through an invite code and keep each other aware of progress.
+Connect with a study buddy, friend, or family member through an invite code and keep each other aware of progress.
 
 - Repeatable promises and routines
-Set small actions for workouts, daily care, recovery, chores, or custom routines with days, counts, and reminder times.
+Set small actions for study, workouts, daily care, recovery, or chores with days, counts, and reminder times.
 
 - Now tab
-Handle today's action, delayed actions, completed actions, and partner status from one focused screen.
+Handle today's study task, delayed actions, completed actions, and partner status from one focused screen.
 
 - Knock-knock reminders
-Send a knock-knock when your partner is quiet or a promise has stopped moving. Missed actions can be pulled back into view instead of disappearing silently.
+Send a knock-knock when your partner is quiet or a promise has stopped moving. Missed actions are pulled back into view instead of disappearing silently.
 
 - Check and cheer
-When your partner reports an action, confirm it and send a short cheer message or reaction.
+When your partner reports a study check-in, confirm it and send a short cheer message or reaction.
 
 - Rewards and penalties
-Agree on a reward for success and a penalty for missed commitments, so motivation is clear before the week gets busy.
+Agree on a reward for success and a penalty for missed commitments, so motivation stays sharp before the week gets busy.
 
-Nodtry is not another to-do list. It is built to keep postponed promises alive inside a real relationship.
+Nodtry is not another to-do list. It is built to keep postponed study promises alive inside a real relationship with a partner.

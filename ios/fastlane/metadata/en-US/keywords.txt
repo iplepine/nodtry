@@ -1,1 +1,1 @@
-couple,boyfriend,girlfriend,friends,family,habit,goal,accountability,challenge,streak,motivation
+study,exam,toefl,toeic,language,routine,plan,habit,coding,reading,motivation,challenge,streak,goal
