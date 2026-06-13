@@ -2,6 +2,7 @@
 *.class
 *.p8
 ios/fastlane/api_key.json
+android/fastlane/json_key.json
 ios/fastlane/report.xml
 *.log
 *.pyc
