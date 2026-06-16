@@ -123,6 +123,25 @@ class RealRecordRepository implements RecordRepository {
     });
   }
 
+  /// 예정시각이 이 분(minute) 이내로 다가온 항목만 "지금 실천(nowAction)"으로 띄운다.
+  /// 그보다 먼 항목은 nextAction(이따)으로 분류해 불필요한 즉시 압박을 줄인다.
+  /// 0으로 두면 "예정시각 정각 이후에만 nowAction"이 된다.
+  static const int nowActionLeadWindowMinutes = 60;
+
+  /// 오늘 남은(미처리) 항목이 지금(nowAction) 카드로 떠야 하는지 판단한다.
+  /// - [hasTime]가 false(시간 미지정)면 항상 false → 오늘 아무 때나(저압력).
+  /// - 시간이 있으면 예정시각이 now + lead window 이내일 때만 true(곧/지금).
+  @visibleForTesting
+  static bool isDueNowItem({
+    required bool hasTime,
+    required int timeInMin,
+    required int nowInMinutes,
+    int leadWindowMinutes = nowActionLeadWindowMinutes,
+  }) {
+    if (!hasTime) return false;
+    return timeInMin <= nowInMinutes + leadWindowMinutes;
+  }
+
   /// Extracted logic for processing plans into cards
   List<HomeCardModel> _processPlans(
     List<Plan> plans,
@@ -248,7 +267,8 @@ class RealRecordRepository implements RecordRepository {
 
     // --- Part 2: My Actions (Executor Role) -> Mine ---
     final myPlans = plans.where((p) => p.userId == myUid);
-    final List<({Plan plan, PlanItem item, int timeInMin})> allTodayItems = [];
+    final List<({Plan plan, PlanItem item, int timeInMin, bool hasTime})>
+    allTodayItems = [];
     bool hasAnyPlanToday = false;
 
     for (var plan in myPlans) {
@@ -358,11 +378,18 @@ class RealRecordRepository implements RecordRepository {
 
       for (var item in todayItems) {
         final time = item.notificationTime;
-        final timeInMin = time != null
+        // type 'none'(알림 시간 미지정)은 "오늘 아무 때나"로 본다.
+        final hasTime = time != null && time.type != 'none';
+        final timeInMin = hasTime
             ? (time.hour * 60 + time.minute)
             : (23 * 60 + 59);
 
-        allTodayItems.add((plan: plan, item: item, timeInMin: timeInMin));
+        allTodayItems.add((
+          plan: plan,
+          item: item,
+          timeInMin: timeInMin,
+          hasTime: hasTime,
+        ));
       }
     }
 
@@ -377,17 +404,34 @@ class RealRecordRepository implements RecordRepository {
           .where((i) => i.timeInMin < nowInMinutes)
           .toList();
 
-      // Primary 캐러셀: 오늘 남은 모든 upcoming 항목 (시간 오름차순)
-      // 첫번째가 selectPrimaryExecutorCard 우선순위로 primary가 된다.
+      // 오늘 남은 항목을 시각 기준으로 둘로 나눈다.
+      // - 예정시각이 곧(now + lead window 이내)이거나 시간 미지정이 아닌 것 → nowAction(지금 실천)
+      // - 그보다 먼 항목 / 시간 미지정 항목 → nextAction(이따·아무 때나)
+      // 아직 시간이 한참 남은 항목까지 "지금 실천"으로 띄워 "당장 해야 할 것 같은"
+      // 압박을 주던 문제를 줄이기 위함이다.
       for (var upcoming in upcomingItems) {
-        final streak = upcoming.plan.currentStreak;
-        mineCards.add(
-          HomeCardModel(
-            state: HomeCardState.nowAction,
-            plan: _createSingleItemPlan(upcoming.plan, upcoming.item),
-            streakCount: streak >= 2 ? streak : null,
-          ),
+        final isDue = isDueNowItem(
+          hasTime: upcoming.hasTime,
+          timeInMin: upcoming.timeInMin,
+          nowInMinutes: nowInMinutes,
         );
+        if (isDue) {
+          final streak = upcoming.plan.currentStreak;
+          mineCards.add(
+            HomeCardModel(
+              state: HomeCardState.nowAction,
+              plan: _createSingleItemPlan(upcoming.plan, upcoming.item),
+              streakCount: streak >= 2 ? streak : null,
+            ),
+          );
+        } else {
+          mineCards.add(
+            HomeCardModel(
+              state: HomeCardState.nextAction,
+              plan: _createSingleItemPlan(upcoming.plan, upcoming.item),
+            ),
+          );
+        }
       }
 
       // 지난 항목 (overdue): 최신순(가장 최근에 지난 것부터)으로 전체 노출.

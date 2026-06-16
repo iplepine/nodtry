@@ -1005,6 +1005,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get comfortingJustDoIt => 'Just do it today';
 
   @override
+  String get nowDoEarly => 'Do it now';
+
+  @override
+  String get nowDoAnytime => 'Do it today';
+
+  @override
+  String get timeChipAnytime => 'Anytime today';
+
+  @override
+  String get nowNextActionLater =>
+      'Not time yet — you can do this later today.';
+
+  @override
+  String get nowNextActionAnytime => 'Do this anytime today.';
+
+  @override
   String get settingsNotifications => 'Notifications';
 
   @override

@@ -988,6 +988,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get comfortingJustDoIt => '오늘 안에만 하면 돼요';
 
   @override
+  String get nowDoEarly => '미리 할게';
+
+  @override
+  String get nowDoAnytime => '오늘 할게';
+
+  @override
+  String get timeChipAnytime => '오늘 아무 때나';
+
+  @override
+  String get nowNextActionLater => '아직 시간 전이에요. 이따 해도 괜찮아요.';
+
+  @override
+  String get nowNextActionAnytime => '오늘 중 아무 때나 하면 돼요.';
+
+  @override
   String get settingsNotifications => '알림 설정';
 
   @override

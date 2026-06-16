@@ -53,8 +53,8 @@ abstract class NowTabState with _$NowTabState {
       primary,
     );
 
-    // 4. Primary 캐러셀 구성: primary 가 nowAction/overdue 면 같은 슬롯에서
-    //    좌우 스와이프로 오늘의 다른 실천(다가올 + 지난)을 순회할 수 있게 한다.
+    // 4. Primary 캐러셀 구성: primary 가 nowAction/overdue/nextAction 이면 같은
+    //    슬롯에서 좌우 스와이프로 오늘의 다른 실천(지금 + 이따 + 지난)을 순회한다.
     final carousel = _buildPrimaryCarousel(processedModels, primary);
 
     // 5. Manager Cards 선정 (다수 가능)
@@ -76,20 +76,28 @@ abstract class NowTabState with _$NowTabState {
   ) {
     if (primary == null) return const [];
     if (primary.state != HomeCardState.nowAction &&
-        primary.state != HomeCardState.overdue) {
+        primary.state != HomeCardState.overdue &&
+        primary.state != HomeCardState.nextAction) {
       return [primary];
     }
 
-    final upcoming = models
+    final due = models
         .where((m) => m.state == HomeCardState.nowAction)
+        .toList();
+    final later = models
+        .where((m) => m.state == HomeCardState.nextAction)
         .toList();
     final overdue = models
         .where((m) => m.state == HomeCardState.overdue)
         .toList();
 
-    // primary 부터 노출 후 같은 슬롯에서 우측 스와이프로 나머지 다가올 항목 → 지난 항목 순.
+    // primary 부터 노출 후 같은 슬롯에서 우측 스와이프로
+    // 지금(due) → 이따(later) → 지난(overdue) 순으로 오늘 타임라인을 훑는다.
     final ordered = <HomeCardModel>[primary];
-    for (final m in upcoming) {
+    for (final m in due) {
+      if (!identical(m, primary)) ordered.add(m);
+    }
+    for (final m in later) {
       if (!identical(m, primary)) ordered.add(m);
     }
     for (final m in overdue) {

@@ -1958,6 +1958,36 @@ abstract class AppLocalizations {
   /// **'Just do it today'**
   String get comfortingJustDoIt;
 
+  /// No description provided for @nowDoEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Do it now'**
+  String get nowDoEarly;
+
+  /// No description provided for @nowDoAnytime.
+  ///
+  /// In en, this message translates to:
+  /// **'Do it today'**
+  String get nowDoAnytime;
+
+  /// No description provided for @timeChipAnytime.
+  ///
+  /// In en, this message translates to:
+  /// **'Anytime today'**
+  String get timeChipAnytime;
+
+  /// No description provided for @nowNextActionLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not time yet — you can do this later today.'**
+  String get nowNextActionLater;
+
+  /// No description provided for @nowNextActionAnytime.
+  ///
+  /// In en, this message translates to:
+  /// **'Do this anytime today.'**
+  String get nowNextActionAnytime;
+
   /// No description provided for @settingsNotifications.
   ///
   /// In en, this message translates to:

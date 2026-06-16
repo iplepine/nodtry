@@ -126,6 +126,8 @@ extension HomeCardStatePriority on HomeCardState {
         return 1; // 1순위: 지금 실천
       case HomeCardState.overdue:
         return 2; // 2순위: 지남 (NowAction 없을 때)
+      case HomeCardState.nextAction:
+        return 3; // 3순위: 다음 예정/아무 때나 (지금 due 항목이 없을 때만 primary)
       case HomeCardState.todayComplete:
       case HomeCardState.todayEmpty:
         return 4; // 4순위: 오늘 완료/없음 (이전 3)
@@ -194,8 +196,9 @@ extension HomeCardStatePriority on HomeCardState {
         allowedSecondaryStates = [HomeCardState.overdue];
         break;
       case HomeCardState.overdue:
-        // Case 2: Overdue + NextAction
-        allowedSecondaryStates = [HomeCardState.nextAction];
+        // 이따(nextAction) 항목은 이제 primary 캐러셀에서 스와이프로 노출되므로
+        // secondary로 중복 노출하지 않는다.
+        allowedSecondaryStates = [];
         break;
       case HomeCardState.todayComplete:
       case HomeCardState.todayEmpty:

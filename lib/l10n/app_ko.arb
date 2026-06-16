@@ -468,6 +468,11 @@
   "comfortingFuture": "오늘 하루도 수고했어요",
   "comfortingLate": "늦어도 괜찮아요",
   "comfortingJustDoIt": "오늘 안에만 하면 돼요",
+  "nowDoEarly": "미리 할게",
+  "nowDoAnytime": "오늘 할게",
+  "timeChipAnytime": "오늘 아무 때나",
+  "nowNextActionLater": "아직 시간 전이에요. 이따 해도 괜찮아요.",
+  "nowNextActionAnytime": "오늘 중 아무 때나 하면 돼요.",
   "headerWithPartner": "{name}님과 함께",
   "@headerWithPartner": {
     "placeholders": {

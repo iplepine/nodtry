@@ -56,6 +56,10 @@ class _NowTabState extends ConsumerState<NowTab>
   int _primaryActiveIndex = 0;
   String? _carouselSignature;
 
+  /// true면 "아래에서 위로 솟는" 입장 애니메이션(첫 로드/새로고침용),
+  /// false면 캐러셀 카드 이동용 페이드만. 카드 전환 시 새로고침처럼 보이지 않게 한다.
+  bool _animateCarouselEntrance = true;
+
   @override
   void initState() {
     super.initState();
@@ -111,21 +115,35 @@ class _NowTabState extends ConsumerState<NowTab>
     super.dispose();
   }
 
-  // 데이터 변경 감지 시 애니메이션 처리
+  // 데이터 변경 감지 시 애니메이션 처리 (첫 로드/새로고침: 위로 솟는 입장 연출)
   void _onDataLoaded() {
     if (mounted) {
+      _animateCarouselEntrance = true;
       _animationController.forward(from: 0.0);
     }
   }
 
   /// 점 인디케이터를 탭하면 해당 카드로 바로 이동한다.
+  /// 카드 간 이동은 새로고침처럼 보이지 않게 페이드만 준다.
   void _goToCarouselIndex(int index, int count) {
     final next = index.clamp(0, count - 1);
     if (next == _primaryActiveIndex) return;
     setState(() {
       _primaryActiveIndex = next;
+      _animateCarouselEntrance = false;
     });
     _animationController.forward(from: 0.0);
+  }
+
+  /// 카드를 좌우로 스와이프하면 캐러셀을 이전/다음 카드로 넘긴다.
+  /// (왼쪽으로 밀기 = 다음 카드, 오른쪽으로 밀기 = 이전 카드)
+  void _handleCarouselSwipe(DragEndDetails details, int count) {
+    if (count <= 1) return;
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity.abs() < 200) return; // 미세한 드래그는 무시
+    final delta = velocity < 0 ? 1 : -1;
+    final next = (_primaryActiveIndex + delta).clamp(0, count - 1);
+    _goToCarouselIndex(next, count);
   }
 
   /// 현재 캐러셀에서 스와이프로 선택된 카드. 비어있으면 기존 primaryCard 폴백.
@@ -1075,6 +1093,7 @@ class _NowTabState extends ConsumerState<NowTab>
       if (next != _primaryActiveIndex) {
         setState(() {
           _primaryActiveIndex = next;
+          _animateCarouselEntrance = false;
         });
         _animationController.forward(from: 0.0);
       }
@@ -1328,6 +1347,10 @@ class _NowTabState extends ConsumerState<NowTab>
           return displayText;
         }
       }
+    }
+    // 시간 미지정 nextAction은 "오늘 아무 때나"로 안내(시간 압박 없음).
+    if (model.state == HomeCardState.nextAction) {
+      return AppLocalizations.of(context)!.timeChipAnytime;
     }
     return null;
   }
@@ -1596,14 +1619,20 @@ class _NowTabState extends ConsumerState<NowTab>
                           FadeTransition(
                             opacity: _primaryFadeAnimation,
                             child: ScaleTransition(
-                              scale: _primaryScaleAnimation,
+                              // 카드 간 이동 시에는 스케일/슬라이드 없이 페이드만 줘서
+                              // 새로고침처럼 "솟아오르는" 느낌을 없앤다.
+                              scale: _animateCarouselEntrance
+                                  ? _primaryScaleAnimation
+                                  : const AlwaysStoppedAnimation<double>(1.0),
                               child: SlideTransition(
                                 position:
                                     Tween<Offset>(
-                                      begin: const Offset(
-                                        0,
-                                        0.15,
-                                      ), // 시작/사라질 때 더 아래로
+                                      begin: _animateCarouselEntrance
+                                          ? const Offset(
+                                              0,
+                                              0.15,
+                                            ) // 첫 로드/새로고침: 아래에서 위로
+                                          : Offset.zero, // 카드 이동: 제자리
                                       end: Offset.zero, // 정상 위치
                                     ).animate(
                                       CurvedAnimation(
@@ -1657,6 +1686,13 @@ class _NowTabState extends ConsumerState<NowTab>
                                           ),
                                       onTap: () =>
                                           _handleCardTap(primaryExecutorCard),
+                                      onHorizontalSwipe:
+                                          carouselCards.length > 1
+                                          ? (details) => _handleCarouselSwipe(
+                                              details,
+                                              carouselCards.length,
+                                            )
+                                          : null,
                                       timeChipText: _getTimeChipText(
                                         primaryExecutorCard,
                                       ),
@@ -2157,6 +2193,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
   final VoidCallback? onAcknowledgePromiseSettled;
   // 우측 상단 '넘기기' 아이콘 — 잠시 후에 할지 / 오늘은 안 할지 고르는 시트를 연다.
   final VoidCallback? onDismissOptions;
+  // 카드를 좌우로 스와이프하면 호출 — 캐러셀 이전/다음 카드로 이동.
+  final void Function(DragEndDetails details)? onHorizontalSwipe;
   final String? timeChipText;
   final TimeChipType? timeChipType;
   final String? recordGazeText;
@@ -2178,6 +2216,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     this.onAcknowledgePromiseSettled,
     this.onDismissOptions,
     this.onTap,
+    this.onHorizontalSwipe,
     this.timeChipText,
     this.timeChipType,
     this.recordGazeText,
@@ -2190,6 +2229,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
+      onHorizontalDragEnd: onHorizontalSwipe,
       child: Card(
         elevation: 1,
         margin: EdgeInsets.zero,
@@ -2468,8 +2508,12 @@ class _PrimaryExecutorCard extends StatelessWidget {
         case HomeCardState.rejected: // Type 1-7: 반려됨
           statusMessage = l10n.nowHeaderAdjustNeeded;
           break;
-        case HomeCardState.nextAction: // Type 1-3: 다음 일정
-          // Next Action usually uses headerMessage or defaults to nothing special
+        case HomeCardState.nextAction: // Type 1-3: 다음 일정 (이따·아무 때나)
+          final nt = model.plan?.items.firstOrNull?.notificationTime;
+          final hasTime = nt != null && nt.type != 'none';
+          statusMessage = hasTime
+              ? l10n.nowNextActionLater
+              : l10n.nowNextActionAnytime;
           break;
         case HomeCardState.poked:
           // 똑똑 배지에서 안내하므로 별도 statusMessage 없음
@@ -2910,6 +2954,38 @@ class _PrimaryExecutorCard extends StatelessWidget {
     );
   }
 
+  /// nextAction(이따·아무 때나) 카드용 약한 액션 버튼.
+  /// 채워진 "했어" 버튼 대신 외곽선 버튼을 써서 "지금 당장"이 아님을 시각적으로 전달한다.
+  Widget _buildNextActionButton(BuildContext context, AppLocalizations l10n) {
+    final nt = model.plan?.items.firstOrNull?.notificationTime;
+    final hasTime = nt != null && nt.type != 'none';
+    final label = hasTime ? l10n.nowDoEarly : l10n.nowDoAnytime;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: onDidIt,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: BorderSide(color: AppColors.primary, width: 1.2),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildButton(BuildContext context, AppLocalizations l10n) {
     final buttonTextColor = Colors.white;
     VoidCallback? onPressed;
@@ -3002,6 +3078,9 @@ class _PrimaryExecutorCard extends StatelessWidget {
           ),
         ),
       );
+    } else if (model.state == HomeCardState.nextAction) {
+      // 아직 시간이 안 된 항목: 압박 없이 "미리 할 수 있다"는 약한 액션만 제공.
+      return _buildNextActionButton(context, l10n);
     } else {
       return const SizedBox.shrink();
     }
