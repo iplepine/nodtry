@@ -1,0 +1,2 @@
+- Now cards no longer feel like "do it right now" when a task isn't due yet. To-dos scheduled for later today (or with no set time) show calmly as "later / anytime today."
+- Swipe through today's cards in order — now, later, then past — with a smoother transition (no more refresh-style pop).
