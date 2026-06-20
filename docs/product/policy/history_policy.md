@@ -1,10 +1,10 @@
 <!-- COMMIT_STATUS START -->
 > **커밋 상태**
-> - 기준 커밋: `d591e92e08aca84dcec3c09187fb4ab615b1419d` (`main`)
-> - 최근 커밋: `d591e92e08ac` chore: bump version to 1.0.53+75 (now-tab timing & carousel swipe)
-> - 커밋 일시: `2026-06-16T10:09:48+09:00`
-> - 워킹트리: `dirty (64 files)`
-> - 문서 갱신: `2026-06-20 22:33:15 +0900`
+> - 기준 커밋: `1277a2680ab04f613f222378000af41a3979ca6a` (`main`)
+> - 최근 커밋: `1277a2680ab0` docs: refresh project documentation status
+> - 커밋 일시: `2026-06-20T22:38:59+09:00`
+> - 워킹트리: `dirty (20 files)`
+> - 문서 갱신: `2026-06-20 22:39:28 +0900`
 <!-- COMMIT_STATUS END -->
 
 # 히스토리(History) 정책
