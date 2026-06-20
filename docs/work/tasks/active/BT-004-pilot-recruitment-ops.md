@@ -1,3 +1,12 @@
+<!-- COMMIT_STATUS START -->
+> **커밋 상태**
+> - 기준 커밋: `d591e92e08aca84dcec3c09187fb4ab615b1419d` (`main`)
+> - 최근 커밋: `d591e92e08ac` chore: bump version to 1.0.53+75 (now-tab timing & carousel swipe)
+> - 커밋 일시: `2026-06-16T10:09:48+09:00`
+> - 워킹트리: `dirty (64 files)`
+> - 문서 갱신: `2026-06-20 22:33:15 +0900`
+<!-- COMMIT_STATUS END -->
+
 # Task
 
 ID: `BT-004-pilot-recruitment-ops`
@@ -10,7 +19,7 @@ ID: `BT-004-pilot-recruitment-ops`
 
 연결 Goal: `G-001-study-sprint-pilot`
 
-마지막 갱신일: 2026-05-11
+마지막 갱신일: 2026-06-20
 
 ## 목표
 
@@ -18,7 +27,7 @@ ID: `BT-004-pilot-recruitment-ops`
 
 ## 배경
 
-제품 thin slice는 카테고리 기반 플랜 생성, 파트너 똑똑 압박, 놓친 약속 자동 전달, 4주 정산 카드까지 준비됐다. Android production `1.0.33+52`와 iOS TestFlight `1.0.30+49`까지 배포됐다. 다음 병목은 제품 기능이 아니라 모집과 운영 증거 수집이다.
+제품 thin slice는 카테고리 기반 플랜 생성, 파트너 똑똑 압박, 놓친 약속 자동 전달, 4주 정산 카드까지 준비됐다. 최근 문서화된 외부 배포는 `1.0.52+74` Android production + iOS App Store review 제출이고, 현재 코드 HEAD는 `1.0.53+75`다. 다음 병목은 제품 기능이 아니라 모집, 운영 증거 수집, 파일럿에 쓸 설치 버전 확정이다.
 
 ## 포함
 
@@ -54,6 +63,6 @@ ID: `BT-004-pilot-recruitment-ops`
 
 ## 준비 완료 항목
 
-- Android production: `1.0.33+52`
-- iOS TestFlight: `1.0.30+49`
+- 최근 외부 배포 기록: `1.0.52+74` Android production + iOS App Store review 제출
+- 현재 코드 버전: `1.0.53+75` (파일럿 적용 전 smoke/release 판단 필요)
 - Cloud Functions: Node.js 22, `notifyMissedActions`, `onPlanUpdated`, `onCheerCreated` 배포 완료

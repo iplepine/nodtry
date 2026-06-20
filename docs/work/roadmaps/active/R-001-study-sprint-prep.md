@@ -1,3 +1,12 @@
+<!-- COMMIT_STATUS START -->
+> **커밋 상태**
+> - 기준 커밋: `d591e92e08aca84dcec3c09187fb4ab615b1419d` (`main`)
+> - 최근 커밋: `d591e92e08ac` chore: bump version to 1.0.53+75 (now-tab timing & carousel swipe)
+> - 커밋 일시: `2026-06-16T10:09:48+09:00`
+> - 워킹트리: `dirty (64 files)`
+> - 문서 갱신: `2026-06-20 22:33:15 +0900`
+<!-- COMMIT_STATUS END -->
+
 # Roadmap
 
 ID: `R-001-study-sprint-prep`
@@ -6,7 +15,7 @@ ID: `R-001-study-sprint-prep`
 
 연결 Goal: `G-001-study-sprint-pilot`
 
-마지막 갱신일: 2026-05-11
+마지막 갱신일: 2026-06-20
 
 ## 목적
 
@@ -16,13 +25,13 @@ ID: `R-001-study-sprint-prep`
 
 시작: 2026-05-03
 
-목표 종료: 2026-05-13
+목표 종료: 2026-06-27
 
 ## 진행률
 
 진행률: 95%
 
-근거: thin slice 대조, 스터디 템플릿/기본값, 파트너 압박 가시성, 4주 정산 카드, 똑똑/놓친 약속 푸시 안정화, Cloud Functions 배포, Android production `1.0.33+52` 배포, iOS TestFlight 업로드가 완료됐다. 파일럿 시작 전 모집 운영 준비와 수동 집계 위치 확정이 남아 있다.
+근거: thin slice 대조, 스터디 템플릿/기본값, 파트너 압박 가시성, 4주 정산 카드, 똑똑/놓친 약속 푸시 안정화, Cloud Functions 배포, 최근 외부 배포(`1.0.52+74`)까지 완료됐다. 현재 코드 HEAD는 `1.0.53+75`이며, 파일럿 시작 전 모집 운영 준비, 수동 집계 위치 확정, 파일럿 배포 대상 버전 판단이 남아 있다.
 
 ## Milestones
 
@@ -64,7 +73,7 @@ ID: `R-001-study-sprint-prep`
 
 테스트: 파트너 연결, 플랜 생성, 확인/응원, 똑똑 카드 제거, 정산 관련 테스트
 
-빌드/QA: Android internal/production, iOS TestFlight, Cloud Functions 배포 검증
+빌드/QA: Android internal/production, iOS TestFlight/App Store review, Cloud Functions 배포 검증, `1.0.53+75` 파일럿 적용 여부 판단
 
 사용자/시장 검증: 성인 학습자 10쌍 파일럿
 

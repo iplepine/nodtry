@@ -1,3 +1,12 @@
+<!-- COMMIT_STATUS START -->
+> **커밋 상태**
+> - 기준 커밋: `d591e92e08aca84dcec3c09187fb4ab615b1419d` (`main`)
+> - 최근 커밋: `d591e92e08ac` chore: bump version to 1.0.53+75 (now-tab timing & carousel swipe)
+> - 커밋 일시: `2026-06-16T10:09:48+09:00`
+> - 워킹트리: `dirty (64 files)`
+> - 문서 갱신: `2026-06-20 22:33:15 +0900`
+<!-- COMMIT_STATUS END -->
+
 # 의사결정 기록
 
 ## D-001 파트너 관계는 양방향 상호 지지로 둔다

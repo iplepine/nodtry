@@ -1,3 +1,12 @@
+<!-- COMMIT_STATUS START -->
+> **커밋 상태**
+> - 기준 커밋: `d591e92e08aca84dcec3c09187fb4ab615b1419d` (`main`)
+> - 최근 커밋: `d591e92e08ac` chore: bump version to 1.0.53+75 (now-tab timing & carousel swipe)
+> - 커밋 일시: `2026-06-16T10:09:48+09:00`
+> - 워킹트리: `dirty (64 files)`
+> - 문서 갱신: `2026-06-20 22:33:15 +0900`
+<!-- COMMIT_STATUS END -->
+
 # Development Workflow
 
 이 repo의 개발 작업은 project-manager의 공통 워크플로우를 따른다.

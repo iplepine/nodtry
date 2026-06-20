@@ -1,6 +1,15 @@
+<!-- COMMIT_STATUS START -->
+> **커밋 상태**
+> - 기준 커밋: `d591e92e08aca84dcec3c09187fb4ab615b1419d` (`main`)
+> - 최근 커밋: `d591e92e08ac` chore: bump version to 1.0.53+75 (now-tab timing & carousel swipe)
+> - 커밋 일시: `2026-06-16T10:09:48+09:00`
+> - 워킹트리: `dirty (64 files)`
+> - 문서 갱신: `2026-06-20 22:33:15 +0900`
+<!-- COMMIT_STATUS END -->
+
 # 작업 관리
 
-마지막 갱신일: 2026-05-12
+마지막 갱신일: 2026-06-20
 
 ## 현재 집중
 
@@ -16,8 +25,9 @@
 
 최근 완료:
 
+- 현재 코드 기준: `1.0.53+75` (Now 탭 타이밍/캐러셀 스와이프 버전 bump, HEAD `d591e92`).
+- 최근 문서화된 외부 배포: `1.0.52+74` Android production + iOS App Store review 제출 완료. `1.0.53+75`는 파일럿 운영 전 smoke/release 판단이 필요하다.
 - `BT-007-notification-production-hardening`: 똑똑/놓친 약속 푸시 안정화, Now 탭 똑똑 카드 정리, Cloud Functions Node 22 전환, Android production 배포.
-- Android production 최신 배포: `1.0.33+52` (상/벌 제안 현재 상태 기반 상한, 약속 기간/남은 예정일 표시, 파트너 완료 확인, 릴리즈 메타데이터 정리).
 
 ## 현재 남은 To-do
 
@@ -26,6 +36,7 @@
 3. `BT-004`: `pilot_joined`, `partner_connected`, `study_plan_created`, `partner_feedback_sent` 수동 집계 위치를 확정한다.
 4. `BT-004`: 1쌍 기준으로 앱 설치, 파트너 연결, 첫 플랜 생성, 똑똑/확인 리허설을 한다.
 5. `BT-005`: 파일럿 시작 후 첫 주 지표 집계와 부담/동기 반응 회수로 넘어간다.
+6. `BT-004`: `1.0.53+75`가 파일럿 배포 대상이면 release readiness와 모집 안내의 설치 버전을 함께 갱신한다.
 
 ## 읽는 순서
 
