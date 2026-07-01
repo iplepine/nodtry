@@ -2822,6 +2822,60 @@ abstract class AppLocalizations {
   /// **'1 hr before'**
   String get notifyEditor1HourBefore;
 
+  /// No description provided for @notifyEditorRepeatModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get notifyEditorRepeatModeLabel;
+
+  /// No description provided for @notifyEditorRepeatDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Once a day'**
+  String get notifyEditorRepeatDaily;
+
+  /// No description provided for @notifyEditorRepeatHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every few hours'**
+  String get notifyEditorRepeatHourly;
+
+  /// No description provided for @notifyEditorIntervalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get notifyEditorIntervalLabel;
+
+  /// No description provided for @notifyEditorIntervalHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count}h'**
+  String notifyEditorIntervalHours(int count);
+
+  /// No description provided for @notifyEditorWindowStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get notifyEditorWindowStart;
+
+  /// No description provided for @notifyEditorWindowEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get notifyEditorWindowEnd;
+
+  /// No description provided for @notifyEditorHourlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll remind you every {interval}h from {start}:00 to {end}:00.'**
+  String notifyEditorHourlyHint(int interval, int start, int end);
+
+  /// No description provided for @planTimeHourlyRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{start}:00–{end}:00 · every {interval}h'**
+  String planTimeHourlyRange(int start, int end, int interval);
+
   /// No description provided for @promiseChipPenaltyTriggered.
   ///
   /// In en, this message translates to:

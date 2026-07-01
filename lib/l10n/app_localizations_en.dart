@@ -1502,6 +1502,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifyEditor1HourBefore => '1 hr before';
 
   @override
+  String get notifyEditorRepeatModeLabel => 'Repeat';
+
+  @override
+  String get notifyEditorRepeatDaily => 'Once a day';
+
+  @override
+  String get notifyEditorRepeatHourly => 'Every few hours';
+
+  @override
+  String get notifyEditorIntervalLabel => 'Interval';
+
+  @override
+  String notifyEditorIntervalHours(int count) {
+    return 'Every ${count}h';
+  }
+
+  @override
+  String get notifyEditorWindowStart => 'Start';
+
+  @override
+  String get notifyEditorWindowEnd => 'End';
+
+  @override
+  String notifyEditorHourlyHint(int interval, int start, int end) {
+    return 'We\'ll remind you every ${interval}h from $start:00 to $end:00.';
+  }
+
+  @override
+  String planTimeHourlyRange(int start, int end, int interval) {
+    return '$start:00–$end:00 · every ${interval}h';
+  }
+
+  @override
   String promiseChipPenaltyTriggered(String description) {
     return 'Penalty locked in — $description';
   }

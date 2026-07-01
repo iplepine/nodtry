@@ -43,6 +43,9 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
   List<int>? scheduledDays;
   int? scheduledHour;
   int? scheduledMinute;
+  int? scheduledIntervalHours;
+  int? scheduledStartHour;
+  int? scheduledEndHour;
 
   @override
   Future<void> cancelPlanReminders(int planId) async {}
@@ -59,10 +62,16 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
     required int minute,
     required List<int> days,
     bool skipToday = false,
+    int intervalHours = 0,
+    int startHour = 0,
+    int endHour = 0,
   }) async {
     scheduledDays = days;
     scheduledHour = hour;
     scheduledMinute = minute;
+    scheduledIntervalHours = intervalHours;
+    scheduledStartHour = startHour;
+    scheduledEndHour = endHour;
   }
 }
 

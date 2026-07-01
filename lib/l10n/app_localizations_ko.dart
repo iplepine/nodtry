@@ -1459,6 +1459,39 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notifyEditor1HourBefore => '1시간 전';
 
   @override
+  String get notifyEditorRepeatModeLabel => '반복 방식';
+
+  @override
+  String get notifyEditorRepeatDaily => '하루 한 번';
+
+  @override
+  String get notifyEditorRepeatHourly => '시간마다';
+
+  @override
+  String get notifyEditorIntervalLabel => '반복 간격';
+
+  @override
+  String notifyEditorIntervalHours(int count) {
+    return '$count시간마다';
+  }
+
+  @override
+  String get notifyEditorWindowStart => '시작 시각';
+
+  @override
+  String get notifyEditorWindowEnd => '종료 시각';
+
+  @override
+  String notifyEditorHourlyHint(int interval, int start, int end) {
+    return '$start시부터 $end시까지 $interval시간마다 알려드려요.';
+  }
+
+  @override
+  String planTimeHourlyRange(int start, int end, int interval) {
+    return '$start시–$end시 · $interval시간마다';
+  }
+
+  @override
   String promiseChipPenaltyTriggered(String description) {
     return '벌칙 발동 확정 — $description';
   }

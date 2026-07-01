@@ -34,6 +34,9 @@ class SettingAlarmUseCase {
       minute: notificationTime.minute,
       days: item.days,
       skipToday: skipToday,
+      intervalHours: notificationTime.intervalHours,
+      startHour: notificationTime.startHour,
+      endHour: notificationTime.endHour,
     );
   }
 

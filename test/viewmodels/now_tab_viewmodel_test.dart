@@ -200,6 +200,9 @@ class FakePlanReminderScheduler implements PlanReminderScheduler {
     required int minute,
     required List<int> days,
     bool skipToday = false,
+    int intervalHours = 0,
+    int startHour = 0,
+    int endHour = 0,
   }) async {}
 }
 
