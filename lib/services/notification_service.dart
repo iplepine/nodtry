@@ -50,6 +50,24 @@ const int _planNotificationWeeksAhead = 4;
 const int _planNotificationSlotsPerPlan = 100; // (day-1)*10 + week
 const int _planNotificationSnoozeOffset = 1500000000;
 const int _planNotificationSnoozeModulo = 200000000;
+
+// Hourly-reminder ID layout
+// -------------------------
+// Weekly reminders occupy [0, ~1e9) (planId<1e7 * 100 + slot<100) and snooze
+// lives at 1.5e9+, so [1e9, 1.5e9) is free for hourly reminders. An hourly
+// plan fans out into many instances, so we schedule a bounded, contiguous
+// block of the next N upcoming fires per plan and refill on every app launch
+// (auto-login re-registers all reminders). N is capped to stay well under the
+// iOS 64-pending-notification ceiling. Block layout:
+//   _hourlyReminderBaseOffset + (planId % _hourlyPlanSlotModulo) * _maxHourlyRemindersPerPlan + index
+// _hourlyPlanSlotModulo * _maxHourlyRemindersPerPlan (= 3e8) keeps every id
+// inside [1e9, 1.3e9).
+const int _hourlyReminderBaseOffset = 1000000000;
+const int _maxHourlyRemindersPerPlan = 48;
+const int _hourlyPlanSlotModulo = 5000000;
+// How far ahead to look for the next hourly fires. The block cap usually bites
+// first; this simply bounds the search for sparse day selections.
+const int _hourlyReminderHorizonDays = 14;
 // Legacy values kept so we can still cancel reminders scheduled by previous
 // versions that used a different id layout.
 const int _legacyPlanNotificationIdModulo = 200000000;
@@ -83,6 +101,9 @@ abstract class PlanReminderScheduler {
     required int minute,
     required List<int> days,
     bool skipToday,
+    int intervalHours,
+    int startHour,
+    int endHour,
   });
 
   Future<void> cancelPlanReminders(int planId);
@@ -241,10 +262,28 @@ class NotificationService implements PlanReminderScheduler {
     required int minute,
     required List<int> days,
     bool skipToday = false,
+    int intervalHours = 0,
+    int startHour = 0,
+    int endHour = 0,
   }) async {
     final normalizedPlanId = _normalizePlanNotificationBaseId(planId);
 
     await cancelPlanReminders(planId);
+
+    if (intervalHours >= 1) {
+      await _scheduleHourlyPlanReminders(
+        normalizedPlanId: normalizedPlanId,
+        planIdentifier: planIdentifier,
+        title: title,
+        minute: minute,
+        days: days,
+        intervalHours: intervalHours,
+        startHour: startHour,
+        endHour: endHour,
+        skipToday: skipToday,
+      );
+      return;
+    }
 
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     final body = _notifString('reminderBody');
@@ -279,6 +318,78 @@ class NotificationService implements PlanReminderScheduler {
           planIdentifier: planIdentifier,
         );
       }
+    }
+  }
+
+  /// Schedule the next [_maxHourlyRemindersPerPlan] upcoming fires for a plan
+  /// that repeats every [intervalHours] hours between [startHour] and [endHour]
+  /// on the selected [days]. The remaining fires are refilled the next time the
+  /// app re-registers reminders (auto-login on launch).
+  Future<void> _scheduleHourlyPlanReminders({
+    required int normalizedPlanId,
+    String? planIdentifier,
+    required String title,
+    required int minute,
+    required List<int> days,
+    required int intervalHours,
+    required int startHour,
+    required int endHour,
+    required bool skipToday,
+  }) async {
+    if (days.isEmpty) return;
+
+    final step = intervalHours < 1 ? 1 : intervalHours;
+    final start = startHour.clamp(0, 23);
+    final end = endHour.clamp(0, 23);
+    if (end < start) return;
+
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    final body = _notifString('reminderBody');
+    final daySet = days.toSet();
+
+    final List<tz.TZDateTime> instances = [];
+    for (
+      int dayOffset = 0;
+      dayOffset <= _hourlyReminderHorizonDays &&
+          instances.length < _maxHourlyRemindersPerPlan;
+      dayOffset++
+    ) {
+      final tz.TZDateTime base = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+      ).add(Duration(days: dayOffset));
+      if (!daySet.contains(base.weekday)) continue;
+      if (skipToday && _isSameLocalDay(base, now)) continue;
+
+      for (int h = start; h <= end; h += step) {
+        final tz.TZDateTime fire = tz.TZDateTime(
+          tz.local,
+          base.year,
+          base.month,
+          base.day,
+          h,
+          minute,
+        );
+        if (fire.isBefore(now)) continue;
+        instances.add(fire);
+        if (instances.length >= _maxHourlyRemindersPerPlan) break;
+      }
+    }
+
+    for (int index = 0; index < instances.length; index++) {
+      final int id = _buildHourlyReminderId(normalizedPlanId, index);
+      debugPrint(
+        '[Notification] Scheduling hourly plan=$normalizedPlanId #$index at ${instances[index]} (id=$id)',
+      );
+      await _scheduleSinglePlanReminder(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: instances[index],
+        planIdentifier: planIdentifier,
+      );
     }
   }
 
@@ -355,6 +466,17 @@ class NotificationService implements PlanReminderScheduler {
           _buildSnoozedNotificationId(id),
         );
       }
+    }
+
+    // Also clear the hourly-reminder block for this plan. We don't know here
+    // whether the plan is hourly, so cancel the whole block unconditionally —
+    // the id region is disjoint from the weekly grid, so this is safe.
+    for (int index = 0; index < _maxHourlyRemindersPerPlan; index++) {
+      final int id = _buildHourlyReminderId(normalizedPlanId, index);
+      await flutterLocalNotificationsPlugin.cancel(id);
+      await flutterLocalNotificationsPlugin.cancel(
+        _buildSnoozedNotificationId(id),
+      );
     }
 
     // Best-effort cleanup of any reminders left over from the previous id
@@ -659,6 +781,15 @@ class NotificationService implements PlanReminderScheduler {
     return normalizedPlanId * _planNotificationSlotsPerPlan +
         (day - 1) * 10 +
         week;
+  }
+
+  int _buildHourlyReminderId(
+    int normalizedPlanId,
+    int index, // 0..(_maxHourlyRemindersPerPlan - 1)
+  ) {
+    return _hourlyReminderBaseOffset +
+        (normalizedPlanId % _hourlyPlanSlotModulo) * _maxHourlyRemindersPerPlan +
+        index;
   }
 
   int _notificationIdForRemoteMessage(RemoteMessage message) {

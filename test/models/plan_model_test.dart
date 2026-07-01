@@ -89,4 +89,61 @@ void main() {
       expect(plan.penaltyTargetDaysLimit(asOf: asOf), 25);
     });
   });
+
+  group('NotificationTime hourly recurrence', () {
+    test('daily notification exposes a single schedule hour', () {
+      final time = NotificationTime.custom(21, 0);
+      expect(time.isHourly, isFalse);
+      expect(time.scheduleHours, [21]);
+    });
+
+    test('hourly factory nails down interval window and fire hours', () {
+      final time = NotificationTime.hourly(
+        intervalHours: 2,
+        startHour: 9,
+        endHour: 21,
+      );
+      expect(time.isHourly, isTrue);
+      expect(time.startHour, 9);
+      expect(time.endHour, 21);
+      expect(time.intervalHours, 2);
+      expect(time.scheduleHours, [9, 11, 13, 15, 17, 19, 21]);
+    });
+
+    test('every-hour window enumerates each hour inclusively', () {
+      final time = NotificationTime.hourly(
+        intervalHours: 1,
+        startHour: 8,
+        endHour: 11,
+      );
+      expect(time.scheduleHours, [8, 9, 10, 11]);
+    });
+
+    test('serialization round-trips hourly fields', () {
+      final time = NotificationTime.hourly(
+        intervalHours: 3,
+        startHour: 10,
+        endHour: 22,
+      );
+      final restored = NotificationTime.fromMap(time.toMap());
+      expect(restored.intervalHours, 3);
+      expect(restored.startHour, 10);
+      expect(restored.endHour, 22);
+      expect(restored.scheduleHours, [10, 13, 16, 19, 22]);
+    });
+
+    test('legacy maps without hourly fields default to daily', () {
+      final restored = NotificationTime.fromMap({
+        'type': 'custom',
+        'value': '21:00',
+        'hour': 21,
+        'minute': 0,
+        'alertOffset': 0,
+      });
+      expect(restored.isHourly, isFalse);
+      expect(restored.startHour, 21);
+      expect(restored.endHour, 21);
+      expect(restored.scheduleHours, [21]);
+    });
+  });
 }

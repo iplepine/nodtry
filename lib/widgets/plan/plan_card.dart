@@ -60,9 +60,15 @@ class PlanCard extends StatelessWidget {
     }
 
     final isAlarmOn = time != null && time.type != 'none';
-    final displayTime = time != null
-        ? '${time.targetHour.toString().padLeft(2, '0')}:${time.targetMinute.toString().padLeft(2, '0')}'
-        : l10n.planTimeUnset;
+    final displayTime = time == null
+        ? l10n.planTimeUnset
+        : time.isHourly
+            ? l10n.planTimeHourlyRange(
+                time.startHour,
+                time.endHour,
+                time.intervalHours,
+              )
+            : '${time.targetHour.toString().padLeft(2, '0')}:${time.targetMinute.toString().padLeft(2, '0')}';
 
     // Status Badge Logic
     final statusInfo = _getStatusInfo(plan.state, l10n);
