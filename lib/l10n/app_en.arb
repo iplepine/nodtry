@@ -1351,6 +1351,34 @@
   "notifyEditor10MinBefore": "10 min before",
   "notifyEditor30MinBefore": "30 min before",
   "notifyEditor1HourBefore": "1 hr before",
+  "notifyEditorRepeatModeLabel": "Repeat",
+  "notifyEditorRepeatDaily": "Once a day",
+  "notifyEditorRepeatHourly": "Every few hours",
+  "notifyEditorIntervalLabel": "Interval",
+  "notifyEditorIntervalHours": "Every {count}h",
+  "@notifyEditorIntervalHours": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "notifyEditorWindowStart": "Start",
+  "notifyEditorWindowEnd": "End",
+  "notifyEditorHourlyHint": "We'll remind you every {interval}h from {start}:00 to {end}:00.",
+  "@notifyEditorHourlyHint": {
+    "placeholders": {
+      "interval": { "type": "int" },
+      "start": { "type": "int" },
+      "end": { "type": "int" }
+    }
+  },
+  "planTimeHourlyRange": "{start}:00–{end}:00 · every {interval}h",
+  "@planTimeHourlyRange": {
+    "placeholders": {
+      "start": { "type": "int" },
+      "end": { "type": "int" },
+      "interval": { "type": "int" }
+    }
+  },
   "promiseChipPenaltyTriggered": "Penalty locked in — {description}",
   "@promiseChipPenaltyTriggered": {
     "placeholders": {

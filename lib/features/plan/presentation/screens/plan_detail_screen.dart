@@ -674,11 +674,25 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
 
   String _getTimeText(NotificationTime? time, AppLocalizations l10n) {
     if (time == null || time.type == 'none') {
+      if (time != null && time.isHourly) {
+        return l10n.planTimeHourlyRange(
+          time.startHour,
+          time.endHour,
+          time.intervalHours,
+        );
+      }
       if (time != null && (time.hour != 0 || time.minute != 0)) {
         final dt = DateTime(2020, 1, 1, time.targetHour, time.targetMinute);
         return TimeFormatter.formatExactTime(dt);
       }
       return l10n.planDetailTimeUnset;
+    }
+    if (time.isHourly) {
+      return l10n.planTimeHourlyRange(
+        time.startHour,
+        time.endHour,
+        time.intervalHours,
+      );
     }
     final dt = DateTime(2020, 1, 1, time.targetHour, time.targetMinute);
     return TimeFormatter.formatExactTime(dt);

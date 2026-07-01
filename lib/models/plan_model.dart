@@ -523,13 +523,47 @@ class NotificationTime {
   final int minute;
   final int alertOffset; // minutes before (0 means at time)
 
+  /// 시간 단위 반복 간격(시간). 0이면 하루 한 번(기존 동작),
+  /// 1 이상이면 [startHour]~[endHour] 사이에서 N시간마다 반복 알림.
+  final int intervalHours;
+
+  /// 시간 단위 반복 시 알림을 시작할 시각(포함). intervalHours가 0이면 무시.
+  final int startHour;
+
+  /// 시간 단위 반복 시 알림을 끝낼 시각(포함). intervalHours가 0이면 무시.
+  final int endHour;
+
   NotificationTime({
     required this.type,
     required this.value,
     required this.hour,
     required this.minute,
     this.alertOffset = 0,
-  });
+    this.intervalHours = 0,
+    int? startHour,
+    int? endHour,
+  }) : startHour = startHour ?? hour,
+       endHour = endHour ?? hour;
+
+  /// 시간 단위 반복 알림 여부.
+  bool get isHourly => intervalHours >= 1;
+
+  /// 하루 동안 알림이 울릴 "시(hour)" 목록.
+  ///
+  /// - 하루 한 번(intervalHours == 0)이면 [targetHour] 하나만 반환한다.
+  /// - 시간 단위 반복이면 [startHour]부터 [endHour]까지 간격만큼 나열한다.
+  List<int> get scheduleHours {
+    if (!isHourly) return [targetHour];
+    final step = intervalHours < 1 ? 1 : intervalHours;
+    final start = startHour.clamp(0, 23);
+    final end = endHour.clamp(0, 23);
+    if (end < start) return [start];
+    final hours = <int>[];
+    for (int h = start; h <= end; h += step) {
+      hours.add(h);
+    }
+    return hours;
+  }
 
   NotificationTime copyWith({
     String? type,
@@ -537,6 +571,9 @@ class NotificationTime {
     int? hour,
     int? minute,
     int? alertOffset,
+    int? intervalHours,
+    int? startHour,
+    int? endHour,
   }) {
     return NotificationTime(
       type: type ?? this.type,
@@ -544,6 +581,9 @@ class NotificationTime {
       hour: hour ?? this.hour,
       minute: minute ?? this.minute,
       alertOffset: alertOffset ?? this.alertOffset,
+      intervalHours: intervalHours ?? this.intervalHours,
+      startHour: startHour ?? this.startHour,
+      endHour: endHour ?? this.endHour,
     );
   }
 
@@ -554,16 +594,23 @@ class NotificationTime {
       'hour': hour,
       'minute': minute,
       'alertOffset': alertOffset,
+      if (intervalHours > 0) 'intervalHours': intervalHours,
+      if (intervalHours > 0) 'startHour': startHour,
+      if (intervalHours > 0) 'endHour': endHour,
     };
   }
 
   factory NotificationTime.fromMap(Map<String, dynamic> map) {
+    final hour = map['hour']?.toInt() ?? 20;
     return NotificationTime(
       type: map['type'] ?? 'preset',
       value: map['value'] ?? 'dinner',
-      hour: map['hour']?.toInt() ?? 20,
+      hour: hour,
       minute: map['minute']?.toInt() ?? 0,
       alertOffset: map['alertOffset']?.toInt() ?? 0,
+      intervalHours: map['intervalHours']?.toInt() ?? 0,
+      startHour: map['startHour']?.toInt() ?? hour,
+      endHour: map['endHour']?.toInt() ?? hour,
     );
   }
 
@@ -603,6 +650,28 @@ class NotificationTime {
       hour: hour,
       minute: minute,
       alertOffset: alertOffset,
+    );
+  }
+
+  /// [startHour]~[endHour] 사이에서 [intervalHours]시간마다 반복되는 알림.
+  /// 기간(계획의 startDate~endDate)은 그대로 두고 하루 안에서만 반복한다.
+  static NotificationTime hourly({
+    required int intervalHours,
+    required int startHour,
+    required int endHour,
+    int minute = 0,
+  }) {
+    final interval = intervalHours < 1 ? 1 : intervalHours;
+    return NotificationTime(
+      type: 'custom',
+      value:
+          '${startHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}-${endHour.toString().padLeft(2, '0')}/$interval',
+      hour: startHour,
+      minute: minute,
+      alertOffset: 0,
+      intervalHours: interval,
+      startHour: startHour,
+      endHour: endHour,
     );
   }
 

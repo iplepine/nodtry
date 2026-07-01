@@ -286,6 +286,13 @@ class _PartnerPreviewCard extends StatelessWidget {
   }
 
   static String _timeLabel(AppLocalizations l10n, NotificationTime notificationTime) {
+    if (notificationTime.isHourly) {
+      return l10n.planTimeHourlyRange(
+        notificationTime.startHour,
+        notificationTime.endHour,
+        notificationTime.intervalHours,
+      );
+    }
     final targetTotal =
         notificationTime.hour * 60 +
         notificationTime.minute +

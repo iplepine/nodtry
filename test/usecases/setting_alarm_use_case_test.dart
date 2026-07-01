@@ -13,6 +13,9 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
   int? scheduledMinute;
   List<int>? scheduledDays;
   bool? scheduledSkipToday;
+  int? scheduledIntervalHours;
+  int? scheduledStartHour;
+  int? scheduledEndHour;
 
   @override
   Future<void> cancelPlanReminders(int planId) async {
@@ -34,6 +37,9 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
     required int minute,
     required List<int> days,
     bool skipToday = false,
+    int intervalHours = 0,
+    int startHour = 0,
+    int endHour = 0,
   }) async {
     scheduledPlanId = planId;
     scheduledPlanIdentifier = planIdentifier;
@@ -42,6 +48,9 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
     scheduledMinute = minute;
     scheduledDays = days;
     scheduledSkipToday = skipToday;
+    scheduledIntervalHours = intervalHours;
+    scheduledStartHour = startHour;
+    scheduledEndHour = endHour;
     calls.add('schedule:$planId');
   }
 }
@@ -115,6 +124,27 @@ void main() {
     expect(scheduler.scheduledMinute, 30);
     expect(scheduler.scheduledDays, [2, 4]);
     expect(scheduler.scheduledSkipToday, isTrue);
+  });
+
+  test('execute forwards hourly recurrence settings to the scheduler', () async {
+    final scheduler = _FakePlanReminderScheduler();
+    final useCase = SettingAlarmUseCase(scheduler);
+    final plan = _buildPlan(
+      id: 'plan-hourly',
+      days: [1, 2, 3],
+      notificationTime: NotificationTime.hourly(
+        intervalHours: 2,
+        startHour: 9,
+        endHour: 21,
+      ),
+    );
+
+    await useCase.execute(plan);
+
+    expect(scheduler.scheduledIntervalHours, 2);
+    expect(scheduler.scheduledStartHour, 9);
+    expect(scheduler.scheduledEndHour, 21);
+    expect(scheduler.scheduledDays, [1, 2, 3]);
   });
 
   test('cancelById uses a stable positive notification id', () async {

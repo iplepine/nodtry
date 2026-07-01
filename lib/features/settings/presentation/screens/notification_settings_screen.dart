@@ -98,14 +98,22 @@ class NotificationSettingsScreen extends ConsumerWidget {
     // Display Time String
     String timeString = l10n.notificationSettingsNoAlarm;
     if (notificationTime != null) {
-      final dt = DateTime(
-        2020,
-        1,
-        1,
-        notificationTime.targetHour,
-        notificationTime.targetMinute,
-      );
-      timeString = TimeFormatter.formatExactTime(dt);
+      if (notificationTime.isHourly) {
+        timeString = l10n.planTimeHourlyRange(
+          notificationTime.startHour,
+          notificationTime.endHour,
+          notificationTime.intervalHours,
+        );
+      } else {
+        final dt = DateTime(
+          2020,
+          1,
+          1,
+          notificationTime.targetHour,
+          notificationTime.targetMinute,
+        );
+        timeString = TimeFormatter.formatExactTime(dt);
+      }
     }
 
     // If Alarm is OFF, subtext might say "OFF" or the scheduled time but grayed out.
