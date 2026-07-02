@@ -4,6 +4,7 @@ import '../../../../services/auth_service.dart';
 import '../../../../repositories/user_repository.dart';
 import '../../../../datasources/user_local_data_source.dart';
 import '../../../../usecases/cancel_all_notifications_use_case.dart';
+import '../../../../utils/analytics.dart';
 
 class WithdrawUseCase {
   final AuthService _authService;
@@ -38,6 +39,7 @@ class WithdrawUseCase {
       // 2. 로컬 데이터 삭제
       await _userLocalDataSource.clearUser();
       // 3. 계정 삭제 (Auth)
+      AnalyticsService.log(AnalyticsEvent.accountDeleted);
       await _authService.deleteAccount();
     }
   }

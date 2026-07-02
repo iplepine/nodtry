@@ -4,6 +4,7 @@ import '../connect_state.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../repositories/connect_repository.dart';
 import '../../../../utils/error_reporter.dart';
+import '../../../../utils/analytics.dart';
 import '../../../../utils/ui_error_codes.dart';
 
 final connectViewModelProvider =
@@ -19,6 +20,14 @@ class ConnectViewModel extends AsyncNotifier<ConnectState> {
       if (next is AsyncData) {
         final status = next.value;
         if (status == ConnectionStatus.active) {
+          // 라이브 전환(none/waiting -> active)일 때만 1회 기록한다. 앱 재시작 시
+          // 첫 emission은 prev가 AsyncLoading이라 제외되어 양쪽 사용자 모두
+          // 활성화 1건으로만 잡힌다(코드 입력자/공유자 공통).
+          final prevStatus =
+              prev is AsyncData<ConnectionStatus> ? prev.value : null;
+          if (prevStatus != null && prevStatus != ConnectionStatus.active) {
+            AnalyticsService.log(AnalyticsEvent.partnerConnected);
+          }
           state = AsyncValue.data(
             state.value!.copyWith(flowState: ConnectFlowState.connected),
           );
@@ -58,6 +67,8 @@ class ConnectViewModel extends AsyncNotifier<ConnectState> {
       return;
     }
 
+    AnalyticsService.log(AnalyticsEvent.connectCodeSubmitted);
+
     state = AsyncValue.data(
       prevState.copyWith(
         isProcessing: true,
@@ -81,6 +92,7 @@ class ConnectViewModel extends AsyncNotifier<ConnectState> {
       state = AsyncValue.data(state.value!.copyWith(isProcessing: false));
     } catch (e, s) {
       ErrorReporter.record(e, s, reason: 'connectWithCode');
+      AnalyticsService.log(AnalyticsEvent.connectFailed, {'reason': 'exception'});
       state = AsyncValue.data(
         state.value!.copyWith(
           isProcessing: false,
@@ -108,6 +120,7 @@ class ConnectViewModel extends AsyncNotifier<ConnectState> {
             : connections.first.executorId;
 
         await ref.read(disconnectConnectionUseCaseProvider).execute(targetId);
+        AnalyticsService.log(AnalyticsEvent.partnerDisconnected);
       }
       state = AsyncValue.data(state.value!.copyWith(isProcessing: false));
     } catch (e, s) {

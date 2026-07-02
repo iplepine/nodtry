@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/repository_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/notification_service.dart' as local_notifications;
+import '../../utils/analytics.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(ref);
@@ -28,6 +29,22 @@ class NotificationService {
       debugPrint('Message data: ${message.data}');
       _showLocalNotification(message);
     });
+
+    // 알림 탭으로 앱이 열린 경우(백그라운드 → 포그라운드) 재참여 신호 기록.
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      AnalyticsService.log(AnalyticsEvent.notificationOpened, {
+        'type': message.data['type']?.toString() ?? 'unknown',
+      });
+    });
+
+    // 종료 상태에서 알림 탭으로 콜드 스타트된 경우.
+    final initialMessage = await _messaging.getInitialMessage();
+    if (initialMessage != null) {
+      AnalyticsService.log(AnalyticsEvent.notificationOpened, {
+        'type': initialMessage.data['type']?.toString() ?? 'unknown',
+        'cold_start': true,
+      });
+    }
 
     final settings = await _messaging.getNotificationSettings();
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
@@ -63,8 +80,13 @@ class NotificationService {
       provisional: false,
     );
     debugPrint('User granted permission: ${settings.authorizationStatus}');
-    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
-        settings.authorizationStatus == AuthorizationStatus.provisional) {
+    final granted =
+        settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
+    AnalyticsService.log(AnalyticsEvent.notificationPermissionResult, {
+      'granted': granted,
+    });
+    if (granted) {
       final token = await _messaging.getToken();
       _saveTokenToFirestore(token);
     }

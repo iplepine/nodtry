@@ -2,13 +2,17 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
 // Removed unused AuthService import
 import '../../../../theme/app_colors.dart';
+import '../../../tutorial/presentation/tutorial_screen.dart';
 
 import '../auth_state.dart';
 import '../viewmodel/auth_viewmodel.dart';
+
+const _kTutorialCompletedKey = 'nodtry_tutorial_completed_v1';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -24,6 +28,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late Animation<Offset> _messageSlideAnimation;
   late Animation<Offset> _buttonSlideAnimation;
   late Animation<double> _buttonFadeAnimation;
+  bool _tutorialStateReady = false;
+  bool _showTutorial = false;
 
   @override
   void initState() {
@@ -62,12 +68,36 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     _controller.forward();
 
-    // 시작하자마자 체크
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(authViewModelProvider.notifier)
-          .dispatch(const CheckAuthIntent());
+      _loadTutorialState();
     });
+  }
+
+  Future<void> _loadTutorialState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final completed = prefs.getBool(_kTutorialCompletedKey) ?? false;
+    if (!mounted) return;
+    setState(() {
+      _tutorialStateReady = true;
+      _showTutorial = !completed;
+    });
+    if (completed) {
+      _checkAuth();
+    }
+  }
+
+  void _checkAuth() {
+    ref.read(authViewModelProvider.notifier).dispatch(const CheckAuthIntent());
+  }
+
+  Future<void> _finishTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kTutorialCompletedKey, true);
+    if (!mounted) return;
+    setState(() {
+      _showTutorial = false;
+    });
+    _checkAuth();
   }
 
   void _handleGoogleLogin() {
@@ -104,11 +134,45 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         final error = next is AsyncError
             ? next.error.toString()
             : next.value?.errorMessage;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.splashLoginFailed(error.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.splashLoginFailed(error.toString()),
+            ),
+          ),
+        );
       }
     });
+
+    if (!_tutorialStateReady) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Center(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SizedBox(
+                width: 96,
+                height: 96,
+                child: Image.asset(
+                  'assets/images/app_icon.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_showTutorial) {
+      return TutorialScreen(
+        showBackButton: false,
+        onFinished: () {
+          _finishTutorial();
+        },
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,

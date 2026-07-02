@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import '../utils/analytics.dart';
 
 String _iapString(String key, [Object? arg]) {
   final locale =
@@ -115,6 +116,10 @@ class IAPService extends Notifier<IAPState> {
     final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
     state = state.copyWith(isPurchasing: true, clearError: true);
 
+    AnalyticsService.log(AnalyticsEvent.donationInitiated, {
+      'product_id': product.id,
+    });
+
     try {
       await _iap.buyConsumable(purchaseParam: purchaseParam);
       // Result handled in stream
@@ -134,6 +139,9 @@ class IAPService extends Notifier<IAPState> {
         state = state.copyWith(isPurchasing: true);
       } else {
         if (purchaseDetails.status == PurchaseStatus.error) {
+          AnalyticsService.log(AnalyticsEvent.purchaseFailed, {
+            'reason': purchaseDetails.error?.code ?? 'unknown',
+          });
           state = state.copyWith(
             isPurchasing: false,
             purchaseError: purchaseDetails.error?.message ?? _iapString('unknownError'),
@@ -144,6 +152,13 @@ class IAPService extends Notifier<IAPState> {
           if (purchaseDetails.pendingCompletePurchase) {
             await _iap.completePurchase(purchaseDetails);
           }
+
+          final product = state.coffeeProduct;
+          AnalyticsService.logPurchase(
+            value: product?.rawPrice ?? 0,
+            currency: product?.currencyCode ?? 'KRW',
+            itemId: purchaseDetails.productID,
+          );
 
           state = state.copyWith(isPurchasing: false, clearError: true);
         }

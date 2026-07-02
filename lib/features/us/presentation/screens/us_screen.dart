@@ -17,6 +17,7 @@ import '../../../../providers/plan_list_provider.dart';
 import '../us_state.dart';
 import '../us_viewmodel.dart';
 import '../../../../utils/ui_error_codes.dart';
+import '../../../../utils/analytics.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -679,6 +680,10 @@ class _MeSection extends StatelessWidget {
                   onTap: () {
                     if (inviteCode != null) {
                       Clipboard.setData(ClipboardData(text: inviteCode!));
+                      AnalyticsService.log(
+                        AnalyticsEvent.inviteCodeShared,
+                        {'method': 'copy'},
+                      );
 
                       ScaffoldMessenger.of(
                         context,

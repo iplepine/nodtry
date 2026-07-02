@@ -4,6 +4,7 @@ import '../plan_create_state.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../providers/home_provider.dart';
+import '../../../../utils/analytics.dart';
 import '../../domain/study_plan_template.dart';
 
 /// Thrown when a plan save is attempted without a resolved signed-in user.
@@ -264,6 +265,12 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       } else {
         planId = await ref.read(createNewPlanUseCaseProvider).execute(plan);
       }
+
+      AnalyticsService.log(AnalyticsEvent.planCreated, {
+        'is_edit': prevState.existingPlanId != null,
+        'frequency': finalDays.length,
+        'has_partner': managerId != null,
+      });
 
       ref.invalidate(homeCardStateProvider);
       // 생성된 ID가 반영된 Plan 객체로 알람 설정

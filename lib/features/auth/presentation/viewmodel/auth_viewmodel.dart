@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth_state.dart';
 import '../../../../providers/repository_provider.dart';
+import '../../../../utils/analytics.dart';
 // Removed unused AuthService import
 
 final authViewModelProvider = AsyncNotifierProvider<AuthViewModel, AuthState>(
@@ -34,6 +35,20 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
         state = AsyncValue.data(prevState.copyWith(errorMessage: null));
       }
     } catch (e, stack) {
+      final failedMethod = switch (intent) {
+        LoginWithGoogleIntent() => 'google',
+        LoginWithAppleIntent() => 'apple',
+        LoginGuestIntent() => 'anonymous',
+        LoginWithEmailIntent() => 'email',
+        SignUpWithEmailIntent() => 'email',
+        _ => null,
+      };
+      if (failedMethod != null) {
+        AnalyticsService.log(AnalyticsEvent.loginFailed, {
+          'method': failedMethod,
+          'reason': e.runtimeType.toString(),
+        });
+      }
       state = AsyncValue.error(e, stack);
       state = AsyncValue.data(
         prevState.copyWith(
@@ -84,6 +99,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
     try {
       final useCase = ref.read(loginWithGoogleUseCaseProvider);
       await useCase.execute();
+      AnalyticsService.logLogin('google');
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isGoogleLoading: false));
     }
@@ -96,6 +112,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
     try {
       final useCase = ref.read(loginWithAppleUseCaseProvider);
       await useCase.execute();
+      AnalyticsService.logLogin('apple');
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isAppleLoading: false));
     }
@@ -108,6 +125,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
     try {
       await ref.read(guestLoginUseCaseProvider).execute();
       ref.invalidate(myProfileProvider);
+      AnalyticsService.logLogin('anonymous');
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isGuestLoading: false));
     }
@@ -120,6 +138,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
     try {
       final useCase = ref.read(loginWithEmailUseCaseProvider);
       await useCase.execute(email, password);
+      AnalyticsService.logLogin('email');
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isEmailLoading: false));
     }
@@ -132,6 +151,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
     try {
       final useCase = ref.read(signUpWithEmailUseCaseProvider);
       await useCase.execute(email, password);
+      AnalyticsService.logLogin('email');
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isEmailLoading: false));
     }

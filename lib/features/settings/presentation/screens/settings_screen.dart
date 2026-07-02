@@ -125,7 +125,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              ..._buildThemeOptions(context, ref, l10n, settingsState.currentTheme),
+              ..._buildThemeOptions(
+                context,
+                ref,
+                l10n,
+                settingsState.currentTheme,
+              ),
               const SizedBox(height: 32),
 
               if (kDebugMode) ...[
@@ -144,6 +149,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
 
               // 알림 설정 (New)
+              _buildTutorialOption(context),
+              const SizedBox(height: 12),
               _buildNotificationSettingsOption(context),
               const SizedBox(height: 32),
 
@@ -211,6 +218,56 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: AppColors.textDisabled),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTutorialOption(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          context.push(AppRoutes.tutorial);
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider, width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '앱 사용법',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '작은 약속을 만들고 확인받는 흐름을 다시 봅니다',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Icon(Icons.chevron_right, color: AppColors.textDisabled),
@@ -546,7 +603,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 // primary/secondary 색 미리보기 — 사용자가 어떤 톤인지
                 // 라벨만 보고 짐작하지 않아도 되도록.
-                _ThemeSwatch(primary: palette.primary, secondary: palette.secondary),
+                _ThemeSwatch(
+                  primary: palette.primary,
+                  secondary: palette.secondary,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(

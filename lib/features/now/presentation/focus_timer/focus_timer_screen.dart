@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../utils/analytics.dart';
 
 class FocusTimerScreen extends StatefulWidget {
   final int minutes;
@@ -34,6 +35,9 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
     _endTime = DateTime.now().add(_total);
     WidgetsBinding.instance.addObserver(this);
     _startTicker();
+    AnalyticsService.log(AnalyticsEvent.focusTimerStarted, {
+      'duration_min': widget.minutes,
+    });
   }
 
   @override
@@ -63,6 +67,9 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
     if (remaining <= Duration.zero) {
       _finished = true;
       _ticker?.cancel();
+      AnalyticsService.log(AnalyticsEvent.focusTimerCompleted, {
+        'duration_min': widget.minutes,
+      });
       if (mounted) Navigator.of(context).pop(_total);
     } else if (mounted) {
       setState(() {});
@@ -86,6 +93,11 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
     if (_finished) return;
     _finished = true;
     _ticker?.cancel();
+    AnalyticsService.log(AnalyticsEvent.focusTimerCompleted, {
+      'duration_min': widget.minutes,
+      'elapsed_min': _currentElapsed().inMinutes,
+      'manual': true,
+    });
     Navigator.of(context).pop(_currentElapsed());
   }
 
@@ -134,6 +146,10 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
     if (confirmed == true && mounted) {
       _finished = true;
       _ticker?.cancel();
+      AnalyticsService.log(AnalyticsEvent.focusTimerCancelled, {
+        'duration_min': widget.minutes,
+        'elapsed_min': _currentElapsed().inMinutes,
+      });
       Navigator.of(context).pop(null);
     }
   }

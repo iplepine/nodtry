@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../settings_state.dart';
 import '../../../../providers/app_settings_provider.dart';
 import '../../../../providers/repository_provider.dart';
+import '../../../../utils/analytics.dart';
 import '../../../auth/presentation/viewmodel/auth_viewmodel.dart';
 
 final settingsViewModelProvider =
@@ -57,6 +58,7 @@ class SettingsViewModel extends AsyncNotifier<SettingsState> {
     try {
       final authService = ref.read(authServiceProvider);
       await authService.signOut();
+      AnalyticsService.log(AnalyticsEvent.logout);
       // 로그아웃 후 인증 상태를 완전히 초기화하여 잔상 제거
       ref.invalidate(authViewModelProvider);
     } catch (e) {

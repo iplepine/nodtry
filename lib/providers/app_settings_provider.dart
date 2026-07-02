@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme_enum.dart';
+import '../utils/analytics.dart';
 import 'repository_provider.dart';
 
 part 'app_settings_provider.freezed.dart';
@@ -40,6 +41,15 @@ class AppSettingsNotifier extends Notifier<AppSettingsState> {
     final initialTheme = storedTheme ?? AppThemeType.smokyPlum;
     // AppColors의 정적 palette도 동기화 — 첫 빌드에서 위젯들이 올바른 색을 읽도록.
     AppColors.setTheme(initialTheme);
+    // 세그먼트 차원으로 현재 테마/언어를 유저 프로퍼티에 기록.
+    AnalyticsService.setUserProperty(
+      AnalyticsUserProperty.appTheme,
+      initialTheme.storageKey,
+    );
+    AnalyticsService.setUserProperty(
+      AnalyticsUserProperty.appLocale,
+      initialLocale?.languageCode ?? 'system',
+    );
     return AppSettingsState(
       currentTheme: initialTheme,
       currentLocale: initialLocale,
@@ -53,6 +63,13 @@ class AppSettingsNotifier extends Notifier<AppSettingsState> {
     AppColors.setTheme(theme);
     final prefs = ref.read(sharedPreferencesProvider);
     prefs.setString(_kThemeKey, theme.storageKey);
+    AnalyticsService.log(AnalyticsEvent.themeChanged, {
+      'theme': theme.storageKey,
+    });
+    AnalyticsService.setUserProperty(
+      AnalyticsUserProperty.appTheme,
+      theme.storageKey,
+    );
   }
 
   /// 언어 변경 — 사용자가 명시적으로 고른 값을 prefs에 persist 한다.
@@ -66,6 +83,12 @@ class AppSettingsNotifier extends Notifier<AppSettingsState> {
     } else {
       prefs.setString(_kLocaleOverrideKey, locale.languageCode);
     }
+    final localeCode = locale?.languageCode ?? 'system';
+    AnalyticsService.log(AnalyticsEvent.localeChanged, {'locale': localeCode});
+    AnalyticsService.setUserProperty(
+      AnalyticsUserProperty.appLocale,
+      localeCode,
+    );
   }
 }
 

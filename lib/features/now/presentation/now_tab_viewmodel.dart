@@ -7,6 +7,7 @@ import '../../../models/home_state.dart';
 import '../../../models/promise_model.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../widgets/quiet_header.dart';
+import '../../../utils/analytics.dart';
 import '../domain/usecases/feedback_to_partner_use_case.dart';
 
 /// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel
@@ -126,6 +127,8 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     // 현재 상태가 로딩 중이거나 에러인 경우 처리 불가 (또는 큐잉)
     if (!state.hasValue) return;
 
+    _logIntent(intent);
+
     try {
       if (intent is CompletePlanIntent) {
         await _completePlan(intent.planId, intent.message);
@@ -177,6 +180,75 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
+    }
+  }
+
+  /// Now 탭의 모든 사용자 행동을 Analytics 이벤트로 매핑한다. [NowTabIntent]가
+  /// sealed라 새 인텐트를 추가하면 이 switch가 컴파일 타임에 누락을 잡아준다.
+  /// 메시지/사유 본문은 PII이므로 보내지 않고 존재 여부(boolean)만 기록한다.
+  void _logIntent(NowTabIntent intent) {
+    switch (intent) {
+      case CompletePlanIntent(:final message):
+        AnalyticsService.log(AnalyticsEvent.planCompleted, {
+          'has_message': message != null && message.isNotEmpty,
+        });
+      case SkipPlanIntent():
+        AnalyticsService.log(AnalyticsEvent.planSkipped);
+      case PassPlanIntent():
+        AnalyticsService.log(AnalyticsEvent.planPassed);
+      case RestPlanIntent():
+        AnalyticsService.log(AnalyticsEvent.planRestUsed);
+      case RescuePlanIntent():
+        AnalyticsService.log(AnalyticsEvent.planRescued);
+      case CheckPartnerActionIntent():
+        AnalyticsService.log(AnalyticsEvent.partnerChecked);
+      case CheerPartnerActionIntent(:final reactionType, :final message):
+        AnalyticsService.log(AnalyticsEvent.partnerCheered, {
+          'reaction_type': reactionType,
+          'has_message': message != null && message.isNotEmpty,
+        });
+      case VerifyPartnerPlanIntent():
+        AnalyticsService.log(AnalyticsEvent.partnerVerified);
+      case ApprovePlanIntent():
+        AnalyticsService.log(AnalyticsEvent.planApproved);
+      case RejectPlanIntent(:final reason):
+        AnalyticsService.log(AnalyticsEvent.planRejected, {
+          'has_reason': reason != null && reason.isNotEmpty,
+        });
+      case PokeUserIntent(:final message):
+        AnalyticsService.log(AnalyticsEvent.pokeSent, {
+          'target': 'user',
+          'has_message': message != null && message.isNotEmpty,
+        });
+      case PokePartnerIntent(:final message, :final reward, :final penalty):
+        AnalyticsService.log(AnalyticsEvent.pokeSent, {
+          'target': 'plan',
+          'has_message': message != null && message.isNotEmpty,
+          'has_reward': reward != null,
+          'has_penalty': penalty != null,
+        });
+      case AcknowledgePokeIntent():
+        AnalyticsService.log(AnalyticsEvent.pokeAcknowledged);
+      case ProposePromiseIntent(:final reward, :final penalty):
+        AnalyticsService.log(AnalyticsEvent.promiseProposed, {
+          'has_reward': reward != null,
+          'has_penalty': penalty != null,
+        });
+      case RespondPromiseIntent(:final accept):
+        AnalyticsService.log(AnalyticsEvent.promiseResponded, {
+          'accepted': accept,
+        });
+      case AcknowledgePromiseSettlementIntent(:final comment):
+        AnalyticsService.log(AnalyticsEvent.promiseSettlementAcknowledged, {
+          'has_comment': comment != null && comment.isNotEmpty,
+        });
+      case RecordPilotSettlementIntent(:final nextPlanIntent, :final exitReason):
+        AnalyticsService.log(AnalyticsEvent.pilotSettlementRecorded, {
+          'next_plan_intent': nextPlanIntent,
+          'exit_reason': exitReason ?? 'none',
+        });
+      case RefreshIntent():
+        break; // 화면 새로고침은 제품 이벤트가 아님
     }
   }
 

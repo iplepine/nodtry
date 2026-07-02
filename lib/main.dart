@@ -17,6 +17,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'utils/error_reporter.dart';
+import 'utils/analytics.dart';
 import 'dart:async';
 
 @pragma('vm:entry-point')
@@ -67,6 +68,9 @@ void main() async {
 
   // Capture uncaught Flutter + async errors in Crashlytics once Firebase is up.
   await ErrorReporter.initialize();
+
+  // Product analytics (collection disabled in debug, same as Crashlytics).
+  await AnalyticsService.initialize();
 
   final prefs = await SharedPreferences.getInstance();
 
