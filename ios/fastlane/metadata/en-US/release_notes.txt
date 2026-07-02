@@ -1,5 +1,3 @@
 What's New
 
-- Added a "strength training twice a week" routine to Verified routines — the minimum effective dose recommended by WHO and US activity guidelines. Pick it during plan creation and start right away.
-- The 4-week settlement now reflects the goal you actually set instead of a fixed bar — no more reading as a failure when you hit your target.
-- You can now set a Now card aside — use the top-right control to choose "I'll do it later" (with a reminder) or "Not today".
+- Stability and usability improvements.
