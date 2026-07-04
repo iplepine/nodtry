@@ -66,8 +66,8 @@ fi
 
 if grep -Eq '(notification startup crash|timezone.*crash|MISSING_INSTANCEID_SERVICE|FCM token|알림 초기화|토큰)' <<< "$COMMITS_TEXT"; then
   add_note \
-    "일부 Android 기기에서 앱 시작 중 알림 초기화가 실패하던 문제를 고쳤어요." \
-    "Fixed a notification startup crash on some Android devices."
+    "일부 기기에서 앱 시작 중 알림 초기화가 실패하던 문제를 고쳤어요." \
+    "Fixed a notification startup crash on some devices."
   add_note \
     "FCM 토큰을 받을 수 없는 기기에서도 앱이 계속 열리도록 안정성을 개선했어요." \
     "Improved stability so the app keeps opening even when an FCM token cannot be issued."
