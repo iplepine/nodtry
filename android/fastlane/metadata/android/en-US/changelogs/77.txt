@@ -1,4 +1,2 @@
-What's New
-
 - Fixed a notification startup crash on some Android devices.
 - Improved stability so the app keeps opening even when an FCM token cannot be issued.

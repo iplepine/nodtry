@@ -64,6 +64,15 @@ if grep -Eq '(P0.?P2|reliability|crash reporting|crashlytics)' <<< "$COMMITS_TEX
     "Improved crash reporting and notification delivery reliability."
 fi
 
+if grep -Eq '(notification startup crash|timezone.*crash|MISSING_INSTANCEID_SERVICE|FCM token|알림 초기화|토큰)' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "일부 Android 기기에서 앱 시작 중 알림 초기화가 실패하던 문제를 고쳤어요." \
+    "Fixed a notification startup crash on some Android devices."
+  add_note \
+    "FCM 토큰을 받을 수 없는 기기에서도 앱이 계속 열리도록 안정성을 개선했어요." \
+    "Improved stability so the app keeps opening even when an FCM token cannot be issued."
+fi
+
 if grep -Eq '(verified routines|science-backed|검증된 루틴|verified routine category)' <<< "$COMMITS_TEXT"; then
   add_note \
     "신경과학·수면 연구 기반 추천 루틴 5개를 약속 만들기에 추가했어요. 아침 햇빛, 카페인 90분 뒤, 생리적 한숨, 90분 집중, 수면 환경 — 새 \"검증된 루틴\" 카테고리에서 골라 바로 약속으로 만들 수 있어요." \

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'dart:convert';
@@ -13,8 +13,7 @@ import 'package:flutter/widgets.dart';
 /// Why: NotificationService runs outside the widget tree (incl. background
 /// isolates), so we can't reach AppLocalizations through BuildContext here.
 String _notifString(String key) {
-  final locale =
-      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  final locale = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
   final isKo = locale.startsWith('ko');
   switch (key) {
     case 'actionDidIt':
@@ -24,7 +23,9 @@ String _notifString(String key) {
     case 'actionSnooze':
       return isKo ? '10분 후 다시 묻기' : 'Ask again in 10 min';
     case 'reminderBody':
-      return isKo ? '오늘 약속, 같이 이어갈까요?' : "Today's promise — want to keep going together?";
+      return isKo
+          ? '오늘 약속, 같이 이어갈까요?'
+          : "Today's promise — want to keep going together?";
     case 'fallbackTitle':
       return isKo ? '새 알림' : 'New notification';
     default:
@@ -156,12 +157,7 @@ class NotificationService implements PlanReminderScheduler {
       return;
     }
 
-    tz.initializeTimeZones(); // Ensure timezones are loaded first
-    final timezoneInfo = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(timezoneInfo.identifier));
-    debugPrint(
-      'NotificationService initialized with timezone: ${timezoneInfo.identifier}',
-    );
+    await _configureLocalTimezone();
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -189,7 +185,10 @@ class NotificationService implements PlanReminderScheduler {
                     DarwinNotificationActionOption.foreground,
                   },
                 ),
-                DarwinNotificationAction.plain(_snoozeActionId, _notifString('actionSnooze')),
+                DarwinNotificationAction.plain(
+                  _snoozeActionId,
+                  _notifString('actionSnooze'),
+                ),
               ],
             ),
           ],
@@ -214,6 +213,56 @@ class NotificationService implements PlanReminderScheduler {
     if (launchDetails?.didNotificationLaunchApp == true &&
         launchResponse != null) {
       await handleNotificationResponse(launchResponse);
+    }
+  }
+
+  Future<void> _configureLocalTimezone() async {
+    String? rawIdentifier;
+    try {
+      tz.initializeTimeZones(); // Ensure timezones are loaded first.
+      final timezoneInfo = await FlutterTimezone.getLocalTimezone();
+      rawIdentifier = timezoneInfo.identifier;
+      final location = _locationForTimezoneIdentifier(rawIdentifier);
+      tz.setLocalLocation(location);
+      debugPrint(
+        'NotificationService initialized with timezone: ${location.name}',
+      );
+    } catch (error) {
+      // Some Android devices report aliases such as Etc/UTC or vendor-specific
+      // IDs that the embedded TZ database may not resolve. Local reminders
+      // should degrade to UTC instead of crashing app startup.
+      tz.setLocalLocation(tz.UTC);
+      debugPrint(
+        '[Notification] Timezone "$rawIdentifier" unavailable; using UTC. $error',
+      );
+    }
+  }
+
+  tz.Location _locationForTimezoneIdentifier(String identifier) {
+    final normalized = _canonicalTimezoneIdentifier(identifier);
+    try {
+      return tz.getLocation(normalized);
+    } catch (error) {
+      debugPrint(
+        '[Notification] Unknown timezone "$identifier" normalized to "$normalized": $error',
+      );
+      return tz.UTC;
+    }
+  }
+
+  String _canonicalTimezoneIdentifier(String identifier) {
+    switch (identifier.trim()) {
+      case '':
+      case 'Etc/UTC':
+      case 'Etc/UCT':
+      case 'Etc/GMT':
+      case 'GMT':
+      case 'UCT':
+      case 'Universal':
+      case 'Zulu':
+        return 'UTC';
+      default:
+        return identifier.trim();
     }
   }
 
@@ -520,7 +569,9 @@ class NotificationService implements PlanReminderScheduler {
     await _ensureInitializedForActionHandling();
 
     final title =
-        message.data['title'] ?? message.notification?.title ?? _notifString('fallbackTitle');
+        message.data['title'] ??
+        message.notification?.title ??
+        _notifString('fallbackTitle');
     final body = message.data['body'] ?? message.notification?.body ?? '';
     final notificationId = _notificationIdForRemoteMessage(message);
     final planId = message.data['planId'];
@@ -714,7 +765,10 @@ class NotificationService implements PlanReminderScheduler {
                   _notifString('actionSkipToday'),
                   showsUserInterface: true,
                 ),
-                AndroidNotificationAction(_snoozeActionId, _notifString('actionSnooze')),
+                AndroidNotificationAction(
+                  _snoozeActionId,
+                  _notifString('actionSnooze'),
+                ),
               ]
             : null,
       ),
@@ -788,7 +842,8 @@ class NotificationService implements PlanReminderScheduler {
     int index, // 0..(_maxHourlyRemindersPerPlan - 1)
   ) {
     return _hourlyReminderBaseOffset +
-        (normalizedPlanId % _hourlyPlanSlotModulo) * _maxHourlyRemindersPerPlan +
+        (normalizedPlanId % _hourlyPlanSlotModulo) *
+            _maxHourlyRemindersPerPlan +
         index;
   }
 

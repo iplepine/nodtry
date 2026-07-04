@@ -22,7 +22,12 @@ class NotificationService {
   /// 권한 다이얼로그를 띄우지 않고, 이미 권한이 grant된 경우에만 토큰을 등록한다.
   /// (Play Pre-launch / 첫 진입 시 권한 팝업이 splash 위에 떠 앱 로딩을 막는 문제 회피)
   Future<void> setupListenersAndMaybeRegister() async {
-    _messaging.onTokenRefresh.listen(_saveTokenToFirestore);
+    _messaging.onTokenRefresh.listen(
+      _saveTokenToFirestore,
+      onError: (Object error, StackTrace stack) {
+        _logMessagingError('onTokenRefresh', error, stack);
+      },
+    );
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('Got a message whilst in the foreground!');
@@ -38,7 +43,7 @@ class NotificationService {
     });
 
     // 종료 상태에서 알림 탭으로 콜드 스타트된 경우.
-    final initialMessage = await _messaging.getInitialMessage();
+    final initialMessage = await _getInitialMessage();
     if (initialMessage != null) {
       AnalyticsService.log(AnalyticsEvent.notificationOpened, {
         'type': initialMessage.data['type']?.toString() ?? 'unknown',
@@ -46,11 +51,11 @@ class NotificationService {
       });
     }
 
-    final settings = await _messaging.getNotificationSettings();
+    final settings = await _getNotificationSettings();
+    if (settings == null) return;
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
-      final token = await _messaging.getToken();
-      _saveTokenToFirestore(token);
+      await _registerCurrentToken();
     } else if (settings.authorizationStatus == AuthorizationStatus.denied) {
       // The user has declined / revoked notifications. The app's core loop
       // (knocks, cheers, missed-action nudges) is delivered via FCM, so a stale
@@ -65,7 +70,8 @@ class NotificationService {
   /// Whether the OS currently grants notification permission. Lets the UI nudge
   /// the user to re-enable, since partner signals depend on it.
   Future<bool> hasPermission() async {
-    final settings = await _messaging.getNotificationSettings();
+    final settings = await _getNotificationSettings();
+    if (settings == null) return false;
     return settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional;
   }
@@ -73,12 +79,18 @@ class NotificationService {
   /// 알림이 의미 있는 시점(예: 약속 알림 설정)에 명시 호출.
   /// 권한이 새로 grant되면 토큰도 등록한다.
   Future<void> requestPermissionAndRegister() async {
-    final settings = await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: false,
-    );
+    final NotificationSettings settings;
+    try {
+      settings = await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+    } catch (error, stack) {
+      _logMessagingError('requestPermission', error, stack);
+      return;
+    }
     debugPrint('User granted permission: ${settings.authorizationStatus}');
     final granted =
         settings.authorizationStatus == AuthorizationStatus.authorized ||
@@ -87,8 +99,7 @@ class NotificationService {
       'granted': granted,
     });
     if (granted) {
-      final token = await _messaging.getToken();
-      _saveTokenToFirestore(token);
+      await _registerCurrentToken();
     }
   }
 
@@ -107,6 +118,43 @@ class NotificationService {
       } catch (e) {
         debugPrint('Error saving FCM token: $e');
       }
+    }
+  }
+
+  Future<RemoteMessage?> _getInitialMessage() async {
+    try {
+      return await _messaging.getInitialMessage();
+    } catch (error, stack) {
+      _logMessagingError('getInitialMessage', error, stack);
+      return null;
+    }
+  }
+
+  Future<NotificationSettings?> _getNotificationSettings() async {
+    try {
+      return await _messaging.getNotificationSettings();
+    } catch (error, stack) {
+      _logMessagingError('getNotificationSettings', error, stack);
+      return null;
+    }
+  }
+
+  Future<void> _registerCurrentToken() async {
+    try {
+      final token = await _messaging.getToken();
+      await _saveTokenToFirestore(token);
+    } catch (error, stack) {
+      // Devices without a usable Firebase Instance ID service can throw
+      // MISSING_INSTANCEID_SERVICE here. Push delivery may be unavailable on
+      // that device, but app startup and local reminders must keep working.
+      _logMessagingError('getToken', error, stack);
+    }
+  }
+
+  void _logMessagingError(String operation, Object error, [StackTrace? stack]) {
+    debugPrint('[Notification] FirebaseMessaging.$operation failed: $error');
+    if (stack != null) {
+      debugPrintStack(stackTrace: stack);
     }
   }
 
