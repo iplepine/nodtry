@@ -40,6 +40,27 @@ add_note() {
   EN_NOTES+=("$2")
 }
 
+if grep -Eq '(수정/삭제 오버플로|약속 카드에 수정|edit/delete.*card|plan card.*(edit|delete))' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "약속 카드에서 바로 수정하고 삭제할 수 있게 됐어요." \
+    "You can now edit and delete a promise right from its card."
+fi
+
+if grep -Eq '(실패를 성공이라|중복 발송|중복.*생성|false success|swallowed error|duplicate (send|create))' <<< "$COMMITS_TEXT"; then
+  add_note \
+    "실천을 확인하거나 똑똑을 보낼 때 실패했는데 성공한 것처럼 보이던 문제를 고쳤어요." \
+    "Fixed cases where confirming a practice or sending a knock failed but looked like it succeeded."
+  add_note \
+    "실수로 두 번 눌러도 약속이나 파트너 연결이 중복으로 만들어지지 않도록 다듬었어요." \
+    "An accidental double tap no longer creates duplicate promises or partner connections."
+  add_note \
+    "집중 타이머가 1시간이 넘는 경우 남은 시간을 잘못 표시하던 문제를 고쳤어요." \
+    "Fixed the focus timer showing the wrong remaining time for sessions longer than an hour."
+  add_note \
+    "영어 사용자에게 안내 문구가 어색하게 나오던 부분과 첫 튜토리얼 번역을 정리했어요." \
+    "Cleaned up awkward English wording and the first-run tutorial translations."
+fi
+
 if grep -Eq '(strength routine|strength training|근력운동)' <<< "$COMMITS_TEXT"; then
   add_note \
     "검증된 추천에 '주 2회 근력운동' 루틴을 추가했어요. WHO·미국 신체활동 지침이 권장하는 최소 효과 용량으로, 약속 만들기에서 바로 골라 시작할 수 있어요." \
