@@ -42,7 +42,12 @@ class PlanCreateState {
     Object? selectedTemplateId = _unset,
     bool? isSaving,
     String? errorMessage,
-    String? existingPlanId,
+    // Sentinel rather than `String?`: initializing from an id-less template (the
+    // "continue after settlement" flow copies a finished plan as a template)
+    // must be able to clear the id left over from the previous save. With plain
+    // null-coalescing that null was ignored and the follow-up plan saved on top
+    // of the finished one.
+    Object? existingPlanId = _unset,
     Plan? originalPlan,
   }) {
     return PlanCreateState(
@@ -57,7 +62,9 @@ class PlanCreateState {
           : selectedTemplateId as String?,
       isSaving: isSaving ?? this.isSaving,
       errorMessage: errorMessage ?? this.errorMessage,
-      existingPlanId: existingPlanId ?? this.existingPlanId,
+      existingPlanId: existingPlanId == _unset
+          ? this.existingPlanId
+          : existingPlanId as String?,
       originalPlan: originalPlan ?? this.originalPlan,
     );
   }

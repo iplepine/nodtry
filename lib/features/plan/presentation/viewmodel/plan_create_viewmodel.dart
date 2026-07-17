@@ -296,7 +296,10 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         prevState.copyWith(
           isSaving: false,
           errorMessage: e.toString(),
-          existingPlanId: createdPlanId,
+          // Keep whatever id we had if the failure landed before the write —
+          // `existingPlanId` now takes an explicit null, so passing
+          // `createdPlanId` straight through would clear it on an edit retry.
+          existingPlanId: createdPlanId ?? prevState.existingPlanId,
         ),
       );
       rethrow;

@@ -394,6 +394,59 @@ void main() {
   );
 
   test(
+    'starting a follow-up plan from a finished one creates it, not overwrites',
+    () async {
+      final repository = _FakeRecordRepository();
+      final container = _buildSaveContainer(repository);
+      addTearDown(container.dispose);
+      await container.read(planCreateViewModelProvider.future);
+      await container.read(myProfileProvider.future);
+      final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
+
+      final notifier = container.read(planCreateViewModelProvider.notifier);
+      await notifier.dispatch(
+        ApplyStudyTemplateIntent(
+          studyPlanTemplatesFor(l10n).firstWhere((t) => t.id == 'walking'),
+        ),
+      );
+      await notifier.dispatch(const SavePlanIntent());
+      expect(repository.createPlanCalls, 1);
+
+      // "Continue after settlement" pushes the plan-create screen with the old
+      // plan copied as a *template* — same content, no id. That screen sees a
+      // non-null planToEdit, so it initializes rather than resetting.
+      final template = Plan(
+        userId: 'user-1',
+        startDate: DateTime(2026, 5, 3),
+        endDate: DateTime(2026, 5, 31),
+        state: PlanState.active,
+        createdAt: DateTime(2026, 5, 3),
+        items: [
+          PlanItem(
+            title: '30분 걷기',
+            days: const [1, 3, 5],
+            count: 3,
+            notificationTime: NotificationTime.custom(21, 0),
+          ),
+        ],
+      );
+      expect(template.id, isNull, reason: 'a template carries no id');
+      await notifier.dispatch(InitializePlanIntent(template));
+
+      // An id-less template must clear the id left over from the last save,
+      // otherwise the follow-up plan silently overwrites the finished one.
+      expect(
+        container.read(planCreateViewModelProvider).value!.existingPlanId,
+        isNull,
+      );
+
+      await notifier.dispatch(const SavePlanIntent());
+      expect(repository.createPlanCalls, 2);
+      expect(repository.updatePlanCalls, 0);
+    },
+  );
+
+  test(
     'retrying after a failed save updates the plan instead of duplicating it',
     () async {
       final repository = _FakeRecordRepository();
