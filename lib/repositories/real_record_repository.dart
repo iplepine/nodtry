@@ -559,7 +559,10 @@ class RealRecordRepository implements RecordRepository {
                     state: HomeCardState.partnerPoke,
                     plan: plan,
                     partnerUid: partnerUid,
-                    headerMessage: hasMissedNotice ? _headerMessage('missedAppeared') : _headerMessage('pokeReadyTurn'),
+                    headerMessage: hasMissedNotice
+                        ? _headerMessage('missedAppeared')
+                        : _headerMessage('pokeReadyTurn'),
+                    hasMissedNotice: hasMissedNotice,
                     canRescue: missedYesterday && yesterdayScheduled,
                   ),
                 );
@@ -1887,7 +1890,7 @@ class RealRecordRepository implements RecordRepository {
       }).length;
 
       if (usedThisWeek >= 1) {
-        throw Exception('이번 주 휴식권을 이미 사용했습니다.');
+        throw const RestPassAlreadyUsedException();
       }
 
       // 1. restedDates에 추가

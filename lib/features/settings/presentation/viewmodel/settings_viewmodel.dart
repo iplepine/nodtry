@@ -4,6 +4,8 @@ import '../settings_state.dart';
 import '../../../../providers/app_settings_provider.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../utils/analytics.dart';
+import '../../../../utils/error_reporter.dart';
+import '../../../../utils/ui_error_codes.dart';
 import '../../../auth/presentation/viewmodel/auth_viewmodel.dart';
 
 final settingsViewModelProvider =
@@ -39,6 +41,10 @@ class SettingsViewModel extends AsyncNotifier<SettingsState> {
 
   Future<void> _withdraw() async {
     final prevState = state.value!;
+    // Deleting an account is irreversible and the row stays on screen while it
+    // runs, so a second tap must not start a second deletion.
+    if (prevState.isWithdrawing) return;
+
     state = AsyncValue.data(
       prevState.copyWith(isWithdrawing: true, errorMessage: null),
     );
@@ -47,9 +53,15 @@ class SettingsViewModel extends AsyncNotifier<SettingsState> {
       final withdrawUseCase = ref.read(withdrawUseCaseProvider);
       await withdrawUseCase.execute();
       state = AsyncValue.data(state.value!.copyWith(isWithdrawing: false));
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorReporter.record(e, stack, reason: 'withdrawAccount');
+      // A code, not `e.toString()`: this used to put the raw exception in front
+      // of the user. See utils/ui_error_codes.dart.
       state = AsyncValue.data(
-        state.value!.copyWith(isWithdrawing: false, errorMessage: e.toString()),
+        state.value!.copyWith(
+          isWithdrawing: false,
+          errorMessage: SettingsErrorCode.withdrawFailed,
+        ),
       );
     }
   }
@@ -61,9 +73,10 @@ class SettingsViewModel extends AsyncNotifier<SettingsState> {
       AnalyticsService.log(AnalyticsEvent.logout);
       // 로그아웃 후 인증 상태를 완전히 초기화하여 잔상 제거
       ref.invalidate(authViewModelProvider);
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorReporter.record(e, stack, reason: 'logout');
       state = AsyncValue.data(
-        state.value!.copyWith(errorMessage: e.toString()),
+        state.value!.copyWith(errorMessage: SettingsErrorCode.logoutFailed),
       );
     }
   }

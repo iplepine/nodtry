@@ -8,6 +8,7 @@ import '../../../models/promise_model.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../widgets/quiet_header.dart';
 import '../../../utils/analytics.dart';
+import '../../../utils/error_reporter.dart';
 import '../domain/usecases/feedback_to_partner_use_case.dart';
 
 /// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel
@@ -101,6 +102,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
           totalWeeks: tWeeks,
           streakCount: m.streakCount,
           canRescue: m.canRescue,
+          hasMissedNotice: m.hasMissedNotice,
           completedPlans: m.completedPlans,
         );
       }).toList();
@@ -179,7 +181,17 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         await _acknowledgePromiseSettlement(intent.planId, intent.comment);
       }
     } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      // A failed action is transient — it must not replace the tab's state.
+      // Publishing it here stranded a raw exception string in an alert dialog
+      // ("Exception: 이번 주 휴식권을 이미 사용했습니다.") while the caller, whose
+      // `await` completed normally, showed its success message at the same time.
+      // Rethrow instead: call sites already map failures to localized copy.
+      ErrorReporter.record(
+        e,
+        stack,
+        reason: 'nowTabDispatch:${intent.runtimeType}',
+      );
+      rethrow;
     }
   }
 
@@ -242,7 +254,10 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         AnalyticsService.log(AnalyticsEvent.promiseSettlementAcknowledged, {
           'has_comment': comment != null && comment.isNotEmpty,
         });
-      case RecordPilotSettlementIntent(:final nextPlanIntent, :final exitReason):
+      case RecordPilotSettlementIntent(
+        :final nextPlanIntent,
+        :final exitReason,
+      ):
         AnalyticsService.log(AnalyticsEvent.pilotSettlementRecorded, {
           'next_plan_intent': nextPlanIntent,
           'exit_reason': exitReason ?? 'none',

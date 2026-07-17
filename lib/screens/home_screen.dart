@@ -4,6 +4,8 @@ import '../theme/app_colors.dart';
 import '../features/now/presentation/now_tab_screen.dart';
 import '../features/history/presentation/screens/history_screen.dart';
 import '../features/us/presentation/screens/us_screen.dart';
+import '../providers/notification_permission_provider.dart';
+import '../widgets/notification_permission_banner.dart';
 
 /// 홈 화면 - 하단 탭 구조
 ///
@@ -21,20 +23,57 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Re-check notification permission when the app returns to the foreground
+    // (e.g. after the user toggles it in OS settings).
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(notificationPermissionProvider);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // When the banner is shown it consumes the top safe area itself, so strip
+    // the tabs' top inset to avoid a double gap below it.
+    final notificationsOff =
+        ref.watch(notificationPermissionProvider).value == false;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBody: true,
       extendBodyBehindAppBar: false,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: const [NowTab(), HistoryScreen(), UsScreen()],
+      body: Column(
+        children: [
+          const NotificationPermissionBanner(),
+          Expanded(
+            child: notificationsOff
+                ? MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: _buildTabStack(),
+                  )
+                : _buildTabStack(),
+          ),
+        ],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -112,6 +151,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTabStack() {
+    return IndexedStack(
+      index: _currentIndex,
+      children: const [NowTab(), HistoryScreen(), UsScreen()],
     );
   }
 }

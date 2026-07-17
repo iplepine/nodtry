@@ -27,6 +27,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
   Duration? _pausedRemaining;
   Timer? _ticker;
   bool _finished = false;
+  ModalRoute<Object?>? _route;
 
   @override
   void initState() {
@@ -41,10 +42,31 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _route = ModalRoute.of(context);
+  }
+
+  @override
   void dispose() {
     _ticker?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  /// Closes the timer screen with [result].
+  ///
+  /// The give-up dialog sits above this screen on the same navigator, so a bare
+  /// `pop` fired from the ticker would close that dialog instead — handing a
+  /// Duration to a `showDialog<bool>`. Drop any route stacked above us first.
+  void _popScreen(Duration? result) {
+    if (!mounted) return;
+    final navigator = Navigator.of(context);
+    final route = _route;
+    if (route != null && route.isActive && !route.isCurrent) {
+      navigator.popUntil((r) => r == route);
+    }
+    navigator.pop(result);
   }
 
   @override
@@ -70,7 +92,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
       AnalyticsService.log(AnalyticsEvent.focusTimerCompleted, {
         'duration_min': widget.minutes,
       });
-      if (mounted) Navigator.of(context).pop(_total);
+      _popScreen(_total);
     } else if (mounted) {
       setState(() {});
     }
@@ -98,7 +120,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
       'elapsed_min': _currentElapsed().inMinutes,
       'manual': true,
     });
-    Navigator.of(context).pop(_currentElapsed());
+    _popScreen(_currentElapsed());
   }
 
   void _togglePause() {
@@ -143,21 +165,24 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
         ],
       ),
     );
-    if (confirmed == true && mounted) {
+    // `_finished` can flip while the dialog is open: the session may have run
+    // out, in which case the ticker already closed this screen as a success.
+    if (confirmed == true && mounted && !_finished) {
       _finished = true;
       _ticker?.cancel();
       AnalyticsService.log(AnalyticsEvent.focusTimerCancelled, {
         'duration_min': widget.minutes,
         'elapsed_min': _currentElapsed().inMinutes,
       });
-      Navigator.of(context).pop(null);
+      _popScreen(null);
     }
   }
 
   String _formatRemaining(Duration d) {
+    final h = d.inHours;
     final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$m:$s';
+    return h > 0 ? '$h:$m:$s' : '$m:$s';
   }
 
   @override

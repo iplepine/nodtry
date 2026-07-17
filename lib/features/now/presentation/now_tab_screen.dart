@@ -15,7 +15,9 @@ import '../../../models/home_state.dart';
 import '../../../routes/app_router.dart';
 import '../../../utils/time_formatter.dart';
 import '../../../utils/build_flags.dart';
+import '../../../utils/error_reporter.dart';
 import '../../../models/promise_model.dart';
+import '../../../repositories/record_repository.dart';
 import 'now_tab_intent.dart';
 import 'now_tab_state.dart';
 import 'now_tab_viewmodel.dart';
@@ -51,6 +53,13 @@ class _NowTabState extends ConsumerState<NowTab>
   bool _isHandlingNotificationInput = false;
   bool _isHandlingNotificationSkip = false;
   final Set<String> _autoAcknowledgedPokes = {};
+
+  /// Actions currently awaiting the network, keyed by intent + target.
+  ///
+  /// Nothing on a card disables itself while its handler is in flight, so a
+  /// double tap used to fire the intent twice — two knocks meant the partner
+  /// got two push notifications for one tap.
+  final Set<String> _inFlightActions = {};
 
   // Primary 카드 캐러셀: 점 인디케이터 탭 / '넘기기' 버튼으로 오늘의 다른 실천을 순회한다.
   int _primaryActiveIndex = 0;
@@ -451,65 +460,91 @@ class _NowTabState extends ConsumerState<NowTab>
     );
   }
 
+  /// Runs [action] unless the same [key] is already in flight.
+  ///
+  /// Guards the repeat-tap window between a tap and its network round-trip.
+  /// Silently dropping the second tap is the point: these actions are visible to
+  /// the partner, so firing twice is worse than doing nothing.
+  Future<void> _runGuarded(String key, Future<void> Function() action) async {
+    if (!_inFlightActions.add(key)) return;
+    try {
+      await action();
+    } finally {
+      _inFlightActions.remove(key);
+    }
+  }
+
   Future<void> _handleCheckIt(HomeCardModel managerCard) async {
     if (managerCard.plan?.id == null) return;
 
     final planId = managerCard.plan!.id!;
 
-    // 카드 상태에 따라 다른 인텐트 발송
-    if (managerCard.state == HomeCardState.partnerPlanCreate ||
-        managerCard.state == HomeCardState.partnerPlanModify) {
-      try {
-        await ref
-            .read(nowTabViewModelProvider.notifier)
-            .dispatch(ApprovePlanIntent(planId));
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.nowApproveCheering),
-              duration: const Duration(seconds: 2),
-            ),
-          );
+    await _runGuarded('checkIt:$planId', () async {
+      // 카드 상태에 따라 다른 인텐트 발송
+      if (managerCard.state == HomeCardState.partnerPlanCreate ||
+          managerCard.state == HomeCardState.partnerPlanModify) {
+        try {
+          await ref
+              .read(nowTabViewModelProvider.notifier)
+              .dispatch(ApprovePlanIntent(planId));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.nowApproveCheering),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
+        } catch (_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.nowApproveFailed),
+              ),
+            );
+          }
         }
-      } catch (_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.nowApproveFailed),
-            ),
-          );
+      } else if (managerCard.state == HomeCardState.partnerAction ||
+          managerCard.state == HomeCardState.partnerTodayComplete) {
+        // 실천 확인
+        try {
+          await ref
+              .read(nowTabViewModelProvider.notifier)
+              .dispatch(VerifyPartnerPlanIntent(planId));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.nowVerifyDone),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
+        } catch (_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.nowVerifyFailed),
+              ),
+            );
+          }
+        }
+      } else {
+        // Fallback
+        try {
+          await ref
+              .read(nowTabViewModelProvider.notifier)
+              .dispatch(CheckPartnerActionIntent(planId));
+        } catch (_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.nowActionFailed),
+              ),
+            );
+          }
         }
       }
-    } else if (managerCard.state == HomeCardState.partnerAction ||
-        managerCard.state == HomeCardState.partnerTodayComplete) {
-      // 실천 확인
-      try {
-        await ref
-            .read(nowTabViewModelProvider.notifier)
-            .dispatch(VerifyPartnerPlanIntent(planId));
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.nowVerifyDone),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      } catch (_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.nowVerifyFailed),
-            ),
-          );
-        }
-      }
-    } else {
-      // Fallback
-      await ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(CheckPartnerActionIntent(planId));
-    }
+    });
   }
 
   Future<void> _handleReject(HomeCardModel managerCard) async {
@@ -562,18 +597,28 @@ class _NowTabState extends ConsumerState<NowTab>
 
     if (finalReason != null && finalReason.isNotEmpty) {
       if (!mounted) return;
-      await ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(
-            RejectPlanIntent(managerCard.plan!.id!, reason: finalReason),
-          );
+      try {
+        await ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(
+              RejectPlanIntent(managerCard.plan!.id!, reason: finalReason),
+            );
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.nowRejectRequested),
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowRejectRequested),
+            ),
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowActionFailed),
+            ),
+          );
+        }
       }
     }
   }
@@ -675,70 +720,82 @@ class _NowTabState extends ConsumerState<NowTab>
   Future<void> _handlePass(HomeCardModel managerCard) async {
     if (managerCard.plan?.id == null) return;
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.nowActionPass)),
-      );
+    // Confirm only once the pass has actually been recorded — this used to
+    // announce it up front and then swallow whatever the dispatch did.
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(PassPlanIntent(managerCard.plan!.id!));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.nowActionPass)),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.nowActionFailed)),
+        );
+      }
     }
-
-    // Dispatch Pass Intent
-    await ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(PassPlanIntent(managerCard.plan!.id!));
   }
 
   Future<void> _handlePokeUser(HomeCardModel model) async {
     if (model.partnerUid == null) return;
     final l10n = AppLocalizations.of(context)!;
-    try {
-      await ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(
-            PokeUserIntent(
-              model.partnerUid!,
-              message: l10n.nowPokeNoActivityMessage,
-            ),
+    await _runGuarded('pokeUser:${model.partnerUid}', () async {
+      try {
+        await ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(
+              PokeUserIntent(
+                model.partnerUid!,
+                message: l10n.nowPokeNoActivityMessage,
+              ),
+            );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeSent)),
           );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeSent)),
-        );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)),
+          );
+        }
       }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)),
-        );
-      }
-    }
+    });
   }
 
   Future<void> _handlePokePartner(HomeCardModel model) async {
     if (model.plan?.id == null) return;
     final l10n = AppLocalizations.of(context)!;
-    try {
-      await ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(
-            PokePartnerIntent(
-              model.plan!.id!,
-              message: l10n.nowPokeAgainMessage,
+    await _runGuarded('pokePartner:${model.plan!.id}', () async {
+      try {
+        await ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(
+              PokePartnerIntent(
+                model.plan!.id!,
+                message: l10n.nowPokeAgainMessage,
+              ),
+            );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowPokeAgainSent),
             ),
           );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.nowPokeAgainSent),
-          ),
-        );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)),
+          );
+        }
       }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)),
-        );
-      }
-    }
+    });
   }
 
   Future<void> _handleAcknowledgePromiseSettled(HomeCardModel card) async {
@@ -784,14 +841,24 @@ class _NowTabState extends ConsumerState<NowTab>
   Future<void> _handleContinueAfterSettlement(HomeCardModel card) async {
     if (card.plan?.id == null) return;
 
-    await ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(
-          RecordPilotSettlementIntent(
-            card.plan!.id!,
-            nextPlanIntent: 'continue',
-          ),
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(
+            RecordPilotSettlementIntent(
+              card.plan!.id!,
+              nextPlanIntent: 'continue',
+            ),
+          );
+    } catch (_) {
+      // Don't move on to the next plan if the settlement wasn't recorded.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.nowActionFailed)),
         );
+      }
+      return;
+    }
 
     if (!mounted) return;
     context.push(AppRoutes.planCreate, extra: _planAsNewTemplate(card.plan!));
@@ -822,15 +889,24 @@ class _NowTabState extends ConsumerState<NowTab>
     final reason = await _showPilotExitReasonDialog(context);
     if (reason == null || reason.trim().isEmpty) return;
 
-    await ref
-        .read(nowTabViewModelProvider.notifier)
-        .dispatch(
-          RecordPilotSettlementIntent(
-            card.plan!.id!,
-            nextPlanIntent: 'stop',
-            exitReason: reason,
-          ),
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(
+            RecordPilotSettlementIntent(
+              card.plan!.id!,
+              nextPlanIntent: 'stop',
+              exitReason: reason,
+            ),
+          );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.nowActionFailed)),
         );
+      }
+      return;
+    }
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -956,8 +1032,7 @@ class _NowTabState extends ConsumerState<NowTab>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              e.toString().contains('이미 사용') ||
-                      e.toString().contains('already used')
+              e is RestPassAlreadyUsedException
                   ? dl10n.nowRestPassAlreadyUsed
                   : dl10n.nowRestPassError,
             ),
@@ -1152,9 +1227,17 @@ class _NowTabState extends ConsumerState<NowTab>
     if (!_autoAcknowledgedPokes.add(planId)) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(AcknowledgePokeIntent(planId));
+      // Automatic and invisible to the user, so there is nothing to report — but
+      // it still has to be caught, or a failure becomes an unhandled async error.
+      // Drop the id again so a later rebuild can retry the acknowledgement.
+      unawaited(
+        ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(AcknowledgePokeIntent(planId))
+            .catchError((Object _) {
+              _autoAcknowledgedPokes.remove(planId);
+            }),
+      );
     });
   }
 
@@ -1492,6 +1575,11 @@ class _NowTabState extends ConsumerState<NowTab>
         // 화면 전체가 에러인 경우는 build()의 error 위젯이 처리
         if (previous.hasError != true) {
           final error = next.error;
+          ErrorReporter.record(
+            error ?? 'unknown',
+            next.stackTrace,
+            reason: 'nowTabLoad',
+          );
           final dl10n = AppLocalizations.of(context)!;
           String errorMessage = dl10n.historyErrorUnknown;
           String? errorUrl;
@@ -1508,9 +1596,11 @@ class _NowTabState extends ConsumerState<NowTab>
             if (match != null) {
               errorUrl = match.group(0);
             }
-          } else {
-            errorMessage = error.toString();
           }
+          // Anything else keeps the localized fallback above — a raw
+          // `error.toString()` here meant users read Firestore internals like
+          // "[cloud_firestore/permission-denied] The caller does not have...".
+          // The detail still reaches Crashlytics via ErrorReporter.
 
           showDialog(
             context: context,
@@ -1766,11 +1856,18 @@ class _NowTabState extends ConsumerState<NowTab>
                                         state,
                                       ),
                                       onReconcile: () {
-                                        ref
-                                            .read(
-                                              nowTabViewModelProvider.notifier,
-                                            )
-                                            .dispatch(const RefreshIntent());
+                                        // Refresh only re-reads the stream; a
+                                        // failure surfaces through the tab's own
+                                        // error handling, so ignore it here
+                                        // rather than let it go unhandled.
+                                        unawaited(
+                                          ref
+                                              .read(
+                                                nowTabViewModelProvider.notifier,
+                                              )
+                                              .dispatch(const RefreshIntent())
+                                              .catchError((Object _) {}),
+                                        );
                                       },
                                       exactTimeText: _getExactTimeText(state),
                                     ),
@@ -3877,8 +3974,7 @@ class _ManagerQuickCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: Text(
-                  (model.headerMessage == '놓친 약속이 떴어요' ||
-                          model.headerMessage == 'Missed promise appeared')
+                  model.hasMissedNotice
                       ? l10n.nowPartnerMissedPokeBody(
                           partnerName ?? l10n.nowPartnerFallback2,
                         )

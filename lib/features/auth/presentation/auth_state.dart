@@ -10,7 +10,9 @@ abstract class AuthState with _$AuthState {
     @Default(false) bool isAppleLoading,
     @Default(false) bool isGuestLoading,
     @Default(false) bool isEmailLoading,
-    String? errorMessage,
+    /// An [AuthErrorCode], not a sentence — the widget layer resolves it to
+    /// localized copy. See `utils/ui_error_codes.dart`.
+    String? errorCode,
   }) = _AuthState;
 }
 

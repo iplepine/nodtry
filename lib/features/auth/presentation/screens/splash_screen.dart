@@ -9,6 +9,7 @@ import '../../../../routes/app_router.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../tutorial/presentation/tutorial_screen.dart';
 
+import '../auth_error_text.dart';
 import '../auth_state.dart';
 import '../viewmodel/auth_viewmodel.dart';
 
@@ -129,19 +130,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     // Listen to errors
     ref.listen(authViewModelProvider, (prev, next) {
-      if (next is AsyncError ||
-          (next is AsyncData && next.value?.errorMessage != null)) {
-        final error = next is AsyncError
-            ? next.error.toString()
-            : next.value?.errorMessage;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.splashLoginFailed(error.toString()),
-            ),
-          ),
-        );
-      }
+      final code = next.value?.errorCode;
+      // Only react to a *new* failure: the code lingers in state until the next
+      // attempt clears it, so re-firing on every rebuild would repeat the snack.
+      if (code == null || prev?.value?.errorCode == code) return;
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(authErrorText(l10n, code))));
     });
 
     if (!_tutorialStateReady) {

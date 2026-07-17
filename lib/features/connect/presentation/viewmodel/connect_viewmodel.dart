@@ -58,6 +58,13 @@ class ConnectViewModel extends AsyncNotifier<ConnectState> {
 
   Future<void> _submitCode(String code) async {
     final prevState = state.value!;
+    // The screen submits from three places (typing the 8th character, the
+    // button, and a clipboard paste) and awaits the profile list before getting
+    // here, so two submissions can overlap. connectWithCode batch-writes two
+    // relation docs with fresh ids and no duplicate check, so a second run would
+    // leave four relation records for one partner.
+    if (prevState.isProcessing) return;
+
     final myCode = ref.read(myProfileProvider).value?.inviteCode;
 
     if (code == myCode) {

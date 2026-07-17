@@ -225,14 +225,6 @@
   "usGuestWarningMessage": "If you change phone or delete app/data, you may lose records.",
   "usGuestWarningAction": "Link Account to Keep Records",
   "usLinkSuccess": "Google account linked successfully!",
-  "usLinkError": "Account linking failed: {error}",
-  "@usLinkError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "usLoadError": "Error loading connections",
   "usNoInviteCode": "No Code",
   "usNoName": "No Name",
@@ -248,14 +240,7 @@
   },
   "usDisconnectConfirm": "Disconnect",
   "usDisconnectSuccess": "Disconnected successfully.",
-  "usDisconnectError": "Disconnection failed: {error}",
-  "@usDisconnectError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
+  "usDisconnectError": "We couldn't disconnect. Please try again.",
   "usDisconnectTooltip": "Disconnect",
   "usCropImageTitle": "Crop Profile Image",
   "cancel": "Cancel",
@@ -1011,7 +996,7 @@
   "@settingsAuthServiceNotFound": {
     "description": "Error message when auth service is missing"
   },
-  "settingsDeleteAccountFailed": "Failed to delete account: {error}",
+  "settingsDeleteAccountFailed": "We couldn't delete your account. Please try again.",
   "reconcileTitle": "Reconcile",
   "reconcileActuallyDone": "Actually did it",
   "reconcileTookRest": "Took a break today",
@@ -1274,12 +1259,7 @@
   },
   "planTellUsActionFirst": "Tell us what you want to promise!",
   "planProposalSaved": "Proposal saved.\nGo chat about it with your partner!",
-  "planSaveError": "An error occurred while saving: {error}",
-  "@planSaveError": {
-    "placeholders": {
-      "error": { "type": "String" }
-    }
-  },
+  "planSaveError": "We couldn't save your promise. Please try again.",
   "planNext": "Next",
   "focusTimerPickerTitle": "How long do you want to focus?",
   "focusTimerPickerSubtitle": "When the timer ends, the \"Done\" note opens automatically.",
@@ -1473,12 +1453,6 @@
     }
   },
   "promiseSheetClose": "Close",
-  "splashLoginFailed": "Login failed: {error}",
-  "@splashLoginFailed": {
-    "placeholders": {
-      "error": { "type": "String" }
-    }
-  },
   "splashLoggingIn": "Signing in…",
   "emailLoginToggleSignUp": "No account? Sign up",
   "emailLoginToggleLogin": "Already have an account? Log in",
@@ -1521,12 +1495,7 @@
   "allPlansDeleteTitle": "Delete this promise?",
   "allPlansDeleteBody": "This can't be undone.",
   "allPlansDeleted": "Promise deleted.",
-  "allPlansDeleteFailed": "Delete failed: {error}",
-  "@allPlansDeleteFailed": {
-    "placeholders": {
-      "error": { "type": "String" }
-    }
-  },
+  "allPlansDeleteFailed": "We couldn't delete that. Please try again.",
   "allPlansDelete": "Delete",
   "allPlansCancel": "Cancel",
   "historyErrorUnknown": "An unknown error occurred.",
@@ -1550,12 +1519,7 @@
   "historyEmpty": "No promises recorded yet",
   "usNoticeTitle": "Notice",
   "usOk": "OK",
-  "usProfileSaveFailed": "Profile save failed: {error}",
-  "@usProfileSaveFailed": {
-    "placeholders": {
-      "error": { "type": "String" }
-    }
-  },
+  "usProfileSaveFailed": "We couldn't save your profile. Please try again.",
   "usEditProfile": "Edit profile",
   "usNameLabel": "Name",
   "usStatusLabel": "Status message",
@@ -1569,20 +1533,10 @@
   "usDeletePlanTitle": "Delete this promise?",
   "usDeletePlanBody": "This can't be undone.",
   "usPlanDeleted": "Promise deleted.",
-  "usDeleteFailed": "Delete failed: {error}",
-  "@usDeleteFailed": {
-    "placeholders": {
-      "error": { "type": "String" }
-    }
-  },
+  "usDeleteFailed": "We couldn't delete that. Please try again.",
   "usDelete": "Delete",
   "planDetailPracticeHistory": "Practice log",
-  "planDetailLoadFailed": "Couldn't load records.\n{error}",
-  "@planDetailLoadFailed": {
-    "placeholders": {
-      "error": { "type": "String" }
-    }
-  },
+  "planDetailLoadFailed": "Couldn't load records. Please try again.",
   "planDetailNoRecords": "No records yet.",
   "planDetailNotSavedPlan": "Plan not saved.",
   "planDetailRecordDone": "Done",
@@ -1590,12 +1544,7 @@
   "planDetailRecordRested": "Rested",
   "planDetailRecordRescued": "Acknowledged",
   "planDetailPokeSent": "Knock knock — door tapped!",
-  "planDetailPokeFailed": "Send failed: {error}",
-  "@planDetailPokeFailed": {
-    "placeholders": {
-      "error": { "type": "String" }
-    }
-  },
+  "planDetailPokeFailed": "We couldn't send that. Please try again.",
   "planDetailPokeDoneToday": "Knock sent for today",
   "planDetailPokeSending": "Sending…",
   "planDetailPokeAsk": "Knock knock… are you forgetting?",
@@ -1616,12 +1565,7 @@
   "planDetailStopBody": "Even if you stop, your record so far is kept.",
   "planDetailCancel": "Cancel",
   "planDetailStopped": "Promise stopped.",
-  "planDetailActionFailed": "Action failed: {error}",
-  "@planDetailActionFailed": {
-    "placeholders": {
-      "error": { "type": "String" }
-    }
-  },
+  "planDetailActionFailed": "Something went wrong. Please try again.",
   "planDetailStop": "Stop",
   "planDetailRestartTitle": "Restart with the same promise?",
   "planDetailRestartBody": "We'll copy the previous promise as-is.\nYou can edit it before starting.",
@@ -2021,5 +1965,32 @@
   "accountLinkErrorInvalidCredential": "The credentials are invalid.",
   "accountLinkErrorNotAllowed": "This operation isn't allowed.",
   "accountLinkErrorGeneric": "Something went wrong while linking your account.",
-  "planCreateErrorNoUser": "We couldn't find your account. Please sign in again."
+  "planCreateErrorNoUser": "We couldn't find your account. Please sign in again.",
+  "notifyBannerTitle": "Notifications are off",
+  "notifyBannerBody": "Turn them on to get your partner's check-ins and reminders.",
+  "notifyBannerAction": "Turn on",
+  "nowActionFailed": "Something went wrong. Please try again.",
+  "usNameRequired": "Please enter a name.",
+  "usImagePickFailed": "We couldn't use that image. Please try another one.",
+  "settingsLogoutFailed": "We couldn't sign you out. Please try again.",
+  "settingsDeletingAccount": "Deleting your account…",
+  "authErrorInvalidCredential": "That email or password isn't right.",
+  "authErrorUserNotFound": "We couldn't find that account.",
+  "authErrorEmailInUse": "That email is already signed up.",
+  "authErrorInvalidEmail": "That email address isn't valid.",
+  "authErrorWeakPassword": "Please use a password of at least 6 characters.",
+  "authErrorTooManyRequests": "Too many attempts. Please try again in a moment.",
+  "authErrorNetwork": "Check your connection and try again.",
+  "authErrorGeneric": "Sign-in failed. Please try again.",
+  "tutorialSkip": "Skip",
+  "tutorialClose": "Close",
+  "tutorialNext": "Next",
+  "tutorialStart": "Okay, let's start",
+  "tutorialFooter": "One small promise is enough to begin.",
+  "tutorialPage1Title": "Keep it small",
+  "tutorialPage1Body": "Instead of a vague goal, make one promise you can keep today. Starting small is what gets you moving.",
+  "tutorialPage2Title": "You don't have to do it alone",
+  "tutorialPage2Body": "Connect with a partner to have them check in on what you did. Less pressure, more follow-through.",
+  "tutorialPage3Title": "Let your record shape what's next",
+  "tutorialPage3Body": "Track what you kept and what you put off, then size your next promise to match. Even a miss is material for the next one."
 }

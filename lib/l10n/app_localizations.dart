@@ -440,12 +440,6 @@ abstract class AppLocalizations {
   /// **'Google account linked successfully!'**
   String get usLinkSuccess;
 
-  /// No description provided for @usLinkError.
-  ///
-  /// In en, this message translates to:
-  /// **'Account linking failed: {error}'**
-  String usLinkError(String error);
-
   /// No description provided for @usLoadError.
   ///
   /// In en, this message translates to:
@@ -497,8 +491,8 @@ abstract class AppLocalizations {
   /// No description provided for @usDisconnectError.
   ///
   /// In en, this message translates to:
-  /// **'Disconnection failed: {error}'**
-  String usDisconnectError(String error);
+  /// **'We couldn\'t disconnect. Please try again.'**
+  String get usDisconnectError;
 
   /// No description provided for @usDisconnectTooltip.
   ///
@@ -1661,8 +1655,8 @@ abstract class AppLocalizations {
   /// No description provided for @settingsDeleteAccountFailed.
   ///
   /// In en, this message translates to:
-  /// **'Failed to delete account: {error}'**
-  String settingsDeleteAccountFailed(Object error);
+  /// **'We couldn\'t delete your account. Please try again.'**
+  String get settingsDeleteAccountFailed;
 
   /// No description provided for @reconcileTitle.
   ///
@@ -2561,8 +2555,8 @@ abstract class AppLocalizations {
   /// No description provided for @planSaveError.
   ///
   /// In en, this message translates to:
-  /// **'An error occurred while saving: {error}'**
-  String planSaveError(String error);
+  /// **'We couldn\'t save your promise. Please try again.'**
+  String get planSaveError;
 
   /// No description provided for @focusTimerPickerTitle.
   ///
@@ -2996,12 +2990,6 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get promiseSheetClose;
 
-  /// No description provided for @splashLoginFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Login failed: {error}'**
-  String splashLoginFailed(String error);
-
   /// No description provided for @splashLoggingIn.
   ///
   /// In en, this message translates to:
@@ -3167,8 +3155,8 @@ abstract class AppLocalizations {
   /// No description provided for @allPlansDeleteFailed.
   ///
   /// In en, this message translates to:
-  /// **'Delete failed: {error}'**
-  String allPlansDeleteFailed(String error);
+  /// **'We couldn\'t delete that. Please try again.'**
+  String get allPlansDeleteFailed;
 
   /// No description provided for @allPlansDelete.
   ///
@@ -3305,8 +3293,8 @@ abstract class AppLocalizations {
   /// No description provided for @usProfileSaveFailed.
   ///
   /// In en, this message translates to:
-  /// **'Profile save failed: {error}'**
-  String usProfileSaveFailed(String error);
+  /// **'We couldn\'t save your profile. Please try again.'**
+  String get usProfileSaveFailed;
 
   /// No description provided for @usEditProfile.
   ///
@@ -3389,8 +3377,8 @@ abstract class AppLocalizations {
   /// No description provided for @usDeleteFailed.
   ///
   /// In en, this message translates to:
-  /// **'Delete failed: {error}'**
-  String usDeleteFailed(String error);
+  /// **'We couldn\'t delete that. Please try again.'**
+  String get usDeleteFailed;
 
   /// No description provided for @usDelete.
   ///
@@ -3407,8 +3395,8 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailLoadFailed.
   ///
   /// In en, this message translates to:
-  /// **'Couldn\'t load records.\n{error}'**
-  String planDetailLoadFailed(String error);
+  /// **'Couldn\'t load records. Please try again.'**
+  String get planDetailLoadFailed;
 
   /// No description provided for @planDetailNoRecords.
   ///
@@ -3455,8 +3443,8 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailPokeFailed.
   ///
   /// In en, this message translates to:
-  /// **'Send failed: {error}'**
-  String planDetailPokeFailed(String error);
+  /// **'We couldn\'t send that. Please try again.'**
+  String get planDetailPokeFailed;
 
   /// No description provided for @planDetailPokeDoneToday.
   ///
@@ -3581,8 +3569,8 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailActionFailed.
   ///
   /// In en, this message translates to:
-  /// **'Action failed: {error}'**
-  String planDetailActionFailed(String error);
+  /// **'Something went wrong. Please try again.'**
+  String get planDetailActionFailed;
 
   /// No description provided for @planDetailStop.
   ///
@@ -4825,6 +4813,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We couldn\'t find your account. Please sign in again.'**
   String get planCreateErrorNoUser;
+
+  /// No description provided for @notifyBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off'**
+  String get notifyBannerTitle;
+
+  /// No description provided for @notifyBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn them on to get your partner\'s check-ins and reminders.'**
+  String get notifyBannerBody;
+
+  /// No description provided for @notifyBannerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get notifyBannerAction;
+
+  /// No description provided for @nowActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get nowActionFailed;
+
+  /// No description provided for @usNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a name.'**
+  String get usNameRequired;
+
+  /// No description provided for @usImagePickFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t use that image. Please try another one.'**
+  String get usImagePickFailed;
+
+  /// No description provided for @settingsLogoutFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t sign you out. Please try again.'**
+  String get settingsLogoutFailed;
+
+  /// No description provided for @settingsDeletingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account…'**
+  String get settingsDeletingAccount;
+
+  /// No description provided for @authErrorInvalidCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'That email or password isn\'t right.'**
+  String get authErrorInvalidCredential;
+
+  /// No description provided for @authErrorUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find that account.'**
+  String get authErrorUserNotFound;
+
+  /// No description provided for @authErrorEmailInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'That email is already signed up.'**
+  String get authErrorEmailInUse;
+
+  /// No description provided for @authErrorInvalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'That email address isn\'t valid.'**
+  String get authErrorInvalidEmail;
+
+  /// No description provided for @authErrorWeakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please use a password of at least 6 characters.'**
+  String get authErrorWeakPassword;
+
+  /// No description provided for @authErrorTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please try again in a moment.'**
+  String get authErrorTooManyRequests;
+
+  /// No description provided for @authErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get authErrorNetwork;
+
+  /// No description provided for @authErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in failed. Please try again.'**
+  String get authErrorGeneric;
+
+  /// No description provided for @tutorialSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get tutorialSkip;
+
+  /// No description provided for @tutorialClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get tutorialClose;
+
+  /// No description provided for @tutorialNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get tutorialNext;
+
+  /// No description provided for @tutorialStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Okay, let\'s start'**
+  String get tutorialStart;
+
+  /// No description provided for @tutorialFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'One small promise is enough to begin.'**
+  String get tutorialFooter;
+
+  /// No description provided for @tutorialPage1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it small'**
+  String get tutorialPage1Title;
+
+  /// No description provided for @tutorialPage1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Instead of a vague goal, make one promise you can keep today. Starting small is what gets you moving.'**
+  String get tutorialPage1Body;
+
+  /// No description provided for @tutorialPage2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have to do it alone'**
+  String get tutorialPage2Title;
+
+  /// No description provided for @tutorialPage2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect with a partner to have them check in on what you did. Less pressure, more follow-through.'**
+  String get tutorialPage2Body;
+
+  /// No description provided for @tutorialPage3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Let your record shape what\'s next'**
+  String get tutorialPage3Title;
+
+  /// No description provided for @tutorialPage3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Track what you kept and what you put off, then size your next promise to match. Even a miss is material for the next one.'**
+  String get tutorialPage3Body;
 }
 
 class _AppLocalizationsDelegate

@@ -19,6 +19,10 @@ import 'dart:async';
 class MockRecordRepository extends Fake implements RecordRepository {
   int reportCompletionCallCount = 0;
   String? lastReportedPlanId;
+
+  /// When set, `reportCompletion` throws it — models a repository failure such
+  /// as a Firestore permission error or an already-used rest pass.
+  Object? reportCompletionError;
   int reportSkipCallCount = 0;
   String? lastSkippedPlanId;
   int cheerPartnerCallCount = 0;
@@ -51,6 +55,7 @@ class MockRecordRepository extends Fake implements RecordRepository {
   Future<void> reportCompletion(String planId, {String? note}) async {
     reportCompletionCallCount++;
     lastReportedPlanId = planId;
+    if (reportCompletionError != null) throw reportCompletionError!;
     emit(_currentValue); // Emit current (or updated) value to trigger stream
   }
 
@@ -58,6 +63,15 @@ class MockRecordRepository extends Fake implements RecordRepository {
   Future<void> reportSkip(String planId) async {
     reportSkipCallCount++;
     lastSkippedPlanId = planId;
+    emit(_currentValue);
+  }
+
+  /// When set, `reportRest` throws it.
+  Object? reportRestError;
+
+  @override
+  Future<void> reportRest(String planId) async {
+    if (reportRestError != null) throw reportRestError!;
     emit(_currentValue);
   }
 
@@ -494,5 +508,65 @@ void main() {
     expect(mockRecordRepository.lastSettlementPlanId, 'plan-settle-123');
     expect(mockRecordRepository.lastNextPlanIntent, 'stop');
     expect(mockRecordRepository.lastExitReason, '목표가 너무 컸어요');
+  });
+
+  group('a failing action', () {
+    test('rethrows so the caller can show its localized message', () async {
+      mockGetNowCardsUseCase.emit([]);
+      await readNowState();
+      mockRecordRepository.reportCompletionError = Exception(
+        '이번 주 휴식권을 이미 사용했습니다.',
+      );
+
+      // Regression: dispatch used to swallow this, so every `await dispatch(...)`
+      // completed normally and the success snackbar fired on failure.
+      await expectLater(
+        container
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(const CompletePlanIntent('plan-123')),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('leaves the tab showing its cards rather than an error', () async {
+      final card = const HomeCardModel(state: HomeCardState.todayEmpty);
+      mockGetNowCardsUseCase.emit([card]);
+      await readNowState();
+      mockRecordRepository.reportCompletionError = Exception(
+        'permission-denied',
+      );
+
+      try {
+        await container
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(const CompletePlanIntent('plan-123'));
+      } catch (_) {
+        // expected — asserted above
+      }
+
+      // Regression: the failure was published as AsyncError, which drove the
+      // screen's listener into showing the raw exception text in a dialog.
+      final state = container.read(nowTabViewModelProvider);
+      expect(state.hasError, isFalse);
+      expect(state.value!.allCards, [card]);
+    });
+
+    test('an already-used rest pass reaches the caller as its own type', () async {
+      mockGetNowCardsUseCase.emit([]);
+      await readNowState();
+      mockRecordRepository.reportRestError =
+          const RestPassAlreadyUsedException();
+
+      // The screen tells "you already used this week's pass" apart from a
+      // generic failure. It used to do that with
+      // `e.toString().contains('이미 사용')`, which only worked because the
+      // repository threw a hardcoded Korean sentence.
+      await expectLater(
+        container
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(const RestPlanIntent('plan-123')),
+        throwsA(isA<RestPassAlreadyUsedException>()),
+      );
+    });
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,11 +19,25 @@ import 'package:nod_try/services/notification_service.dart';
 
 class _FakeRecordRepository extends Fake implements RecordRepository {
   Plan? createdPlan;
+  int createPlanCalls = 0;
+  int updatePlanCalls = 0;
+
+  /// When set, `createPlan` blocks until it completes — lets a test hold a save
+  /// in flight and fire a second one, the way a double-tap would.
+  Completer<void>? createGate;
 
   @override
   Future<String> createPlan(Plan plan) async {
+    createPlanCalls++;
+    if (createGate != null) await createGate!.future;
     createdPlan = plan;
     return 'study-plan-id';
+  }
+
+  @override
+  Future<void> updatePlan(Plan plan) async {
+    updatePlanCalls++;
+    createdPlan = plan;
   }
 
   @override
@@ -47,6 +63,10 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
   int? scheduledStartHour;
   int? scheduledEndHour;
 
+  /// Fails the first schedule attempt only — models the realistic case where
+  /// the plan is written but the alarm hand-off blows up afterwards.
+  bool failOnce = false;
+
   @override
   Future<void> cancelPlanReminders(int planId) async {}
 
@@ -66,6 +86,10 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
     int startHour = 0,
     int endHour = 0,
   }) async {
+    if (failOnce) {
+      failOnce = false;
+      throw Exception('scheduling failed');
+    }
     scheduledDays = days;
     scheduledHour = hour;
     scheduledMinute = minute;
@@ -303,5 +327,120 @@ void main() {
       expect(scheduler.scheduledHour, 21);
       expect(scheduler.scheduledMinute, 0);
     },
+  );
+
+  test(
+    'a second send while the first is in flight creates only one plan',
+    () async {
+      final repository = _FakeRecordRepository()..createGate = Completer<void>();
+      final container = _buildSaveContainer(repository);
+      addTearDown(container.dispose);
+      await container.read(planCreateViewModelProvider.future);
+      await container.read(myProfileProvider.future);
+      final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
+
+      final notifier = container.read(planCreateViewModelProvider.notifier);
+      await notifier.dispatch(
+        ApplyStudyTemplateIntent(
+          studyPlanTemplatesFor(l10n).firstWhere((t) => t.id == 'walking'),
+        ),
+      );
+
+      // The send button only pops the screen once the round-trip completes, so
+      // an impatient user can land a second tap while the first is saving.
+      final first = notifier.dispatch(const SavePlanIntent());
+      final second = notifier.dispatch(const SavePlanIntent());
+      repository.createGate!.complete();
+      await Future.wait([first, second]);
+
+      // Regression: both taps reached createPlan with existingPlanId still null,
+      // writing two plans and sending the partner two approval requests.
+      expect(repository.createPlanCalls, 1);
+    },
+  );
+
+  test(
+    'reset clears the id kept from the last save, so the next plan is new',
+    () async {
+      final repository = _FakeRecordRepository();
+      final container = _buildSaveContainer(repository);
+      addTearDown(container.dispose);
+      await container.read(planCreateViewModelProvider.future);
+      await container.read(myProfileProvider.future);
+      final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
+
+      final notifier = container.read(planCreateViewModelProvider.notifier);
+      await notifier.dispatch(
+        ApplyStudyTemplateIntent(
+          studyPlanTemplatesFor(l10n).firstWhere((t) => t.id == 'walking'),
+        ),
+      );
+      await notifier.dispatch(const SavePlanIntent());
+      expect(
+        container.read(planCreateViewModelProvider).value!.existingPlanId,
+        'study-plan-id',
+      );
+
+      // The provider outlives the screen, which resets it on open. Saving now
+      // remembers the created id, so that reset is what stops the next new
+      // promise from overwriting the one just created.
+      await notifier.dispatch(const ResetIntent());
+
+      expect(
+        container.read(planCreateViewModelProvider).value!.existingPlanId,
+        isNull,
+      );
+    },
+  );
+
+  test(
+    'retrying after a failed save updates the plan instead of duplicating it',
+    () async {
+      final repository = _FakeRecordRepository();
+      // Alarm scheduling runs after the plan document is already written.
+      final scheduler = _FakePlanReminderScheduler()..failOnce = true;
+      final container = _buildSaveContainer(repository, scheduler: scheduler);
+      addTearDown(container.dispose);
+      await container.read(planCreateViewModelProvider.future);
+      await container.read(myProfileProvider.future);
+      final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
+
+      final notifier = container.read(planCreateViewModelProvider.notifier);
+      await notifier.dispatch(
+        ApplyStudyTemplateIntent(
+          studyPlanTemplatesFor(l10n).firstWhere((t) => t.id == 'walking'),
+        ),
+      );
+
+      await expectLater(
+        notifier.dispatch(const SavePlanIntent()),
+        throwsA(isA<Exception>()),
+      );
+      expect(repository.createPlanCalls, 1);
+
+      // The user sees the error and taps send again.
+      await notifier.dispatch(const SavePlanIntent());
+
+      // Regression: the created id was never kept, so the retry wrote a second
+      // plan rather than updating the one that already exists.
+      expect(repository.createPlanCalls, 1);
+      expect(repository.updatePlanCalls, 1);
+    },
+  );
+}
+
+ProviderContainer _buildSaveContainer(
+  _FakeRecordRepository repository, {
+  _FakePlanReminderScheduler? scheduler,
+}) {
+  return ProviderContainer(
+    overrides: [
+      recordRepositoryProvider.overrideWithValue(repository),
+      settingAlarmUseCaseProvider.overrideWithValue(
+        SettingAlarmUseCase(scheduler ?? _FakePlanReminderScheduler()),
+      ),
+      myProfileProvider.overrideWithValue(AsyncData(_buildUser())),
+      connectedProfilesProvider.overrideWith((ref) async => <ConnectedUser>[]),
+    ],
   );
 }

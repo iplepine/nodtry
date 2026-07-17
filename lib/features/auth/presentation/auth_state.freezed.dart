@@ -14,7 +14,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuthState {
 
- bool get isAutoLoggingIn; bool get isGoogleLoading; bool get isAppleLoading; bool get isGuestLoading; bool get isEmailLoading; String? get errorMessage;
+ bool get isAutoLoggingIn; bool get isGoogleLoading; bool get isAppleLoading; bool get isGuestLoading; bool get isEmailLoading;/// An [AuthErrorCode], not a sentence — the widget layer resolves it to
+/// localized copy. See `utils/ui_error_codes.dart`.
+ String? get errorCode;
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +27,16 @@ $AuthStateCopyWith<AuthState> get copyWith => _$AuthStateCopyWithImpl<AuthState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthState&&(identical(other.isAutoLoggingIn, isAutoLoggingIn) || other.isAutoLoggingIn == isAutoLoggingIn)&&(identical(other.isGoogleLoading, isGoogleLoading) || other.isGoogleLoading == isGoogleLoading)&&(identical(other.isAppleLoading, isAppleLoading) || other.isAppleLoading == isAppleLoading)&&(identical(other.isGuestLoading, isGuestLoading) || other.isGuestLoading == isGuestLoading)&&(identical(other.isEmailLoading, isEmailLoading) || other.isEmailLoading == isEmailLoading)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthState&&(identical(other.isAutoLoggingIn, isAutoLoggingIn) || other.isAutoLoggingIn == isAutoLoggingIn)&&(identical(other.isGoogleLoading, isGoogleLoading) || other.isGoogleLoading == isGoogleLoading)&&(identical(other.isAppleLoading, isAppleLoading) || other.isAppleLoading == isAppleLoading)&&(identical(other.isGuestLoading, isGuestLoading) || other.isGuestLoading == isGuestLoading)&&(identical(other.isEmailLoading, isEmailLoading) || other.isEmailLoading == isEmailLoading)&&(identical(other.errorCode, errorCode) || other.errorCode == errorCode));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isAutoLoggingIn,isGoogleLoading,isAppleLoading,isGuestLoading,isEmailLoading,errorMessage);
+int get hashCode => Object.hash(runtimeType,isAutoLoggingIn,isGoogleLoading,isAppleLoading,isGuestLoading,isEmailLoading,errorCode);
 
 @override
 String toString() {
-  return 'AuthState(isAutoLoggingIn: $isAutoLoggingIn, isGoogleLoading: $isGoogleLoading, isAppleLoading: $isAppleLoading, isGuestLoading: $isGuestLoading, isEmailLoading: $isEmailLoading, errorMessage: $errorMessage)';
+  return 'AuthState(isAutoLoggingIn: $isAutoLoggingIn, isGoogleLoading: $isGoogleLoading, isAppleLoading: $isAppleLoading, isGuestLoading: $isGuestLoading, isEmailLoading: $isEmailLoading, errorCode: $errorCode)';
 }
 
 
@@ -45,7 +47,7 @@ abstract mixin class $AuthStateCopyWith<$Res>  {
   factory $AuthStateCopyWith(AuthState value, $Res Function(AuthState) _then) = _$AuthStateCopyWithImpl;
 @useResult
 $Res call({
- bool isAutoLoggingIn, bool isGoogleLoading, bool isAppleLoading, bool isGuestLoading, bool isEmailLoading, String? errorMessage
+ bool isAutoLoggingIn, bool isGoogleLoading, bool isAppleLoading, bool isGuestLoading, bool isEmailLoading, String? errorCode
 });
 
 
@@ -62,14 +64,14 @@ class _$AuthStateCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isAutoLoggingIn = null,Object? isGoogleLoading = null,Object? isAppleLoading = null,Object? isGuestLoading = null,Object? isEmailLoading = null,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isAutoLoggingIn = null,Object? isGoogleLoading = null,Object? isAppleLoading = null,Object? isGuestLoading = null,Object? isEmailLoading = null,Object? errorCode = freezed,}) {
   return _then(_self.copyWith(
 isAutoLoggingIn: null == isAutoLoggingIn ? _self.isAutoLoggingIn : isAutoLoggingIn // ignore: cast_nullable_to_non_nullable
 as bool,isGoogleLoading: null == isGoogleLoading ? _self.isGoogleLoading : isGoogleLoading // ignore: cast_nullable_to_non_nullable
 as bool,isAppleLoading: null == isAppleLoading ? _self.isAppleLoading : isAppleLoading // ignore: cast_nullable_to_non_nullable
 as bool,isGuestLoading: null == isGuestLoading ? _self.isGuestLoading : isGuestLoading // ignore: cast_nullable_to_non_nullable
 as bool,isEmailLoading: null == isEmailLoading ? _self.isEmailLoading : isEmailLoading // ignore: cast_nullable_to_non_nullable
-as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as bool,errorCode: freezed == errorCode ? _self.errorCode : errorCode // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -155,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isAutoLoggingIn,  bool isGoogleLoading,  bool isAppleLoading,  bool isGuestLoading,  bool isEmailLoading,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isAutoLoggingIn,  bool isGoogleLoading,  bool isAppleLoading,  bool isGuestLoading,  bool isEmailLoading,  String? errorCode)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthState() when $default != null:
-return $default(_that.isAutoLoggingIn,_that.isGoogleLoading,_that.isAppleLoading,_that.isGuestLoading,_that.isEmailLoading,_that.errorMessage);case _:
+return $default(_that.isAutoLoggingIn,_that.isGoogleLoading,_that.isAppleLoading,_that.isGuestLoading,_that.isEmailLoading,_that.errorCode);case _:
   return orElse();
 
 }
@@ -176,10 +178,10 @@ return $default(_that.isAutoLoggingIn,_that.isGoogleLoading,_that.isAppleLoading
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isAutoLoggingIn,  bool isGoogleLoading,  bool isAppleLoading,  bool isGuestLoading,  bool isEmailLoading,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isAutoLoggingIn,  bool isGoogleLoading,  bool isAppleLoading,  bool isGuestLoading,  bool isEmailLoading,  String? errorCode)  $default,) {final _that = this;
 switch (_that) {
 case _AuthState():
-return $default(_that.isAutoLoggingIn,_that.isGoogleLoading,_that.isAppleLoading,_that.isGuestLoading,_that.isEmailLoading,_that.errorMessage);case _:
+return $default(_that.isAutoLoggingIn,_that.isGoogleLoading,_that.isAppleLoading,_that.isGuestLoading,_that.isEmailLoading,_that.errorCode);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +198,10 @@ return $default(_that.isAutoLoggingIn,_that.isGoogleLoading,_that.isAppleLoading
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isAutoLoggingIn,  bool isGoogleLoading,  bool isAppleLoading,  bool isGuestLoading,  bool isEmailLoading,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isAutoLoggingIn,  bool isGoogleLoading,  bool isAppleLoading,  bool isGuestLoading,  bool isEmailLoading,  String? errorCode)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthState() when $default != null:
-return $default(_that.isAutoLoggingIn,_that.isGoogleLoading,_that.isAppleLoading,_that.isGuestLoading,_that.isEmailLoading,_that.errorMessage);case _:
+return $default(_that.isAutoLoggingIn,_that.isGoogleLoading,_that.isAppleLoading,_that.isGuestLoading,_that.isEmailLoading,_that.errorCode);case _:
   return null;
 
 }
@@ -211,7 +213,7 @@ return $default(_that.isAutoLoggingIn,_that.isGoogleLoading,_that.isAppleLoading
 
 
 class _AuthState implements AuthState {
-  const _AuthState({this.isAutoLoggingIn = false, this.isGoogleLoading = false, this.isAppleLoading = false, this.isGuestLoading = false, this.isEmailLoading = false, this.errorMessage});
+  const _AuthState({this.isAutoLoggingIn = false, this.isGoogleLoading = false, this.isAppleLoading = false, this.isGuestLoading = false, this.isEmailLoading = false, this.errorCode});
   
 
 @override@JsonKey() final  bool isAutoLoggingIn;
@@ -219,7 +221,9 @@ class _AuthState implements AuthState {
 @override@JsonKey() final  bool isAppleLoading;
 @override@JsonKey() final  bool isGuestLoading;
 @override@JsonKey() final  bool isEmailLoading;
-@override final  String? errorMessage;
+/// An [AuthErrorCode], not a sentence — the widget layer resolves it to
+/// localized copy. See `utils/ui_error_codes.dart`.
+@override final  String? errorCode;
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +235,16 @@ _$AuthStateCopyWith<_AuthState> get copyWith => __$AuthStateCopyWithImpl<_AuthSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthState&&(identical(other.isAutoLoggingIn, isAutoLoggingIn) || other.isAutoLoggingIn == isAutoLoggingIn)&&(identical(other.isGoogleLoading, isGoogleLoading) || other.isGoogleLoading == isGoogleLoading)&&(identical(other.isAppleLoading, isAppleLoading) || other.isAppleLoading == isAppleLoading)&&(identical(other.isGuestLoading, isGuestLoading) || other.isGuestLoading == isGuestLoading)&&(identical(other.isEmailLoading, isEmailLoading) || other.isEmailLoading == isEmailLoading)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthState&&(identical(other.isAutoLoggingIn, isAutoLoggingIn) || other.isAutoLoggingIn == isAutoLoggingIn)&&(identical(other.isGoogleLoading, isGoogleLoading) || other.isGoogleLoading == isGoogleLoading)&&(identical(other.isAppleLoading, isAppleLoading) || other.isAppleLoading == isAppleLoading)&&(identical(other.isGuestLoading, isGuestLoading) || other.isGuestLoading == isGuestLoading)&&(identical(other.isEmailLoading, isEmailLoading) || other.isEmailLoading == isEmailLoading)&&(identical(other.errorCode, errorCode) || other.errorCode == errorCode));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isAutoLoggingIn,isGoogleLoading,isAppleLoading,isGuestLoading,isEmailLoading,errorMessage);
+int get hashCode => Object.hash(runtimeType,isAutoLoggingIn,isGoogleLoading,isAppleLoading,isGuestLoading,isEmailLoading,errorCode);
 
 @override
 String toString() {
-  return 'AuthState(isAutoLoggingIn: $isAutoLoggingIn, isGoogleLoading: $isGoogleLoading, isAppleLoading: $isAppleLoading, isGuestLoading: $isGuestLoading, isEmailLoading: $isEmailLoading, errorMessage: $errorMessage)';
+  return 'AuthState(isAutoLoggingIn: $isAutoLoggingIn, isGoogleLoading: $isGoogleLoading, isAppleLoading: $isAppleLoading, isGuestLoading: $isGuestLoading, isEmailLoading: $isEmailLoading, errorCode: $errorCode)';
 }
 
 
@@ -251,7 +255,7 @@ abstract mixin class _$AuthStateCopyWith<$Res> implements $AuthStateCopyWith<$Re
   factory _$AuthStateCopyWith(_AuthState value, $Res Function(_AuthState) _then) = __$AuthStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isAutoLoggingIn, bool isGoogleLoading, bool isAppleLoading, bool isGuestLoading, bool isEmailLoading, String? errorMessage
+ bool isAutoLoggingIn, bool isGoogleLoading, bool isAppleLoading, bool isGuestLoading, bool isEmailLoading, String? errorCode
 });
 
 
@@ -268,14 +272,14 @@ class __$AuthStateCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isAutoLoggingIn = null,Object? isGoogleLoading = null,Object? isAppleLoading = null,Object? isGuestLoading = null,Object? isEmailLoading = null,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isAutoLoggingIn = null,Object? isGoogleLoading = null,Object? isAppleLoading = null,Object? isGuestLoading = null,Object? isEmailLoading = null,Object? errorCode = freezed,}) {
   return _then(_AuthState(
 isAutoLoggingIn: null == isAutoLoggingIn ? _self.isAutoLoggingIn : isAutoLoggingIn // ignore: cast_nullable_to_non_nullable
 as bool,isGoogleLoading: null == isGoogleLoading ? _self.isGoogleLoading : isGoogleLoading // ignore: cast_nullable_to_non_nullable
 as bool,isAppleLoading: null == isAppleLoading ? _self.isAppleLoading : isAppleLoading // ignore: cast_nullable_to_non_nullable
 as bool,isGuestLoading: null == isGuestLoading ? _self.isGuestLoading : isGuestLoading // ignore: cast_nullable_to_non_nullable
 as bool,isEmailLoading: null == isEmailLoading ? _self.isEmailLoading : isEmailLoading // ignore: cast_nullable_to_non_nullable
-as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as bool,errorCode: freezed == errorCode ? _self.errorCode : errorCode // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

@@ -11,6 +11,7 @@ import '../../../../routes/app_router.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../models/connected_user.dart';
 import '../../../../models/plan_model.dart';
+import '../../../../utils/error_reporter.dart';
 import '../../../../widgets/app_underlined_text.dart';
 import '../../../../widgets/plan/plan_card.dart';
 import '../../../../providers/plan_list_provider.dart';
@@ -361,13 +362,14 @@ class _UsScreenState extends ConsumerState<UsScreen> {
 
   void _showEmailLinkDialog(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(l10n.usLinkEmailTitle),
         content: Form(
           key: formKey,
@@ -410,22 +412,32 @@ class _UsScreenState extends ConsumerState<UsScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(l10n.cancel),
           ),
           TextButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                Navigator.pop(context);
-                ref
-                    .read(usViewModelProvider.notifier)
-                    .dispatch(
-                      UsIntent.linkEmail(
-                        emailController.text.trim(),
-                        passwordController.text.trim(),
-                      ),
-                    );
-                ScaffoldMessenger.of(context).showSnackBar(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              // Close before awaiting: a failure makes the view model publish an
+              // errorNotification, and the screen's listener stacks an error
+              // dialog on top of this one — popping afterwards would close that.
+              Navigator.pop(dialogContext);
+              final notifier = ref.read(usViewModelProvider.notifier);
+              // An error dialog dismissed by tapping the barrier leaves the old
+              // notification set; drop it so the check below sees this attempt.
+              notifier.clearError();
+              await notifier.dispatch(
+                UsIntent.linkEmail(
+                  emailController.text.trim(),
+                  passwordController.text.trim(),
+                ),
+              );
+              // dispatch reports link failures as state, never by throwing, so
+              // the outcome has to be read back before claiming success.
+              final failed =
+                  ref.read(usViewModelProvider).value?.errorNotification != null;
+              if (!failed) {
+                messenger.showSnackBar(
                   SnackBar(content: Text(l10n.usLinkEmailSuccess)),
                 );
               }
@@ -880,7 +892,7 @@ class _YouSection extends ConsumerWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.usDisconnectError(e.toString()))),
+            SnackBar(content: Text(l10n.usDisconnectError)),
           );
         }
       }
@@ -1168,6 +1180,7 @@ class _EditProfileDialogContentState
   late TextEditingController _statusController;
   File? _tempProfileImage;
   bool _isSaving = false;
+  String? _nameError;
 
   @override
   void initState() {
@@ -1218,20 +1231,36 @@ class _EditProfileDialogContentState
           });
         }
       }
-    } catch (e) {
-      debugPrint('이미지 선택 에러: $e');
+    } catch (e, stack) {
+      // A permission denial or a cropper failure used to leave the user tapping
+      // the camera badge with nothing happening at all.
+      ErrorReporter.record(e, stack, reason: 'pickProfileImage');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(widget.l10n.usImagePickFailed)),
+        );
+      }
     }
   }
 
   Future<void> _save() async {
+    final name = _nameController.text.trim();
+    // An empty name saved fine and your own view masked it with a fallback, but
+    // partner-facing views null-coalesce — they showed a blank name and a
+    // "Disconnect from ?" dialog.
+    if (name.isEmpty) {
+      setState(() => _nameError = widget.l10n.usNameRequired);
+      return;
+    }
     setState(() {
+      _nameError = null;
       _isSaving = true;
     });
 
     try {
       final updateUseCase = ref.read(updateProfileUseCaseProvider);
       await updateUseCase.execute(
-        name: _nameController.text,
+        name: name,
         statusMessage: _statusController.text.isEmpty
             ? null
             : _statusController.text,
@@ -1244,11 +1273,12 @@ class _EditProfileDialogContentState
       if (mounted) {
         Navigator.pop(context);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorReporter.record(e, stack, reason: 'saveProfile');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(widget.l10n.usProfileSaveFailed(e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(widget.l10n.usProfileSaveFailed)),
+        );
       }
     } finally {
       if (mounted) {
@@ -1366,9 +1396,15 @@ class _EditProfileDialogContentState
           TextField(
             controller: _nameController,
             enabled: !_isSaving,
+            maxLength: 20,
+            onChanged: (_) {
+              if (_nameError != null) setState(() => _nameError = null);
+            },
             decoration: InputDecoration(
               labelText: widget.l10n.usNameLabel,
               labelStyle: TextStyle(color: AppColors.textSecondary),
+              errorText: _nameError,
+              counterText: '',
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: AppColors.divider),
               ),
@@ -1666,7 +1702,7 @@ class _ActivePlanListSection extends ConsumerWidget {
                   if (context.mounted) {
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.usDeleteFailed(e.toString()))));
+                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.usDeleteFailed)));
                   }
                 }
               },

@@ -3,6 +3,16 @@ import '../models/history_item.dart';
 import '../models/plan_model.dart';
 import '../models/promise_model.dart';
 
+/// 이번 주 휴식권을 이미 써서 [RecordRepository.reportRest]가 거절된 경우.
+///
+/// Why: 예전에는 한국어 문장을 담은 [Exception]을 던지고 UI가 그 문장을
+/// `contains('이미 사용')`으로 검사했다. 저장소가 던지는 문장이 로케일과
+/// 무관하게 한국어여서 우연히 동작했을 뿐이라, 문구를 다듬는 순간 조용히
+/// 깨지는 구조였다. 타입으로 구분하면 그런 결합이 사라진다.
+class RestPassAlreadyUsedException implements Exception {
+  const RestPassAlreadyUsedException();
+}
+
 /// 기록 관련 데이터 저장소 인터페이스
 ///
 /// '지금' 탭과 '기록' 탭에서 사용하는 데이터를 관리합니다.

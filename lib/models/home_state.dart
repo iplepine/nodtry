@@ -253,6 +253,13 @@ class HomeCardModel {
   final int? streakCount; // 연속 달성 횟수
   final bool canRescue; // 파트너가 실천 인정 가능 여부
 
+  /// partnerPoke 카드에서 "놓친 약속이 떴어요"인지 "똑똑 보낼 차례"인지 구분한다.
+  ///
+  /// Why: [headerMessage]는 저장소에서 이미 로케일에 맞춰 번역된 표시용 문장이라
+  /// 분기 조건으로 쓰면 안 된다. 실제로 화면이 번역문을 문자열 비교하다가 영어
+  /// 사용자는 항상 잘못된 안내를 봤다.
+  final bool hasMissedNotice;
+
   /// 오늘 완료한 모든 플랜 (todayComplete 상태일 때만 채워짐).
   /// 길이가 2 이상이면 체크리스트 형태로 렌더링.
   final List<Plan> completedPlans;
@@ -269,6 +276,7 @@ class HomeCardModel {
     this.totalWeeks,
     this.streakCount,
     this.canRescue = false,
+    this.hasMissedNotice = false,
     this.completedPlans = const [],
   });
 
@@ -284,6 +292,7 @@ class HomeCardModel {
     int? totalWeeks,
     int? streakCount,
     bool? canRescue,
+    bool? hasMissedNotice,
     List<Plan>? completedPlans,
   }) {
     return HomeCardModel(
@@ -298,6 +307,7 @@ class HomeCardModel {
       totalWeeks: totalWeeks ?? this.totalWeeks,
       streakCount: streakCount ?? this.streakCount,
       canRescue: canRescue ?? this.canRescue,
+      hasMissedNotice: hasMissedNotice ?? this.hasMissedNotice,
       completedPlans: completedPlans ?? this.completedPlans,
     );
   }
@@ -318,6 +328,7 @@ class HomeCardModel {
           totalWeeks == other.totalWeeks &&
           streakCount == other.streakCount &&
           canRescue == other.canRescue &&
+          hasMissedNotice == other.hasMissedNotice &&
           _listEquals(completedPlans, other.completedPlans);
 
   @override
@@ -333,6 +344,7 @@ class HomeCardModel {
       totalWeeks.hashCode ^
       streakCount.hashCode ^
       canRescue.hashCode ^
+      hasMissedNotice.hashCode ^
       Object.hashAll(completedPlans.map((p) => p.id));
 }
 

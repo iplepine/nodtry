@@ -189,11 +189,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usLinkSuccess => 'Google account linked successfully!';
 
   @override
-  String usLinkError(String error) {
-    return 'Account linking failed: $error';
-  }
-
-  @override
   String get usLoadError => 'Error loading connections';
 
   @override
@@ -220,9 +215,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usDisconnectSuccess => 'Disconnected successfully.';
 
   @override
-  String usDisconnectError(String error) {
-    return 'Disconnection failed: $error';
-  }
+  String get usDisconnectError => 'We couldn\'t disconnect. Please try again.';
 
   @override
   String get usDisconnectTooltip => 'Disconnect';
@@ -837,9 +830,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAuthServiceNotFound => 'Auth Service not found';
 
   @override
-  String settingsDeleteAccountFailed(Object error) {
-    return 'Failed to delete account: $error';
-  }
+  String get settingsDeleteAccountFailed =>
+      'We couldn\'t delete your account. Please try again.';
 
   @override
   String get reconcileTitle => 'Reconcile';
@@ -1353,9 +1345,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Proposal saved.\nGo chat about it with your partner!';
 
   @override
-  String planSaveError(String error) {
-    return 'An error occurred while saving: $error';
-  }
+  String get planSaveError =>
+      'We couldn\'t save your promise. Please try again.';
 
   @override
   String get focusTimerPickerTitle => 'How long do you want to focus?';
@@ -1621,11 +1612,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promiseSheetClose => 'Close';
 
   @override
-  String splashLoginFailed(String error) {
-    return 'Login failed: $error';
-  }
-
-  @override
   String get splashLoggingIn => 'Signing in…';
 
   @override
@@ -1715,9 +1701,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allPlansDeleted => 'Promise deleted.';
 
   @override
-  String allPlansDeleteFailed(String error) {
-    return 'Delete failed: $error';
-  }
+  String get allPlansDeleteFailed =>
+      'We couldn\'t delete that. Please try again.';
 
   @override
   String get allPlansDelete => 'Delete';
@@ -1788,9 +1773,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usOk => 'OK';
 
   @override
-  String usProfileSaveFailed(String error) {
-    return 'Profile save failed: $error';
-  }
+  String get usProfileSaveFailed =>
+      'We couldn\'t save your profile. Please try again.';
 
   @override
   String get usEditProfile => 'Edit profile';
@@ -1832,9 +1816,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usPlanDeleted => 'Promise deleted.';
 
   @override
-  String usDeleteFailed(String error) {
-    return 'Delete failed: $error';
-  }
+  String get usDeleteFailed => 'We couldn\'t delete that. Please try again.';
 
   @override
   String get usDelete => 'Delete';
@@ -1843,9 +1825,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDetailPracticeHistory => 'Practice log';
 
   @override
-  String planDetailLoadFailed(String error) {
-    return 'Couldn\'t load records.\n$error';
-  }
+  String get planDetailLoadFailed =>
+      'Couldn\'t load records. Please try again.';
 
   @override
   String get planDetailNoRecords => 'No records yet.';
@@ -1869,9 +1850,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDetailPokeSent => 'Knock knock — door tapped!';
 
   @override
-  String planDetailPokeFailed(String error) {
-    return 'Send failed: $error';
-  }
+  String get planDetailPokeFailed =>
+      'We couldn\'t send that. Please try again.';
 
   @override
   String get planDetailPokeDoneToday => 'Knock sent for today';
@@ -1936,9 +1916,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDetailStopped => 'Promise stopped.';
 
   @override
-  String planDetailActionFailed(String error) {
-    return 'Action failed: $error';
-  }
+  String get planDetailActionFailed =>
+      'Something went wrong. Please try again.';
 
   @override
   String get planDetailStop => 'Stop';
@@ -2661,4 +2640,94 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get planCreateErrorNoUser =>
       'We couldn\'t find your account. Please sign in again.';
+
+  @override
+  String get notifyBannerTitle => 'Notifications are off';
+
+  @override
+  String get notifyBannerBody =>
+      'Turn them on to get your partner\'s check-ins and reminders.';
+
+  @override
+  String get notifyBannerAction => 'Turn on';
+
+  @override
+  String get nowActionFailed => 'Something went wrong. Please try again.';
+
+  @override
+  String get usNameRequired => 'Please enter a name.';
+
+  @override
+  String get usImagePickFailed =>
+      'We couldn\'t use that image. Please try another one.';
+
+  @override
+  String get settingsLogoutFailed =>
+      'We couldn\'t sign you out. Please try again.';
+
+  @override
+  String get settingsDeletingAccount => 'Deleting your account…';
+
+  @override
+  String get authErrorInvalidCredential =>
+      'That email or password isn\'t right.';
+
+  @override
+  String get authErrorUserNotFound => 'We couldn\'t find that account.';
+
+  @override
+  String get authErrorEmailInUse => 'That email is already signed up.';
+
+  @override
+  String get authErrorInvalidEmail => 'That email address isn\'t valid.';
+
+  @override
+  String get authErrorWeakPassword =>
+      'Please use a password of at least 6 characters.';
+
+  @override
+  String get authErrorTooManyRequests =>
+      'Too many attempts. Please try again in a moment.';
+
+  @override
+  String get authErrorNetwork => 'Check your connection and try again.';
+
+  @override
+  String get authErrorGeneric => 'Sign-in failed. Please try again.';
+
+  @override
+  String get tutorialSkip => 'Skip';
+
+  @override
+  String get tutorialClose => 'Close';
+
+  @override
+  String get tutorialNext => 'Next';
+
+  @override
+  String get tutorialStart => 'Okay, let\'s start';
+
+  @override
+  String get tutorialFooter => 'One small promise is enough to begin.';
+
+  @override
+  String get tutorialPage1Title => 'Keep it small';
+
+  @override
+  String get tutorialPage1Body =>
+      'Instead of a vague goal, make one promise you can keep today. Starting small is what gets you moving.';
+
+  @override
+  String get tutorialPage2Title => 'You don\'t have to do it alone';
+
+  @override
+  String get tutorialPage2Body =>
+      'Connect with a partner to have them check in on what you did. Less pressure, more follow-through.';
+
+  @override
+  String get tutorialPage3Title => 'Let your record shape what\'s next';
+
+  @override
+  String get tutorialPage3Body =>
+      'Track what you kept and what you put off, then size your next promise to match. Even a miss is material for the next one.';
 }

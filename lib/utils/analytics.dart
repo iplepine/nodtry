@@ -175,6 +175,8 @@ class AnalyticsEvent {
   static const localeChanged = 'locale_changed';
   static const notificationPermissionResult = 'notification_permission_result';
   static const notificationOpened = 'notification_opened';
+  static const notificationBannerShown = 'notification_banner_shown';
+  static const notificationBannerTapped = 'notification_banner_tapped';
 }
 
 /// User property names (segmentation dimensions).

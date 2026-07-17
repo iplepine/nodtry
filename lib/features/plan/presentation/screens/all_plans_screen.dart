@@ -7,6 +7,7 @@ import '../../../../models/plan_model.dart';
 import '../../../../widgets/plan/plan_card.dart';
 import '../../../../providers/plan_list_provider.dart';
 import '../../../../providers/repository_provider.dart';
+import '../../../../utils/error_reporter.dart';
 
 class AllPlansScreen extends ConsumerWidget {
   final String userId;
@@ -83,7 +84,18 @@ class AllPlansScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        // Was `Text('Error: $err')` — an untranslated label with a raw
+        // Firestore exception after it.
+        error: (err, stack) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              l10n.historyErrorUnknown,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -116,11 +128,12 @@ class AllPlansScreen extends ConsumerWidget {
                       );
                     }
                   }
-                } catch (e) {
+                } catch (e, stack) {
+                  ErrorReporter.record(e, stack, reason: 'deletePlan');
                   if (context.mounted) {
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.allPlansDeleteFailed(e.toString()))));
+                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.allPlansDeleteFailed)));
                   }
                 }
               },

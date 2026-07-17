@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_colors.dart';
 
 class TutorialScreen extends StatefulWidget {
@@ -21,23 +22,28 @@ class _TutorialScreenState extends State<TutorialScreen> {
   final PageController _controller = PageController();
   int _index = 0;
 
-  static const _pages = [
+  /// This screen is shown before sign-in, so it is the very first thing a new
+  /// user sees — resolve the copy against the active locale rather than
+  /// hardcoding it.
+  static List<_TutorialPageData> _pagesFor(AppLocalizations l10n) => [
     _TutorialPageData(
       icon: Icons.edit_note_rounded,
-      title: '할 일을 작게 정해요',
-      body: '막연한 목표 대신 오늘 바로 할 수 있는 약속 하나를 만들어요. 작게 시작해야 진짜로 움직일 수 있어요.',
+      title: l10n.tutorialPage1Title,
+      body: l10n.tutorialPage1Body,
     ),
     _TutorialPageData(
       icon: Icons.handshake_outlined,
-      title: '혼자 버티지 않아요',
-      body: '필요하면 파트너와 연결해서 실천 여부를 확인받아요. 부담은 줄이고, 실행감은 남깁니다.',
+      title: l10n.tutorialPage2Title,
+      body: l10n.tutorialPage2Body,
     ),
     _TutorialPageData(
       icon: Icons.insights_rounded,
-      title: '기록으로 다음을 정해요',
-      body: '성공과 미룸을 기록해 다음 약속의 크기를 조정해요. 실패도 다음 설계의 재료가 됩니다.',
+      title: l10n.tutorialPage3Title,
+      body: l10n.tutorialPage3Body,
     ),
   ];
+
+  static const _pageCount = 3;
 
   @override
   void dispose() {
@@ -57,7 +63,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   void _next() {
-    if (_index == _pages.length - 1) {
+    if (_index == _pageCount - 1) {
       _finish();
       return;
     }
@@ -69,7 +75,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLast = _index == _pages.length - 1;
+    final l10n = AppLocalizations.of(context)!;
+    final pages = _pagesFor(l10n);
+    final isLast = _index == pages.length - 1;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -100,16 +108,16 @@ class _TutorialScreenState extends State<TutorialScreen> {
                       letterSpacing: 0,
                     ),
                   ),
-                  child: Text(isLast ? '닫기' : '건너뛰기'),
+                  child: Text(isLast ? l10n.tutorialClose : l10n.tutorialSkip),
                 ),
               ),
               Expanded(
                 child: PageView.builder(
                   controller: _controller,
-                  itemCount: _pages.length,
+                  itemCount: pages.length,
                   onPageChanged: (value) => setState(() => _index = value),
                   itemBuilder: (context, pageIndex) {
-                    final page = _pages[pageIndex];
+                    final page = pages[pageIndex];
                     return Column(
                       children: [
                         const Spacer(),
@@ -174,7 +182,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(_pages.length, (dotIndex) {
+                children: List.generate(pages.length, (dotIndex) {
                   final selected = dotIndex == _index;
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
@@ -209,12 +217,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
                       letterSpacing: 0,
                     ),
                   ),
-                  child: Text(isLast ? '그래, 시작하기' : '다음'),
+                  child: Text(isLast ? l10n.tutorialStart : l10n.tutorialNext),
                 ),
               ),
               const SizedBox(height: 12),
               Text(
-                '처음엔 작은 약속 하나면 충분해요.',
+                l10n.tutorialFooter,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.textDisabled,

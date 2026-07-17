@@ -10,6 +10,7 @@ import '../../../../theme/app_theme_enum.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../providers/repository_provider.dart';
+import '../../../../utils/ui_error_codes.dart';
 
 // App Store Review rejected submission bd240493-bbc3-425f-a286-a8343a50f34f
 // (May 23, 2026, Guideline 2.1(b)) because the in-app "buy the dev a coffee"
@@ -18,6 +19,17 @@ import '../../../../providers/repository_provider.dart';
 // is created + approved there; flip this to true and submit IAP metadata
 // (incl. App Review screenshot) at the same time as the next release.
 const bool _kShowCoffeeDonation = false;
+
+/// Maps a locale-independent [SettingsErrorCode] to a localized message.
+String _settingsErrorText(AppLocalizations l10n, String code) {
+  switch (code) {
+    case SettingsErrorCode.logoutFailed:
+      return l10n.settingsLogoutFailed;
+    case SettingsErrorCode.withdrawFailed:
+    default:
+      return l10n.settingsDeleteAccountFailed;
+  }
+}
 
 /// 설정 화면 - 언어 및 테마 변경
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -42,21 +54,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // 연결 끊기 성공 시 토스트 처리 등 (Listen)
     ref.listen(settingsViewModelProvider, (previous, next) {
       if (previous?.value?.isWithdrawing == true &&
-          next.value?.isWithdrawing == false) {
-        if (next.value?.errorMessage == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.settingsAccountDeletedSuccess)),
-          );
-          context.go(AppRoutes.splash);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                l10n.settingsDeleteAccountFailed(next.value!.errorMessage!),
-              ),
-            ),
-          );
-        }
+          next.value?.isWithdrawing == false &&
+          next.value?.errorMessage == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.settingsAccountDeletedSuccess)),
+        );
+        context.go(AppRoutes.splash);
+        return;
+      }
+      // Every newly-set error, including a failed logout — this listener only
+      // ever looked at withdraw transitions, so a failed sign-out said nothing.
+      final code = next.value?.errorMessage;
+      if (code != null && previous?.value?.errorMessage != code) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_settingsErrorText(l10n, code))),
+        );
       }
     });
 
@@ -360,10 +372,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildWithdrawOption(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Deletion runs over the network with the row still on screen. Without this
+    // the screen looked completely idle and the row stayed tappable, so an
+    // impatient user got the confirm dialog again mid-deletion.
+    final isWithdrawing =
+        ref.watch(settingsViewModelProvider).value?.isWithdrawing ?? false;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _showWithdrawDialog(context),
+        onTap: isWithdrawing ? null : () => _showWithdrawDialog(context),
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
@@ -384,12 +401,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.error,
+                          color: isWithdrawing
+                              ? AppColors.textDisabled
+                              : AppColors.error,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        l10n.settingsDeleteAccountDesc,
+                        isWithdrawing
+                            ? l10n.settingsDeletingAccount
+                            : l10n.settingsDeleteAccountDesc,
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -398,7 +419,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: AppColors.textDisabled),
+                if (isWithdrawing)
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(
+                        AppColors.textDisabled,
+                      ),
+                    ),
+                  )
+                else
+                  Icon(Icons.chevron_right, color: AppColors.textDisabled),
               ],
             ),
           ),

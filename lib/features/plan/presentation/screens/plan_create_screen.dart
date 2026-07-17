@@ -8,6 +8,7 @@ import '../../../../models/plan_model.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../services/notification_service.dart';
+import '../../../../utils/error_reporter.dart';
 import '../../domain/study_plan_template.dart';
 // No repository_provider or home_provider needed here if only using the viewModel state
 
@@ -166,12 +167,14 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
         );
         context.pop();
       }
-    } catch (e) {
+    } catch (e, stack) {
+      // The user now gets a plain message, so the detail has to go somewhere.
+      ErrorReporter.record(e, stack, reason: 'savePlan');
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         final message = e is PlanCreateAuthException
             ? l10n.planCreateErrorNoUser
-            : l10n.planSaveError(e.toString());
+            : l10n.planSaveError;
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(message)));
@@ -189,11 +192,16 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
     final partnerName = connectedProfiles.firstOrNull?.user.displayName;
     final currentStep = planCreateState.currentStep;
     const totalSteps = 3;
+    final isSaving = planCreateState.isSaving;
+    final actionMissing =
+        currentStep == 1 && _actionController.text.trim().isEmpty;
+    final nextDisabled = actionMissing || isSaving;
 
     return PopScope(
-      canPop: currentStep == 1,
+      canPop: currentStep == 1 && !isSaving,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
+        if (isSaving) return;
         if (currentStep > 1) {
           _prevPage(currentStep);
         }
@@ -206,13 +214,15 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
           elevation: 0,
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-            onPressed: () {
-              if (currentStep > 1) {
-                _prevPage(currentStep);
-              } else {
-                context.pop();
-              }
-            },
+            onPressed: isSaving
+                ? null
+                : () {
+                    if (currentStep > 1) {
+                      _prevPage(currentStep);
+                    } else {
+                      context.pop();
+                    }
+                  },
           ),
           titleSpacing: 0,
           title: Text(
@@ -227,43 +237,62 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 24),
               child: GestureDetector(
-                onTap: () {
-                  if (currentStep == 1 &&
-                      _actionController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.planTellUsActionFirst),
-                        duration: const Duration(seconds: 1),
-                      ),
-                    );
-                    return;
-                  }
-                  _nextPage(currentStep);
-                },
+                // Saving hits the network and only pops on completion; without
+                // this guard a second tap writes a duplicate plan.
+                onTap: isSaving
+                    ? null
+                    : () {
+                        if (actionMissing) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.planTellUsActionFirst),
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
+                          return;
+                        }
+                        _nextPage(currentStep);
+                      },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color:
-                        (currentStep == 1 &&
-                            _actionController.text.trim().isEmpty)
+                    color: nextDisabled
                         ? AppColors.textDisabled.withValues(alpha: 0.2)
                         : AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    currentStep == totalSteps ? l10n.planSummarySend : l10n.planNext,
-                    style: TextStyle(
-                      color:
-                          (currentStep == 1 &&
-                              _actionController.text.trim().isEmpty)
-                          ? AppColors.textDisabled
-                          : AppColors.primary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isSaving) ...[
+                        SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(
+                              AppColors.textDisabled,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        currentStep == totalSteps
+                            ? l10n.planSummarySend
+                            : l10n.planNext,
+                        style: TextStyle(
+                          color: nextDisabled
+                              ? AppColors.textDisabled
+                              : AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

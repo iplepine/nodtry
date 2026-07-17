@@ -153,11 +153,16 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
   Future<void> _savePlan() async {
     final prevState = state.value!;
     if (prevState.action.trim().isEmpty) return;
+    // A second tap while the first save is still in flight would run the whole
+    // create path again with `existingPlanId` still null, writing a duplicate
+    // plan document (and a duplicate approval request to the partner).
+    if (prevState.isSaving) return;
 
     state = AsyncValue.data(
       prevState.copyWith(isSaving: true, errorMessage: null),
     );
 
+    String? createdPlanId;
     try {
       final userState = ref.read(myProfileProvider);
       final userId = userState.asData?.value?.uid;
@@ -272,17 +277,27 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         'has_partner': managerId != null,
       });
 
+      // The plan now exists in Firestore. Remember its id before anything else
+      // can fail, so a retry updates that document instead of creating a second
+      // one (alarm scheduling below is the realistic failure point).
+      createdPlanId = planId;
+
       ref.invalidate(homeCardStateProvider);
       // 생성된 ID가 반영된 Plan 객체로 알람 설정
       await ref
           .read(settingAlarmUseCaseProvider)
           .execute(plan.copyWith(id: planId));
 
-      state = AsyncValue.data(prevState.copyWith(isSaving: false));
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
       state = AsyncValue.data(
-        prevState.copyWith(isSaving: false, errorMessage: e.toString()),
+        prevState.copyWith(isSaving: false, existingPlanId: planId),
+      );
+    } catch (e) {
+      state = AsyncValue.data(
+        prevState.copyWith(
+          isSaving: false,
+          errorMessage: e.toString(),
+          existingPlanId: createdPlanId,
+        ),
       );
       rethrow;
     }

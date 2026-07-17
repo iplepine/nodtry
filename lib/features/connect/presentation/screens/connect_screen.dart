@@ -37,6 +37,13 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   final TextEditingController _codeController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
+  /// True from the moment a submission starts until it resolves.
+  ///
+  /// `isProcessing` only goes up once the view model is reached, but this
+  /// screen awaits the partner list first — and the send button stays enabled
+  /// during that gap, so typing the 8th character and tapping send both landed.
+  bool _isConnecting = false;
+
   @override
   void initState() {
     super.initState();
@@ -130,7 +137,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
 
   Future<void> _connectManually() async {
     final code = _codeController.text;
-    if (code.length == 8) {
+    if (code.length != 8) return;
+    if (_isConnecting) return;
+
+    setState(() => _isConnecting = true);
+    try {
       // 1. 이미 연결된 파트너가 있는지 확인
       final profiles = await ref.read(connectedProfilesProvider.future);
       if (profiles.isNotEmpty) {
@@ -145,7 +156,10 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.connectOk, style: TextStyle(color: AppColors.primary)),
+                  child: Text(
+                    l10n.connectOk,
+                    style: TextStyle(color: AppColors.primary),
+                  ),
                 ),
               ],
             );
@@ -155,9 +169,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       }
 
       // 2. 연결 요청
-      ref
+      await ref
           .read(connectViewModelProvider.notifier)
           .dispatch(SubmitInviteCodeIntent(code));
+    } finally {
+      if (mounted) setState(() => _isConnecting = false);
     }
   }
 
@@ -369,7 +385,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
           PrimaryButton(
             text: AppLocalizations.of(context)!.sendConnectionRequest,
             onPressed: () => _connectManually(),
-            isLoading: state.isProcessing,
+            isLoading: state.isProcessing || _isConnecting,
           ),
         ],
       ],

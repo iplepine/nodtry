@@ -1,9 +1,31 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth_state.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../utils/analytics.dart';
+import '../../../../utils/error_reporter.dart';
+import '../../../../utils/ui_error_codes.dart';
 // Removed unused AuthService import
+
+/// Maps a failure to a stable code the widget layer turns into localized copy.
+/// Firebase's own messages are English-only implementation detail — they used to
+/// be shown verbatim ("[firebase_auth/wrong-password] The password is invalid…").
+String _authErrorCodeFor(Object error) {
+  if (error is! FirebaseAuthException) return AuthErrorCode.generic;
+  return switch (error.code) {
+    // Recent Firebase versions collapse wrong-password/user-not-found into
+    // invalid-credential; keep the older codes mapped for older SDK responses.
+    'invalid-credential' || 'wrong-password' => AuthErrorCode.invalidCredential,
+    'user-not-found' || 'user-disabled' => AuthErrorCode.userNotFound,
+    'email-already-in-use' => AuthErrorCode.emailInUse,
+    'invalid-email' => AuthErrorCode.invalidEmail,
+    'weak-password' => AuthErrorCode.weakPassword,
+    'too-many-requests' => AuthErrorCode.tooManyRequests,
+    'network-request-failed' => AuthErrorCode.network,
+    _ => AuthErrorCode.generic,
+  };
+}
 
 final authViewModelProvider = AsyncNotifierProvider<AuthViewModel, AuthState>(
   AuthViewModel.new,
@@ -32,7 +54,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
       } else if (intent is SignUpWithEmailIntent) {
         await _signUpWithEmail(intent.email, intent.password);
       } else if (intent is ClearErrorIntent) {
-        state = AsyncValue.data(prevState.copyWith(errorMessage: null));
+        state = AsyncValue.data(prevState.copyWith(errorCode: null));
       }
     } catch (e, stack) {
       final failedMethod = switch (intent) {
@@ -49,7 +71,10 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
           'reason': e.runtimeType.toString(),
         });
       }
-      state = AsyncValue.error(e, stack);
+      ErrorReporter.record(e, stack, reason: 'authDispatch:$failedMethod');
+      // Publish the failure exactly once. Emitting AsyncError here *and* then
+      // AsyncData below made the splash listener fire on both branches, so a
+      // single failed login queued two identical snackbars.
       state = AsyncValue.data(
         prevState.copyWith(
           isAutoLoggingIn: false,
@@ -57,7 +82,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
           isAppleLoading: false,
           isGuestLoading: false,
           isEmailLoading: false,
-          errorMessage: e.toString(),
+          errorCode: _authErrorCodeFor(e),
         ),
       );
     }
@@ -79,7 +104,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
         state = AsyncValue.data(
           state.value!.copyWith(
             isAutoLoggingIn: false,
-            errorMessage: e.toString(),
+            errorCode: _authErrorCodeFor(e),
           ),
         );
         rethrow;
@@ -94,7 +119,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
 
   Future<void> _loginWithGoogle() async {
     state = AsyncValue.data(
-      state.value!.copyWith(isGoogleLoading: true, errorMessage: null),
+      state.value!.copyWith(isGoogleLoading: true, errorCode: null),
     );
     try {
       final useCase = ref.read(loginWithGoogleUseCaseProvider);
@@ -107,7 +132,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
 
   Future<void> _loginWithApple() async {
     state = AsyncValue.data(
-      state.value!.copyWith(isAppleLoading: true, errorMessage: null),
+      state.value!.copyWith(isAppleLoading: true, errorCode: null),
     );
     try {
       final useCase = ref.read(loginWithAppleUseCaseProvider);
@@ -120,7 +145,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
 
   Future<void> _loginGuest() async {
     state = AsyncValue.data(
-      state.value!.copyWith(isGuestLoading: true, errorMessage: null),
+      state.value!.copyWith(isGuestLoading: true, errorCode: null),
     );
     try {
       await ref.read(guestLoginUseCaseProvider).execute();
@@ -133,7 +158,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
 
   Future<void> _loginWithEmail(String email, String password) async {
     state = AsyncValue.data(
-      state.value!.copyWith(isEmailLoading: true, errorMessage: null),
+      state.value!.copyWith(isEmailLoading: true, errorCode: null),
     );
     try {
       final useCase = ref.read(loginWithEmailUseCaseProvider);
@@ -146,7 +171,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
 
   Future<void> _signUpWithEmail(String email, String password) async {
     state = AsyncValue.data(
-      state.value!.copyWith(isEmailLoading: true, errorMessage: null),
+      state.value!.copyWith(isEmailLoading: true, errorCode: null),
     );
     try {
       final useCase = ref.read(signUpWithEmailUseCaseProvider);

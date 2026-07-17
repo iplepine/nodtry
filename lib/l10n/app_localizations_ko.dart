@@ -186,11 +186,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usLinkSuccess => '구글 계정이 성공적으로 연결되었습니다!';
 
   @override
-  String usLinkError(String error) {
-    return '계정 연결 실패: $error';
-  }
-
-  @override
   String get usLoadError => '연결 정보를 불러오는 중 오류가 발생했습니다.';
 
   @override
@@ -217,9 +212,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usDisconnectSuccess => '연결이 해제되었습니다.';
 
   @override
-  String usDisconnectError(String error) {
-    return '연결 해제 실패: $error';
-  }
+  String get usDisconnectError => '연결을 해제하지 못했어요. 다시 시도해 주세요.';
 
   @override
   String get usDisconnectTooltip => '연결 해제';
@@ -820,9 +813,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAuthServiceNotFound => '인증 서비스를 찾을 수 없습니다';
 
   @override
-  String settingsDeleteAccountFailed(Object error) {
-    return '계정 삭제 실패: $error';
-  }
+  String get settingsDeleteAccountFailed => '계정을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.';
 
   @override
   String get reconcileTitle => '정리하기';
@@ -1313,9 +1304,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planProposalSaved => '계획 제안이 완료되었습니다.\n상대방과 대화해보세요!';
 
   @override
-  String planSaveError(String error) {
-    return '저장 중 오류가 발생했습니다: $error';
-  }
+  String get planSaveError => '약속을 저장하지 못했어요. 다시 시도해 주세요.';
 
   @override
   String get focusTimerPickerTitle => '얼마나 집중할까요?';
@@ -1578,11 +1567,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get promiseSheetClose => '닫기';
 
   @override
-  String splashLoginFailed(String error) {
-    return '로그인 실패: $error';
-  }
-
-  @override
   String get splashLoggingIn => '로그인 중...';
 
   @override
@@ -1672,9 +1656,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get allPlansDeleted => '약속이 삭제되었습니다.';
 
   @override
-  String allPlansDeleteFailed(String error) {
-    return '삭제 실패: $error';
-  }
+  String get allPlansDeleteFailed => '삭제하지 못했어요. 다시 시도해 주세요.';
 
   @override
   String get allPlansDelete => '삭제';
@@ -1744,9 +1726,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usOk => '확인';
 
   @override
-  String usProfileSaveFailed(String error) {
-    return '프로필 저장 실패: $error';
-  }
+  String get usProfileSaveFailed => '프로필을 저장하지 못했어요. 다시 시도해 주세요.';
 
   @override
   String get usEditProfile => '프로필 편집';
@@ -1788,9 +1768,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usPlanDeleted => '약속이 삭제되었습니다.';
 
   @override
-  String usDeleteFailed(String error) {
-    return '삭제 실패: $error';
-  }
+  String get usDeleteFailed => '삭제하지 못했어요. 다시 시도해 주세요.';
 
   @override
   String get usDelete => '삭제';
@@ -1799,9 +1777,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailPracticeHistory => '실천 기록';
 
   @override
-  String planDetailLoadFailed(String error) {
-    return '기록을 불러오지 못했어요.\n$error';
-  }
+  String get planDetailLoadFailed => '기록을 불러오지 못했어요. 다시 시도해 주세요.';
 
   @override
   String get planDetailNoRecords => '아직 기록이 없어요.';
@@ -1825,9 +1801,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailPokeSent => '똑똑, 문을 두드렸어요!';
 
   @override
-  String planDetailPokeFailed(String error) {
-    return '전송 실패: $error';
-  }
+  String get planDetailPokeFailed => '전송하지 못했어요. 다시 시도해 주세요.';
 
   @override
   String get planDetailPokeDoneToday => '오늘의 똑똑 완료';
@@ -1891,9 +1865,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailStopped => '약속이 중단되었습니다.';
 
   @override
-  String planDetailActionFailed(String error) {
-    return '처리 실패: $error';
-  }
+  String get planDetailActionFailed => '문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
 
   @override
   String get planDetailStop => '그만하기';
@@ -2596,4 +2568,88 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get planCreateErrorNoUser => '사용자 정보를 찾을 수 없어요. 다시 로그인해 주세요.';
+
+  @override
+  String get notifyBannerTitle => '알림이 꺼져 있어요';
+
+  @override
+  String get notifyBannerBody => '파트너의 확인과 리마인더를 받으려면 알림을 켜주세요.';
+
+  @override
+  String get notifyBannerAction => '켜기';
+
+  @override
+  String get nowActionFailed => '문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
+
+  @override
+  String get usNameRequired => '이름을 입력해 주세요.';
+
+  @override
+  String get usImagePickFailed => '이 이미지를 사용할 수 없어요. 다른 이미지를 골라주세요.';
+
+  @override
+  String get settingsLogoutFailed => '로그아웃하지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get settingsDeletingAccount => '계정을 삭제하는 중이에요…';
+
+  @override
+  String get authErrorInvalidCredential => '이메일 또는 비밀번호가 올바르지 않아요.';
+
+  @override
+  String get authErrorUserNotFound => '해당 계정을 찾을 수 없어요.';
+
+  @override
+  String get authErrorEmailInUse => '이미 가입된 이메일이에요.';
+
+  @override
+  String get authErrorInvalidEmail => '이메일 주소 형식이 올바르지 않아요.';
+
+  @override
+  String get authErrorWeakPassword => '비밀번호는 6자 이상으로 입력해 주세요.';
+
+  @override
+  String get authErrorTooManyRequests => '시도가 너무 많아요. 잠시 후 다시 시도해 주세요.';
+
+  @override
+  String get authErrorNetwork => '네트워크 연결을 확인한 뒤 다시 시도해 주세요.';
+
+  @override
+  String get authErrorGeneric => '로그인에 실패했어요. 다시 시도해 주세요.';
+
+  @override
+  String get tutorialSkip => '건너뛰기';
+
+  @override
+  String get tutorialClose => '닫기';
+
+  @override
+  String get tutorialNext => '다음';
+
+  @override
+  String get tutorialStart => '그래, 시작하기';
+
+  @override
+  String get tutorialFooter => '처음엔 작은 약속 하나면 충분해요.';
+
+  @override
+  String get tutorialPage1Title => '할 일을 작게 정해요';
+
+  @override
+  String get tutorialPage1Body =>
+      '막연한 목표 대신 오늘 바로 할 수 있는 약속 하나를 만들어요. 작게 시작해야 진짜로 움직일 수 있어요.';
+
+  @override
+  String get tutorialPage2Title => '혼자 버티지 않아요';
+
+  @override
+  String get tutorialPage2Body =>
+      '필요하면 파트너와 연결해서 실천 여부를 확인받아요. 부담은 줄이고, 실행감은 남깁니다.';
+
+  @override
+  String get tutorialPage3Title => '기록으로 다음을 정해요';
+
+  @override
+  String get tutorialPage3Body =>
+      '성공과 미룸을 기록해 다음 약속의 크기를 조정해요. 실패도 다음 설계의 재료가 됩니다.';
 }

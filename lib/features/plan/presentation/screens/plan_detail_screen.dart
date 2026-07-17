@@ -5,6 +5,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../utils/time_formatter.dart';
+import '../../../../utils/error_reporter.dart';
 import '../widgets/notification_setting_editor.dart';
 // import '../../../../features/plan/domain/usecases/setting_alarm_use_case.dart'; // Unused
 import '../../../../models/history_item.dart';
@@ -325,7 +326,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
                     AppLocalizations.of(context)!
-                        .planDetailLoadFailed(snapshot.error.toString()),
+                        .planDetailLoadFailed,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.error),
                   ),
@@ -582,12 +583,13 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                       SnackBar(content: Text(AppLocalizations.of(context)!.planDetailPokeSent)),
                     );
                   }
-                } catch (e) {
+                } catch (e, stack) {
+                  ErrorReporter.record(e, stack, reason: 'planDetailPoke');
                   if (mounted) setState(() => _isPoking = false);
                   if (context.mounted) {
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailPokeFailed(e.toString()))));
+                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailPokeFailed)));
                   }
                 }
               },
@@ -882,11 +884,12 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                       context.pop();
                     }
                   }
-                } catch (e) {
+                } catch (e, stack) {
+                  ErrorReporter.record(e, stack, reason: 'planDetailAction');
                   if (context.mounted) {
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailActionFailed(e.toString()))));
+                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailActionFailed)));
                   }
                 }
               },
@@ -964,11 +967,12 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                       extra: widget.plan.copyWith(id: null),
                     );
                   }
-                } catch (e) {
+                } catch (e, stack) {
+                  ErrorReporter.record(e, stack, reason: 'planDetailAction');
                   if (context.mounted) {
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailActionFailed(e.toString()))));
+                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailActionFailed)));
                   }
                 }
               },
