@@ -1457,6 +1457,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planStateStopped => 'Stopped';
 
   @override
+  String get planCardMenuTooltip => 'Promise options';
+
+  @override
+  String get planCardEdit => 'Edit';
+
+  @override
+  String get planCardDelete => 'Delete';
+
+  @override
   String get planDescriptionTip => 'Tip: try \"If X, then Y\"';
 
   @override

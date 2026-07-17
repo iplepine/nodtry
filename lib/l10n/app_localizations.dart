@@ -2738,6 +2738,24 @@ abstract class AppLocalizations {
   /// **'Stopped'**
   String get planStateStopped;
 
+  /// No description provided for @planCardMenuTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise options'**
+  String get planCardMenuTooltip;
+
+  /// No description provided for @planCardEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get planCardEdit;
+
+  /// No description provided for @planCardDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get planCardDelete;
+
   /// No description provided for @planDescriptionTip.
   ///
   /// In en, this message translates to:

@@ -1415,6 +1415,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planStateStopped => '중단됨';
 
   @override
+  String get planCardMenuTooltip => '약속 메뉴';
+
+  @override
+  String get planCardEdit => '수정';
+
+  @override
+  String get planCardDelete => '삭제';
+
+  @override
   String get planDescriptionTip => 'Tip: \"만약 ~하면, ~한다\" 로 적어보세요';
 
   @override

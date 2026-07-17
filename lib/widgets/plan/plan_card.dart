@@ -4,6 +4,8 @@ import '../../models/plan_model.dart';
 import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 
+enum _PlanCardAction { edit, delete }
+
 class PlanCard extends StatelessWidget {
   final Plan plan;
   final VoidCallback? onTap;
@@ -24,6 +26,11 @@ class PlanCard extends StatelessWidget {
     this.isOwner = false,
     this.onCheer,
   });
+
+  /// 내 약속이고 실제로 걸린 액션이 하나라도 있을 때만 오버플로 메뉴를 띄운다.
+  /// onEdit는 수정 가능한 state에서만 넘어오므로(예: completed 약속은 null),
+  /// 둘 다 null이면 메뉴 대신 기존 chevron을 그대로 둔다.
+  bool get _hasOwnerMenu => isOwner && (onEdit != null || onDelete != null);
 
   @override
   Widget build(BuildContext context) {
@@ -228,6 +235,9 @@ class PlanCard extends StatelessWidget {
                     tooltip: l10n.usCheerTooltip,
                     onPressed: onCheer,
                   ),
+                ] else if (_hasOwnerMenu) ...[
+                  const SizedBox(width: 4),
+                  _buildOwnerMenu(l10n),
                 ] else if (onTap != null) ...[
                   const SizedBox(width: 12),
                   Icon(Icons.chevron_right, color: AppColors.textDisabled),
@@ -241,6 +251,61 @@ class PlanCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// 수정/삭제를 chevron 자리의 오버플로 메뉴로 모은다.
+  /// IconButton 기본 tap target(48x48)을 그대로 쓰기 위해 visualDensity는 건드리지 않는다.
+  Widget _buildOwnerMenu(AppLocalizations l10n) {
+    return PopupMenuButton<_PlanCardAction>(
+      icon: Icon(Icons.more_vert, color: AppColors.textDisabled, size: 20),
+      tooltip: l10n.planCardMenuTooltip,
+      position: PopupMenuPosition.under,
+      color: AppColors.surface,
+      onSelected: (action) {
+        switch (action) {
+          case _PlanCardAction.edit:
+            onEdit?.call();
+            break;
+          case _PlanCardAction.delete:
+            onDelete?.call();
+            break;
+        }
+      },
+      itemBuilder: (context) => [
+        if (onEdit != null)
+          PopupMenuItem<_PlanCardAction>(
+            value: _PlanCardAction.edit,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.edit_outlined,
+                  size: 18,
+                  color: AppColors.textPrimary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.planCardEdit,
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
+              ],
+            ),
+          ),
+        if (onDelete != null)
+          PopupMenuItem<_PlanCardAction>(
+            value: _PlanCardAction.delete,
+            child: Row(
+              children: [
+                Icon(Icons.delete_outline, size: 18, color: AppColors.error),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.planCardDelete,
+                  style: TextStyle(color: AppColors.error),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
