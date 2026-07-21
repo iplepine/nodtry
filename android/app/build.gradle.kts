@@ -40,7 +40,10 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 23
-        targetSdk = flutter.targetSdkVersion
+        // Pinned to the latest API level (Android 16) rather than
+        // flutter.targetSdkVersion, which this Flutter (3.32.5) still defaults
+        // to 35 — Play now requires targeting API 36. compileSdk is already 36.
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

@@ -1,0 +1,2 @@
+- Updated compatibility for the latest Android version (API 36).
+- Stability improvements.
