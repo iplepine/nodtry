@@ -62,3 +62,7 @@ android/vendor/
 # Ad-hoc debug screenshots from local runs (root-level only; curated store
 # assets live under android/fastlane/.../phoneScreenshots and ios/fastlane).
 /screenshots/
+
+# Flutter-managed SwiftPM resolution (regenerated on build; consistent with the
+# existing .swiftpm/ ignore above). Enabled by the Flutter 3.44 iOS migration.
+**/xcshareddata/swiftpm/Package.resolved
