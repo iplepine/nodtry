@@ -107,7 +107,7 @@ void main() {
     expect(find.text('주 3일'), findsOneWidget);
     expect(find.text('평일'), findsOneWidget);
     expect(find.text('매일'), findsOneWidget);
-    expect(find.text('파트너에게 이렇게 보여요'), findsOneWidget);
+    expect(find.text('실천 메이트에게 이렇게 보여요'), findsOneWidget);
     expect(find.textContaining('지민님에게 "영어 문장 10개 소리내어 읽기"'), findsOneWidget);
     expect(find.textContaining('오후 9시'), findsOneWidget);
   });

@@ -5,5 +5,3 @@ What's New
 - An accidental double tap no longer creates duplicate promises or partner connections.
 - Fixed the focus timer showing the wrong remaining time for sessions longer than an hour.
 - Cleaned up awkward English wording and the first-run tutorial translations.
-- Fixed a notification startup crash on some devices.
-- Improved stability so the app keeps opening even when an FCM token cannot be issued.

@@ -134,16 +134,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Regression: the card matched on the translated headerMessage against the
-    // literal 'Missed promise appeared', but the repository emits 'A missed
-    // promise appeared' — so English users always fell through to the quiet
-    // body and were never told the promise had actually been missed.
     expect(
-      find.textContaining('is now a missed promise'),
+      find.textContaining('restart a missed promise'),
       findsOneWidget,
       reason: 'expected the missed-promise body for hasMissedNotice: true',
     );
-    expect(find.textContaining('is still quiet'), findsNothing);
+    expect(find.textContaining('promise is quiet'), findsNothing);
   });
 
   testWidgets('an English quiet knock still shows the quiet body', (
@@ -154,8 +150,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('is still quiet'), findsOneWidget);
-    expect(find.textContaining('is now a missed promise'), findsNothing);
+    expect(find.textContaining('promise is quiet'), findsOneWidget);
+    expect(find.textContaining('restart a missed promise'), findsNothing);
   });
 
   testWidgets('the Korean missed-promise knock keeps working', (tester) async {

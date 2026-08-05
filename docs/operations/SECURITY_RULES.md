@@ -24,7 +24,7 @@
 | `cheers/{id}` | 참가자 | `fromUserId==me` | ✗ | ✗ |
 | Storage `users/{uid}/*` | 로그인 사용자 전체 | 본인·이미지<5MB | 본인·이미지<5MB | 본인 |
 
-¹ ² **읽기가 넓은 이유**: 매니저가 파트너의 `users`/`plans`/`actions`를 *파트너 uid로 필터링*해
+¹ ² **읽기가 넓은 이유**: 실천 메이트가 상대의 `users`/`plans`/`actions`를 *partner uid로 필터링*해
 조회한다(`where userId == partnerId`, `where planId == X`, `whereIn`). Firestore 쿼리 보안 규칙은
 정적 분석이라, 문서별 `userId==me` 같은 엄격한 read 규칙을 걸면 이 cross-user 쿼리들이 거부된다.
 읽기를 더 좁히려면 모든 문서에 `managerId`를 비정규화하고 cross-user 쿼리를 재작성해야 한다
@@ -56,7 +56,7 @@
    ```bash
    firebase deploy --only firestore:indexes
    ```
-5. 배포 직후 실기기에서 스모크: 로그인 → 파트너 연결 → 플랜 생성 → 실천 보고 → 파트너 확인 →
+5. 배포 직후 실기기에서 스모크: 로그인 → 실천 메이트 연결 → 플랜 생성 → 실천 보고 → 메이트 확인 →
    프로필 이미지 업로드가 모두 동작하는지 확인. 하나라도 막히면 즉시 콘솔에서 이전 규칙으로 롤백.
 
 ## 알려진 잔여 리스크 (후속 과제)

@@ -585,7 +585,7 @@ class NotificationService implements PlanReminderScheduler {
         channelId: 'general_notifications',
         channelName: 'General Notifications',
         channelDescription:
-            'Notifications for cheer messages and partner actions',
+            'Notifications for encouragement and accountability check-ins',
         includeReminderActions: opensInput,
       ),
       payload: _buildPayload(

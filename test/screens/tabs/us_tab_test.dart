@@ -134,8 +134,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check Empty State Text
-      // "아직 연결된 메이트가 없어요"
-      expect(find.text('아직 연결된 메이트가 없어요'), findsOneWidget);
+      expect(find.text('아직 실천 메이트가 없어요'), findsOneWidget);
 
       // Check Invite Button (Footer)
       expect(find.byIcon(Icons.send), findsOneWidget);

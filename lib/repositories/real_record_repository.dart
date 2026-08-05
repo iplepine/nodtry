@@ -41,17 +41,21 @@ String _headerMessage(String key) {
     case 'promiseResult':
       return isKo ? '약속 결과가 나왔어요' : 'Promise result is out';
     case 'partnerRequestedAdjust':
-      return isKo ? '파트너가 조율을 요청했어요' : 'Partner requested an adjustment';
+      return isKo
+          ? '실천 메이트가 조율을 요청했어요'
+          : 'Your accountability partner requested an adjustment';
     case 'promiseProposalArrived':
       return isKo ? '약속 제안이 도착했어요' : 'Promise proposal arrived';
     case 'settlementNeeded':
       return isKo ? '4주 정산이 필요해요' : '4-week settlement needed';
     case 'pokeWaiting':
-      return isKo ? '똑똑! 파트너가 기다리고 있어요.' : 'Knock! Your partner is waiting.';
+      return isKo
+          ? '똑똑! 실천 메이트가 기다리고 있어요.'
+          : 'Knock! Your accountability partner is waiting.';
     case 'todayMissed':
       return isKo
-          ? '똑똑! 오늘 약속이 파트너에게 놓친 약속으로 남았어요.'
-          : "Knock! Today's promise is now a missed promise for your partner.";
+          ? '똑똑! 오늘 약속이 실천 메이트에게 아직 미처리로 보여요.'
+          : "Knock! Your accountability partner can see today's promise is still open.";
     case 'waitingForPromise':
       return isKo ? '약속을 기다리고 있어요' : 'Waiting for a promise';
     case 'missedAppeared':
@@ -917,7 +921,7 @@ class RealRecordRepository implements RecordRepository {
       final now = DateTime.now();
       await _firestore.collection('plans').doc(planId).update({
         'lastPokeAt': Timestamp.fromDate(now),
-        'lastPokeMessage': message ?? '똑똑! 파트너가 기다리고 있어요. 지금 약속을 정리해볼까요?',
+        'lastPokeMessage': message ?? '똑똑! 실천 메이트가 기다리고 있어요. 오늘 약속을 정리해볼까요?',
         'lastPokeAcknowledgedAt': FieldValue.delete(),
         'lastUpdatedBy': user.uid,
       });

@@ -58,3 +58,7 @@ ui-debug.log
 
 # Vendored Ruby gems (fastlane) — regenerated via bundle install, never committed
 android/vendor/
+
+# Ad-hoc debug screenshots from local runs (root-level only; curated store
+# assets live under android/fastlane/.../phoneScreenshots and ios/fastlane).
+/screenshots/

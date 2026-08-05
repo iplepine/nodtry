@@ -314,7 +314,7 @@ export const onActionCompleted = functions.firestore
 
             // 3. 발신자(수행자) 이름 조회
             const userDoc = await admin.firestore().collection("users").doc(userId).get();
-            const senderName = userDoc.exists ? userDoc.data()?.displayName || "파트너" : "파트너";
+            const senderName = userDoc.exists ? userDoc.data()?.displayName || "실천 메이트" : "실천 메이트";
 
             // 4. 메시지 구성 (행동 타입에 따라)
             let title = "약속 실천 완료! 🌟";
@@ -380,7 +380,7 @@ export const notifyMissedActions = functions.pubsub
             if (!fcmToken) continue;
 
             const userDoc = await admin.firestore().collection("users").doc(userId).get();
-            const senderName = userDoc.exists ? userDoc.data()?.displayName || "파트너" : "파트너";
+            const senderName = userDoc.exists ? userDoc.data()?.displayName || "실천 메이트" : "실천 메이트";
             const itemTitle = dueItem.title || "오늘 약속";
 
             const title = "약속 시간이 지났어요";
@@ -459,7 +459,7 @@ export const notifyUnverifiedActions = functions.pubsub
 
             const userDoc = await admin.firestore().collection("users").doc(userId).get();
             const senderName = userDoc.exists ?
-                userDoc.data()?.displayName || "파트너" : "파트너";
+                userDoc.data()?.displayName || "실천 메이트" : "실천 메이트";
             const itemTitle = (action.title as string) || "오늘 약속";
 
             const delivered = await sendAndCleanup(
@@ -510,10 +510,10 @@ export const onPlanUpdated = functions.firestore
             if (!fcmToken) return;
 
             // 2. 발신자 이름 조회
-            let senderName = "파트너";
+            let senderName = "실천 메이트";
             if (lastUpdatedBy) {
                 const senderDoc = await admin.firestore().collection("users").doc(lastUpdatedBy).get();
-                senderName = senderDoc.exists ? senderDoc.data()?.displayName || "파트너" : "파트너";
+                senderName = senderDoc.exists ? senderDoc.data()?.displayName || "실천 메이트" : "실천 메이트";
             }
 
             // 3. 변경 내용 분석 및 알림 내용 구성

@@ -526,38 +526,35 @@ class _WeeklyPulseCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 헤드라인: "이번 주" + 작은 카운트 (나 / 파트너)
-          Row(
-            children: [
-              Text(
-                l10n.historyWeeklyPulseTitle,
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const Spacer(),
-              if (hasPartnerData) ...[
+          Text(
+            l10n.historyWeeklyPulseTitle,
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 6,
+              runSpacing: 6,
+              children: [
                 _CountChip(
                   label: l10n.historyWeeklyMeLabel,
                   count: myCount,
                   color: AppColors.primary,
                 ),
-                const SizedBox(width: 6),
-                _CountChip(
-                  label: l10n.historyWeeklyPartnerLabel,
-                  count: partnerCount,
-                  color: AppColors.secondary,
-                ),
-              ] else ...[
-                _CountChip(
-                  label: l10n.historyWeeklyMeLabel,
-                  count: myCount,
-                  color: AppColors.primary,
-                ),
+                if (hasPartnerData)
+                  _CountChip(
+                    label: l10n.historyWeeklyPartnerLabel,
+                    count: partnerCount,
+                    color: AppColors.secondary,
+                  ),
               ],
-            ],
+            ),
           ),
           const SizedBox(height: 14),
           // 요일 라벨

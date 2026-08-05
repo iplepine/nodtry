@@ -78,7 +78,7 @@ abstract class RecordRepository {
   Future<void> passPlan(String planId);
 
   /// 파트너 찌르기 (똑똑)
-  /// message: "똑똑! 파트너가 기다리고 있어요." 등
+  /// message: "똑똑! 실천 메이트가 기다리고 있어요." 등
   Future<void> pokePartner(String planId, {String? message});
 
   /// 찌르기 확인 (응답)

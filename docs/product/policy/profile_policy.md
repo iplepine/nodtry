@@ -29,7 +29,7 @@
 ## 프로필 업데이트
 - `updateProfileUseCase.execute(name, statusMessage, imagePath)`
 - Firestore 동기화 + 로컬 캐시 저장 (`userLocalDataSource.saveUser()`)
-- `myProfileProvider`를 통한 Firestore 실시간 감시
+- `myProfileProvider`를 통한 Firestore 실시간 변경 감지
 
 ## 초대 코드 정책
 - 형식: `^[A-Z0-9]{8}$` (8자리 대문자+숫자)
@@ -47,9 +47,9 @@
 - 게스트 경고 배너 (익명 사용자)
 - 내 플랜 목록 (active/pending만 표시)
 
-### 파트너 섹션 (연결 시)
-- 파트너 프로필 정보
-- 파트너 플랜 목록 (읽기 전용)
+### 실천 메이트 섹션 (연결 시)
+- 실천 메이트 프로필 정보
+- 실천 메이트 플랜 목록 (읽기 전용)
 - 승인/확인/응원 인터랙션 가능
 - 연결 해제 옵션
 

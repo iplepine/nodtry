@@ -8,7 +8,7 @@ enum ConnectionStatus {
   rejected, // 거절됨 (옵션)
 }
 
-/// 커플 연결 관련 데이터 저장소 인터페이스
+/// 1:1 실천 메이트 연결 관련 데이터 저장소 인터페이스
 abstract class ConnectRepository {
   /// 초대 코드 생성
   ///

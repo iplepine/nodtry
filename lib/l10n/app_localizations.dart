@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// Tagline shown on splash screen
   ///
   /// In en, this message translates to:
-  /// **'Plans we couldn\'t keep alone, together'**
+  /// **'Keep the promises you put off with one person who notices.'**
   String get splashTagline;
 
   /// Google login button text
@@ -131,25 +131,25 @@ abstract class AppLocalizations {
   /// Privacy message shown at bottom of login screen
   ///
   /// In en, this message translates to:
-  /// **'We don\'t push.\nYour records are private between you two.'**
+  /// **'You both choose to connect.\nYour records stay between you.'**
   String get privacyMessage;
 
   /// Headline on connect screen
   ///
   /// In en, this message translates to:
-  /// **'Want to entrust this month to someone?'**
+  /// **'Keep the promises you put off'**
   String get connectHeadline;
 
   /// Subtitle on connect screen
   ///
   /// In en, this message translates to:
-  /// **'You make the plan, and your partner manages it.'**
+  /// **'Connect with one accountability partner. They notice your effort, and you notice theirs.'**
   String get connectSubtitle;
 
   /// Button to create invite code
   ///
   /// In en, this message translates to:
-  /// **'Create Invite Code'**
+  /// **'Invite an accountability partner'**
   String get createInviteCode;
 
   /// Button to enter invite code
@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// Message below invite code
   ///
   /// In en, this message translates to:
-  /// **'Share this code with your partner'**
+  /// **'Share this code with your accountability partner'**
   String get codeShareMessage;
 
   /// Instruction to enter code
@@ -203,13 +203,13 @@ abstract class AppLocalizations {
   /// Button to send connection request
   ///
   /// In en, this message translates to:
-  /// **'Send Connection Request'**
+  /// **'Send accountability partner request'**
   String get sendConnectionRequest;
 
   /// Message while waiting for connection
   ///
   /// In en, this message translates to:
-  /// **'Your partner is reviewing the connection'**
+  /// **'Waiting for them to accept your connection'**
   String get waitingForConnection;
 
   /// Message when there's a task to report
@@ -245,7 +245,7 @@ abstract class AppLocalizations {
   /// Message while waiting for partner's check
   ///
   /// In en, this message translates to:
-  /// **'Waiting for confirmation'**
+  /// **'Waiting for their check-in'**
   String get homeWaitingForCheck;
 
   /// Message when there's nothing to do
@@ -317,13 +317,13 @@ abstract class AppLocalizations {
   /// Context about who is managing
   ///
   /// In en, this message translates to:
-  /// **'Entrusted to {name}'**
+  /// **'Keeping it going with {name}'**
   String homeContextEntrusted(String name);
 
   /// Context about who is being managed
   ///
   /// In en, this message translates to:
-  /// **'Managing {name}'**
+  /// **'Noticing {name}\'s effort'**
   String homeContextManaging(String name);
 
   /// Now tab label
@@ -341,7 +341,7 @@ abstract class AppLocalizations {
   /// Us tab label
   ///
   /// In en, this message translates to:
-  /// **'Us'**
+  /// **'Together'**
   String get tabUs;
 
   /// Empty state message for history tab
@@ -365,13 +365,13 @@ abstract class AppLocalizations {
   /// Us tab - You section title
   ///
   /// In en, this message translates to:
-  /// **'Partner'**
+  /// **'Accountability partner'**
   String get usYouTitle;
 
   /// No description provided for @usHeroSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Promises you\'re building together'**
+  /// **'One person who notices, both ways'**
   String get usHeroSubtitle;
 
   /// No description provided for @usCheerSent.
@@ -461,7 +461,7 @@ abstract class AppLocalizations {
   /// No description provided for @usUnknownUser.
   ///
   /// In en, this message translates to:
-  /// **'Unknown User'**
+  /// **'Accountability partner'**
   String get usUnknownUser;
 
   /// No description provided for @usDisconnectDialogTitle.
@@ -473,7 +473,7 @@ abstract class AppLocalizations {
   /// No description provided for @usDisconnectDialogContent.
   ///
   /// In en, this message translates to:
-  /// **'Disconnect from {name}?'**
+  /// **'Disconnect {name} as your accountability partner?'**
   String usDisconnectDialogContent(String name);
 
   /// No description provided for @usDisconnectConfirm.
@@ -485,7 +485,7 @@ abstract class AppLocalizations {
   /// No description provided for @usDisconnectSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Disconnected successfully.'**
+  /// **'You\'re no longer connected.'**
   String get usDisconnectSuccess;
 
   /// No description provided for @usDisconnectError.
@@ -521,7 +521,7 @@ abstract class AppLocalizations {
   /// Us tab - Add new connection button label
   ///
   /// In en, this message translates to:
-  /// **'Add new connection'**
+  /// **'Connect accountability partner'**
   String get usAddConnectionLabel;
 
   /// Us tab - Badge: Mutual support
@@ -533,43 +533,43 @@ abstract class AppLocalizations {
   /// Us tab - Empty state title
   ///
   /// In en, this message translates to:
-  /// **'No mates connected yet'**
+  /// **'No accountability partner yet'**
   String get usEmptyMatesTitle;
 
   /// Us tab - Empty state subtitle
   ///
   /// In en, this message translates to:
-  /// **'Send your invite code to become each other\'s safe base'**
+  /// **'Invite one person and notice each other\'s effort'**
   String get usEmptyMatesSubtitle;
 
   /// Section title for connected people
   ///
   /// In en, this message translates to:
-  /// **'Connected People'**
+  /// **'Your accountability partner'**
   String get usConnectedPeople;
 
   /// Status label for managing someone
   ///
   /// In en, this message translates to:
-  /// **'Managing'**
+  /// **'Supporting them'**
   String get usManaging;
 
   /// Status label for being managed
   ///
   /// In en, this message translates to:
-  /// **'Entrusted'**
+  /// **'Supported by them'**
   String get usEntrusted;
 
   /// Button to invite new person
   ///
   /// In en, this message translates to:
-  /// **'Invite New Person'**
+  /// **'Invite one person'**
   String get usInviteNew;
 
   /// Empty state message for us tab
   ///
   /// In en, this message translates to:
-  /// **'No connections yet'**
+  /// **'No accountability partner yet'**
   String get usNoConnections;
 
   /// Week progress in header
@@ -593,7 +593,7 @@ abstract class AppLocalizations {
   /// Message when there's no active plan
   ///
   /// In en, this message translates to:
-  /// **'What promises shall we make this month?'**
+  /// **'No promise for now'**
   String get nowNoPlan;
 
   /// Button to create a new plan
@@ -629,7 +629,7 @@ abstract class AppLocalizations {
   /// Subtitle when there's no plan
   ///
   /// In en, this message translates to:
-  /// **'Shall we make just one promise?'**
+  /// **'Start with one promise you can share'**
   String get nowNoPlanSubtitle;
 
   /// Message when all tasks are done
@@ -755,31 +755,31 @@ abstract class AppLocalizations {
   /// Manager suggestion title - soft approach
   ///
   /// In en, this message translates to:
-  /// **'If you entrust this promise to someone'**
+  /// **'Keep this promise with one person'**
   String get managerSuggestionTitle;
 
   /// Manager suggestion subtitle
   ///
   /// In en, this message translates to:
-  /// **'it might become a little easier'**
+  /// **'An accountability partner can help it stick'**
   String get managerSuggestionSubtitle;
 
   /// Alternative manager suggestion text
   ///
   /// In en, this message translates to:
-  /// **'If keeping it alone is hard, you can try together'**
+  /// **'Notice each other\'s effort in a mutual 1:1 connection'**
   String get managerSuggestionAlternative;
 
   /// Button to find manager - soft approach
   ///
   /// In en, this message translates to:
-  /// **'Find someone to entrust'**
+  /// **'Choose one person'**
   String get managerSuggestionButton;
 
   /// Question to suggest manager - soft approach
   ///
   /// In en, this message translates to:
-  /// **'Is there someone who can take care of this promise?'**
+  /// **'Who could be your accountability partner?'**
   String get managerSuggestionQuestion;
 
   /// Title for plan proposal screens - solo-first approach
@@ -815,7 +815,7 @@ abstract class AppLocalizations {
   /// Alternative title for solo plan
   ///
   /// In en, this message translates to:
-  /// **'A promise I want to keep'**
+  /// **'A promise to keep together'**
   String get planKeepWatching;
 
   /// Hint text for action input field
@@ -941,7 +941,7 @@ abstract class AppLocalizations {
   /// Info message about proposal
   ///
   /// In en, this message translates to:
-  /// **'This is a proposal. Your partner will review and decide together.'**
+  /// **'Your accountability partner will review it. It starts when you both agree.'**
   String get planSummaryInfo;
 
   /// Message about adjustability
@@ -1241,13 +1241,13 @@ abstract class AppLocalizations {
   /// Connect screen description
   ///
   /// In en, this message translates to:
-  /// **'Couple connection screen'**
+  /// **'Accountability partner connection screen'**
   String get developerScreenConnectDesc;
 
   /// Home screen description
   ///
   /// In en, this message translates to:
-  /// **'Now/History/Us tabs'**
+  /// **'Now/History/Together tabs'**
   String get developerScreenHomeDesc;
 
   /// Settings screen description
@@ -1379,7 +1379,7 @@ abstract class AppLocalizations {
   /// Header text showing partner name
   ///
   /// In en, this message translates to:
-  /// **'With {name}'**
+  /// **'Keeping it going with {name}'**
   String headerWithPartner(String name);
 
   /// No description provided for @usLinkEmailSuccess.
@@ -1391,7 +1391,7 @@ abstract class AppLocalizations {
   /// History card label when partner verified
   ///
   /// In en, this message translates to:
-  /// **'Partner verified'**
+  /// **'Accountability partner checked'**
   String get historyPartnerVerified;
 
   /// History card label when I verified
@@ -1703,25 +1703,25 @@ abstract class AppLocalizations {
   /// No description provided for @historyFilterPartner.
   ///
   /// In en, this message translates to:
-  /// **'Partner\'s Action'**
+  /// **'Accountability partner'**
   String get historyFilterPartner;
 
   /// No description provided for @historyMyActionVerified.
   ///
   /// In en, this message translates to:
-  /// **'Partner saw it'**
+  /// **'They checked it'**
   String get historyMyActionVerified;
 
   /// No description provided for @historyPartnerActionVerified.
   ///
   /// In en, this message translates to:
-  /// **'Saw it'**
+  /// **'I checked it'**
   String get historyPartnerActionVerified;
 
   /// No description provided for @historyPartnerActionWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Not seen yet'**
+  /// **'Waiting for me'**
   String get historyPartnerActionWaiting;
 
   /// No description provided for @historyActionSawIt.
@@ -2069,7 +2069,7 @@ abstract class AppLocalizations {
   /// No description provided for @planPartnerFallback.
   ///
   /// In en, this message translates to:
-  /// **'your partner'**
+  /// **'your accountability partner'**
   String get planPartnerFallback;
 
   /// No description provided for @planActionFallback.
@@ -2081,25 +2081,25 @@ abstract class AppLocalizations {
   /// No description provided for @planPartnerPreviewLabel.
   ///
   /// In en, this message translates to:
-  /// **'Here\'s how your partner sees it'**
+  /// **'What your accountability partner will see'**
   String get planPartnerPreviewLabel;
 
   /// No description provided for @planPartnerPreviewWith.
   ///
   /// In en, this message translates to:
-  /// **'{name} will be asked to nudge you on \"{promise}\" without missing a beat for 28 days.'**
+  /// **'Invite {name} to keep \"{promise}\" with you for 28 days.'**
   String planPartnerPreviewWith(String name, String promise);
 
   /// No description provided for @planPartnerPreviewWithout.
   ///
   /// In en, this message translates to:
-  /// **'Without a partner there\'s no one to receive the poke. Connect one before saving for stronger pressure.'**
+  /// **'You can start solo. Connect an accountability partner to notice each other\'s effort and exchange knocks.'**
   String get planPartnerPreviewWithout;
 
   /// No description provided for @planConnectPartner.
   ///
   /// In en, this message translates to:
-  /// **'Connect a partner'**
+  /// **'Connect an accountability partner'**
   String get planConnectPartner;
 
   /// No description provided for @planDayEveryDay.
@@ -2273,7 +2273,7 @@ abstract class AppLocalizations {
   /// No description provided for @planTemplateReadingDescription.
   ///
   /// In en, this message translates to:
-  /// **'Leave a one-line trace so your partner can check in easily.'**
+  /// **'Leave a one-line trace so your accountability partner can notice it easily.'**
   String get planTemplateReadingDescription;
 
   /// No description provided for @planTemplateWritingLabel.
@@ -2345,7 +2345,7 @@ abstract class AppLocalizations {
   /// No description provided for @planTemplateStretchingDescription.
   ///
   /// In en, this message translates to:
-  /// **'Show your partner even a short loosen-up.'**
+  /// **'Share even a short stretch with your accountability partner.'**
   String get planTemplateStretchingDescription;
 
   /// No description provided for @planTemplateMorningLightLabel.
@@ -2495,7 +2495,7 @@ abstract class AppLocalizations {
   /// No description provided for @planDayPresetStudyEveryDayDesc.
   ///
   /// In en, this message translates to:
-  /// **'Show your partner something each day, even briefly'**
+  /// **'Share something with your accountability partner each day, even briefly'**
   String get planDayPresetStudyEveryDayDesc;
 
   /// No description provided for @planDayPresetExerciseThreeDaysDesc.
@@ -2513,7 +2513,7 @@ abstract class AppLocalizations {
   /// No description provided for @planDayPresetExerciseEveryDayDesc.
   ///
   /// In en, this message translates to:
-  /// **'Get daily check-ins like a short stretch'**
+  /// **'Notice each other\'s daily effort, even a short stretch'**
   String get planDayPresetExerciseEveryDayDesc;
 
   /// No description provided for @planDayPresetCustomThreeDaysDesc.
@@ -2549,7 +2549,7 @@ abstract class AppLocalizations {
   /// No description provided for @planProposalSaved.
   ///
   /// In en, this message translates to:
-  /// **'Proposal saved.\nGo chat about it with your partner!'**
+  /// **'Proposal sent.\nTalk it through with your accountability partner!'**
   String get planProposalSaved;
 
   /// No description provided for @planSaveError.
@@ -2789,13 +2789,13 @@ abstract class AppLocalizations {
   /// No description provided for @notifyEditorPromiseTime.
   ///
   /// In en, this message translates to:
-  /// **'Promise time visible to your partner'**
+  /// **'Promise time your accountability partner can see'**
   String get notifyEditorPromiseTime;
 
   /// No description provided for @notifyEditorDefaultTimeHint.
   ///
   /// In en, this message translates to:
-  /// **'9 PM by default is a good time for your partner to check before the day slips by.'**
+  /// **'9 PM is a good default for noticing each other\'s effort before the day ends.'**
   String get notifyEditorDefaultTimeHint;
 
   /// No description provided for @notifyEditorPrealert.
@@ -3059,7 +3059,7 @@ abstract class AppLocalizations {
   /// No description provided for @planSummaryPartnerVerified.
   ///
   /// In en, this message translates to:
-  /// **'Partner verified'**
+  /// **'Accountability partner checked'**
   String get planSummaryPartnerVerified;
 
   /// No description provided for @planSummaryCount.
@@ -3101,7 +3101,7 @@ abstract class AppLocalizations {
   /// No description provided for @connectAlreadyConnectedBody.
   ///
   /// In en, this message translates to:
-  /// **'You already have a connected partner.\nMultiple partners will be supported later.'**
+  /// **'You already have one accountability partner.\nFor now, Nodtry supports one mutual connection at a time.'**
   String get connectAlreadyConnectedBody;
 
   /// No description provided for @connectOk.
@@ -3113,7 +3113,7 @@ abstract class AppLocalizations {
   /// No description provided for @connectSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Connected!'**
+  /// **'Accountability partner connected!'**
   String get connectSuccess;
 
   /// No description provided for @allPlansTitleMine.
@@ -3125,7 +3125,7 @@ abstract class AppLocalizations {
   /// No description provided for @allPlansTitlePartner.
   ///
   /// In en, this message translates to:
-  /// **'Partner\'s promises'**
+  /// **'Accountability partner\'s promises'**
   String get allPlansTitlePartner;
 
   /// No description provided for @allPlansEmpty.
@@ -3257,7 +3257,7 @@ abstract class AppLocalizations {
   /// No description provided for @historyWeeklyPartnerLabel.
   ///
   /// In en, this message translates to:
-  /// **'Partner'**
+  /// **'Accountability partner'**
   String get historyWeeklyPartnerLabel;
 
   /// No description provided for @historyReconcileTitle.
@@ -3341,7 +3341,7 @@ abstract class AppLocalizations {
   /// No description provided for @usEmptyPartner.
   ///
   /// In en, this message translates to:
-  /// **'Partner has no active promises'**
+  /// **'Your accountability partner has no active promises'**
   String get usEmptyPartner;
 
   /// No description provided for @usCreatePlanShort.
@@ -3815,7 +3815,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowPokeNoActivityMessage.
   ///
   /// In en, this message translates to:
-  /// **'Knock knock! Someone\'s waiting for a promise. Want to make today\'s?'**
+  /// **'Knock knock! Your accountability partner is ready. Make one promise for today?'**
   String get nowPokeNoActivityMessage;
 
   /// No description provided for @nowPokeSent.
@@ -3833,13 +3833,13 @@ abstract class AppLocalizations {
   /// No description provided for @nowPokeAgainMessage.
   ///
   /// In en, this message translates to:
-  /// **'Knock knock! Your partner is waiting. Want to firm up today\'s promise?'**
+  /// **'Knock knock! Your accountability partner is here. Ready to keep today\'s promise going?'**
   String get nowPokeAgainMessage;
 
   /// No description provided for @nowPokeAgainSent.
   ///
   /// In en, this message translates to:
-  /// **'Knock knock — pulled the promise again.'**
+  /// **'Knock sent to help today\'s promise continue.'**
   String get nowPokeAgainSent;
 
   /// No description provided for @nowSettlementSaved.
@@ -3857,7 +3857,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowExitReasonWeakPoke.
   ///
   /// In en, this message translates to:
-  /// **'The knock pressure was weak'**
+  /// **'Knocks didn\'t help me follow through'**
   String get nowExitReasonWeakPoke;
 
   /// No description provided for @nowExitReasonTooBig.
@@ -3869,7 +3869,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowExitReasonPartnerBurden.
   ///
   /// In en, this message translates to:
-  /// **'Partner verification felt heavy'**
+  /// **'Checking in on each other felt heavy'**
   String get nowExitReasonPartnerBurden;
 
   /// No description provided for @nowExitReasonCustomLabel.
@@ -4007,7 +4007,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowGuideWhen.
   ///
   /// In en, this message translates to:
-  /// **'Setting \"when to do it\" raises your follow-through'**
+  /// **'Pick when you\'ll do it so today\'s starting point is clear'**
   String get nowGuideWhen;
 
   /// No description provided for @nowGuideSmallStart.
@@ -4049,7 +4049,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowPartnerActionFallback.
   ///
   /// In en, this message translates to:
-  /// **'Partner\'s practice'**
+  /// **'Accountability partner\'s practice'**
   String get nowPartnerActionFallback;
 
   /// No description provided for @nowActionNoteHint.
@@ -4109,7 +4109,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowPromiseAckDialogHint.
   ///
   /// In en, this message translates to:
-  /// **'Drop a quick word for your partner (optional)'**
+  /// **'Leave a quick word for your accountability partner (optional)'**
   String get nowPromiseAckDialogHint;
 
   /// No description provided for @nowPromiseAckDialogConfirm.
@@ -4349,7 +4349,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowHeaderSettlementSub.
   ///
   /// In en, this message translates to:
-  /// **'Confirm whether the knock really pulled the promise and pick the next 4 weeks.'**
+  /// **'See whether action followed the knock, then choose the next 4 weeks.'**
   String get nowHeaderSettlementSub;
 
   /// No description provided for @nowMetricCompleted.
@@ -4361,7 +4361,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowMetricPartnerReact.
   ///
   /// In en, this message translates to:
-  /// **'Partner reactions'**
+  /// **'Accountability partner reactions'**
   String get nowMetricPartnerReact;
 
   /// No description provided for @nowMetricMissed.
@@ -4499,7 +4499,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowHeaderConfirmAndPull.
   ///
   /// In en, this message translates to:
-  /// **'Time to verify and pull'**
+  /// **'Time to check in and cheer them on'**
   String get nowHeaderConfirmAndPull;
 
   /// No description provided for @nowHeaderWaiting.
@@ -4535,31 +4535,31 @@ abstract class AppLocalizations {
   /// No description provided for @nowPartnerNoNewPlanGuide.
   ///
   /// In en, this message translates to:
-  /// **'The other person hasn\'t made a new promise. Want to knock before it gets buried?'**
+  /// **'Your accountability partner hasn\'t made a new promise yet. Knock and start together?'**
   String get nowPartnerNoNewPlanGuide;
 
   /// No description provided for @nowKnockMakePlan.
   ///
   /// In en, this message translates to:
-  /// **'Knock! Ask to make a promise'**
+  /// **'Knock! Ask to start together'**
   String get nowKnockMakePlan;
 
   /// No description provided for @nowPartnerMissedPokeBody.
   ///
   /// In en, this message translates to:
-  /// **'{name}\'s promise is now a missed promise. Knock to pull it again.'**
+  /// **'Send {name} a knock to help them restart a missed promise.'**
   String nowPartnerMissedPokeBody(String name);
 
   /// No description provided for @nowPartnerQuietPokeBody.
   ///
   /// In en, this message translates to:
-  /// **'{name}\'s promise is still quiet. Knock before it gets buried.'**
+  /// **'{name}\'s promise is quiet. Send a knock to show you noticed.'**
   String nowPartnerQuietPokeBody(String name);
 
   /// No description provided for @nowKnockPull.
   ///
   /// In en, this message translates to:
-  /// **'Knock! Pull'**
+  /// **'Knock! Help them restart'**
   String get nowKnockPull;
 
   /// No description provided for @nowRescueYesterday.
@@ -4583,7 +4583,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowPartnerFallback2.
   ///
   /// In en, this message translates to:
-  /// **'partner'**
+  /// **'accountability partner'**
   String get nowPartnerFallback2;
 
   /// No description provided for @nowPartnerAllDone.
@@ -4595,7 +4595,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowQuickCheckHelp.
   ///
   /// In en, this message translates to:
-  /// **'A quick verification makes tomorrow easier too.'**
+  /// **'Check in briefly and keep tomorrow\'s promise visible too.'**
   String get nowQuickCheckHelp;
 
   /// No description provided for @nowLastAction.
@@ -4673,7 +4673,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowMakePromiseSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'It starts once your partner accepts'**
+  /// **'It starts when you and your accountability partner agree'**
   String get nowMakePromiseSubtitle;
 
   /// No description provided for @nowProgressLine.
@@ -4745,7 +4745,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowPokeReceived.
   ///
   /// In en, this message translates to:
-  /// **'Your partner sent a knock'**
+  /// **'Your accountability partner sent a knock'**
   String get nowPokeReceived;
 
   /// No description provided for @nowPokeReceivedFromName.
@@ -4823,7 +4823,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifyBannerBody.
   ///
   /// In en, this message translates to:
-  /// **'Turn them on to get your partner\'s check-ins and reminders.'**
+  /// **'Turn them on so you don\'t miss your accountability partner\'s check-ins and knocks.'**
   String get notifyBannerBody;
 
   /// No description provided for @notifyBannerAction.
@@ -4955,13 +4955,13 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialPage2Title.
   ///
   /// In en, this message translates to:
-  /// **'You don\'t have to do it alone'**
+  /// **'One person who notices'**
   String get tutorialPage2Title;
 
   /// No description provided for @tutorialPage2Body.
   ///
   /// In en, this message translates to:
-  /// **'Connect with a partner to have them check in on what you did. Less pressure, more follow-through.'**
+  /// **'Connect with an accountability partner by mutual choice. They notice your effort, and you cheer on theirs.'**
   String get tutorialPage2Body;
 
   /// No description provided for @tutorialPage3Title.

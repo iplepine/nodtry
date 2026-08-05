@@ -36,9 +36,9 @@
 | 조율하기 | `Icons.tune_rounded` | 계획 조율, 반려 사유 |
 | 휴식권 | `Icons.nightlight_round` | 오늘은 쉬어갈게요 |
 | 놓친 약속 | `Icons.schedule_rounded` | 지연, overdue |
-| 다시 당기기 | `Icons.replay_rounded` | 복귀, 다시 시도 |
+| 다시 이어주기 | `Icons.replay_rounded` | 복귀, 다시 시도 |
 | 관계 연결 | `Icons.link_rounded` | 연결/초대 |
-| 파트너 | `Icons.person_rounded` | 상대 프로필 fallback |
+| 실천 메이트 | `Icons.person_rounded` | 상대 프로필 fallback |
 | 우리 | `Icons.group_rounded` | 우리 탭 |
 | 기록 | `Icons.timeline_rounded` | 기록 탭 |
 | 빈 상태 | `Icons.add_task_rounded` | 약속 없음 |

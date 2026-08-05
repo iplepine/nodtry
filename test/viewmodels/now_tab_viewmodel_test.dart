@@ -413,14 +413,17 @@ void main() {
           .dispatch(
             const PokePartnerIntent(
               'plan-poke-123',
-              message: '똑똑! 파트너가 기다리고 있어요.',
+              message: '똑똑! 실천 메이트가 기다리고 있어요.',
             ),
           );
 
       final state = container.read(nowTabViewModelProvider).value!;
       expect(mockRecordRepository.pokePartnerCallCount, 1);
       expect(mockRecordRepository.lastPokedPlanId, 'plan-poke-123');
-      expect(mockRecordRepository.lastPokePartnerMessage, '똑똑! 파트너가 기다리고 있어요.');
+      expect(
+        mockRecordRepository.lastPokePartnerMessage,
+        '똑똑! 실천 메이트가 기다리고 있어요.',
+      );
       expect(state.managerCards, isEmpty);
     },
   );

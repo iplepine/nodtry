@@ -10,7 +10,7 @@
 # 히스토리(History) 정책
 
 ## 개요
-플랜 실천 기록을 추적하고, 파트너와의 확인/피드백을 관리하는 기능.
+플랜 실천 기록을 추적하고, 실천 메이트와 주고받은 확인/피드백을 관리하는 기능.
 
 ## 히스토리 항목 구조
 
@@ -22,9 +22,9 @@
 - `status`: 상태 (아래 참고)
 - `executorId`: 실천자
 - `note`: 실천자 메모
-- `comment`: 매니저 피드백
+- `comment`: 실천 메이트 피드백
 - `isVerifiedByPartner`, `isVerifiedByMe`: 확인 플래그
-- `partnerName`, `partnerImageUrl`, `partnerMessage`: 파트너 정보
+- `partnerName`, `partnerImageUrl`, `partnerMessage`: 실천 메이트 정보
 
 ## 히스토리 상태
 
@@ -33,7 +33,7 @@
 | `done` | 했어 | 당일 실천 완료 |
 | `actuallyDone` | 사실 했어요 | 사후 정리 - 실제로 했다고 정정 |
 | `rested` | 쉴게요 | 사후 정리 - 쉬었다고 정정 |
-| `verified` | 확인됨 | 매니저가 실천 확인 |
+| `verified` | 확인됨 | 실천 메이트가 실천 확인 |
 | `skipped` | 건너뜀 | 당일 건너뜀 |
 
 ## 화면 구성
@@ -64,7 +64,7 @@
 과거 실천에 대한 이견 해소
 
 ### 프로세스
-1. 매니저가 과거 기록에 의문 제기
+1. 실천 메이트가 과거 기록에 의문 제기
 2. 실천자가 해명:
    - "사실 했어요" → `actuallyDone`
    - "쉬었어요" → `rested`
@@ -77,4 +77,4 @@
 
 ## 실시간 업데이트
 - `getHistoryItemsStream()`으로 Firestore 변경 감지
-- 파트너의 리액션/확인 추가 시 자동 갱신
+- 실천 메이트의 리액션/확인 추가 시 자동 갱신

@@ -13,7 +13,7 @@
 
 ### 1. 원격 알림 (FCM)
 - Firebase Cloud Messaging 기반 푸시 알림
-- 이벤트 트리거: 플랜 제안, 파트너 실천 보고, 미실천 자동 전달 등
+- 이벤트 트리거: 플랜 제안, 실천 메이트의 실천 보고, 미실천 자동 전달 등
 - production 상태: `1.0.30+49`부터 OS가 직접 표시할 수 있는 notification/APNS alert payload를 포함한다.
 
 ### 2. 로컬 알림 (플랜 리마인더)
@@ -58,7 +58,7 @@
 
 ## 미실천 자동 전달
 
-약속 시간이 지났는데도 실천자가 오늘 행동을 처리하지 않으면, 실패가 혼자 묻히지 않도록 파트너에게 자동 전달한다.
+약속 시간이 지났는데도 실천자가 오늘 행동을 처리하지 않으면, 실패가 혼자 묻히지 않도록 실천 메이트에게 자동 전달한다.
 
 운영 구현: Cloud Functions `notifyMissedActions`가 30분 주기로 실행된다.
 
@@ -71,11 +71,11 @@
 - `lastMissedNotifiedAt`이 오늘 날짜가 아님
 
 ### 결과
-- 파트너에게 `action_missed` 타입 푸시를 보낸다.
+- 실천 메이트에게 `action_missed` 타입 푸시를 보낸다.
 - 플랜에 `lastMissedNotifiedAt`, `lastMissedItemTitle`, `lastUpdatedBy: system_missed_action`을 기록한다.
 - 같은 플랜의 미실천 푸시는 하루 1회만 보낸다.
 - 이 업데이트 자체는 일반 플랜 변경 알림으로 재전파하지 않는다.
-- 앱은 `lastMissedNotifiedAt`을 읽어 Now 탭에서 실천자에게 "똑똑! 오늘 약속이 파트너에게 놓친 약속으로 남았어요.", 파트너에게 "놓친 약속이 떴어요" 상태를 보여준다.
+- 앱은 `lastMissedNotifiedAt`을 읽어 Now 탭에서 실천자에게 "똑똑! 오늘 약속이 실천 메이트에게 아직 미처리로 보여요.", 실천 메이트에게 "놓친 약속이 떴어요" 상태를 보여준다.
 
 ## 원격 알림 운영 상태
 

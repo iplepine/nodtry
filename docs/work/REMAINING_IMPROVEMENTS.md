@@ -19,10 +19,10 @@ P0/P1/P2 개선 스윕에서 **안전하게 완결·검증된 항목은 코드�
 
 ---
 
-## 1. (P1 #4) 콜드스타트 — 파트너 대기/재참여 설계
+## 1. (P1 #4) 콜드스타트 — 실천 메이트 대기/재참여 설계
 
 ### 현재 상태
-- 솔로 사용은 이미 가능하다: 파트너(매니저)가 없으면 플랜은 `pendingApproval`이 아니라
+- 솔로 사용은 이미 가능하다: 실천 메이트(`managerId`)가 없으면 플랜은 `pendingApproval`이 아니라
   즉시 `active`로 생성된다 (`plan_create_viewmodel.dart` 187–191).
 - 알림 권한 상태를 조회할 수 있는 훅을 추가해 두었다:
   `NotificationService.hasPermission()` (`lib/core/services/notification_service.dart`).
@@ -33,7 +33,7 @@ P0/P1/P2 개선 스윕에서 **안전하게 완결·검증된 항목은 코드�
   만들려면 초대 발급/전달을 추적하는 **새 데이터 흐름**이 필요하다. → 제품 결정 필요
   (딥링크 초대 + `invites` 컬렉션 도입 여부).
 - **알림 OFF 배너**: 코어 루프가 FCM에 의존하므로, 권한이 꺼져 있으면 홈/우리 탭 상단에
-  "알림을 켜야 파트너 신호를 받을 수 있어요 · 켜기" 배너를 노출. `hasPermission()` +
+  "알림을 켜야 실천 메이트의 확인 신호를 받을 수 있어요 · 켜기" 배너를 노출. `hasPermission()` +
   `requestPermissionAndRegister()`로 구현 가능하나, 노출 위치가 `now_tab_screen.dart`
   (대형 파일)이라 2번 리팩토링과 함께 진행 권장.
 
@@ -86,3 +86,20 @@ P0/P1/P2 개선 스윕에서 **안전하게 완결·검증된 항목은 코드�
    있게 된다(`docs/operations/SECURITY_RULES.md`의 잔여 리스크와 연결).
 
 각 단계는 별도 PR로, 단계 사이에 운영 데이터로 검증 후 진행한다.
+
+---
+
+## 4. (P2) Pretendard 경량 폰트 자산 복구
+
+### 현재 상태
+- `assets/fonts/Pretendard-*.otf` 3개는 실제 OpenType 파일이 아니라 GitHub HTML 응답이다.
+- 앱은 플랫폼 폰트로 fallback할 수 있지만, 테스트 기반 스토어 이미지 생성에서는 글자가
+  네모로 렌더링된다.
+- `tool/generate_store_screenshots_test.dart`는 파일 시그니처를 검사하고 macOS 시스템 폰트로
+  대체해 스토어 이미지를 안정적으로 생성한다.
+
+### 완료 조건
+1. 실제 Pretendard 파일 또는 필요한 글리프만 포함한 경량 서브셋을 준비한다.
+2. Android 콜드스타트와 ANR 지표가 기존 대비 악화되지 않는지 확인한다.
+3. iOS·Android 한글/영문 렌더링과 스토어 이미지 생성 테스트를 통과한다.
+4. 검증 전에는 과거 1.6MB 폰트 3개를 그대로 복원하지 않는다.

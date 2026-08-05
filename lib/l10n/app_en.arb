@@ -4,7 +4,7 @@
   "@appTitle": {
     "description": "The application title"
   },
-  "splashTagline": "Plans we couldn't keep alone, together",
+  "splashTagline": "Keep the promises you put off with one person who notices.",
   "@splashTagline": {
     "description": "Tagline shown on splash screen"
   },
@@ -20,19 +20,19 @@
   "@loginGuest": {
     "description": "Button to start the app without logging in (Guest Mode)"
   },
-  "privacyMessage": "We don't push.\nYour records are private between you two.",
+  "privacyMessage": "You both choose to connect.\nYour records stay between you.",
   "@privacyMessage": {
     "description": "Privacy message shown at bottom of login screen"
   },
-  "connectHeadline": "Want to entrust this month to someone?",
+  "connectHeadline": "Keep the promises you put off",
   "@connectHeadline": {
     "description": "Headline on connect screen"
   },
-  "connectSubtitle": "You make the plan, and your partner manages it.",
+  "connectSubtitle": "Connect with one accountability partner. They notice your effort, and you notice theirs.",
   "@connectSubtitle": {
     "description": "Subtitle on connect screen"
   },
-  "createInviteCode": "Create Invite Code",
+  "createInviteCode": "Invite an accountability partner",
   "@createInviteCode": {
     "description": "Button to create invite code"
   },
@@ -60,7 +60,7 @@
   "@codeCopied": {
     "description": "Message when code is copied"
   },
-  "codeShareMessage": "Share this code with your partner",
+  "codeShareMessage": "Share this code with your accountability partner",
   "@codeShareMessage": {
     "description": "Message below invite code"
   },
@@ -68,11 +68,11 @@
   "@enterCodeBelow": {
     "description": "Instruction to enter code"
   },
-  "sendConnectionRequest": "Send Connection Request",
+  "sendConnectionRequest": "Send accountability partner request",
   "@sendConnectionRequest": {
     "description": "Button to send connection request"
   },
-  "waitingForConnection": "Your partner is reviewing the connection",
+  "waitingForConnection": "Waiting for them to accept your connection",
   "@waitingForConnection": {
     "description": "Message while waiting for connection"
   },
@@ -96,7 +96,7 @@
   "@homeSentWaiting": {
     "description": "Message when report is sent and waiting"
   },
-  "homeWaitingForCheck": "Waiting for confirmation",
+  "homeWaitingForCheck": "Waiting for their check-in",
   "@homeWaitingForCheck": {
     "description": "Message while waiting for partner's check"
   },
@@ -152,7 +152,7 @@
       }
     }
   },
-  "homeContextEntrusted": "Entrusted to {name}",
+  "homeContextEntrusted": "Keeping it going with {name}",
   "@homeContextEntrusted": {
     "description": "Context about who is managing",
     "placeholders": {
@@ -161,7 +161,7 @@
       }
     }
   },
-  "homeContextManaging": "Managing {name}",
+  "homeContextManaging": "Noticing {name}'s effort",
   "@homeContextManaging": {
     "description": "Context about who is being managed",
     "placeholders": {
@@ -178,7 +178,7 @@
   "@tabHistory": {
     "description": "History tab label"
   },
-  "tabUs": "Us",
+  "tabUs": "Together",
   "@tabUs": {
     "description": "Us tab label"
   },
@@ -194,8 +194,8 @@
   "@usDefaultNameMe": {
     "description": "Us tab - Default user name"
   },
-  "usYouTitle": "Partner",
-  "usHeroSubtitle": "Promises you're building together",
+  "usYouTitle": "Accountability partner",
+  "usHeroSubtitle": "One person who notices, both ways",
   "usCheerSent": "Cheer sent ⚡",
   "usCheerTooltip": "Send cheer",
   "@usYouTitle": {
@@ -228,9 +228,9 @@
   "usLoadError": "Error loading connections",
   "usNoInviteCode": "No Code",
   "usNoName": "No Name",
-  "usUnknownUser": "Unknown User",
+  "usUnknownUser": "Accountability partner",
   "usDisconnectDialogTitle": "Disconnect",
-  "usDisconnectDialogContent": "Disconnect from {name}?",
+  "usDisconnectDialogContent": "Disconnect {name} as your accountability partner?",
   "@usDisconnectDialogContent": {
     "placeholders": {
       "name": {
@@ -239,7 +239,7 @@
     }
   },
   "usDisconnectConfirm": "Disconnect",
-  "usDisconnectSuccess": "Disconnected successfully.",
+  "usDisconnectSuccess": "You're no longer connected.",
   "usDisconnectError": "We couldn't disconnect. Please try again.",
   "usDisconnectTooltip": "Disconnect",
   "usCropImageTitle": "Crop Profile Image",
@@ -251,7 +251,7 @@
   "@usProfileEditImageLabel": {
     "description": "Us tab - Profile edit image label"
   },
-  "usAddConnectionLabel": "Add new connection",
+  "usAddConnectionLabel": "Connect accountability partner",
   "@usAddConnectionLabel": {
     "description": "Us tab - Add new connection button label"
   },
@@ -259,31 +259,31 @@
   "@usBadgeMutual": {
     "description": "Us tab - Badge: Mutual support"
   },
-  "usEmptyMatesTitle": "No mates connected yet",
+  "usEmptyMatesTitle": "No accountability partner yet",
   "@usEmptyMatesTitle": {
     "description": "Us tab - Empty state title"
   },
-  "usEmptyMatesSubtitle": "Send your invite code to become each other's safe base",
+  "usEmptyMatesSubtitle": "Invite one person and notice each other's effort",
   "@usEmptyMatesSubtitle": {
     "description": "Us tab - Empty state subtitle"
   },
-  "usConnectedPeople": "Connected People",
+  "usConnectedPeople": "Your accountability partner",
   "@usConnectedPeople": {
     "description": "Section title for connected people"
   },
-  "usManaging": "Managing",
+  "usManaging": "Supporting them",
   "@usManaging": {
     "description": "Status label for managing someone"
   },
-  "usEntrusted": "Entrusted",
+  "usEntrusted": "Supported by them",
   "@usEntrusted": {
     "description": "Status label for being managed"
   },
-  "usInviteNew": "Invite New Person",
+  "usInviteNew": "Invite one person",
   "@usInviteNew": {
     "description": "Button to invite new person"
   },
-  "usNoConnections": "No connections yet",
+  "usNoConnections": "No accountability partner yet",
   "@usNoConnections": {
     "description": "Empty state message for us tab"
   },
@@ -307,7 +307,7 @@
   "@headerPlanEnded": {
     "description": "Message when plan period ended"
   },
-  "nowNoPlan": "What promises shall we make this month?",
+  "nowNoPlan": "No promise for now",
   "@nowNoPlan": {
     "description": "Message when there's no active plan"
   },
@@ -341,7 +341,7 @@
   "@nowQuietNoAction": {
     "description": "Quiet state message - no action needed"
   },
-  "nowNoPlanSubtitle": "Shall we make just one promise?",
+  "nowNoPlanSubtitle": "Start with one promise you can share",
   "@nowNoPlanSubtitle": {
     "description": "Subtitle when there's no plan"
   },
@@ -419,23 +419,23 @@
       }
     }
   },
-  "managerSuggestionTitle": "If you entrust this promise to someone",
+  "managerSuggestionTitle": "Keep this promise with one person",
   "@managerSuggestionTitle": {
     "description": "Manager suggestion title - soft approach"
   },
-  "managerSuggestionSubtitle": "it might become a little easier",
+  "managerSuggestionSubtitle": "An accountability partner can help it stick",
   "@managerSuggestionSubtitle": {
     "description": "Manager suggestion subtitle"
   },
-  "managerSuggestionAlternative": "If keeping it alone is hard, you can try together",
+  "managerSuggestionAlternative": "Notice each other's effort in a mutual 1:1 connection",
   "@managerSuggestionAlternative": {
     "description": "Alternative manager suggestion text"
   },
-  "managerSuggestionButton": "Find someone to entrust",
+  "managerSuggestionButton": "Choose one person",
   "@managerSuggestionButton": {
     "description": "Button to find manager - soft approach"
   },
-  "managerSuggestionQuestion": "Is there someone who can take care of this promise?",
+  "managerSuggestionQuestion": "Who could be your accountability partner?",
   "@managerSuggestionQuestion": {
     "description": "Question to suggest manager - soft approach"
   },
@@ -459,7 +459,7 @@
   "@planMyPromise": {
     "description": "Alternative title for solo plan"
   },
-  "planKeepWatching": "A promise I want to keep",
+  "planKeepWatching": "A promise to keep together",
   "@planKeepWatching": {
     "description": "Alternative title for solo plan"
   },
@@ -543,7 +543,7 @@
   "@planSummaryDayConditional": {
     "description": "Text when no days are selected"
   },
-  "planSummaryInfo": "This is a proposal. Your partner will review and decide together.",
+  "planSummaryInfo": "Your accountability partner will review it. It starts when you both agree.",
   "@planSummaryInfo": {
     "description": "Info message about proposal"
   },
@@ -743,11 +743,11 @@
   "@developerScreenLoginDesc": {
     "description": "Login screen description"
   },
-  "developerScreenConnectDesc": "Couple connection screen",
+  "developerScreenConnectDesc": "Accountability partner connection screen",
   "@developerScreenConnectDesc": {
     "description": "Connect screen description"
   },
-  "developerScreenHomeDesc": "Now/History/Us tabs",
+  "developerScreenHomeDesc": "Now/History/Together tabs",
   "@developerScreenHomeDesc": {
     "description": "Home screen description"
   },
@@ -814,7 +814,7 @@
   "usEmailLabel": "Email",
   "usPasswordLabel": "Password",
   "usLinkConfirm": "Link",
-  "headerWithPartner": "With {name}",
+  "headerWithPartner": "Keeping it going with {name}",
   "@headerWithPartner": {
     "description": "Header text showing partner name",
     "placeholders": {
@@ -824,7 +824,7 @@
     }
   },
   "usLinkEmailSuccess": "Email account linked successfully!",
-  "historyPartnerVerified": "Partner verified",
+  "historyPartnerVerified": "Accountability partner checked",
   "@historyPartnerVerified": {
     "description": "History card label when partner verified"
   },
@@ -1004,10 +1004,10 @@
   "reconcileDoneMessage": "Record has been reconciled.",
   "historyFilterAll": "All",
   "historyFilterMe": "My Action",
-  "historyFilterPartner": "Partner's Action",
-  "historyMyActionVerified": "Partner saw it",
-  "historyPartnerActionVerified": "Saw it",
-  "historyPartnerActionWaiting": "Not seen yet",
+  "historyFilterPartner": "Accountability partner",
+  "historyMyActionVerified": "They checked it",
+  "historyPartnerActionVerified": "I checked it",
+  "historyPartnerActionWaiting": "Waiting for me",
   "historyActionSawIt": "Saw it 👍",
   "historyActionCheer": "Cheering you 💜",
   "timeChipStillActionable": "Still actionable",
@@ -1136,18 +1136,18 @@
   "planClearAction": "Clear",
   "planRecommendedFrequency": "Suggested frequency",
   "planNoDayMeansDaily": "Without picking days, this becomes a daily promise.",
-  "planPartnerFallback": "your partner",
+  "planPartnerFallback": "your accountability partner",
   "planActionFallback": "my promise",
-  "planPartnerPreviewLabel": "Here's how your partner sees it",
-  "planPartnerPreviewWith": "{name} will be asked to nudge you on \"{promise}\" without missing a beat for 28 days.",
+  "planPartnerPreviewLabel": "What your accountability partner will see",
+  "planPartnerPreviewWith": "Invite {name} to keep \"{promise}\" with you for 28 days.",
   "@planPartnerPreviewWith": {
     "placeholders": {
       "name": { "type": "String" },
       "promise": { "type": "String" }
     }
   },
-  "planPartnerPreviewWithout": "Without a partner there's no one to receive the poke. Connect one before saving for stronger pressure.",
-  "planConnectPartner": "Connect a partner",
+  "planPartnerPreviewWithout": "You can start solo. Connect an accountability partner to notice each other's effort and exchange knocks.",
+  "planConnectPartner": "Connect an accountability partner",
   "planDayEveryDay": "Every day",
   "planDayWeekdays": "Weekdays",
   "planDayCountFormat": "{count} days/week",
@@ -1206,7 +1206,7 @@
   "planTemplateCodingDescription": "Secure the days you actually touch code before chasing big goals.",
   "planTemplateReadingLabel": "Reading",
   "planTemplateReadingAction": "Read 10 pages and log one line",
-  "planTemplateReadingDescription": "Leave a one-line trace so your partner can check in easily.",
+  "planTemplateReadingDescription": "Leave a one-line trace so your accountability partner can notice it easily.",
   "planTemplateWritingLabel": "Writing",
   "planTemplateWritingAction": "Write for 15 min or 300 characters",
   "planTemplateWritingDescription": "Focus on starting days, not finished pieces.",
@@ -1218,7 +1218,7 @@
   "planTemplateGymDescription": "Increase days you arrive at the gym rather than perfect workouts.",
   "planTemplateStretchingLabel": "Stretching",
   "planTemplateStretchingAction": "Stretch for 10 minutes",
-  "planTemplateStretchingDescription": "Show your partner even a short loosen-up.",
+  "planTemplateStretchingDescription": "Share even a short stretch with your accountability partner.",
   "planTemplateMorningLightLabel": "Morning light",
   "planTemplateMorningLightAction": "Get 5–10 minutes of morning sunlight",
   "planTemplateMorningLightDescription": "Morning sunlight hitting your eyes tells the brain the day has started, locking in tonight's melatonin release so you fall asleep faster and deeper. 5–10 minutes outdoors is enough on clear days; stretch to 10–20 on cloudy ones, 20–30 in rain. Windows block the key wavelengths and sunglasses dampen the light-sensing cells (never stare directly at the sun)",
@@ -1243,10 +1243,10 @@
   "planDayPresetWeekendLabel": "Weekend",
   "planDayPresetStudyThreeDaysDesc": "Build three wins in the first week",
   "planDayPresetStudyWeekdaysDesc": "Anchor your study to the weekdays",
-  "planDayPresetStudyEveryDayDesc": "Show your partner something each day, even briefly",
+  "planDayPresetStudyEveryDayDesc": "Share something with your accountability partner each day, even briefly",
   "planDayPresetExerciseThreeDaysDesc": "Start with a Mon/Wed/Fri rhythm",
   "planDayPresetExerciseWeekendDesc": "Leave a movement trace on weekends",
-  "planDayPresetExerciseEveryDayDesc": "Get daily check-ins like a short stretch",
+  "planDayPresetExerciseEveryDayDesc": "Notice each other's daily effort, even a short stretch",
   "planDayPresetCustomThreeDaysDesc": "A low-pressure default",
   "planDayPresetCustomWeekdaysDesc": "Lock it in as a weekday routine",
   "planDayPresetCustomEveryDayDesc": "Leave a small action every day",
@@ -1258,7 +1258,7 @@
     }
   },
   "planTellUsActionFirst": "Tell us what you want to promise!",
-  "planProposalSaved": "Proposal saved.\nGo chat about it with your partner!",
+  "planProposalSaved": "Proposal sent.\nTalk it through with your accountability partner!",
   "planSaveError": "We couldn't save your promise. Please try again.",
   "planNext": "Next",
   "focusTimerPickerTitle": "How long do you want to focus?",
@@ -1326,8 +1326,8 @@
   "notifyEditorTitle": "Notifications",
   "notifyEditorSubtitleOn": "Pick when we should poke you.",
   "notifyEditorSubtitleOff": "Track without notifications.",
-  "notifyEditorPromiseTime": "Promise time visible to your partner",
-  "notifyEditorDefaultTimeHint": "9 PM by default is a good time for your partner to check before the day slips by.",
+  "notifyEditorPromiseTime": "Promise time your accountability partner can see",
+  "notifyEditorDefaultTimeHint": "9 PM is a good default for noticing each other's effort before the day ends.",
   "notifyEditorPrealert": "Pre-alert",
   "notifyEditorOnTime": "On time",
   "notifyEditor5MinBefore": "5 min before",
@@ -1469,7 +1469,7 @@
   "historyCardFeedbackButton": "OK",
   "historyCardAcknowledgePractice": "Acknowledge practice",
   "planSummaryMyDone": "My completions",
-  "planSummaryPartnerVerified": "Partner verified",
+  "planSummaryPartnerVerified": "Accountability partner checked",
   "planSummaryCount": "{count}",
   "@planSummaryCount": {
     "placeholders": {
@@ -1486,11 +1486,11 @@
   "connectCancel": "Cancel",
   "connectPaste": "Paste",
   "connectNotice": "Notice",
-  "connectAlreadyConnectedBody": "You already have a connected partner.\nMultiple partners will be supported later.",
+  "connectAlreadyConnectedBody": "You already have one accountability partner.\nFor now, Nodtry supports one mutual connection at a time.",
   "connectOk": "OK",
-  "connectSuccess": "Connected!",
+  "connectSuccess": "Accountability partner connected!",
   "allPlansTitleMine": "My promises",
-  "allPlansTitlePartner": "Partner's promises",
+  "allPlansTitlePartner": "Accountability partner's promises",
   "allPlansEmpty": "No promises yet",
   "allPlansDeleteTitle": "Delete this promise?",
   "allPlansDeleteBody": "This can't be undone.",
@@ -1512,7 +1512,7 @@
   "historyCardDatePattern": "M/d (EEE)",
   "historyWeeklyPulseTitle": "This week",
   "historyWeeklyMeLabel": "Me",
-  "historyWeeklyPartnerLabel": "Partner",
+  "historyWeeklyPartnerLabel": "Accountability partner",
   "historyReconcileTitle": "Reconcile past record",
   "historyReconcileSubtitle": "What actually happened on this day?",
   "historyReconcileHold": "Leave it",
@@ -1527,7 +1527,7 @@
   "usSave": "Save",
   "usSeeAll": "See all >",
   "usEmptyMine": "No promises yet",
-  "usEmptyPartner": "Partner has no active promises",
+  "usEmptyPartner": "Your accountability partner has no active promises",
   "usCreatePlanShort": "+ New promise",
   "usCreatePlan": "New promise",
   "usDeletePlanTitle": "Delete this promise?",
@@ -1642,16 +1642,16 @@
   "nowCheerProud": "Said you're awesome! 👍",
   "nowCheerStrength": "Said hang in there! 💪",
   "nowCheerFailed": "Couldn't send cheer.",
-  "nowPokeNoActivityMessage": "Knock knock! Someone's waiting for a promise. Want to make today's?",
+  "nowPokeNoActivityMessage": "Knock knock! Your accountability partner is ready. Make one promise for today?",
   "nowPokeSent": "Sent a knock signal.",
   "nowPokeFailed": "Couldn't send the knock.",
-  "nowPokeAgainMessage": "Knock knock! Your partner is waiting. Want to firm up today's promise?",
-  "nowPokeAgainSent": "Knock knock — pulled the promise again.",
+  "nowPokeAgainMessage": "Knock knock! Your accountability partner is here. Ready to keep today's promise going?",
+  "nowPokeAgainSent": "Knock sent to help today's promise continue.",
   "nowSettlementSaved": "4-week settlement saved.",
   "nowExitDialogTitle": "Wrap up this 4-week round here?",
-  "nowExitReasonWeakPoke": "The knock pressure was weak",
+  "nowExitReasonWeakPoke": "Knocks didn't help me follow through",
   "nowExitReasonTooBig": "The goal was too big",
-  "nowExitReasonPartnerBurden": "Partner verification felt heavy",
+  "nowExitReasonPartnerBurden": "Checking in on each other felt heavy",
   "nowExitReasonCustomLabel": "Other",
   "nowExitReasonCustomHint": "Optionally, a brief note on wrapping up",
   "nowExitReasonNoCustom": "No custom reason",
@@ -1694,14 +1694,14 @@
     }
   },
   "nowKeepFlowing": "Great! Keep this flow going",
-  "nowGuideWhen": "Setting \"when to do it\" raises your follow-through",
+  "nowGuideWhen": "Pick when you'll do it so today's starting point is clear",
   "nowGuideSmallStart": "Starting small is fine. Consistency wins",
   "nowGuideBetterToday": "Better than yesterday is enough",
   "nowErrorTitle": "Error",
   "nowErrorCreationLink": "Creation link:",
   "nowOk": "OK",
   "nowRetryLater": "Please try again later",
-  "nowPartnerActionFallback": "Partner's practice",
+  "nowPartnerActionFallback": "Accountability partner's practice",
   "nowActionNoteHint": "Leave a warm note (optional)",
   "nowVerifyAndSend": "Verify and send",
   "nowStreakCount": "{count} days in a row!",
@@ -1716,7 +1716,7 @@
   "nowPromiseAckButton": "See the result",
   "nowPromiseAckWithNote": "Leave a word and close",
   "nowPromiseAckDialogTitle": "Promise result",
-  "nowPromiseAckDialogHint": "Drop a quick word for your partner (optional)",
+  "nowPromiseAckDialogHint": "Leave a quick word for your accountability partner (optional)",
   "nowPromiseAckDialogConfirm": "Got it",
   "nowPromiseAckSnackbar": "Result acknowledged",
   "nowPromiseAckFailed": "Could not acknowledge the result",
@@ -1783,9 +1783,9 @@
     }
   },
   "nowHeaderSettlementNeeded": "4-week settlement needed",
-  "nowHeaderSettlementSub": "Confirm whether the knock really pulled the promise and pick the next 4 weeks.",
+  "nowHeaderSettlementSub": "See whether action followed the knock, then choose the next 4 weeks.",
   "nowMetricCompleted": "Completed",
-  "nowMetricPartnerReact": "Partner reactions",
+  "nowMetricPartnerReact": "Accountability partner reactions",
   "nowMetricMissed": "Missed days",
   "nowMetricDaysSuffix": "{count} days",
   "@nowMetricDaysSuffix": {
@@ -1836,38 +1836,38 @@
   "nowMissedPlanFallback": "Past promise",
   "nowVerifyingDeadline": "Waiting for verification · cheer needed",
   "nowHeaderTodayAllDone": "All today's promises kept",
-  "nowHeaderConfirmAndPull": "Time to verify and pull",
+  "nowHeaderConfirmAndPull": "Time to check in and cheer them on",
   "nowHeaderWaiting": "Waiting",
   "nowHeaderWaitingAccept": "Waiting for promise approval",
   "nowHeaderPromiseResult": "Promise result is out",
   "nowAdjust": "Adjust",
   "nowApprove": "Approve",
-  "nowPartnerNoNewPlanGuide": "The other person hasn't made a new promise. Want to knock before it gets buried?",
-  "nowKnockMakePlan": "Knock! Ask to make a promise",
-  "nowPartnerMissedPokeBody": "{name}'s promise is now a missed promise. Knock to pull it again.",
+  "nowPartnerNoNewPlanGuide": "Your accountability partner hasn't made a new promise yet. Knock and start together?",
+  "nowKnockMakePlan": "Knock! Ask to start together",
+  "nowPartnerMissedPokeBody": "Send {name} a knock to help them restart a missed promise.",
   "@nowPartnerMissedPokeBody": {
     "placeholders": {
       "name": { "type": "String" }
     }
   },
-  "nowPartnerQuietPokeBody": "{name}'s promise is still quiet. Knock before it gets buried.",
+  "nowPartnerQuietPokeBody": "{name}'s promise is quiet. Send a knock to show you noticed.",
   "@nowPartnerQuietPokeBody": {
     "placeholders": {
       "name": { "type": "String" }
     }
   },
-  "nowKnockPull": "Knock! Pull",
+  "nowKnockPull": "Knock! Help them restart",
   "nowRescueYesterday": "Acknowledge yesterday",
   "nowVerifyAndCheer": "Verify and cheer",
   "nowMakePromise": "Make a promise",
-  "nowPartnerFallback2": "partner",
+  "nowPartnerFallback2": "accountability partner",
   "nowPartnerAllDone": "{name} kept all today's promises.",
   "@nowPartnerAllDone": {
     "placeholders": {
       "name": { "type": "String" }
     }
   },
-  "nowQuickCheckHelp": "A quick verification makes tomorrow easier too.",
+  "nowQuickCheckHelp": "Check in briefly and keep tomorrow's promise visible too.",
   "nowLastAction": "Last action: {title}",
   "@nowLastAction": {
     "placeholders": {
@@ -1914,7 +1914,7 @@
     }
   },
   "nowMakePromiseTitle": "Make a promise",
-  "nowMakePromiseSubtitle": "It starts once your partner accepts",
+  "nowMakePromiseSubtitle": "It starts when you and your accountability partner agree",
   "nowProgressLine": "Currently {success} successes · {failed} failures · {remaining} days remaining",
   "@nowProgressLine": {
     "placeholders": {
@@ -1949,7 +1949,7 @@
       "days": { "type": "int" }
     }
   },
-  "nowPokeReceived": "Your partner sent a knock",
+  "nowPokeReceived": "Your accountability partner sent a knock",
   "nowPokeReceivedFromName": "{name} sent a knock",
   "@nowPokeReceivedFromName": {
     "placeholders": {
@@ -1967,7 +1967,7 @@
   "accountLinkErrorGeneric": "Something went wrong while linking your account.",
   "planCreateErrorNoUser": "We couldn't find your account. Please sign in again.",
   "notifyBannerTitle": "Notifications are off",
-  "notifyBannerBody": "Turn them on to get your partner's check-ins and reminders.",
+  "notifyBannerBody": "Turn them on so you don't miss your accountability partner's check-ins and knocks.",
   "notifyBannerAction": "Turn on",
   "nowActionFailed": "Something went wrong. Please try again.",
   "usNameRequired": "Please enter a name.",
@@ -1989,8 +1989,8 @@
   "tutorialFooter": "One small promise is enough to begin.",
   "tutorialPage1Title": "Keep it small",
   "tutorialPage1Body": "Instead of a vague goal, make one promise you can keep today. Starting small is what gets you moving.",
-  "tutorialPage2Title": "You don't have to do it alone",
-  "tutorialPage2Body": "Connect with a partner to have them check in on what you did. Less pressure, more follow-through.",
+  "tutorialPage2Title": "One person who notices",
+  "tutorialPage2Body": "Connect with an accountability partner by mutual choice. They notice your effort, and you cheer on theirs.",
   "tutorialPage3Title": "Let your record shape what's next",
   "tutorialPage3Body": "Track what you kept and what you put off, then size your next promise to match. Even a miss is material for the next one."
 }
