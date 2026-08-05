@@ -122,7 +122,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
 
     return SwitchListTile(
       contentPadding: EdgeInsets.zero,
-      activeColor: AppColors.primary,
+      activeThumbColor: AppColors.primary,
       title: Text(
         item.title,
         style: TextStyle(

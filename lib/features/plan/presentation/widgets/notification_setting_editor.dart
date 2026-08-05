@@ -80,7 +80,7 @@ class NotificationSettingEditor extends StatelessWidget {
                   onTimeChanged(notificationTime.copyWith(type: 'none'));
                 }
               },
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
             ),
           ],
         ),

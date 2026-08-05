@@ -1,0 +1,2 @@
+- Updated the Google Play Billing Library to the latest version.
+- Stability improvements.

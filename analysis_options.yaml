@@ -9,6 +9,14 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  # Never analyze build output. Under Dart 3.12's workspace resolution the
+  # analyzer otherwise picks up stray package test files fetched into
+  # build/ (e.g. build/macos/SourcePackages/**), reporting thousands of
+  # errors that have nothing to do with this project.
+  exclude:
+    - build/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

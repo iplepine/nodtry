@@ -39,10 +39,13 @@ android {
         applicationId = "com.devho.nodtry.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
-        // Pinned to the latest API level (Android 16) rather than
-        // flutter.targetSdkVersion, which this Flutter (3.32.5) still defaults
-        // to 35 — Play now requires targeting API 36. compileSdk is already 36.
+        // flutter.minSdkVersion is 24 on Flutter 3.44 (was explicitly 23 =
+        // Android 6.0 before the upgrade). The Flutter Android migrator rewrites
+        // this line back to flutter.minSdkVersion on every build, so we follow
+        // it — the practical cost is dropping API 23, a negligible device slice.
+        minSdk = flutter.minSdkVersion
+        // Pinned to the latest API level (Android 16) to satisfy Play's target
+        // API requirement, explicit so it can't drift. compileSdk is 36.
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName

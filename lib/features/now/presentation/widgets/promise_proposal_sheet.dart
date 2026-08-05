@@ -347,7 +347,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
         Switch(
           value: enabled,
           onChanged: onToggle,
-          activeColor: AppColors.primary,
+          activeThumbColor: AppColors.primary,
         ),
       ],
     );
