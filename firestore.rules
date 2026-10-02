@@ -1,20 +1,24 @@
 rules_version = '2';
 
-// Nodtry Firestore security rules.
+// 둘운완 Firestore security rules.
 //
-// Threat model for the current pilot:
+// Threat model:
 //   - Block ALL access from unauthenticated callers (default-deny + isSignedIn()).
 //   - Lock every WRITE to the owning / participating user so nobody can
 //     impersonate another user, tamper with someone else's records, or delete
 //     data they don't own.
-//   - READS are intentionally broad (any signed-in user) on collections the app
-//     queries cross-user by design: a manager reads their partner's `users`,
-//     `plans` and `actions` via queries that filter on the *partner's* uid, so a
-//     statically-tight per-document read rule would reject those queries.
-//     Tightening reads requires denormalizing `managerId` onto every document
-//     and rewriting the cross-user queries — tracked as a follow-up data-model
-//     task (see docs/operations/SECURITY_RULES.md). For a closed pilot the
-//     write-side lockdown is the meaningful hardening.
+//   - A 짝꿍 link (relations) is made only by the person who entered the code
+//     owner's *current* invite code; the server (onRelationCreated) then
+//     enforces 1:1 and re-issues the codes. Server-owned fields (invite codes
+//     once issued, a manager's proof floor) can't be written by clients.
+//   - READS are still broad (any signed-in user) on users, plans and actions:
+//     builds ≤80 query a partner's docs by the partner's uid, and look invite
+//     codes up by querying users. The narrowed version is staged in
+//     firestore.rules.next (participants only; build ≥81 queries only in
+//     shapes it allows). It replaces this file in the flip described in
+//     docs/operations/SECURITY_RULES.md ("읽기 축소 전환"); keep the two in
+//     sync until then — a write rule changed here must change there too
+//     (rules.next only adds a guard on the owner editing actions.managerId).
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -26,74 +30,155 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
     // users/{uid}
     // Read: any signed-in user (invite-code lookup + partner profiles need it).
-    // Write: only the owner of the document.
+    // Write: only the owner. The invite code is written once by the app (on
+    // sign-up, or as a backfill when missing); after that only the server
+    // re-issues it, so nobody can take over someone else's code.
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow create, update, delete: if isUser(userId);
+      allow create, delete: if isUser(userId);
+      allow update: if isUser(userId)
+        && (resource.data.get('inviteCode', null) == null
+          || request.resource.data.get('inviteCode', null) == resource.data.inviteCode);
+
+      // users/{uid}/private/{doc}: owner-only data (e.g. the messaging token),
+      // read by Cloud Functions with the admin SDK.
+      match /private/{docId} {
+        allow read, write: if isUser(userId);
+      }
     }
 
     // relations/{id}
-    // Bidirectional support links. A user may only touch a relation they are a
-    // participant of (executor or manager).
+    // Bidirectional 짝꿍 links, written in pairs by the person who entered the
+    // code. Never edited; either participant may delete (disconnect).
     match /relations/{relationId} {
       function relParticipant(data) {
         return isSignedIn() &&
           (request.auth.uid == data.executorId || request.auth.uid == data.managerId);
       }
+      // `inviterId` is the code owner — the *other* participant, so the writer
+      // is always the one who entered the code — and `inviteCode` must be the
+      // owner's current code.
+      function stampedLink(data) {
+        return data.inviterId is string
+          && data.inviterId != request.auth.uid
+          && (data.inviterId == data.managerId || data.inviterId == data.executorId)
+          && data.inviteCode is string
+          && data.inviteCode.matches('^[A-Z0-9]{8}$')
+          && get(/databases/$(database)/documents/users/$(data.inviterId)).data.get('inviteCode', null)
+            == data.inviteCode;
+      }
+      // Builds from before 둘운완 write neither field. They may link only while
+      // ops keeps config/app.legacyLinkUntil (a timestamp) in the future; the
+      // server then hands over nobody's plans and tells both people.
+      function legacyLink(data) {
+        return !('inviterId' in data) && !('inviteCode' in data)
+          && request.time < get(/databases/$(database)/documents/config/app).data
+            .get('legacyLinkUntil', timestamp.value(0));
+      }
       allow read: if relParticipant(resource.data);
-      allow create: if relParticipant(request.resource.data);
-      allow update: if relParticipant(resource.data) && relParticipant(request.resource.data);
+      allow create: if relParticipant(request.resource.data)
+        && request.resource.data.managerId is string
+        && request.resource.data.executorId is string
+        && request.resource.data.managerId != request.resource.data.executorId
+        && request.resource.data.get('createdBy', request.auth.uid) == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && (stampedLink(request.resource.data) || legacyLink(request.resource.data));
+      allow update: if false;
       allow delete: if relParticipant(resource.data);
     }
 
     // plans/{id}
     // Owned by `userId`, managed by `managerId`. Reads are cross-user (manager
     // streams the partner's plans); writes are participant-scoped and the owner
-    // can never be reassigned.
+    // can never be reassigned. `managerSince` / `managerSinceUid` (from when
+    // the manager may see proof photos, storage.rules) are written by the
+    // server only.
     match /plans/{planId} {
       function planParticipant(data) {
         return isSignedIn() &&
           (request.auth.uid == data.userId || request.auth.uid == data.managerId);
       }
       allow read: if isSignedIn();
-      allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId;
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId
+        && !request.resource.data.keys().hasAny(['managerSince', 'managerSinceUid']);
       allow update: if planParticipant(resource.data)
-        && request.resource.data.userId == resource.data.userId;
+        && request.resource.data.userId == resource.data.userId
+        && !changedKeys().hasAny(['managerSince', 'managerSinceUid']);
       allow delete: if isSignedIn() && request.auth.uid == resource.data.userId;
     }
 
     // actions/{id}
-    // Daily proof records. The owner (`userId`) writes them; the plan's manager
-    // verifies them. get()/update() are single-document ops so we can safely
-    // resolve the plan's manager; list() stays broad because partner-history and
-    // plan-timeline queries filter cross-user.
+    // Daily proof records. The owner (`userId`) writes them, only into their
+    // own plan; the plan's manager may add a 인정 (verification, reaction,
+    // message) and nothing else. get()/update() are single-document ops so we
+    // can safely resolve the plan's manager; list() stays broad because
+    // builds ≤80 filter partner history and plan timelines cross-user.
+    // `managerId` (optional, build ≥81 / the server) mirrors the plan's
+    // current manager; firestore.rules.next lets partners list through it.
+    // When the app writes it on create it must be the plan's manager.
     match /actions/{actionId} {
+      function planDoc(planId) {
+        return /databases/$(database)/documents/plans/$(planId);
+      }
+      // Absent is fine (builds ≤80 never write it; the server stamps it).
+      function managerStampOk(data, planId) {
+        return !('managerId' in data)
+          || data.managerId == get(planDoc(planId)).data.get('managerId', null);
+      }
       function actionOwner() {
         return isSignedIn() && request.auth.uid == resource.data.userId;
       }
       function actionPlanManager() {
-        return isSignedIn() &&
-          exists(/databases/$(database)/documents/plans/$(resource.data.planId)) &&
-          get(/databases/$(database)/documents/plans/$(resource.data.planId)).data.managerId == request.auth.uid;
+        return isSignedIn()
+          && resource.data.planId is string
+          && exists(planDoc(resource.data.planId))
+          && get(planDoc(resource.data.planId)).data.get('managerId', null) == request.auth.uid
+          && get(planDoc(resource.data.planId)).data.get('userId', null) == resource.data.userId;
       }
       allow get: if actionOwner() || actionPlanManager();
       allow list: if isSignedIn();
-      allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId;
-      allow update: if actionOwner() || actionPlanManager();
+      allow create: if isSignedIn()
+        && request.auth.uid == request.resource.data.userId
+        && request.resource.data.planId is string
+        && exists(planDoc(request.resource.data.planId))
+        && get(planDoc(request.resource.data.planId)).data.get('userId', null) == request.auth.uid
+        && managerStampOk(request.resource.data, request.resource.data.planId);
+      allow update: if (actionOwner()
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.get('planId', null) == resource.data.get('planId', null))
+        || (actionPlanManager()
+          && changedKeys().hasOnly(['verifiedBy', 'verifiedAt', 'comment', 'partnerMessage', 'reaction']));
       allow delete: if actionOwner();
     }
 
     // cheers/{id}
-    // Append-only cheer / poke signals. Created by the sender; read+processed
-    // server-side by Cloud Functions (admin SDK bypasses rules). Clients never
-    // mutate or query this collection.
+    // Append-only cheer / poke / poke-reply signals. Created by the sender;
+    // read+processed server-side by Cloud Functions (admin SDK bypasses
+    // rules). Clients never mutate or query this collection.
     match /cheers/{cheerId} {
       allow read: if isSignedIn() &&
         (request.auth.uid == resource.data.fromUserId || request.auth.uid == resource.data.toUserId);
       allow create: if isSignedIn() && request.auth.uid == request.resource.data.fromUserId;
       allow update, delete: if false;
     }
+
+    // config/{doc}
+    // App-wide settings such as config/app {minBuild, latestBuild,
+    // legacyLinkUntil}. Readable before sign-in (the version gate runs at
+    // launch); written only from the console / admin SDK.
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Server-only collections (serverLocks for push dedupe / rate limits /
+    // link processing) have no match here, so clients can neither read nor
+    // write them.
   }
 }

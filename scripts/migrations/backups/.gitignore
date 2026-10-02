@@ -1,0 +1,4 @@
+# Backups written by the migrations in scripts/migrations with --apply
+# (user data, strip_user_emails' even holds emails: never commit).
+*
+!.gitignore

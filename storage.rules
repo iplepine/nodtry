@@ -1,11 +1,39 @@
 rules_version = '2';
 
-// Nodtry Cloud Storage security rules.
-// Profile images live under users/{uid}/. Anyone signed in may read (partners
-// render each other's avatars); only the owner may upload, and uploads are
-// constrained to reasonably-sized images.
+// 둘운완 Cloud Storage security rules.
+//
+// users/{uid}/   Profile images. Anyone signed in may read (partners render
+//                each other's avatars); only the owner may upload.
+// proofs/{ownerUid}/{planId}/{actionId}.jpg
+//                오운완 인증샷. Readable by the owner, and by the *current*
+//                manager of the owner's plan (plans/{planId}: userId ==
+//                ownerUid, managerId == reader) for photos taken since they
+//                became its manager (managerSince, stamped by the server for
+//                managerSinceUid). Clearing managerId on disconnect
+//                (onRelationDeleted) revokes the ex-partner's access at once,
+//                and a later partner never sees the earlier era. Plans managed
+//                before stamps existed carry no stamp and keep full access.
+//                Files are immutable: JPEG only (clients re-encode to strip
+//                EXIF/GPS), < 3MB, and only into the owner's own plan. The
+//                owner may delete.
+//
+// Cross-service rules (firestore.get) need the one-time IAM grant that the
+// Firebase CLI offers on the first `firebase deploy --only storage`.
 service firebase.storage {
   match /b/{bucket}/o {
+    function planData(planId) {
+      return firestore.get(/databases/(default)/documents/plans/$(planId)).data;
+    }
+
+    function managerMayRead(ownerUid, planId) {
+      let plan = planData(planId);
+      return plan.get('userId', null) == ownerUid
+        && plan.get('managerId', null) == request.auth.uid
+        && (plan.get('managerSinceUid', null) == null
+          || (plan.get('managerSinceUid', null) == request.auth.uid
+            && resource.timeCreated >= plan.managerSince));
+    }
+
     match /users/{userId}/{fileName} {
       allow read: if request.auth != null;
       allow write: if request.auth != null
@@ -13,6 +41,21 @@ service firebase.storage {
         && request.resource.size < 5 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
       allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /proofs/{ownerUid}/{planId}/{fileName} {
+      allow read: if request.auth != null
+        && (request.auth.uid == ownerUid || managerMayRead(ownerUid, planId));
+      // `resource == null` keeps proofs write-once even where an overwrite is
+      // evaluated as a create (the Storage emulator does this).
+      allow create: if request.auth != null
+        && request.auth.uid == ownerUid
+        && resource == null
+        && request.resource.contentType == 'image/jpeg'
+        && request.resource.size < 3 * 1024 * 1024
+        && planData(planId).get('userId', null) == ownerUid;
+      allow update: if false;
+      allow delete: if request.auth != null && request.auth.uid == ownerUid;
     }
 
     // Everything else is denied.

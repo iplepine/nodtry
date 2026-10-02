@@ -1,0 +1,21 @@
+{
+    "name": "duounwan-rules-tests",
+    "private": true,
+    "description": "Emulator tests for firestore.rules (and the staged firestore.rules.next), storage.rules and the Cloud Functions triggers.",
+    "scripts": {
+        "test": "node --test --test-concurrency=1 test/*.test.js test-next/query-shapes.test.js test-next/client_queries.test.js",
+        "test:next": "FIRESTORE_RULES=firestore.rules.next node --test --test-concurrency=1 test/*.test.js test-next/*.test.js",
+        "test:functions": "node --test --test-concurrency=1 functions/*.test.js",
+        "emulators:rules": "firebase emulators:exec --only firestore,storage --project demo-duounwan \"npm test\"",
+        "emulators:rules-next": "firebase emulators:exec --config ../firebase.next.json --only firestore,storage --project demo-duounwan \"npm run test:next\"",
+        "emulators:functions": "npm --prefix ../functions run build && PATH=\"${JAVA_HOME:+$JAVA_HOME/bin:}$PATH\" npx -y firebase-tools@15 emulators:exec --only auth,firestore,functions,storage --project demo-duounwan \"npm run test:functions\""
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "devDependencies": {
+        "@firebase/rules-unit-testing": "^5.0.2",
+        "firebase": "^12.0.0",
+        "firebase-admin": "^13.9.0"
+    }
+}
