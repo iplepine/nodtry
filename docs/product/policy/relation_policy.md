@@ -9,36 +9,30 @@
 
 # 관계(Relation) 정책
 
-## 용어 원칙
+마지막 갱신: 2026-10-03 (1.1.0+81)
 
-- 사용자에게는 연결 상대를 **실천 메이트** 또는 자연스럽게 **메이트**로 표현한다.
-- 기존 코드·데이터 호환을 위해 식별자, 상태명, 역할명에 포함된 `partner`, `Manager`, `Executor` 표기는 그대로 유지한다.
-- 관계는 양쪽이 동의한 상호 1:1 지원이며, 감시나 통제를 목적으로 하지 않는다.
+## 용어
+- 사용자에게는 상대를 **애칭 → 표시 이름 → 짝꿍** 순으로 부른다. `실천 메이트`·`메이트`는 쓰지 않는다.
+- 코드·데이터의 `partner`, `Manager`, `Executor`, `relations` 이름은 호환성을 위해 유지한다.
+- 관계는 연인·부부가 동의한 상호 1:1이다(D-001 상호 지지, D-002 1:1 유지).
 
-## 관계 구조
+## Relation 모델 (`relations/{id}`)
+- `managerId`: 이 문서에서 봐주는 쪽 · `executorId`: 약속을 거는 쪽 · `status`: `pending|active|rejected`
+- 신규(선택): `inviterId`(코드 소유자 uid), `inviteCode`(입력한 코드). 앱 1.1.0+가 두 문서 모두에 쓴다. 없으면(구버전) 서버가 가입이 오래된 쪽을 초대자로 본다.
 
-### Relation 모델
-- `managerId`: 실천 메이트 중 응원하는 역할
-- `executorId`: 실천자(지지받는 사람)
-- `status`: pending | active | rejected
+## 양방향 생성
+- `connectWithCode`가 relation 2개를 한 배치로 만든다: A 초대자=manager·참여자=executor, B 반대.
+- 결과: 연결 즉시 상호. 우리 탭에는 양방향 배지만 보인다(단방향 배지 숨김).
 
-### 관계 유형 (UI 뱃지)
-| 조건 | 뱃지 | 의미 |
-|------|------|------|
-| 나=Executor, 상대=Manager (1개 relation) | 지지받는 중 | 상대가 나를 응원 |
-| 나=Manager, 상대=Executor (1개 relation) | 응원하는 중 | 내가 상대를 응원 |
-| 양방향 relation 2개 존재 | 함께하는 중 | 상호지지 |
+## 서버 불변식 (피벗 신규)
+- **1:1**: `onRelationCreated`가 둘 중 누구라도 더 오래된 연결이 있으면 새 관계를 지운다.
+- **managerId = 연결된 짝꿍**: `onPlanCreated`/`onPlanUpdated`가 relation 없는 `managerId`를 해제한다(위조·오래된 짝꿍의 인증샷 접근 차단).
+- **해제 정리**: 두 relation이 모두 사라지면 `onRelationDeleted`가 양쪽 약속의 `managerId` 해제, pending→active, 진행 중 내기 rejected.
+- 상세 흐름은 [connect_policy.md](./connect_policy.md).
 
-## 연결 정책
+## 레거시 데이터
+- 단방향 relation 1개만 있는 옛 사용자: 앱 로직(똑똑·카드)은 양방향 체크로 호환된다.
+- 한 사용자가 짝꿍 2명 이상이거나 relation 없는 `managerId`가 남은 약속: `scripts/migrations/clear_stale_manager_ids.js`가 보고(dry-run 기본)하고 `--apply`로 정리한다(2명 이상은 보고만). 실행은 대표 승인 후, 런북 5단계.
 
-### 실천 메이트 연결 시 양방향 relation 생성 (2025-03-25 적용)
-- `connectWithCode` 호출 시 relation 2개를 batch로 생성
-  - A: 초대자(코드 생성자) = Manager, 참여자(코드 입력자) = Executor
-  - B: 참여자 = Manager, 초대자 = Executor
-- 결과: 연결 즉시 **상호지지(함께하는 중)** 상태
-- 이유: 실천 메이트 연결은 양쪽의 동의를 전제로 서로를 지원하는 관계이므로 단방향은 부자연스러움
-
-### 기존 단방향 관계 마이그레이션
-- 기존 사용자는 relation이 1개만 존재할 수 있음
-- 해결 방법: Firebase `relations` 컬렉션에서 기존 문서 삭제 후 앱에서 재연결
-- 앱 로직(똑똑 등)은 양방향 체크로 단방향 관계도 호환
+## 다대다
+- 책임망(D-005, `RESPONSIBILITY_NETWORK.md`) 확장은 보류다. 둘운완은 커플 1:1만 지원한다. 공개 그룹은 계속 제외.

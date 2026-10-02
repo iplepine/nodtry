@@ -9,27 +9,65 @@
 
 # 출시 준비 체크리스트
 
-## 제품
-- 첫 실행에서 가입, 프로필, 파트너 연결, 플랜 생성이 막힘 없이 이어진다.
-- 지금 탭의 빈 상태, 오늘 할 일, 완료, 지연, 파트너 카드가 모두 확인되었다.
-- 플랜 승인, 조율, 수정, 중단, 자동 완료가 정상 동작한다.
-- 히스토리 기록과 파트너 확인이 양측에 반영된다.
-- 보상/벌칙 약속 제안과 정산 카드가 노출된다.
+마지막 갱신: 2026-10-03
 
-## 알림
-- 로컬 알림 권한 요청과 스케줄링을 확인했다.
-- 원격 알림 토큰 등록과 주요 이벤트 알림을 확인했다.
-- 알림 비활성화와 플랜 종료 시 알림 취소를 확인했다.
+## 진행 중 릴리스: 둘운완 피벗 `1.1.0+81` — **미배포**
+- 상태: 코드 완료(브랜치 `feat/couple-workout-pivot`, **미커밋**). 서버·스토어 어디에도 배포하지 않았다. 직전 스토어 빌드는 `1.0.58+80`(2026-08-05 커밋 기준, 이 문서의 상세 배포 기록은 `1.0.52+74`에서 멈춰 있음).
+- 범위: `docs/product/PIVOT_DUOUNWAN_SPEC.md` §6, 요약 `docs/product/MVP_SCOPE.md`. 결정 D-007.
+- **배포 순서·명령·롤백은 [`LAUNCH_RUNBOOK.md`](./LAUNCH_RUNBOOK.md)가 정본이다.** 콘솔 클릭은 [`STORE_CONSOLE_CHECKLIST.md`](./STORE_CONSOLE_CHECKLIST.md).
+  - 순서(스펙 §8): Storage 규칙 → Firestore 규칙(`config` 읽기) → Functions → Hosting → 마이그레이션 dry-run/실행 → 앱 심사 제출(수동 출시) → 양 스토어 동시 공개 → `config/app.latestBuild = 81`
+  - 서버 먼저, 앱 나중. 앱 공개 전까지만 서버 롤백, 공개 후에는 fix-forward.
+- 승인: 서버 배포·마이그레이션·스토어 제출·광고 예산·상표 출원은 **대표 승인 후**. 일정안: 10/27 심사 제출 → 11/3 동시 공개(`LAUNCH_PLAN_DUOUNWAN.md` §2).
+- 작업 티켓: [`../work/tasks/active/BT-009-pivot-release-prep.md`](../work/tasks/active/BT-009-pivot-release-prep.md)
 
-## 데이터
-- 양방향 relation 생성이 중복 없이 동작한다.
-- 1인 파트너 제한이 적용된다.
-- 플랜, 히스토리, 약속 데이터가 계정 삭제 또는 연결 해제 상황에서 예상대로 남거나 정리된다.
+### 게이트 A — 코드 (스펙 §8)
+| 게이트 | 현황 (레인 요약 기준, 최종 통합 재실행 필요) |
+|---|---|
+| `flutter analyze` 에러 0 | S1~S6·shots 레인 모두 0 에러·0 경고(기존 info 4건) |
+| `flutter test` 전부 그린 | S6 시점 557/557 |
+| `functions` `npm run build`·`npm test`·`npm run lint` | build OK, 17/17, lint 0 |
+| 규칙·트리거 에뮬레이터 테스트 | 규칙 21/21, 트리거 13/13 (`SECURITY_RULES.md` 테스트 절) |
+| iOS 시뮬레이터 빌드 + 핵심 화면 스모크 | **미확인**. 새 네이티브 플러그인(package_info_plus, url_launcher, share_plus, in_app_review) 반영 필요 |
+| Android AAB 빌드 | **재확인 필요**. AGP 8.7.3에서 `checkDebugAarMetadata` 실패 보고 → 현재 `settings.gradle.kts` 8.9.1로 상향됨 |
+| 금지어 0건(`실천 메이트|공부|스터디|파일럿|Nod&Try|Nodtry|그래,해봐`) | ARB 규칙 테스트 통과, ios/Runner·android/app/src/main·web 0건. `pivotNoticeTitle`만 예외. lib·functions/src 최종 grep 필요 |
+| 메타데이터 길이·표시명 토큰 일치 | 스크립트 검증 통과(brand·gtm 레인) |
+| pubspec `1.1.0+81` | 반영됨 |
 
-## 품질
-- 주요 화면에서 로딩, 오류, 빈 상태가 있다.
-- Android와 iOS에서 핵심 루프를 각각 1회 이상 수동 검증했다.
-- 개인정보 처리방침, 이용약관, 문의 채널을 준비했다.
+### 게이트 B — 실기기 (출시 전 필수)
+- [ ] 카메라/앨범 인증샷(아이폰 HEIC 앨범 사진 포함), 동의 시트, 비행기 모드 8초 타임아웃, 사진 삭제·신고 메일
+- [ ] 두 기기 연결: 공유 시트(카카오톡, iPad 팝오버), 클립보드 붙여넣기 팝업, `/i/{CODE}` 랜딩 → 설치 → 코드 감지
+- [ ] 연결 해제 후 전 짝꿍 사진 거부, 상대 기기 캐시 삭제
+- [ ] 공유 카드 PNG → 인스타 스토리·카카오톡, 평점 요청 다이얼로그(TestFlight)
+- [ ] 알림: 애칭 리마인더, 인증샷 푸시(빌드 81+), 인정 푸시 1건, 똑똑 하루 1회, 답장 푸시, Android 12+ 모노크롬 작은 아이콘
+- [ ] 버전 게이트: `config/app` 없을 때 통과, `minBuild` 차단·`latestBuild` 소프트 안내
+- [ ] 기존 사용자 업데이트 경로: 1회 공지, 애칭 시트, 리마인더 재예약
+- [ ] Analytics DebugView에서 퍼널 8종(`ANALYTICS_EVENTS.md` §1)
+
+### 게이트 C — 출시 전 열린 이슈
+- 공유 카드 푸터 `App Store·Google Play에서 둘운완`: iOS 앱·스크린샷에 `Google Play` 노출 → Apple 2.3.10 위험. 플랫폼 중립 문구로 교체 권고.
+- 마이그레이션 스크립트(`scripts/migrations/clear_stale_manager_ids.js`)는 dry-run/`--apply`만 있고 런북 계약(JSON 백업, `--restore`)이 없다. 런북 5단계 `<MIGRATION_CMD>` 확정 필요.
+- iOS fastlane `release`/`metadata_only`는 `automatic_release:true`·`reject_if_possible:true`. 수동 출시용 `release_manual` 레인 없음(런북 우회 명령 사용).
+- Play 프로덕션 레인은 심사 통과 즉시 공개 → 콘솔에서 관리형 게시 켜기.
+- `assets/fonts/Pretendard-*.otf`가 실제 폰트가 아니라 HTML 파일 → 앱이 시스템 폰트로 대체 중.
+- 노란색(`#FFD84D`) 텍스트 사용처 대비 1.4:1 → `accentWine`으로 교체 권고(BRAND.md).
+- 개인정보처리방침 시행일 2026-10-02 → 실제 출시일과 맞출 것. 페이지가 설명하는 동작(사진별 삭제, 해제 시 접근 차단·캐시 삭제, 탈퇴 시 Storage 정리, 신고)이 출시 빌드와 서버에 실제로 있는지 확인 후 게시.
+- 레거시 pending 약속을 실행자가 수정하면 짝꿍에게 `승인` 푸시가 가는 문제(`onPlanUpdated`).
+- 대표 결정 대기: 공유 카드 빈도, 영어 용어(props·knock·bet), 영어 키워드 편차, 튜토리얼 키 변경, minBuild=82 보안 묶음 시점.
+
+## 상시 체크리스트 (둘운완 기준)
+### 제품
+- 첫 실행: 로그인 → (새 사용자) 초대 단계 → 연결 → 애칭 → 운동 약속 1화면이 막힘 없이 이어진다.
+- 지금 탭: 오늘 운동했어? 히어로, 오늘 완료, 짝꿍 카드(인증샷·리액션·응원·똑똑), 초대 카드, 둘운완 헤더.
+- 약속 생성·수정·재시작(새 문서)·중단·자동 완료, 레거시 pending 승인.
+- 기록 탭 인정·주간 펄스, 우리 탭 히어로·애칭, 내기 제안·정산.
+### 알림
+- 로컬 마감 리마인더(애칭 본문, 오늘 기록 후 제외), FCM 토큰 등록, `data.type`별 푸시(`notification_policy.md` 표).
+### 데이터
+- 양방향 relation + `inviterId`/`inviteCode`, 서버 1:1 강제, 코드 회전.
+- 연결 해제·탈퇴 시 `managerId`·내기·Storage·actions·cheers가 예상대로 정리된다.
+### 품질
+- 주요 화면 로딩·오류·빈 상태, 작은 화면 오버플로 없음.
+- 개인정보처리방침·지원 페이지·문의 채널(`devhohouse@gmail.com`), 신고 24시간 응대 담당(Temporary Operations Lead) 지정.
 
 ## 최근 내부 테스트 배포
 - 2026-06-13: `1.0.52+74` Android production + iOS App Store Connect(심사 제출) 배포 완료. UX 3건 + P0–P2 안정성. (1) 4주 정산 카드 승/패를 하드코딩 `completed >= 12`가 아니라 사용자가 정한 실제 보상 목표(`reward.targetDays`) 기준으로 판정 — 주 2회(예정 8일)처럼 짧은 플랜이 완벽 성공해도 무조건 "실패"로 보이던 버그 수정. 약속이 없으면 승패 대신 중립 문구, 종료 카피는 "멈추기"→"마무리"로. (2) 검증된 루틴에 "주 2회 근력운동"(WHO·미국 신체활동 지침 최소 효과 용량) 추가. (3) 지금 탭 실천 카드 우측 상단 "넘기기"(X) → 시트로 "잠시 후에 할게"(다음 카드로 넘기고 1시간 뒤 로컬 리마인드) / "오늘은 안 할게"(기존 SkipPlanIntent). 기존 좌우 스와이프 제스처는 발견성이 낮아 제거하고 점 인디케이터 탭 + 넘기기 버튼으로 대체. (4) P0–P2(직전 배포 이후 누적): `firebase_crashlytics` + 전역 FlutterError/PlatformDispatcher 핸들러, 알림 권한 거부 시 FCM 토큰 정리 + Functions 무효 토큰 cleanup·미확인 실천 리마인드, 검증 멱등 트랜잭션, connect/us/plan 하드코딩 한국어 에러 → l10n 코드화. Firestore/Storage 보안 규칙은 이미 별도 배포됨. 사전 검증 `flutter analyze` 클린 + 전체 테스트 59 그린(이전 컴파일조차 안 되던 스위트 복구). `fastlane release_all`로 Android production AAB → Play production 15:44:18 "Successfully finished the upload to Google Play". **iOS는 새 `firebase_crashlytics` pod 때문에 Pods가 stale → 첫 archive가 `The sandbox is not in sync with the Podfile.lock`로 exit 65 실패** (release_all의 iOS 경로가 archive 전 `pod install`을 안 돌림 — 이전엔 새 pod이 없어 안 터졌던 잠복 허점). 수동 `pod install`은 셸 LANG이 비UTF-8이라 한글 콘텐츠에서 `Encoding::CompatibilityError(ASCII-8BIT)`로 또 실패 → `LANG/LC_ALL=en_US.UTF-8` 강제로 해결, `FirebaseCrashlytics`가 `Podfile.lock`에 동기화(Manifest.lock 일치 확인). **재발 방지로 iOS `release` 레인에 `cocoapods` 단계를 추가**(Fastfile 상단이 UTF-8 강제하므로 인코딩 안전). Android는 이미 라이브이므로 iOS만 `fastlane release` 재실행 → 20:13:34 "Successfully submitted the app for review!" (`reject_if_possible:true`로 직전 1.0.51+73 in-review 제출 자동 대체). 같은 사이클에 스토어 리스팅을 "공부습관 파트너" 포지셔닝(제목·부제·키워드·설명 ko/en 양 플랫폼)으로 갱신했고, iOS 한국어 이름은 기기 라벨 `그래,해봐` 토큰을 유지해(`Nodtry - 그래해봐, 공부 습관 약속 챌린지`, 27자) Guideline 2.3.8 재반려를 피했다. **보안 후속(공개 전 필수): `android/fastlane/json_key.json`(Play 서비스계정 개인키)이 c1918c1부터 히스토리에 커밋돼 있음 — 퍼블릭 공개 전 키 회전 + `.gitignore` + 히스토리 purge 필요.** Firebase 클라이언트 API 키(`AIza…`)는 히스토리 8종 노출되나 클라이언트 키라 낮은 위험(키 제한 + App Check 권장).
@@ -60,7 +98,10 @@
 - 배포 전 사용자 수동 smoke 확인: 가입/연결/플랜/실천/파트너 반응 흐름 정상.
 
 ## 출시 보류 조건
-- 가입 후 첫 플랜 생성 실패
-- 파트너 연결 또는 양방향 관계 생성 실패
+- 가입 후 첫 운동 약속 생성 실패
+- 짝꿍 연결 또는 양방향 관계 생성 실패, 서버 1:1 강제가 정상 연결을 취소함
+- 인증샷 업로드·짝꿍 조회가 규칙에 막힘(IAM 권한 미부여 포함), 또는 전 짝꿍이 해제 후에도 사진을 읽음
+- 업로드한 사진에 EXIF/GPS가 남아 있음
 - 알림 권한 거부 시 앱이 진행 불가 상태가 됨
-- 히스토리나 정산 결과가 양측에서 다르게 보임
+- 기록·둘운완·정산 결과가 양측에서 다르게 보임
+- 구버전(빌드 80 이하) 사용자가 새 규칙·함수 배포 후 기존 기능을 못 씀

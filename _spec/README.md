@@ -1,5 +1,9 @@
 # 스펙 문서
 
+> **2026-10-03 둘운완 피벗(D-007) 안내** — 현재 제품 정본은 `docs/product/PIVOT_DUOUNWAN_SPEC.md`와 `docs/product/policy/`다.
+> 이 폴더에서 피벗에 맞춰 갱신된 문서는 [`15-data-model/firestore-schema.md`](./15-data-model/firestore-schema.md)뿐이다.
+> `00-meta/`, `10-domain/`, `20-feature/`, `50-ui/`, `60-ux/`, `90-biz/`, `99-test/`는 `Nodtry / 실천 메이트`·3단계 위자드·스터디 템플릿 시기의 기록이다. 충돌하면 `docs/` 쪽을 따른다.
+
 이 폴더는 프로젝트의 스펙 문서를 다음 구조에 맞추어 관리합니다.
 
 ## 폴더 구조
@@ -18,7 +22,7 @@
 - [MVP 스펙](./00-meta/mvp-spec.md)
 - [역할 모드 스펙](./10-domain/role-mode-spec.md)
 - [디자인 스펙](./50-ui/design-spec.md)
-- [아키텍쳐 스펙](./00-meta/architecture-spec.md)
+- [아키텍쳐 스펙](./00-meta/architecture.md)
 - [페르소나 정의](./60-ux/personas.md)
 - [TODO 리스트](./00-meta/workflow/TODO.md)
 - [우선순위 백로그](./00-meta/workflow/priority-backlog.md)

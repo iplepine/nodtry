@@ -11,11 +11,14 @@
 
 ID: `R-001-study-sprint-prep`
 
-상태: `Active`
+상태: `Dropped` (2026-10-02)
 
-연결 Goal: `G-001-study-sprint-pilot`
+연결 Goal: `G-001-study-sprint-pilot` (Dropped)
 
-마지막 갱신일: 2026-06-20
+마지막 갱신일: 2026-10-03
+
+> **중단 사유 (D-007)**: 둘운완 피벗으로 스터디 파일럿 준비를 중단했다. 완료된 제품 작업(BT-001·002·003·007·008, NT-001)의 일부 — 28일 기간, 4주 정산 카드, 놓친 약속 자동 전달, 똑똑 안정화 — 는 둘운완 빌드에 그대로 남는다. 스터디 템플릿·검증 루틴은 피벗 빌드에서 삭제됐다. 남은 BT-004·BT-005는 Dropped, BT-006은 보류(Backlog).
+> 후속 roadmap: `R-002-duounwan-release`.
 
 ## 목적
 

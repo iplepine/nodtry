@@ -13,7 +13,9 @@ ID: `BT-005-week-one-pilot-ops-review`
 
 유형: `Ops`
 
-상태: `Ready`
+상태: `Dropped` (2026-10-02)
+
+> **중단 사유 (D-007)**: 파일럿이 시작되지 않아 1주차 리뷰 대상이 없다. 출시 후 1주차 지표 리뷰는 둘운완 소프트 런칭 Gate 1(11/17, `LAUNCH_PLAN_DUOUNWAN.md` §3.4)로 대체한다.
 
 연결 Roadmap: `R-001-study-sprint-prep`
 

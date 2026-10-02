@@ -7,75 +7,69 @@
 > - 문서 갱신: `2026-06-20 22:39:28 +0900`
 <!-- COMMIT_STATUS END -->
 
-# 플랜(Plan) 정책
+# 운동 약속(Plan) 정책
 
-## 플랜 구조
+마지막 갱신: 2026-10-03 (1.1.0+81, 피벗 S3) · 사용자 용어 `운동 약속`, 코드·데이터 `plan`
 
-### Plan 모델
-- `id`: 고유 식별자
-- `userId`: 생성자/실천자
-- `managerId`: 응원하는 실천 메이트 (선택)
-- `startDate`, `endDate`: 기간
-- `state`: 현재 상태
-- `items`: PlanItem 목록
-- `promise`: 보상/벌칙 약속 (선택)
-- `completedDates`, `verifiedDates`: 완료/확인 날짜 추적
-- `lastMissedNotifiedAt`, `lastMissedItemTitle`: 놓친 약속 자동 전달 메타데이터
-- `pilotNextPlanIntent`, `pilotExitReason`, `pilotSettledAt`: 4주 파일럿 정산 응답
+## Plan 모델
+- `userId`: 약속을 건 사람(실행자) · `managerId`: 봐주는 짝꿍(선택)
+- `startDate`, `endDate`: 기간(28일) · `state`: 아래 상태 · `items`: 약속 항목(현재 1개)
+- `workoutType` (선택, 신규): `gym|running|home_training|walking|pilates|yoga|stretching|swimming|climbing|cycling|hiking|strength|diet|other`. 없으면 레거시 비운동 약속으로 보고 중립 `약속` 카피를 쓴다.
+- `promise`: 내기(선택) · `completedDates` / `verifiedDates` / `skippedDates` / `restedDates` / `rescuedDates`
+- `lastActionId`, `lastProofPhotoPath`, `lastProofAt` (신규, 인증샷 정책 참고)
+- `lastMissedNotifiedAt`, `lastPokeAt`, `lastUpdatedBy` 등 메타. 전체 필드는 `_spec/15-data-model/firestore-schema.md`
 
-### PlanItem 구조
-- `title`: 실천 내용 (예: "30분 운동하기")
-- `days`: 요일 선택 [1-7] (1=월, 7=일, 복수 선택 가능)
-- `count`: 반복 목표 횟수
-- `notificationTime`: 알림 설정
-- `description`: 부가 설명 (선택)
+### PlanItem
+- `title`: 약속 한 줄(예: `저녁에 30분 러닝`) · `days`: 요일(최소 1개) · `notificationTime`: 마감 시각 · `description`: 메모(선택)
 
-## 플랜 상태 (State)
-
+## 상태
 | 상태 | 설명 |
-|------|------|
-| `draft` | 생성됨, 아직 미활성 |
-| `pending_approval` | 제출됨, 실천 메이트 승인 대기 |
-| `active` | 승인 완료, 진행 중 |
-| `completed` | 기간 종료, 성공적 완료 |
-| `rejected` | 실천 메이트가 거절 (수정 필요) |
-| `stopped` | 사용자가 조기 중단 |
+|---|---|
+| `active` | 진행 중. **새 약속은 짝꿍 유무와 상관없이 바로 active** |
+| `completed` | 기간 종료 |
+| `stopped` | 실행자가 조기 중단 |
+| `pending_approval` | 레거시. 구버전이 만든 승인 대기 약속만 존재 |
+| `rejected` / `draft` | 레거시 |
 
-## 플랜 생성 흐름 (3단계 위자드)
+상태 값은 추가하지 않는다(구버전 호환).
 
-1. **행동 단계**: 공부/운동/직접 입력 카테고리와 추천 약속 또는 직접 입력
-2. **설명 단계**: 실천 메이트가 확인할 수 있는 선택 메모
-3. **요일/알림 단계**: 주 3일/평일/매일 등 추천 빈도, 요일 직접 선택, 실천 메이트에게 보일 시간, 메이트 프리뷰
+## 약속 걸기 (1화면)
+1. 헤더 `{애칭}한테 어떤 운동을 약속할까요?` (혼자이거나 수정이면 `어떤 운동을 약속할까요?`)
+2. 운동 타일 3열 그리드(14종 + ✏️ 직접). 타일을 고르면 비어 있는(또는 이전 타일 기본값 그대로인) 약속 한 줄·요일·마감을 채운다. 직접 입력한 줄은 유지한다.
+3. 약속 한 줄(수정 가능)
+4. 빈도 칩(주 2일·주 3일·평일·주말·매일) + 요일 7칩. **최소 1개 필수**(예전의 "요일 없음 = 매일" 규칙 폐지)
+5. 마감 칩(아침 7시·점심 12시·저녁 7시·밤 9시·밤 10시·직접). **필수**. 이 화면에는 끄기·매시간 옵션이 없다.
+6. 메모(접힘) · 혼자면 `짝꿍 연결하기` 카드
+7. 하단 고정 바: 요약(`주 3일 · 오후 10시 · 28일`), 짝꿍이 있으면 `못 하면 {애칭}한테 알려져요`, 버튼 `🤙 {애칭}이랑 손가락 걸기`(조사는 `withJosa`) / 혼자 `약속 시작하기` / 수정 `저장하기`
+- 빈 항목이 있으면 무엇이 빠졌는지 알려 주고 저장하지 않는다.
+- 새 약속이면 짝꿍의 최신 active 약속 요일을 미리 선택하고 힌트를 보여 준다.
 
-## 플랜 승인 흐름
+## 저장 규칙
+| 경우 | 결과 |
+|---|---|
+| 새 약속 | `active`, 기간 오늘 00:00 ~ +27일 23:59:59, `managerId`=현재 짝꿍, `lastUpdatedBy`=본인, `workoutType`=선택 타일(타일 없이 입력하면 `other`) |
+| active·completed·stopped 수정 | 기간·상태·기록·내기·`lastActionId` 유지, `lastUpdatedBy`=본인 |
+| pending·rejected·draft 수정 | active로 바꾸고 오늘부터 새 기간 |
+| 재시작(상세 화면) | `asRestartTemplate()` — id·기록 없는 복사본으로 **새 문서** 생성(기존 약속 덮어쓰기 버그 수정) |
+| 알림 설정 실패 후 재시도 | 이미 저장된 약속을 갱신(기간 재시작 없음) |
 
-```
-사용자: 플랜 생성 → pending_approval
-    ↓
-실천 메이트: "승인" 탭 → active (실천 시작)
-    또는
-실천 메이트: "조율" 탭 → rejected (수정 요청)
-    ↓
-사용자: 수정 후 재저장 → pending_approval (재승인 대기)
-```
+## 승인·조율 (레거시)
+- 새 약속에는 승인 단계가 없다.
+- 남아 있는 `pending_approval` 약속은 짝꿍이 승인할 수 있다. 승인은 트랜잭션으로, 여전히 pending일 때만 기간을 오늘~+27일로 다시 잡는다.
+- 짝꿍 연결 시 서버와 앱 모두 기존 active 약속에 `managerId`만 지정한다(`lastUpdatedBy: 'system_link'`). 더 이상 pending으로 되돌리지 않는다.
 
-## 플랜 완료 정책
-
-### 자동 완료
-- 종료일(`endDate`)이 지난 `active`/`pending_approval` 플랜은 `completeOverduePlans()`에 의해 자동 완료
-- 상태: `active` → `completed`, `pending_approval` → `completed`
-- 완료된 파일럿 플랜은 Now 탭에서 4주 정산 카드로 노출하며, 다음 4주 의향 또는 종료 사유를 기록한다.
-
-### 수동 중단
-- 사용자가 직접 플랜 조기 중단 가능
-- 상태: `active` → `stopped`
-
-## 플랜 편집 정책
-- 우리 탭에서 플랜 탭 → 생성 화면에 `planToEdit` 파라미터로 진입
-- 편집 가능 항목: 제목, 요일, 알림 시간, 설명
-- 저장 시 pending/rejected 상태는 `pending_approval`로 재전환
+## 완료·중단
+- 종료일이 지난 active/pending은 자동 `completed`. 완료 약속은 지금 탭 4주 정산 카드로 다음 4주 의향을 받는다.
+- 실행자가 조기 중단하면 `stopped`. stopped 약속은 중단일이 없어 둘운완 계산에서 미스를 만들지 않는다(duo_stats 정책).
 
 ## 비즈니스 규칙
-- 실천 메이트의 플랜은 읽기 전용 (승인/확인만 가능, 편집 불가)
-- 실천 메이트 연결 시 기존 active 플랜의 `managerId`에 메이트를 자동 할당 (`assignManagerToActivePlans()`)
-- 일일 추적: 실천 요일마다 히스토리 항목 생성
+- 짝꿍의 약속은 읽기 전용(인정·응원·똑똑·내기 제안만).
+- 서버 불변식: `managerId`는 연결된 짝꿍이어야 한다. 아니면 `onPlanCreated`/`onPlanUpdated`가 해제한다.
+- 운동 문구: `workoutType`이 있으면 운동 카피(식단은 `식단`, `운동`·`오운완` 표현 안 씀), 없으면 중립 `약속` 카피.
+- 분석: `plan_created {is_edit, frequency, has_partner, workout_type, template_id, template_edited}`
+
+## 알려진 한계
+- 수정 저장은 화면을 연 시점의 약속 전체를 다시 쓴다. 그 사이 짝꿍 인정이 들어오면 덮일 수 있다(피벗 이전부터 존재).
+- 알림이 꺼진 레거시 약속을 수정하면 밤 9시가 미리 선택돼 리마인더와 미기록 전달이 다시 켜진다.
+- 실행자가 레거시 pending 약속을 수정해 active가 되면 서버가 짝꿍에게 `승인` 푸시를 보낸다(`onPlanUpdated`가 `lastUpdatedBy`를 보지 않음). 수정 대기.
+- 상세 화면·알림 설정의 `NotificationSettingEditor`는 여전히 끌 수 있어, 끄면 짝꿍 미기록 전달도 멈춘다.

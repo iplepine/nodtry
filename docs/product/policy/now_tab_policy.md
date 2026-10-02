@@ -9,97 +9,69 @@
 
 # 지금 탭(Now Tab) 정책
 
+마지막 갱신: 2026-10-03 (1.1.0+81, 피벗 S1·S4·S5·S6)
+
 ## 개요
-현재 실천 상황과 실천 메이트의 피드백을 실시간으로 보여주는 카드 기반 UI.
-Now 탭의 핵심 역할은 “오늘 안 한 행동이 혼자 묻히지 않게” 만드는 것이다.
+지금 탭의 역할은 하나다: **오늘 운동했어?**에 답하게 하고, 짝꿍의 오운완을 인정하게 한다.
+카드 판단 로직은 `cards/now_card_rules.dart`의 순수 함수에서만 한다. 번역 문자열(`headerMessage`, 시간 칩 텍스트) 비교로 분기하지 않는다(피벗에서 제거).
+
+## 헤더
+- 짝꿍이 있으면 **둘운완 헤더**: 두 아바타 + `둘이 함께 N일째`(0이면 `오늘 둘 다 하면 둘운완 1일째`) + 각자 상태 칩(예: `나 인정 대기` / `{애칭} 아직`). 오늘이 둘운완 데이면 `오늘 둘운완이에요 🎉`. 계산은 [duo_stats_policy.md](./duo_stats_policy.md).
+- 짝꿍이 없거나 통계가 아직 없으면 기존 조용한 헤더.
+- 상대 이름은 `partnerLabelProvider`(애칭 → 표시 이름 → `짝꿍`).
 
 ## 카드 유형
 
-### 내 카드 (CardRole.mine)
-
+### 내 카드
 | 상태 | 설명 |
-|------|------|
-| `nowAction` | 오늘 예정된 실천 항목 |
-| `emptyPlan` | 활성 플랜 없음 (생성 유도 CTA) |
-| `nextAction` | 다음 예정된 실천 정보 |
-| `todayEmpty` | 오늘은 실천 항목 없음 (안내) |
-| `todayComplete` | 오늘 모든 실천 완료 |
-| `overdue` | 플랜 기간 종료됨 |
-| `poked` | 실천 메이트에게 똑똑 받음 |
-| `rejected` | 플랜 거절됨, 수정 필요 |
-| `promiseProposed` | 보상/벌칙 제안 받음 |
-| `promiseSettled` | 보상/벌칙 결과 확인 |
-| `pilotSettlement` | 4주 스터디 파일럿 정산 응답 필요 |
+|---|---|
+| `nowAction` / `nextAction` / `overdue` | 오늘 예정 약속. 오늘 미기록이면 **오늘 운동했어? 히어로**로 렌더 |
+| `poked` | 짝꿍이 똑똑함. 히어로 + 똑똑 배지 + 원탭 답장 |
+| `todayComplete` | 오늘 다 함. 내 인증샷 썸네일 + `짝꿍이 인정했어요`(리액션) |
+| `todayEmpty` / `emptyPlan` | 오늘 예정 없음 / 약속 없음(생성 유도) |
+| `promiseProposed` / `promiseSettled` | 내기 제안 받음 / 내기 정산 |
+| `pilotSettlement` | 28일 종료 약속의 4주 정산(다음 4주 의향) |
+| `rejected` | 레거시 조율 요청 |
 
-### 실천 메이트 카드 (CardRole.yours)
-
+### 짝꿍 카드
 | 상태 | 설명 |
-|------|------|
-| `partnerPlanCreate` | 실천 메이트가 새 플랜 제안 |
-| `partnerPlanModify` | 실천 메이트가 플랜 수정 |
-| `partnerAction` | 실천 메이트가 실천 완료 보고 |
-| `partnerNoPlan` | 실천 메이트에게 활성 플랜 없음 |
-| `partnerPoke` | 실천 메이트가 아직 미실천 (똑똑 유도) |
-| `partnerPromiseProposed` | 내가 실천 메이트에게 보상/벌칙 제안함 |
+|---|---|
+| `partnerAction` | 짝꿍이 오늘 기록함. 인증샷·메모 + ❤️🔥💪👏 리액션 줄 |
+| `partnerPoke` | 짝꿍 미기록. 놓친 운동 자동 전달 버전이면 `응원 보내기`(주) / `똑똑`(보조) |
+| `partnerNoPlan` | 짝꿍 약속 없음. 똑똑으로 약속 걸자고 부른다 |
+| `partnerPlanCreate` / `partnerPlanModify` | 레거시 승인 대기 약속. 승인 버튼만 노출 |
+| `partnerPromiseProposed` | 내가 낸 내기 제안 대기 |
 
-## 카드 우선순위 (Primary Card)
+### 초대 카드
+- 짝꿍이 없으면 `NowInviteCard`. 초대를 공유한 뒤에는 `짝꿍을 기다리는 중이에요` + `초대 다시 보내기`.
 
-내 카드 우선순위:
-1. **Tier 0 (긴급)**: rejected / poked / promiseProposed / promiseSettled / pilotSettlement
-   - `poked` 상태는 nowAction과 동일하게 렌더되며 상단 똑똑 배지만 추가된다.
-2. **Tier 1 (현재)**: nowAction
-3. **Tier 2 (지연)**: overdue
-4. **Tier 4 (완료)**: todayComplete / todayEmpty
-5. **Tier 5 (유도)**: emptyPlan
+## 오늘 운동했어? 히어로
+- 노출: `showsTodayCheckInHero(state, plan, now)` — nowAction·nextAction·overdue 카드가 **오늘 예정이고 done·skip·rest 기록이 없으면 하루 종일**, poked 카드는 기록이 없으면. 22:00 마감 약속도 09:00부터 보인다(`isDueNowItem`은 그대로).
+- 질문(`todayCheckInQuestion`): 운동 `오늘 🏃 러닝 했어?`, 식단 `오늘 🥗 식단 지켰어?`, 레거시 `오늘 '{title}' 했어?`
+- 버튼: `📸 인증샷 찍기`(주) → [proof_photo_policy.md](./proof_photo_policy.md) / `사진 없이 했어`(메모 다이얼로그) / `오늘은 쉴게`(휴식권이 남아 있을 때). 휴식권이 없는 overdue 카드는 기존 건너뛰기 링크.
+- 레거시 약속도 같은 📸 / 사진 없이 버튼을 쓴다(스펙의 단일 `인증하기` 대신. 의도적 차이).
 
-Secondary 카드: Primary가 nowAction일 때 overdue, nextAction 노출
+## 짝꿍 쪽 동작
+| 동작 | 결과 |
+|---|---|
+| 리액션 원탭(❤️🔥💪👏) | 오늘 done action에 `reaction`, plan `verifiedDates`에 오늘. 다이얼로그 없음 |
+| `한마디` | 메모와 함께 ❤️ 전송 |
+| `응원 보내기`(놓친 운동) | `cheers {reactionType: '💪', message: '할 수 있어! 기다릴게 💪'}`. **인정 아님**(`verifiedDates` 안 건드림) |
+| `똑똑` | 약속당 하루 1회. 오늘 이미 보냈으면 `오늘 똑똑 보냈어요`로 비활성 |
+| `내기 걸기` | [promise_policy.md](./promise_policy.md) |
+| 레거시 승인 | pending일 때만 기간 리셋 후 active |
 
-## 사용자 인터랙션
+- 오늘 인증샷 판정: `lastProofAt`이 오늘이고 경로가 `lastActionId`와 맞을 때만. 어제 사진은 오늘 인증으로 보이지 않는다.
 
-### 내 실천 액션
-| 버튼 | 동작 | 결과 |
-|------|------|------|
-| "했어" | 오늘 실천 완료 보고 | 노트 입력 다이얼로그 → 히스토리 `done` 생성 |
-| "지금 할게! (집중 타이머)" | 즉석에서 N분 집중 타이머 시작 | 타이머 종료 시 노트 다이얼로그 자동 (`"{N}분 집중 완료"` prefill) → 히스토리 `done` 생성. 자세한 동작은 [focus_timer_policy.md](./focus_timer_policy.md) |
-| "건너뛸게" | 오늘 건너뜀 | 히스토리 `skipped` 생성 |
+## 똑똑 받은 쪽
+- 오늘 똑똑을 받았고 미기록이면 `지금 간다 🏃` / `오늘은 봐줘 🙏` 원탭 답장. `cheers {reactionType: 'reply'}`만 쓰고 약속은 안 건드린다. 기기에서 약속별·날짜별로 답장 여부를 기억한다.
+- 카드를 보면 `lastPokeAcknowledgedAt`이 자동 기록된다.
 
-> **똑똑 수신 시**: 별도의 "지금 처리하기" / "똑똑 확인만 하기" 버튼 없음. 카드는 평소대로 nowAction으로 렌더되고 상단에 똑똑 배지만 추가된다. 카드를 보는 순간 `lastPokeAcknowledgedAt`이 자동 기록된다.
+## 홈 프롬프트 (한 번에 하나, 홈이 최상단일 때만)
+1. 기존 사용자 1회 공지 → 2. 첫 로그인 클립보드 초대 코드 확인(1회) → 3. 애칭 시트(짝꿍당 1회) → 4. 둘운완 순간(공유 카드·평점 요청)
 
-### 실천 메이트 액션
-| 버튼 | 동작 | 결과 |
-|------|------|------|
-| "시작 응원" | 실천 메이트의 플랜 승인 | pending_approval → active |
-| "확인하고 응원 보내기" | 실천 메이트의 실천 확인과 응원 | `verifiedDates` 또는 응원 피드백 기록 |
-| "응원하기" | 리액션 보내기 | 이모지 선택 + 메시지 (선택) |
-| "똑똑! 다시 이어주기" | 실천 메이트에게 알림 | 똑똑 메시지 + 약속 제안 (선택) |
+## 숨김
+- 집중 타이머 버튼(`_kFocusTimerEnabled=false`), 어제 인정 rescue 버튼(`_kRescueButtonEnabled=false`), 기록 응시(record gaze) 팁(삭제)
 
-### 자동 미실천 전달
-- 예정 시간 + 30분이 지나도 실천자가 오늘 행동을 처리하지 않으면 서버가 실천 메이트에게 `action_missed` 푸시를 보낸다.
-- 푸시는 하루 1회만 보낸다.
-- 실천 메이트는 지금 탭에서 똑똑, 실천 인정, 조율 요청 등 후속 행동을 선택한다.
-- 실천자는 `했어`, `휴식권`, `건너뜀` 중 하나로 오늘을 직접 정리해야 한다.
-
-### 4주 파일럿 정산
-- 완료된 28일 플랜 중 `pilotNextPlanIntent`가 없는 플랜은 내 카드 `pilotSettlement`로 노출한다.
-- 카드는 완료일, 실천 메이트 반응 수, 놓친 날을 보여준다.
-- "다음 4주 시작하기"는 `pilotNextPlanIntent: continue`, `pilotSettledAt`을 기록하고 같은 약속을 새 28일 플랜 템플릿으로 넘긴다.
-- "이번 4주는 여기서 멈추기"는 `pilotNextPlanIntent: stop`, `pilotExitReason`, `pilotSettledAt`을 기록한다.
-
-### 거절 응답 (rejected 상태)
-- 다이얼로그 옵션:
-  - "횟수 줄이기"
-  - "시간 변경"
-  - "직접 수정" (플랜 생성 화면 이동)
-
-### 리액션 유형
-- fire, heart, thumbs_up, muscle
-
-## 헤더 정보
-- 실천 메이트 이름 표시
-- 기간 상태: inProgress (활성 플랜 있음) / noPlan (없음)
-- 주차 추적: 현재 주 / 전체 주
-
-## 애니메이션
-- 카드 로드: Fade + Scale (300ms, easeOutBack)
-- 완료 시: Scale up 1.05 → 축소 (카드 제거)
-- 카드 전환: Smooth fade
+## 4주 정산
+- 28일 완료 약속 중 `pilotNextPlanIntent`가 없으면 `pilotSettlement` 카드. `다음 4주 시작하기`(같은 약속 새 28일) / `여기서 마무리`(사유 기록). 필드명은 레거시 `pilot*` 유지.

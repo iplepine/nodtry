@@ -7,53 +7,43 @@
 > - 문서 갱신: `2026-06-20 22:39:28 +0900`
 <!-- COMMIT_STATUS END -->
 
-# 프로필(Profile) 정책
+# 프로필(Profile)·우리 탭 정책
 
-## 프로필 구성 요소
+마지막 갱신: 2026-10-03 (1.1.0+81)
 
+## 프로필 구성
 | 항목 | 설명 | 비고 |
-|------|------|------|
-| 프로필 이미지 | 갤러리 선택 → 정사각형 크롭 → 업로드 | Firebase Storage 저장 |
-| 표시 이름 | 사용자 닉네임 | 기본값: "나" |
-| 상태 메시지 | 개인 메시지 | 선택 사항 |
-| 초대 코드 | 8자리 영숫자 (대문자 + 숫자) | 사용자당 고유, 자동 생성 |
+|---|---|---|
+| 프로필 이미지 | 갤러리 선택 → 정사각형 크롭 → 업로드 | Storage `users/{uid}/` |
+| 표시 이름 | 내 이름 | 기본값 `나` |
+| 상태 메시지 | 한 줄 소개 | 선택 |
+| 초대 코드 | 8자리, 서버가 연결·해제 때 회전 | [connect_policy.md](./connect_policy.md) |
+| 짝꿍 애칭 | 내가 짝꿍을 부르는 호칭(≤10자) | [nickname_policy.md](./nickname_policy.md) |
 
-## 프로필 이미지 업로드 흐름
-1. 우리 탭에서 프로필 이미지 탭
-2. `image_picker`로 갤러리 열기
-3. `image_cropper`로 정사각형 크롭
-4. Firebase Storage 업로드
-5. Firestore 사용자 문서에 URL 저장
-6. 로컬 캐시 업데이트
+## 프로필 이미지 업로드
+1. 우리 탭 프로필 이미지 탭 → `image_picker` 갤러리 → `image_cropper` 정사각형 → Storage 업로드 → `users.profileImageUrl` 저장 → 로컬 캐시 갱신.
+- 인증샷과 달리 프로필 이미지는 로그인 사용자 누구나 읽을 수 있다(짝꿍 아바타 표시).
+- iOS 사진 권한 문구는 인증샷만 언급한다. PHPicker는 보통 권한 팝업이 없지만, 프로필 사진 언급 여부는 법무·제품 확인 대기.
 
 ## 프로필 업데이트
-- `updateProfileUseCase.execute(name, statusMessage, imagePath)`
-- Firestore 동기화 + 로컬 캐시 저장 (`userLocalDataSource.saveUser()`)
-- `myProfileProvider`를 통한 Firestore 실시간 변경 감지
+- `updateProfileUseCase.execute(name, statusMessage, imagePath)` → Firestore + 로컬 캐시(`userLocalDataSource.saveUser()`), `myProfileProvider`로 실시간 반영.
+- 로그인 시 앱이 `clientBuild`·`timezone`·`locale`을 바뀐 값만 `update()`로 기록한다(문서가 없으면 만들지 않음).
 
-## 초대 코드 정책
-- 형식: `^[A-Z0-9]{8}$` (8자리 대문자+숫자)
-- 사용자 최초 초기화 시 자동 생성
-- Firestore `users/{uid}.inviteCode`에 저장
-- 복사 기능: 탭하면 클립보드에 복사 (토스트 표시)
-- 공유 기능: 시스템 공유 시트 사용 가능
-- 보안: 8자리 조합으로 추측 방지
-
-## 우리 탭 프로필 표시
+## 우리 탭
+### 히어로 (짝꿍 있을 때)
+- `둘이 함께 N일째` + 이번 주 나/짝꿍 7일 도트(둘운완 데이 강조, 인정은 ❤️, 미스는 ×) + `공유 카드 만들기`. [duo_stats_policy.md](./duo_stats_policy.md)
 
 ### 내 섹션
-- 프로필 이미지, 이름, 상태 메시지
-- 초대 코드 (복사 가능)
-- 게스트 경고 배너 (익명 사용자)
-- 내 플랜 목록 (active/pending만 표시)
+- 프로필 이미지·이름·상태 메시지, 게스트 경고 배너, 내 약속 목록(active/pending)
 
-### 실천 메이트 섹션 (연결 시)
-- 실천 메이트 프로필 정보
-- 실천 메이트 플랜 목록 (읽기 전용)
-- 승인/확인/응원 인터랙션 가능
-- 연결 해제 옵션
+### 짝꿍 섹션
+- 짝꿍 카드: 애칭(크게) + 실제 이름(작게). 카드나 `애칭 정하기/바꾸기` 필을 탭하면 애칭 시트.
+- 짝꿍 약속 목록(읽기 전용). 약속 제목에도 애칭 라벨.
+- 연결 해제: `confirmAndDisconnectPartner` 공통 다이얼로그(인증샷 보기와 공유), 해제 시 사진 캐시 삭제.
+- 숨김·제거: 단방향 배지(`지지받는 중`/`응원하는 중`) 숨김(양방향 배지만 유지), 가짜 응원 버튼 제거.
 
-## 게스트 사용자 처리
-- 우리 탭에 경고 배너 노출
-- 계정 연동 옵션 제공 (Google / 이메일)
-- 탈퇴 옵션도 제공
+### 짝꿍 없을 때
+- 초대 패널(공유·복사·코드 입력)
+
+## 게스트
+- 우리 탭 경고 배너 → 계정 연동(Google·이메일·Apple) 또는 탈퇴.

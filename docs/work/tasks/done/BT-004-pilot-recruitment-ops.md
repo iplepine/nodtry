@@ -13,7 +13,9 @@ ID: `BT-004-pilot-recruitment-ops`
 
 유형: `Ops`
 
-상태: `Active`
+상태: `Dropped` (2026-10-02)
+
+> **중단 사유 (D-007)**: 둘운완 피벗으로 4주 스터디 파일럿 모집을 하지 않는다. 아래 완료 기준은 미완료 상태로 종료한다. 모집·운영 대신 스토어 출시 + 소프트 런칭(`docs/go-to-market/LAUNCH_PLAN_DUOUNWAN.md`)으로 가설을 측정한다. 수동 집계 이벤트 이름(`pilot_joined`, `study_plan_created` 등)은 폐기(`docs/operations/ANALYTICS_EVENTS.md` §6). 후속: `BT-009-pivot-release-prep`.
 
 연결 Roadmap: `R-001-study-sprint-prep`
 

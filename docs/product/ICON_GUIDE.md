@@ -7,10 +7,12 @@
 > - 문서 갱신: `2026-06-20 22:39:28 +0900`
 <!-- COMMIT_STATUS END -->
 
-# Nodtry Icon Guide
+# 둘운완 인앱 아이콘 가이드
+
+> 앱 아이콘·스플래시·알림 아이콘·팔레트는 `docs/design/BRAND.md`가 정본이다(김홍도 Heart-Check, primary `#D92653`). 아래 색 원칙의 민트/주황은 피벗 전 팔레트 기준이라 브랜드 토큰(primary·인정 옐로 `#FFD84D`은 채움 전용·텍스트는 `accentWine`)으로 읽는다.
 
 직접 제작한 아이콘 asset은 사용하지 않는다.
-앱 내부 아이콘은 Flutter Material Icons의 rounded/outlined 계열을 우선 사용하고, Nodtry의 성격은 아이콘 자체보다 색상, 배경칩, 카드 상태로 표현한다.
+앱 내부 아이콘은 Flutter Material Icons의 rounded/outlined 계열을 우선 사용하고, 앱의 성격은 아이콘 자체보다 색상, 배경칩, 카드 상태로 표현한다.
 
 ## 원칙
 
@@ -38,7 +40,7 @@
 | 놓친 약속 | `Icons.schedule_rounded` | 지연, overdue |
 | 다시 이어주기 | `Icons.replay_rounded` | 복귀, 다시 시도 |
 | 관계 연결 | `Icons.link_rounded` | 연결/초대 |
-| 실천 메이트 | `Icons.person_rounded` | 상대 프로필 fallback |
+| 짝꿍 | `Icons.person_rounded` | 상대 프로필 fallback |
 | 우리 | `Icons.group_rounded` | 우리 탭 |
 | 기록 | `Icons.timeline_rounded` | 기록 탭 |
 | 빈 상태 | `Icons.add_task_rounded` | 약속 없음 |

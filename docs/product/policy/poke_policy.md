@@ -7,58 +7,49 @@
 > - 문서 갱신: `2026-06-20 22:39:28 +0900`
 <!-- COMMIT_STATUS END -->
 
-# 똑똑(Poke) 정책
+# 똑똑(Poke)·응원 정책
+
+마지막 갱신: 2026-10-03 (1.1.0+81, 피벗 S2·S6·backend)
 
 ## 개요
-실천 메이트의 상태에 따라 "똑똑" 버튼을 노출하여 약속이 혼자 묻히지 않게 다시 이어주는 기능.
-
-똑똑은 감시 표현이 아니라, 서로 동의한 1:1 관계에서 주고받는 가벼운 책임 신호다. 화면에서는 귀여운 알림보다 "나의 실천을 알아봐 주는 한 사람이 있다"는 맥락이 먼저 보여야 한다.
+**안 하면 짝꿍이 안다**를 가볍게 만드는 장치다. 짝꿍은 놓친 운동에 `응원 보내기`(주)나 `똑똑`(보조)을 보내고, 받은 쪽은 한 번 탭으로 답한다. 감시가 아니라 "봐준다"는 톤을 지킨다.
 
 ## 똑똑 유형
+### 1. 약속 똑똑 (`partnerPoke`)
+- 조건: 짝꿍에게 오늘 예정·미기록 약속이 있다.
+- 기본 문구(저장값): `똑똑! 오늘 약속 기다리고 있어` (`kDefaultPlanPokeMessage`). 화면은 보내는 사람 언어로 현지화된 문구를 넘긴다.
+- **제한**: 약속당 수신자 현지 날짜 기준 하루 1회. 서버가 `serverLocks`로 강제한다(plan의 `lastPokeAt` 경로와 cheers 경로 공유). 앱은 오늘 이미 보냈으면 버튼을 `오늘 똑똑 보냈어요`로 끈다.
 
-### 1. `partnerNoPlan` (실천 메이트 계획 없음)
-- **조건**: 실천 메이트에게 active/pendingApproval/rejected 상태의 플랜이 하나도 없을 때
-- **노출 위치**: 지금 탭 > `Manager Card`
-- **메시지**: "상대방이 아직 새로운 약속을 만들지 않았어요. 약속이 묻히기 전에 똑똑으로 불러볼까요?"
-- **버튼**: "똑똑! 약속 만들라고 하기"
+### 2. 약속 없음 똑똑 (`partnerNoPlan`)
+- 기본 문구: `똑똑! 운동 약속 하나 걸어 줘` (`kDefaultUserPokeMessage`). planId 없는 cheers는 짝꿍 쌍당 하루 1회 제한.
 
-### 2. `partnerPoke` (실천 메이트의 실천 지연)
-- **조건**: 실천 메이트에게 오늘 해야 할 일이 있는데 아직 완료/휴식/건너뜀 처리하지 않았을 때
-- **반복 제한**: 같은 플랜은 오늘 이미 `lastPokeAt`이 있으면 다시 노출하지 않음
-- **노출 위치**: 지금 탭 > `Manager Card`
-- **메시지**: "{메이트명}님의 약속이 아직 조용해요. 묻히기 전에 똑똑으로 당겨주세요."
-- **버튼**: "똑똑! 다시 이어주기"
-- **수신자 카드**: 평소의 nowAction 카드 그대로. 카드 상단에 "{메이트명}님이 똑똑을 보냈어요" 배지만 추가. 버튼은 평소대로 `했어` / `지금 할게! (집중 타이머)` / `휴식권` / `건너뛸게`. 카드를 보면 즉시 `lastPokeAcknowledgedAt`이 자동 기록된다.
-- **전송자 카드 처리**: 똑똑 전송 성공 후 Now 탭에서 해당 카드 즉시 제거
+### 3. 놓친 운동 자동 전달 (`action_missed`)
+- 조건: 짝꿍 있는 active 약속, 오늘 예정, 마감 + 30분 유예가 지남, 오늘 done/skip/rest/rescue 없음. 판정은 **실행자 `users.timezone`** 기준(없으면 Asia/Seoul).
+- `notifyMissedActions` 30분 주기 → 실제 전달은 마감 후 30~60분. 사용자 문구에 정확한 분을 약속하지 않는다.
+- 같은 약속 하루 1회. `lastMissedNotifiedAt`, `lastUpdatedBy: system_missed_action`.
+- 짝꿍 카드는 `응원 보내기`(주) / `똑똑`(보조) 순서.
 
-### 3. action_missed (자동 미실천 전달)
-- **조건**: 실천 메이트의 약속 시간이 지나고 30분이 지났는데 오늘 행동이 아직 미처리일 때
-- **발신 주체**: 시스템
-- **수신자**: 실천 메이트
-- **푸시 타입**: `action_missed`
-- **메시지**: "약속 시간이 지났어요. 한 번 물어봐 주세요."
-- **반복 제한**: 같은 플랜 기준 하루 1회
-- **목적**: 사용자가 실패를 혼자 묻고 앱을 닫지 못하게 후속 대화를 만든다.
-- **Now 탭 반영**: `lastMissedNotifiedAt`이 오늘이면 실천자에게 `poked`, 실천 메이트에게 `partnerPoke`의 놓친 약속 버전으로 노출한다.
+## 응원 보내기
+- `cheers {fromUserId, toUserId, planId?, reactionType: '💪', message: '할 수 있어! 기다릴게 💪'}`
+- 인정이 아니다: `verifiedDates`를 건드리지 않고, 서버는 오늘 기록이 없으므로 `응원` 문구로 보낸다.
+- 분석: `cheer_sent {surface: missed_card, has_message}`
 
-## 방향 정책 (2025-03-25 적용)
+## 받은 쪽 원탭 답장
+- 조건: 오늘 똑똑을 받았고 아직 기록이 없다.
+- 버튼: `지금 간다 🏃` / `오늘은 봐줘 🙏`
+- 저장: `cheers {fromUserId, toUserId: plan.managerId, planId, reactionType: 'reply', message, createdAt}`. 약속 문서는 안 바꾼다.
+- 서버: `onCheerCreated` → 푸시 `💬 {이름}의 답장`, `data.type = poke_reply`.
+- 기기별로 약속·날짜당 1회 기억(`poke.replied_v1`). 다른 기기에서는 버튼이 다시 보일 수 있다.
+- 분석: `poke_replied {kind: coming|pass}`
 
-### 양방향 똑똑
-- Manager든 Executor든 관계 방향에 **무관하게** 실천 메이트의 플랜 상태를 체크
-- 같은 실천 메이트를 중복 체크하지 않음 (`checkedPartnerUids` Set으로 관리)
-- 이유: 관계가 상호적이므로 똑똑도 양방향이 자연스러움
+## 호환
+- 구버전이 저장한 `실천 메이트` 포함 똑똑 문구는 서버(푸시)와 앱(`pokeHeaderFor`) 모두 새 기본 문구로 바꿔 보여 준다. 그 외 옛 문구는 그대로 표시된다.
+- 연결되지 않은 사용자 사이의 cheers는 푸시하지 않는다.
 
-### 구현 위치
-- 카드 생성: `real_record_repository.dart` > `_processPlans()` > Part 3
-- UI 렌더링: `now_tab_screen.dart` > `_ManagerQuickCard`
-- Intent 처리: `now_tab_viewmodel.dart` > `PokeUserIntent`, `PokePartnerIntent`
-- 원격 푸시: `functions/src/index.ts` > `onCheerCreated`, `onPlanUpdated`
+## 구현 위치
+- 카드 규칙: `now_card_rules.dart` `knockedToday`, `showsPokeReplies`, `leadsWithCheer`
+- 저장: `RealRecordRepository.replyToPoke`, `sendCheer`, `pokeUser`/`pokePartner`
+- 서버: `functions/src/index.ts` `onCheerCreated`, `onPlanUpdated`, `notifyMissedActions`; 문구 `copy.ts`
 
-## 운영 상태
-
-- `1.0.30+49`부터 Android production과 iOS TestFlight에 똑똑 카드 정리 및 OS 표시 푸시가 반영됐다.
-- 실제 수신은 상대방 알림 권한과 `users/{uid}.fcmToken` 저장 여부에 의존한다.
-
-## 노출 위치 참고
-- **지금 탭**: `Manager Card`에서 똑똑 버튼 노출 (O)
-- **우리 탭**: "실천 메이트가 진행 중인 약속이 없어요" 텍스트만 표시 (똑똑 버튼 없음)
+## 알려진 한계
+- 똑똑을 보낸 직후 짝꿍 카드는 예전처럼 사라진다. 비활성 상태는 주로 스트림에 오늘 똑똑이 이미 있을 때 보인다. 실제 가드는 서버 제한이다.

@@ -7,74 +7,44 @@
 > - 문서 갱신: `2026-06-20 22:39:28 +0900`
 <!-- COMMIT_STATUS END -->
 
-# 히스토리(History) 정책
+# 기록(History) 탭 정책
+
+마지막 갱신: 2026-10-03 (1.1.0+81)
 
 ## 개요
-플랜 실천 기록을 추적하고, 실천 메이트와 주고받은 확인/피드백을 관리하는 기능.
+나와 짝꿍의 운동 기록·인증샷·인정을 날짜순으로 본다. 탭 이름은 `기록`(EN History).
 
-## 히스토리 항목 구조
+## HistoryItem (원천: `actions/{id}`)
+- `id`, `planId`, `date`, `title`, `status`, `executorId`, `note`(실행자 메모), `comment`(짝꿍 한마디)
+- `isVerifiedByPartner` / `isVerifiedByMe`, `partnerName`, `partnerImageUrl`, `partnerMessage`
+- 신규: `proofPhotoPath`, `proofSource`(`camera|gallery`), `proofTakenAt`, `reaction`(짝꿍이 인정한 이모지)
 
-### HistoryItem 모델
-- `id`: 고유 식별자
-- `planId`: 연관 플랜
-- `date`: 실천 날짜
-- `title`: 실천 내용
-- `status`: 상태 (아래 참고)
-- `executorId`: 실천자
-- `note`: 실천자 메모
-- `comment`: 실천 메이트 피드백
-- `isVerifiedByPartner`, `isVerifiedByMe`: 확인 플래그
-- `partnerName`, `partnerImageUrl`, `partnerMessage`: 실천 메이트 정보
+## 상태
+| 상태 | 표시 | 설명 |
+|---|---|---|
+| `done` | 했어 | 오운완 기록 |
+| `verified` | 인정받음 | 짝꿍이 인정 |
+| `rested` | 쉬었어 | 휴식권 |
+| `skipped` | 건너뜀 | 오늘 건너뜀 |
+| `actuallyDone` | 사실 했어 | 레거시 사후 정리 |
 
-## 히스토리 상태
-
-| 상태 | 한글 | 설명 |
-|------|------|------|
-| `done` | 했어 | 당일 실천 완료 |
-| `actuallyDone` | 사실 했어요 | 사후 정리 - 실제로 했다고 정정 |
-| `rested` | 쉴게요 | 사후 정리 - 쉬었다고 정정 |
-| `verified` | 확인됨 | 실천 메이트가 실천 확인 |
-| `skipped` | 건너뜀 | 당일 건너뜀 |
+action type 값은 추가하지 않는다.
 
 ## 화면 구성
+- **주간 펄스 카드**: 이번 주 둘운완 일수와 나/짝꿍 도트. 지금·우리 탭과 같은 `duoStatsProvider`를 쓴다.
+- **기록 카드**: 인증샷 썸네일 + 출처 배지, 메모, 리액션 아이콘.
+  - 짝꿍 기록이 아직 인정 전이면 ❤️🔥💪👏 리액션 줄 + `한마디`. 탭하면 `HistoryIntent.verify(id, reaction:)` → `verifyHistoryItem`이 `actions.reaction`·`verifiedDates`·`lastUpdatedBy`(=인정한 사람)를 쓴다.
+  - 인정된 기록은 리액션 아이콘 표시.
+- 사진 탭 → 전체 화면 보기(신고·연결 끊기·본인 삭제). [proof_photo_policy.md](./proof_photo_policy.md)
+- 필터와 짝꿍 이름은 `partnerLabelProvider`(애칭 우선).
+- 오류는 `historyErrorUnknown`으로 표시(원문 예외 노출 금지). 제목 없는 기록은 `약속`(`promiseUntitledFallback`).
 
-### 섹션 구분
-1. **진행 중 플랜 섹션**: 현재 활성 약속과 최근 실천 기록
-2. **완료된 플랜 섹션**: 완료/중단된 플랜 요약
+## 푸시
+- 기록 탭 인정은 cheers 문서를 만들지 않으므로 `onPlanUpdated`가 `action_verified` 1건만 보낸다(이모지 미포함).
 
-### 그룹핑
-- 플랜/행동별 그룹
-- 날짜별 정렬 + 리액션 포함
+## 사후 정리 (레거시)
+- 짝꿍이 과거 기록에 의문을 제기하면 실행자가 `사실 했어` / `쉬었어`로 정정하는 흐름이 남아 있다. 신규 기능 확장 대상은 아니다.
 
-## 카드 유형
-
-### HistoryCard
-- 개별 실천 기록 표시
-- 리액션 아이콘 포함
-
-### PlanSummaryCard
-- 완료된 플랜 통계 표시
-  - 총 약속 일수
-  - 달성률
-  - 최종 상태
-
-## 사후 정리 (Reconciliation)
-
-### 목적
-과거 실천에 대한 이견 해소
-
-### 프로세스
-1. 실천 메이트가 과거 기록에 의문 제기
-2. 실천자가 해명:
-   - "사실 했어요" → `actuallyDone`
-   - "쉬었어요" → `rested`
-3. 상태 업데이트
-
-## 리액션 시스템
-- 이모지 종류: fire, heart, thumbs_up, muscle
-- 히스토리 항목 하단에 표시
-- 저장 위치: 히스토리 항목 레코드 내
-
-## 실시간 업데이트
-- `getHistoryItemsStream()`으로 Firestore 변경 감지
-- 실천 메이트의 리액션/확인 추가 시 자동 갱신
+## 실시간
+- `getHistoryItemsStream()`으로 Firestore 변경을 반영한다. 짝꿍의 리액션·인정이 바로 보인다.
+- 짝꿍의 모든 약속을 `userId`로 읽는다(둘운완 통계와 같은 쿼리). plans read 규칙을 좁히면 이 쿼리 전체가 거부되므로, 보안 묶음 때 쿼리를 함께 바꿔야 한다.

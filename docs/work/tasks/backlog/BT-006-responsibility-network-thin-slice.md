@@ -13,7 +13,9 @@ ID: `BT-006-responsibility-network-thin-slice`
 
 유형: `Product/Dev`
 
-상태: `Ready`
+상태: `Backlog` (보류, 2026-10-02)
+
+> **보류 사유 (D-007)**: 둘운완은 커플 1:1만 지원한다. 여러 짝꿍·약속별 담당자(책임망, D-005)는 커플 포지셔닝과 맞지 않아 착수하지 않는다. D-005의 "공개 그룹 배제" 원칙은 유지된다. 1:1 커플 루프의 리텐션 근거가 생기고 다인(예: 친구 운동 크루) 수요가 확인되면 새 결정으로 다시 연다. 연결 roadmap R-001은 Dropped.
 
 연결 Roadmap: `R-001-study-sprint-prep`
 
