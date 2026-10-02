@@ -115,6 +115,7 @@
 - `actions`: `userId ASC, managerId ASC, date DESC` (짝꿍 기록)
 - `actions`: `planId ASC, managerId ASC, date DESC` (짝꿍 약속 타임라인, 인정할 오늘 기록 찾기의 `date` 범위 쿼리)
 - `actions`: `planId ASC, userId ASC, date DESC` (내 약속 타임라인)
+- `actions`: `planId ASC, date ASC` — **빌드 ≤80의 인정 경로**(`cheerPartner`·`verifyPlan`의 `planId + date 범위 limit 1`)가 쓴다. 원래 콘솔에서 만들어져 파일에 없던 인덱스라 2026-10-03 배포 때 "파일에 없는 인덱스 삭제?" 프롬프트에서 삭제됐고, 같은 날 파일에 추가해 복구했다. **이 프롬프트에는 항상 N으로 답한다.**
 - (빌드 81은 쓰지 않음) `actions`: `managerId ASC, date DESC` — 공유받은 기록 전체·OR 쿼리를 `orderBy date`로 쓰게 되면 추가
 - 등호만 쓰는 쿼리(`plans where userId==A && managerId==B`, 서버의 `actions where userId==A && managerId==B`)는 단일 필드 인덱스로 충분하다.
 

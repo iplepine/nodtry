@@ -70,6 +70,7 @@ firebase deploy --only firestore:rules --project nod-try
 # 인덱스가 바뀐 경우에만 — 1.1.0(81)은 바뀌었다: actions 복합 인덱스 3개(SECURITY_RULES.md "필요한 복합 인덱스")
 firebase deploy --only firestore:indexes --project nod-try
 ```
+- 인덱스 배포 중 "The following indexes are defined in your project but are not present in your firestore indexes file … delete?" 프롬프트가 나오면 **항상 N**. 콘솔에서 만든 인덱스를 구버전이 쓰고 있을 수 있다(2026-10-03에 `actions (planId ASC, date ASC)`를 삭제해 빌드 ≤80 인정이 깨졌다가 파일에 추가해 복구).
 - 6단계(스토어 제출) 전에 콘솔에서 세 인덱스가 "사용 설정됨"인지 확인한다. 없으면 81의 짝꿍 기록·약속 타임라인·인정이 `failed-precondition`으로 실패한다.
 - 배포 직후 콘솔에서 `config/app` 문서를 만든다: `minBuild: 0`, `latestBuild: 80`(숫자형).
   - 앱(`lib/core/services/app_version_gate.dart`)은 문서가 없거나 읽기에 실패하면 게이트를 건너뛴다(fail-open). 그래도 미리 만들어 두면 이후 운영에서 숫자만 바꾸면 된다.

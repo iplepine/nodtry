@@ -20,6 +20,14 @@
       "collectionGroup": "actions",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "planId", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "actions",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "type", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "ASCENDING" }
       ]
