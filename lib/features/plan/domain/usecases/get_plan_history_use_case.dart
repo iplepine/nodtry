@@ -6,7 +6,8 @@ class GetPlanHistoryUseCase {
 
   GetPlanHistoryUseCase(this._repository);
 
-  Stream<List<HistoryItem>> execute(String planId) {
-    return _repository.getHistoryItemsByPlanIdStream(planId);
+  /// [ownerId] is the plan's `userId` (picks the readable query shape).
+  Stream<List<HistoryItem>> execute(String planId, {String? ownerId}) {
+    return _repository.getHistoryItemsByPlanIdStream(planId, ownerId: ownerId);
   }
 }

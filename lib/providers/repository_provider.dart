@@ -41,6 +41,8 @@ import '../usecases/get_connected_profiles_use_case.dart';
 import '../usecases/disconnect_connection_use_case.dart';
 import '../services/auth_service.dart';
 import '../datasources/user_local_data_source.dart';
+import '../features/connect/application/partner_label_provider.dart';
+import '../core/services/notification_service.dart' as push;
 
 // ... (ConnectRepository related imports and providers kept below)
 
@@ -198,7 +200,13 @@ final mockRecordRepositoryProvider = Provider<MockRecordRepository?>((ref) {
 });
 
 /// 연결 상태 스트림 Provider
+///
+/// Re-subscribes when the signed-in account changes: the repository reads
+/// `currentUser` once when the stream is created, so a stream made before a
+/// fresh login stayed on the logged-out `none` forever — the new user's link
+/// (and the inviter's live "connected" moment) never reached the app.
 final connectionStatusStreamProvider = StreamProvider<ConnectionStatus>((ref) {
+  ref.watch(authStateChangesProvider.select((auth) => auth.value?.uid));
   final repository = ref.watch(connectRepositoryProvider);
   return repository.watchConnectionStatus();
 });
@@ -217,10 +225,19 @@ final autoLoginUseCaseProvider = Provider<AutoLoginUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final userLocalDataSource = ref.watch(userLocalDataSourceProvider);
-  final cancelAllNotifications = ref.watch(cancelAllNotificationsUseCaseProvider);
+  final cancelAllNotifications = ref.watch(
+    cancelAllNotificationsUseCaseProvider,
+  );
   final recordRepository = ref.watch(recordRepositoryProvider);
   final settingAlarmUseCase = ref.watch(settingAlarmUseCaseProvider);
-  return AutoLoginUseCase(authService, userRepository, userLocalDataSource, cancelAllNotifications, recordRepository, settingAlarmUseCase);
+  return AutoLoginUseCase(
+    authService,
+    userRepository,
+    userLocalDataSource,
+    cancelAllNotifications,
+    recordRepository,
+    settingAlarmUseCase,
+  );
 });
 
 final linkWithGoogleUseCaseProvider = Provider<LinkWithGoogleUseCase>((ref) {
@@ -271,7 +288,9 @@ final withdrawUseCaseProvider = Provider<WithdrawUseCase>((ref) {
   final localDataSource = ref.watch(userLocalDataSourceProvider);
   final recordRepository = ref.watch(recordRepositoryProvider);
   final connectRepository = ref.watch(connectRepositoryProvider);
-  final cancelAllNotifications = ref.watch(cancelAllNotificationsUseCaseProvider);
+  final cancelAllNotifications = ref.watch(
+    cancelAllNotificationsUseCaseProvider,
+  );
   return WithdrawUseCase(
     authService,
     userRepository,
@@ -301,8 +320,43 @@ final cancelAllNotificationsUseCaseProvider =
     });
 
 final settingAlarmUseCaseProvider = Provider<SettingAlarmUseCase>((ref) {
-  return SettingAlarmUseCase(local_notifications.NotificationService());
+  return SettingAlarmUseCase(
+    local_notifications.NotificationService(),
+    partnerLabelFor: (plan) => _reminderPartnerLabel(ref, plan),
+    partnerAbsent: () => _reminderPartnerAbsent(ref),
+    // A permission granted at the reminder prompt also registers the push
+    // token now (partner pushes), not at the next cold start.
+    afterPermissionRequest: () =>
+        ref.read(push.notificationServiceProvider).maybeRegister(),
+  );
 });
+
+/// The partner list has loaded and is empty: no partner line in reminders.
+bool _reminderPartnerAbsent(Ref ref) {
+  try {
+    final partners = ref.read(connectedProfilesProvider);
+    return partners is AsyncData<List<ConnectedUser>> && partners.value.isEmpty;
+  } catch (_) {
+    return false;
+  }
+}
+
+/// What a reminder calls the partner of [plan]: the nickname or display name
+/// of the connected partner, or — while the partner list is still loading
+/// (e.g. reminders restored at launch) — the nickname alone. Null means the
+/// generic 짝꿍.
+String? _reminderPartnerLabel(Ref ref, Plan plan) {
+  try {
+    final label = ref.read(partnerLabelProvider);
+    if (label.hasPartner) {
+      return label.partnerUid == plan.managerId ? label.preferred : null;
+    }
+    final nickname = ref.read(myProfileProvider).value?.partnerNickname;
+    return normalizePartnerNickname(nickname);
+  } catch (_) {
+    return null; // never let the copy block a reminder
+  }
+}
 
 final getNowCardsUseCaseProvider = Provider<GetNowCardsUseCase>((ref) {
   return GetNowCardsUseCase(ref.watch(recordRepositoryProvider));

@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../domain/invite_code.dart';
+
 part 'connect_state.freezed.dart';
 
 enum ConnectFlowState { initial, waiting, connected, error }
@@ -20,7 +22,13 @@ sealed class ConnectIntent {
 
 class SubmitInviteCodeIntent extends ConnectIntent {
   final String code;
-  const SubmitInviteCodeIntent(this.code);
+
+  /// Where the code came from (analytics only).
+  final InviteCodeSource source;
+  const SubmitInviteCodeIntent(
+    this.code, {
+    this.source = InviteCodeSource.manual,
+  });
 }
 
 class DisconnectPartnerIntent extends ConnectIntent {

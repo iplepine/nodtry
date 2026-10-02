@@ -3,14 +3,57 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../theme/app_colors.dart';
 
+/// Turning off the reminder of a promise with a partner also removes its
+/// deadline: the partner is never told about a missed day. Asks first.
+Future<bool> confirmPartneredReminderOff(
+  BuildContext context, {
+  required String partnerName,
+}) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      final l10n = AppLocalizations.of(context)!;
+      return AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(l10n.notifyEditorOffWarningTitle),
+        content: Text(l10n.notifyEditorOffWarningBody(partnerName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              l10n.nowCancel,
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          TextButton(
+            key: const ValueKey('reminder-off-confirm'),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              l10n.notifyEditorOffWarningConfirm,
+              style: TextStyle(color: AppColors.primary),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+  return confirmed ?? false;
+}
+
 class NotificationSettingEditor extends StatelessWidget {
   final NotificationTime notificationTime;
   final ValueChanged<NotificationTime> onTimeChanged;
+
+  /// Asked before the reminder is turned off; false keeps it on. A promise
+  /// with a partner warns here: without a reminder there is no deadline, so
+  /// the partner is never told about a missed day.
+  final Future<bool> Function()? confirmTurnOff;
 
   const NotificationSettingEditor({
     super.key,
     required this.notificationTime,
     required this.onTimeChanged,
+    this.confirmTurnOff,
   });
 
   @override
@@ -77,7 +120,16 @@ class NotificationSettingEditor extends StatelessWidget {
                         : restored.copyWith(type: 'custom'),
                   );
                 } else {
-                  onTimeChanged(notificationTime.copyWith(type: 'none'));
+                  final confirm = confirmTurnOff;
+                  if (confirm == null) {
+                    onTimeChanged(notificationTime.copyWith(type: 'none'));
+                    return;
+                  }
+                  confirm().then((ok) {
+                    if (ok) {
+                      onTimeChanged(notificationTime.copyWith(type: 'none'));
+                    }
+                  });
                 }
               },
               activeThumbColor: AppColors.primary,

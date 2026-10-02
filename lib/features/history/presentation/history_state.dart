@@ -31,6 +31,12 @@ class HistoryIntent with _$HistoryIntent {
     HistoryStatus status,
   ) = ReconcileIntent;
   const factory HistoryIntent.setFilter(HistoryFilter filter) = SetFilterIntent;
-  const factory HistoryIntent.verify(String historyId, {String? message}) =
-      VerifyHistoryIntent;
+
+  /// 인정 of a partner's record: the one-tap [reaction] emoji (❤️🔥💪👏)
+  /// and/or a [message].
+  const factory HistoryIntent.verify(
+    String historyId, {
+    String? message,
+    String? reaction,
+  }) = VerifyHistoryIntent;
 }

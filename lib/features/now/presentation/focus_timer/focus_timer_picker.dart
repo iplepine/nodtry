@@ -56,9 +56,7 @@ class _FocusTimerPickerState extends State<FocusTimerPicker> {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.background,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(24),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + systemNavInset),
         child: Column(
@@ -87,10 +85,7 @@ class _FocusTimerPickerState extends State<FocusTimerPicker> {
             const SizedBox(height: 4),
             Text(
               l10n.focusTimerPickerSubtitle,
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 13,
-              ),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
             const SizedBox(height: 20),
             Row(
@@ -184,16 +179,15 @@ class _PresetChip extends StatelessWidget {
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        backgroundColor:
-            selected ? AppColors.primary.withValues(alpha: 0.12) : null,
+        backgroundColor: selected
+            ? AppColors.primary.withValues(alpha: 0.12)
+            : null,
         side: BorderSide(
           color: selected ? AppColors.primary : AppColors.textDisabled,
           width: selected ? 1.5 : 1,
         ),
         padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       child: Text(
         label,

@@ -65,16 +65,25 @@ class GetConnectedProfilesUseCase {
           user: user,
           isSupported: existing.isSupported || isSupported,
           isCheering: existing.isCheering || isCheering,
+          linkedAt: _earlier(existing.linkedAt, conn.linkedAt),
         );
       } else {
         result[partnerId] = ConnectedUser(
           user: user,
           isSupported: isSupported,
           isCheering: isCheering,
+          linkedAt: conn.linkedAt,
         );
       }
     }
 
     return result.values.toList();
   }
+}
+
+/// The earlier of two optional times (null = unknown, ignored).
+DateTime? _earlier(DateTime? a, DateTime? b) {
+  if (a == null) return b;
+  if (b == null) return a;
+  return a.isBefore(b) ? a : b;
 }

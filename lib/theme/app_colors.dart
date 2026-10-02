@@ -21,10 +21,11 @@ class ThemePalette {
   final Color primarySoft;
 
   // --- Secondary / Accent ---
-  /// 의미상 "accent". 텍스트/아이콘으로 쓰일 수 있어야 하므로 surface 위에서
-  /// 대비가 충분해야 한다. (deepOlive의 옛 #D2CCC3 같은 sand-on-sand는 ❌)
+  /// 의미상 "accent". 브랜드 팔레트(둘운완)에서는 인정 옐로 **채움** 색이라
+  /// 위에 textPrimary를 올린다. 흰 배경 위 텍스트/아이콘 accent가 필요하면
+  /// [accentWine]을 쓴다. (deepOlive의 옛 #D2CCC3 같은 sand-on-sand는 ❌)
   final Color secondary;
-  final Color accentWine; // 짙은 accent, 강한 강조 텍스트
+  final Color accentWine; // 짙은 accent, 강한 강조 텍스트 (흰 배경 AA)
   final Color accentInkViolet; // 옅은 accent, 힌트 배경
 
   // --- Text ---
@@ -88,9 +89,13 @@ class ThemePalette {
   });
 }
 
-/// Nodtry Color System - Multi-Theme Support (5 palettes)
+/// 둘운완 / DuoDone Color System
 ///
-/// - Mint × Orange  (`smokyPlum`)   : 차분 + 행동 강조
+/// 앱은 단일 브랜드 팔레트로 고정한다(테마 선택 UI는 숨김). 브랜드 팔레트는
+/// 저장 키 호환 때문에 enum 이름 `smokyPlum`에 들어 있다.
+/// - 둘운완 Brand (`smokyPlum`)     : raspberry coral × 인정 옐로 — 기본·고정
+///
+/// 아래 4개는 숨겨진 레거시 팔레트(개발자 화면/롤백용, 사용자 노출 없음):
 /// - Deep Olive × Sand (`deepOlive`): 단단함 · 책임감
 /// - Pacific (`pacific`)            : 바다 + 산호 — 활기, 청량
 /// - Rose Mocha (`roseMocha`)       : 더스티 로즈 + 크림 — 따뜻함, 편안
@@ -211,37 +216,49 @@ class AppColors {
   static Color get pendingBadgeText => _palette.pendingBadgeText;
 
   // ============================================
-  // Theme A: Mint & Orange (smokyPlum)
+  // Theme A: 둘운완 Brand — Coral × 인정 Yellow (storage key `smokyPlum`)
   // ============================================
+  //
+  // 정본: docs/product/PIVOT_DUOUNWAN_SPEC.md 1절, docs/design/BRAND.md.
+  // enum 이름/저장 키 `smokyPlum`은 기존 사용자 prefs 호환을 위해 그대로 둔다.
+  // 대비(WCAG 2.x, 흰 글자 기준):
+  //   white on primary 4.82:1 (AA) · white on primaryPressed 6.38:1 (AA)
+  //   primary on background 4.60:1 (AA) · textSecondary on background 5.91:1
+  //   textPrimary on secondary(yellow) 11.85:1 (AAA)
+  // ⚠ secondary(#FFD84D)는 "채움" 색이다 — 위에는 textPrimary를 올린다.
+  //   흰 배경 위 텍스트/아이콘 색으로 쓰면 1.38:1로 안 보인다. 그 용도는
+  //   accentWine(#8A5A00, 흰 배경 5.93:1)을 쓴다.
   static const ThemePalette _smokyPlumPalette = ThemePalette(
-    background: Color(0xFFF8FAF7),
-    surface: Color(0xFFFFFFFF),
-    outline: Color(0xFFD9E4DF),
-    divider: Color(0xFFE3ECE8),
-    disabled: Color(0xFFC5D0CC),
-    primary: Color(0xFF18B7A0),
-    primaryPressed: Color(0xFF0E7F70),
-    primarySoft: Color(0xFFDDF8F2),
-    secondary: Color(0xFFFF8A3D),
-    accentWine: Color(0xFFC85A1E),
-    accentInkViolet: Color(0xFFFFF0E5),
-    textPrimary: Color(0xFF1D2B27),
-    textSecondary: Color(0xFF66736F),
-    textDisabled: Color(0xFF97A4A0),
-    warningSoft: Color(0xFFFFF1E6),
-    warningBorder: Color(0xFFFF8A3D),
-    warningStrong: Color(0xFFB54708),
-    noticeBackground: Color(0xFFFFF4E5),
-    noticeBorder: Color(0xFFFFD180),
-    noticeText: Color(0xFF5D4037),
-    restTone: Color(0xFF7AB8C8),
-    neutralBadge: Color(0xFFEBE6E1),
-    timeChipNowBackground: Color(0xFFF28B82),
-    timeChipNeutralBackground: Color(0xFFF2ECE7),
-    timeChipNowText: Color(0xFF3F3A36),
-    timeChipMutedText: Color(0xFF7A726C),
-    pendingBadgeFill: Color(0x1AFF9800),
-    pendingBadgeText: Color(0xFFEF6C00),
+    background: Color(0xFFFFF8F6), // warm blush white (앱 배경, 스플래시)
+    surface: Color(0xFFFFFFFF), // 카드
+    outline: Color(0xFFEADADD), // rose-grey 테두리
+    divider: Color(0xFFF3E7E9),
+    disabled: Color(0xFFD8C8CC),
+    primary: Color(0xFFD92653), // raspberry coral — 버튼·강조
+    primaryPressed: Color(0xFFB81C45), // 눌림 / soft 위 진한 텍스트
+    primarySoft: Color(0xFFFFE8ED), // 칩·선택 배경
+    secondary: Color(0xFFFFD84D), // 인정 옐로 — 채움 전용 (위 경고 참고)
+    accentWine: Color(0xFF8A5A00), // honey — 옐로 계열의 텍스트/아이콘 색
+    accentInkViolet: Color(0xFFFFF6D6), // 옅은 옐로 힌트 배경
+    textPrimary: Color(0xFF2B1B21),
+    textSecondary: Color(0xFF6F5C63),
+    textDisabled: Color(0xFFA8969C),
+    // 내기(벌칙)·경고 칩: primary(핑크)와 구분되는 따뜻한 오렌지 계열
+    warningSoft: Color(0xFFFFF1E8),
+    warningBorder: Color(0xFFE0612A), // 아이콘/테두리, 흰 배경 3.55:1
+    warningStrong: Color(0xFFA3410F), // warningSoft 위 텍스트 5.72:1
+    // 게스트 안내 배너: 인정 옐로 톤
+    noticeBackground: Color(0xFFFFF7DB),
+    noticeBorder: Color(0xFFFFD84D),
+    noticeText: Color(0xFF5C4210), // noticeBackground 위 8.73:1
+    restTone: Color(0xFF9DB0E0), // 휴식 셀: 차가운 periwinkle로 done(코랄)과 구분
+    neutralBadge: Color(0xFFF2E8EA),
+    timeChipNowBackground: Color(0xFFD92653), // "지금" 칩 = primary
+    timeChipNeutralBackground: Color(0xFFF5ECEE),
+    timeChipNowText: Color(0xFFFFFFFF), // primary 위 흰 글자 4.82:1
+    timeChipMutedText: Color(0xFF7A666D), // neutral(80%) 위 4.67:1
+    pendingBadgeFill: Color(0x33FFD84D), // 20% 인정 옐로
+    pendingBadgeText: Color(0xFF8A5A00), // fill 위 5.53:1
   );
 
   // ============================================

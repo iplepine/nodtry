@@ -405,22 +405,144 @@ class AuthService {
     }
   }
 
-  /// 회원 탈퇴 (계정 삭제)
-  Future<void> deleteAccount() async {
+  /// Re-signs the current user in with their own provider right before the
+  /// account is deleted: Firebase refuses `user.delete()` with
+  /// `requires-recent-login` for any session older than a few minutes, which
+  /// left the account (and, after a client-side cascade, a half-deleted one)
+  /// behind. Nothing is deleted before this succeeds.
+  ///
+  /// * Apple: a fresh Apple ID credential — its authorization code is what
+  ///   [deleteAccount] revokes (Guideline 5.1.1(v)).
+  /// * Google: the Google account picker.
+  /// * Email: [password] (throws [ReauthPasswordRequiredException] without).
+  /// * Guest (anonymous): nothing to do.
+  ///
+  /// Throws [ReauthCancelledException] when the user backs out.
+  Future<DeletionReauth> reauthenticateForDeletion({String? password}) async {
+    final user = _auth.currentUser;
+    if (user == null || user.isAnonymous) return const DeletionReauth();
+    final providers = user.providerData.map((p) => p.providerId).toSet();
+
+    if (providers.contains('apple.com')) {
+      final rawNonce = _generateNonce();
+      final AuthorizationCredentialAppleID apple;
+      try {
+        apple = await SignInWithApple.getAppleIDCredential(
+          scopes: const [],
+          nonce: _sha256ofString(rawNonce),
+        );
+      } on SignInWithAppleAuthorizationException catch (e) {
+        if (e.code == AuthorizationErrorCode.canceled) {
+          throw const ReauthCancelledException();
+        }
+        throw _mapAppleAuthorizationException(e);
+      }
+      final identityToken = apple.identityToken;
+      if (identityToken == null || identityToken.isEmpty) {
+        throw Exception(_authString('appleNoToken'));
+      }
+      await user.reauthenticateWithCredential(
+        AppleAuthProvider.credentialWithIDToken(
+          identityToken,
+          rawNonce,
+          AppleFullPersonName(),
+        ),
+      );
+      return DeletionReauth(appleAuthorizationCode: apple.authorizationCode);
+    }
+
+    if (providers.contains('google.com')) {
+      final account = await _googleSignIn.signIn();
+      if (account == null) throw const ReauthCancelledException();
+      final auth = await account.authentication;
+      await user.reauthenticateWithCredential(
+        GoogleAuthProvider.credential(
+          accessToken: auth.accessToken,
+          idToken: auth.idToken,
+        ),
+      );
+      return const DeletionReauth();
+    }
+
+    if (providers.contains('password')) {
+      final email = user.email;
+      if (email == null || password == null || password.isEmpty) {
+        throw const ReauthPasswordRequiredException();
+      }
+      await user.reauthenticateWithCredential(
+        EmailAuthProvider.credential(email: email, password: password),
+      );
+      return const DeletionReauth();
+    }
+
+    return const DeletionReauth();
+  }
+
+  /// Whether deleting the current account needs the user's password (an
+  /// email account), so the UI can ask before starting.
+  bool get deletionNeedsPassword {
+    final user = _auth.currentUser;
+    if (user == null || user.isAnonymous) return false;
+    final providers = user.providerData.map((p) => p.providerId).toSet();
+    return providers.contains('password') &&
+        !providers.contains('apple.com') &&
+        !providers.contains('google.com');
+  }
+
+  /// 회원 탈퇴 (계정 삭제). Call [reauthenticateForDeletion] first.
+  ///
+  /// A Sign in with Apple user's Apple token is revoked with
+  /// [appleAuthorizationCode] before the account goes (Guideline 5.1.1(v)),
+  /// so 둘운완 disappears from their Apple ID's "Sign in with Apple" list.
+  /// Google is disconnected only after the delete succeeded — a failed
+  /// attempt no longer leaves Google unlinked.
+  Future<void> deleteAccount({String? appleAuthorizationCode}) async {
     try {
       final user = _auth.currentUser;
-      if (user != null) {
-        // 구글 로그인 사용자의 경우 재인증 필요할 수 있음
-        // (민감한 작업 전 재인증 로직은 UseCase 레벨에서 처리 권장하지만, 편의상 여기서 호출 가능)
-        // 여기서는 단순 삭제 시도
-        if (_googleSignIn.currentUser != null) {
-          await _googleSignIn.disconnect();
+      if (user == null) return;
+      if (appleAuthorizationCode != null && appleAuthorizationCode.isNotEmpty) {
+        try {
+          await _auth.revokeTokenWithAuthorizationCode(appleAuthorizationCode);
+        } catch (e) {
+          // The account is still deleted; the revoke failure is logged.
+          debugPrint('Apple token revoke failed: $e');
         }
-        await user.delete();
+      }
+      await user.delete();
+      if (_googleSignIn.currentUser != null) {
+        try {
+          await _googleSignIn.disconnect();
+        } catch (e) {
+          debugPrint('Google disconnect after delete failed: $e');
+        }
       }
     } catch (e) {
       debugPrint("Error deleting account: $e");
       rethrow;
     }
   }
+}
+
+/// The user backed out of signing in again before deleting the account.
+class ReauthCancelledException implements Exception {
+  const ReauthCancelledException();
+
+  @override
+  String toString() => 'ReauthCancelledException';
+}
+
+/// An email account needs its password to confirm the deletion.
+class ReauthPasswordRequiredException implements Exception {
+  const ReauthPasswordRequiredException();
+
+  @override
+  String toString() => 'ReauthPasswordRequiredException';
+}
+
+/// What signing in again produced for the deletion.
+class DeletionReauth {
+  const DeletionReauth({this.appleAuthorizationCode});
+
+  /// Sign in with Apple's authorization code, to revoke the Apple token.
+  final String? appleAuthorizationCode;
 }

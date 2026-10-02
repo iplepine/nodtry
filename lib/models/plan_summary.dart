@@ -15,9 +15,9 @@ class PlanSummary {
     this.partnerCount,
   });
 
-  String get periodString {
+  /// Length of the plan in whole weeks, rounded up (28 days → 4).
+  int get periodWeeks {
     final duration = endDate.difference(startDate).inDays;
-    final weeks = (duration / 7).ceil();
-    return '$weeks주간';
+    return (duration / 7).ceil();
   }
 }

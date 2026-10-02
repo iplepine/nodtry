@@ -10,11 +10,50 @@ class ConnectErrorCode {
   static const selfCode = 'connect_self_code';
   static const connectFailed = 'connect_failed';
   static const disconnectFailed = 'connect_disconnect_failed';
+
+  /// No user holds the entered code.
+  static const codeNotFound = 'connect_code_not_found';
+
+  /// The entered text is not 8 letters/digits.
+  static const codeFormat = 'connect_code_format';
+
+  /// The server undid the link: the code's owner already has a partner.
+  static const ownerTaken = 'connect_owner_taken';
+
+  /// The server undid the link: I already have a partner.
+  static const selfTaken = 'connect_self_taken';
+
+  /// The server undid the link: the code was replaced since it was shared.
+  static const codeChanged = 'connect_code_changed';
+
+  /// The link went away right after it was made, reason unknown (most often
+  /// the code's owner already has a partner).
+  static const linkUndone = 'connect_link_undone';
+
+  /// The error for a `partner_connect_failed` push's `data.reason`.
+  static String forFailureReason(String? reason) {
+    switch (reason) {
+      case 'owner_taken':
+        return ownerTaken;
+      case 'self_taken':
+        return selfTaken;
+      case 'invalid_code':
+        return codeChanged;
+      default:
+        return linkUndone;
+    }
+  }
 }
 
 class SettingsErrorCode {
   static const withdrawFailed = 'settings_withdraw_failed';
   static const logoutFailed = 'settings_logout_failed';
+
+  /// The user backed out of signing in again; nothing was deleted.
+  static const withdrawReauthCancelled = 'settings_withdraw_reauth_cancelled';
+
+  /// The password entered to confirm the deletion was wrong.
+  static const withdrawWrongPassword = 'settings_withdraw_wrong_password';
 }
 
 class AuthErrorCode {

@@ -6,6 +6,7 @@ import '../models/home_state.dart';
 import '../models/history_item.dart';
 import '../models/plan_model.dart';
 import '../models/promise_model.dart';
+import '../models/proof_photo.dart';
 import 'record_repository.dart';
 
 /// Mock 데이터 저장소 구현체
@@ -14,6 +15,12 @@ class MockRecordRepository implements RecordRepository {
   List<HistoryItem> _mockHistoryItems = [];
 
   List<Plan> _mockPlans = [];
+
+  /// In-memory stand-in for Storage: proof photo bytes by path.
+  final Map<String, Uint8List> _proofPhotos = {};
+
+  /// Proof photo paths uploaded so far (for tests and the debug screen).
+  Iterable<String> get proofPhotoPaths => _proofPhotos.keys;
 
   MockRecordRepository() {
     _mockHomeCardModels = _buildInitialMockModels();
@@ -25,15 +32,15 @@ class MockRecordRepository implements RecordRepository {
     return [
       HomeCardModel(
         state: HomeCardState.overdue,
-        plan: _createMockPlan(hour: 8, minute: 0, title: '아침 영양제 챙겨먹기'),
+        plan: _createMockPlan(hour: 8, minute: 0, title: '아침 스트레칭 10분'),
       ),
       HomeCardModel(
         state: HomeCardState.nowAction,
-        plan: _createMockPlan(hour: 13, minute: 0, title: '점심 후 10분 명상'),
+        plan: _createMockPlan(hour: 13, minute: 0, title: '점심 먹고 10분 걷기'),
       ),
       HomeCardModel(
         state: HomeCardState.partnerPoke,
-        plan: _createMockPlan(hour: 9, minute: 0, title: '아침 영양제 챙겨먹기'),
+        plan: _createMockPlan(hour: 9, minute: 0, title: '아침 스트레칭 10분'),
         partnerName: '지민',
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
@@ -41,15 +48,15 @@ class MockRecordRepository implements RecordRepository {
       ),
       HomeCardModel(
         state: HomeCardState.partnerPlanCreate,
-        plan: _createMockPlan(hour: 10, minute: 0, title: '책 30분 읽기'),
+        plan: _createMockPlan(hour: 10, minute: 0, title: '홈트 30분'),
       ),
       HomeCardModel(
         state: HomeCardState.partnerAction,
         plan: _createMockPlan(
           hour: 20,
           minute: 0,
-          title: '책 30분 읽기',
-          description: '자기 전 마음의 양식 쌓기',
+          title: '홈트 30분',
+          description: '자기 전 가볍게 땀 내기',
           days: [1, 2, 3, 4, 5],
         ),
         partnerName: '지민',
@@ -69,12 +76,11 @@ class MockRecordRepository implements RecordRepository {
         partnerName: '지민',
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
-        headerMessage: '이런 약속을 제안했어요',
+        headerMessage: '짝꿍이 새 약속을 보냈어요',
       ),
       HomeCardModel(
         state: HomeCardState.partnerAction,
-        plan: _createMockPlan(hour: 21, minute: 0, title: '하루 회고록 쓰기'),
-        headerMessage: '함께하는 중',
+        plan: _createMockPlan(hour: 21, minute: 0, title: '저녁 러닝 3km'),
       ),
       const HomeCardModel(state: HomeCardState.emptyPlan),
     ];
@@ -86,11 +92,11 @@ class MockRecordRepository implements RecordRepository {
         id: '1',
         planId: 'mock_plan_book',
         date: DateTime.now().subtract(const Duration(days: 1)), // 어제
-        title: '책 30분 읽기',
+        title: '홈트 30분',
         status: HistoryStatus.verified,
         executorId: 'partner',
         isVerifiedByMe: true,
-        note: '어제도 고마워요. 덕분에 책 읽는 시간이 생겼어요.',
+        note: '어제도 고마워. 덕분에 운동하러 나갔어.',
         partnerName: '지민',
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
@@ -109,7 +115,7 @@ class MockRecordRepository implements RecordRepository {
         id: '3',
         planId: 'mock_plan_book',
         date: DateTime.now().subtract(const Duration(days: 3)), // 3일 전
-        title: '책 30분 읽기',
+        title: '홈트 30분',
         status: HistoryStatus.done,
         executorId: 'partner',
         isVerifiedByMe: false, // 아직 확인 안 함
@@ -121,10 +127,10 @@ class MockRecordRepository implements RecordRepository {
         id: '4',
         planId: 'mock_plan_vitamin',
         date: DateTime.now().subtract(const Duration(days: 4)), // 4일 전
-        title: '영양제 챙겨 먹기',
+        title: '스트레칭 10분',
         status: HistoryStatus.rested,
         executorId: 'me',
-        note: '오늘은 컨디션 난조로 쉬어갔어요.',
+        note: '오늘은 컨디션이 안 좋아서 쉬어갔어.',
       ),
     ];
   }
@@ -142,7 +148,7 @@ class MockRecordRepository implements RecordRepository {
         id: 'mock_plan_book',
         hour: 21,
         minute: 0,
-        title: '책 30분 읽기',
+        title: '홈트 30분',
         description: '매일 밤 하루를 정리해요',
         days: [1, 2, 3, 4, 5],
       ),
@@ -151,7 +157,7 @@ class MockRecordRepository implements RecordRepository {
         hour: 13,
         minute: 0,
         title: '매일 스쿼트 50회',
-        description: '오후 집중력을 위해',
+        description: '하체 튼튼',
         days: [1, 3, 5],
         state: PlanState.completed,
       ),
@@ -159,28 +165,33 @@ class MockRecordRepository implements RecordRepository {
         id: 'mock_plan_vitamin',
         hour: 8,
         minute: 0,
-        title: '영양제 챙겨먹기',
+        title: '저녁 먹고 만 보 걷기',
         description: '건강이 최고',
         days: [1, 2, 3, 4, 5, 6, 7],
       ),
     ].map((p) {
       if (p.id == 'mock_plan_book') {
-        return p.copyWith(userId: 'partner');
+        // The partner's promise that I watch over (managerId == me).
+        return p.copyWith(userId: 'partner', managerId: 'me');
       }
       return p.copyWith(userId: 'me');
     }).toList();
   }
 
+  /// Like the real repository (firestore.rules.next): all of my plans, or
+  /// only the partner's plans that I manage.
+  List<Plan> _readablePlansOf(String userId, List<Plan> plans) {
+    // Mock Logic: userId가 'me'이면 내 것, 아니면 파트너 것 반환
+    if (userId == 'me') {
+      return plans.where((p) => p.userId == 'me').toList();
+    }
+    return plans.where((p) => p.userId != 'me' && p.managerId == 'me').toList();
+  }
+
   @override
   Future<List<Plan>> getPlansByUserId(String userId) async {
     await Future.delayed(const Duration(milliseconds: 500));
-    // Mock Logic: userId가 'me'이면 내 것, 아니면 파트너 것 반환
-    // 실제 앱에서는 userId로 정확히 필터링
-    if (userId == 'me') {
-      return _mockPlans.where((p) => p.userId == 'me').toList();
-    } else {
-      return _mockPlans.where((p) => p.userId != 'me').toList();
-    }
+    return _readablePlansOf(userId, _mockPlans);
   }
 
   @override
@@ -213,7 +224,10 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
-  Stream<List<HistoryItem>> getHistoryItemsByPlanIdStream(String planId) {
+  Stream<List<HistoryItem>> getHistoryItemsByPlanIdStream(
+    String planId, {
+    String? ownerId,
+  }) {
     // This stream should emit the current state immediately, then follow updates.
     // Create a controller to manage this behavior.
     late StreamController<List<HistoryItem>> controller;
@@ -256,39 +270,23 @@ class MockRecordRepository implements RecordRepository {
   @override
   Stream<List<Plan>> getPlansByUserIdStream(String userId) {
     // Initial emission
-    Future.microtask(() {
-      final filtered = userId == 'me'
-          ? _mockPlans.where((p) => p.userId == 'me').toList()
-          : _mockPlans.where((p) => p.userId != 'me').toList();
-      _plansStreamController.add(filtered);
-    });
+    // (unfiltered: every listener filters for its own user)
+    Future.microtask(() => _plansStreamController.add(_mockPlans));
 
-    return _plansStreamController.stream.map((plans) {
-      if (userId == 'me') {
-        return plans.where((p) => p.userId == 'me').toList();
-      } else {
-        return plans.where((p) => p.userId != 'me').toList();
-      }
-    });
+    return _plansStreamController.stream.map(
+      (plans) => _readablePlansOf(userId, plans),
+    );
   }
 
   @override
   Stream<List<Plan>> getAllPlansByUserIdStream(String userId) {
     // Initial emission
-    Future.microtask(() {
-      final filtered = userId == 'me'
-          ? _mockPlans.where((p) => p.userId == 'me').toList()
-          : _mockPlans.where((p) => p.userId != 'me').toList();
-      _plansStreamController.add(filtered);
-    });
+    // (unfiltered: every listener filters for its own user)
+    Future.microtask(() => _plansStreamController.add(_mockPlans));
 
-    return _plansStreamController.stream.map((plans) {
-      if (userId == 'me') {
-        return plans.where((p) => p.userId == 'me').toList();
-      } else {
-        return plans.where((p) => p.userId != 'me').toList();
-      }
-    });
+    return _plansStreamController.stream.map(
+      (plans) => _readablePlansOf(userId, plans),
+    );
   }
 
   @override
@@ -328,6 +326,13 @@ class MockRecordRepository implements RecordRepository {
       _mockPlans[planIndex] = plan;
       _notifyPlansStream();
     }
+  }
+
+  @override
+  Future<void> updatePlanItems(String planId, List<PlanItem> items) async {
+    final planIndex = _mockPlans.indexWhere((p) => p.id == planId);
+    if (planIndex == -1) return;
+    await updatePlan(_mockPlans[planIndex].copyWith(items: items));
   }
 
   @override
@@ -421,39 +426,70 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
-  Future<void> verifyHistoryItem(String historyId, {String? message}) async {
+  Future<void> verifyHistoryItem(
+    String historyId, {
+    String? message,
+    String? reaction,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 500));
     final index = _mockHistoryItems.indexWhere((item) => item.id == historyId);
     if (index != -1) {
       final item = _mockHistoryItems[index];
-      _mockHistoryItems[index] = HistoryItem(
-        id: item.id,
-        planId: item.planId,
-        date: item.date,
-        title: item.title,
-        status: item.status,
-        executorId: item.executorId,
+      _mockHistoryItems[index] = item.copyWith(
         isVerifiedByMe: true, // 내가 확인함
-        isVerifiedByPartner: item.isVerifiedByPartner,
-        note: item.note,
-        comment: message ?? item.comment,
-        partnerName: item.partnerName,
-        partnerImageUrl: item.partnerImageUrl,
+        comment: message,
+        reaction: reaction,
       );
+      _notifyHistoryStream();
     }
   }
 
   @override
-  Future<void> reportCompletion(String planId, {String? note}) async {
+  Future<ProofCompletionResult> reportCompletion(
+    String planId, {
+    String? note,
+    ProofPhotoUpload? photo,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 500));
+    final actionId = 'mock_h_${DateTime.now().microsecondsSinceEpoch}';
+    // The mock "uploads" by keeping the bytes in memory under the real path
+    // shape, so the photo widgets can load them back.
+    String? photoPath;
+    if (photo != null) {
+      photoPath = proofPhotoPathFor(
+        ownerUid: 'me',
+        planId: planId,
+        actionId: actionId,
+      );
+      _proofPhotos[photoPath] = photo.bytes;
+    }
+    final now = DateTime.now();
+
+    final planIndex = _mockPlans.indexWhere((p) => p.id == planId);
+    if (planIndex != -1) {
+      _mockPlans[planIndex] = _mockPlans[planIndex].copyWith(
+        lastActionNote: note,
+        lastActionId: actionId,
+        completedDates: [..._mockPlans[planIndex].completedDates, now],
+        lastProofPhotoPath: photoPath,
+        lastProofAt: photoPath != null ? now : null,
+      );
+      _notifyPlansStream();
+    }
+
     // Find model
     final index = _mockHomeCardModels.indexWhere((m) => m.plan?.id == planId);
+    final model = index != -1 ? _mockHomeCardModels[index] : null;
+    final isMine =
+        model == null ||
+        model.state == HomeCardState.nowAction ||
+        model.state == HomeCardState.nextAction ||
+        model.state == HomeCardState.overdue ||
+        model.state == HomeCardState.poked;
 
-    if (index != -1) {
-      final model = _mockHomeCardModels[index];
+    if (model != null) {
       // If it's my plan (active), remove it to show next card
-      if (model.state == HomeCardState.nowAction ||
-          model.state == HomeCardState.overdue) {
+      if (isMine) {
         _mockHomeCardModels.removeAt(index);
         // If empty, add todayComplete
         if (_mockHomeCardModels.isEmpty) {
@@ -462,40 +498,83 @@ class MockRecordRepository implements RecordRepository {
           );
         }
       } else {
-        // Partner plan logic (existing)
+        // Partner plan logic (existing). Card behaviour is driven by the
+        // state, never by a display string in headerMessage.
         _mockHomeCardModels[index] = HomeCardModel(
           state: HomeCardState.partnerAction,
           plan: model.plan,
           partnerName: model.partnerName,
           partnerImageUrl: model.partnerImageUrl,
-          headerMessage: '함께하는 중',
         );
       }
       _notifyStream();
-
-      // 히스토리에 추가
-      _mockHistoryItems.insert(
-        0,
-        HistoryItem(
-          id: 'mock_h_${DateTime.now().millisecondsSinceEpoch}',
-          planId: planId,
-          date: DateTime.now(),
-          title: model.plan?.items.firstOrNull?.title ?? '계획 완료',
-          status:
-              (model.state == HomeCardState.nowAction ||
-                  model.state == HomeCardState.overdue)
-              ? HistoryStatus.done
-              : HistoryStatus.actuallyDone,
-          executorId:
-              (model.state == HomeCardState.nowAction ||
-                  model.state == HomeCardState.overdue)
-              ? 'me'
-              : 'partner',
-          note: note,
-        ),
-      );
-      _notifyHistoryStream();
     }
+
+    // 히스토리에 추가
+    _mockHistoryItems.insert(
+      0,
+      HistoryItem(
+        id: actionId,
+        planId: planId,
+        date: now,
+        title:
+            model?.plan?.items.firstOrNull?.title ??
+            (planIndex != -1
+                ? _mockPlans[planIndex].items.firstOrNull?.title
+                : null) ??
+            '계획 완료',
+        status: isMine ? HistoryStatus.done : HistoryStatus.actuallyDone,
+        executorId: isMine ? 'me' : 'partner',
+        note: note,
+        proofPhotoPath: photoPath,
+        proofSource: photoPath != null ? photo!.source.id : null,
+        proofTakenAt: photoPath != null ? photo!.takenAt : null,
+      ),
+    );
+    _notifyHistoryStream();
+
+    return ProofCompletionResult(
+      actionId: actionId,
+      photoPath: photoPath,
+      attemptedSource: photo?.source,
+    );
+  }
+
+  @override
+  Future<HistoryItem?> getHistoryItem(String actionId) async {
+    for (final item in _mockHistoryItems) {
+      if (item.id == actionId) return item;
+    }
+    return null;
+  }
+
+  @override
+  Future<Uint8List?> downloadProofPhoto(String path) async {
+    return _proofPhotos[path];
+  }
+
+  @override
+  Future<void> deleteProofPhoto(String photoPath) async {
+    _proofPhotos.remove(photoPath);
+    for (var i = 0; i < _mockHistoryItems.length; i++) {
+      if (_mockHistoryItems[i].proofPhotoPath == photoPath) {
+        _mockHistoryItems[i] = _mockHistoryItems[i].copyWith(
+          clearProofPhoto: true,
+        );
+      }
+    }
+    for (var i = 0; i < _mockPlans.length; i++) {
+      final plan = _mockPlans[i];
+      if (plan.lastProofPhotoPath == photoPath) {
+        _mockPlans[i] = Plan.fromMap({
+          ...plan.toMap()
+            ..remove('lastProofPhotoPath')
+            ..remove('lastProofAt'),
+        }, plan.id ?? '');
+      }
+    }
+    _notifyHistoryStream();
+    _notifyPlansStream();
   }
 
   @override
@@ -566,6 +645,7 @@ class MockRecordRepository implements RecordRepository {
       'Mock: Partner cheered for plan $planId with reaction $reactionType, message: $message',
     );
     await Future.delayed(const Duration(milliseconds: 500));
+    final now = DateTime.now();
 
     // Plan 업데이트 시뮬레이션
     final index = _mockPlans.indexWhere((p) => p.id == planId);
@@ -573,10 +653,73 @@ class MockRecordRepository implements RecordRepository {
       _mockPlans[index] = _mockPlans[index].copyWith(
         lastComment: message,
         lastCheerType: reactionType,
-        lastCheerAt: DateTime.now(),
+        lastCheerAt: now,
+        verifiedDates: [..._mockPlans[index].verifiedDates, now],
       );
       _notifyPlansStream();
     }
+
+    // 인정 lands on today's done record of the plan, with the emoji.
+    final historyIndex = _mockHistoryItems.indexWhere(
+      (h) =>
+          h.planId == planId &&
+          h.status == HistoryStatus.done &&
+          h.date.year == now.year &&
+          h.date.month == now.month &&
+          h.date.day == now.day,
+    );
+    if (historyIndex != -1) {
+      _mockHistoryItems[historyIndex] = _mockHistoryItems[historyIndex]
+          .copyWith(
+            isVerifiedByMe: true,
+            partnerMessage: message,
+            reaction: reactionType,
+          );
+      _notifyHistoryStream();
+    }
+
+    // The partner card is answered: drop it from the Now tab.
+    _mockHomeCardModels.removeWhere(
+      (m) =>
+          m.plan?.id == planId &&
+          (m.state == HomeCardState.partnerAction ||
+              m.state == HomeCardState.partnerTodayComplete),
+    );
+    _notifyStream();
+  }
+
+  /// cheers docs written so far (replies and plain cheers), newest last.
+  final List<Map<String, Object?>> sentCheers = [];
+
+  @override
+  Future<void> replyToPoke(
+    String planId, {
+    required String toUserId,
+    required String message,
+  }) async {
+    sentCheers.add({
+      'fromUserId': 'me',
+      'toUserId': toUserId,
+      'planId': planId,
+      'reactionType': 'reply',
+      'message': message,
+    });
+  }
+
+  @override
+  Future<void> sendCheer(
+    String toUserId, {
+    String? planId,
+    required String emoji,
+    String? message,
+  }) async {
+    sentCheers.add({
+      'fromUserId': 'me',
+      'toUserId': toUserId,
+      'planId': planId,
+      'reactionType': emoji,
+      'message': message,
+    });
   }
 
   @override
@@ -595,12 +738,10 @@ class MockRecordRepository implements RecordRepository {
           (plan.managerId == null || plan.managerId!.isEmpty) &&
           (plan.state == PlanState.active ||
               plan.state == PlanState.pendingApproval)) {
-        // Mock update: Create new instance with managerId
+        // Mirrors RealRecordRepository: only the manager is set, the state
+        // stays as it was (no approval step).
         final index = _mockPlans.indexOf(plan);
-        _mockPlans[index] = plan.copyWith(
-          managerId: managerId,
-          state: PlanState.pendingApproval, // 변경
-        );
+        _mockPlans[index] = plan.copyWith(managerId: managerId);
       }
     }
   }
@@ -610,7 +751,18 @@ class MockRecordRepository implements RecordRepository {
     await Future.delayed(const Duration(milliseconds: 500));
     final index = _mockPlans.indexWhere((p) => p.id == planId);
     if (index != -1) {
-      _mockPlans[index] = _mockPlans[index].copyWith(state: PlanState.active);
+      final plan = _mockPlans[index];
+      // Mirrors RealRecordRepository.approvePlan: a pending plan's 4 weeks
+      // restart on the approval day — unless days were already logged.
+      final period =
+          plan.state == PlanState.pendingApproval && plan.completedDates.isEmpty
+          ? Plan.periodStartingOn(DateTime.now())
+          : null;
+      _mockPlans[index] = plan.copyWith(
+        state: PlanState.active,
+        startDate: period?.start,
+        endDate: period?.end,
+      );
       _notifyPlansStream();
       // Update Home Cards? For mock, simplified.
     }
@@ -702,7 +854,7 @@ class MockRecordRepository implements RecordRepository {
             HomeCardModel(
               state: HomeCardState.pilotSettlement,
               plan: _mockPlans[i],
-              headerMessage: '4주 정산이 필요해요',
+              headerMessage: '4주를 마쳤어요',
             ),
           );
         }

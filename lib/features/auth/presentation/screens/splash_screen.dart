@@ -7,13 +7,17 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
 // Removed unused AuthService import
 import '../../../../theme/app_colors.dart';
+import '../../../onboarding/domain/onboarding_gate.dart';
 import '../../../tutorial/presentation/tutorial_screen.dart';
 
 import '../auth_error_text.dart';
 import '../auth_state.dart';
 import '../viewmodel/auth_viewmodel.dart';
 
-const _kTutorialCompletedKey = 'nodtry_tutorial_completed_v1';
+/// v2 with the couple-workout tutorial: signed-out returning users see it once
+/// (the v1 flag from the old tutorial still marks the device as legacy, see
+/// `kLegacyTutorialKey`).
+const _kTutorialCompletedKey = 'duodone_tutorial_completed_v2';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -76,6 +80,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   Future<void> _loadTutorialState() async {
     final prefs = await SharedPreferences.getInstance();
+    // Someone who arrived through an invite link already knows why they're
+    // here: skip the tutorial and go to sign-in, then code entry (spec §4.1).
+    final invitedByLink = OnboardingStore(prefs).pendingInviteCode != null;
+    if (invitedByLink) await prefs.setBool(_kTutorialCompletedKey, true);
     final completed = prefs.getBool(_kTutorialCompletedKey) ?? false;
     if (!mounted) return;
     setState(() {
@@ -91,9 +99,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     ref.read(authViewModelProvider.notifier).dispatch(const CheckAuthIntent());
   }
 
-  Future<void> _finishTutorial() async {
+  Future<void> _finishTutorial({bool haveInviteCode = false}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kTutorialCompletedKey, true);
+    if (haveInviteCode) {
+      // "초대 코드 받았어요": the first screen after login is code entry.
+      await OnboardingStore(prefs).setPendingCodeEntry();
+    }
     if (!mounted) return;
     setState(() {
       _showTutorial = false;
@@ -167,6 +179,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         onFinished: () {
           _finishTutorial();
         },
+        onHaveInviteCode: () {
+          _finishTutorial(haveInviteCode: true);
+        },
       );
     }
 
@@ -196,7 +211,21 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           fit: BoxFit.contain,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
+                      // 앱 이름
+                      Text(
+                        AppLocalizations.of(context)!.appTitle,
+                        key: const ValueKey('splash-app-title'),
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
+                              color: AppColors.textPrimary,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
                       // 태그라인
                       Text(
                         AppLocalizations.of(context)!.splashTagline,
@@ -366,37 +395,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                 ),
                                 const SizedBox(height: 12),
 
-                                // 이메일 로그인 버튼
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 50,
-                                  child: OutlinedButton(
-                                    onPressed: () {
-                                      context.push(AppRoutes.emailLogin);
-                                    },
-                                    style: OutlinedButton.styleFrom(
-                                      side: BorderSide(
-                                        color: AppColors.primary,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.loginWithEmail,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        letterSpacing: 0.0,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-
                                 // 게스트 로그인 (둘러보기) - 커스텀 밑줄 (Border)
                                 TextButton(
                                   onPressed: authState.isGuestLoading
@@ -443,7 +441,35 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                         ),
                                 ),
 
-                                const SizedBox(height: 24),
+                                // 이메일 로그인: 보조 텍스트 링크로 낮춤
+                                TextButton(
+                                  key: const ValueKey('splash-email-link'),
+                                  onPressed: () {
+                                    context.push(AppRoutes.emailLogin);
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.textSecondary,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 4,
+                                    ),
+                                    minimumSize: const Size(0, 32),
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.loginWithEmail,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
                               ],
                             ),
                           ),

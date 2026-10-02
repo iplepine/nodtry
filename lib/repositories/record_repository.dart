@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import '../models/home_state.dart';
 import '../models/history_item.dart';
 import '../models/plan_model.dart';
 import '../models/promise_model.dart';
+import '../models/proof_photo.dart';
 
 /// 이번 주 휴식권을 이미 써서 [RecordRepository.reportRest]가 거절된 경우.
 ///
@@ -27,16 +30,22 @@ abstract class RecordRepository {
   /// '기록' 탭의 히스토리 아이템 목록을 가져옵니다.
   Future<List<HistoryItem>> getHistoryItems();
 
-  /// '기록' 탭의 히스토리 아이템 목록을 스트림으로  /// 히스토리 내역 스트림 (실시간 반영)
+  /// '기록' 탭의 히스토리 내역 스트림 (실시간 반영), 최신순.
+  ///
+  /// [userIds] 중 나는 내 기록 전부, 짝꿍은 나에게 공유된 기록만
+  /// (`actions.managerId == me`, 즉 내가 봐주는 약속의 기록). 비우면 내 것만.
   Stream<List<HistoryItem>> getHistoryItemsStream({List<String>? userIds});
 
-  /// 특정 유저의 활성 계획 목록을 가져옵니다.
+  /// 특정 유저의 활성 계획 목록을 가져옵니다. 짝꿍이면 내가 봐주는
+  /// (`managerId == me`) 계획만 — 나머지는 읽기 권한이 없습니다.
   Future<List<Plan>> getPlansByUserId(String userId);
 
   /// 특정 유저의 활성 계획 목록을 스트림으로 가져옵니다. (Offline-First)
+  /// 짝꿍이면 내가 봐주는 계획만.
   Stream<List<Plan>> getPlansByUserIdStream(String userId);
 
   /// 특정 유저의 모든 계획 목록(상태 상관없이)을 스트림으로 가져옵니다.
+  /// 짝꿍이면 내가 봐주는 계획만.
   Stream<List<Plan>> getAllPlansByUserIdStream(String userId);
 
   /// 새로운 계획을 생성합니다. (생성된 ID 반환)
@@ -44,6 +53,13 @@ abstract class RecordRepository {
 
   /// 기존 계획을 수정합니다.
   Future<void> updatePlan(Plan plan);
+
+  /// Replaces only the plan's `items` (e.g. a reminder time edited by the
+  /// owner) and stamps `lastUpdatedBy` with me. A whole-document
+  /// [updatePlan] kept a stale `lastUpdatedBy` (often the partner after their
+  /// 인정) — the server then pushed "약속 바꿨어" to me instead of them — and
+  /// replayed record arrays from when the editor opened.
+  Future<void> updatePlanItems(String planId, List<PlanItem> items);
 
   /// 특정 계획을 삭제합니다.
   Future<void> deletePlan(String planId);
@@ -57,17 +73,62 @@ abstract class RecordRepository {
   /// 사후 정리 (Reconcile)
   Future<void> reconcilePlan(String planId, HistoryStatus status);
 
-  /// 파트너의 실천 기록 확인 처리
-  Future<void> verifyHistoryItem(String historyId, {String? message});
+  /// 파트너의 기록 인정. [reaction] is the one-tap emoji (❤️🔥💪👏), stored as
+  /// `actions.reaction`.
+  Future<void> verifyHistoryItem(
+    String historyId, {
+    String? message,
+    String? reaction,
+  });
 
-  /// 실천 완료 보고 (했어)
-  Future<void> reportCompletion(String planId, {String? note});
+  /// 했어 report, optionally with a proof photo (인증샷).
+  ///
+  /// The photo is uploaded first (bounded by [kProofUploadTimeout]); if that
+  /// fails the record is still saved, without the photo, and the result says
+  /// so ([ProofCompletionResult.photoFailed]).
+  Future<ProofCompletionResult> reportCompletion(
+    String planId, {
+    String? note,
+    ProofPhotoUpload? photo,
+  });
 
-  /// 파트너 응원하기 (고마워요)
-  /// reactionType: 'fire', 'heart', 'thumbs_up', 'muscle' 등
+  /// One `actions` record by id (e.g. the one a proof photo belongs to), or
+  /// null when it doesn't exist.
+  Future<HistoryItem?> getHistoryItem(String actionId);
+
+  /// Bytes of the proof photo at Storage [path] (`proofs/…`). Throws when the
+  /// read is denied (e.g. after disconnecting); null when the object is gone.
+  Future<Uint8List?> downloadProofPhoto(String path);
+
+  /// The owner removes one of their proof photos: the Storage object and the
+  /// proof fields on the action (and on the plan when it is the latest one).
+  Future<void> deleteProofPhoto(String photoPath);
+
+  /// 파트너 인정 + 응원. [reactionType] is the emoji the partner tapped
+  /// (❤️🔥💪👏); it is also stored as `actions.reaction`.
   Future<void> cheerPartner(
     String planId,
     String reactionType, {
+    String? message,
+  });
+
+  /// One-tap answer to a knock (지금 간다 🏃 / 오늘은 봐줘 🙏): a `cheers` doc
+  /// `{fromUserId, toUserId, planId, reactionType: 'reply', message}` (spec
+  /// §9). It touches no plan or action field.
+  Future<void> replyToPoke(
+    String planId, {
+    required String toUserId,
+    required String message,
+  });
+
+  /// 응원 on the partner's missed-workout card: a `cheers` doc with the
+  /// [emoji] as reactionType and an optional [message]. Unlike [cheerPartner]
+  /// this is not 인정 — no verifiedDates, no action update — so a day the
+  /// partner hasn't recorded is never marked acknowledged.
+  Future<void> sendCheer(
+    String toUserId, {
+    String? planId,
+    required String emoji,
     String? message,
   });
 
@@ -87,7 +148,8 @@ abstract class RecordRepository {
   /// 과거 기록 소명 (HistoryItem 수정)
   Future<void> reconcileHistoryItem(String historyId, HistoryStatus status);
 
-  /// 기존의 모든 활성 계획에 대해 매니저를 일괄 할당합니다.
+  /// 매니저가 없는 내 진행 중 약속에 새 짝꿍을 매니저로 지정합니다.
+  /// 상태는 바꾸지 않습니다(승인 단계 없음). `lastUpdatedBy`는 'system_link'.
   Future<void> assignManagerToActivePlans(String managerId);
 
   /// 계획 승인 (pending_approval -> active)
@@ -99,8 +161,13 @@ abstract class RecordRepository {
   /// 계획 반려(조율 요청) (pending_approval -> rejected)
   Future<void> rejectPlan(String planId, {String? reason});
 
-  /// 특정 계획의 히스토리 아이템 목록을 스트림으로 가져옵니다.
-  Stream<List<HistoryItem>> getHistoryItemsByPlanIdStream(String planId);
+  /// 특정 계획의 히스토리 아이템 목록을 스트림으로 가져옵니다 (최신순).
+  /// [ownerId]는 계획 주인(`plan.userId`): 내 계획이면 내 기록, 짝꿍 계획이면
+  /// 나에게 공유된 기록만 읽습니다. 모르면 비워 두세요(두 쿼리를 합칩니다).
+  Stream<List<HistoryItem>> getHistoryItemsByPlanIdStream(
+    String planId, {
+    String? ownerId,
+  });
 
   /// 기간이 만료된 진행/승인 대기 계획들을 찾아 '완료(completed)' 상태로 자동 전환합니다.
   Future<List<String>> completeOverduePlans();
@@ -122,10 +189,7 @@ abstract class RecordRepository {
   Future<void> settlePromise(String planId);
 
   /// 정산 결과 카드를 현재 사용자가 확인 처리(닫기). 한마디 코멘트를 함께 남길 수 있다.
-  Future<void> acknowledgePromiseSettlement(
-    String planId, {
-    String? comment,
-  });
+  Future<void> acknowledgePromiseSettlement(String planId, {String? comment});
 
   /// 파트너 실천 인정 (스트릭 구제)
   Future<void> rescuePlan(String planId, {DateTime? date});

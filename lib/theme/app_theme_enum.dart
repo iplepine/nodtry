@@ -1,6 +1,6 @@
 /// 앱 테마 타입
 enum AppThemeType {
-  /// Theme A: Mint × Orange — 차분 + 행동 강조
+  /// 둘운완 Brand — Coral × 인정 Yellow (fixed default)
   smokyPlum,
 
   /// Theme B: Deep Olive × Sand — 단단함 · 책임감

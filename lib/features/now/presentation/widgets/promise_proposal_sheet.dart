@@ -4,6 +4,26 @@ import '../../../../models/plan_model.dart';
 import '../../../../models/promise_model.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../domain/promise_money_guard.dart';
+
+/// Curated "if missed" bets: treats and chores between the two of them, never
+/// money (spec §4.9).
+List<String> promisePenaltyChips(AppLocalizations l10n) => [
+  l10n.promisePenaltyChicken,
+  l10n.promisePenaltyCoffee,
+  l10n.promisePenaltyDishes,
+  l10n.promisePenaltyMassage,
+  l10n.promisePenaltyMovie,
+  l10n.promisePenaltyPickup,
+];
+
+/// Curated "if kept" bets.
+List<String> promiseRewardChips(AppLocalizations l10n) => [
+  l10n.promiseRewardOmakase,
+  l10n.promiseRewardDessert,
+  l10n.promiseRewardMassage,
+  l10n.promiseRewardMovie,
+];
 
 @visibleForTesting
 class PromiseProposalSheet extends StatefulWidget {
@@ -17,8 +37,9 @@ class PromiseProposalSheet extends StatefulWidget {
 }
 
 class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
-  bool _enableReward = true;
-  bool _enablePenalty = false;
+  // 못 지키면 leads ("못 지키면 🍗 치킨 쏘기"); 지키면 is optional.
+  bool _enableReward = false;
+  bool _enablePenalty = true;
   final _rewardDescController = TextEditingController();
   final _penaltyDescController = TextEditingController();
   late int _rewardDays;
@@ -48,8 +69,14 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
     super.dispose();
   }
 
+  bool get _rewardMentionsMoney =>
+      _enableReward && mentionsMoney(_rewardDescController.text);
+  bool get _penaltyMentionsMoney =>
+      _enablePenalty && mentionsMoney(_penaltyDescController.text);
+
   bool get _isValid {
     if (!_enableReward && !_enablePenalty) return false;
+    if (_rewardMentionsMoney || _penaltyMentionsMoney) return false;
     if (_enableReward && _rewardDescController.text.trim().isEmpty) {
       return false;
     }
@@ -188,7 +215,11 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    l10n.nowProgressLine(_completedDays, _failedDays, _remainingDays),
+                    l10n.nowProgressLine(
+                      _completedDays,
+                      _failedDays,
+                      _remainingDays,
+                    ),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                       height: 1.4,
@@ -207,44 +238,7 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
             ),
             const SizedBox(height: 24),
 
-            // 보상 섹션
-            _buildSectionToggle(
-              title: l10n.nowRewardTitle,
-              enabled: _enableReward,
-              onToggle: (v) => setState(() => _enableReward = v),
-            ),
-            if (_enableReward) ...[
-              const SizedBox(height: 8),
-              TextField(
-                controller: _rewardDescController,
-                decoration: InputDecoration(
-                  hintText: l10n.nowRewardHint,
-                  hintStyle: TextStyle(color: AppColors.textDisabled),
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-                maxLength: 100,
-                onChanged: (_) => setState(() {}),
-              ),
-              _buildDaysPicker(
-                label: l10n.nowRewardTargetLabel,
-                days: _rewardDays,
-                maxDays: _rewardDaysLimit,
-                onChanged: _setRewardDays,
-              ),
-            ],
-
-            const SizedBox(height: 16),
-
-            // 벌칙 섹션
+            // 못 지키면 (penalty) first, then 지키면 (reward).
             _buildSectionToggle(
               title: l10n.nowPenaltyTitle,
               enabled: _enablePenalty,
@@ -252,24 +246,19 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
             ),
             if (_enablePenalty) ...[
               const SizedBox(height: 8),
-              TextField(
+              _buildChips(
+                keyPrefix: 'promise-penalty-chip',
+                labels: promisePenaltyChips(l10n),
                 controller: _penaltyDescController,
-                decoration: InputDecoration(
-                  hintText: l10n.nowPenaltyHint,
-                  hintStyle: TextStyle(color: AppColors.textDisabled),
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-                maxLength: 100,
-                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 8),
+              _buildDescriptionField(
+                key: const ValueKey('promise-penalty-field'),
+                controller: _penaltyDescController,
+                hint: l10n.nowPenaltyHint,
+                moneyError: _penaltyMentionsMoney
+                    ? l10n.promiseMoneyBlocked
+                    : null,
               ),
               _buildDaysPicker(
                 label: l10n.nowPenaltyTargetLabel,
@@ -279,12 +268,44 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
               ),
             ],
 
+            const SizedBox(height: 16),
+
+            _buildSectionToggle(
+              title: l10n.nowRewardTitle,
+              enabled: _enableReward,
+              onToggle: (v) => setState(() => _enableReward = v),
+            ),
+            if (_enableReward) ...[
+              const SizedBox(height: 8),
+              _buildChips(
+                keyPrefix: 'promise-reward-chip',
+                labels: promiseRewardChips(l10n),
+                controller: _rewardDescController,
+              ),
+              const SizedBox(height: 8),
+              _buildDescriptionField(
+                key: const ValueKey('promise-reward-field'),
+                controller: _rewardDescController,
+                hint: l10n.nowRewardHint,
+                moneyError: _rewardMentionsMoney
+                    ? l10n.promiseMoneyBlocked
+                    : null,
+              ),
+              _buildDaysPicker(
+                label: l10n.nowRewardTargetLabel,
+                days: _rewardDays,
+                maxDays: _rewardDaysLimit,
+                onChanged: _setRewardDays,
+              ),
+            ],
+
             const SizedBox(height: 24),
 
             // 제출 버튼
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                key: const ValueKey('promise-submit'),
                 onPressed: _isValid
                     ? () {
                         Navigator.pop(context, (
@@ -318,13 +339,88 @@ class _PromiseProposalSheetState extends State<PromiseProposalSheet> {
                 ),
                 child: Text(
                   l10n.nowProposePromise,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  /// One-tap bets: tapping a chip fills the text (it can still be edited).
+  Widget _buildChips({
+    required String keyPrefix,
+    required List<String> labels,
+    required TextEditingController controller,
+  }) {
+    final current = controller.text.trim();
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (var i = 0; i < labels.length; i++)
+          ChoiceChip(
+            key: ValueKey('$keyPrefix-$i'),
+            label: Text(labels[i]),
+            selected: current == labels[i],
+            showCheckmark: false,
+            selectedColor: AppColors.primarySoft,
+            backgroundColor: AppColors.surface,
+            side: BorderSide(
+              color: current == labels[i]
+                  ? AppColors.primary
+                  : AppColors.outline.withValues(alpha: 0.6),
+            ),
+            labelStyle: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 13,
+              fontWeight: current == labels[i]
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+            ),
+            onSelected: (_) => setState(() {
+              controller.text = labels[i];
+              controller.selection = TextSelection.collapsed(
+                offset: labels[i].length,
+              );
+            }),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDescriptionField({
+    required Key key,
+    required TextEditingController controller,
+    required String hint,
+    String? moneyError,
+  }) {
+    return TextField(
+      key: key,
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: AppColors.textDisabled),
+        filled: true,
+        fillColor: AppColors.surface,
+        errorText: moneyError,
+        errorMaxLines: 3,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+      ),
+      maxLength: 100,
+      onChanged: (_) => setState(() {}),
     );
   }
 

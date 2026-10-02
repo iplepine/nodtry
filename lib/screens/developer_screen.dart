@@ -224,7 +224,13 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
                 children: [
                   _buildInfoRow(context, 'UID', user.uid),
                   _buildInfoRow(context, 'Name', user.displayName ?? 'N/A'),
-                  _buildInfoRow(context, 'Email', user.email ?? 'N/A'),
+                  // The account's own email, from FirebaseAuth: users docs
+                  // no longer carry it.
+                  _buildInfoRow(
+                    context,
+                    'Email',
+                    FirebaseAuth.instance.currentUser?.email ?? 'N/A',
+                  ),
                   _buildInfoRow(
                     context,
                     'Invite Code',
@@ -391,7 +397,7 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
               Divider(height: 24),
               _buildPushTestButton(
                 context,
-                title: '나에게 실천 완료 푸시 보내기',
+                title: '나에게 오운완 인증 푸시 보내기',
                 subtitle: 'onActionCompleted 트리거 테스트',
                 icon: Icons.check_circle,
                 onPressed: () async {
@@ -430,7 +436,7 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
 
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('실천 기록 생성 완료! 푸시를 확인하세요.')),
+                      SnackBar(content: Text('오운완 기록 생성 완료! 푸시를 확인하세요.')),
                     );
                   } catch (e) {
                     if (!context.mounted) return;
@@ -547,74 +553,70 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
             border: Border.all(color: AppColors.divider),
           ),
           child: currentTypeAsync.when(
-            data: (type) => Column(
-              children: [
-                RadioListTile<RepositoryType>(
-                  title: Text('Mock Data'),
-                  subtitle: Text('사용자 정의 테스트 데이터를 사용합니다.'),
-                  value: RepositoryType.mock,
-                  groupValue: type,
-                  onChanged: (value) {
-                    if (value != null) {
-                      ref.read(repositoryTypeProvider.notifier).setType(value);
-                    }
-                  },
-                  contentPadding: EdgeInsets.zero,
-                  activeColor: AppColors.primary,
-                ),
-                RadioListTile<RepositoryType>(
-                  title: Text('Real Data (Firestore)'),
-                  subtitle: Text('실제 서버 데이터를 사용합니다.'),
-                  value: RepositoryType.real,
-                  groupValue: type,
-                  onChanged: (value) {
-                    if (value != null) {
-                      ref.read(repositoryTypeProvider.notifier).setType(value);
-                    }
-                  },
-                  contentPadding: EdgeInsets.zero,
-                  activeColor: AppColors.primary,
-                ),
-                if (type == RepositoryType.mock) ...[
-                  Divider(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 16,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '디버그 상태 확인',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Now Tab의 플로팅 액션 버튼(버그 아이콘)을 사용하여 다양한 UI 상태를 테스트할 수 있습니다.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
+            data: (type) => RadioGroup<RepositoryType>(
+              groupValue: type,
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(repositoryTypeProvider.notifier).setType(value);
+                }
+              },
+              child: Column(
+                children: [
+                  RadioListTile<RepositoryType>(
+                    title: Text('Mock Data'),
+                    subtitle: Text('사용자 정의 테스트 데이터를 사용합니다.'),
+                    value: RepositoryType.mock,
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: AppColors.primary,
                   ),
-                  const SizedBox(height: 8),
+                  RadioListTile<RepositoryType>(
+                    title: Text('Real Data (Firestore)'),
+                    subtitle: Text('실제 서버 데이터를 사용합니다.'),
+                    value: RepositoryType.real,
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: AppColors.primary,
+                  ),
+                  if (type == RepositoryType.mock) ...[
+                    Divider(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '디버그 상태 확인',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Now Tab의 플로팅 액션 버튼(버그 아이콘)을 사용하여 다양한 UI 상태를 테스트할 수 있습니다.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ],
-              ],
+              ),
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, stack) => Text('Error loading settings: $err'),

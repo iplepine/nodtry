@@ -10,6 +10,11 @@ class RelationModel {
   final DateTime createdAt;
   final DateTime? connectedAt;
 
+  /// When this link was made: `connectedAt ?? createdAt` as stored, or null
+  /// when the document has neither (legacy) — unlike [createdAt], which
+  /// falls back to "now".
+  final DateTime? linkedAt;
+
   RelationModel({
     required this.id,
     required this.executorId,
@@ -17,11 +22,26 @@ class RelationModel {
     required this.status,
     required this.createdAt,
     this.connectedAt,
+    DateTime? linkedAt,
+  }) : linkedAt = linkedAt ?? connectedAt ?? createdAt;
+
+  RelationModel._fromStored({
+    required this.id,
+    required this.executorId,
+    required this.managerId,
+    required this.status,
+    required this.createdAt,
+    required this.connectedAt,
+    required this.linkedAt,
   });
 
   factory RelationModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return RelationModel(
+    final storedCreatedAt = (data['createdAt'] as Timestamp?)?.toDate();
+    final connectedAt = data['connectedAt'] != null
+        ? (data['connectedAt'] as Timestamp).toDate()
+        : null;
+    return RelationModel._fromStored(
       id: doc.id,
       executorId: data['executorId'],
       managerId: data['managerId'],
@@ -29,10 +49,9 @@ class RelationModel {
         (e) => e.name == data['status'],
         orElse: () => RelationStatus.pending,
       ),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      connectedAt: data['connectedAt'] != null
-          ? (data['connectedAt'] as Timestamp).toDate()
-          : null,
+      createdAt: storedCreatedAt ?? DateTime.now(),
+      connectedAt: connectedAt,
+      linkedAt: connectedAt ?? storedCreatedAt,
     );
   }
 }

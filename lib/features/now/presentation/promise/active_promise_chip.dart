@@ -41,8 +41,9 @@ class ActivePromiseChip extends StatelessWidget {
                 summary.text,
                 style: TextStyle(
                   color: summary.foreground,
-                  fontWeight:
-                      summary.emphasis ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: summary.emphasis
+                      ? FontWeight.w700
+                      : FontWeight.w500,
                   fontSize: 13,
                   height: 1.35,
                 ),
@@ -85,7 +86,6 @@ _Summary? _summarize(AppLocalizations l10n, Plan plan, Promise promise) {
   if (reward == null && penalty == null) return null;
 
   final success = plan.completedDayCount();
-  final remaining = plan.remainingScheduledDayCount();
 
   // 보상까지 더 필요한 성공일 (0 = 달성, >0 = 더 필요)
   int? rewardNeeded;
@@ -94,25 +94,23 @@ _Summary? _summarize(AppLocalizations l10n, Plan plan, Promise promise) {
     if (rewardNeeded < 0) rewardNeeded = 0;
   }
 
-  // 벌칙 회피 여유 (= 더 실패해도 되는 횟수)
-  // 벌칙 발동 조건: 최종 성공일 < penalty.targetDays
-  // 최종 가능 성공일 = success + remaining
-  // buffer = (success + remaining) - penalty.targetDays
-  // buffer >= 0 → 안전, < 0 → 이미 확정
-  int? failureBuffer;
-  if (penalty != null) {
-    failureBuffer = (success + remaining) - penalty.targetDays;
-  }
+  // 못 지키면 counts missed days: settlement triggers it when
+  // failDays >= penalty.targetDays ("⚡ 2일 놓치면"). missesLeft is how many
+  // more misses set it off — the same predicate, so the chip never says
+  // "safe" for a bet that is already on.
+  final missesLeft = penalty == null
+      ? null
+      : penaltyMissesLeft(penalty, failed: plan.failedDayCount());
 
   // ===== 우선순위 =====
   // 1) 이미 벌칙 확정
-  if (failureBuffer != null && failureBuffer < 0) {
+  if (missesLeft != null && missesLeft <= 0) {
     return _penaltyTriggered(l10n, penalty!);
   }
 
-  // 2) 벌칙 임박 (≤1번 여유)
-  if (failureBuffer != null && failureBuffer <= 1) {
-    return _penaltyImminent(l10n, penalty!, failureBuffer);
+  // 2) 벌칙 임박 (한 번만 더 놓치면)
+  if (missesLeft != null && missesLeft == 1) {
+    return _penaltyImminent(l10n, penalty!);
   }
 
   // 3) 보상 이미 달성
@@ -126,8 +124,13 @@ _Summary? _summarize(AppLocalizations l10n, Plan plan, Promise promise) {
   }
 
   // 5) 양쪽 안전권 — 정보성 한 줄
-  return _safe(l10n, reward, rewardNeeded, penalty, failureBuffer);
+  return _safe(l10n, reward, rewardNeeded, penalty, missesLeft);
 }
+
+/// How many more missed days set off [penalty] (≤ 0: already on). The
+/// settlement rule: `failDays >= penalty.targetDays`.
+int penaltyMissesLeft(PromisePenalty penalty, {required int failed}) =>
+    penalty.targetDays - failed;
 
 _Summary _penaltyTriggered(AppLocalizations l10n, PromisePenalty penalty) {
   return _Summary(
@@ -139,16 +142,9 @@ _Summary _penaltyTriggered(AppLocalizations l10n, PromisePenalty penalty) {
   );
 }
 
-_Summary _penaltyImminent(
-  AppLocalizations l10n,
-  PromisePenalty penalty,
-  int buffer,
-) {
-  final text = buffer == 0
-      ? l10n.promiseChipPenaltyImminentOne(penalty.description)
-      : l10n.promiseChipPenaltyImminent(buffer, penalty.description);
+_Summary _penaltyImminent(AppLocalizations l10n, PromisePenalty penalty) {
   return _Summary(
-    text: text,
+    text: l10n.promiseChipPenaltyImminentOne(penalty.description),
     background: AppColors.warningSoft,
     border: AppColors.warningBorder,
     foreground: AppColors.warningStrong,
@@ -185,15 +181,15 @@ _Summary _safe(
   PromiseReward? reward,
   int? rewardNeeded,
   PromisePenalty? penalty,
-  int? failureBuffer,
+  int? missesLeft,
 ) {
   String text;
-  if (rewardNeeded != null && failureBuffer != null) {
-    text = l10n.promiseChipSafeBoth(rewardNeeded, failureBuffer);
+  if (rewardNeeded != null && missesLeft != null) {
+    text = l10n.promiseChipSafeBoth(rewardNeeded, missesLeft);
   } else if (rewardNeeded != null) {
     text = l10n.promiseChipSafeRewardOnly(rewardNeeded, reward!.description);
-  } else if (failureBuffer != null) {
-    text = l10n.promiseChipSafePenaltyOnly(failureBuffer, penalty!.description);
+  } else if (missesLeft != null) {
+    text = l10n.promiseChipSafePenaltyOnly(missesLeft, penalty!.description);
   } else {
     text = '';
   }
@@ -237,9 +233,7 @@ class _PromiseDetailSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.background,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + systemNavInset),
       child: Column(
@@ -268,10 +262,7 @@ class _PromiseDetailSheet extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             l10n.promiseSheetSubtitle(success, failed, remaining),
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 20),
           if (promise.reward != null)
@@ -296,10 +287,10 @@ class _PromiseDetailSheet extends StatelessWidget {
               targetText: _penaltyDescription(
                 l10n: l10n,
                 penalty: promise.penalty!,
-                success: success,
-                remaining: remaining,
+                failed: failed,
               ),
-              progress: (success / promise.penalty!.targetDays).clamp(0.0, 1.0),
+              // Missed days toward the bet, like the plan-detail card.
+              progress: (failed / promise.penalty!.targetDays).clamp(0.0, 1.0),
               progressColor: AppColors.warningBorder,
             ),
           const SizedBox(height: 20),
@@ -323,18 +314,16 @@ class _PromiseDetailSheet extends StatelessWidget {
 String _penaltyDescription({
   required AppLocalizations l10n,
   required PromisePenalty penalty,
-  required int success,
-  required int remaining,
+  required int failed,
 }) {
-  final maxPossible = success + remaining;
-  final buffer = maxPossible - penalty.targetDays;
-  if (buffer < 0) {
+  final missesLeft = penaltyMissesLeft(penalty, failed: failed);
+  if (missesLeft <= 0) {
     return l10n.promiseSheetPenaltyImpossible(penalty.targetDays);
   }
-  if (buffer == 0) {
+  if (missesLeft == 1) {
     return l10n.promiseSheetPenaltyJustOne(penalty.targetDays);
   }
-  return l10n.promiseSheetPenaltyBuffer(penalty.targetDays, buffer);
+  return l10n.promiseSheetPenaltyBuffer(penalty.targetDays, missesLeft);
 }
 
 class _RewardOrPenaltyBlock extends StatelessWidget {

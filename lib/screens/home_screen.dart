@@ -5,7 +5,17 @@ import '../features/now/presentation/now_tab_screen.dart';
 import '../features/history/presentation/screens/history_screen.dart';
 import '../features/us/presentation/screens/us_screen.dart';
 import '../providers/notification_permission_provider.dart';
+import '../providers/repository_provider.dart';
+import '../features/connect/application/partner_label_provider.dart';
+import '../features/onboarding/presentation/home_prompts.dart';
+import '../features/duo/application/duo_stats_provider.dart';
+import '../features/now/application/notification_routing.dart';
+import '../core/services/notification_service.dart';
+import '../routes/app_router.dart';
+import '../services/notification_service.dart' as local_notifications;
 import '../widgets/notification_permission_banner.dart';
+import 'package:go_router/go_router.dart';
+import 'dart:async';
 
 /// 홈 화면 - 하단 탭 구조
 ///
@@ -26,15 +36,84 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with WidgetsBindingObserver {
   int _currentIndex = 0;
+  bool _promptRunning = false;
+  StreamSubscription<local_notifications.NotificationOpenRequest>?
+  _openSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _runPrompts());
+
+    // Opened notifications (foreground taps, background/cold-start pushes)
+    // land here and go to the screen they are about.
+    final notifications = local_notifications.NotificationService();
+    _openSubscription = notifications.openRequests.listen(_routeOpened);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pending = notifications.takePendingOpenRequest();
+      if (pending != null) _routeOpened(pending);
+    });
+  }
+
+  /// Takes an opened notification to its screen (see
+  /// [notificationOpenTargetFor]).
+  void _routeOpened(local_notifications.NotificationOpenRequest request) {
+    if (!mounted) return;
+    final target = notificationOpenTargetFor(request.type);
+    if (target == NotificationOpenTarget.none) return;
+
+    final router = GoRouter.maybeOf(context);
+    if (target == NotificationOpenTarget.connect) {
+      router?.push(
+        AppRoutes.connectEntry(failureReason: request.reason ?? 'unknown'),
+      );
+      return;
+    }
+
+    // Back to the tabs from whatever was pushed on top (plan detail …).
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) {
+      router?.go(AppRoutes.home);
+    }
+    final index = switch (target) {
+      NotificationOpenTarget.history => 1,
+      NotificationOpenTarget.us => 2,
+      _ => 0,
+    };
+    if (index != _currentIndex) setState(() => _currentIndex = index);
+
+    switch (target) {
+      case NotificationOpenTarget.nowCheckIn:
+        ref.read(nowCheckInRequestProvider.notifier).request(request.planId);
+      case NotificationOpenTarget.us:
+        // A new partner: the nickname sheet comes from the home prompts.
+        _schedulePrompts();
+      default:
+        break;
+    }
+  }
+
+  /// Rename notice / first-login clipboard look / nickname sheet — at most
+  /// one at a time, and only while home is the route on top (the connect
+  /// screen runs its own nickname offer).
+  Future<void> _runPrompts() async {
+    if (_promptRunning || !mounted) return;
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+    _promptRunning = true;
+    try {
+      await runHomePrompts(context, ref);
+    } finally {
+      _promptRunning = false;
+    }
+  }
+
+  void _schedulePrompts() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _runPrompts());
   }
 
   @override
   void dispose() {
+    _openSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -45,12 +124,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     // (e.g. after the user toggles it in OS settings).
     if (state == AppLifecycleState.resumed) {
       ref.invalidate(notificationPermissionProvider);
+      // Permission turned on in Settings: register the push token now, not
+      // at the next cold start.
+      try {
+        unawaited(ref.read(notificationServiceProvider).maybeRegister());
+      } catch (_) {}
+      // A new day while in the background: the duo header's "today".
+      ref.read(duoTodayProvider.notifier).refresh();
+      _schedulePrompts();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    // A partner appearing (or the profile loading) can make a prompt due.
+    ref.listen(partnerLabelProvider, (previous, next) {
+      if (previous?.partnerUid != next.partnerUid) _schedulePrompts();
+    });
+    ref.listen(myProfileProvider.select((p) => p.value?.uid), (previous, next) {
+      if (next != null && previous != next) _schedulePrompts();
+    });
+    // Today turning into a 둘운완 day (or a new 인정) can make the share card
+    // or the review request due.
+    ref.listen(
+      duoStatsProvider.select(
+        (s) => s == null ? null : (s.todayIsDuoDone, s.streak),
+      ),
+      (previous, next) {
+        if (next != null && previous != next) _schedulePrompts();
+      },
+    );
+    ref.listen(
+      myDuoPlansProvider.select(
+        (plans) => plans == null ? null : countVerificationsReceived(plans),
+      ),
+      (previous, next) {
+        if (next != null && previous != next) _schedulePrompts();
+      },
+    );
 
     // When the banner is shown it consumes the top safe area itself, so strip
     // the tabs' top inset to avoid a double gap below it.
@@ -99,9 +212,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     final selected = states.contains(WidgetState.selected);
                     return TextStyle(
                       fontSize: 12,
-                      fontWeight: selected
-                          ? FontWeight.w600
-                          : FontWeight.w400,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                       color: selected
                           ? AppColors.primary
                           : AppColors.textDisabled,
@@ -126,8 +237,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   backgroundColor: Colors.transparent,
                   elevation: 0,
                   height: 68,
-                  labelBehavior:
-                      NavigationDestinationLabelBehavior.alwaysShow,
+                  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                   destinations: [
                     NavigationDestination(
                       icon: const Icon(Icons.bolt_outlined),

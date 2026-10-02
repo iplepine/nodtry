@@ -11,10 +11,12 @@ import 'package:nod_try/features/now/domain/usecases/get_now_cards_use_case.dart
 import 'package:nod_try/features/plan/domain/usecases/setting_alarm_use_case.dart';
 import 'package:nod_try/models/plan_model.dart';
 import 'package:nod_try/models/history_item.dart';
+import 'package:nod_try/models/proof_photo.dart';
 import 'package:nod_try/models/connected_user.dart';
 import 'package:nod_try/models/user_model.dart';
 import 'package:nod_try/services/notification_service.dart';
 import 'dart:async';
+import 'dart:typed_data';
 
 class MockRecordRepository extends Fake implements RecordRepository {
   int reportCompletionCallCount = 0;
@@ -51,12 +53,29 @@ class MockRecordRepository extends Fake implements RecordRepository {
     _controller.add(data);
   }
 
+  ProofPhotoUpload? lastReportedPhoto;
+
+  /// What `reportCompletion` reports back for a photo: uploaded unless set.
+  bool photoUploadFails = false;
+
   @override
-  Future<void> reportCompletion(String planId, {String? note}) async {
+  Future<ProofCompletionResult> reportCompletion(
+    String planId, {
+    String? note,
+    ProofPhotoUpload? photo,
+  }) async {
     reportCompletionCallCount++;
     lastReportedPlanId = planId;
+    lastReportedPhoto = photo;
     if (reportCompletionError != null) throw reportCompletionError!;
     emit(_currentValue); // Emit current (or updated) value to trigger stream
+    return ProofCompletionResult(
+      actionId: 'action-1',
+      photoPath: photo == null || photoUploadFails
+          ? null
+          : 'proofs/me/$planId/action-1.jpg',
+      attemptedSource: photo?.source,
+    );
   }
 
   @override
@@ -83,8 +102,11 @@ class MockRecordRepository extends Fake implements RecordRepository {
   }) async {
     cheerPartnerCallCount++;
     lastCheeredPlanId = planId;
+    lastCheerReaction = reactionType;
     emit(_currentValue);
   }
+
+  String? lastCheerReaction;
 
   @override
   Future<void> passPlan(String planId) async {
@@ -147,8 +169,11 @@ class MockRecordRepository extends Fake implements RecordRepository {
   Future<void> reconcilePlan(String planId, HistoryStatus status) =>
       Future.value();
   @override
-  Future<void> verifyHistoryItem(String historyId, {String? message}) =>
-      Future.value();
+  Future<void> verifyHistoryItem(
+    String historyId, {
+    String? message,
+    String? reaction,
+  }) => Future.value();
   @override
   Future<void> reconcileHistoryItem(String historyId, HistoryStatus status) =>
       Future.value();
@@ -210,6 +235,7 @@ class FakePlanReminderScheduler implements PlanReminderScheduler {
     required int planId,
     String? planIdentifier,
     required String title,
+    String? body,
     required int hour,
     required int minute,
     required List<int> days,
@@ -413,7 +439,7 @@ void main() {
           .dispatch(
             const PokePartnerIntent(
               'plan-poke-123',
-              message: '똑똑! 실천 메이트가 기다리고 있어요.',
+              message: '똑똑! 오늘 약속 기다리고 있어 🙂',
             ),
           );
 
@@ -422,7 +448,7 @@ void main() {
       expect(mockRecordRepository.lastPokedPlanId, 'plan-poke-123');
       expect(
         mockRecordRepository.lastPokePartnerMessage,
-        '똑똑! 실천 메이트가 기다리고 있어요.',
+        '똑똑! 오늘 약속 기다리고 있어 🙂',
       );
       expect(state.managerCards, isEmpty);
     },
@@ -441,14 +467,17 @@ void main() {
         .dispatch(
           const PokeUserIntent(
             'partner-user',
-            message: '똑똑! 약속을 기다리는 사람이 있어요.',
+            message: '똑똑! 운동 약속 하나 걸어 줘. 내가 봐줄게 🙂',
           ),
         );
 
     final state = container.read(nowTabViewModelProvider).value!;
     expect(mockRecordRepository.pokeUserCallCount, 1);
     expect(mockRecordRepository.lastPokedUserId, 'partner-user');
-    expect(mockRecordRepository.lastPokeUserMessage, '똑똑! 약속을 기다리는 사람이 있어요.');
+    expect(
+      mockRecordRepository.lastPokeUserMessage,
+      '똑똑! 운동 약속 하나 걸어 줘. 내가 봐줄게 🙂',
+    );
     expect(state.managerCards, isEmpty);
   });
 
@@ -492,6 +521,58 @@ void main() {
       );
     },
   );
+
+  test('a partner card uses my nickname for the partner', () async {
+    final now = DateTime.now();
+    final partner = ConnectedUser(
+      user: UserModel(
+        uid: 'partner-user',
+        displayName: '민지',
+        createdAt: now,
+        updatedAt: now,
+      ),
+      isSupported: true,
+      isCheering: true,
+    );
+    final me = UserModel(
+      uid: 'me',
+      displayName: '나',
+      partnerNickname: '자기',
+      createdAt: now,
+      updatedAt: now,
+    );
+    final local = ProviderContainer(
+      overrides: [
+        recordRepositoryProvider.overrideWithValue(mockRecordRepository),
+        getNowCardsUseCaseProvider.overrideWithValue(mockGetNowCardsUseCase),
+        settingAlarmUseCaseProvider.overrideWithValue(
+          SettingAlarmUseCase(FakePlanReminderScheduler()),
+        ),
+        connectedProfilesProvider.overrideWith((ref) async => [partner]),
+        myProfileProvider.overrideWithValue(AsyncData(me)),
+      ],
+    );
+    addTearDown(local.dispose);
+    await local.read(connectedProfilesProvider.future);
+
+    mockGetNowCardsUseCase.emit([
+      HomeCardModel(
+        state: HomeCardState.partnerTodayComplete,
+        plan: testPlan('plan-complete-today'),
+      ),
+    ]);
+    final completer = Completer<NowTabState>();
+    final sub = local.listen(nowTabViewModelProvider, (_, next) {
+      if (next.hasValue && !completer.isCompleted) {
+        completer.complete(next.value!);
+      }
+    }, fireImmediately: true);
+    addTearDown(sub.close);
+    final state = await completer.future.timeout(const Duration(seconds: 5));
+
+    expect(state.managerCards.single.partnerUid, 'partner-user');
+    expect(state.managerCards.single.partnerName, '자기');
+  });
 
   test('RecordPilotSettlementIntent should call repository', () async {
     mockGetNowCardsUseCase.emit([]);
@@ -554,22 +635,89 @@ void main() {
       expect(state.value!.allCards, [card]);
     });
 
-    test('an already-used rest pass reaches the caller as its own type', () async {
+    test(
+      'an already-used rest pass reaches the caller as its own type',
+      () async {
+        mockGetNowCardsUseCase.emit([]);
+        await readNowState();
+        mockRecordRepository.reportRestError =
+            const RestPassAlreadyUsedException();
+
+        // The screen tells "you already used this week's pass" apart from a
+        // generic failure. It used to do that with
+        // `e.toString().contains('이미 사용')`, which only worked because the
+        // repository threw a hardcoded Korean sentence.
+        await expectLater(
+          container
+              .read(nowTabViewModelProvider.notifier)
+              .dispatch(const RestPlanIntent('plan-123')),
+          throwsA(isA<RestPassAlreadyUsedException>()),
+        );
+      },
+    );
+  });
+
+  group('proof photo', () {
+    final photo = ProofPhotoUpload(
+      bytes: Uint8List.fromList(const [1, 2, 3]),
+      source: ProofSource.camera,
+      takenAt: DateTime(2026, 10, 2, 19, 42),
+    );
+
+    test(
+      'complete() hands the photo to the repository and reports it',
+      () async {
+        mockGetNowCardsUseCase.emit([]);
+        await readNowState();
+
+        final result = await container
+            .read(nowTabViewModelProvider.notifier)
+            .complete(
+              CompletePlanIntent('plan-1', message: '하체', photo: photo),
+            );
+
+        expect(mockRecordRepository.lastReportedPhoto, same(photo));
+        expect(result!.hasPhoto, isTrue);
+        expect(result.photoFailed, isFalse);
+        expect(result.photoPath, 'proofs/me/plan-1/action-1.jpg');
+      },
+    );
+
+    test('a failed upload still completes and says so', () async {
       mockGetNowCardsUseCase.emit([]);
       await readNowState();
-      mockRecordRepository.reportRestError =
-          const RestPassAlreadyUsedException();
+      mockRecordRepository.photoUploadFails = true;
 
-      // The screen tells "you already used this week's pass" apart from a
-      // generic failure. It used to do that with
-      // `e.toString().contains('이미 사용')`, which only worked because the
-      // repository threw a hardcoded Korean sentence.
-      await expectLater(
-        container
-            .read(nowTabViewModelProvider.notifier)
-            .dispatch(const RestPlanIntent('plan-123')),
-        throwsA(isA<RestPassAlreadyUsedException>()),
-      );
+      final result = await container
+          .read(nowTabViewModelProvider.notifier)
+          .complete(CompletePlanIntent('plan-1', photo: photo));
+
+      expect(mockRecordRepository.reportCompletionCallCount, 1);
+      expect(result!.hasPhoto, isFalse);
+      expect(result.photoFailed, isTrue);
+    });
+
+    test('dispatch(CompletePlanIntent) goes through the same path', () async {
+      mockGetNowCardsUseCase.emit([]);
+      await readNowState();
+
+      await container
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(CompletePlanIntent('plan-2', photo: photo));
+
+      expect(mockRecordRepository.lastReportedPlanId, 'plan-2');
+      expect(mockRecordRepository.lastReportedPhoto, same(photo));
+    });
+
+    test('a one-tap reaction is passed on as the real emoji', () async {
+      mockGetNowCardsUseCase.emit([]);
+      await readNowState();
+
+      await container
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(const CheerPartnerActionIntent('plan-3', '🔥'));
+
+      expect(mockRecordRepository.lastCheerReaction, '🔥');
     });
   });
 }

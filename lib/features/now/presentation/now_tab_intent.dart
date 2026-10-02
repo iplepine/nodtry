@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../../models/promise_model.dart';
+import '../../../models/proof_photo.dart';
 
 /// Now Tab에서 발생하는 사용자 의도(Intent) 정의
 /// MVI 패턴의 'Intent' 역할
@@ -8,11 +9,14 @@ sealed class NowTabIntent {
   const NowTabIntent();
 }
 
-/// 계획 실천 완료 (했어/넘어갈게요)
+/// 했어 report, optionally with a proof photo (인증샷).
 class CompletePlanIntent extends NowTabIntent {
   final String planId;
   final String? message;
-  const CompletePlanIntent(this.planId, {this.message});
+
+  /// The metadata-stripped photo to upload with the record, if any.
+  final ProofPhotoUpload? photo;
+  const CompletePlanIntent(this.planId, {this.message, this.photo});
 
   @override
   bool operator ==(Object other) =>
@@ -20,10 +24,12 @@ class CompletePlanIntent extends NowTabIntent {
       other is CompletePlanIntent &&
           runtimeType == other.runtimeType &&
           planId == other.planId &&
-          message == other.message;
+          message == other.message &&
+          identical(photo, other.photo);
 
   @override
-  int get hashCode => planId.hashCode ^ message.hashCode;
+  int get hashCode =>
+      planId.hashCode ^ message.hashCode ^ identityHashCode(photo);
 }
 
 /// 파트너 실천 확인 (확인하기/응원하기)
@@ -63,10 +69,11 @@ class SkipPlanIntent extends NowTabIntent {
   int get hashCode => planId.hashCode;
 }
 
-/// 파트너 응원하기 (고마워요 + 리액션)
+/// 파트너 인정 + 응원: the one-tap reaction emoji (❤️🔥💪👏) and an optional
+/// note.
 class CheerPartnerActionIntent extends NowTabIntent {
   final String planId;
-  final String reactionType; // 'fire', 'heart', 'thumbs_up', 'muscle'
+  final String reactionType; // the emoji itself, e.g. '❤️'
   final String? message;
   const CheerPartnerActionIntent(
     this.planId,
@@ -211,6 +218,75 @@ class PokePartnerIntent extends NowTabIntent {
 
   @override
   int get hashCode => planId.hashCode ^ (message?.hashCode ?? 0);
+}
+
+/// Which one-tap answer to a knock was sent.
+enum PokeReplyKind {
+  /// 지금 간다 🏃
+  coming('coming'),
+
+  /// 오늘은 봐줘 🙏
+  pass('pass');
+
+  const PokeReplyKind(this.id);
+
+  /// Analytics value.
+  final String id;
+}
+
+/// One-tap answer to a knock on [planId], sent to the partner who knocked
+/// ([toUserId]) as a `cheers` doc with reactionType 'reply'.
+class ReplyToPokeIntent extends NowTabIntent {
+  final String planId;
+  final String toUserId;
+  final PokeReplyKind kind;
+
+  /// The reply text as shown on the button (it is what the partner reads).
+  final String message;
+  const ReplyToPokeIntent(
+    this.planId, {
+    required this.toUserId,
+    required this.kind,
+    required this.message,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ReplyToPokeIntent &&
+          planId == other.planId &&
+          toUserId == other.toUserId &&
+          kind == other.kind &&
+          message == other.message;
+
+  @override
+  int get hashCode => Object.hash(planId, toUserId, kind, message);
+}
+
+/// 응원 보내기 on the partner's missed-workout card: encouragement, not 인정.
+class SendCheerIntent extends NowTabIntent {
+  final String toUserId;
+  final String? planId;
+  final String emoji;
+  final String? message;
+  const SendCheerIntent(
+    this.toUserId, {
+    this.planId,
+    required this.emoji,
+    this.message,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SendCheerIntent &&
+          toUserId == other.toUserId &&
+          planId == other.planId &&
+          emoji == other.emoji &&
+          message == other.message;
+
+  @override
+  int get hashCode => Object.hash(toUserId, planId, emoji, message);
 }
 
 /// 약속 제안 (보상/벌칙)

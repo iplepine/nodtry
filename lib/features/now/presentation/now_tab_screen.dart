@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../../../models/plan_model.dart';
@@ -17,17 +16,45 @@ import '../../../utils/time_formatter.dart';
 import '../../../utils/build_flags.dart';
 import '../../../utils/error_reporter.dart';
 import '../../../models/promise_model.dart';
+import '../../../models/proof_photo.dart';
 import '../../../repositories/record_repository.dart';
+import '../../connect/application/partner_label_provider.dart';
+import '../../connect/presentation/widgets/now_invite_card.dart';
+import '../../duo/application/duo_stats_provider.dart';
+import '../../duo/presentation/duo_widgets.dart';
+import '../../../providers/repository_provider.dart';
+import '../application/notification_routing.dart';
+import '../application/poke_reply_store.dart';
+import '../../plan/domain/workout_template.dart';
+import '../../proof/domain/proof_analytics.dart';
+import '../../proof/presentation/proof_capture.dart';
+import '../../proof/presentation/proof_photo_view.dart';
+import '../../proof/presentation/proof_reaction_row.dart';
+import 'cards/check_in_question.dart';
 import 'now_tab_intent.dart';
 import 'now_tab_state.dart';
 import 'now_tab_viewmodel.dart';
 import 'now_tab_fake_states.dart';
 import '../../../widgets/action_note_dialog.dart';
 import '../../../services/notification_service.dart' as local_notifications;
+import 'cards/now_card_rules.dart';
 import 'focus_timer/focus_timer_picker.dart';
 import 'focus_timer/focus_timer_screen.dart';
 import 'promise/active_promise_chip.dart';
 import 'widgets/promise_proposal_sheet.dart';
+
+part 'cards/card_shared.dart';
+part 'cards/primary_executor_card.dart';
+part 'cards/secondary_executor_card.dart';
+part 'cards/manager_quick_card.dart';
+
+/// The focus timer is a study-era feature and is hidden for the workout
+/// pivot. Its files, tests and the card wiring stay so it can come back.
+const bool _kFocusTimerEnabled = false;
+
+/// '어제 실천 인정해주기' (rescue) is hidden on the partner card. The intent,
+/// repository method and handler stay; only the button is not offered.
+const bool _kRescueButtonEnabled = false;
 
 /// 지금 탭 - Now Card 기반 관계 중심 홈
 class NowTab extends ConsumerStatefulWidget {
@@ -53,6 +80,26 @@ class _NowTabState extends ConsumerState<NowTab>
   bool _isHandlingNotificationInput = false;
   bool _isHandlingNotificationSkip = false;
   final Set<String> _autoAcknowledgedPokes = {};
+
+  /// A reminder / knock that was opened: focus its promise with the check-in
+  /// choices once the cards are in.
+  NowCheckInRequest? _pendingCheckIn;
+  bool _isHandlingCheckIn = false;
+
+  /// A record is being saved (photo upload, server ack): the faded cards
+  /// take no taps and a spinner shows instead.
+  bool _recording = false;
+
+  /// Partner cards I already cheered / knocked from this session, as
+  /// '{planId}@{day}' — the buttons turn off right away instead of waiting for
+  /// the plan stream.
+  final Set<String> _cheeredPlans = {};
+  final Set<String> _knockedPlans = {};
+
+  static String _todayKeyFor(String planId) {
+    final now = DateTime.now();
+    return '$planId@${now.year}-${now.month}-${now.day}';
+  }
 
   /// Actions currently awaiting the network, keyed by intent + target.
   ///
@@ -113,6 +160,9 @@ class _NowTabState extends ConsumerState<NowTab>
       if (pendingSkipRequest != null) {
         _queueNotificationSkip(pendingSkipRequest);
       }
+
+      final pendingCheckIn = ref.read(nowCheckInRequestProvider);
+      if (pendingCheckIn != null) _queueCheckIn(pendingCheckIn);
     });
   }
 
@@ -222,54 +272,123 @@ class _NowTabState extends ConsumerState<NowTab>
     return l10n.nowFocusNoteDoneFor(duration);
   }
 
+  /// One record per promise at a time: the photo flow, 사진 없이 했어 and the
+  /// notification's 했어 share this guard, so a second tap (even on a card
+  /// that is fading out) can't write a second `done`.
+  static String _recordKey(String planId) => 'record:$planId';
+
+  /// 사진 없이 했어 (and the notification "did it" action): an optional note,
+  /// then the report.
   Future<void> _handleDidItForCard(
     HomeCardModel targetCard, {
     String? dialogTitle,
     String? prefillNote,
   }) async {
+    final planId = targetCard.plan?.id;
+    if (planId == null) return;
+
+    await _runGuarded(_recordKey(planId), () async {
+      final l10n = AppLocalizations.of(context)!;
+      // 1. Show Dialog to input note
+      final note = await showDialog<String>(
+        context: context,
+        builder: (context) => ActionNoteDialog(
+          title:
+              targetCard.plan?.items.firstOrNull?.title ??
+              dialogTitle ??
+              l10n.homeDidIt,
+          showEmoji: false,
+          initialText: prefillNote,
+        ),
+      );
+
+      if (note == null || !mounted) {
+        // Canceled: Do nothing (card didn't vanish)
+        return;
+      }
+
+      await _completeCard(targetCard, note: note);
+    });
+  }
+
+  /// 📸 인증샷 찍기: consent (first time) → camera/album → preview with an
+  /// optional note → report with the photo.
+  Future<void> _handleProofPhoto() async {
+    final card = _activePrimaryCard();
+    if (card == null) return;
+    await _handleProofPhotoForCard(card);
+  }
+
+  Future<void> _handleProofPhotoForCard(HomeCardModel card) async {
+    final planId = card.plan?.id;
+    if (planId == null) return;
+
+    await _runGuarded(_recordKey(planId), () async {
+      final upload = await captureProofPhoto(context, ref);
+      if (upload == null || !mounted) return;
+      final note = await showProofPreviewSheet(
+        context,
+        upload: upload,
+        title: card.plan?.items.firstOrNull?.title,
+      );
+      if (note == null || !mounted) return;
+      await _completeCard(card, note: note, photo: upload);
+    });
+  }
+
+  /// Plays the "done" animation and reports [targetCard], with [photo] when
+  /// given. Tells the user when the record was saved without the photo.
+  Future<void> _completeCard(
+    HomeCardModel targetCard, {
+    required String note,
+    ProofPhotoUpload? photo,
+  }) async {
+    final planId = targetCard.plan?.id;
+    if (planId == null) return;
+    final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
-    if (targetCard.plan?.id == null) return;
 
-    // 1. Show Dialog to input note
-    final note = await showDialog<String>(
-      context: context,
-      builder: (context) => ActionNoteDialog(
-        title:
-            targetCard.plan?.items.firstOrNull?.title ??
-            dialogTitle ??
-            l10n.homeDidIt,
-        showEmoji: false,
-        initialText: prefillNote,
-      ),
-    );
+    // The cards fade out while the record is saved (an upload can take up to
+    // 8 s): no taps on the invisible cards, and a spinner meanwhile.
+    setState(() => _recording = true);
 
-    if (note == null) {
-      // Canceled: Do nothing (card didn't vanish)
-      return;
-    }
-
-    // 2. Success Animation: Scale Up slightly then Shrink
-    // First, animate scale up to 1.1 quickly
+    // Success Animation: Scale Up slightly then Shrink
     await _animationController.animateTo(
       1.05,
       duration: const Duration(milliseconds: 150),
       curve: Curves.easeOut,
     );
-
-    // Then reverse (shrink)
     await _animationController.reverse();
 
-    // 3. Dispatch Intent with note
     try {
-      final planId = targetCard.plan?.id;
-      if (planId != null) {
-        await ref
-            .read(nowTabViewModelProvider.notifier)
-            .dispatch(CompletePlanIntent(planId, message: note));
+      final result = await ref
+          .read(nowTabViewModelProvider.notifier)
+          .complete(CompletePlanIntent(planId, message: note, photo: photo));
+      // Null result / no action id: nothing was recorded (no state, signed
+      // out), so there is no photo outcome to report either.
+      if (result == null || result.actionId == null) return;
+      if (result.photoFailed) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.proofUploadFailed)));
+      } else if (result.queued) {
+        // Offline: saved here, reaches the partner once back online.
+        messenger.showSnackBar(SnackBar(content: Text(l10n.nowRecordQueued)));
+      } else if (result.hasPhoto) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.proofUploadDone)));
       }
     } catch (e) {
       // Error handling (restore animation if failed)
-      if (mounted) _animationController.forward();
+      if (mounted) {
+        _animationController.forward();
+        messenger.showSnackBar(SnackBar(content: Text(l10n.nowActionFailed)));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _recording = false);
+        // Bring the cards back even when the plan stream didn't emit.
+        if (_animationController.status == AnimationStatus.dismissed) {
+          _onDataLoaded();
+        }
+      }
     }
   }
 
@@ -415,7 +534,22 @@ class _NowTabState extends ConsumerState<NowTab>
     HomeCardModel targetCard, {
     String? dialogTitle,
   }) async {
-    if (targetCard.plan?.id == null) return;
+    final skipped = await _confirmAndSkip(targetCard, dialogTitle: dialogTitle);
+    if (!skipped || !mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.nowSkippedSnackbar)),
+    );
+  }
+
+  /// 오늘은 패스: a skip counts as a missed day (the 둘운완 streak can reset)
+  /// and the partner is told, so every path asks first. Returns whether the
+  /// day was skipped.
+  Future<bool> _confirmAndSkip(
+    HomeCardModel targetCard, {
+    String? dialogTitle,
+  }) async {
+    if (targetCard.plan?.id == null) return false;
 
     final l10n = AppLocalizations.of(context)!;
     final planTitle =
@@ -450,14 +584,191 @@ class _NowTabState extends ConsumerState<NowTab>
       },
     );
 
-    if (confirmed != true) return;
+    if (confirmed != true || !mounted) return false;
 
-    final skipped = await _skipCard(targetCard);
-    if (!skipped || !mounted) return;
+    return _skipCard(targetCard);
+  }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.nowSkippedSnackbar)),
+  void _queueCheckIn(NowCheckInRequest request) {
+    if (!mounted) return;
+    _pendingCheckIn = request;
+    // Consumed here; cleared outside the listener that delivered it.
+    Future.microtask(() {
+      if (mounted) ref.read(nowCheckInRequestProvider.notifier).clear();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openPendingCheckInIfReady();
+    });
+  }
+
+  /// An opened reminder / knock: brings its promise's card up and offers the
+  /// same choices as the hero (📸 인증샷 찍기 first) — the tap used to open a
+  /// note-only dialog that recorded without a photo.
+  void _openPendingCheckInIfReady() {
+    if (!mounted ||
+        _isHandlingCheckIn ||
+        _isHandlingNotificationInput ||
+        _isHandlingNotificationSkip) {
+      return;
+    }
+    final request = _pendingCheckIn;
+    if (request == null) return;
+    // A card that never shows up (already recorded, another day) is not
+    // waited for: no sheet popping up minutes later.
+    if (DateTime.now().difference(request.at) > const Duration(seconds: 30)) {
+      _pendingCheckIn = null;
+      return;
+    }
+    final nowState = ref.read(nowTabViewModelProvider).value;
+    if (nowState == null) return;
+    final card = _findCheckInCard(nowState, planId: request.planId);
+    if (card == null) return; // maybe after the next update
+
+    _pendingCheckIn = null;
+    final carousel = nowState.primaryCarouselCards;
+    final index = carousel.indexWhere((c) => c.plan?.id == card.plan?.id);
+    if (index >= 0) _goToCarouselIndex(index, carousel.length);
+    _isHandlingCheckIn = true;
+    unawaited(
+      _showCheckInSheet(card).whenComplete(() => _isHandlingCheckIn = false),
     );
+  }
+
+  HomeCardModel? _findCheckInCard(NowTabState state, {String? planId}) {
+    final now = DateTime.now();
+    bool asks(HomeCardModel card) =>
+        showsTodayCheckInHero(card.state, card.plan, now: now);
+    if (planId != null && planId.isNotEmpty) {
+      for (final card in state.allCards) {
+        if (card.plan?.id == planId && asks(card)) return card;
+      }
+      return null;
+    }
+    final primary = state.primaryCard;
+    if (primary != null && asks(primary)) return primary;
+    for (final card in state.allCards) {
+      if (asks(card)) return card;
+    }
+    return null;
+  }
+
+  /// 📸 인증샷 찍기 / 사진 없이 했어 / 오늘은 쉴게 (or 오늘은 패스할게) for [card].
+  Future<void> _showCheckInSheet(HomeCardModel card) async {
+    final plan = card.plan;
+    if (plan?.id == null) return;
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx)!;
+        final legacy = workoutDisplayFor(l10n, plan!.workoutType) == null;
+        final canRest = plan.canUseRestToday;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.outline,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  todayCheckInQuestion(l10n, plan),
+                  style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  key: const ValueKey('check-in-sheet-photo'),
+                  onPressed: () => Navigator.pop(ctx, 'photo'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    legacy ? l10n.nowHeroVerifyLegacy : l10n.nowProofTakePhoto,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  key: const ValueKey('check-in-sheet-no-photo'),
+                  onPressed: () => Navigator.pop(ctx, 'done'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: BorderSide(color: AppColors.primary, width: 1.2),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.nowDidItNoPhoto,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                TextButton(
+                  key: ValueKey(
+                    canRest ? 'check-in-sheet-rest' : 'check-in-sheet-skip',
+                  ),
+                  onPressed: () => Navigator.pop(ctx, canRest ? 'rest' : 'skip'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.textSecondary,
+                  ),
+                  child: Text(
+                    canRest ? l10n.nowRestToday : l10n.nowActionSkipToday,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case 'photo':
+        await _handleProofPhotoForCard(card);
+      case 'done':
+        await _handleDidItForCard(card);
+      case 'rest':
+        await _handleRestForCard(card);
+      case 'skip':
+        final skipped = await _confirmAndSkip(card);
+        if (skipped && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowSkippedSnackbar),
+            ),
+          );
+        }
+    }
   }
 
   /// Runs [action] unless the same [key] is already in flight.
@@ -474,74 +785,30 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
-  Future<void> _handleCheckIt(HomeCardModel managerCard) async {
-    if (managerCard.plan?.id == null) return;
+  Future<void> _handleApprove(HomeCardModel managerCard) async {
+    final planId = managerCard.plan?.id;
+    if (planId == null) return;
 
-    final planId = managerCard.plan!.id!;
-
-    await _runGuarded('checkIt:$planId', () async {
-      // 카드 상태에 따라 다른 인텐트 발송
-      if (managerCard.state == HomeCardState.partnerPlanCreate ||
-          managerCard.state == HomeCardState.partnerPlanModify) {
-        try {
-          await ref
-              .read(nowTabViewModelProvider.notifier)
-              .dispatch(ApprovePlanIntent(planId));
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.nowApproveCheering),
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          }
-        } catch (_) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.nowApproveFailed),
-              ),
-            );
-          }
+    await _runGuarded('approve:$planId', () async {
+      try {
+        await ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(ApprovePlanIntent(planId));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowApproveCheering),
+              duration: const Duration(seconds: 2),
+            ),
+          );
         }
-      } else if (managerCard.state == HomeCardState.partnerAction ||
-          managerCard.state == HomeCardState.partnerTodayComplete) {
-        // 실천 확인
-        try {
-          await ref
-              .read(nowTabViewModelProvider.notifier)
-              .dispatch(VerifyPartnerPlanIntent(planId));
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.nowVerifyDone),
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          }
-        } catch (_) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.nowVerifyFailed),
-              ),
-            );
-          }
-        }
-      } else {
-        // Fallback
-        try {
-          await ref
-              .read(nowTabViewModelProvider.notifier)
-              .dispatch(CheckPartnerActionIntent(planId));
-        } catch (_) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.nowActionFailed),
-              ),
-            );
-          }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowApproveFailed),
+            ),
+          );
         }
       }
     });
@@ -672,71 +939,9 @@ class _NowTabState extends ConsumerState<NowTab>
     );
   }
 
-  Future<void> _handleCheer(HomeCardModel managerCard) async {
-    if (managerCard.plan?.id == null) return;
-
-    final l10n = AppLocalizations.of(context)!;
-    // 1. Random Reaction Selection
-    final reactions = [
-      ('🔥', l10n.nowCheerExcited),
-      ('❤️', l10n.nowCheerLove),
-      ('👍', l10n.nowCheerProud),
-      ('💪', l10n.nowCheerStrength),
-    ];
-    final random = Random();
-    final selected = reactions[random.nextInt(reactions.length)];
-    final reactionType = selected.$1;
-    final reactionMessage = selected.$2;
-
-    try {
-      await ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(
-            CheerPartnerActionIntent(managerCard.plan!.id!, reactionType),
-          );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(reactionMessage),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.nowCheerFailed)),
-        );
-      }
-    }
-  }
-
   void _handleCardTap(HomeCardModel model) {
     if (model.plan != null) {
       context.pushNamed('plan-detail', extra: model.plan);
-    }
-  }
-
-  Future<void> _handlePass(HomeCardModel managerCard) async {
-    if (managerCard.plan?.id == null) return;
-
-    // Confirm only once the pass has actually been recorded — this used to
-    // announce it up front and then swallow whatever the dispatch did.
-    try {
-      await ref
-          .read(nowTabViewModelProvider.notifier)
-          .dispatch(PassPlanIntent(managerCard.plan!.id!));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.nowActionPass)),
-        );
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.nowActionFailed)),
-        );
-      }
     }
   }
 
@@ -761,7 +966,9 @@ class _NowTabState extends ConsumerState<NowTab>
       } catch (_) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowPokeFailed),
+            ),
           );
         }
       }
@@ -782,6 +989,7 @@ class _NowTabState extends ConsumerState<NowTab>
               ),
             );
         if (mounted) {
+          setState(() => _knockedPlans.add(_todayKeyFor(model.plan!.id!)));
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context)!.nowPokeAgainSent),
@@ -791,11 +999,114 @@ class _NowTabState extends ConsumerState<NowTab>
       } catch (_) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.nowPokeFailed)),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.nowPokeFailed),
+            ),
           );
         }
       }
     });
+  }
+
+  /// 응원 보내기 on the partner's missed-workout card: a cheers doc only — not
+  /// 인정, so their unrecorded day is never marked acknowledged.
+  Future<void> _handleSendCheer(HomeCardModel card) async {
+    final planId = card.plan?.id;
+    final toUserId = card.partnerUid ?? card.plan?.userId;
+    if (planId == null || toUserId == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    await _runGuarded('cheer:$planId', () async {
+      try {
+        await ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(
+              SendCheerIntent(
+                toUserId,
+                planId: planId,
+                emoji: '💪',
+                message: l10n.nowCheerDefaultMessage,
+              ),
+            );
+        if (mounted) setState(() => _cheeredPlans.add(_todayKeyFor(planId)));
+        messenger.showSnackBar(SnackBar(content: Text(l10n.nowCheerSent)));
+      } catch (_) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.nowCheerFailed)));
+      }
+    });
+  }
+
+  /// 지금 간다 🏃 / 오늘은 봐줘 🙏 to the partner who knocked today.
+  Future<void> _handlePokeReply(HomeCardModel card, PokeReplyKind kind) async {
+    final planId = card.plan?.id;
+    final toUserId = card.plan?.managerId;
+    if (planId == null || toUserId == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final store = ref.read(pokeReplyStoreProvider);
+    await _runGuarded('pokeReply:$planId', () async {
+      try {
+        await ref
+            .read(nowTabViewModelProvider.notifier)
+            .dispatch(
+              ReplyToPokeIntent(
+                planId,
+                toUserId: toUserId,
+                kind: kind,
+                message: kind == PokeReplyKind.coming
+                    ? l10n.nowPokeReplyComing
+                    : l10n.nowPokeReplyPass,
+              ),
+            );
+        await store.markReplied(planId, DateTime.now());
+        if (mounted) setState(() {});
+        messenger.showSnackBar(SnackBar(content: Text(l10n.nowPokeReplySent)));
+      } catch (_) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.nowPokeReplyFailed)),
+        );
+      }
+    });
+  }
+
+  /// The replies to today's knock for [card], or null when they don't apply.
+  ValueChanged<PokeReplyKind>? _pokeReplyFor(HomeCardModel card) {
+    final plan = card.plan;
+    final now = DateTime.now();
+    if (!showsPokeReplies(plan, now: now)) return null;
+    if (ref.watch(pokeReplyStoreProvider).hasReplied(plan!.id!, now)) {
+      return null;
+    }
+    return (kind) => _handlePokeReply(card, kind);
+  }
+
+  /// The duo header (two avatars, "둘이 함께 N일째", today's status for both)
+  /// once a partner is connected and the stats are in; the quiet header
+  /// otherwise.
+  Widget _buildHeader(NowTabState uiState) {
+    final partner = uiState.partnerProfile;
+    final label = ref.watch(partnerLabelProvider);
+    final stats = ref.watch(duoStatsProvider);
+    if (partner != null && stats != null && stats.hasPartner) {
+      final me = ref.watch(myProfileProvider).value;
+      return DuoStreakHeader(
+        stats: stats,
+        myName: me?.displayName,
+        myImageUrl: me?.profileImageUrl,
+        // Starts the status pill ("{name} 아직"): the capitalized fallback.
+        partnerName:
+            label.preferredFor(partner.uid, displayName: partner.displayName) ??
+            AppLocalizations.of(context)!.partnerFallbackLabelStart,
+        partnerImageUrl: partner.profileImageUrl,
+      );
+    }
+    return QuietHeader(
+      partnerName: partner == null
+          ? null
+          : label.preferredFor(partner.uid, displayName: partner.displayName),
+      periodState: uiState.headerPeriodState,
+      onSettingsTap: null,
+    );
   }
 
   Future<void> _handleAcknowledgePromiseSettled(HomeCardModel card) async {
@@ -854,33 +1165,16 @@ class _NowTabState extends ConsumerState<NowTab>
       // Don't move on to the next plan if the settlement wasn't recorded.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.nowActionFailed)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.nowActionFailed),
+          ),
         );
       }
       return;
     }
 
     if (!mounted) return;
-    context.push(AppRoutes.planCreate, extra: _planAsNewTemplate(card.plan!));
-  }
-
-  Plan _planAsNewTemplate(Plan plan) {
-    return Plan(
-      userId: plan.userId,
-      managerId: plan.managerId,
-      startDate: plan.startDate,
-      endDate: plan.endDate,
-      state: plan.state,
-      items: plan.items,
-      createdAt: plan.createdAt,
-      completedDates: plan.completedDates,
-      skippedDates: plan.skippedDates,
-      verifiedDates: plan.verifiedDates,
-      rescuedDates: plan.rescuedDates,
-      restedDates: plan.restedDates,
-      lastActionNote: plan.lastActionNote,
-      lastComment: plan.lastComment,
-    );
+    context.push(AppRoutes.planCreate, extra: card.plan!.asRestartTemplate());
   }
 
   Future<void> _handleExitAfterSettlement(HomeCardModel card) async {
@@ -902,7 +1196,9 @@ class _NowTabState extends ConsumerState<NowTab>
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.nowActionFailed)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.nowActionFailed),
+          ),
         );
       }
       return;
@@ -981,7 +1277,12 @@ class _NowTabState extends ConsumerState<NowTab>
 
   Future<void> _handleRest() async {
     final primaryCard = _activePrimaryCard();
-    if (primaryCard?.plan?.id == null) return;
+    if (primaryCard == null) return;
+    await _handleRestForCard(primaryCard);
+  }
+
+  Future<void> _handleRestForCard(HomeCardModel primaryCard) async {
+    if (primaryCard.plan?.id == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -1017,7 +1318,7 @@ class _NowTabState extends ConsumerState<NowTab>
     try {
       await ref
           .read(nowTabViewModelProvider.notifier)
-          .dispatch(RestPlanIntent(primaryCard!.plan!.id!));
+          .dispatch(RestPlanIntent(primaryCard.plan!.id!));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1070,7 +1371,14 @@ class _NowTabState extends ConsumerState<NowTab>
     final primaryCard = _activePrimaryCard();
     if (primaryCard?.plan?.id == null) return;
 
-    await _skipCard(primaryCard!);
+    final skipped = await _confirmAndSkip(primaryCard!);
+    if (skipped && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.nowSkippedSnackbar),
+        ),
+      );
+    }
   }
 
   Future<bool> _skipCard(HomeCardModel targetCard) async {
@@ -1125,7 +1433,17 @@ class _NowTabState extends ConsumerState<NowTab>
                 subtitle: Text(l10n.nowDeferLaterSubtitle),
                 onTap: () => Navigator.pop(ctx, 'later'),
               ),
+              // The streak-safe way out first, when there is one.
+              if (card.plan?.canUseRestToday == true)
+                ListTile(
+                  key: const ValueKey('defer-rest'),
+                  leading: Icon(Icons.spa_outlined, color: AppColors.primary),
+                  title: Text(l10n.nowRestToday),
+                  subtitle: Text(l10n.nowDeferRestSubtitle),
+                  onTap: () => Navigator.pop(ctx, 'rest'),
+                ),
               ListTile(
+                key: const ValueKey('defer-skip'),
                 leading: Icon(
                   Icons.remove_circle_outline,
                   color: AppColors.textSecondary,
@@ -1144,8 +1462,10 @@ class _NowTabState extends ConsumerState<NowTab>
     if (!mounted) return;
     if (choice == 'later') {
       await _handleDeferLater(card);
+    } else if (choice == 'rest') {
+      await _handleRestForCard(card);
     } else if (choice == 'skip') {
-      final ok = await _skipCard(card);
+      final ok = await _confirmAndSkip(card);
       if (ok && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1371,7 +1691,11 @@ class _NowTabState extends ConsumerState<NowTab>
   /// Time Chip 텍스트 가져오기 (Vague Time 적용)
   String? _getTimeChipText(HomeCardModel model) {
     if (model.state == HomeCardState.overdue) {
-      return '${AppLocalizations.of(context)!.pastUncompletedTimeChip} · ${AppLocalizations.of(context)!.timeChipPassed}';
+      return overdueTimeChipText(
+        AppLocalizations.of(context)!,
+        model.plan,
+        now: DateTime.now(),
+      );
     }
 
     if (model.plan != null && model.plan!.items.isNotEmpty) {
@@ -1438,95 +1762,12 @@ class _NowTabState extends ConsumerState<NowTab>
     return null;
   }
 
-  /// Time Chip 타입 가져오기
+  /// Time Chip 타입 — 카드 상태로 정한다. 칩 문구(번역문)는 해석하지 않는다.
   TimeChipType? _getTimeChipType(HomeCardModel model) {
-    if (model.state == HomeCardState.overdue) {
-      return TimeChipType.past;
-    }
-
-    final text = _getTimeChipText(model);
-    if (text == null) return null;
-
-    final l10n = AppLocalizations.of(context)!;
-    if (text == l10n.timeChipNow) {
-      return TimeChipType.now;
-    } else if (text == l10n.timeChipJustNow) {
-      return TimeChipType.past;
-    } else if (text.contains('지남') ||
-        text.contains('overdue') ||
-        text == l10n.nowYesterday ||
-        text.endsWith('전') ||
-        text.endsWith('ago') ||
-        text.endsWith('left')) {
-      if (text.contains('지남') ||
-          text.contains('overdue') ||
-          text == l10n.nowYesterday ||
-          text.endsWith('ago')) {
-        return TimeChipType.past;
-      }
-      if (text.endsWith('전') || text.endsWith('left')) {
-        return TimeChipType.upcoming;
-      }
-      return TimeChipType.upcoming;
-    } else {
-      return TimeChipType.upcoming;
-    }
-  }
-
-  /// Manager Quick Card용 Time Chip 텍스트
-  String? _getManagerTimeChipText(HomeCardModel model) {
-    return _getTimeChipText(model);
-  }
-
-  /// Manager Quick Card용 Time Chip 타입
-  TimeChipType? _getManagerTimeChipType(HomeCardModel model) {
-    return _getTimeChipType(model);
-  }
-
-  /// Secondary Executor Card용 Time Chip 텍스트
-  String? _getSecondaryTimeChipText(HomeCardModel model) {
-    return _getTimeChipText(model);
-  }
-
-  /// Secondary Executor Card용 Time Chip 타입
-  TimeChipType? _getSecondaryTimeChipType(HomeCardModel model) {
-    return _getTimeChipType(model);
-  }
-
-  /// 기록의 시선 텍스트 생성 (If-Then 팁 + 스트릭 독려)
-  String? _getRecordGazeText(HomeCardModel model) {
-    if (model.state != HomeCardState.nowAction &&
-        model.state != HomeCardState.overdue) {
-      return null;
-    }
-
-    final l10n = AppLocalizations.of(context)!;
-    // 스트릭 기반 독려 메시지
-    final streak = model.streakCount;
-    if (streak != null && streak >= 5) {
-      return l10n.nowKeepFlowing;
-    }
-
-    // description에 if-then 패턴이 있으면 리마인더로 활용
-    final desc = model.plan?.items.firstOrNull?.description;
-    if (desc != null && desc.isNotEmpty) {
-      if (desc.contains('하면') ||
-          desc.contains('되면') ||
-          desc.contains('나면') ||
-          desc.toLowerCase().contains('when ') ||
-          desc.toLowerCase().contains('if ')) {
-        return desc;
-      }
-    }
-
-    // if-then 팁 로테이션 (날짜 기반)
-    final tips = [
-      l10n.nowGuideWhen,
-      l10n.nowGuideSmallStart,
-      l10n.nowGuideBetterToday,
-    ];
-    final dayIndex = DateTime.now().day % tips.length;
-    return tips[dayIndex];
+    return timeChipTypeFor(
+      model.state,
+      hasChipText: _getTimeChipText(model) != null,
+    );
   }
 
   @override
@@ -1534,9 +1775,20 @@ class _NowTabState extends ConsumerState<NowTab>
     // Provider 구독
     final homeStateAsync = ref.watch(nowTabViewModelProvider);
 
+    // An opened reminder / knock (routed here by the home screen).
+    ref.listen(nowCheckInRequestProvider, (previous, next) {
+      if (next != null) _queueCheckIn(next);
+    });
+
     // 데이터 변경 감지하여 애니메이션 트리거
     ref.listen(nowTabViewModelProvider, (previous, next) {
       if (!next.hasValue) return;
+
+      if (_pendingCheckIn != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openPendingCheckInIfReady();
+        });
+      }
 
       if (_pendingNotificationInput != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1682,14 +1934,13 @@ class _NowTabState extends ConsumerState<NowTab>
 
       return Stack(
         children: [
-          Column(
+          AbsorbPointer(
+            // No taps on cards that are fading out while a record is saved.
+            absorbing: _recording,
+            child: Column(
             children: [
               // 헤더
-              QuietHeader(
-                partnerName: uiState.partnerProfile?.displayName,
-                periodState: uiState.headerPeriodState,
-                onSettingsTap: null,
-              ),
+              _buildHeader(uiState),
               // Now Card
               Expanded(
                 child: SingleChildScrollView(
@@ -1704,6 +1955,8 @@ class _NowTabState extends ConsumerState<NowTab>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // No partner yet: invite first (hidden otherwise).
+                        const NowInviteCard(),
                         // Executor Area (Primary Action)
                         if (primaryExecutorCard != null) ...[
                           FadeTransition(
@@ -1740,8 +1993,14 @@ class _NowTabState extends ConsumerState<NowTab>
                                         '${primaryExecutorCard.state.name}:${primaryExecutorCard.plan?.id ?? ""}',
                                       ),
                                       model: primaryExecutorCard,
+                                      onPokeReply: _pokeReplyFor(
+                                        primaryExecutorCard,
+                                      ),
                                       onDidIt: _handleDidIt,
-                                      onFocusTimer: _handleFocusTimer,
+                                      onProofPhoto: _handleProofPhoto,
+                                      onFocusTimer: _kFocusTimerEnabled
+                                          ? _handleFocusTimer
+                                          : null,
                                       onSkip: _handleSkip,
                                       onRest: _handleRest,
                                       onCreatePlan: _handleCreatePlan,
@@ -1787,9 +2046,6 @@ class _NowTabState extends ConsumerState<NowTab>
                                         primaryExecutorCard,
                                       ),
                                       timeChipType: _getTimeChipType(
-                                        primaryExecutorCard,
-                                      ),
-                                      recordGazeText: _getRecordGazeText(
                                         primaryExecutorCard,
                                       ),
                                       exactTimeText: _getExactTimeText(
@@ -1849,26 +2105,8 @@ class _NowTabState extends ConsumerState<NowTab>
                                     widthFactor: 0.85,
                                     child: _SecondaryExecutorCard(
                                       model: state,
-                                      timeChipText: _getSecondaryTimeChipText(
-                                        state,
-                                      ),
-                                      timeChipType: _getSecondaryTimeChipType(
-                                        state,
-                                      ),
-                                      onReconcile: () {
-                                        // Refresh only re-reads the stream; a
-                                        // failure surfaces through the tab's own
-                                        // error handling, so ignore it here
-                                        // rather than let it go unhandled.
-                                        unawaited(
-                                          ref
-                                              .read(
-                                                nowTabViewModelProvider.notifier,
-                                              )
-                                              .dispatch(const RefreshIntent())
-                                              .catchError((Object _) {}),
-                                        );
-                                      },
+                                      timeChipText: _getTimeChipText(state),
+                                      timeChipType: _getTimeChipType(state),
                                       exactTimeText: _getExactTimeText(state),
                                     ),
                                   ),
@@ -1892,31 +2130,41 @@ class _NowTabState extends ConsumerState<NowTab>
                                     child: _ManagerQuickCard(
                                       model: card,
                                       partnerName: card.partnerName,
-                                      onCheckIt: () => _handleCheckIt(card),
-                                      onReject: () =>
-                                          _handleReject(card), // Added
-                                      onCheer: () => _handleCheer(card),
-                                      onPass: () => _handlePass(card),
-                                      onSimpleCheer: () =>
-                                          _handleSimpleCheer(card),
-                                      onMoreCheer: () => _handleMoreCheer(card),
-                                      onPokeUser: () =>
-                                          _handlePokeUser(card), // Added
+                                      onApprove: () => _handleApprove(card),
+                                      onReject: () => _handleReject(card),
+                                      onReact: (emoji) =>
+                                          _handleReact(card, emoji),
+                                      onAddNote: () =>
+                                          _handleReactWithNote(card),
+                                      onPokeUser: () => _handlePokeUser(card),
                                       onPokePartner: () =>
-                                          _handlePokePartner(card), // Added
-                                      onRescue: () => _handleRescue(card),
+                                          _handlePokePartner(card),
+                                      onSendCheer: () => _handleSendCheer(card),
+                                      cheerSent:
+                                          card.plan?.id != null &&
+                                          _cheeredPlans.contains(
+                                            _todayKeyFor(card.plan!.id!),
+                                          ),
+                                      knockSent:
+                                          knockedToday(
+                                            card.plan,
+                                            now: DateTime.now(),
+                                          ) ||
+                                          (card.plan?.id != null &&
+                                              _knockedPlans.contains(
+                                                _todayKeyFor(card.plan!.id!),
+                                              )),
+                                      onRescue: _kRescueButtonEnabled
+                                          ? () => _handleRescue(card)
+                                          : null,
                                       onProposePromise: () =>
                                           _handleProposePromise(card),
                                       onAcknowledgePromiseSettled: () =>
                                           _handleAcknowledgePromiseSettled(
                                             card,
                                           ),
-                                      timeChipText: _getManagerTimeChipText(
-                                        card,
-                                      ),
-                                      timeChipType: _getManagerTimeChipType(
-                                        card,
-                                      ),
+                                      timeChipText: _getTimeChipText(card),
+                                      timeChipType: _getTimeChipType(card),
                                       exactTimeText: _getExactTimeText(card),
                                     ).wrapWithGlass(),
                                   ),
@@ -1925,8 +2173,6 @@ class _NowTabState extends ConsumerState<NowTab>
                             );
                           }),
                         ],
-                        // Footer
-                        const _ContextFooter(),
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -1935,6 +2181,17 @@ class _NowTabState extends ConsumerState<NowTab>
               ),
             ],
           ),
+          ),
+          if (_recording)
+            const Positioned.fill(
+              child: IgnorePointer(
+                child: Center(
+                  child: CircularProgressIndicator(
+                    key: ValueKey('now-recording-progress'),
+                  ),
+                ),
+              ),
+            ),
 
           // Debug Fake State Toggle Button (Debug Only)
           if (kDebugMode && !BuildFlags.storeScreenshotMode)
@@ -1975,10 +2232,22 @@ class _NowTabState extends ConsumerState<NowTab>
     }
   }
 
-  Future<void> _handleSimpleCheer(HomeCardModel card) async {
-    if (card.plan?.id == null) return;
+  /// One-tap 인정 on a partner card: verifies today's record and sends
+  /// [emoji] — no dialog, no keyboard.
+  Future<void> _handleReact(HomeCardModel card, String emoji) async {
+    final plan = card.plan;
+    final planId = plan?.id;
+    if (plan == null || planId == null) return;
+    await _runGuarded('react:$planId', () async {
+      await _sendReaction(card, emoji, surface: 'now');
+    });
+  }
 
-    // Show Dialog to input feedback (consistent with History tab)
+  /// "한마디": the optional note dialog, sent as 인정 with ❤️.
+  Future<void> _handleReactWithNote(HomeCardModel card) async {
+    final planId = card.plan?.id;
+    if (planId == null) return;
+
     final l10n = AppLocalizations.of(context)!;
     final feedback = await showDialog<String>(
       context: context,
@@ -1988,195 +2257,51 @@ class _NowTabState extends ConsumerState<NowTab>
             l10n.nowPartnerActionFallback,
         hintText: l10n.nowActionNoteHint,
         buttonLabel: l10n.nowVerifyAndSend,
+        showEmoji: false,
       ),
     );
+    if (feedback == null || !mounted) return;
 
-    if (feedback != null) {
-      try {
-        await ref
-            .read(nowTabViewModelProvider.notifier)
-            .dispatch(
-              CheerPartnerActionIntent(
-                card.plan!.id!,
-                '👍',
-                message: feedback.isEmpty ? null : feedback,
-              ),
-            );
-      } catch (_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.nowCheerFailed),
-            ),
-          );
-        }
-      }
-    }
+    await _runGuarded('react:$planId', () async {
+      await _sendReaction(
+        card,
+        kProofReactions.first,
+        message: feedback.trim().isEmpty ? null : feedback.trim(),
+        surface: 'now_note',
+      );
+    });
   }
 
-  void _handleMoreCheer(HomeCardModel card) {
-    if (card.plan?.id == null) return;
-    _showReactionBottomSheet(context, card.plan!.id!);
-  }
-
-  void _showReactionBottomSheet(BuildContext context, String planId) {
+  Future<void> _sendReaction(
+    HomeCardModel card,
+    String emoji, {
+    String? message,
+    required String surface,
+  }) async {
+    final plan = card.plan!;
+    final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final messageController = TextEditingController();
-    String selectedReaction = '🔥';
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            final mediaQuery = MediaQuery.of(context);
-            final bottomInset = mediaQuery.viewInsets.bottom > 0
-                ? mediaQuery.viewInsets.bottom
-                : mediaQuery.viewPadding.bottom;
-
-            return Container(
-              constraints: BoxConstraints(
-                maxHeight: mediaQuery.size.height * 0.9,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
-                ),
-              ),
-              padding: EdgeInsets.fromLTRB(24, 24, 24, bottomInset + 24),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.disabled,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      l10n.cheerSheetTitle,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: ReactionIcon.reactions.map((emoji) {
-                        final isSelected = selectedReaction == emoji;
-                        return GestureDetector(
-                          onTap: () {
-                            setSheetState(() {
-                              selectedReaction = emoji;
-                            });
-                          },
-                          child: Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.primary.withValues(alpha: 0.1)
-                                  : Colors.transparent,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isSelected
-                                    ? AppColors.primary
-                                    : Colors.grey.shade300,
-                                width: 2,
-                              ),
-                            ),
-                            child: ReactionIcon(emoji, size: 34),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 24),
-                    TextField(
-                      controller: messageController,
-                      decoration: InputDecoration(
-                        hintText: l10n.cheerMessageHint,
-                        filled: true,
-                        fillColor: AppColors.background,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                      ),
-                      minLines: 2,
-                      maxLines: 4,
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          try {
-                            await ref
-                                .read(nowTabViewModelProvider.notifier)
-                                .dispatch(
-                                  CheerPartnerActionIntent(
-                                    planId,
-                                    selectedReaction,
-                                    message: messageController.text.trim(),
-                                  ),
-                                );
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                            }
-                          } catch (_) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.nowCheerFailed,
-                                  ),
-                                ),
-                              );
-                            }
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: Text(
-                          l10n.cheerSend,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    ).whenComplete(messageController.dispose);
+    try {
+      await ref
+          .read(nowTabViewModelProvider.notifier)
+          .dispatch(
+            CheerPartnerActionIntent(plan.id!, emoji, message: message),
+          );
+      logPartnerReacted(
+        reportedAt: plan.lastProofAt ?? _lastActionNoteDate(plan),
+        surface: surface,
+        reaction: emoji,
+        hasPhoto: todayProofPhotoPathOf(plan) != null,
+      );
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.nowReactedSnackbar(emoji)),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.nowCheerFailed)));
+    }
   }
 
   void _showFakeStateSelector(BuildContext context, WidgetRef ref) {
@@ -2270,2328 +2395,6 @@ class _NowTabState extends ConsumerState<NowTab>
           ),
         );
       },
-    );
-  }
-}
-
-class _PrimaryExecutorCard extends StatelessWidget {
-  final HomeCardModel model;
-  final VoidCallback? onTap;
-  final VoidCallback? onDidIt;
-  final VoidCallback? onFocusTimer;
-  final VoidCallback? onSkip;
-  final VoidCallback? onRest; // 휴식권
-  final VoidCallback? onCreatePlan;
-  final VoidCallback? onModify; // Added
-  final VoidCallback? onAcceptPromise;
-  final VoidCallback? onRejectPromise;
-  final VoidCallback? onContinueAfterSettlement;
-  final VoidCallback? onExitAfterSettlement;
-  final VoidCallback? onAcknowledgePromiseSettled;
-  // 우측 상단 '넘기기' 아이콘 — 잠시 후에 할지 / 오늘은 안 할지 고르는 시트를 연다.
-  final VoidCallback? onDismissOptions;
-  // 카드를 좌우로 스와이프하면 호출 — 캐러셀 이전/다음 카드로 이동.
-  final void Function(DragEndDetails details)? onHorizontalSwipe;
-  final String? timeChipText;
-  final TimeChipType? timeChipType;
-  final String? recordGazeText;
-  final String? exactTimeText;
-
-  const _PrimaryExecutorCard({
-    super.key,
-    required this.model,
-    this.onDidIt,
-    this.onFocusTimer,
-    this.onSkip,
-    this.onRest,
-    this.onCreatePlan,
-    this.onModify, // Added
-    this.onAcceptPromise,
-    this.onRejectPromise,
-    this.onContinueAfterSettlement,
-    this.onExitAfterSettlement,
-    this.onAcknowledgePromiseSettled,
-    this.onDismissOptions,
-    this.onTap,
-    this.onHorizontalSwipe,
-    this.timeChipText,
-    this.timeChipType,
-    this.recordGazeText,
-    this.exactTimeText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return GestureDetector(
-      onTap: onTap,
-      onHorizontalDragEnd: onHorizontalSwipe,
-      child: Card(
-        elevation: 1,
-        margin: EdgeInsets.zero,
-        color: AppColors.surface.withValues(alpha: 0.7),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(4),
-          ),
-        ),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (model.state == HomeCardState.poked) ...[
-                    _PokeBadge(partnerName: model.partnerName),
-                    const SizedBox(height: 12),
-                  ],
-                  if (timeChipText != null && timeChipType != null)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Week indicator removed per user request
-                        exactTimeText != null
-                            ? Tooltip(
-                                message: exactTimeText!,
-                                triggerMode: TooltipTriggerMode.longPress,
-                                child: TimeChip(
-                                  text: timeChipText!,
-                                  type: timeChipType!,
-                                ),
-                              )
-                            : TimeChip(
-                                text: timeChipText!,
-                                type: timeChipType!,
-                              ),
-                      ],
-                    ),
-                  if (timeChipText != null && timeChipType != null)
-                    const SizedBox(height: 12),
-                  _buildMessage(context, l10n),
-                  if (recordGazeText != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      recordGazeText!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ],
-                  if (_shouldShowActivePromiseChip()) ...[
-                    const SizedBox(height: 12),
-                    ActivePromiseChip(plan: model.plan!),
-                  ],
-                  const SizedBox(height: 20),
-                  _buildButton(context, l10n),
-                ],
-              ),
-            ),
-            if ((model.state == HomeCardState.nowAction ||
-                    model.state == HomeCardState.overdue ||
-                    model.state == HomeCardState.poked) &&
-                onDismissOptions != null)
-              Positioned(
-                top: 4,
-                right: 4,
-                child: IconButton(
-                  onPressed: onDismissOptions,
-                  iconSize: 20,
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.all(6),
-                  constraints: const BoxConstraints(),
-                  tooltip: AppLocalizations.of(context)!.nowDeferMenuTooltip,
-                  icon: Icon(
-                    Icons.close_rounded,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  bool _shouldShowActivePromiseChip() {
-    final plan = model.plan;
-    final promise = plan?.promise;
-    if (plan == null || promise == null) return false;
-    if (promise.status != PromiseStatus.active) return false;
-    return model.state == HomeCardState.nowAction ||
-        model.state == HomeCardState.poked ||
-        model.state == HomeCardState.overdue;
-  }
-
-  /// TodayComplete + 다중 플랜용 메시지 영역.
-  /// 카운트 헤드라인 + 각 플랜의 체크리스트 row(스트릭이 있으면 작은 뱃지).
-  Widget _buildMultiPlanCompleteMessage(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
-    final plans = model.completedPlans;
-    final children = <Widget>[
-      Text(
-        l10n.nowTodayAllDone(plans.length),
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.bold,
-          height: 1.5,
-        ),
-        textAlign: TextAlign.left,
-      ),
-      const SizedBox(height: 12),
-    ];
-
-    for (var i = 0; i < plans.length; i++) {
-      if (i > 0) children.add(const SizedBox(height: 8));
-      children.add(_buildCompletedPlanRow(context, plans[i]));
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
-    );
-  }
-
-  Widget _buildCompletedPlanRow(BuildContext context, Plan plan) {
-    final title = plan.items.firstOrNull?.title ?? '';
-    final streak = plan.currentStreak;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Icon(Icons.check_circle, size: 18, color: AppColors.primary),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textPrimary,
-              height: 1.4,
-            ),
-          ),
-        ),
-        if (streak >= 2) ...[
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.local_fire_department,
-                  size: 12,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  '$streak',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildMessage(BuildContext context, AppLocalizations l10n) {
-    // 오늘 완료한 플랜이 둘 이상이면 체크리스트로 보여줘 성취의 규모가 드러나게 한다.
-    if (model.state == HomeCardState.todayComplete &&
-        model.completedPlans.length >= 2) {
-      return _buildMultiPlanCompleteMessage(context, l10n);
-    }
-
-    final title = model.plan?.items.firstOrNull?.title;
-    final List<Widget> children = [];
-
-    // Title (if applicable)
-    if (title != null) {
-      children.add(
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-            height: 1.5,
-          ),
-          textAlign: TextAlign.left,
-        ),
-      );
-
-      // Description
-      final description = model.plan?.items.firstOrNull?.description;
-      if (description != null && description.isNotEmpty) {
-        children.add(const SizedBox(height: 4));
-        children.add(
-          Text(
-            description,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.4,
-            ),
-            textAlign: TextAlign.left,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-      }
-    }
-
-    // 스트릭 배지
-    if (model.streakCount != null && model.streakCount! >= 2) {
-      children.add(const SizedBox(height: 8));
-      children.add(
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            l10n.nowStreakCount(model.streakCount!),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-        ),
-      );
-    }
-
-    String? statusMessage = model.headerMessage;
-    String? subMessage; // Added for Type 2-1, 2-2 A/B, etc.
-
-    if (statusMessage == null) {
-      switch (model.state) {
-        case HomeCardState.nowAction: // Type 1: 지금 실천
-          // statusMessage = l10n.homeNowTask; // Removed per user request
-          break;
-        case HomeCardState.overdue: // Type 5: 지난 실천
-          // statusMessage = l10n.timePassedActorMessage; // Removed per user request
-          // subMessage = l10n.timePassedActorSubMessage;
-          break;
-        case HomeCardState.emptyPlan: // Type 2-1: 계획 필요
-          statusMessage = l10n.nowNoPlan;
-          subMessage = l10n.nowNoPlanSubtitle;
-          break;
-        case HomeCardState.todayComplete: // Type 2-2 A: 오늘 완료
-          statusMessage = l10n.nowTodayDone;
-          // Sub-message for next promise can be handled via upcoming schedule if available
-          break;
-        case HomeCardState.todayEmpty: // Type 2-2 B: 여유로운 날
-          statusMessage = l10n.nowQuietRest;
-          break;
-        case HomeCardState.rejected: // Type 1-7: 반려됨
-          statusMessage = l10n.nowHeaderAdjustNeeded;
-          break;
-        case HomeCardState.nextAction: // Type 1-3: 다음 일정 (이따·아무 때나)
-          final nt = model.plan?.items.firstOrNull?.notificationTime;
-          final hasTime = nt != null && nt.type != 'none';
-          statusMessage = hasTime
-              ? l10n.nowNextActionLater
-              : l10n.nowNextActionAnytime;
-          break;
-        case HomeCardState.poked:
-          // 똑똑 배지에서 안내하므로 별도 statusMessage 없음
-          break;
-        case HomeCardState.promiseProposed:
-          statusMessage = l10n.nowHeaderPromiseProposed;
-          break;
-        case HomeCardState.promiseSettled:
-          statusMessage = l10n.nowHeaderPromiseSettled;
-          break;
-        case HomeCardState.pilotSettlement:
-          statusMessage = l10n.nowHeaderSettlementNeeded;
-          subMessage = l10n.nowHeaderSettlementSub;
-          break;
-        default:
-          break;
-      }
-    }
-
-    if (statusMessage != null) {
-      if (children.isNotEmpty) children.add(const SizedBox(height: 8));
-      children.add(
-        ReactionText(
-          statusMessage,
-          style:
-              (title != null
-                      ? Theme.of(context).textTheme.bodyMedium
-                      : Theme.of(context).textTheme.titleLarge)
-                  ?.copyWith(
-                    color: title != null
-                        ? AppColors.textSecondary
-                        : AppColors.textPrimary,
-                    height: 1.5,
-                  ),
-          textAlign: TextAlign.left,
-        ),
-      );
-    }
-
-    // Render Sub-message if exists (e.g. for Plan Needed)
-    if (subMessage != null) {
-      children.add(const SizedBox(height: 4));
-      children.add(
-        Text(
-          subMessage,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
-            height: 1.5,
-          ),
-          textAlign: TextAlign.left,
-        ),
-      );
-    }
-
-    // ----------------------------------------------------
-    // 1. lastActionNote (실천자 한마디 - 나/파트너 공통)
-    // 날짜 라벨을 위에 붙여 "오늘은 ..."이 어제 작성된 메모임을 분명히 한다.
-    // ----------------------------------------------------
-    if (model.plan?.lastActionNote != null &&
-        model.plan!.lastActionNote!.isNotEmpty) {
-      children.add(const SizedBox(height: 12));
-      children.add(
-        _buildDatedNoteBubble(
-          context,
-          l10n: l10n,
-          text: model.plan!.lastActionNote!,
-          date: _lastActionNoteDate(model.plan!),
-          background: AppColors.background.withValues(alpha: 0.5),
-          noteColor: AppColors.textPrimary,
-          noteItalic: true,
-          radius: const BorderRadius.only(
-            topRight: Radius.circular(12),
-            bottomLeft: Radius.circular(12),
-            bottomRight: Radius.circular(12),
-            topLeft: Radius.circular(2),
-          ),
-        ),
-      );
-    }
-
-    // ----------------------------------------------------
-    // 2. lastComment (매니저 피드백/응원)
-    // lastCheerAt 기준으로 날짜 라벨을 붙인다.
-    // lastCheerType(👍/❤️/💪 같은 리액션 이모지)과 lastComment를 나란히
-    // 놓으면 ① 파트너가 보통 코멘트에도 이모지를 같이 치기 때문에 의미가
-    // 중복되고 ② 두 Text의 fontSize/strut이 달라 윗선이 어긋난다.
-    // ----------------------------------------------------
-    if (model.plan?.lastComment != null &&
-        model.plan!.lastComment!.isNotEmpty) {
-      children.add(const SizedBox(height: 8));
-      children.add(
-        _buildDatedNoteBubble(
-          context,
-          l10n: l10n,
-          text: model.plan!.lastComment!,
-          date: model.plan!.lastCheerAt,
-          background: AppColors.primary.withValues(alpha: 0.1),
-          noteColor: AppColors.primary,
-          dateLabelColor: AppColors.primary.withValues(alpha: 0.75),
-          noteWeight: FontWeight.w600,
-          radius: BorderRadius.circular(12),
-        ),
-      );
-    }
-
-    // ----------------------------------------------------
-    // 3. Promise 상세 (약속 제안/정산 결과)
-    // ----------------------------------------------------
-    if (model.plan?.promise != null) {
-      final promise = model.plan!.promise!;
-      if (model.state == HomeCardState.promiseProposed ||
-          model.state == HomeCardState.promiseSettled) {
-        children.add(const SizedBox(height: 12));
-        children.add(_buildPromiseDetail(context, promise));
-      }
-    }
-
-    if (model.state == HomeCardState.pilotSettlement && model.plan != null) {
-      children.add(const SizedBox(height: 12));
-      children.add(_buildPilotSettlementDetail(context, model.plan!));
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
-    );
-  }
-
-  Widget _buildPilotSettlementDetail(BuildContext context, Plan plan) {
-    final l10n = AppLocalizations.of(context)!;
-    final totalScheduled = _scheduledDaysCount(plan);
-    final completed = plan.completedDates.length;
-    final feedback = _partnerFeedbackCount(plan);
-    final missed = (totalScheduled - completed).clamp(0, totalScheduled);
-
-    // Judge the outcome against the goal the user actually set with their
-    // partner (the reward target) — not a fixed day count. A short plan (e.g.
-    // 2x/week → 8 scheduled days) can never reach an absolute threshold, so a
-    // perfect run used to read as a failure. With no reward promise there is no
-    // win/lose at all, so we show a neutral wrap-up message instead.
-    final rewardTarget = plan.promise?.reward?.targetDays;
-    final String settlementMessage;
-    if (rewardTarget == null) {
-      settlementMessage = l10n.nowSettlementNeutralMessage;
-    } else if (completed >= rewardTarget) {
-      settlementMessage = l10n.nowSettlementWinMessage;
-    } else {
-      settlementMessage = l10n.nowSettlementLoseMessage;
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _buildSettlementMetric(
-                  l10n.nowMetricCompleted,
-                  l10n.nowMetricDaysSuffix(completed),
-                ),
-              ),
-              Expanded(
-                child: _buildSettlementMetric(
-                  l10n.nowMetricPartnerReact,
-                  l10n.nowMetricCountSuffix(feedback),
-                ),
-              ),
-              Expanded(
-                child: _buildSettlementMetric(
-                  l10n.nowMetricMissed,
-                  l10n.nowMetricDaysSuffix(missed),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            settlementMessage,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettlementMetric(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w800,
-            fontSize: 16,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
-        ),
-      ],
-    );
-  }
-
-  int _scheduledDaysCount(Plan plan) {
-    return plan.scheduledDayCount;
-  }
-
-  int _partnerFeedbackCount(Plan plan) {
-    var count = plan.verifiedDates.length + plan.rescuedDates.length;
-    if (plan.lastCheerAt != null) count++;
-    if (plan.lastPokeAt != null) count++;
-    return count;
-  }
-
-  Widget _buildPromiseDetail(BuildContext context, Promise promise) {
-    final l10n = AppLocalizations.of(context)!;
-    final isSettled = promise.status == PromiseStatus.settled;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (promise.reward != null) ...[
-            Row(
-              children: [
-                const Text('🏆', style: TextStyle(fontSize: 16)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.nowRewardCondition(
-                      promise.reward!.targetDays,
-                      promise.reward!.description,
-                    ),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                if (isSettled)
-                  _buildSettlementBadge(context, promise, isReward: true),
-              ],
-            ),
-          ],
-          if (promise.reward != null && promise.penalty != null)
-            const SizedBox(height: 8),
-          if (promise.penalty != null) ...[
-            Row(
-              children: [
-                const Text('⚡', style: TextStyle(fontSize: 16)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.nowPenaltyCondition(
-                      promise.penalty!.targetDays,
-                      promise.penalty!.description,
-                    ),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                if (isSettled)
-                  _buildSettlementBadge(context, promise, isReward: false),
-              ],
-            ),
-          ],
-          if (isSettled && promise.settledSuccessDays != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              l10n.nowPromiseResult(
-                promise.settledSuccessDays!,
-                promise.settledFailDays ?? 0,
-              ),
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettlementBadge(
-    BuildContext context,
-    Promise promise, {
-    required bool isReward,
-  }) {
-    final result = promise.settlementResult;
-    final bool achieved;
-    if (isReward) {
-      achieved =
-          result == SettlementResult.rewardAchieved ||
-          result == SettlementResult.bothMet;
-    } else {
-      achieved =
-          result == SettlementResult.penaltyTriggered ||
-          result == SettlementResult.bothMet;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: achieved
-            ? (isReward ? AppColors.success : AppColors.error).withValues(
-                alpha: 0.15,
-              )
-            : AppColors.disabled.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        achieved
-            ? (isReward
-                  ? AppLocalizations.of(context)!.nowAchieved
-                  : AppLocalizations.of(context)!.nowTriggered)
-            : AppLocalizations.of(context)!.nowNotMet,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: achieved
-              ? (isReward ? AppColors.success : AppColors.error)
-              : AppColors.textDisabled,
-          fontWeight: FontWeight.bold,
-          fontSize: 11,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPromiseProposedButtons(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: onRejectPromise,
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: AppColors.primary),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  AppLocalizations.of(context)!.nowDecline,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: onAcceptPromise,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  AppLocalizations.of(context)!.nowAccept,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPromiseSettledButton(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: onAcknowledgePromiseSettled,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              l10n.nowPromiseAckButton,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// nextAction(이따·아무 때나) 카드용 약한 액션 버튼.
-  /// 채워진 "했어" 버튼 대신 외곽선 버튼을 써서 "지금 당장"이 아님을 시각적으로 전달한다.
-  Widget _buildNextActionButton(BuildContext context, AppLocalizations l10n) {
-    final nt = model.plan?.items.firstOrNull?.notificationTime;
-    final hasTime = nt != null && nt.type != 'none';
-    final label = hasTime ? l10n.nowDoEarly : l10n.nowDoAnytime;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: onDidIt,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: BorderSide(color: AppColors.primary, width: 1.2),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildButton(BuildContext context, AppLocalizations l10n) {
-    final buttonTextColor = Colors.white;
-    VoidCallback? onPressed;
-    String buttonText;
-
-    if (model.state == HomeCardState.pilotSettlement) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onContinueAfterSettlement,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                l10n.nowContinueNext4Weeks,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: onExitAfterSettlement,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.textSecondary,
-              minimumSize: const Size(double.infinity, 32),
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: AppUnderlinedText(
-              l10n.nowStopHere,
-              style: const TextStyle(fontSize: 13),
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (model.state == HomeCardState.nowAction ||
-        model.state == HomeCardState.poked) {
-      buttonText = l10n.homeDidIt;
-      onPressed = onDidIt;
-    } else if (model.state == HomeCardState.overdue) {
-      buttonText = l10n.homeDidIt;
-      onPressed = onDidIt;
-    } else if (model.state == HomeCardState.emptyPlan) {
-      buttonText = l10n.nowCreatePlan;
-      onPressed = onCreatePlan;
-    } else if (model.state == HomeCardState.rejected) {
-      buttonText = l10n.nowModify;
-      onPressed = onModify;
-    } else if (model.state == HomeCardState.promiseProposed) {
-      return _buildPromiseProposedButtons(context);
-    } else if (model.state == HomeCardState.promiseSettled) {
-      return _buildPromiseSettledButton(context, l10n);
-    } else if (model.state == HomeCardState.todayComplete ||
-        model.state == HomeCardState.todayEmpty) {
-      // "작은 버튼" 요청: TextButton으로 구현
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: TextButton(
-          onPressed: onCreatePlan,
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.textSecondary,
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppUnderlinedText(
-                l10n.nowAddMorePlan,
-                style: const TextStyle(fontSize: 14),
-              ),
-              const SizedBox(width: 4),
-              const Icon(Icons.arrow_forward_ios, size: 10),
-            ],
-          ),
-        ),
-      );
-    } else if (model.state == HomeCardState.nextAction) {
-      // 아직 시간이 안 된 항목: 압박 없이 "미리 할 수 있다"는 약한 액션만 제공.
-      return _buildNextActionButton(context, l10n);
-    } else {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: onPressed,
-            style:
-                ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: buttonTextColor,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ).copyWith(
-                  overlayColor: WidgetStateProperty.resolveWith<Color?>((
-                    states,
-                  ) {
-                    if (states.contains(WidgetState.pressed)) {
-                      return AppColors.primaryPressed;
-                    }
-                    return null;
-                  }),
-                ),
-            child: Text(
-              buttonText,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: buttonTextColor,
-              ),
-            ),
-          ),
-        ),
-        // 지금 할게! (집중 타이머)
-        if ((model.state == HomeCardState.nowAction ||
-                model.state == HomeCardState.poked) &&
-            onFocusTimer != null) ...[
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: onFocusTimer,
-              icon: Icon(
-                Icons.timer_outlined,
-                size: 18,
-                color: AppColors.primary,
-              ),
-              label: Text(
-                l10n.nowStartFocusTimer,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.primary, width: 1.2),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-        ],
-        // 휴식권 버튼 (nowAction에서 사용 가능 시)
-        if ((model.state == HomeCardState.nowAction ||
-                model.state == HomeCardState.poked) &&
-            onRest != null &&
-            model.plan?.canUseRestToday == true) ...[
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: onRest,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.textSecondary,
-              minimumSize: const Size(double.infinity, 32),
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: AppUnderlinedText(
-              l10n.nowRestToday,
-              style: const TextStyle(fontSize: 13),
-            ),
-          ),
-        ],
-        if (model.state == HomeCardState.overdue && onSkip != null) ...[
-          const SizedBox(height: 12),
-          // 휴식권 우선, 없으면 skip
-          if (onRest != null && model.plan?.canUseRestToday == true)
-            TextButton(
-              onPressed: onRest,
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.textSecondary,
-                minimumSize: const Size(double.infinity, 32),
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: AppUnderlinedText(
-                l10n.nowRestToday,
-                style: const TextStyle(fontSize: 13),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: onSkip,
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.textSecondary,
-                minimumSize: const Size(double.infinity, 32),
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: AppUnderlinedText(
-                l10n.nowActionSkipToday,
-                style: const TextStyle(fontSize: 13),
-              ),
-            ),
-        ],
-      ],
-    );
-  }
-}
-
-class _SecondaryExecutorCard extends StatelessWidget {
-  final HomeCardModel model;
-  final String? timeChipText;
-  final TimeChipType? timeChipType;
-  final String? exactTimeText;
-
-  final VoidCallback? onReconcile;
-
-  const _SecondaryExecutorCard({
-    required this.model,
-    this.timeChipText,
-    this.timeChipType,
-    this.onReconcile,
-    this.exactTimeText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    // Checked 상태인 경우 다른 레이아웃 적용
-    if (model.state == HomeCardState.todayComplete) {
-      return _buildCheckedCard(context, l10n);
-    }
-
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: AppColors.surface.withValues(alpha: 0.7),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(4),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // Fixed: Left alignment
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    if (model.partnerName != null) ...[
-                      CircleAvatar(
-                        radius: 12,
-                        backgroundColor: AppColors.primary,
-                        backgroundImage: model.partnerImageUrl != null
-                            ? NetworkImage(model.partnerImageUrl!)
-                            : null,
-                        child: model.partnerImageUrl == null
-                            ? const Icon(
-                                Icons.person,
-                                size: 14,
-                                color: Colors.white,
-                              )
-                            : null,
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-
-                    // Week indicator removed
-                  ],
-                ),
-                if (timeChipText != null && timeChipType != null) ...[
-                  if (exactTimeText != null)
-                    Tooltip(
-                      message: exactTimeText!,
-                      triggerMode: TooltipTriggerMode.longPress,
-                      child: TimeChip(text: timeChipText!, type: timeChipType!),
-                    )
-                  else
-                    TimeChip(text: timeChipText!, type: timeChipType!),
-                ],
-              ],
-            ),
-            if (timeChipText != null && timeChipType != null)
-              const SizedBox(height: 8),
-            _buildMessage(context, l10n),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCheckedCard(BuildContext context, AppLocalizations l10n) {
-    final title = model.plan?.items.firstOrNull?.title ?? '';
-    final now = DateTime.now();
-    final dateStr =
-        '${now.month}.${now.day} (${_getWeekdayStr(now.weekday, l10n)})';
-
-    // 긍정 메시지 중 하나 선택
-    final messages = [
-      l10n.nowLateCompletion,
-      l10n.nowLateJustInTime,
-      l10n.nowWithinToday,
-    ];
-    final message = messages[now.second % messages.length];
-
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: AppColors.surface.withValues(alpha: 0.5),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(4),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  dateStr,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    l10n.nowStatusActuallyDone,
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title.isNotEmpty ? title : l10n.nowMissedPlanFallback,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            // 작은 말풍선 스타일 (Low Intensity)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.background.withValues(alpha: 0.3),
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                  topLeft: Radius.circular(2),
-                ),
-              ),
-              child: Text(
-                message,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                  height: 1.4,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _getWeekdayStr(int weekday, AppLocalizations l10n) {
-    switch (weekday) {
-      case 1:
-        return l10n.planDetailDayMon;
-      case 2:
-        return l10n.planDetailDayTue;
-      case 3:
-        return l10n.planDetailDayWed;
-      case 4:
-        return l10n.planDetailDayThu;
-      case 5:
-        return l10n.planDetailDayFri;
-      case 6:
-        return l10n.planDetailDaySat;
-      case 7:
-        return l10n.planDetailDaySun;
-      default:
-        return '';
-    }
-  }
-
-  Widget _buildMessage(BuildContext context, AppLocalizations l10n) {
-    final title = model.plan?.items.firstOrNull?.title;
-    final List<Widget> children = [];
-
-    // Title
-    if (title != null) {
-      children.add(
-        Text(
-          title,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-            height: 1.4,
-          ),
-          textAlign: TextAlign.left,
-        ),
-      );
-
-      // Description
-      final description = model.plan?.items.firstOrNull?.description;
-      if (description != null && description.isNotEmpty) {
-        children.add(const SizedBox(height: 4));
-        children.add(
-          Text(
-            description,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.4,
-            ),
-            textAlign: TextAlign.left,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-      }
-    }
-
-    String? statusMessage;
-    // Secondary card doesn't usually use subMessage but for consistency can add if needed.
-    // However, specs target mostly primary card.
-
-    if (model.state == HomeCardState.partnerAction) {
-      // "000님이 아침 약 챙겨먹기를... 했어요"
-      // final action = ...
-      // For now, simpler text construction
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          RichText(
-            text: TextSpan(
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textPrimary,
-                height: 1.4,
-              ),
-              children: [
-                TextSpan(
-                  text: title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(
-                  text: '${_particleEulReul(title ?? '', l10n.localeName)}\n',
-                ),
-                TextSpan(
-                  text: l10n.nowPartnerDidIt,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
-          // Description
-          if (model.plan?.items.firstOrNull?.description != null)
-            Text(
-              model.plan!.items.firstOrNull!.description!,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          // ----------------------------------------------------
-          // 1. lastActionNote (실천자 한마디) — 날짜 라벨 포함
-          // ----------------------------------------------------
-          if (model.plan?.lastActionNote != null &&
-              model.plan!.lastActionNote!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            _buildDatedNoteBubble(
-              context,
-              l10n: l10n,
-              text: model.plan!.lastActionNote!,
-              date: _lastActionNoteDate(model.plan!),
-              background: AppColors.background.withValues(alpha: 0.5),
-              noteColor: AppColors.textPrimary,
-              noteItalic: true,
-              radius: const BorderRadius.only(
-                topRight: Radius.circular(12),
-                bottomLeft: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-                topLeft: Radius.circular(2),
-              ),
-            ),
-          ],
-          // ----------------------------------------------------
-          // 2. lastComment (매니저 피드백) — lastCheerAt 기준 날짜 라벨
-          // ----------------------------------------------------
-          if (model.plan?.lastComment != null &&
-              model.plan!.lastComment!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            _buildDatedNoteBubble(
-              context,
-              l10n: l10n,
-              text: model.plan!.lastComment!,
-              date: model.plan!.lastCheerAt,
-              background: AppColors.primary.withValues(alpha: 0.1),
-              noteColor: AppColors.primary,
-              dateLabelColor: AppColors.primary.withValues(alpha: 0.75),
-              noteWeight: FontWeight.w600,
-              radius: BorderRadius.circular(12),
-            ),
-          ],
-        ],
-      );
-    }
-
-    switch (model.state) {
-      case HomeCardState.partnerAction:
-        statusMessage = l10n.nowVerifyingDeadline;
-        break;
-      case HomeCardState.todayEmpty:
-        statusMessage = l10n.nowQuietRest;
-        break;
-      case HomeCardState.overdue:
-        // statusMessage = l10n.timePassedActorMessage;
-        break;
-      default:
-        break;
-    }
-
-    if (statusMessage != null) {
-      if (children.isNotEmpty) children.add(const SizedBox(height: 4));
-      children.add(
-        Text(
-          statusMessage,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: title != null
-                ? AppColors.textSecondary
-                : AppColors.textPrimary,
-            height: 1.4,
-          ),
-          textAlign: TextAlign.left,
-        ),
-      );
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
-    );
-  }
-}
-
-class _ManagerQuickCard extends StatelessWidget {
-  final HomeCardModel model;
-  final String? partnerName;
-  final VoidCallback? onCheckIt;
-  final VoidCallback? onCheer;
-  final VoidCallback? onPass;
-  final VoidCallback? onSimpleCheer;
-  final VoidCallback? onMoreCheer;
-  final VoidCallback? onReject;
-  final VoidCallback? onPokeUser;
-  final VoidCallback? onPokePartner; // Added
-  final VoidCallback? onRescue; // 실천 인정
-  final VoidCallback? onProposePromise;
-  final VoidCallback? onAcknowledgePromiseSettled;
-  final String? timeChipText;
-  final TimeChipType? timeChipType;
-  final String? exactTimeText;
-
-  const _ManagerQuickCard({
-    required this.model,
-    this.partnerName,
-    this.onCheckIt,
-    this.onCheer,
-    this.onPass,
-    this.onSimpleCheer,
-    this.onMoreCheer,
-    this.onReject,
-    this.onPokeUser,
-    this.onPokePartner,
-    this.onRescue,
-    this.onProposePromise,
-    this.onAcknowledgePromiseSettled,
-    this.timeChipText,
-    this.timeChipType,
-    this.exactTimeText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final isPartnerTodayComplete =
-        model.state == HomeCardState.partnerTodayComplete;
-
-    String headerText;
-    if (isPartnerTodayComplete) {
-      headerText = l10n.nowHeaderTodayAllDone;
-    } else if (model.state == HomeCardState.partnerAction) {
-      headerText = l10n.nowHeaderConfirmAndPull;
-    } else if (model.state == HomeCardState.partnerPlanCreate ||
-        model.state == HomeCardState.partnerPlanModify) {
-      if (model.headerMessage == '조정 중' ||
-          model.headerMessage == '같이 맞춰보는 중이에요' ||
-          model.headerMessage == 'Adjusting' ||
-          model.headerMessage == 'Working it out together') {
-        headerText = l10n.nowPartnerAdjusting;
-      } else {
-        headerText = l10n.nowPartnerProposed;
-      }
-    } else if (model.state == HomeCardState.partnerNoPlan) {
-      headerText = l10n.nowHeaderWaiting;
-    } else if (model.state == HomeCardState.partnerPromiseProposed) {
-      headerText = l10n.nowHeaderWaitingAccept;
-    } else if (model.state == HomeCardState.promiseSettled) {
-      headerText = l10n.nowHeaderPromiseResult;
-    } else {
-      headerText = model.headerMessage ?? l10n.homeReceivedMessage;
-    }
-
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: AppColors.surface.withValues(alpha: 0.6),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-          bottomLeft: Radius.circular(4),
-          bottomRight: Radius.circular(20),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                if (partnerName != null) ...[
-                  CircleAvatar(
-                    radius: 14,
-                    backgroundColor: AppColors.primary,
-                    backgroundImage: model.partnerImageUrl != null
-                        ? NetworkImage(model.partnerImageUrl!)
-                        : null,
-                    child: model.partnerImageUrl == null
-                        ? const Icon(
-                            Icons.person,
-                            size: 16,
-                            color: Colors.white,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                ],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Week indicator removed
-                      Text(
-                        headerText,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textPrimary,
-                          height: 1.4,
-                          fontSize: 16,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ],
-                  ),
-                ),
-                if (timeChipText != null && timeChipType != null) ...[
-                  const SizedBox(width: 8),
-                  if (exactTimeText != null)
-                    Tooltip(
-                      message: exactTimeText!,
-                      triggerMode: TooltipTriggerMode.longPress,
-                      child: TimeChip(text: timeChipText!, type: timeChipType!),
-                    )
-                  else
-                    TimeChip(text: timeChipText!, type: timeChipType!),
-                ],
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Title (Diff Aware)
-            if (!isPartnerTodayComplete &&
-                model.plan?.items.firstOrNull?.title != null) ...[
-              SizedBox(
-                width: double.infinity,
-                child: _buildDiffText(
-                  context,
-                  current: model.plan!.items.firstOrNull!.title,
-                  previous: model.previousPlan?.items.firstOrNull?.title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 4),
-            ],
-            // Scale & Period
-            if (!isPartnerTodayComplete && model.plan != null)
-              _buildPlanDetails(context, model.plan!, l10n),
-            const SizedBox(height: 8),
-            // Description (Diff Aware)
-            if (!isPartnerTodayComplete &&
-                model.plan?.items.firstOrNull?.description != null) ...[
-              SizedBox(
-                width: double.infinity,
-                child: _buildDiffText(
-                  context,
-                  current: model.plan!.items.firstOrNull!.description,
-                  previous: model.previousPlan?.items.firstOrNull?.description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                    height: 1.4,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-            if (isPartnerTodayComplete) ...[
-              _buildPartnerTodayCompleteMessage(context),
-            ],
-            // Button (Only for partnerActionShare/partnerPlanShare that needs action)
-            if (model.state == HomeCardState.partnerPlanCreate ||
-                model.state == HomeCardState.partnerPlanModify) ...[
-              if (model.headerMessage != '함께하는 중' &&
-                  model.headerMessage != 'Working together') ...[
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: onReject,
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.primary),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          l10n.nowAdjust,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: onCheckIt,
-                        style:
-                            ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ).copyWith(
-                              overlayColor:
-                                  WidgetStateProperty.resolveWith<Color?>((
-                                    states,
-                                  ) {
-                                    if (states.contains(WidgetState.pressed)) {
-                                      return AppColors.primaryPressed;
-                                    }
-                                    return null;
-                                  }),
-                            ),
-                        child: Text(
-                          l10n.nowApprove,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-
-            // Button (Partner No Plan - Poke)
-            if (model.state == HomeCardState.partnerNoPlan) ...[
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: Text(
-                  l10n.nowPartnerNoNewPlanGuide,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: onPokeUser,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
-                    foregroundColor: AppColors.textPrimary,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    l10n.nowKnockMakePlan,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ] else if (model.state == HomeCardState.partnerPoke) ...[
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: Text(
-                  model.hasMissedNotice
-                      ? l10n.nowPartnerMissedPokeBody(
-                          partnerName ?? l10n.nowPartnerFallback2,
-                        )
-                      : l10n.nowPartnerQuietPokeBody(
-                          partnerName ?? l10n.nowPartnerFallback2,
-                        ),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: onPokePartner,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
-                    foregroundColor: AppColors.textPrimary,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    l10n.nowKnockPull,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              // 실천 인정 버튼 (어제 놓친 경우)
-              if (model.canRescue && onRescue != null) ...[
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: onRescue,
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.textSecondary,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.volunteer_activism,
-                          size: 16,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        AppUnderlinedText(
-                          l10n.nowRescueYesterday,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ] else if (model.state == HomeCardState.partnerAction ||
-                model.state == HomeCardState.partnerTodayComplete) ...[
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: onSimpleCheer ?? onCheckIt,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      l10n.nowVerifyAndCheer,
-                      maxLines: 1,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ] else if (model.state == HomeCardState.partnerPromiseProposed) ...[
-              const SizedBox(height: 12),
-              if (model.plan?.promise != null)
-                _buildManagerPromiseDetail(context, model.plan!.promise!),
-            ] else if (model.state == HomeCardState.promiseSettled) ...[
-              const SizedBox(height: 12),
-              if (model.plan?.promise != null)
-                _buildManagerPromiseDetail(context, model.plan!.promise!),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: onAcknowledgePromiseSettled,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    l10n.nowPromiseAckButton,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            // "약속 걸기" 버튼 (partnerPoke, partnerPlanCreate에서 약속 없을 때)
-            if ((model.state == HomeCardState.partnerPoke ||
-                    model.state == HomeCardState.partnerPlanCreate ||
-                    model.state == HomeCardState.partnerAction) &&
-                (model.plan?.promise == null ||
-                    model.plan?.promise?.status == PromiseStatus.rejected)) ...[
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: onProposePromise,
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.secondary,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.handshake_outlined,
-                        size: 16,
-                        color: AppColors.secondary,
-                      ),
-                      const SizedBox(width: 4),
-                      AppUnderlinedText(
-                        l10n.nowMakePromise,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.secondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPartnerTodayCompleteMessage(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final resolvedPartnerName = (partnerName?.trim().isNotEmpty ?? false)
-        ? partnerName!.trim()
-        : l10n.nowPartnerFallback2;
-    final title = model.plan?.items.firstOrNull?.title;
-    final note = model.plan?.lastActionNote?.trim();
-
-    return SizedBox(
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.check_circle_outline,
-                size: 20,
-                color: AppColors.primary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.nowPartnerAllDone(resolvedPartnerName),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w700,
-                    height: 1.35,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.nowQuickCheckHelp,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.45,
-            ),
-          ),
-          if (title != null && title.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Text(
-              l10n.nowLastAction(title),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.4,
-              ),
-            ),
-          ],
-          if (note != null && note.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            _buildDatedNoteBubble(
-              context,
-              l10n: l10n,
-              text: note,
-              date: model.plan != null
-                  ? _lastActionNoteDate(model.plan!)
-                  : null,
-              background: AppColors.background.withValues(alpha: 0.5),
-              noteColor: AppColors.textPrimary,
-              noteItalic: true,
-              radius: const BorderRadius.only(
-                topRight: Radius.circular(12),
-                bottomLeft: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-                topLeft: Radius.circular(2),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildManagerPromiseDetail(BuildContext context, Promise promise) {
-    final l10n = AppLocalizations.of(context)!;
-    final isSettled = promise.status == PromiseStatus.settled;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.background.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (promise.reward != null) ...[
-            Text(
-              l10n.nowRewardLine(
-                promise.reward!.targetDays,
-                promise.reward!.description,
-              ),
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
-            ),
-          ],
-          if (promise.reward != null && promise.penalty != null)
-            const SizedBox(height: 4),
-          if (promise.penalty != null) ...[
-            Text(
-              l10n.nowPenaltyLine(
-                promise.penalty!.targetDays,
-                promise.penalty!.description,
-              ),
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
-            ),
-          ],
-          if (isSettled && promise.settledSuccessDays != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              l10n.nowResultLine(
-                promise.settledSuccessDays!,
-                promise.settledFailDays ?? 0,
-              ),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            if (promise.settlementResult != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                _settlementResultText(promise.settlementResult!, l10n),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ] else ...[
-            const SizedBox(height: 4),
-            Text(
-              l10n.nowWaitingApproval,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  String _settlementResultText(SettlementResult result, AppLocalizations l10n) {
-    switch (result) {
-      case SettlementResult.rewardAchieved:
-        return l10n.nowRewardAchievedTitle;
-      case SettlementResult.penaltyTriggered:
-        return l10n.nowPenaltyTriggeredTitle;
-      case SettlementResult.bothMet:
-        return l10n.nowBothTitle;
-      case SettlementResult.neitherMet:
-        return l10n.nowConditionNotMet;
-    }
-  }
-
-  Widget _buildDiffText(
-    BuildContext context, {
-    required String? current,
-    required String? previous,
-    required TextStyle? style,
-  }) {
-    // 변경된 내용이 없거나 previous가 없으면 현재 내용만 표시
-    if (previous == null || current == previous) {
-      return Text(current ?? '', style: style, textAlign: TextAlign.left);
-    }
-
-    // 변경된 내용이 있으면 취소선(Before) -> Normal(After) 표시
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          previous,
-          style: style?.copyWith(
-            decoration: TextDecoration.lineThrough,
-            color: AppColors.textSecondary.withValues(alpha: 0.7),
-            // 취소선 스타일 조정 (선택 사항)
-            decorationColor: AppColors.textSecondary,
-          ),
-          textAlign: TextAlign.left,
-        ),
-        // 약간의 간격? 원한다면 추가. 현재 요구사항엔 명시 없음.
-        Text(current ?? '', style: style, textAlign: TextAlign.left),
-      ],
-    );
-  }
-
-  Widget _buildPlanDetails(
-    BuildContext context,
-    Plan plan,
-    AppLocalizations l10n,
-  ) {
-    if (plan.items.isEmpty) return const SizedBox.shrink();
-    final item = plan.items.first;
-
-    // Period: 10.01(Mon) - 10.28(Sun)
-    final start = plan.startDate;
-    final end = plan.endDate;
-
-    String getWeekday(DateTime d) =>
-        TimeFormatter.getWeekdayName(l10n, d.weekday);
-    final periodStr =
-        '${start.month}.${start.day}(${getWeekday(start)}) - ${end.month}.${end.day}(${getWeekday(end)})';
-
-    // Days: Mon, Wed, Fri
-    final daysStr = item.days.length == 7
-        ? l10n.frequencyEveryday
-        : item.days
-              .map((d) => TimeFormatter.getWeekdayName(l10n, d))
-              .join(', ');
-
-    return SizedBox(
-      width: double.infinity,
-      child: Text(
-        '$periodStr · $daysStr',
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.textSecondary,
-          fontSize: 14, // Increased
-        ),
-        textAlign: TextAlign.left,
-      ),
-    );
-  }
-}
-
-class _ContextFooter extends StatelessWidget {
-  const _ContextFooter();
-
-  @override
-  Widget build(BuildContext context) {
-    final contextInfo = <String>[];
-    if (contextInfo.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      children: contextInfo.map((info) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            info,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-// _ReconcileMenu removed per user request (was unused after UI updates)
-
-extension GlassExtension on Widget {
-  Widget wrapWithGlass() {
-    return RepaintBoundary(
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface.withValues(alpha: 0.85),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.2),
-            width: 1.5,
-          ),
-        ),
-        child: this,
-      ),
-    );
-  }
-}
-
-class _PokeBadge extends StatelessWidget {
-  final String? partnerName;
-
-  const _PokeBadge({this.partnerName});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final label = partnerName == null || partnerName!.isEmpty
-        ? l10n.nowPokeReceived
-        : l10n.nowPokeReceivedFromName(partnerName!);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.notifications_active_outlined,
-            size: 14,
-            color: AppColors.primary,
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// lastActionNote가 작성된 시점 추정. reportCompletion에서 completedDates와
-/// lastActionNote가 함께 갱신되므로, 가장 최근 completedDate를 노트 작성일로
-/// 본다. 비어있으면 null.
-DateTime? _lastActionNoteDate(Plan plan) {
-  if (plan.completedDates.isEmpty) return null;
-  return plan.completedDates.reduce((a, b) => a.isAfter(b) ? a : b);
-}
-
-/// "오늘 / 어제 / N일 전 / M월 D일" 같은 짧은 날짜 라벨.
-/// 노트·코멘트 풍선의 상단에 작은 글씨로 박아 시간 맥락을 명시한다.
-String? _formatNoteDateLabel(AppLocalizations l10n, DateTime? date) {
-  if (date == null) return null;
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final target = DateTime(date.year, date.month, date.day);
-  final diffDays = today.difference(target).inDays;
-  if (diffDays <= 0) return l10n.nowNoteDateToday;
-  if (diffDays == 1) return l10n.timeChipYesterday;
-  if (diffDays <= 6) return l10n.timeChipDaysAgo(diffDays);
-  return l10n.timeChipDate(date.month, date.day);
-}
-
-/// 노트/코멘트 풍선을 그리는 공통 빌더. 날짜가 있으면 작은 라벨을 위에 붙인다.
-Widget _buildDatedNoteBubble(
-  BuildContext context, {
-  required AppLocalizations l10n,
-  required String text,
-  required DateTime? date,
-  required Color background,
-  required Color noteColor,
-  Color? dateLabelColor,
-  FontWeight noteWeight = FontWeight.w500,
-  bool noteItalic = false,
-  BorderRadius? radius,
-}) {
-  final dateLabel = _formatNoteDateLabel(l10n, date);
-  return Container(
-    width: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    decoration: BoxDecoration(
-      color: background,
-      borderRadius: radius ?? BorderRadius.circular(12),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (dateLabel != null) ...[
-          Text(
-            dateLabel,
-            style: TextStyle(
-              color: dateLabelColor ?? AppColors.textSecondary,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.2,
-            ),
-          ),
-          const SizedBox(height: 3),
-        ],
-        ReactionText(
-          text,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: noteColor,
-            fontWeight: noteWeight,
-            fontStyle: noteItalic ? FontStyle.italic : FontStyle.normal,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-/// 한국어 조사 을/를 판별 (받침 유무 기준)
-/// 영어 등 다른 로케일에서는 공백만 반환 (조사 개념 없음)
-String _particleEulReul(String text, [String locale = 'ko']) {
-  if (!locale.startsWith('ko')) return ' ';
-  if (text.isEmpty) return '를';
-  final lastChar = text.codeUnitAt(text.length - 1);
-  // 한글 유니코드 범위: 0xAC00 ~ 0xD7A3
-  if (lastChar >= 0xAC00 && lastChar <= 0xD7A3) {
-    return (lastChar - 0xAC00) % 28 == 0 ? '를' : '을';
-  }
-  return '를';
-}
-
-/// Primary 카드 캐러셀의 페이지 인디케이터 (점 + 카운터).
-class _PrimaryCarouselIndicator extends StatelessWidget {
-  final int count;
-  final int activeIndex;
-  final ValueChanged<int>? onTap;
-
-  const _PrimaryCarouselIndicator({
-    required this.count,
-    required this.activeIndex,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (int i = 0; i < count; i++)
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onTap == null ? null : () => onTap!(i),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              // Tap target stays comfortable while the dot itself is small.
-              margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
-              width: i == activeIndex ? 18 : 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: i == activeIndex
-                    ? AppColors.primary
-                    : AppColors.textDisabled.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

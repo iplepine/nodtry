@@ -7,6 +7,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../../utils/time_formatter.dart';
 import '../../../../utils/error_reporter.dart';
 import '../widgets/notification_setting_editor.dart';
+import '../../../connect/application/partner_label_provider.dart';
 // import '../../../../features/plan/domain/usecases/setting_alarm_use_case.dart'; // Unused
 import '../../../../models/history_item.dart';
 import 'package:nod_try/providers/repository_provider.dart';
@@ -119,9 +120,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           icon: Icon(Icons.close, color: AppColors.textPrimary),
           onPressed: () => context.pop(),
         ),
-        actions: [
-          if (isMine) _buildPlanMenu(context, ref, plan),
-        ],
+        actions: [if (isMine) _buildPlanMenu(context, ref, plan)],
       ),
       body: SafeArea(
         child: CustomScrollView(
@@ -267,19 +266,15 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
       style: ButtonStyle(
         visualDensity: VisualDensity.compact,
         textStyle: WidgetStatePropertyAll(
-          Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
 
-  Widget _buildHistorySliver(
-    BuildContext context,
-    WidgetRef ref,
-    Plan plan,
-  ) {
+  Widget _buildHistorySliver(BuildContext context, WidgetRef ref, Plan plan) {
     switch (_historyView) {
       case _HistoryViewMode.list:
         return _buildHistoryListSliver(context, ref, plan);
@@ -293,9 +288,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
       case _HistoryViewMode.graph:
         return SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          sliver: SliverToBoxAdapter(
-            child: PlanHistoryGraphView(plan: plan),
-          ),
+          sliver: SliverToBoxAdapter(child: PlanHistoryGraphView(plan: plan)),
         );
     }
   }
@@ -306,7 +299,9 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
     Plan plan,
   ) {
     return StreamBuilder<List<HistoryItem>>(
-      stream: ref.watch(getPlanHistoryUseCaseProvider).execute(plan.id!),
+      stream: ref
+          .watch(getPlanHistoryUseCaseProvider)
+          .execute(plan.id!, ownerId: plan.userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SliverToBoxAdapter(
@@ -325,8 +320,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    AppLocalizations.of(context)!
-                        .planDetailLoadFailed,
+                    AppLocalizations.of(context)!.planDetailLoadFailed,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.error),
                   ),
@@ -344,8 +338,9 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
               child: Center(
                 child: Text(
                   AppLocalizations.of(context)!.planDetailNoRecords,
-                  style: Theme.of(context).textTheme.bodyMedium
-                      ?.copyWith(color: AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ),
@@ -404,11 +399,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
               value: _PlanMenuAction.restartCompleted,
               child: Row(
                 children: [
-                  Icon(
-                    Icons.refresh,
-                    size: 18,
-                    color: AppColors.textPrimary,
-                  ),
+                  Icon(Icons.refresh, size: 18, color: AppColors.textPrimary),
                   const SizedBox(width: 12),
                   Text(l10n.planDetailMenuRestartCompleted),
                 ],
@@ -422,11 +413,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
             value: _PlanMenuAction.restartActive,
             child: Row(
               children: [
-                Icon(
-                  Icons.refresh,
-                  size: 18,
-                  color: AppColors.textPrimary,
-                ),
+                Icon(Icons.refresh, size: 18, color: AppColors.textPrimary),
                 const SizedBox(width: 12),
                 Text(l10n.planDetailMenuRestartActive),
               ],
@@ -436,11 +423,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
             value: _PlanMenuAction.stop,
             child: Row(
               children: [
-                Icon(
-                  Icons.flag_outlined,
-                  size: 18,
-                  color: AppColors.error,
-                ),
+                Icon(Icons.flag_outlined, size: 18, color: AppColors.error),
                 const SizedBox(width: 12),
                 Text(
                   l10n.planDetailMenuStop,
@@ -469,13 +452,15 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
         icon = Icons.cancel_outlined;
         color = AppColors.textDisabled;
         break;
+      // Yellow (secondary) is a fill colour only: ~1.4:1 on white. Icons
+      // and text use the honey accent.
       case HistoryStatus.rested:
         icon = Icons.hotel;
-        color = AppColors.secondary;
+        color = AppColors.accentWine;
         break;
       case HistoryStatus.rescued:
         icon = Icons.volunteer_activism;
-        color = AppColors.secondary;
+        color = AppColors.accentWine;
         break;
     }
 
@@ -536,9 +521,9 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           local.day == now.day;
     }
 
-    final isPokedToday =
-        isSameDay(effectiveLastPokeAt) &&
-        !isSameDay(effectiveLastPokeAcknowledgedAt);
+    // One knock per promise per day, like the Now tab and the server's daily
+    // lock — seeing the knock (acknowledging it) doesn't allow another.
+    final isPokedToday = isSameDay(effectiveLastPokeAt);
 
     // 파트너가 오늘 이미 완료/스킵/휴식/실천인정한 경우 똑똑 불필요
     final isHandledToday =
@@ -570,7 +555,14 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
             : () async {
                 setState(() => _isPoking = true); // Disable immediately
                 try {
-                  await ref.read(pokePartnerUseCaseProvider).execute(plan.id!);
+                  await ref
+                      .read(pokePartnerUseCaseProvider)
+                      .execute(
+                        plan.id!,
+                        message: AppLocalizations.of(
+                          context,
+                        )!.nowPokeAgainMessage,
+                      );
                   if (context.mounted) {
                     // Optimistic Update: Force local state to "Poked Today"
                     setState(() {
@@ -580,16 +572,24 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                     });
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.planDetailPokeSent)),
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.planDetailPokeSent,
+                        ),
+                      ),
                     );
                   }
                 } catch (e, stack) {
                   ErrorReporter.record(e, stack, reason: 'planDetailPoke');
                   if (mounted) setState(() => _isPoking = false);
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailPokeFailed)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.planDetailPokeFailed,
+                        ),
+                      ),
+                    );
                   }
                 }
               },
@@ -604,8 +604,10 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           isHandledToday
               ? AppLocalizations.of(context)!.planDetailPokeAlreadyDone
               : isPokedToday
-                  ? AppLocalizations.of(context)!.planDetailPokeDoneToday
-                  : (_isPoking ? AppLocalizations.of(context)!.planDetailPokeSending : AppLocalizations.of(context)!.planDetailPokeAsk),
+              ? AppLocalizations.of(context)!.planDetailPokeDoneToday
+              : (_isPoking
+                    ? AppLocalizations.of(context)!.planDetailPokeSending
+                    : AppLocalizations.of(context)!.planDetailPokeAsk),
         ),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -753,6 +755,14 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                           tempTime = newTime;
                         });
                       },
+                      confirmTurnOff: sourcePlan.managerId == null
+                          ? null
+                          : () => confirmPartneredReminderOff(
+                              context,
+                              partnerName: ref
+                                  .read(partnerLabelProvider)
+                                  .resolve(AppLocalizations.of(context)!),
+                            ),
                     ),
 
                     const SizedBox(height: 32),
@@ -793,19 +803,35 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                               settingAlarmUseCaseProvider,
                             );
 
-                            await repository.updatePlan(updatedPlan);
+                            // Only the items, stamped as mine: a whole-plan
+                            // write kept a stale lastUpdatedBy (the server
+                            // then told me, not my partner) and replayed old
+                            // record arrays.
+                            await repository.updatePlanItems(
+                              sourcePlan.id!,
+                              updatedItems,
+                            );
                             await settingAlarmUseCase.execute(updatedPlan);
 
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(AppLocalizations.of(context)!.planDetailNotificationSaved)),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.planDetailNotificationSaved,
+                                  ),
+                                ),
                               );
                             }
                           } catch (e) {
                             try {
                               await ref
                                   .read(recordRepositoryProvider)
-                                  .updatePlan(sourcePlan);
+                                  .updatePlanItems(
+                                    sourcePlan.id!,
+                                    sourcePlan.items,
+                                  );
                               await ref
                                   .read(settingAlarmUseCaseProvider)
                                   .execute(sourcePlan);
@@ -817,7 +843,13 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
 
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(AppLocalizations.of(context)!.planDetailNotificationSaveFailed)),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.planDetailNotificationSaveFailed,
+                                  ),
+                                ),
                               );
                             }
                           }
@@ -862,7 +894,10 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(l10n.planDetailCancel, style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                l10n.planDetailCancel,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -879,7 +914,11 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
 
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppLocalizations.of(context)!.planDetailStopped)),
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!.planDetailStopped,
+                          ),
+                        ),
                       );
                       context.pop();
                     }
@@ -887,13 +926,20 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                 } catch (e, stack) {
                   ErrorReporter.record(e, stack, reason: 'planDetailAction');
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailActionFailed)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.planDetailActionFailed,
+                        ),
+                      ),
+                    );
                   }
                 }
               },
-              child: Text(l10n.planDetailStop, style: TextStyle(color: AppColors.error)),
+              child: Text(
+                l10n.planDetailStop,
+                style: TextStyle(color: AppColors.error),
+              ),
             ),
           ],
         );
@@ -912,7 +958,10 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(l10n.planDetailCancel, style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                l10n.planDetailCancel,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () {
@@ -920,12 +969,15 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                 if (context.mounted) {
                   context.pushNamed(
                     'plan-create',
-                    extra: widget.plan.copyWith(id: null),
+                    extra: widget.plan.asRestartTemplate(),
                     queryParameters: {'startAtLastStep': 'true'},
                   );
                 }
               },
-              child: Text(l10n.planDetailRestart, style: TextStyle(color: AppColors.primary)),
+              child: Text(
+                l10n.planDetailRestart,
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
           ],
         );
@@ -944,7 +996,10 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(l10n.planDetailCancel, style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                l10n.planDetailCancel,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -964,24 +1019,30 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                   if (context.mounted) {
                     context.pushNamed(
                       'plan-create',
-                      extra: widget.plan.copyWith(id: null),
+                      extra: widget.plan.asRestartTemplate(),
                     );
                   }
                 } catch (e, stack) {
                   ErrorReporter.record(e, stack, reason: 'planDetailAction');
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.planDetailActionFailed)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.planDetailActionFailed,
+                        ),
+                      ),
+                    );
                   }
                 }
               },
-              child: Text(l10n.planDetailRestart, style: TextStyle(color: AppColors.primary)),
+              child: Text(
+                l10n.planDetailRestart,
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
           ],
         );
       },
     );
   }
-
 }

@@ -101,13 +101,13 @@ abstract class AppLocalizations {
   /// The application title
   ///
   /// In en, this message translates to:
-  /// **'Nod&Try'**
+  /// **'DuoDone'**
   String get appTitle;
 
   /// Tagline shown on splash screen
   ///
   /// In en, this message translates to:
-  /// **'Keep the promises you put off with one person who notices.'**
+  /// **'When your partner sees it, you actually do it.'**
   String get splashTagline;
 
   /// Google login button text
@@ -131,68 +131,38 @@ abstract class AppLocalizations {
   /// Privacy message shown at bottom of login screen
   ///
   /// In en, this message translates to:
-  /// **'You both choose to connect.\nYour records stay between you.'**
+  /// **'You both agree to connect.\nProof photos are seen only by your partner.'**
   String get privacyMessage;
 
   /// Headline on connect screen
   ///
   /// In en, this message translates to:
-  /// **'Keep the promises you put off'**
+  /// **'Invite your partner'**
   String get connectHeadline;
 
   /// Subtitle on connect screen
   ///
   /// In en, this message translates to:
-  /// **'Connect with one accountability partner. They notice your effort, and you notice theirs.'**
+  /// **'Send your code so you can back each other\'s workout promises.'**
   String get connectSubtitle;
-
-  /// Button to create invite code
-  ///
-  /// In en, this message translates to:
-  /// **'Invite an accountability partner'**
-  String get createInviteCode;
 
   /// Button to enter invite code
   ///
   /// In en, this message translates to:
-  /// **'Enter Invite Code'**
+  /// **'Enter your partner\'s code'**
   String get enterInviteCode;
 
   /// Button to start without connecting to a partner
   ///
   /// In en, this message translates to:
-  /// **'Start Solo'**
+  /// **'I\'ll connect later'**
   String get startSolo;
-
-  /// Label for invite code
-  ///
-  /// In en, this message translates to:
-  /// **'Invite Code'**
-  String get inviteCode;
-
-  /// Button to copy code
-  ///
-  /// In en, this message translates to:
-  /// **'Copy'**
-  String get copyCode;
-
-  /// Button to share code
-  ///
-  /// In en, this message translates to:
-  /// **'Share'**
-  String get shareCode;
 
   /// Message when code is copied
   ///
   /// In en, this message translates to:
   /// **'Code copied'**
   String get codeCopied;
-
-  /// Message below invite code
-  ///
-  /// In en, this message translates to:
-  /// **'Share this code with your accountability partner'**
-  String get codeShareMessage;
 
   /// Instruction to enter code
   ///
@@ -203,20 +173,8 @@ abstract class AppLocalizations {
   /// Button to send connection request
   ///
   /// In en, this message translates to:
-  /// **'Send accountability partner request'**
+  /// **'Connect as partners'**
   String get sendConnectionRequest;
-
-  /// Message while waiting for connection
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for them to accept your connection'**
-  String get waitingForConnection;
-
-  /// Message when there's a task to report
-  ///
-  /// In en, this message translates to:
-  /// **'You can do it now'**
-  String get homeNowTask;
 
   /// Button to report completion
   ///
@@ -227,104 +185,14 @@ abstract class AppLocalizations {
   /// Message when there's a verification needed
   ///
   /// In en, this message translates to:
-  /// **'I\'ll do this'**
+  /// **'News from your partner'**
   String get homeReceivedMessage;
-
-  /// Button to check verification
-  ///
-  /// In en, this message translates to:
-  /// **'Nod&Try'**
-  String get homeCheckIt;
-
-  /// Message when report is sent and waiting
-  ///
-  /// In en, this message translates to:
-  /// **'I sent my work'**
-  String get homeSentWaiting;
-
-  /// Message while waiting for partner's check
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for their check-in'**
-  String get homeWaitingForCheck;
-
-  /// Message when there's nothing to do
-  ///
-  /// In en, this message translates to:
-  /// **'You can rest for a while now'**
-  String get homeQuietDay;
 
   /// Message when report is checked
   ///
   /// In en, this message translates to:
-  /// **'Okay'**
+  /// **'Props'**
   String get homeChecked;
-
-  /// Thank you message after check
-  ///
-  /// In en, this message translates to:
-  /// **'Thank you'**
-  String get homeThankYou;
-
-  /// Message for actor when time has passed but within grace period
-  ///
-  /// In en, this message translates to:
-  /// **'No record delivered yet'**
-  String get timePassedActorMessage;
-
-  /// Message for manager when actor hasn't reported yet
-  ///
-  /// In en, this message translates to:
-  /// **'No words delivered yet'**
-  String get timePassedManagerMessage;
-
-  /// Sub-message for actor when time has passed
-  ///
-  /// In en, this message translates to:
-  /// **'It\'s okay to start now'**
-  String get timePassedActorSubMessage;
-
-  /// Sub-message for manager when actor hasn't reported yet
-  ///
-  /// In en, this message translates to:
-  /// **'The day is passing quietly'**
-  String get timePassedManagerSubMessage;
-
-  /// Message for past uncompleted task in Secondary card
-  ///
-  /// In en, this message translates to:
-  /// **'Scheduled a little while ago'**
-  String get pastUncompletedMessage;
-
-  /// Sub-message for past uncompleted task
-  ///
-  /// In en, this message translates to:
-  /// **'There was a previous promise'**
-  String get pastUncompletedSubMessage;
-
-  /// Time chip text for past uncompleted tasks
-  ///
-  /// In en, this message translates to:
-  /// **'Just before'**
-  String get pastUncompletedTimeChip;
-
-  /// Week context information
-  ///
-  /// In en, this message translates to:
-  /// **'{week} of {total} weeks'**
-  String homeContextWeek(int week, int total);
-
-  /// Context about who is managing
-  ///
-  /// In en, this message translates to:
-  /// **'Keeping it going with {name}'**
-  String homeContextEntrusted(String name);
-
-  /// Context about who is being managed
-  ///
-  /// In en, this message translates to:
-  /// **'Noticing {name}\'s effort'**
-  String homeContextManaging(String name);
 
   /// Now tab label
   ///
@@ -341,7 +209,7 @@ abstract class AppLocalizations {
   /// Us tab label
   ///
   /// In en, this message translates to:
-  /// **'Together'**
+  /// **'Us'**
   String get tabUs;
 
   /// Empty state message for history tab
@@ -365,20 +233,14 @@ abstract class AppLocalizations {
   /// Us tab - You section title
   ///
   /// In en, this message translates to:
-  /// **'Accountability partner'**
+  /// **'Partner'**
   String get usYouTitle;
 
   /// No description provided for @usHeroSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'One person who notices, both ways'**
+  /// **'Backing each other\'s workouts'**
   String get usHeroSubtitle;
-
-  /// No description provided for @usCheerSent.
-  ///
-  /// In en, this message translates to:
-  /// **'Cheer sent ⚡'**
-  String get usCheerSent;
 
   /// No description provided for @usCheerTooltip.
   ///
@@ -398,29 +260,11 @@ abstract class AppLocalizations {
   /// **'Set status message'**
   String get usStatusMessagePlaceholder;
 
-  /// Us tab - My introduction button
-  ///
-  /// In en, this message translates to:
-  /// **'My Introduction'**
-  String get usMyIntroduction;
-
   /// Us tab - My invite code button
   ///
   /// In en, this message translates to:
   /// **'My Invite Code'**
   String get usMyInviteCode;
-
-  /// Us tab - Badge: They support Me
-  ///
-  /// In en, this message translates to:
-  /// **'Supported'**
-  String get usBadgeSupported;
-
-  /// Us tab - Badge: I cheer Them
-  ///
-  /// In en, this message translates to:
-  /// **'Cheering'**
-  String get usBadgeCheering;
 
   /// No description provided for @usGuestWarningMessage.
   ///
@@ -434,16 +278,10 @@ abstract class AppLocalizations {
   /// **'Link Account to Keep Records'**
   String get usGuestWarningAction;
 
-  /// No description provided for @usLinkSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Google account linked successfully!'**
-  String get usLinkSuccess;
-
   /// No description provided for @usLoadError.
   ///
   /// In en, this message translates to:
-  /// **'Error loading connections'**
+  /// **'Couldn\'t load your connection.'**
   String get usLoadError;
 
   /// No description provided for @usNoInviteCode.
@@ -452,16 +290,10 @@ abstract class AppLocalizations {
   /// **'No Code'**
   String get usNoInviteCode;
 
-  /// No description provided for @usNoName.
-  ///
-  /// In en, this message translates to:
-  /// **'No Name'**
-  String get usNoName;
-
   /// No description provided for @usUnknownUser.
   ///
   /// In en, this message translates to:
-  /// **'Accountability partner'**
+  /// **'Partner'**
   String get usUnknownUser;
 
   /// No description provided for @usDisconnectDialogTitle.
@@ -473,7 +305,7 @@ abstract class AppLocalizations {
   /// No description provided for @usDisconnectDialogContent.
   ///
   /// In en, this message translates to:
-  /// **'Disconnect {name} as your accountability partner?'**
+  /// **'Disconnect from {name}?'**
   String usDisconnectDialogContent(String name);
 
   /// No description provided for @usDisconnectConfirm.
@@ -521,7 +353,7 @@ abstract class AppLocalizations {
   /// Us tab - Add new connection button label
   ///
   /// In en, this message translates to:
-  /// **'Connect accountability partner'**
+  /// **'Connect your partner'**
   String get usAddConnectionLabel;
 
   /// Us tab - Badge: Mutual support
@@ -533,145 +365,67 @@ abstract class AppLocalizations {
   /// Us tab - Empty state title
   ///
   /// In en, this message translates to:
-  /// **'No accountability partner yet'**
+  /// **'No partner yet'**
   String get usEmptyMatesTitle;
 
   /// Us tab - Empty state subtitle
   ///
   /// In en, this message translates to:
-  /// **'Invite one person and notice each other\'s effort'**
+  /// **'Invite your partner and back each other\'s workout promises'**
   String get usEmptyMatesSubtitle;
-
-  /// Section title for connected people
-  ///
-  /// In en, this message translates to:
-  /// **'Your accountability partner'**
-  String get usConnectedPeople;
-
-  /// Status label for managing someone
-  ///
-  /// In en, this message translates to:
-  /// **'Supporting them'**
-  String get usManaging;
-
-  /// Status label for being managed
-  ///
-  /// In en, this message translates to:
-  /// **'Supported by them'**
-  String get usEntrusted;
-
-  /// Button to invite new person
-  ///
-  /// In en, this message translates to:
-  /// **'Invite one person'**
-  String get usInviteNew;
-
-  /// Empty state message for us tab
-  ///
-  /// In en, this message translates to:
-  /// **'No accountability partner yet'**
-  String get usNoConnections;
-
-  /// Week progress in header
-  ///
-  /// In en, this message translates to:
-  /// **'{week} of {total} weeks'**
-  String headerWeekProgress(int week, int total);
-
-  /// Message when there's no plan
-  ///
-  /// In en, this message translates to:
-  /// **'No plan yet'**
-  String get headerNoPlan;
-
-  /// Message when plan period ended
-  ///
-  /// In en, this message translates to:
-  /// **'Plan ended'**
-  String get headerPlanEnded;
 
   /// Message when there's no active plan
   ///
   /// In en, this message translates to:
-  /// **'No promise for now'**
+  /// **'No workout promise yet'**
   String get nowNoPlan;
 
   /// Button to create a new plan
   ///
   /// In en, this message translates to:
-  /// **'Create Plan'**
+  /// **'+ Make a workout promise'**
   String get nowCreatePlan;
-
-  /// Message showing time until next action
-  ///
-  /// In en, this message translates to:
-  /// **'Next action in {time}'**
-  String nowNextActionIn(String time);
-
-  /// Message showing days until next schedule
-  ///
-  /// In en, this message translates to:
-  /// **'Next schedule in D-{days}'**
-  String nowNextActionDays(int days);
 
   /// Quiet state message - rest
   ///
   /// In en, this message translates to:
-  /// **'You can rest for a while now'**
+  /// **'Today\'s a rest day'**
   String get nowQuietRest;
-
-  /// Quiet state message - no action needed
-  ///
-  /// In en, this message translates to:
-  /// **'No need to worry for a while'**
-  String get nowQuietNoAction;
 
   /// Subtitle when there's no plan
   ///
   /// In en, this message translates to:
-  /// **'Start with one promise you can share'**
+  /// **'Pick one workout and make it a promise'**
   String get nowNoPlanSubtitle;
 
   /// Message when all tasks are done
   ///
   /// In en, this message translates to:
-  /// **'Took care of everything today 🙌'**
+  /// **'All of today\'s promises kept 🙌'**
   String get nowTodayDone;
 
   /// Headline when multiple plans were completed today
   ///
   /// In en, this message translates to:
-  /// **'Took care of all {count} today 🙌'**
+  /// **'Kept all {count} promises today 🙌'**
   String nowTodayAllDone(int count);
 
   /// Partner plan share - proposed
   ///
   /// In en, this message translates to:
-  /// **'Proposed this promise'**
-  String get nowPartnerProposed;
+  /// **'{name} sent a new promise'**
+  String nowPartnerProposed(String name);
 
   /// Partner plan share - adjusting
   ///
   /// In en, this message translates to:
-  /// **'Adjusting the promise a bit'**
+  /// **'Your partner tweaked a promise'**
   String get nowPartnerAdjusting;
-
-  /// Partner action share - confirmed
-  ///
-  /// In en, this message translates to:
-  /// **'I did it!'**
-  String get nowPartnerDidIt;
-
-  /// Action to skip partner feedback
-  ///
-  /// In en, this message translates to:
-  /// **'Just skip'**
-  String get nowActionPass;
 
   /// Action to skip today's task
   ///
   /// In en, this message translates to:
-  /// **'Let\'s skip today'**
+  /// **'Skip today'**
   String get nowActionSkipToday;
 
   /// No description provided for @nowDeferMenuTooltip.
@@ -689,20 +443,26 @@ abstract class AppLocalizations {
   /// No description provided for @nowDeferLaterSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'See your next to-do now; we\'ll nudge you again later'**
+  /// **'We\'ll show your next promise now and nudge you again later'**
   String get nowDeferLaterSubtitle;
 
   /// No description provided for @nowSkipTodayTitle.
   ///
   /// In en, this message translates to:
-  /// **'Not today'**
+  /// **'Skip today'**
   String get nowSkipTodayTitle;
 
   /// No description provided for @nowSkipTodaySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Skip this promise for today'**
+  /// **'Counts as missed — your streak may reset'**
   String get nowSkipTodaySubtitle;
+
+  /// Defer sheet: rest-pass option subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Use a rest pass — your streak stays'**
+  String get nowDeferRestSubtitle;
 
   /// No description provided for @nowSkipTodayDone.
   ///
@@ -731,73 +491,13 @@ abstract class AppLocalizations {
   /// Button to add more plans in TodayComplete/TodayEmpty state
   ///
   /// In en, this message translates to:
-  /// **'Shall we make another promise?'**
+  /// **'Add another workout promise?'**
   String get nowAddMorePlan;
-
-  /// Record gaze - showing count in current week
-  ///
-  /// In en, this message translates to:
-  /// **'{count}th promise this week'**
-  String recordGazeWeekCount(int count);
-
-  /// Record gaze - showing week progress
-  ///
-  /// In en, this message translates to:
-  /// **'Week {week} of {total}'**
-  String recordGazeWeekProgress(int week, int total);
-
-  /// Record gaze - showing completion count
-  ///
-  /// In en, this message translates to:
-  /// **'Already done {count} times'**
-  String recordGazeDoneCount(int count);
-
-  /// Manager suggestion title - soft approach
-  ///
-  /// In en, this message translates to:
-  /// **'Keep this promise with one person'**
-  String get managerSuggestionTitle;
-
-  /// Manager suggestion subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'An accountability partner can help it stick'**
-  String get managerSuggestionSubtitle;
-
-  /// Alternative manager suggestion text
-  ///
-  /// In en, this message translates to:
-  /// **'Notice each other\'s effort in a mutual 1:1 connection'**
-  String get managerSuggestionAlternative;
-
-  /// Button to find manager - soft approach
-  ///
-  /// In en, this message translates to:
-  /// **'Choose one person'**
-  String get managerSuggestionButton;
-
-  /// Question to suggest manager - soft approach
-  ///
-  /// In en, this message translates to:
-  /// **'Who could be your accountability partner?'**
-  String get managerSuggestionQuestion;
-
-  /// Title for plan proposal screens - solo-first approach
-  ///
-  /// In en, this message translates to:
-  /// **'My Promise'**
-  String get planProposal;
-
-  /// Progress hint for plan preparation
-  ///
-  /// In en, this message translates to:
-  /// **'Preparing promise'**
-  String get planPreparing;
 
   /// Title asking what to promise
   ///
   /// In en, this message translates to:
-  /// **'What would you like to promise?'**
+  /// **'Which workout will you promise?'**
   String get planWhatToPromise;
 
   /// Hint about what kind of promise to make
@@ -806,251 +506,17 @@ abstract class AppLocalizations {
   /// **'Something you think you can keep'**
   String get planPromiseHint;
 
-  /// Alternative title for solo plan
-  ///
-  /// In en, this message translates to:
-  /// **'A promise I made to myself'**
-  String get planMyPromise;
-
-  /// Alternative title for solo plan
-  ///
-  /// In en, this message translates to:
-  /// **'A promise to keep together'**
-  String get planKeepWatching;
-
   /// Hint text for action input field
   ///
   /// In en, this message translates to:
-  /// **'e.g., Spending time with kids, Making time to read'**
+  /// **'e.g., 30 min at the gym, a 10k-step walk after dinner'**
   String get planActionHint;
-
-  /// Message when input is empty
-  ///
-  /// In en, this message translates to:
-  /// **'Just one line is enough'**
-  String get planOneLineEnough;
-
-  /// Next button text
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get planNext;
-
-  /// Title for frequency selection screen
-  ///
-  /// In en, this message translates to:
-  /// **'How about this much?'**
-  String get planFrequencyTitle;
-
-  /// Subtitle for frequency selection
-  ///
-  /// In en, this message translates to:
-  /// **'It\'s okay if you don\'t keep it perfectly'**
-  String get planFrequencySubtitle;
-
-  /// Title for description screen
-  ///
-  /// In en, this message translates to:
-  /// **'You can write it in detail if you want'**
-  String get planDescriptionTitle;
-
-  /// Subtitle for description screen
-  ///
-  /// In en, this message translates to:
-  /// **'You can change it later'**
-  String get planDescriptionSubtitle;
-
-  /// Label for description input
-  ///
-  /// In en, this message translates to:
-  /// **'What specifically would you like to do?'**
-  String get planDescriptionLabel;
-
-  /// Example text for description
-  ///
-  /// In en, this message translates to:
-  /// **'e.g., Squats and stretching at home'**
-  String get planDescriptionExample;
 
   /// Hint text for description input field
   ///
   /// In en, this message translates to:
   /// **'e.g., Squats and stretching at home, leg workout at gym...'**
   String get planDescriptionHint;
-
-  /// Skip button for description screen
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get planDescriptionSkip;
-
-  /// Message that description is optional
-  ///
-  /// In en, this message translates to:
-  /// **'You can skip this step'**
-  String get planDescriptionOptional;
-
-  /// Title for day selection screen
-  ///
-  /// In en, this message translates to:
-  /// **'You don\'t have to set days'**
-  String get planDayTitle;
-
-  /// Subtitle for day selection
-  ///
-  /// In en, this message translates to:
-  /// **'But choosing them can make it easier to remember.'**
-  String get planDaySubtitle;
-
-  /// Skip button text for day selection
-  ///
-  /// In en, this message translates to:
-  /// **'I\'ll decide based on how I feel that day'**
-  String get planDaySkip;
-
-  /// Title for summary screen
-  ///
-  /// In en, this message translates to:
-  /// **'This is what I\'ll propose'**
-  String get planSummaryTitle;
-
-  /// Label for frequency in summary
-  ///
-  /// In en, this message translates to:
-  /// **'Frequency'**
-  String get planSummaryFrequency;
-
-  /// Label for days in summary
-  ///
-  /// In en, this message translates to:
-  /// **'Days'**
-  String get planSummaryDay;
-
-  /// Label for description in summary
-  ///
-  /// In en, this message translates to:
-  /// **'Description'**
-  String get planSummaryDescription;
-
-  /// Text when no days are selected
-  ///
-  /// In en, this message translates to:
-  /// **'Decide based on condition'**
-  String get planSummaryDayConditional;
-
-  /// Info message about proposal
-  ///
-  /// In en, this message translates to:
-  /// **'Your accountability partner will review it. It starts when you both agree.'**
-  String get planSummaryInfo;
-
-  /// Message about adjustability
-  ///
-  /// In en, this message translates to:
-  /// **'You can adjust anytime if it\'s too much'**
-  String get planSummaryAdjustable;
-
-  /// Button to send proposal
-  ///
-  /// In en, this message translates to:
-  /// **'I\'ll do this'**
-  String get planSummarySend;
-
-  /// Message when proposal is sent
-  ///
-  /// In en, this message translates to:
-  /// **'Plan proposal has been sent'**
-  String get planSummarySent;
-
-  /// Light frequency option label
-  ///
-  /// In en, this message translates to:
-  /// **'Lightly'**
-  String get planFrequencyLight;
-
-  /// Moderate frequency option label
-  ///
-  /// In en, this message translates to:
-  /// **'Moderately'**
-  String get planFrequencyModerate;
-
-  /// More frequency option label
-  ///
-  /// In en, this message translates to:
-  /// **'A bit more'**
-  String get planFrequencyMore;
-
-  /// 2 times per week description
-  ///
-  /// In en, this message translates to:
-  /// **'2 times/week'**
-  String get planFrequencyWeekly2;
-
-  /// 3 times per week description
-  ///
-  /// In en, this message translates to:
-  /// **'3 times/week'**
-  String get planFrequencyWeekly3;
-
-  /// 4 times per week description
-  ///
-  /// In en, this message translates to:
-  /// **'4 times/week'**
-  String get planFrequencyWeekly4;
-
-  /// Light frequency with count for summary
-  ///
-  /// In en, this message translates to:
-  /// **'Lightly (2 times/week)'**
-  String get planFrequencyLightWithCount;
-
-  /// Moderate frequency with count for summary
-  ///
-  /// In en, this message translates to:
-  /// **'Moderately (3 times/week)'**
-  String get planFrequencyModerateWithCount;
-
-  /// More frequency with count for summary
-  ///
-  /// In en, this message translates to:
-  /// **'A bit more (4 times/week)'**
-  String get planFrequencyMoreWithCount;
-
-  /// Message when connection is successful
-  ///
-  /// In en, this message translates to:
-  /// **'Connected'**
-  String get connectConnected;
-
-  /// Button to go to home screen
-  ///
-  /// In en, this message translates to:
-  /// **'Go to Home'**
-  String get connectGoToHome;
-
-  /// Plan section title in Us tab
-  ///
-  /// In en, this message translates to:
-  /// **'Plan'**
-  String get usPlanSection;
-
-  /// Message when there's no plan in Us tab
-  ///
-  /// In en, this message translates to:
-  /// **'No current plan'**
-  String get usNoPlanMessage;
-
-  /// Subtitle when there's no plan
-  ///
-  /// In en, this message translates to:
-  /// **'Would you like to start a new promise?'**
-  String get usNoPlanSubtitle;
-
-  /// Button to start a new plan
-  ///
-  /// In en, this message translates to:
-  /// **'Start New Plan'**
-  String get usStartNewPlan;
 
   /// Monday abbreviation
   ///
@@ -1196,12 +662,6 @@ abstract class AppLocalizations {
   /// **'Splash'**
   String get developerScreenSplash;
 
-  /// Login screen name
-  ///
-  /// In en, this message translates to:
-  /// **'Login'**
-  String get developerScreenLogin;
-
   /// Connect screen name
   ///
   /// In en, this message translates to:
@@ -1232,22 +692,16 @@ abstract class AppLocalizations {
   /// **'App launch screen'**
   String get developerScreenSplashDesc;
 
-  /// Login screen description
-  ///
-  /// In en, this message translates to:
-  /// **'Google/Apple login'**
-  String get developerScreenLoginDesc;
-
   /// Connect screen description
   ///
   /// In en, this message translates to:
-  /// **'Accountability partner connection screen'**
+  /// **'Partner connection screen'**
   String get developerScreenConnectDesc;
 
   /// Home screen description
   ///
   /// In en, this message translates to:
-  /// **'Now/History/Together tabs'**
+  /// **'Now/History/Us tabs'**
   String get developerScreenHomeDesc;
 
   /// Settings screen description
@@ -1262,77 +716,11 @@ abstract class AppLocalizations {
   /// **'Action Selection'**
   String get developerScreenActionSelection;
 
-  /// Frequency screen name
-  ///
-  /// In en, this message translates to:
-  /// **'Frequency'**
-  String get developerScreenFrequency;
-
-  /// Day selection screen name
-  ///
-  /// In en, this message translates to:
-  /// **'Day Selection'**
-  String get developerScreenDaySelection;
-
-  /// Description screen name
-  ///
-  /// In en, this message translates to:
-  /// **'Description'**
-  String get developerScreenDescription;
-
-  /// Summary screen name
-  ///
-  /// In en, this message translates to:
-  /// **'Summary'**
-  String get developerScreenSummary;
-
   /// Action selection screen description
   ///
   /// In en, this message translates to:
   /// **'Screen 1: Action selection'**
   String get developerScreenActionSelectionDesc;
-
-  /// Frequency screen description
-  ///
-  /// In en, this message translates to:
-  /// **'Screen 2: Repeat frequency'**
-  String get developerScreenFrequencyDesc;
-
-  /// Day selection screen description
-  ///
-  /// In en, this message translates to:
-  /// **'Screen 4: Day selection'**
-  String get developerScreenDaySelectionDesc;
-
-  /// Description screen description
-  ///
-  /// In en, this message translates to:
-  /// **'Screen 3: Specific action description'**
-  String get developerScreenDescriptionDesc;
-
-  /// Summary screen description
-  ///
-  /// In en, this message translates to:
-  /// **'Screen 5: Plan proposal summary'**
-  String get developerScreenSummaryDesc;
-
-  /// Section title for plan creation in settings
-  ///
-  /// In en, this message translates to:
-  /// **'Plan Creation'**
-  String get settingsPlanCreation;
-
-  /// Title for plan creation option
-  ///
-  /// In en, this message translates to:
-  /// **'Create New Promise'**
-  String get settingsPlanCreationTitle;
-
-  /// No description provided for @settingsPlanCreationDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'All steps in one screen'**
-  String get settingsPlanCreationDesc;
 
   /// Developer menu label
   ///
@@ -1379,110 +767,44 @@ abstract class AppLocalizations {
   /// Header text showing partner name
   ///
   /// In en, this message translates to:
-  /// **'Keeping it going with {name}'**
+  /// **'Together with {name}'**
   String headerWithPartner(String name);
 
   /// No description provided for @usLinkEmailSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Email account linked successfully!'**
+  /// **'Email account linked!'**
   String get usLinkEmailSuccess;
 
   /// History card label when partner verified
   ///
   /// In en, this message translates to:
-  /// **'Accountability partner checked'**
+  /// **'Your partner gave props'**
   String get historyPartnerVerified;
 
   /// History card label when I verified
   ///
   /// In en, this message translates to:
-  /// **'I verified'**
+  /// **'You gave props'**
   String get historyMeVerified;
 
   /// Frequency label for everyday
   ///
   /// In en, this message translates to:
-  /// **'Everyday'**
+  /// **'Every day'**
   String get frequencyEveryday;
-
-  /// Label for optional notification time
-  ///
-  /// In en, this message translates to:
-  /// **'Notification time (Optional)'**
-  String get planNotificationTimeOptional;
 
   /// Title for my plan section
   ///
   /// In en, this message translates to:
-  /// **'My Promise'**
+  /// **'My promises'**
   String get usMyPlanTitle;
 
   /// Title for partner plan section
   ///
   /// In en, this message translates to:
-  /// **'{name}\'s Promise'**
+  /// **'{name}\'s promises'**
   String usPartnerPlanTitle(String name);
-
-  /// Vague time label for dinner
-  ///
-  /// In en, this message translates to:
-  /// **'Dinner'**
-  String get vagueTimeDinner;
-
-  /// Vague time label for bedtime
-  ///
-  /// In en, this message translates to:
-  /// **'Bedtime'**
-  String get vagueTimeBedtime;
-
-  /// Simple cheer option
-  ///
-  /// In en, this message translates to:
-  /// **'Okay'**
-  String get cheerSimple;
-
-  /// Option to see more cheer options
-  ///
-  /// In en, this message translates to:
-  /// **'More'**
-  String get cheerMore;
-
-  /// Title for the cheer selection sheet
-  ///
-  /// In en, this message translates to:
-  /// **'How to Cheer?'**
-  String get cheerSheetTitle;
-
-  /// Hint text for cheer message input
-  ///
-  /// In en, this message translates to:
-  /// **'Leave a cheer message'**
-  String get cheerMessageHint;
-
-  /// Send button for cheer message
-  ///
-  /// In en, this message translates to:
-  /// **'Send'**
-  String get cheerSend;
-
-  /// No description provided for @doneSheetTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Share your thoughts'**
-  String get doneSheetTitle;
-
-  /// No description provided for @doneMessageHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave a short note'**
-  String get doneMessageHint;
-
-  /// No description provided for @doneButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete'**
-  String get doneButton;
 
   /// Description for developer menu
   ///
@@ -1505,7 +827,7 @@ abstract class AppLocalizations {
   /// Description for logout option
   ///
   /// In en, this message translates to:
-  /// **'Log out from your current account'**
+  /// **'Log out of your current account'**
   String get settingsLogoutDesc;
 
   /// Title for logout confirmation dialog
@@ -1517,7 +839,7 @@ abstract class AppLocalizations {
   /// Content for logout confirmation dialog
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to log out?'**
+  /// **'Log out now?'**
   String get settingsLogoutDialogContent;
 
   /// Logout confirmation button label
@@ -1535,7 +857,7 @@ abstract class AppLocalizations {
   /// Description for delete account option
   ///
   /// In en, this message translates to:
-  /// **'Permanently delete your account and data'**
+  /// **'Permanently delete your account and records'**
   String get settingsDeleteAccountDesc;
 
   /// Title for delete account confirmation dialog
@@ -1547,7 +869,7 @@ abstract class AppLocalizations {
   /// Content for delete account confirmation dialog
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete your account? This action cannot be undone.'**
+  /// **'Delete your account? Your account, records and proof photos will be erased, and this can\'t be undone. You may be asked to sign in once more to confirm.'**
   String get settingsDeleteAccountDialogContent;
 
   /// Cancel button label
@@ -1592,12 +914,6 @@ abstract class AppLocalizations {
   /// **'Sign Up'**
   String get signUp;
 
-  /// Headline for email login screen
-  ///
-  /// In en, this message translates to:
-  /// **'Start with Email'**
-  String get emailStartMessage;
-
   /// Hint text for password input
   ///
   /// In en, this message translates to:
@@ -1622,35 +938,17 @@ abstract class AppLocalizations {
   /// **'Password must be at least 6 characters'**
   String get weakPassword;
 
-  /// Error message for existing account
-  ///
-  /// In en, this message translates to:
-  /// **'Account already exists with a different credential'**
-  String get accountExistsWithDifferentCredential;
-
   /// Error message for user not found
   ///
   /// In en, this message translates to:
-  /// **'No user found for that email.'**
+  /// **'No account found for that email.'**
   String get userNotFound;
-
-  /// Error message for wrong password
-  ///
-  /// In en, this message translates to:
-  /// **'Wrong password provided for that user.'**
-  String get wrongPassword;
 
   /// Success message after account deletion
   ///
   /// In en, this message translates to:
-  /// **'Account deleted successfully'**
+  /// **'Account deleted'**
   String get settingsAccountDeletedSuccess;
-
-  /// Error message when auth service is missing
-  ///
-  /// In en, this message translates to:
-  /// **'Auth Service not found'**
-  String get settingsAuthServiceNotFound;
 
   /// No description provided for @settingsDeleteAccountFailed.
   ///
@@ -1658,89 +956,35 @@ abstract class AppLocalizations {
   /// **'We couldn\'t delete your account. Please try again.'**
   String get settingsDeleteAccountFailed;
 
-  /// No description provided for @reconcileTitle.
+  /// Account deletion: the re-sign-in was cancelled
   ///
   /// In en, this message translates to:
-  /// **'Reconcile'**
-  String get reconcileTitle;
+  /// **'You need to sign in again to delete your account. Nothing was deleted.'**
+  String get settingsDeleteAccountReauthCancelled;
 
-  /// No description provided for @reconcileActuallyDone.
+  /// Account deletion: wrong password
   ///
   /// In en, this message translates to:
-  /// **'Actually did it'**
-  String get reconcileActuallyDone;
+  /// **'That password isn\'t right. Please try again.'**
+  String get settingsDeleteAccountWrongPassword;
+
+  /// Account deletion: password prompt title (email accounts)
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your password'**
+  String get settingsDeleteAccountPasswordTitle;
+
+  /// No description provided for @settingsDeleteAccountPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get settingsDeleteAccountPasswordHint;
 
   /// No description provided for @reconcileTookRest.
   ///
   /// In en, this message translates to:
-  /// **'Took a break today'**
+  /// **'Took a rest'**
   String get reconcileTookRest;
-
-  /// No description provided for @reconcileSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get reconcileSkip;
-
-  /// No description provided for @reconcileDoneMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Record has been reconciled.'**
-  String get reconcileDoneMessage;
-
-  /// No description provided for @historyFilterAll.
-  ///
-  /// In en, this message translates to:
-  /// **'All'**
-  String get historyFilterAll;
-
-  /// No description provided for @historyFilterMe.
-  ///
-  /// In en, this message translates to:
-  /// **'My Action'**
-  String get historyFilterMe;
-
-  /// No description provided for @historyFilterPartner.
-  ///
-  /// In en, this message translates to:
-  /// **'Accountability partner'**
-  String get historyFilterPartner;
-
-  /// No description provided for @historyMyActionVerified.
-  ///
-  /// In en, this message translates to:
-  /// **'They checked it'**
-  String get historyMyActionVerified;
-
-  /// No description provided for @historyPartnerActionVerified.
-  ///
-  /// In en, this message translates to:
-  /// **'I checked it'**
-  String get historyPartnerActionVerified;
-
-  /// No description provided for @historyPartnerActionWaiting.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for me'**
-  String get historyPartnerActionWaiting;
-
-  /// No description provided for @historyActionSawIt.
-  ///
-  /// In en, this message translates to:
-  /// **'Saw it 👍'**
-  String get historyActionSawIt;
-
-  /// No description provided for @historyActionCheer.
-  ///
-  /// In en, this message translates to:
-  /// **'Cheering you 💜'**
-  String get historyActionCheer;
-
-  /// No description provided for @timeChipStillActionable.
-  ///
-  /// In en, this message translates to:
-  /// **'Still actionable'**
-  String get timeChipStillActionable;
 
   /// No description provided for @timeChipPassed.
   ///
@@ -1753,24 +997,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Actually did it'**
   String get nowStatusActuallyDone;
-
-  /// No description provided for @nowLateCompletion.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed even if late!'**
-  String get nowLateCompletion;
-
-  /// No description provided for @nowLateJustInTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Did it a bit late'**
-  String get nowLateJustInTime;
-
-  /// No description provided for @nowWithinToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Done within today'**
-  String get nowWithinToday;
 
   /// No description provided for @timeChipNow.
   ///
@@ -1928,12 +1154,6 @@ abstract class AppLocalizations {
   /// **'Sun'**
   String get weekdaySun;
 
-  /// No description provided for @planTimeQuestion.
-  ///
-  /// In en, this message translates to:
-  /// **'When should I notify you?'**
-  String get planTimeQuestion;
-
   /// No description provided for @comfortingFuture.
   ///
   /// In en, this message translates to:
@@ -1945,12 +1165,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Late is okay'**
   String get comfortingLate;
-
-  /// No description provided for @comfortingJustDoIt.
-  ///
-  /// In en, this message translates to:
-  /// **'Just do it today'**
-  String get comfortingJustDoIt;
 
   /// No description provided for @nowDoEarly.
   ///
@@ -2030,22 +1244,10 @@ abstract class AppLocalizations {
   /// **'Can\'t connect to the store. Please check your settings.'**
   String get settingsStoreUnavailable;
 
-  /// No description provided for @planMostlyProcrastinated.
-  ///
-  /// In en, this message translates to:
-  /// **'What you usually put off'**
-  String get planMostlyProcrastinated;
-
-  /// No description provided for @planRecommendedPromises.
-  ///
-  /// In en, this message translates to:
-  /// **'Suggested promises'**
-  String get planRecommendedPromises;
-
   /// No description provided for @planMine.
   ///
   /// In en, this message translates to:
-  /// **'My promise'**
+  /// **'Your promise in one line'**
   String get planMine;
 
   /// No description provided for @planClearAction.
@@ -2054,52 +1256,16 @@ abstract class AppLocalizations {
   /// **'Clear'**
   String get planClearAction;
 
-  /// No description provided for @planRecommendedFrequency.
-  ///
-  /// In en, this message translates to:
-  /// **'Suggested frequency'**
-  String get planRecommendedFrequency;
-
-  /// No description provided for @planNoDayMeansDaily.
-  ///
-  /// In en, this message translates to:
-  /// **'Without picking days, this becomes a daily promise.'**
-  String get planNoDayMeansDaily;
-
-  /// No description provided for @planPartnerFallback.
-  ///
-  /// In en, this message translates to:
-  /// **'your accountability partner'**
-  String get planPartnerFallback;
-
-  /// No description provided for @planActionFallback.
-  ///
-  /// In en, this message translates to:
-  /// **'my promise'**
-  String get planActionFallback;
-
-  /// No description provided for @planPartnerPreviewLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'What your accountability partner will see'**
-  String get planPartnerPreviewLabel;
-
-  /// No description provided for @planPartnerPreviewWith.
-  ///
-  /// In en, this message translates to:
-  /// **'Invite {name} to keep \"{promise}\" with you for 28 days.'**
-  String planPartnerPreviewWith(String name, String promise);
-
   /// No description provided for @planPartnerPreviewWithout.
   ///
   /// In en, this message translates to:
-  /// **'You can start solo. Connect an accountability partner to notice each other\'s effort and exchange knocks.'**
+  /// **'You can start solo. Connect your partner to give each other props and knocks.'**
   String get planPartnerPreviewWithout;
 
   /// No description provided for @planConnectPartner.
   ///
   /// In en, this message translates to:
-  /// **'Connect an accountability partner'**
+  /// **'Connect your partner'**
   String get planConnectPartner;
 
   /// No description provided for @planDayEveryDay.
@@ -2117,7 +1283,7 @@ abstract class AppLocalizations {
   /// No description provided for @planDayCountFormat.
   ///
   /// In en, this message translates to:
-  /// **'{count} days/week'**
+  /// **'{count, plural, =1{1 day/week} other{{count} days/week}}'**
   String planDayCountFormat(int count);
 
   /// No description provided for @planPreviewMeta.
@@ -2141,320 +1307,14 @@ abstract class AppLocalizations {
   /// No description provided for @planTimeFormatNoMinute.
   ///
   /// In en, this message translates to:
-  /// **'{period} {hour}'**
+  /// **'{hour} {period}'**
   String planTimeFormatNoMinute(String period, int hour);
 
   /// No description provided for @planTimeFormatWithMinute.
   ///
   /// In en, this message translates to:
-  /// **'{period} {hour}:{minute}'**
+  /// **'{hour}:{minute} {period}'**
   String planTimeFormatWithMinute(String period, int hour, String minute);
-
-  /// No description provided for @planTemplatePerWeek.
-  ///
-  /// In en, this message translates to:
-  /// **'{label} · {count}/wk'**
-  String planTemplatePerWeek(String label, int count);
-
-  /// No description provided for @planCategoryStudyLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Study'**
-  String get planCategoryStudyLabel;
-
-  /// No description provided for @planCategoryStudyDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Self-study you keep putting off — English, certifications, coding'**
-  String get planCategoryStudyDescription;
-
-  /// No description provided for @planCategoryExerciseLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Exercise'**
-  String get planCategoryExerciseLabel;
-
-  /// No description provided for @planCategoryExerciseDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Movement that\'s hard to start — walking, gym, stretching'**
-  String get planCategoryExerciseDescription;
-
-  /// No description provided for @planCategoryVerifiedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Verified routines'**
-  String get planCategoryVerifiedLabel;
-
-  /// No description provided for @planCategoryVerifiedDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily habits grounded in neuroscience and sleep research'**
-  String get planCategoryVerifiedDescription;
-
-  /// No description provided for @planCategoryCustomLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get planCategoryCustomLabel;
-
-  /// No description provided for @planCategoryCustomDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Write your own promise without picking a template'**
-  String get planCategoryCustomDescription;
-
-  /// No description provided for @planTemplateEnglishLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'English'**
-  String get planTemplateEnglishLabel;
-
-  /// No description provided for @planTemplateEnglishAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Read 10 English sentences aloud'**
-  String get planTemplateEnglishAction;
-
-  /// No description provided for @planTemplateEnglishDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Aim for low-pressure daily exposure to English.'**
-  String get planTemplateEnglishDescription;
-
-  /// No description provided for @planTemplateCertificateLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Certification'**
-  String get planTemplateCertificateLabel;
-
-  /// No description provided for @planTemplateCertificateAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Solve 10 past exam questions'**
-  String get planTemplateCertificateAction;
-
-  /// No description provided for @planTemplateCertificateDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Repeat a fixed count without breaking the streak instead of cramming.'**
-  String get planTemplateCertificateDescription;
-
-  /// No description provided for @planTemplateCodingLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Coding'**
-  String get planTemplateCodingLabel;
-
-  /// No description provided for @planTemplateCodingAction.
-  ///
-  /// In en, this message translates to:
-  /// **'30 min of coding or one problem'**
-  String get planTemplateCodingAction;
-
-  /// No description provided for @planTemplateCodingDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Secure the days you actually touch code before chasing big goals.'**
-  String get planTemplateCodingDescription;
-
-  /// No description provided for @planTemplateReadingLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Reading'**
-  String get planTemplateReadingLabel;
-
-  /// No description provided for @planTemplateReadingAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Read 10 pages and log one line'**
-  String get planTemplateReadingAction;
-
-  /// No description provided for @planTemplateReadingDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave a one-line trace so your accountability partner can notice it easily.'**
-  String get planTemplateReadingDescription;
-
-  /// No description provided for @planTemplateWritingLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Writing'**
-  String get planTemplateWritingLabel;
-
-  /// No description provided for @planTemplateWritingAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Write for 15 min or 300 characters'**
-  String get planTemplateWritingAction;
-
-  /// No description provided for @planTemplateWritingDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Focus on starting days, not finished pieces.'**
-  String get planTemplateWritingDescription;
-
-  /// No description provided for @planTemplateWalkingLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Walking'**
-  String get planTemplateWalkingLabel;
-
-  /// No description provided for @planTemplateWalkingAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Walk 30 minutes'**
-  String get planTemplateWalkingAction;
-
-  /// No description provided for @planTemplateWalkingDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Commit to stepping outside before worrying about gear.'**
-  String get planTemplateWalkingDescription;
-
-  /// No description provided for @planTemplateGymLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Gym'**
-  String get planTemplateGymLabel;
-
-  /// No description provided for @planTemplateGymAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Go to the gym and work out for 30 min'**
-  String get planTemplateGymAction;
-
-  /// No description provided for @planTemplateGymDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Increase days you arrive at the gym rather than perfect workouts.'**
-  String get planTemplateGymDescription;
-
-  /// No description provided for @planTemplateStretchingLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Stretching'**
-  String get planTemplateStretchingLabel;
-
-  /// No description provided for @planTemplateStretchingAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Stretch for 10 minutes'**
-  String get planTemplateStretchingAction;
-
-  /// No description provided for @planTemplateStretchingDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Share even a short stretch with your accountability partner.'**
-  String get planTemplateStretchingDescription;
-
-  /// No description provided for @planTemplateMorningLightLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Morning light'**
-  String get planTemplateMorningLightLabel;
-
-  /// No description provided for @planTemplateMorningLightAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Get 5–10 minutes of morning sunlight'**
-  String get planTemplateMorningLightAction;
-
-  /// No description provided for @planTemplateMorningLightDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Morning sunlight hitting your eyes tells the brain the day has started, locking in tonight\'s melatonin release so you fall asleep faster and deeper. 5–10 minutes outdoors is enough on clear days; stretch to 10–20 on cloudy ones, 20–30 in rain. Windows block the key wavelengths and sunglasses dampen the light-sensing cells (never stare directly at the sun)'**
-  String get planTemplateMorningLightDescription;
-
-  /// No description provided for @planTemplateCaffeineDelayLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Delay caffeine'**
-  String get planTemplateCaffeineDelayLabel;
-
-  /// No description provided for @planTemplateCaffeineDelayAction.
-  ///
-  /// In en, this message translates to:
-  /// **'First caffeine 90 minutes after waking'**
-  String get planTemplateCaffeineDelayAction;
-
-  /// No description provided for @planTemplateCaffeineDelayDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Caffeine right after waking only blocks sleep-signal molecules (adenosine) for a while — they pile up and hit at once later, causing an afternoon slump. Wait 90 minutes for cleaner, longer-lasting energy'**
-  String get planTemplateCaffeineDelayDescription;
-
-  /// No description provided for @planTemplatePhysioSighLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Physiological sigh'**
-  String get planTemplatePhysioSighLabel;
-
-  /// No description provided for @planTemplatePhysioSighAction.
-  ///
-  /// In en, this message translates to:
-  /// **'5 minutes of physiological sighs'**
-  String get planTemplatePhysioSighAction;
-
-  /// No description provided for @planTemplatePhysioSighDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Take a short inhale through the nose, then a second one to fully inflate the lungs, and exhale slowly through the mouth. This dumps trapped CO₂ in one shot and drops heart rate immediately. An RCT (n=111) showed it beat meditation for stress and mood. Even one or two reps help in the moment; 5 minutes daily is the preventive dose'**
-  String get planTemplatePhysioSighDescription;
-
-  /// No description provided for @planTemplateFocus90Label.
-  ///
-  /// In en, this message translates to:
-  /// **'90-min focus'**
-  String get planTemplateFocus90Label;
-
-  /// No description provided for @planTemplateFocus90Action.
-  ///
-  /// In en, this message translates to:
-  /// **'One 90-minute focus session'**
-  String get planTemplateFocus90Action;
-
-  /// No description provided for @planTemplateFocus90Description.
-  ///
-  /// In en, this message translates to:
-  /// **'The brain runs on ~90-minute focus cycles (ultradian rhythm). Mornings are richest in dopamine and norepinephrine, so deep work lands best then, and attention naturally drops after 90 min — give yourself 10–30 minutes off before the next cycle. Kill notifications and stay on one task throughout'**
-  String get planTemplateFocus90Description;
-
-  /// No description provided for @planTemplateSleepEnvLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Sleep environment'**
-  String get planTemplateSleepEnvLabel;
-
-  /// No description provided for @planTemplateSleepEnvAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Dim and cool the bedroom an hour before bed'**
-  String get planTemplateSleepEnvAction;
-
-  /// No description provided for @planTemplateSleepEnvDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'An hour before bed, switch off overhead lights and use indirect lamps — that\'s when melatonin starts to rise, speeding sleep onset. Keep the bedroom at 18–20°C; your body needs a slight temperature drop for deep sleep and REM. A hot shower right before bed actually delays sleep, so finish 1–2 hours earlier'**
-  String get planTemplateSleepEnvDescription;
-
-  /// No description provided for @planTemplateStrength2xLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Strength 2×/week'**
-  String get planTemplateStrength2xLabel;
-
-  /// No description provided for @planTemplateStrength2xAction.
-  ///
-  /// In en, this message translates to:
-  /// **'One full-body strength session'**
-  String get planTemplateStrength2xAction;
-
-  /// No description provided for @planTemplateStrength2xDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Strength training just twice a week is the \'minimum effective dose\' for preserving muscle, strength, and bone density — the bar set by the WHO and US physical-activity guidelines. It protects the muscle you naturally lose with age and supports metabolism, blood-sugar control, posture, and fall prevention. Favor compound moves — squat, hinge (deadlift), push, pull — for 3–4 sets of 6–10 reps, nudging the weight or reps up each week (progressive overload). The same muscles need 48+ hours to recover, so space the two sessions 2–3 days apart and back them with protein and sleep'**
-  String get planTemplateStrength2xDescription;
 
   /// No description provided for @planDayPresetThreeDaysLabel.
   ///
@@ -2480,83 +1340,347 @@ abstract class AppLocalizations {
   /// **'Weekend'**
   String get planDayPresetWeekendLabel;
 
-  /// No description provided for @planDayPresetStudyThreeDaysDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Build three wins in the first week'**
-  String get planDayPresetStudyThreeDaysDesc;
-
-  /// No description provided for @planDayPresetStudyWeekdaysDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Anchor your study to the weekdays'**
-  String get planDayPresetStudyWeekdaysDesc;
-
-  /// No description provided for @planDayPresetStudyEveryDayDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Share something with your accountability partner each day, even briefly'**
-  String get planDayPresetStudyEveryDayDesc;
-
-  /// No description provided for @planDayPresetExerciseThreeDaysDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Start with a Mon/Wed/Fri rhythm'**
-  String get planDayPresetExerciseThreeDaysDesc;
-
-  /// No description provided for @planDayPresetExerciseWeekendDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave a movement trace on weekends'**
-  String get planDayPresetExerciseWeekendDesc;
-
-  /// No description provided for @planDayPresetExerciseEveryDayDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Notice each other\'s daily effort, even a short stretch'**
-  String get planDayPresetExerciseEveryDayDesc;
-
-  /// No description provided for @planDayPresetCustomThreeDaysDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'A low-pressure default'**
-  String get planDayPresetCustomThreeDaysDesc;
-
-  /// No description provided for @planDayPresetCustomWeekdaysDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Lock it in as a weekday routine'**
-  String get planDayPresetCustomWeekdaysDesc;
-
-  /// No description provided for @planDayPresetCustomEveryDayDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave a small action every day'**
-  String get planDayPresetCustomEveryDayDesc;
-
-  /// No description provided for @planStepHeader.
-  ///
-  /// In en, this message translates to:
-  /// **'Preparing promise · {current}/{total}'**
-  String planStepHeader(int current, int total);
-
   /// No description provided for @planTellUsActionFirst.
   ///
   /// In en, this message translates to:
-  /// **'Tell us what you want to promise!'**
+  /// **'Tell us which workout you\'ll do!'**
   String get planTellUsActionFirst;
-
-  /// No description provided for @planProposalSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Proposal sent.\nTalk it through with your accountability partner!'**
-  String get planProposalSaved;
 
   /// No description provided for @planSaveError.
   ///
   /// In en, this message translates to:
   /// **'We couldn\'t save your promise. Please try again.'**
   String get planSaveError;
+
+  /// No description provided for @planCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New workout promise'**
+  String get planCreateTitle;
+
+  /// No description provided for @planEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit promise'**
+  String get planEditTitle;
+
+  /// No description provided for @planCreateHeaderWithPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Which workout will you promise {name}?'**
+  String planCreateHeaderWithPartner(String name);
+
+  /// No description provided for @planCreateDaysTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which days?'**
+  String get planCreateDaysTitle;
+
+  /// No description provided for @planCreateDaysRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at least one day'**
+  String get planCreateDaysRequired;
+
+  /// No description provided for @planCreateDaysFromPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched to {name}\'s workout days'**
+  String planCreateDaysFromPartner(String name);
+
+  /// No description provided for @planCreateDeadlineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Done by when?'**
+  String get planCreateDeadlineTitle;
+
+  /// No description provided for @planCreateDeadlineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll remind you at this time'**
+  String get planCreateDeadlineHint;
+
+  /// No description provided for @planCreateDeadlineRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a deadline'**
+  String get planCreateDeadlineRequired;
+
+  /// No description provided for @planDeadlineMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'7 AM'**
+  String get planDeadlineMorning;
+
+  /// No description provided for @planDeadlineNoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Noon'**
+  String get planDeadlineNoon;
+
+  /// No description provided for @planDeadlineEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'7 PM'**
+  String get planDeadlineEvening;
+
+  /// No description provided for @planDeadlineNight.
+  ///
+  /// In en, this message translates to:
+  /// **'9 PM'**
+  String get planDeadlineNight;
+
+  /// No description provided for @planDeadlineLateNight.
+  ///
+  /// In en, this message translates to:
+  /// **'10 PM'**
+  String get planDeadlineLateNight;
+
+  /// No description provided for @planDeadlineCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get planDeadlineCustom;
+
+  /// No description provided for @planCreateMemoToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note (optional)'**
+  String get planCreateMemoToggle;
+
+  /// No description provided for @planCreatePartnerNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Miss it and {name} will know'**
+  String planCreatePartnerNotice(String name);
+
+  /// Main button when a partner is connected. ko uses nameWithParticle (the name + 이랑/랑, built with withJosa); en uses name.
+  ///
+  /// In en, this message translates to:
+  /// **'🤙 Pinky promise with {name}'**
+  String planCreateCtaWithPartner(String name, String nameWithParticle);
+
+  /// No description provided for @planCreateCtaSolo.
+  ///
+  /// In en, this message translates to:
+  /// **'Start my promise'**
+  String get planCreateCtaSolo;
+
+  /// No description provided for @planEditCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get planEditCta;
+
+  /// No description provided for @planSavedWithPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout promise made with {name} 🤙'**
+  String planSavedWithPartner(String name);
+
+  /// No description provided for @planSavedSolo.
+  ///
+  /// In en, this message translates to:
+  /// **'Your workout promise has started 💪'**
+  String get planSavedSolo;
+
+  /// No description provided for @planEditSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Promise updated'**
+  String get planEditSaved;
+
+  /// No description provided for @planDayPresetTwoDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'2 days/wk'**
+  String get planDayPresetTwoDaysLabel;
+
+  /// No description provided for @workoutTypeGymLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym'**
+  String get workoutTypeGymLabel;
+
+  /// No description provided for @workoutTypeGymAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Hit the gym'**
+  String get workoutTypeGymAction;
+
+  /// No description provided for @workoutTypeRunningLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get workoutTypeRunningLabel;
+
+  /// No description provided for @workoutTypeRunningAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Run for 30 minutes'**
+  String get workoutTypeRunningAction;
+
+  /// No description provided for @workoutTypeHomeTrainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Home workout'**
+  String get workoutTypeHomeTrainingLabel;
+
+  /// No description provided for @workoutTypeHomeTrainingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'20-minute home workout'**
+  String get workoutTypeHomeTrainingAction;
+
+  /// No description provided for @workoutTypeWalkingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Walking'**
+  String get workoutTypeWalkingLabel;
+
+  /// No description provided for @workoutTypeWalkingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk for 30 minutes'**
+  String get workoutTypeWalkingAction;
+
+  /// No description provided for @workoutTypePilatesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilates'**
+  String get workoutTypePilatesLabel;
+
+  /// No description provided for @workoutTypePilatesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Pilates class'**
+  String get workoutTypePilatesAction;
+
+  /// No description provided for @workoutTypeYogaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga'**
+  String get workoutTypeYogaLabel;
+
+  /// No description provided for @workoutTypeYogaAction.
+  ///
+  /// In en, this message translates to:
+  /// **'30 minutes of yoga'**
+  String get workoutTypeYogaAction;
+
+  /// No description provided for @workoutTypeStretchingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stretching'**
+  String get workoutTypeStretchingLabel;
+
+  /// No description provided for @workoutTypeStretchingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Stretch for 10 minutes before bed'**
+  String get workoutTypeStretchingAction;
+
+  /// No description provided for @workoutTypeSwimmingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Swimming'**
+  String get workoutTypeSwimmingLabel;
+
+  /// No description provided for @workoutTypeSwimmingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go for a swim'**
+  String get workoutTypeSwimmingAction;
+
+  /// No description provided for @workoutTypeClimbingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Climbing'**
+  String get workoutTypeClimbingLabel;
+
+  /// No description provided for @workoutTypeClimbingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go climbing'**
+  String get workoutTypeClimbingAction;
+
+  /// No description provided for @workoutTypeCyclingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycling'**
+  String get workoutTypeCyclingLabel;
+
+  /// No description provided for @workoutTypeCyclingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride a bike for 40 minutes'**
+  String get workoutTypeCyclingAction;
+
+  /// No description provided for @workoutTypeHikingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiking'**
+  String get workoutTypeHikingLabel;
+
+  /// No description provided for @workoutTypeHikingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go hiking'**
+  String get workoutTypeHikingAction;
+
+  /// No description provided for @workoutTypeStrengthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get workoutTypeStrengthLabel;
+
+  /// No description provided for @workoutTypeStrengthAction.
+  ///
+  /// In en, this message translates to:
+  /// **'30 minutes of strength training'**
+  String get workoutTypeStrengthAction;
+
+  /// No description provided for @workoutTypeDietLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Diet · no late snacks'**
+  String get workoutTypeDietLabel;
+
+  /// No description provided for @workoutTypeDietAction.
+  ///
+  /// In en, this message translates to:
+  /// **'No late-night snacks'**
+  String get workoutTypeDietAction;
+
+  /// No description provided for @workoutTypeDietName.
+  ///
+  /// In en, this message translates to:
+  /// **'Diet'**
+  String get workoutTypeDietName;
+
+  /// No description provided for @workoutTypeOtherLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get workoutTypeOtherLabel;
+
+  /// No description provided for @workoutTypeOtherName.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout'**
+  String get workoutTypeOtherName;
+
+  /// Cycling inside a sentence: 오늘 🚴 {name} 했어?
+  ///
+  /// In en, this message translates to:
+  /// **'Cycling'**
+  String get workoutTypeCyclingName;
+
+  /// Strength inside a sentence: Strength training done today?
+  ///
+  /// In en, this message translates to:
+  /// **'Strength training'**
+  String get workoutTypeStrengthName;
 
   /// No description provided for @focusTimerPickerTitle.
   ///
@@ -2669,7 +1793,7 @@ abstract class AppLocalizations {
   /// No description provided for @actionNoteHintDefault.
   ///
   /// In en, this message translates to:
-  /// **'Share your thoughts (optional)'**
+  /// **'How did it go? (optional)'**
   String get actionNoteHintDefault;
 
   /// No description provided for @planTimeUnset.
@@ -2681,7 +1805,7 @@ abstract class AppLocalizations {
   /// No description provided for @planDaysEveryday.
   ///
   /// In en, this message translates to:
-  /// **'Everyday'**
+  /// **'Every day'**
   String get planDaysEveryday;
 
   /// No description provided for @planDaysWeekdays.
@@ -2750,24 +1874,6 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get planCardDelete;
 
-  /// No description provided for @planDescriptionTip.
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: try \"If X, then Y\"'**
-  String get planDescriptionTip;
-
-  /// No description provided for @planDescriptionExamples.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. \"When I get home from work, I change into workout clothes\"\ne.g. \"When the kids fall asleep, I read for 30 minutes\"'**
-  String get planDescriptionExamples;
-
-  /// No description provided for @planDescriptionTipFooter.
-  ///
-  /// In en, this message translates to:
-  /// **'A specific situation makes you 2–3× more likely to follow through!'**
-  String get planDescriptionTipFooter;
-
   /// No description provided for @notifyEditorTitle.
   ///
   /// In en, this message translates to:
@@ -2777,7 +1883,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifyEditorSubtitleOn.
   ///
   /// In en, this message translates to:
-  /// **'Pick when we should poke you.'**
+  /// **'We\'ll remind you at your promise time.'**
   String get notifyEditorSubtitleOn;
 
   /// No description provided for @notifyEditorSubtitleOff.
@@ -2789,14 +1895,32 @@ abstract class AppLocalizations {
   /// No description provided for @notifyEditorPromiseTime.
   ///
   /// In en, this message translates to:
-  /// **'Promise time your accountability partner can see'**
+  /// **'Promise time your partner sees'**
   String get notifyEditorPromiseTime;
 
   /// No description provided for @notifyEditorDefaultTimeHint.
   ///
   /// In en, this message translates to:
-  /// **'9 PM is a good default for noticing each other\'s effort before the day ends.'**
+  /// **'9 PM is a good default — there\'s still time to give each other props before the day ends.'**
   String get notifyEditorDefaultTimeHint;
+
+  /// No description provided for @notifyEditorOffWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off the reminder?'**
+  String get notifyEditorOffWarningTitle;
+
+  /// No description provided for @notifyEditorOffWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a reminder there\'s no deadline, so {name} won\'t hear about a missed day.'**
+  String notifyEditorOffWarningBody(String name);
+
+  /// No description provided for @notifyEditorOffWarningConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off'**
+  String get notifyEditorOffWarningConfirm;
 
   /// No description provided for @notifyEditorPrealert.
   ///
@@ -2891,97 +2015,91 @@ abstract class AppLocalizations {
   /// No description provided for @promiseChipPenaltyTriggered.
   ///
   /// In en, this message translates to:
-  /// **'Penalty locked in — {description}'**
+  /// **'Missed it — {description}'**
   String promiseChipPenaltyTriggered(String description);
 
   /// No description provided for @promiseChipPenaltyImminentOne.
   ///
   /// In en, this message translates to:
-  /// **'Just one more miss triggers the penalty — {description}'**
+  /// **'One more miss and it\'s {description}'**
   String promiseChipPenaltyImminentOne(String description);
-
-  /// No description provided for @promiseChipPenaltyImminent.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} more misses triggers the penalty — {description}'**
-  String promiseChipPenaltyImminent(int count, String description);
 
   /// No description provided for @promiseChipRewardAchieved.
   ///
   /// In en, this message translates to:
-  /// **'Reward earned! — {description}'**
+  /// **'Kept it! — {description}'**
   String promiseChipRewardAchieved(String description);
 
   /// No description provided for @promiseChipRewardImminent.
   ///
   /// In en, this message translates to:
-  /// **'{days} more day(s) to the reward — {description}'**
+  /// **'{days, plural, =1{1 more day} other{{days} more days}} to win — {description}'**
   String promiseChipRewardImminent(int days, String description);
 
   /// No description provided for @promiseChipSafeBoth.
   ///
   /// In en, this message translates to:
-  /// **'{rewardDays} days to reward · {penaltyBuffer} misses safe'**
+  /// **'{rewardDays, plural, =1{1 day} other{{rewardDays} days}} to win · {penaltyBuffer} more misses and the bet\'s on'**
   String promiseChipSafeBoth(int rewardDays, int penaltyBuffer);
 
   /// No description provided for @promiseChipSafeRewardOnly.
   ///
   /// In en, this message translates to:
-  /// **'{days} days to reward — {description}'**
+  /// **'{days} days to win — {description}'**
   String promiseChipSafeRewardOnly(int days, String description);
 
-  /// No description provided for @promiseChipSafePenaltyOnly.
+  /// Chip: how many more missed days set off the bet (2 or more)
   ///
   /// In en, this message translates to:
-  /// **'{buffer} misses safe — {description}'**
+  /// **'{buffer, plural, =1{One more miss} other{{buffer} more misses}} and it\'s {description}'**
   String promiseChipSafePenaltyOnly(int buffer, String description);
 
   /// No description provided for @promiseSheetTitle.
   ///
   /// In en, this message translates to:
-  /// **'Promise terms'**
+  /// **'The bet'**
   String get promiseSheetTitle;
 
   /// No description provided for @promiseSheetSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Settled when the plan ends. Currently {success} done · {failed} missed · {remaining} days left.'**
+  /// **'Settled when the promise ends. So far {success} kept · {failed} missed · {remaining} to go.'**
   String promiseSheetSubtitle(int success, int failed, int remaining);
 
   /// No description provided for @promiseSheetRewardLabel.
   ///
   /// In en, this message translates to:
-  /// **'Reward'**
+  /// **'If kept'**
   String get promiseSheetRewardLabel;
 
   /// No description provided for @promiseSheetPenaltyLabel.
   ///
   /// In en, this message translates to:
-  /// **'Penalty'**
+  /// **'If missed'**
   String get promiseSheetPenaltyLabel;
 
   /// No description provided for @promiseSheetRewardTarget.
   ///
   /// In en, this message translates to:
-  /// **'{target} successful days to earn it — currently {success}'**
+  /// **'Keep {target} days to win — {success} so far'**
   String promiseSheetRewardTarget(int target, int success);
 
   /// No description provided for @promiseSheetPenaltyImpossible.
   ///
   /// In en, this message translates to:
-  /// **'Needed {target} successful days but you can no longer reach it — penalty locked in'**
+  /// **'{target, plural, =1{1 day} other{{target} days}} missed — the bet\'s on'**
   String promiseSheetPenaltyImpossible(int target);
 
   /// No description provided for @promiseSheetPenaltyJustOne.
   ///
   /// In en, this message translates to:
-  /// **'Triggers below {target} successful days — you can\'t miss even once more'**
+  /// **'On at {target} missed days — one more miss and it\'s on'**
   String promiseSheetPenaltyJustOne(int target);
 
   /// No description provided for @promiseSheetPenaltyBuffer.
   ///
   /// In en, this message translates to:
-  /// **'Triggers below {target} successful days — {buffer} more misses are safe'**
+  /// **'On at {target} missed days — {buffer} more misses and it\'s on'**
   String promiseSheetPenaltyBuffer(int target, int buffer);
 
   /// No description provided for @promiseSheetClose.
@@ -3035,31 +2153,31 @@ abstract class AppLocalizations {
   /// No description provided for @historyCardFeedbackHint.
   ///
   /// In en, this message translates to:
-  /// **'Leave a warm note (optional)'**
+  /// **'Add a word (optional)'**
   String get historyCardFeedbackHint;
 
   /// No description provided for @historyCardFeedbackButton.
   ///
   /// In en, this message translates to:
-  /// **'OK'**
+  /// **'Props!'**
   String get historyCardFeedbackButton;
 
   /// No description provided for @historyCardAcknowledgePractice.
   ///
   /// In en, this message translates to:
-  /// **'Acknowledge practice'**
+  /// **'Partner props'**
   String get historyCardAcknowledgePractice;
 
   /// No description provided for @planSummaryMyDone.
   ///
   /// In en, this message translates to:
-  /// **'My completions'**
+  /// **'Days I did it'**
   String get planSummaryMyDone;
 
   /// No description provided for @planSummaryPartnerVerified.
   ///
   /// In en, this message translates to:
-  /// **'Accountability partner checked'**
+  /// **'Partner props'**
   String get planSummaryPartnerVerified;
 
   /// No description provided for @planSummaryCount.
@@ -3071,14 +2189,8 @@ abstract class AppLocalizations {
   /// No description provided for @connectInviteCodeDetectedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Invite code detected'**
+  /// **'We found an invite code you copied'**
   String get connectInviteCodeDetectedTitle;
-
-  /// No description provided for @connectInviteCodeDetectedBody.
-  ///
-  /// In en, this message translates to:
-  /// **'We found an invite code ({code}) in your clipboard.\nPaste it?'**
-  String connectInviteCodeDetectedBody(String code);
 
   /// No description provided for @connectCancel.
   ///
@@ -3086,22 +2198,16 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get connectCancel;
 
-  /// No description provided for @connectPaste.
-  ///
-  /// In en, this message translates to:
-  /// **'Paste'**
-  String get connectPaste;
-
   /// No description provided for @connectNotice.
   ///
   /// In en, this message translates to:
-  /// **'Notice'**
+  /// **'Heads up'**
   String get connectNotice;
 
   /// No description provided for @connectAlreadyConnectedBody.
   ///
   /// In en, this message translates to:
-  /// **'You already have one accountability partner.\nFor now, Nodtry supports one mutual connection at a time.'**
+  /// **'You\'re already connected with a partner.\nDuoDone connects you with one person at a time.'**
   String get connectAlreadyConnectedBody;
 
   /// No description provided for @connectOk.
@@ -3109,12 +2215,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get connectOk;
-
-  /// No description provided for @connectSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Accountability partner connected!'**
-  String get connectSuccess;
 
   /// No description provided for @allPlansTitleMine.
   ///
@@ -3125,7 +2225,7 @@ abstract class AppLocalizations {
   /// No description provided for @allPlansTitlePartner.
   ///
   /// In en, this message translates to:
-  /// **'Accountability partner\'s promises'**
+  /// **'Your partner\'s promises'**
   String get allPlansTitlePartner;
 
   /// No description provided for @allPlansEmpty.
@@ -3173,13 +2273,13 @@ abstract class AppLocalizations {
   /// No description provided for @historyErrorUnknown.
   ///
   /// In en, this message translates to:
-  /// **'An unknown error occurred.'**
+  /// **'Something unexpected went wrong.'**
   String get historyErrorUnknown;
 
   /// No description provided for @historyErrorIndexMissing.
   ///
   /// In en, this message translates to:
-  /// **'Database index missing for this query.\nPlease screenshot this and send it to the developer.'**
+  /// **'A database index is missing for this query.\nPlease screenshot this and send it to the developer.'**
   String get historyErrorIndexMissing;
 
   /// No description provided for @historyErrorAlreadyDeleted.
@@ -3191,7 +2291,7 @@ abstract class AppLocalizations {
   /// No description provided for @historyErrorTitle.
   ///
   /// In en, this message translates to:
-  /// **'Error'**
+  /// **'Something went wrong'**
   String get historyErrorTitle;
 
   /// No description provided for @historyErrorCreationLink.
@@ -3257,13 +2357,13 @@ abstract class AppLocalizations {
   /// No description provided for @historyWeeklyPartnerLabel.
   ///
   /// In en, this message translates to:
-  /// **'Accountability partner'**
+  /// **'Partner'**
   String get historyWeeklyPartnerLabel;
 
   /// No description provided for @historyReconcileTitle.
   ///
   /// In en, this message translates to:
-  /// **'Reconcile past record'**
+  /// **'Fix a past record'**
   String get historyReconcileTitle;
 
   /// No description provided for @historyReconcileSubtitle.
@@ -3341,19 +2441,19 @@ abstract class AppLocalizations {
   /// No description provided for @usEmptyPartner.
   ///
   /// In en, this message translates to:
-  /// **'Your accountability partner has no active promises'**
+  /// **'Your partner has no active promises'**
   String get usEmptyPartner;
 
   /// No description provided for @usCreatePlanShort.
   ///
   /// In en, this message translates to:
-  /// **'+ New promise'**
+  /// **'+ Workout promise'**
   String get usCreatePlanShort;
 
   /// No description provided for @usCreatePlan.
   ///
   /// In en, this message translates to:
-  /// **'New promise'**
+  /// **'Make a workout promise'**
   String get usCreatePlan;
 
   /// No description provided for @usDeletePlanTitle.
@@ -3389,7 +2489,7 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailPracticeHistory.
   ///
   /// In en, this message translates to:
-  /// **'Practice log'**
+  /// **'Log'**
   String get planDetailPracticeHistory;
 
   /// No description provided for @planDetailLoadFailed.
@@ -3407,7 +2507,7 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailNotSavedPlan.
   ///
   /// In en, this message translates to:
-  /// **'Plan not saved.'**
+  /// **'This promise isn\'t saved yet.'**
   String get planDetailNotSavedPlan;
 
   /// No description provided for @planDetailRecordDone.
@@ -3425,19 +2525,19 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailRecordRested.
   ///
   /// In en, this message translates to:
-  /// **'Rested'**
+  /// **'Rest pass'**
   String get planDetailRecordRested;
 
   /// No description provided for @planDetailRecordRescued.
   ///
   /// In en, this message translates to:
-  /// **'Acknowledged'**
+  /// **'Partner props'**
   String get planDetailRecordRescued;
 
   /// No description provided for @planDetailPokeSent.
   ///
   /// In en, this message translates to:
-  /// **'Knock knock — door tapped!'**
+  /// **'Knock sent to your partner.'**
   String get planDetailPokeSent;
 
   /// No description provided for @planDetailPokeFailed.
@@ -3449,7 +2549,7 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailPokeDoneToday.
   ///
   /// In en, this message translates to:
-  /// **'Knock sent for today'**
+  /// **'Knocked today'**
   String get planDetailPokeDoneToday;
 
   /// No description provided for @planDetailPokeSending.
@@ -3461,7 +2561,7 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailPokeAsk.
   ///
   /// In en, this message translates to:
-  /// **'Knock knock… are you forgetting?'**
+  /// **'Send a knock'**
   String get planDetailPokeAsk;
 
   /// No description provided for @planDetailPokeAlreadyDone.
@@ -3602,42 +2702,6 @@ abstract class AppLocalizations {
   /// **'Your current promise will be stopped and you\'ll move to create a new one.\nExisting records are kept safe.'**
   String get planDetailReplaceBody;
 
-  /// No description provided for @planDetailReport.
-  ///
-  /// In en, this message translates to:
-  /// **'Practice report'**
-  String get planDetailReport;
-
-  /// No description provided for @planDetailReportPeriod.
-  ///
-  /// In en, this message translates to:
-  /// **'Total period'**
-  String get planDetailReportPeriod;
-
-  /// No description provided for @planDetailReportDays.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} days'**
-  String planDetailReportDays(int count);
-
-  /// No description provided for @planDetailReportCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Completions'**
-  String get planDetailReportCompleted;
-
-  /// No description provided for @planDetailReportCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} times'**
-  String planDetailReportCount(int count);
-
-  /// No description provided for @planDetailReportRate.
-  ///
-  /// In en, this message translates to:
-  /// **'Achievement rate'**
-  String get planDetailReportRate;
-
   /// No description provided for @planDetailRestartWithScheduleTitle.
   ///
   /// In en, this message translates to:
@@ -3689,7 +2753,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowSkipDialogBody.
   ///
   /// In en, this message translates to:
-  /// **'We\'ll mark {title} as skipped for today.'**
+  /// **'\'{title}\' will count as missed today, and your partner will be told. Your streak together may reset.'**
   String nowSkipDialogBody(String title);
 
   /// No description provided for @nowCancel.
@@ -3713,31 +2777,19 @@ abstract class AppLocalizations {
   /// No description provided for @nowApproveCheering.
   ///
   /// In en, this message translates to:
-  /// **'Cheering you on!'**
+  /// **'Great — it\'s on!'**
   String get nowApproveCheering;
 
   /// No description provided for @nowApproveFailed.
   ///
   /// In en, this message translates to:
-  /// **'Approval failed.'**
+  /// **'Couldn\'t accept.'**
   String get nowApproveFailed;
-
-  /// No description provided for @nowVerifyDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Practice verified!'**
-  String get nowVerifyDone;
-
-  /// No description provided for @nowVerifyFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Verification failed.'**
-  String get nowVerifyFailed;
 
   /// No description provided for @nowRejectDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'Want to adjust a bit more?'**
+  /// **'Want to tweak it a bit?'**
   String get nowRejectDialogTitle;
 
   /// No description provided for @nowRejectLessFrequent.
@@ -3755,19 +2807,19 @@ abstract class AppLocalizations {
   /// No description provided for @nowRejectCustom.
   ///
   /// In en, this message translates to:
-  /// **'Custom message'**
+  /// **'I\'ll write my own'**
   String get nowRejectCustom;
 
   /// No description provided for @nowRejectRequested.
   ///
   /// In en, this message translates to:
-  /// **'Adjustment requested'**
+  /// **'Sent your suggestion'**
   String get nowRejectRequested;
 
   /// No description provided for @nowRejectCustomDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'What would you like to adjust?'**
+  /// **'What would you change?'**
   String get nowRejectCustomDialogTitle;
 
   /// No description provided for @nowRejectCustomHint.
@@ -3782,30 +2834,6 @@ abstract class AppLocalizations {
   /// **'Send'**
   String get nowSend;
 
-  /// No description provided for @nowCheerExcited.
-  ///
-  /// In en, this message translates to:
-  /// **'Sent excited support! 🔥'**
-  String get nowCheerExcited;
-
-  /// No description provided for @nowCheerLove.
-  ///
-  /// In en, this message translates to:
-  /// **'Sent your love! ❤️'**
-  String get nowCheerLove;
-
-  /// No description provided for @nowCheerProud.
-  ///
-  /// In en, this message translates to:
-  /// **'Said you\'re awesome! 👍'**
-  String get nowCheerProud;
-
-  /// No description provided for @nowCheerStrength.
-  ///
-  /// In en, this message translates to:
-  /// **'Said hang in there! 💪'**
-  String get nowCheerStrength;
-
   /// No description provided for @nowCheerFailed.
   ///
   /// In en, this message translates to:
@@ -3815,13 +2843,13 @@ abstract class AppLocalizations {
   /// No description provided for @nowPokeNoActivityMessage.
   ///
   /// In en, this message translates to:
-  /// **'Knock knock! Your accountability partner is ready. Make one promise for today?'**
+  /// **'Knock knock! Make a workout promise — I\'ve got your back 🙂'**
   String get nowPokeNoActivityMessage;
 
   /// No description provided for @nowPokeSent.
   ///
   /// In en, this message translates to:
-  /// **'Sent a knock signal.'**
+  /// **'Knock sent.'**
   String get nowPokeSent;
 
   /// No description provided for @nowPokeFailed.
@@ -3833,19 +2861,19 @@ abstract class AppLocalizations {
   /// No description provided for @nowPokeAgainMessage.
   ///
   /// In en, this message translates to:
-  /// **'Knock knock! Your accountability partner is here. Ready to keep today\'s promise going?'**
+  /// **'Knock knock! Waiting on today\'s promise 🙂'**
   String get nowPokeAgainMessage;
 
   /// No description provided for @nowPokeAgainSent.
   ///
   /// In en, this message translates to:
-  /// **'Knock sent to help today\'s promise continue.'**
+  /// **'Knock sent to your partner.'**
   String get nowPokeAgainSent;
 
   /// No description provided for @nowSettlementSaved.
   ///
   /// In en, this message translates to:
-  /// **'4-week settlement saved.'**
+  /// **'Saved your 4-week wrap-up.'**
   String get nowSettlementSaved;
 
   /// No description provided for @nowExitDialogTitle.
@@ -3857,7 +2885,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowExitReasonWeakPoke.
   ///
   /// In en, this message translates to:
-  /// **'Knocks didn\'t help me follow through'**
+  /// **'Knocks didn\'t really help'**
   String get nowExitReasonWeakPoke;
 
   /// No description provided for @nowExitReasonTooBig.
@@ -3869,7 +2897,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowExitReasonPartnerBurden.
   ///
   /// In en, this message translates to:
-  /// **'Checking in on each other felt heavy'**
+  /// **'Backing each other felt like a lot'**
   String get nowExitReasonPartnerBurden;
 
   /// No description provided for @nowExitReasonCustomLabel.
@@ -3905,7 +2933,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowRestPassBody.
   ///
   /// In en, this message translates to:
-  /// **'Use one rest pass this week.\nYour streak stays intact.'**
+  /// **'Use this week\'s rest pass.\nYour streak stays intact.'**
   String get nowRestPassBody;
 
   /// No description provided for @nowRestPassConfirm.
@@ -3929,49 +2957,49 @@ abstract class AppLocalizations {
   /// No description provided for @nowRestPassError.
   ///
   /// In en, this message translates to:
-  /// **'An error occurred.'**
+  /// **'Something went wrong.'**
   String get nowRestPassError;
 
   /// No description provided for @nowRescuedSnackbar.
   ///
   /// In en, this message translates to:
-  /// **'Acknowledged the practice! Streak preserved.'**
+  /// **'Props given! Their streak lives on.'**
   String get nowRescuedSnackbar;
 
   /// No description provided for @nowRescueFailed.
   ///
   /// In en, this message translates to:
-  /// **'Couldn\'t acknowledge practice.'**
+  /// **'Couldn\'t give props.'**
   String get nowRescueFailed;
 
   /// No description provided for @nowPromiseAccepted.
   ///
   /// In en, this message translates to:
-  /// **'Accepted the promise!'**
+  /// **'Bet\'s on! 🤝'**
   String get nowPromiseAccepted;
 
   /// No description provided for @nowPromiseDeclined.
   ///
   /// In en, this message translates to:
-  /// **'Declined the promise.'**
+  /// **'Passed on this bet.'**
   String get nowPromiseDeclined;
 
   /// No description provided for @nowPromiseResponseFailed.
   ///
   /// In en, this message translates to:
-  /// **'Couldn\'t send promise response.'**
+  /// **'Couldn\'t answer the bet.'**
   String get nowPromiseResponseFailed;
 
   /// No description provided for @nowPromiseProposed.
   ///
   /// In en, this message translates to:
-  /// **'Proposed the promise!'**
+  /// **'Bet proposed!'**
   String get nowPromiseProposed;
 
   /// No description provided for @nowPromiseProposeFailed.
   ///
   /// In en, this message translates to:
-  /// **'Couldn\'t propose the promise.'**
+  /// **'Couldn\'t propose the bet.'**
   String get nowPromiseProposeFailed;
 
   /// No description provided for @nowTimeMinBeforeAlert.
@@ -3998,34 +3026,10 @@ abstract class AppLocalizations {
   /// **'{hours}h after alert'**
   String nowTimeHourAfterAlert(int hours);
 
-  /// No description provided for @nowKeepFlowing.
-  ///
-  /// In en, this message translates to:
-  /// **'Great! Keep this flow going'**
-  String get nowKeepFlowing;
-
-  /// No description provided for @nowGuideWhen.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick when you\'ll do it so today\'s starting point is clear'**
-  String get nowGuideWhen;
-
-  /// No description provided for @nowGuideSmallStart.
-  ///
-  /// In en, this message translates to:
-  /// **'Starting small is fine. Consistency wins'**
-  String get nowGuideSmallStart;
-
-  /// No description provided for @nowGuideBetterToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Better than yesterday is enough'**
-  String get nowGuideBetterToday;
-
   /// No description provided for @nowErrorTitle.
   ///
   /// In en, this message translates to:
-  /// **'Error'**
+  /// **'Something went wrong'**
   String get nowErrorTitle;
 
   /// No description provided for @nowErrorCreationLink.
@@ -4049,25 +3053,25 @@ abstract class AppLocalizations {
   /// No description provided for @nowPartnerActionFallback.
   ///
   /// In en, this message translates to:
-  /// **'Accountability partner\'s practice'**
+  /// **'Your partner\'s promise'**
   String get nowPartnerActionFallback;
 
   /// No description provided for @nowActionNoteHint.
   ///
   /// In en, this message translates to:
-  /// **'Leave a warm note (optional)'**
+  /// **'Add a word (optional)'**
   String get nowActionNoteHint;
 
   /// No description provided for @nowVerifyAndSend.
   ///
   /// In en, this message translates to:
-  /// **'Verify and send'**
+  /// **'Give props & send'**
   String get nowVerifyAndSend;
 
   /// No description provided for @nowStreakCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} days in a row!'**
+  /// **'{count} in a row!'**
   String nowStreakCount(int count);
 
   /// No description provided for @nowHeaderAdjustNeeded.
@@ -4079,13 +3083,13 @@ abstract class AppLocalizations {
   /// No description provided for @nowHeaderPromiseProposed.
   ///
   /// In en, this message translates to:
-  /// **'Promise proposal arrived'**
+  /// **'A bet proposal arrived'**
   String get nowHeaderPromiseProposed;
 
   /// No description provided for @nowHeaderPromiseSettled.
   ///
   /// In en, this message translates to:
-  /// **'Promise result is out'**
+  /// **'The bet result is in'**
   String get nowHeaderPromiseSettled;
 
   /// No description provided for @nowPromiseAckButton.
@@ -4094,22 +3098,16 @@ abstract class AppLocalizations {
   /// **'See the result'**
   String get nowPromiseAckButton;
 
-  /// No description provided for @nowPromiseAckWithNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave a word and close'**
-  String get nowPromiseAckWithNote;
-
   /// No description provided for @nowPromiseAckDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'Promise result'**
+  /// **'Bet result'**
   String get nowPromiseAckDialogTitle;
 
   /// No description provided for @nowPromiseAckDialogHint.
   ///
   /// In en, this message translates to:
-  /// **'Leave a quick word for your accountability partner (optional)'**
+  /// **'A word for your partner (optional)'**
   String get nowPromiseAckDialogHint;
 
   /// No description provided for @nowPromiseAckDialogConfirm.
@@ -4121,13 +3119,13 @@ abstract class AppLocalizations {
   /// No description provided for @nowPromiseAckSnackbar.
   ///
   /// In en, this message translates to:
-  /// **'Result acknowledged'**
+  /// **'Result checked'**
   String get nowPromiseAckSnackbar;
 
   /// No description provided for @nowPromiseAckFailed.
   ///
   /// In en, this message translates to:
-  /// **'Could not acknowledge the result'**
+  /// **'Couldn\'t confirm the result'**
   String get nowPromiseAckFailed;
 
   /// No description provided for @planDetailViewList.
@@ -4157,13 +3155,13 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailLegendRested.
   ///
   /// In en, this message translates to:
-  /// **'Rested'**
+  /// **'Rest pass'**
   String get planDetailLegendRested;
 
   /// No description provided for @planDetailLegendRescued.
   ///
   /// In en, this message translates to:
-  /// **'Rescued'**
+  /// **'Props'**
   String get planDetailLegendRescued;
 
   /// No description provided for @planDetailLegendSkipped.
@@ -4193,7 +3191,7 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailGraphCompletionRate.
   ///
   /// In en, this message translates to:
-  /// **'Weekly completion rate'**
+  /// **'Weekly completion'**
   String get planDetailGraphCompletionRate;
 
   /// No description provided for @planDetailGraphEmpty.
@@ -4265,49 +3263,49 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailPromiseProgressTitle.
   ///
   /// In en, this message translates to:
-  /// **'Promise progress'**
+  /// **'Bet progress'**
   String get planDetailPromiseProgressTitle;
 
   /// No description provided for @planDetailPromiseRewardLabel.
   ///
   /// In en, this message translates to:
-  /// **'🏆 Reward'**
+  /// **'🏆 If kept'**
   String get planDetailPromiseRewardLabel;
 
   /// No description provided for @planDetailPromisePenaltyLabel.
   ///
   /// In en, this message translates to:
-  /// **'⚡ Penalty'**
+  /// **'⚡ If missed'**
   String get planDetailPromisePenaltyLabel;
 
   /// No description provided for @planDetailPromiseRewardNeed.
   ///
   /// In en, this message translates to:
-  /// **'{days} more day(s) to reward'**
+  /// **'{days, plural, =1{1 more day} other{{days} more days}} to win'**
   String planDetailPromiseRewardNeed(int days);
 
   /// No description provided for @planDetailPromiseRewardAchieved.
   ///
   /// In en, this message translates to:
-  /// **'🎉 Reward achieved!'**
+  /// **'🎉 Kept it!'**
   String get planDetailPromiseRewardAchieved;
 
   /// No description provided for @planDetailPromisePenaltyBuffer.
   ///
   /// In en, this message translates to:
-  /// **'{buffer} miss(es) of room'**
+  /// **'{buffer} more misses and the bet\'s on'**
   String planDetailPromisePenaltyBuffer(int buffer);
 
   /// No description provided for @planDetailPromisePenaltyImminent.
   ///
   /// In en, this message translates to:
-  /// **'One more miss triggers penalty'**
+  /// **'One more miss and the bet\'s on'**
   String get planDetailPromisePenaltyImminent;
 
   /// No description provided for @planDetailPromisePenaltyTriggered.
   ///
   /// In en, this message translates to:
-  /// **'⚡ Penalty triggered'**
+  /// **'⚡ Missed · the bet\'s on'**
   String get planDetailPromisePenaltyTriggered;
 
   /// No description provided for @planDetailMoreMenu.
@@ -4319,7 +3317,7 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailMenuRestartCompleted.
   ///
   /// In en, this message translates to:
-  /// **'Make a new plan from this'**
+  /// **'New promise from this one'**
   String get planDetailMenuRestartCompleted;
 
   /// No description provided for @planDetailMenuRestartActive.
@@ -4331,25 +3329,25 @@ abstract class AppLocalizations {
   /// No description provided for @planDetailMenuStop.
   ///
   /// In en, this message translates to:
-  /// **'Stop plan'**
+  /// **'Stop promise'**
   String get planDetailMenuStop;
 
   /// No description provided for @planDetailPromiseSuccessFailBreakdown.
   ///
   /// In en, this message translates to:
-  /// **'{success} done · {fail} missed'**
+  /// **'{success} kept · {fail} missed'**
   String planDetailPromiseSuccessFailBreakdown(int success, int fail);
 
   /// No description provided for @nowHeaderSettlementNeeded.
   ///
   /// In en, this message translates to:
-  /// **'4-week settlement needed'**
+  /// **'Your 4 weeks are up'**
   String get nowHeaderSettlementNeeded;
 
   /// No description provided for @nowHeaderSettlementSub.
   ///
   /// In en, this message translates to:
-  /// **'See whether action followed the knock, then choose the next 4 weeks.'**
+  /// **'Look back on these 4 weeks and decide on the next round.'**
   String get nowHeaderSettlementSub;
 
   /// No description provided for @nowMetricCompleted.
@@ -4361,7 +3359,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowMetricPartnerReact.
   ///
   /// In en, this message translates to:
-  /// **'Accountability partner reactions'**
+  /// **'Partner props'**
   String get nowMetricPartnerReact;
 
   /// No description provided for @nowMetricMissed.
@@ -4373,49 +3371,49 @@ abstract class AppLocalizations {
   /// No description provided for @nowMetricDaysSuffix.
   ///
   /// In en, this message translates to:
-  /// **'{count} days'**
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
   String nowMetricDaysSuffix(int count);
 
   /// No description provided for @nowMetricCountSuffix.
   ///
   /// In en, this message translates to:
-  /// **'{count} times'**
+  /// **'{count, plural, =1{1 time} other{{count} times}}'**
   String nowMetricCountSuffix(int count);
 
   /// No description provided for @nowSettlementWinMessage.
   ///
   /// In en, this message translates to:
-  /// **'You hit the goal you set together. Nicely done! Time to decide whether to keep going for another 4 weeks.'**
+  /// **'You hit the goal you set. Nicely done! Decide whether to keep going for another 4 weeks.'**
   String get nowSettlementWinMessage;
 
   /// No description provided for @nowSettlementLoseMessage.
   ///
   /// In en, this message translates to:
-  /// **'You didn\'t quite reach the goal this time, but the 4 weeks you shared still count. Decide what to adjust for the next 4 weeks.'**
+  /// **'You didn\'t quite reach the goal this time, but the 4 weeks you shared still count. Decide what to adjust for the next round.'**
   String get nowSettlementLoseMessage;
 
   /// No description provided for @nowSettlementNeutralMessage.
   ///
   /// In en, this message translates to:
-  /// **'You made it through the whole 4 weeks together. Time to decide whether to continue for another round.'**
+  /// **'You made it through the whole 4 weeks together. Decide whether to go another round.'**
   String get nowSettlementNeutralMessage;
 
   /// No description provided for @nowRewardCondition.
   ///
   /// In en, this message translates to:
-  /// **'{days} successful days: {description}'**
+  /// **'Keep {days} days: {description}'**
   String nowRewardCondition(int days, String description);
 
   /// No description provided for @nowPenaltyCondition.
   ///
   /// In en, this message translates to:
-  /// **'{days} failed days: {description}'**
+  /// **'Miss {days} days: {description}'**
   String nowPenaltyCondition(int days, String description);
 
   /// No description provided for @nowPromiseResult.
   ///
   /// In en, this message translates to:
-  /// **'Successes {success} / Failures {fail}'**
+  /// **'{success} kept / {fail} missed'**
   String nowPromiseResult(int success, int fail);
 
   /// No description provided for @nowAchieved.
@@ -4427,7 +3425,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowTriggered.
   ///
   /// In en, this message translates to:
-  /// **'Triggered!'**
+  /// **'It\'s on!'**
   String get nowTriggered;
 
   /// No description provided for @nowNotMet.
@@ -4439,13 +3437,13 @@ abstract class AppLocalizations {
   /// No description provided for @nowDecline.
   ///
   /// In en, this message translates to:
-  /// **'Decline'**
+  /// **'Pass'**
   String get nowDecline;
 
   /// No description provided for @nowAccept.
   ///
   /// In en, this message translates to:
-  /// **'Accept'**
+  /// **'I\'m in!'**
   String get nowAccept;
 
   /// No description provided for @nowContinueNext4Weeks.
@@ -4478,148 +3476,136 @@ abstract class AppLocalizations {
   /// **'Rest today (rest pass)'**
   String get nowRestToday;
 
-  /// No description provided for @nowMissedPlanFallback.
-  ///
-  /// In en, this message translates to:
-  /// **'Past promise'**
-  String get nowMissedPlanFallback;
-
-  /// No description provided for @nowVerifyingDeadline.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for verification · cheer needed'**
-  String get nowVerifyingDeadline;
-
   /// No description provided for @nowHeaderTodayAllDone.
   ///
   /// In en, this message translates to:
-  /// **'All today\'s promises kept'**
+  /// **'All done for today 🎉'**
   String get nowHeaderTodayAllDone;
 
-  /// No description provided for @nowHeaderConfirmAndPull.
+  /// Partner card header: the partner recorded today. name: nickname ?? display name ?? Your partner
   ///
   /// In en, this message translates to:
-  /// **'Time to check in and cheer them on'**
-  String get nowHeaderConfirmAndPull;
+  /// **'{name} did it! Give them props?'**
+  String nowHeaderConfirmAndPull(String name);
 
   /// No description provided for @nowHeaderWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Waiting'**
-  String get nowHeaderWaiting;
+  /// **'Waiting for {name}\'s promise'**
+  String nowHeaderWaiting(String name);
 
   /// No description provided for @nowHeaderWaitingAccept.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for promise approval'**
+  /// **'Waiting for them to accept the bet'**
   String get nowHeaderWaitingAccept;
 
   /// No description provided for @nowHeaderPromiseResult.
   ///
   /// In en, this message translates to:
-  /// **'Promise result is out'**
+  /// **'The bet result is in'**
   String get nowHeaderPromiseResult;
 
   /// No description provided for @nowAdjust.
   ///
   /// In en, this message translates to:
-  /// **'Adjust'**
+  /// **'Let\'s tweak it'**
   String get nowAdjust;
 
   /// No description provided for @nowApprove.
   ///
   /// In en, this message translates to:
-  /// **'Approve'**
+  /// **'Sounds good!'**
   String get nowApprove;
 
   /// No description provided for @nowPartnerNoNewPlanGuide.
   ///
   /// In en, this message translates to:
-  /// **'Your accountability partner hasn\'t made a new promise yet. Knock and start together?'**
+  /// **'Your partner hasn\'t made a workout promise yet. Send a knock to start together?'**
   String get nowPartnerNoNewPlanGuide;
 
   /// No description provided for @nowKnockMakePlan.
   ///
   /// In en, this message translates to:
-  /// **'Knock! Ask to start together'**
+  /// **'Knock! Let\'s do this together'**
   String get nowKnockMakePlan;
 
   /// No description provided for @nowPartnerMissedPokeBody.
   ///
   /// In en, this message translates to:
-  /// **'Send {name} a knock to help them restart a missed promise.'**
+  /// **'{name} hasn\'t done today\'s promise yet. Send a cheer?'**
   String nowPartnerMissedPokeBody(String name);
 
   /// No description provided for @nowPartnerQuietPokeBody.
   ///
   /// In en, this message translates to:
-  /// **'{name}\'s promise is quiet. Send a knock to show you noticed.'**
+  /// **'{name}\'s promise is still quiet. Send a knock to say you\'re waiting?'**
   String nowPartnerQuietPokeBody(String name);
 
   /// No description provided for @nowKnockPull.
   ///
   /// In en, this message translates to:
-  /// **'Knock! Help them restart'**
+  /// **'Send a knock'**
   String get nowKnockPull;
 
   /// No description provided for @nowRescueYesterday.
   ///
   /// In en, this message translates to:
-  /// **'Acknowledge yesterday'**
+  /// **'Give props for yesterday'**
   String get nowRescueYesterday;
 
   /// No description provided for @nowVerifyAndCheer.
   ///
   /// In en, this message translates to:
-  /// **'Verify and cheer'**
+  /// **'Give props'**
   String get nowVerifyAndCheer;
 
   /// No description provided for @nowMakePromise.
   ///
   /// In en, this message translates to:
-  /// **'Make a promise'**
+  /// **'Make a bet'**
   String get nowMakePromise;
 
   /// No description provided for @nowPartnerFallback2.
   ///
   /// In en, this message translates to:
-  /// **'accountability partner'**
+  /// **'Your partner'**
   String get nowPartnerFallback2;
 
   /// No description provided for @nowPartnerAllDone.
   ///
   /// In en, this message translates to:
-  /// **'{name} kept all today\'s promises.'**
+  /// **'{name} kept every promise today 🎉'**
   String nowPartnerAllDone(String name);
 
   /// No description provided for @nowQuickCheckHelp.
   ///
   /// In en, this message translates to:
-  /// **'Check in briefly and keep tomorrow\'s promise visible too.'**
+  /// **'Giving props keeps them going tomorrow.'**
   String get nowQuickCheckHelp;
 
   /// No description provided for @nowLastAction.
   ///
   /// In en, this message translates to:
-  /// **'Last action: {title}'**
+  /// **'Last check-in: {title}'**
   String nowLastAction(String title);
 
   /// No description provided for @nowRewardLine.
   ///
   /// In en, this message translates to:
-  /// **'🏆 {days} successful days: {description}'**
+  /// **'🏆 Keep {days} days: {description}'**
   String nowRewardLine(int days, String description);
 
   /// No description provided for @nowPenaltyLine.
   ///
   /// In en, this message translates to:
-  /// **'⚡ {days} failed days: {description}'**
+  /// **'⚡ Miss {days} days: {description}'**
   String nowPenaltyLine(int days, String description);
 
   /// No description provided for @nowResultLine.
   ///
   /// In en, this message translates to:
-  /// **'Result: Successes {success} / Failures {fail}'**
+  /// **'Result: {success} kept / {fail} missed'**
   String nowResultLine(int success, int fail);
 
   /// No description provided for @nowWaitingApproval.
@@ -4631,19 +3617,19 @@ abstract class AppLocalizations {
   /// No description provided for @nowRewardAchievedTitle.
   ///
   /// In en, this message translates to:
-  /// **'🎉 Reward earned!'**
+  /// **'🎉 Kept it!'**
   String get nowRewardAchievedTitle;
 
   /// No description provided for @nowPenaltyTriggeredTitle.
   ///
   /// In en, this message translates to:
-  /// **'⚡ Penalty triggered!'**
+  /// **'⚡ The bet\'s on!'**
   String get nowPenaltyTriggeredTitle;
 
   /// No description provided for @nowBothTitle.
   ///
   /// In en, this message translates to:
-  /// **'🎉 Reward earned! + ⚡ Penalty triggered!'**
+  /// **'🎉 Kept it! + ⚡ The bet\'s on!'**
   String get nowBothTitle;
 
   /// No description provided for @nowConditionNotMet.
@@ -4661,79 +3647,79 @@ abstract class AppLocalizations {
   /// No description provided for @nowTotalDaysScheduled.
   ///
   /// In en, this message translates to:
-  /// **'A {days}-day promise · {scheduled} practice days planned'**
+  /// **'A {days}-day promise · {scheduled} days scheduled'**
   String nowTotalDaysScheduled(int days, int scheduled);
 
   /// No description provided for @nowMakePromiseTitle.
   ///
   /// In en, this message translates to:
-  /// **'Make a promise'**
+  /// **'Make a bet'**
   String get nowMakePromiseTitle;
 
   /// No description provided for @nowMakePromiseSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'It starts when you and your accountability partner agree'**
+  /// **'The bet starts once your partner accepts. Bet treats and chores, not money.'**
   String get nowMakePromiseSubtitle;
 
   /// No description provided for @nowProgressLine.
   ///
   /// In en, this message translates to:
-  /// **'Currently {success} successes · {failed} failures · {remaining} days remaining'**
+  /// **'So far {success} kept · {failed} missed · {remaining} to go'**
   String nowProgressLine(int success, int failed, int remaining);
 
   /// No description provided for @nowMaxLimitsLine.
   ///
   /// In en, this message translates to:
-  /// **'Reward up to {reward} days, penalty up to {penalty} days.'**
+  /// **'Set up to {reward} days to keep and up to {penalty} misses.'**
   String nowMaxLimitsLine(int reward, int penalty);
 
   /// No description provided for @nowRewardTitle.
   ///
   /// In en, this message translates to:
-  /// **'🏆 Reward (carrot)'**
+  /// **'🏆 If kept'**
   String get nowRewardTitle;
 
   /// No description provided for @nowRewardHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. treat to chicken, fancy dinner'**
+  /// **'e.g. 🍣 sushi date, you pick the movie'**
   String get nowRewardHint;
 
   /// No description provided for @nowRewardTargetLabel.
   ///
   /// In en, this message translates to:
-  /// **'Success target'**
+  /// **'Days to keep'**
   String get nowRewardTargetLabel;
 
   /// No description provided for @nowPenaltyTitle.
   ///
   /// In en, this message translates to:
-  /// **'⚡ Penalty (stick)'**
+  /// **'⚡ If missed'**
   String get nowPenaltyTitle;
 
   /// No description provided for @nowPenaltyHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. dishes for a week, buy coffee'**
+  /// **'e.g. 🍗 buy the chicken, dishes for a week'**
   String get nowPenaltyHint;
 
   /// No description provided for @nowPenaltyTargetLabel.
   ///
   /// In en, this message translates to:
-  /// **'Failure limit'**
+  /// **'Miss limit'**
   String get nowPenaltyTargetLabel;
 
   /// No description provided for @nowProposePromise.
   ///
   /// In en, this message translates to:
-  /// **'Propose promise'**
+  /// **'Propose the bet'**
   String get nowProposePromise;
 
   /// No description provided for @nowDaysSuffix.
   ///
   /// In en, this message translates to:
-  /// **'{count} days'**
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
   String nowDaysSuffix(int count);
 
   /// No description provided for @nowMaxDaysLabel.
@@ -4745,7 +3731,7 @@ abstract class AppLocalizations {
   /// No description provided for @nowPokeReceived.
   ///
   /// In en, this message translates to:
-  /// **'Your accountability partner sent a knock'**
+  /// **'Your partner sent a knock'**
   String get nowPokeReceived;
 
   /// No description provided for @nowPokeReceivedFromName.
@@ -4753,12 +3739,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} sent a knock'**
   String nowPokeReceivedFromName(String name);
-
-  /// No description provided for @nowYesterday.
-  ///
-  /// In en, this message translates to:
-  /// **'Yesterday'**
-  String get nowYesterday;
 
   /// No description provided for @nowNoteDateToday.
   ///
@@ -4823,7 +3803,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifyBannerBody.
   ///
   /// In en, this message translates to:
-  /// **'Turn them on so you don\'t miss your accountability partner\'s check-ins and knocks.'**
+  /// **'Turn them on so you don\'t miss your partner\'s props and knocks.'**
   String get notifyBannerBody;
 
   /// No description provided for @notifyBannerAction.
@@ -4931,50 +3911,1226 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialStart.
   ///
   /// In en, this message translates to:
-  /// **'Okay, let\'s start'**
+  /// **'Get started'**
   String get tutorialStart;
 
   /// No description provided for @tutorialFooter.
   ///
   /// In en, this message translates to:
-  /// **'One small promise is enough to begin.'**
+  /// **'One workout promise is all it takes to start.'**
   String get tutorialFooter;
 
   /// No description provided for @tutorialPage1Title.
   ///
   /// In en, this message translates to:
-  /// **'Keep it small'**
+  /// **'Make a workout promise'**
   String get tutorialPage1Title;
 
   /// No description provided for @tutorialPage1Body.
   ///
   /// In en, this message translates to:
-  /// **'Instead of a vague goal, make one promise you can keep today. Starting small is what gets you moving.'**
+  /// **'Gym, running, home workouts — pick what and when, then promise it to your partner. It\'s much harder to skip than a promise to yourself.'**
   String get tutorialPage1Body;
 
   /// No description provided for @tutorialPage2Title.
   ///
   /// In en, this message translates to:
-  /// **'One person who notices'**
+  /// **'Your partner sees it, and gives props'**
   String get tutorialPage2Title;
 
   /// No description provided for @tutorialPage2Body.
   ///
   /// In en, this message translates to:
-  /// **'Connect with an accountability partner by mutual choice. They notice your effort, and you cheer on theirs.'**
+  /// **'Snap a proof photo after your workout and your partner sees it right away. One tap from them is props — and they\'ll knock on the days you forget.'**
   String get tutorialPage2Body;
 
   /// No description provided for @tutorialPage3Title.
   ///
   /// In en, this message translates to:
-  /// **'Let your record shape what\'s next'**
+  /// **'Both done? That\'s DuoDone'**
   String get tutorialPage3Title;
 
   /// No description provided for @tutorialPage3Body.
   ///
   /// In en, this message translates to:
-  /// **'Track what you kept and what you put off, then size your next promise to match. Even a miss is material for the next one.'**
+  /// **'When you both work out, that\'s a DuoDone day. Watch the days you\'ve stacked up together.'**
   String get tutorialPage3Body;
+
+  /// No description provided for @appUpdateRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update required'**
+  String get appUpdateRequiredTitle;
+
+  /// No description provided for @appUpdateRequiredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This version is no longer supported. Update to the latest version to keep going.'**
+  String get appUpdateRequiredBody;
+
+  /// No description provided for @appUpdateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get appUpdateButton;
+
+  /// No description provided for @appUpdateSoftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version is here'**
+  String get appUpdateSoftTitle;
+
+  /// No description provided for @appUpdateSoftBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Update to get the latest features and fixes.'**
+  String get appUpdateSoftBody;
+
+  /// No description provided for @appUpdateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get appUpdateLater;
+
+  /// No description provided for @appUpdateStoreOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the store. Please update from the store app.'**
+  String get appUpdateStoreOpenFailed;
+
+  /// Header on my rejected plan card: the partner asked to adjust it
+  ///
+  /// In en, this message translates to:
+  /// **'Your partner suggested a tweak'**
+  String get nowHeaderPartnerAskedAdjust;
+
+  /// Header on my poked card when the knock carries no message
+  ///
+  /// In en, this message translates to:
+  /// **'Knock knock! Your partner is waiting'**
+  String get nowHeaderPokeWaiting;
+
+  /// Header on my card after the missed-promise notice went to my partner
+  ///
+  /// In en, this message translates to:
+  /// **'No check-in yet today, so {name} got a heads-up'**
+  String nowHeaderMissedNotice(String name);
+
+  /// Header on the partner card after their missed-promise notice
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s promise is still open today'**
+  String nowHeaderPartnerMissed(String name);
+
+  /// Header on the partner card when a knock would help
+  ///
+  /// In en, this message translates to:
+  /// **'Your turn to send a knock'**
+  String get nowHeaderPokeTurn;
+
+  /// Neutral fallback title when a plan or record has no title (may be a legacy non-workout plan)
+  ///
+  /// In en, this message translates to:
+  /// **'Promise'**
+  String get promiseUntitledFallback;
+
+  /// Length of a finished plan in weeks
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week} other{{count} weeks}}'**
+  String planSummaryWeeks(int count);
+
+  /// Settings row that replays the tutorial
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get settingsTutorialTitle;
+
+  /// Subtitle of the settings row that replays the tutorial
+  ///
+  /// In en, this message translates to:
+  /// **'See again how workout promises and props work'**
+  String get settingsTutorialDesc;
+
+  /// Notification action button: mark today's promise done
+  ///
+  /// In en, this message translates to:
+  /// **'Did it'**
+  String get notifActionDidIt;
+
+  /// Notification action button: skip today's promise
+  ///
+  /// In en, this message translates to:
+  /// **'Skip today'**
+  String get notifActionSkipToday;
+
+  /// Notification action button: snooze 10 minutes
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me in 10 min'**
+  String get notifActionSnooze;
+
+  /// Body of the local promise reminder (title is the promise). Neutral: may be a legacy non-workout plan
+  ///
+  /// In en, this message translates to:
+  /// **'One check-in and today is logged 📸'**
+  String get notifReminderBody;
+
+  /// Title for a push that arrives without one
+  ///
+  /// In en, this message translates to:
+  /// **'DuoDone'**
+  String get notifFallbackTitle;
+
+  /// Android notification channel name
+  ///
+  /// In en, this message translates to:
+  /// **'Promise reminders'**
+  String get notifChannelRemindersName;
+
+  /// Android notification channel description
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders at the times you set for your promises'**
+  String get notifChannelRemindersDesc;
+
+  /// Android notification channel name
+  ///
+  /// In en, this message translates to:
+  /// **'Partner updates'**
+  String get notifChannelGeneralName;
+
+  /// Android notification channel description
+  ///
+  /// In en, this message translates to:
+  /// **'Props, knocks, and cheers from your partner'**
+  String get notifChannelGeneralDesc;
+
+  /// Android notification channel name
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled reminders'**
+  String get notifChannelScheduledName;
+
+  /// Android notification channel description
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications at a time you picked'**
+  String get notifChannelScheduledDesc;
+
+  /// Android notification channel name (debug tools)
+  ///
+  /// In en, this message translates to:
+  /// **'Test notifications'**
+  String get notifChannelDebugName;
+
+  /// Android notification channel description (debug tools)
+  ///
+  /// In en, this message translates to:
+  /// **'For testing notifications'**
+  String get notifChannelDebugDesc;
+
+  /// Now-tab hero question for a workout promise, e.g. 오늘 🏃 러닝 했어?
+  ///
+  /// In en, this message translates to:
+  /// **'{emoji} {workout} done today?'**
+  String nowHeroQuestion(String emoji, String workout);
+
+  /// Now-tab hero question for a diet promise (not a workout)
+  ///
+  /// In en, this message translates to:
+  /// **'{emoji} {workout} on track today?'**
+  String nowHeroQuestionDiet(String emoji, String workout);
+
+  /// Now-tab hero question for a promise from before the pivot (no workout type)
+  ///
+  /// In en, this message translates to:
+  /// **'Did you do \'{title}\' today?'**
+  String nowHeroQuestionLegacy(String title);
+
+  /// Primary hero button: report with a proof photo
+  ///
+  /// In en, this message translates to:
+  /// **'📸 Take a proof photo'**
+  String get nowProofTakePhoto;
+
+  /// Main check-in button for a promise from before the pivot (no workout type)
+  ///
+  /// In en, this message translates to:
+  /// **'Check in'**
+  String get nowHeroVerifyLegacy;
+
+  /// Secondary hero button: report without a photo (partner-to-partner tone)
+  ///
+  /// In en, this message translates to:
+  /// **'Did it, no photo'**
+  String get nowDidItNoPhoto;
+
+  /// Title of the camera/album picker sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Add a proof photo'**
+  String get proofSourceSheetTitle;
+
+  /// Camera option in the proof photo picker (default)
+  ///
+  /// In en, this message translates to:
+  /// **'📸 Take with camera'**
+  String get proofSourceCamera;
+
+  /// Subtitle under the camera option
+  ///
+  /// In en, this message translates to:
+  /// **'Shows as just taken'**
+  String get proofSourceCameraHint;
+
+  /// Album option in the proof photo picker
+  ///
+  /// In en, this message translates to:
+  /// **'🖼️ Choose from album'**
+  String get proofSourceGallery;
+
+  /// Subtitle under the album option
+  ///
+  /// In en, this message translates to:
+  /// **'Shows as an album photo with its date'**
+  String get proofSourceGalleryHint;
+
+  /// One-time consent sheet title shown before the first proof photo
+  ///
+  /// In en, this message translates to:
+  /// **'Before your first proof photo'**
+  String get proofConsentTitle;
+
+  /// Consent sheet line: who can see proof photos
+  ///
+  /// In en, this message translates to:
+  /// **'Only your partner can see it.'**
+  String get proofConsentOnlyPartner;
+
+  /// Consent sheet line: EXIF/GPS is stripped
+  ///
+  /// In en, this message translates to:
+  /// **'Location and other photo info are removed before upload.'**
+  String get proofConsentLocationRemoved;
+
+  /// Consent sheet line: what happens after disconnecting
+  ///
+  /// In en, this message translates to:
+  /// **'If you disconnect, it can no longer be seen in the app.'**
+  String get proofConsentAfterDisconnect;
+
+  /// Consent sheet line: content rule
+  ///
+  /// In en, this message translates to:
+  /// **'Please don\'t upload inappropriate photos.'**
+  String get proofConsentNoInappropriate;
+
+  /// Consent sheet confirm button
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get proofConsentAgree;
+
+  /// Title of the preview sheet after picking a proof photo
+  ///
+  /// In en, this message translates to:
+  /// **'Send this proof?'**
+  String get proofPreviewTitle;
+
+  /// Preview sheet button that reports with the photo
+  ///
+  /// In en, this message translates to:
+  /// **'Send proof'**
+  String get proofPreviewSubmit;
+
+  /// Snackbar after a report with a photo
+  ///
+  /// In en, this message translates to:
+  /// **'Proof photo sent 📸'**
+  String get proofUploadDone;
+
+  /// Snackbar when the photo upload failed or timed out but the record was saved
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t upload the photo, but today\'s record is saved.'**
+  String get proofUploadFailed;
+
+  /// Snackbar when a picked photo can't be decoded
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t use that photo. Please try another one.'**
+  String get proofPhotoPrepareFailed;
+
+  /// Snackbar when the image picker fails (e.g. permission denied)
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the camera or album.'**
+  String get proofPickFailed;
+
+  /// Badge on a proof photo taken with the in-app camera today
+  ///
+  /// In en, this message translates to:
+  /// **'📸 Just taken · {time}'**
+  String proofBadgeCamera(String time);
+
+  /// Badge on a camera proof photo without a capture time
+  ///
+  /// In en, this message translates to:
+  /// **'📸 Just taken'**
+  String get proofBadgeCameraJustNow;
+
+  /// Badge on a camera proof photo from an earlier day; when is like 9/28 19:42
+  ///
+  /// In en, this message translates to:
+  /// **'📸 Camera · {when}'**
+  String proofBadgeCameraOn(String when);
+
+  /// Badge on an album proof photo with its original capture date (M/D)
+  ///
+  /// In en, this message translates to:
+  /// **'🖼️ Album · taken {date}'**
+  String proofBadgeGalleryTaken(String date);
+
+  /// Badge on an album proof photo without a known capture date
+  ///
+  /// In en, this message translates to:
+  /// **'🖼️ Album'**
+  String get proofBadgeGallery;
+
+  /// Proof photo error state
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the photo'**
+  String get proofPhotoLoadFailed;
+
+  /// Retry action on the proof photo error state
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get proofPhotoRetry;
+
+  /// Accessibility label of a proof photo
+  ///
+  /// In en, this message translates to:
+  /// **'Proof photo'**
+  String get proofPhotoSemantics;
+
+  /// Tooltip of the proof photo viewer menu
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get proofViewerMenu;
+
+  /// Viewer menu: report the photo by email
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get proofViewerReport;
+
+  /// Viewer menu (owner only): delete the proof photo
+  ///
+  /// In en, this message translates to:
+  /// **'Delete photo'**
+  String get proofViewerDelete;
+
+  /// Delete confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this proof photo?'**
+  String get proofDeleteConfirmTitle;
+
+  /// Delete confirmation body
+  ///
+  /// In en, this message translates to:
+  /// **'Your partner won\'t see it anymore. The record itself stays.'**
+  String get proofDeleteConfirmBody;
+
+  /// Delete confirmation button
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get proofDeleteConfirm;
+
+  /// Snackbar after deleting a proof photo
+  ///
+  /// In en, this message translates to:
+  /// **'Proof photo deleted.'**
+  String get proofDeleted;
+
+  /// Snackbar when deleting a proof photo failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the photo. Please try again.'**
+  String get proofDeleteFailed;
+
+  /// Subject of the report email draft
+  ///
+  /// In en, this message translates to:
+  /// **'[DuoDone] Report a proof photo'**
+  String get proofReportSubject;
+
+  /// Body of the report email draft
+  ///
+  /// In en, this message translates to:
+  /// **'Please tell us what\'s wrong with this photo.\n\nRecord ID: {actionId}'**
+  String proofReportBody(String actionId);
+
+  /// Snackbar when no mail app could open the report draft
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open your mail app. Please email us at {email}.'**
+  String proofReportMailFailed(String email);
+
+  /// Hint above the one-tap reaction row on the partner card
+  ///
+  /// In en, this message translates to:
+  /// **'One tap gives props'**
+  String get nowReactHint;
+
+  /// Link next to the reaction row that opens the note dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get nowReactAddNote;
+
+  /// Accessibility label of a one-tap reaction button
+  ///
+  /// In en, this message translates to:
+  /// **'Give props with {emoji}'**
+  String nowReactSemantics(String emoji);
+
+  /// Snackbar after a one-tap reaction
+  ///
+  /// In en, this message translates to:
+  /// **'Props sent {emoji}'**
+  String nowReactedSnackbar(String emoji);
+
+  /// What the partner is called when there is no nickname and no display name
+  ///
+  /// In en, this message translates to:
+  /// **'your partner'**
+  String get partnerFallbackLabel;
+
+  /// The partner without a nickname or name, at the start of a line or sentence (en capitalized)
+  ///
+  /// In en, this message translates to:
+  /// **'Your partner'**
+  String get partnerFallbackLabelStart;
+
+  /// Primary button: opens the system share sheet with the invite message
+  ///
+  /// In en, this message translates to:
+  /// **'Send an invite'**
+  String get connectShareInvite;
+
+  /// Secondary button: copies my invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get connectCopyCode;
+
+  /// Heading above the code entry on the invite screen
+  ///
+  /// In en, this message translates to:
+  /// **'Got a code from your partner?'**
+  String get connectHaveCodeTitle;
+
+  /// Snackbar after the invite was shared
+  ///
+  /// In en, this message translates to:
+  /// **'Invite sent. We\'ll let you know when your partner joins.'**
+  String get connectInviteSent;
+
+  /// Snackbar when the share sheet could not open
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the share sheet. Copy the code and send it instead.'**
+  String get connectShareFailed;
+
+  /// Error when no user holds the entered invite code
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find anyone with that code. Please check it and try again.'**
+  String get connectErrorCodeNotFound;
+
+  /// Error when the entered code is not 8 letters/digits
+  ///
+  /// In en, this message translates to:
+  /// **'Codes are 8 letters and numbers.'**
+  String get connectErrorCodeFormat;
+
+  /// The link was undone: the code's owner already has a partner
+  ///
+  /// In en, this message translates to:
+  /// **'That code\'s owner is already connected to someone. Ask them for a new code.'**
+  String get connectErrorOwnerTaken;
+
+  /// The link was undone: I already have a partner
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already connected to a partner. Disconnect first, then try again.'**
+  String get connectErrorSelfTaken;
+
+  /// The link was undone: the code was replaced
+  ///
+  /// In en, this message translates to:
+  /// **'That code has changed. Ask your partner for the new one.'**
+  String get connectErrorCodeChanged;
+
+  /// The link went away right after it was made (reason unknown)
+  ///
+  /// In en, this message translates to:
+  /// **'The connection didn\'t hold. The code may belong to someone who\'s already connected — ask for a new code.'**
+  String get connectErrorLinkUndone;
+
+  /// Invite message shared to the partner (couple tone) when I already have a workout promise. It comes from me, so it never names me.
+  ///
+  /// In en, this message translates to:
+  /// **'I made a workout promise 🤙 Back me up! Get DuoDone and enter code {code} to connect → {link}'**
+  String inviteShareMessage(String code, String link);
+
+  /// Invite message when I have no workout promise yet.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m making a workout promise 🤙 Back me up! Get DuoDone and enter code {code} to connect → {link}'**
+  String inviteShareMessageNoPromise(String code, String link);
+
+  /// Subject line used by share targets that support one (e.g. email)
+  ///
+  /// In en, this message translates to:
+  /// **'DuoDone invite'**
+  String get inviteShareSubject;
+
+  /// Small link for invited users: skips ahead to code entry
+  ///
+  /// In en, this message translates to:
+  /// **'I got an invite code'**
+  String get inviteHaveCodeLink;
+
+  /// Confirm sheet before connecting: name is the code owner
+  ///
+  /// In en, this message translates to:
+  /// **'Back {name}\'s workout promises?'**
+  String connectConfirmTitle(String name);
+
+  /// Body of the connect confirm sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Once connected, you\'ll see each other\'s workout promises and proof photos.'**
+  String get connectConfirmBody;
+
+  /// Confirm button (partner-to-partner tone): connect with the code owner
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve got you'**
+  String get connectConfirmAccept;
+
+  /// Success state after connecting
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re connected with {name} 🎉'**
+  String connectSuccessTitle(String name);
+
+  /// Body of the success state
+  ///
+  /// In en, this message translates to:
+  /// **'Now you can back each other\'s workout promises.'**
+  String get connectSuccessBody;
+
+  /// Asks the newly connected invitee to make their own promise
+  ///
+  /// In en, this message translates to:
+  /// **'Make one too?'**
+  String get connectSuccessAskTitle;
+
+  /// Body under connectSuccessAskTitle
+  ///
+  /// In en, this message translates to:
+  /// **'When you both do it, that\'s DuoDone.'**
+  String get connectSuccessAskBody;
+
+  /// Button: open the workout promise screen
+  ///
+  /// In en, this message translates to:
+  /// **'Make mine'**
+  String get connectSuccessMakePromise;
+
+  /// Button: go home without making a promise
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get connectSuccessLater;
+
+  /// Button on the success state for the person who shared the code
+  ///
+  /// In en, this message translates to:
+  /// **'Great'**
+  String get connectSuccessDone;
+
+  /// Title of the nickname sheet
+  ///
+  /// In en, this message translates to:
+  /// **'What do you call your partner?'**
+  String get nicknameSheetTitle;
+
+  /// Body of the nickname sheet; name is the partner display name
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll show this instead of {name} in the app and notifications.'**
+  String nicknameSheetBody(String name);
+
+  /// Nickname preset (default)
+  ///
+  /// In en, this message translates to:
+  /// **'Partner'**
+  String get nicknamePresetPartner;
+
+  /// Nickname preset
+  ///
+  /// In en, this message translates to:
+  /// **'Babe'**
+  String get nicknamePresetJagi;
+
+  /// Nickname preset
+  ///
+  /// In en, this message translates to:
+  /// **'Honey'**
+  String get nicknamePresetOppa;
+
+  /// Nickname preset
+  ///
+  /// In en, this message translates to:
+  /// **'Love'**
+  String get nicknamePresetYeobo;
+
+  /// Nickname preset
+  ///
+  /// In en, this message translates to:
+  /// **'Baby'**
+  String get nicknamePresetAegi;
+
+  /// Nickname chip that opens a text field
+  ///
+  /// In en, this message translates to:
+  /// **'Type my own'**
+  String get nicknamePresetCustom;
+
+  /// Hint of the custom nickname field
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname (up to 10 characters)'**
+  String get nicknameCustomHint;
+
+  /// Save the nickname
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get nicknameSave;
+
+  /// Close the nickname sheet without saving
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll decide later'**
+  String get nicknameLater;
+
+  /// Remove the current nickname
+  ///
+  /// In en, this message translates to:
+  /// **'Remove nickname'**
+  String get nicknameRemove;
+
+  /// Snackbar after saving a nickname
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname saved.'**
+  String get nicknameSaved;
+
+  /// Snackbar after removing a nickname
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname removed.'**
+  String get nicknameRemoved;
+
+  /// Snackbar when saving the nickname failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the nickname. Please try again.'**
+  String get nicknameSaveFailed;
+
+  /// Partner card action when no nickname is set
+  ///
+  /// In en, this message translates to:
+  /// **'Set a nickname'**
+  String get usSetNickname;
+
+  /// Partner card action when a nickname is set
+  ///
+  /// In en, this message translates to:
+  /// **'Change nickname'**
+  String get usEditNickname;
+
+  /// Skip link on the post-login invite step
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll invite later'**
+  String get onboardingInviteLater;
+
+  /// Now tab card while there is no partner
+  ///
+  /// In en, this message translates to:
+  /// **'You actually do it when your partner sees it'**
+  String get nowInviteCardTitle;
+
+  /// Body of the Now tab invite card
+  ///
+  /// In en, this message translates to:
+  /// **'Send an invite so you can back each other\'s workout promises.'**
+  String get nowInviteCardBody;
+
+  /// Now tab invite card after an invite was shared
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your partner'**
+  String get nowInviteCardWaitingTitle;
+
+  /// Body of the waiting invite card
+  ///
+  /// In en, this message translates to:
+  /// **'They haven\'t joined yet. Send it again?'**
+  String get nowInviteCardWaitingBody;
+
+  /// Resend button on the waiting invite card
+  ///
+  /// In en, this message translates to:
+  /// **'Send it again'**
+  String get nowInviteCardResend;
+
+  /// One-time notice for existing users: the app was renamed. Must name the old app.
+  ///
+  /// In en, this message translates to:
+  /// **'Nod&Try is now DuoDone'**
+  String get pivotNoticeTitle;
+
+  /// Body of the one-time rename notice
+  ///
+  /// In en, this message translates to:
+  /// **'Your promises, history and partner connection are all still here.'**
+  String get pivotNoticeBody;
+
+  /// Dismiss button of the rename notice
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get pivotNoticeOk;
+
+  /// Duo streak headline (Now header, Us hero)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Together for 1 day} other{Together for {count} days}}'**
+  String duoStreakDays(int count);
+
+  /// Duo headline while the streak is 0
+  ///
+  /// In en, this message translates to:
+  /// **'Both check in today for day 1'**
+  String get duoStreakStart;
+
+  /// Shown when today is a duo day (both kept their promises)
+  ///
+  /// In en, this message translates to:
+  /// **'You both did it today 🎉'**
+  String get duoTodayDone;
+
+  /// Label for myself in duo status rows
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get duoMeLabel;
+
+  /// Duo status: done today
+  ///
+  /// In en, this message translates to:
+  /// **'done ✓'**
+  String get duoStatusDone;
+
+  /// Duo status: done and the partner gave props (인정)
+  ///
+  /// In en, this message translates to:
+  /// **'props ❤️'**
+  String get duoStatusVerified;
+
+  /// Duo status: done, partner's props (인정) still pending
+  ///
+  /// In en, this message translates to:
+  /// **'awaiting props'**
+  String get duoStatusWaiting;
+
+  /// Duo status: scheduled today, not recorded yet
+  ///
+  /// In en, this message translates to:
+  /// **'not yet'**
+  String get duoStatusPending;
+
+  /// Duo status: rest pass used
+  ///
+  /// In en, this message translates to:
+  /// **'rest pass'**
+  String get duoStatusRested;
+
+  /// Duo status: nothing scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'day off'**
+  String get duoStatusOff;
+
+  /// Duo status: a past scheduled day without a record
+  ///
+  /// In en, this message translates to:
+  /// **'missed'**
+  String get duoStatusMissed;
+
+  /// Duo status: a future scheduled day
+  ///
+  /// In en, this message translates to:
+  /// **'coming up'**
+  String get duoStatusUpcoming;
+
+  /// One person's status chip: name (or Me) then the status word
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {status}'**
+  String duoPersonStatus(String name, String status);
+
+  /// Duo days so far this week
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No duo days yet} =1{1 duo day} other{{count} duo days}}'**
+  String duoWeekDuoDays(int count);
+
+  /// Screen-reader label of one day in the weekly duo dots
+  ///
+  /// In en, this message translates to:
+  /// **'{day}: me {me}, partner {partner}'**
+  String duoDaySemantics(String day, String me, String partner);
+
+  /// Us tab button that opens the share card
+  ///
+  /// In en, this message translates to:
+  /// **'Make a share card'**
+  String get duoShareButton;
+
+  /// Share card headline
+  ///
+  /// In en, this message translates to:
+  /// **'#DuoDone {count}-day streak'**
+  String shareCardStreak(int count);
+
+  /// Share card headline without a streak
+  ///
+  /// In en, this message translates to:
+  /// **'#DuoDone'**
+  String get shareCardNoStreak;
+
+  /// Share card footer
+  ///
+  /// In en, this message translates to:
+  /// **'Search \'DuoDone\' in your app store'**
+  String get shareCardStores;
+
+  /// Share card line: a person and the workout they did
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ✓ {workout}'**
+  String shareCardPersonDone(String name, String workout);
+
+  /// Share card line: nothing scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · day off'**
+  String shareCardPersonOff(String name);
+
+  /// Share card line: rest pass
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · rest pass'**
+  String shareCardPersonRested(String name);
+
+  /// Share card line: not recorded yet
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · not yet'**
+  String shareCardPersonPending(String name);
+
+  /// Share card sheet title when today became a duo day
+  ///
+  /// In en, this message translates to:
+  /// **'You both did it today 🎉 Show it off?'**
+  String get shareCardSheetTitleToday;
+
+  /// Share card sheet title on a 3/7/30-day streak
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count} days together 🎉 Show it off?}}'**
+  String shareCardSheetTitleMilestone(int count);
+
+  /// Share card sheet title from the Us tab
+  ///
+  /// In en, this message translates to:
+  /// **'Share card'**
+  String get shareCardSheetTitleManual;
+
+  /// Share card sheet primary button
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareCardShare;
+
+  /// Share card sheet dismiss button
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get shareCardLater;
+
+  /// Share card capture or share failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t make the share card.'**
+  String get shareCardFailed;
+
+  /// Share card sheet note: the partner's photo is never included
+  ///
+  /// In en, this message translates to:
+  /// **'Only your own photo goes on the card.'**
+  String get shareCardOnlyMyPhoto;
+
+  /// Text sent along with the share card image
+  ///
+  /// In en, this message translates to:
+  /// **'#DuoDone When your partner sees it, you actually do it.'**
+  String get shareCardText;
+
+  /// Screen-reader label of the share card
+  ///
+  /// In en, this message translates to:
+  /// **'DuoDone share card'**
+  String get shareCardSemantics;
+
+  /// One-tap reply to a knock (partner-to-partner tone)
+  ///
+  /// In en, this message translates to:
+  /// **'On my way 🏃'**
+  String get nowPokeReplyComing;
+
+  /// One-tap reply to a knock (partner-to-partner tone)
+  ///
+  /// In en, this message translates to:
+  /// **'Go easy on me 🙏'**
+  String get nowPokeReplyPass;
+
+  /// Snackbar / label after replying to a knock
+  ///
+  /// In en, this message translates to:
+  /// **'Reply sent'**
+  String get nowPokeReplySent;
+
+  /// Knock reply failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send the reply.'**
+  String get nowPokeReplyFailed;
+
+  /// Primary button on a partner's missed-workout card
+  ///
+  /// In en, this message translates to:
+  /// **'Send a cheer'**
+  String get nowSendCheer;
+
+  /// Cheer text sent from the missed-workout card (partner-to-partner tone)
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve got this! I\'m waiting 💪'**
+  String get nowCheerDefaultMessage;
+
+  /// Snackbar after sending a cheer
+  ///
+  /// In en, this message translates to:
+  /// **'Cheer sent'**
+  String get nowCheerSent;
+
+  /// Disabled knock button: one knock per promise per day
+  ///
+  /// In en, this message translates to:
+  /// **'Knocked today'**
+  String get nowKnockSentToday;
+
+  /// Bet chip (if missed)
+  ///
+  /// In en, this message translates to:
+  /// **'🍗 Buy the chicken'**
+  String get promisePenaltyChicken;
+
+  /// Bet chip (if missed)
+  ///
+  /// In en, this message translates to:
+  /// **'☕ Buy the iced coffee'**
+  String get promisePenaltyCoffee;
+
+  /// Bet chip (if missed)
+  ///
+  /// In en, this message translates to:
+  /// **'🍽️ Dishes for a week'**
+  String get promisePenaltyDishes;
+
+  /// Bet chip (if missed)
+  ///
+  /// In en, this message translates to:
+  /// **'💆 10-minute massage'**
+  String get promisePenaltyMassage;
+
+  /// Bet chip (if missed)
+  ///
+  /// In en, this message translates to:
+  /// **'🎬 They pick the movie'**
+  String get promisePenaltyMovie;
+
+  /// Bet chip (if missed)
+  ///
+  /// In en, this message translates to:
+  /// **'🚗 Pick-up duty'**
+  String get promisePenaltyPickup;
+
+  /// Bet chip (if kept)
+  ///
+  /// In en, this message translates to:
+  /// **'🍣 Omakase together'**
+  String get promiseRewardOmakase;
+
+  /// Bet chip (if kept)
+  ///
+  /// In en, this message translates to:
+  /// **'🍰 Dessert date'**
+  String get promiseRewardDessert;
+
+  /// Bet chip (if kept)
+  ///
+  /// In en, this message translates to:
+  /// **'💆 A 10-minute massage'**
+  String get promiseRewardMassage;
+
+  /// Bet chip (if kept)
+  ///
+  /// In en, this message translates to:
+  /// **'🎬 You pick the movie'**
+  String get promiseRewardMovie;
+
+  /// Shown under a bet that mentions money; saving is blocked
+  ///
+  /// In en, this message translates to:
+  /// **'Money bets aren\'t supported. Bet something you can do together, like a meal, coffee or the dishes.'**
+  String get promiseMoneyBlocked;
+
+  /// Deadline reminder body for a promise with a partner. Never promise exact minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'No check-in yet? We\'ll let {name} know soon.'**
+  String notifReminderBodyWithPartner(String name);
+
+  /// Snackbar: the record was saved offline and will sync
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. It\'ll reach your partner once you\'re back online.'**
+  String get nowRecordQueued;
+
+  /// Settings section with the privacy policy, terms and support
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAboutSection;
+
+  /// No description provided for @settingsPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get settingsPrivacyPolicy;
+
+  /// No description provided for @settingsTermsOfUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of use'**
+  String get settingsTermsOfUse;
+
+  /// No description provided for @settingsContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get settingsContactSupport;
+
+  /// Subject of the support email draft
+  ///
+  /// In en, this message translates to:
+  /// **'[DuoDone] Support'**
+  String get settingsContactSupportSubject;
+
+  /// No description provided for @settingsLinkOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open it. You can reach us at {email}.'**
+  String settingsLinkOpenFailed(String email);
+
+  /// Partner card menu: report the partner's content or behavior
+  ///
+  /// In en, this message translates to:
+  /// **'Report partner'**
+  String get usReportPartner;
+
+  /// No description provided for @usReportPartnerSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'[DuoDone] Report a partner'**
+  String get usReportPartnerSubject;
+
+  /// No description provided for @usReportPartnerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what\'s wrong (a photo, note or message). We\'ll review it and act.\n\nReported account ID: {uid}'**
+  String usReportPartnerBody(String uid);
+
+  /// No description provided for @termsViewLink.
+  ///
+  /// In en, this message translates to:
+  /// **'View terms of use'**
+  String get termsViewLink;
+
+  /// Clickwrap on the invite confirm sheet (Guideline 1.2)
+  ///
+  /// In en, this message translates to:
+  /// **'By connecting you agree to the Terms of Use. Objectionable content and abusive behavior aren\'t tolerated — reported content and accounts are removed.'**
+  String get termsNoticeConnect;
+
+  /// Clickwrap under the invite share button
+  ///
+  /// In en, this message translates to:
+  /// **'Sending an invite means you agree to the Terms of Use. Objectionable content and abuse aren\'t tolerated.'**
+  String get termsNoticeInvite;
+
+  /// Clickwrap on the first-photo consent sheet
+  ///
+  /// In en, this message translates to:
+  /// **'By posting you agree to the Terms of Use. Objectionable photos and abuse aren\'t tolerated.'**
+  String get termsNoticePhoto;
+
+  /// Sheet after the first solo promise is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Promise made! Ask your partner to back you up?'**
+  String get planSavedInviteTitle;
+
+  /// No description provided for @planSavedInviteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'With your partner watching, you\'ll actually do it. Send them your code and link.'**
+  String get planSavedInviteBody;
 }
 
 class _AppLocalizationsDelegate

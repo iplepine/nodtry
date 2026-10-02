@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,11 +12,40 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(ref);
 });
 
+/// Keeps `users/{uid}.fcmToken` registered for whoever is signed in.
+///
+/// The cold-start registration in main.dart runs before sign-in on a fresh
+/// install (no current user, so nothing was saved), and nothing registered the
+/// token after a login — partner pushes (인증샷, 똑똑, missed notices,
+/// 연결됐어요) were dropped server-side for that whole session. Watched from
+/// the app root.
+final fcmTokenBinderProvider = Provider<void>((ref) {
+  ref.listen<String?>(
+    authStateChangesProvider.select((auth) => auth.value?.uid),
+    (previous, next) {
+      if (next == null || next == previous) return;
+      try {
+        unawaited(ref.read(notificationServiceProvider).maybeRegister());
+      } catch (e) {
+        debugPrint('[Notification] token binder skipped: $e');
+      }
+    },
+    fireImmediately: true,
+  );
+});
+
 class NotificationService {
   final Ref _ref;
-  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-  final local_notifications.NotificationService _localNotifications =
+
+  /// Resolved lazily so building the service never touches Firebase (tests,
+  /// devices without Play services).
+  FirebaseMessaging get _messaging => FirebaseMessaging.instance;
+  local_notifications.NotificationService get _localNotifications =>
       local_notifications.NotificationService();
+
+  /// The latest token from onTokenRefresh, saved once a user signs in.
+  String? _latestToken;
+  bool _listenersAttached = false;
 
   NotificationService(this._ref);
 
@@ -22,35 +53,57 @@ class NotificationService {
   /// 권한 다이얼로그를 띄우지 않고, 이미 권한이 grant된 경우에만 토큰을 등록한다.
   /// (Play Pre-launch / 첫 진입 시 권한 팝업이 splash 위에 떠 앱 로딩을 막는 문제 회피)
   Future<void> setupListenersAndMaybeRegister() async {
-    _messaging.onTokenRefresh.listen(
-      _saveTokenToFirestore,
-      onError: (Object error, StackTrace stack) {
-        _logMessagingError('onTokenRefresh', error, stack);
-      },
-    );
+    if (!_listenersAttached) {
+      _listenersAttached = true;
+      try {
+        _messaging.onTokenRefresh.listen(
+          (token) {
+            _latestToken = token;
+            _saveTokenToFirestore(token);
+          },
+          onError: (Object error, StackTrace stack) {
+            _logMessagingError('onTokenRefresh', error, stack);
+          },
+        );
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('Got a message whilst in the foreground!');
-      debugPrint('Message data: ${message.data}');
-      _showLocalNotification(message);
-    });
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+          debugPrint('Got a message whilst in the foreground!');
+          debugPrint('Message data: ${message.data}');
+          _showLocalNotification(message);
+        });
 
-    // 알림 탭으로 앱이 열린 경우(백그라운드 → 포그라운드) 재참여 신호 기록.
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      AnalyticsService.log(AnalyticsEvent.notificationOpened, {
-        'type': message.data['type']?.toString() ?? 'unknown',
-      });
-    });
+        // 알림 탭으로 앱이 열린 경우(백그라운드 → 포그라운드): 재참여 신호 기록 +
+        // data.type 에 맞는 화면으로 이동.
+        FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+          AnalyticsService.log(AnalyticsEvent.notificationOpened, {
+            'type': message.data['type']?.toString() ?? 'unknown',
+          });
+          _localNotifications.emitPushOpen(message.data);
+        });
+      } catch (error, stack) {
+        _logMessagingError('listen', error, stack);
+      }
 
-    // 종료 상태에서 알림 탭으로 콜드 스타트된 경우.
-    final initialMessage = await _getInitialMessage();
-    if (initialMessage != null) {
-      AnalyticsService.log(AnalyticsEvent.notificationOpened, {
-        'type': initialMessage.data['type']?.toString() ?? 'unknown',
-        'cold_start': true,
-      });
+      // 종료 상태에서 알림 탭으로 콜드 스타트된 경우. The request waits in the
+      // local service until home is ready to route it.
+      final initialMessage = await _getInitialMessage();
+      if (initialMessage != null) {
+        AnalyticsService.log(AnalyticsEvent.notificationOpened, {
+          'type': initialMessage.data['type']?.toString() ?? 'unknown',
+          'cold_start': true,
+        });
+        _localNotifications.emitPushOpen(initialMessage.data);
+      }
     }
 
+    await maybeRegister();
+  }
+
+  /// Registers the FCM token for the signed-in user when notifications are
+  /// allowed (never asks), and clears it when they were turned off. Called at
+  /// launch, on every sign-in ([fcmTokenBinderProvider]), on app resume and
+  /// after the reminder permission prompt.
+  Future<void> maybeRegister() async {
     final settings = await _getNotificationSettings();
     if (settings == null) return;
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
@@ -61,7 +114,7 @@ class NotificationService {
       // (knocks, cheers, missed-action nudges) is delivered via FCM, so a stale
       // token left in Firestore would just generate dead sends. Clear it; the
       // token re-registers automatically if the user re-enables notifications.
-      _clearTokenFromFirestore();
+      await _clearTokenFromFirestore();
     }
     // notDetermined: we haven't asked yet — leave it for the explicit
     // permission request at the meaningful moment (e.g. setting a reminder).
@@ -76,8 +129,8 @@ class NotificationService {
         settings.authorizationStatus == AuthorizationStatus.provisional;
   }
 
-  /// 알림이 의미 있는 시점(예: 약속 알림 설정)에 명시 호출.
-  /// 권한이 새로 grant되면 토큰도 등록한다.
+  /// 알림이 의미 있는 시점(예: 짝꿍 연결, 초대 공유, 약속 알림 설정)에 명시 호출.
+  /// 권한이 새로 grant되면 토큰도 등록한다. Never throws.
   Future<void> requestPermissionAndRegister() async {
     final NotificationSettings settings;
     try {
@@ -110,7 +163,12 @@ class NotificationService {
   Future<void> _saveTokenToFirestore(String? token) async {
     if (token == null) return;
 
-    final user = FirebaseAuth.instance.currentUser;
+    final User? user;
+    try {
+      user = FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      return;
+    }
     if (user != null) {
       try {
         await _ref.read(userRepositoryProvider).updateFcmToken(user.uid, token);
@@ -141,13 +199,15 @@ class NotificationService {
 
   Future<void> _registerCurrentToken() async {
     try {
-      final token = await _messaging.getToken();
+      final token = await _messaging.getToken() ?? _latestToken;
+      _latestToken = token ?? _latestToken;
       await _saveTokenToFirestore(token);
     } catch (error, stack) {
       // Devices without a usable Firebase Instance ID service can throw
       // MISSING_INSTANCEID_SERVICE here. Push delivery may be unavailable on
       // that device, but app startup and local reminders must keep working.
       _logMessagingError('getToken', error, stack);
+      await _saveTokenToFirestore(_latestToken);
     }
   }
 
@@ -159,7 +219,12 @@ class NotificationService {
   }
 
   Future<void> _clearTokenFromFirestore() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final User? user;
+    try {
+      user = FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      return;
+    }
     if (user == null) return;
     try {
       await _ref.read(userRepositoryProvider).clearFcmToken(user.uid);

@@ -9,10 +9,16 @@ class TutorialScreen extends StatefulWidget {
     super.key,
     this.onFinished,
     this.showBackButton = true,
+    this.onHaveInviteCode,
   });
 
   final VoidCallback? onFinished;
   final bool showBackButton;
+
+  /// First run only: "초대 코드 받았어요" skips the remaining pages; the
+  /// caller then opens code entry right after sign-in. Hidden when null
+  /// (e.g. the replay from Settings).
+  final VoidCallback? onHaveInviteCode;
 
   @override
   State<TutorialScreen> createState() => _TutorialScreenState();
@@ -24,20 +30,22 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
   /// This screen is shown before sign-in, so it is the very first thing a new
   /// user sees — resolve the copy against the active locale rather than
-  /// hardcoding it.
+  /// hardcoding it. The three pages tell the core couple-workout loop:
+  /// make a workout promise → your partner sees it and gives props → when you
+  /// both do it, that's 둘운완 (DuoDone).
   static List<_TutorialPageData> _pagesFor(AppLocalizations l10n) => [
     _TutorialPageData(
-      icon: Icons.edit_note_rounded,
+      icon: Icons.fitness_center_rounded,
       title: l10n.tutorialPage1Title,
       body: l10n.tutorialPage1Body,
     ),
     _TutorialPageData(
-      icon: Icons.handshake_outlined,
+      icon: Icons.favorite_rounded,
       title: l10n.tutorialPage2Title,
       body: l10n.tutorialPage2Body,
     ),
     _TutorialPageData(
-      icon: Icons.insights_rounded,
+      icon: Icons.celebration_rounded,
       title: l10n.tutorialPage3Title,
       body: l10n.tutorialPage3Body,
     ),
@@ -118,64 +126,77 @@ class _TutorialScreenState extends State<TutorialScreen> {
                   onPageChanged: (value) => setState(() => _index = value),
                   itemBuilder: (context, pageIndex) {
                     final page = pages[pageIndex];
-                    return Column(
-                      children: [
-                        const Spacer(),
-                        Container(
-                          width: 132,
-                          height: 132,
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(30),
-                            border: Border.all(
-                              color: AppColors.divider,
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withValues(
-                                  alpha: 0.10,
+                    // Centered when it fits, scrollable on short screens
+                    // (small phones, large text) instead of overflowing.
+                    return LayoutBuilder(
+                      builder: (context, constraints) => SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 132,
+                                height: 132,
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface,
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: AppColors.divider,
+                                    width: 1,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.10,
+                                      ),
+                                      blurRadius: 28,
+                                      offset: const Offset(0, 16),
+                                    ),
+                                  ],
                                 ),
-                                blurRadius: 28,
-                                offset: const Offset(0, 16),
+                                child: Icon(
+                                  page.icon,
+                                  color: AppColors.primary,
+                                  size: 62,
+                                ),
+                              ),
+                              const SizedBox(height: 34),
+                              Text(
+                                page.title,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.2,
+                                  letterSpacing: 0,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 330,
+                                ),
+                                child: Text(
+                                  page.body,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.58,
+                                    letterSpacing: 0,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                          child: Icon(
-                            page.icon,
-                            color: AppColors.primary,
-                            size: 62,
-                          ),
                         ),
-                        const SizedBox(height: 34),
-                        Text(
-                          page.title,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                            height: 1.2,
-                            letterSpacing: 0,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 330),
-                          child: Text(
-                            page.body,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              height: 1.58,
-                              letterSpacing: 0,
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                      ],
+                      ),
                     );
                   },
                 ),
@@ -220,7 +241,27 @@ class _TutorialScreenState extends State<TutorialScreen> {
                   child: Text(isLast ? l10n.tutorialStart : l10n.tutorialNext),
                 ),
               ),
-              const SizedBox(height: 12),
+              if (widget.onHaveInviteCode != null)
+                TextButton(
+                  key: const ValueKey('tutorial-have-invite-code'),
+                  onPressed: widget.onHaveInviteCode,
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    minimumSize: const Size(0, 36),
+                    textStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                  child: Text(l10n.inviteHaveCodeLink),
+                )
+              else
+                const SizedBox(height: 12),
               Text(
                 l10n.tutorialFooter,
                 textAlign: TextAlign.center,

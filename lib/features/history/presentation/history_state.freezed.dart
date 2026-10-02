@@ -418,13 +418,13 @@ return verify(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  refresh,TResult Function( String historyId,  HistoryStatus status)?  reconcile,TResult Function( HistoryFilter filter)?  setFilter,TResult Function( String historyId,  String? message)?  verify,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  refresh,TResult Function( String historyId,  HistoryStatus status)?  reconcile,TResult Function( HistoryFilter filter)?  setFilter,TResult Function( String historyId,  String? message,  String? reaction)?  verify,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
 return refresh();case ReconcileIntent() when reconcile != null:
 return reconcile(_that.historyId,_that.status);case SetFilterIntent() when setFilter != null:
 return setFilter(_that.filter);case VerifyHistoryIntent() when verify != null:
-return verify(_that.historyId,_that.message);case _:
+return verify(_that.historyId,_that.message,_that.reaction);case _:
   return orElse();
 
 }
@@ -442,13 +442,13 @@ return verify(_that.historyId,_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  refresh,required TResult Function( String historyId,  HistoryStatus status)  reconcile,required TResult Function( HistoryFilter filter)  setFilter,required TResult Function( String historyId,  String? message)  verify,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  refresh,required TResult Function( String historyId,  HistoryStatus status)  reconcile,required TResult Function( HistoryFilter filter)  setFilter,required TResult Function( String historyId,  String? message,  String? reaction)  verify,}) {final _that = this;
 switch (_that) {
 case RefreshIntent():
 return refresh();case ReconcileIntent():
 return reconcile(_that.historyId,_that.status);case SetFilterIntent():
 return setFilter(_that.filter);case VerifyHistoryIntent():
-return verify(_that.historyId,_that.message);case _:
+return verify(_that.historyId,_that.message,_that.reaction);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -465,13 +465,13 @@ return verify(_that.historyId,_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  refresh,TResult? Function( String historyId,  HistoryStatus status)?  reconcile,TResult? Function( HistoryFilter filter)?  setFilter,TResult? Function( String historyId,  String? message)?  verify,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  refresh,TResult? Function( String historyId,  HistoryStatus status)?  reconcile,TResult? Function( HistoryFilter filter)?  setFilter,TResult? Function( String historyId,  String? message,  String? reaction)?  verify,}) {final _that = this;
 switch (_that) {
 case RefreshIntent() when refresh != null:
 return refresh();case ReconcileIntent() when reconcile != null:
 return reconcile(_that.historyId,_that.status);case SetFilterIntent() when setFilter != null:
 return setFilter(_that.filter);case VerifyHistoryIntent() when verify != null:
-return verify(_that.historyId,_that.message);case _:
+return verify(_that.historyId,_that.message,_that.reaction);case _:
   return null;
 
 }
@@ -649,11 +649,12 @@ as HistoryFilter,
 
 
 class VerifyHistoryIntent implements HistoryIntent {
-  const VerifyHistoryIntent(this.historyId, {this.message});
+  const VerifyHistoryIntent(this.historyId, {this.message, this.reaction});
   
 
  final  String historyId;
  final  String? message;
+ final  String? reaction;
 
 /// Create a copy of HistoryIntent
 /// with the given fields replaced by the non-null parameter values.
@@ -665,16 +666,16 @@ $VerifyHistoryIntentCopyWith<VerifyHistoryIntent> get copyWith => _$VerifyHistor
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VerifyHistoryIntent&&(identical(other.historyId, historyId) || other.historyId == historyId)&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VerifyHistoryIntent&&(identical(other.historyId, historyId) || other.historyId == historyId)&&(identical(other.message, message) || other.message == message)&&(identical(other.reaction, reaction) || other.reaction == reaction));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,historyId,message);
+int get hashCode => Object.hash(runtimeType,historyId,message,reaction);
 
 @override
 String toString() {
-  return 'HistoryIntent.verify(historyId: $historyId, message: $message)';
+  return 'HistoryIntent.verify(historyId: $historyId, message: $message, reaction: $reaction)';
 }
 
 
@@ -685,7 +686,7 @@ abstract mixin class $VerifyHistoryIntentCopyWith<$Res> implements $HistoryInten
   factory $VerifyHistoryIntentCopyWith(VerifyHistoryIntent value, $Res Function(VerifyHistoryIntent) _then) = _$VerifyHistoryIntentCopyWithImpl;
 @useResult
 $Res call({
- String historyId, String? message
+ String historyId, String? message, String? reaction
 });
 
 
@@ -702,10 +703,11 @@ class _$VerifyHistoryIntentCopyWithImpl<$Res>
 
 /// Create a copy of HistoryIntent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? historyId = null,Object? message = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? historyId = null,Object? message = freezed,Object? reaction = freezed,}) {
   return _then(VerifyHistoryIntent(
 null == historyId ? _self.historyId : historyId // ignore: cast_nullable_to_non_nullable
 as String,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,reaction: freezed == reaction ? _self.reaction : reaction // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

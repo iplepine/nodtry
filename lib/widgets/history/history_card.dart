@@ -11,6 +11,10 @@ import '../app_underlined_text.dart';
 import '../reaction_icon.dart';
 import '../../features/history/presentation/history_viewmodel.dart';
 import '../../features/history/presentation/history_state.dart';
+import '../../features/proof/domain/proof_analytics.dart';
+import '../../features/proof/presentation/proof_photo_view.dart';
+import '../../features/proof/presentation/proof_reaction_row.dart';
+import '../../models/proof_photo.dart';
 
 class HistoryCard extends ConsumerWidget {
   final HistoryItem item;
@@ -21,13 +25,70 @@ class HistoryCard extends ConsumerWidget {
   /// 메모/상태가 시각적 주인공이 되도록 제목 라인을 생략한다.
   final bool showTitle;
 
+  /// One-tap 인정 on a partner's record. Defaults to the 기록-tab view model.
+  final ValueChanged<String>? onReact;
+
+  /// "한마디" on a partner's record. Defaults to the note dialog + view model.
+  final VoidCallback? onAddNote;
+
   const HistoryCard({
     super.key,
     required this.item,
     required this.isMe,
     this.onReconcile,
     this.showTitle = true,
+    this.onReact,
+    this.onAddNote,
   });
+
+  void _react(WidgetRef ref, String emoji) {
+    logPartnerReacted(
+      reportedAt: item.date,
+      surface: 'history',
+      reaction: emoji,
+      hasPhoto: item.proofPhotoPath != null,
+    );
+    if (onReact != null) {
+      onReact!(emoji);
+      return;
+    }
+    ref
+        .read(historyViewModelProvider.notifier)
+        .dispatch(HistoryIntent.verify(item.id, reaction: emoji));
+  }
+
+  Future<void> _addNote(BuildContext context, WidgetRef ref) async {
+    if (onAddNote != null) {
+      onAddNote!();
+      return;
+    }
+    final l10n = AppLocalizations.of(context)!;
+    final feedback = await showDialog<String>(
+      context: context,
+      builder: (context) => ActionNoteDialog(
+        title: item.title,
+        hintText: l10n.historyCardFeedbackHint,
+        buttonLabel: l10n.historyCardFeedbackButton,
+        showEmoji: false,
+      ),
+    );
+    if (feedback == null) return;
+    logPartnerReacted(
+      reportedAt: item.date,
+      surface: 'history_note',
+      reaction: kProofReactions.first,
+      hasPhoto: item.proofPhotoPath != null,
+    );
+    ref
+        .read(historyViewModelProvider.notifier)
+        .dispatch(
+          HistoryIntent.verify(
+            item.id,
+            message: feedback.trim().isEmpty ? null : feedback.trim(),
+            reaction: kProofReactions.first,
+          ),
+        );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -114,6 +175,19 @@ class HistoryCard extends ConsumerWidget {
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
+                      ),
+                    ],
+
+                    // 인증샷
+                    if (item.proofPhotoPath != null) ...[
+                      const SizedBox(height: 10),
+                      ProofPhoto(
+                        key: ValueKey('history-proof-${item.id}'),
+                        path: item.proofPhotoPath!,
+                        source: item.proofSource,
+                        takenAt: item.proofTakenAt,
+                        isOwner: isMe,
+                        height: 200,
                       ),
                     ],
 
@@ -215,6 +289,10 @@ class HistoryCard extends ConsumerWidget {
                                 ],
                               ),
                             ),
+                            if (item.reaction != null) ...[
+                              const SizedBox(width: 6),
+                              ReactionIcon(item.reaction!, size: 22),
+                            ],
                           ],
                         ),
                       ),
@@ -227,63 +305,34 @@ class HistoryCard extends ConsumerWidget {
                           Icon(
                             Icons.check_circle,
                             size: 14,
-                            color: AppColors.secondary,
+                            color: AppColors.accentWine,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             AppLocalizations.of(context)!.historyMeVerified,
                             style: TextStyle(
-                              color: AppColors.secondary,
+                              color: AppColors.accentWine,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
+                          if (item.reaction != null) ...[
+                            const SizedBox(width: 6),
+                            ReactionIcon(item.reaction!, size: 18),
+                          ],
                         ],
                       ),
                     ] else if (!isMe &&
                         !item.isVerifiedByMe &&
+                        item.canVerify &&
                         item.status == HistoryStatus.done) ...[
-                      // Not verified yet button
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            // Show Dialog to input feedback (reuse ActionNoteDialog)
-                            final feedback = await showDialog<String>(
-                              context: context,
-                              builder: (context) => ActionNoteDialog(
-                                title: item.title,
-                                hintText: AppLocalizations.of(context)!.historyCardFeedbackHint,
-                                buttonLabel: AppLocalizations.of(context)!.historyCardFeedbackButton,
-                              ),
-                            );
-
-                            if (feedback != null) {
-                              ref
-                                  .read(historyViewModelProvider.notifier)
-                                  .dispatch(
-                                    HistoryIntent.verify(
-                                      item.id,
-                                      message: feedback,
-                                    ),
-                                  );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)!.historyCardFeedbackButton,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                      // Not given 인정 yet: one tap does it.
+                      const SizedBox(height: 14),
+                      ProofReactionRow(
+                        showHint: false,
+                        iconSize: 22,
+                        onReact: (emoji) => _react(ref, emoji),
+                        onAddNote: () => _addNote(context, ref),
                       ),
                     ],
 
@@ -314,7 +363,10 @@ class HistoryCard extends ConsumerWidget {
 
   String _formatDate(BuildContext context, DateTime date) {
     final l10n = AppLocalizations.of(context)!;
-    return DateFormat(l10n.historyCardDatePattern, l10n.localeName).format(date);
+    return DateFormat(
+      l10n.historyCardDatePattern,
+      l10n.localeName,
+    ).format(date);
   }
 
   _StatusDisplayInfo _getStatusInfo(
@@ -332,8 +384,8 @@ class HistoryCard extends ConsumerWidget {
       case HistoryStatus.actuallyDone:
         return _StatusDisplayInfo(
           text: AppLocalizations.of(context)!.nowStatusActuallyDone,
-          color: AppColors.secondary.withValues(alpha: 0.1),
-          textColor: AppColors.secondary,
+          color: AppColors.secondary.withValues(alpha: 0.18),
+          textColor: AppColors.accentWine,
           icon: Icons.check_circle_outline,
         );
       case HistoryStatus.rested:
@@ -360,8 +412,8 @@ class HistoryCard extends ConsumerWidget {
       case HistoryStatus.rescued:
         return _StatusDisplayInfo(
           text: AppLocalizations.of(context)!.historyCardAcknowledgePractice,
-          color: AppColors.secondary.withValues(alpha: 0.1),
-          textColor: AppColors.secondary,
+          color: AppColors.secondary.withValues(alpha: 0.18),
+          textColor: AppColors.accentWine,
           icon: Icons.volunteer_activism,
         );
     }

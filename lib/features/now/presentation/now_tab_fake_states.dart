@@ -66,7 +66,7 @@ class NowTabFakeStates {
     secondaryCards: [
       HomeCardModel(
         state: HomeCardState.overdue,
-        plan: _createPlan('아침 약 먹기 (지난 일)', _yesterday, hour: 8),
+        plan: _createPlan('아침 러닝 (지난 일)', _yesterday, hour: 8),
         currentWeek: 1,
         totalWeeks: 4,
       ),
@@ -79,7 +79,7 @@ class NowTabFakeStates {
     allCards: [],
     primaryCard: HomeCardModel(
       state: HomeCardState.overdue,
-      plan: _createPlan('어제 못 한 독서', _yesterday, hour: 20),
+      plan: _createPlan('어제 못 한 홈트', _yesterday, hour: 20),
     ),
     secondaryCards: [
       HomeCardModel(
@@ -99,7 +99,7 @@ class NowTabFakeStates {
       HomeCardModel(
         state: HomeCardState.nextAction,
         headerMessage: '3일 뒤 일정',
-        plan: _createPlan('주말 브런치', _threeDaysLater, hour: 11),
+        plan: _createPlan('주말 등산', _threeDaysLater, hour: 11),
       ),
     ],
     managerCards: const [],
@@ -111,11 +111,11 @@ class NowTabFakeStates {
     primaryCard: HomeCardModel(
       state: HomeCardState.nowAction,
       plan: _createPlan(
-        '저녁 샐러드 먹기',
+        '저녁 야식 참기',
         _now,
         hour: 19,
-        note: '오늘은 드레싱 없이 먹었어요! 뿌듯합니다.',
-        comment: '오 드레싱 없이! 대단해요 🥗 칭찬합니다!',
+        note: '오늘은 야식 없이 버텼어! 뿌듯해.',
+        comment: '오 야식 참았어? 인정 🔥',
       ),
       currentWeek: 3,
       totalWeeks: 8,
@@ -124,10 +124,10 @@ class NowTabFakeStates {
       HomeCardModel(
         state: HomeCardState.overdue,
         plan: _createPlan(
-          '아침 약 챙겨먹기',
+          '아침 스트레칭 10분',
           _yesterday,
           hour: 8,
-          note: '어제는 깜빡했네요 ㅠㅠ',
+          note: '어제는 깜빡했어 ㅠㅠ',
         ),
       ),
     ],
@@ -138,12 +138,12 @@ class NowTabFakeStates {
         partnerName: '지민',
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
-        plan: _createPlan('저녁 독서 (수정)', _now, hour: 22),
-        previousPlan: _createPlan('저녁 독서 하기', _now, hour: 22),
+        plan: _createPlan('저녁 러닝 (수정)', _now, hour: 22),
+        previousPlan: _createPlan('저녁 러닝 하기', _now, hour: 22),
       ),
       HomeCardModel(
         state: HomeCardState.partnerAction,
-        headerMessage: '나 했어요!',
+        headerMessage: '나 했어!',
         partnerName: '지민',
         partnerImageUrl:
             'https://api.dicebear.com/7.x/avataaars/png?seed=Jimin',
@@ -151,8 +151,8 @@ class NowTabFakeStates {
           '아침 스트레칭',
           _now,
           hour: 7,
-          note: '아침 공기가 상쾌해서 평소보다 길게 했어요 🏃‍♀️',
-          comment: '상쾌한 아침이었겠네요! 멋져요!',
+          note: '아침 공기가 좋아서 평소보다 길게 했어 🏃‍♀️',
+          comment: '상쾌했겠다! 인정 💪',
         ),
         currentWeek: 2,
         totalWeeks: 4,
@@ -165,7 +165,7 @@ class NowTabFakeStates {
     allCards: [],
     primaryCard: HomeCardModel(
       state: HomeCardState.nowAction,
-      plan: _createPlan('노트만 있는 경우', _now, hour: 12, note: '실천자가 남긴 한마디입니다.'),
+      plan: _createPlan('노트만 있는 경우', _now, hour: 12, note: '내가 남긴 한마디예요.'),
     ),
     secondaryCards: [
       HomeCardModel(
@@ -174,21 +174,21 @@ class NowTabFakeStates {
           '피드백만 있는 경우',
           _yesterday,
           hour: 10,
-          comment: '매니저의 따뜻한 응원 한마디!',
+          comment: '짝꿍의 따뜻한 응원 한마디!',
         ),
       ),
     ],
     managerCards: [
       HomeCardModel(
         state: HomeCardState.partnerAction,
-        headerMessage: '나 했어요!',
+        headerMessage: '나 했어!',
         partnerName: '상대방',
         plan: _createPlan(
           '둘 다 있는 경우',
           _now,
           hour: 9,
-          note: '실천 소감과 함께입니다.',
-          comment: '소감을 보고 답해주는 피드백입니다.',
+          note: '오늘 운동 한마디와 함께예요.',
+          comment: '한마디를 보고 남긴 답장이에요.',
         ),
       ),
     ],

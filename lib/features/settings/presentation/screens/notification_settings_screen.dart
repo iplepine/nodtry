@@ -6,6 +6,9 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../utils/time_formatter.dart';
+import '../../../connect/application/partner_label_provider.dart';
+import '../../../plan/presentation/widgets/notification_setting_editor.dart'
+    show confirmPartneredReminderOff;
 
 class NotificationSettingsScreen extends ConsumerWidget {
   const NotificationSettingsScreen({super.key});
@@ -156,12 +159,25 @@ class NotificationSettingsScreen extends ConsumerWidget {
 
     NotificationTime newTime;
     if (value) {
-      // Turning ON
-      // If current type is none, switch to custom (or preset if we knew)
-      // Default to custom to preserve exact hour/minute
-      newTime = currentTime.copyWith(type: 'custom');
+      // Turning ON: keep the stored time, but a reminder that was never set
+      // (00:00 from NotificationTime.none()) gets the editor's 밤 9시 default —
+      // a 00:00 deadline told the partner about a "miss" every night at 00:30.
+      final restored = currentTime.copyWith(type: 'custom');
+      newTime =
+          restored.hour == 0 && restored.minute == 0 && !restored.isHourly
+          ? NotificationTime.custom(21, 0)
+          : restored;
     } else {
-      // Turning OFF
+      // Turning OFF a promise with a partner also drops its deadline: say so.
+      if (plan.managerId != null) {
+        final ok = await confirmPartneredReminderOff(
+          context,
+          partnerName: ref
+              .read(partnerLabelProvider)
+              .resolve(AppLocalizations.of(context)!),
+        );
+        if (!ok || !context.mounted) return;
+      }
       newTime = currentTime.copyWith(type: 'none');
     }
 
@@ -182,12 +198,14 @@ class NotificationSettingsScreen extends ConsumerWidget {
     final repository = ref.read(recordRepositoryProvider);
     final settingAlarmUseCase = ref.read(settingAlarmUseCaseProvider);
 
+    if (plan.id == null) return;
     try {
-      await repository.updatePlan(updatedPlan);
+      // Only the items, stamped as mine (see RecordRepository.updatePlanItems).
+      await repository.updatePlanItems(plan.id!, newItems);
       await settingAlarmUseCase.execute(updatedPlan);
     } catch (e) {
       try {
-        await repository.updatePlan(plan);
+        await repository.updatePlanItems(plan.id!, plan.items);
         await settingAlarmUseCase.execute(plan);
       } catch (rollbackError) {
         debugPrint(

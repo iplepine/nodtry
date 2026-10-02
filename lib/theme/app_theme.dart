@@ -116,7 +116,8 @@ class AppTheme {
       secondary: AppColors.secondary,
       surface: AppColors.darkSurface,
       onPrimary: Colors.white,
-      onSecondary: Colors.white,
+      // 브랜드 secondary는 인정 옐로(#FFD84D) — 흰 글자는 1.38:1이라 어두운 글자.
+      onSecondary: AppColors.textPrimary,
       onSurface: Colors.white,
       error: baseDarkColorScheme.error,
       onError: baseDarkColorScheme.onError,

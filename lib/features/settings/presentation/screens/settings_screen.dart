@@ -11,6 +11,8 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../utils/ui_error_codes.dart';
+import '../../../../core/legal_links.dart';
+import '../../../proof/domain/proof_labels.dart' show kSupportEmail;
 
 // App Store Review rejected submission bd240493-bbc3-425f-a286-a8343a50f34f
 // (May 23, 2026, Guideline 2.1(b)) because the in-app "buy the dev a coffee"
@@ -20,11 +22,20 @@ import '../../../../utils/ui_error_codes.dart';
 // (incl. App Review screenshot) at the same time as the next release.
 const bool _kShowCoffeeDonation = false;
 
+// 둘운완 (D-007) ships one brand palette. The theme picker is hidden and
+// AppSettingsNotifier always starts on AppThemeType.smokyPlum, whose colours
+// now carry the brand palette. The picker code stays for a later return.
+const bool _kShowThemePicker = false;
+
 /// Maps a locale-independent [SettingsErrorCode] to a localized message.
 String _settingsErrorText(AppLocalizations l10n, String code) {
   switch (code) {
     case SettingsErrorCode.logoutFailed:
       return l10n.settingsLogoutFailed;
+    case SettingsErrorCode.withdrawReauthCancelled:
+      return l10n.settingsDeleteAccountReauthCancelled;
+    case SettingsErrorCode.withdrawWrongPassword:
+      return l10n.settingsDeleteAccountWrongPassword;
     case SettingsErrorCode.withdrawFailed:
     default:
       return l10n.settingsDeleteAccountFailed;
@@ -127,23 +138,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               const SizedBox(height: 32),
 
-              // 테마 설정
-              Text(
-                l10n.settingsTheme,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              // 테마 설정 — 둘운완은 단일 브랜드 팔레트라 숨김(코드는 유지).
+              if (_kShowThemePicker) ...[
+                Text(
+                  l10n.settingsTheme,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              ..._buildThemeOptions(
-                context,
-                ref,
-                l10n,
-                settingsState.currentTheme,
-              ),
-              const SizedBox(height: 32),
+                const SizedBox(height: 16),
+                ..._buildThemeOptions(
+                  context,
+                  ref,
+                  l10n,
+                  settingsState.currentTheme,
+                ),
+                const SizedBox(height: 32),
+              ],
 
               if (kDebugMode) ...[
                 // 개발자 옵션
@@ -183,6 +196,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 32),
               ],
 
+              // 정보 — 개인정보처리방침 · 이용약관 · 고객지원. Always shown
+              // (Guideline 5.1.1(i): the policy must be reachable in the app).
+              Text(
+                l10n.settingsAboutSection,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildLinkOption(
+                key: const ValueKey('settings-privacy-policy'),
+                title: l10n.settingsPrivacyPolicy,
+                onTap: () => _openLink(Uri.parse(kPrivacyPolicyUrl)),
+              ),
+              const SizedBox(height: 12),
+              _buildLinkOption(
+                key: const ValueKey('settings-terms'),
+                title: l10n.settingsTermsOfUse,
+                onTap: () => _openLink(Uri.parse(kTermsOfUseUrl)),
+              ),
+              const SizedBox(height: 12),
+              _buildLinkOption(
+                key: const ValueKey('settings-contact-support'),
+                title: l10n.settingsContactSupport,
+                subtitle: kSupportEmail,
+                onTap: () => _openLink(
+                  supportMailUri(subject: l10n.settingsContactSupportSubject),
+                ),
+              ),
+              const SizedBox(height: 32),
+
               // 계정 관리
               Text(
                 l10n.settingsAccount,
@@ -197,6 +243,73 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 12),
               _buildWithdrawOption(context),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openLink(Uri uri) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final opened = await ref.read(externalLinkLauncherProvider)(uri);
+    if (!opened) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.settingsLinkOpenFailed(kSupportEmail))),
+      );
+    }
+  }
+
+  Widget _buildLinkOption({
+    required Key key,
+    required String title,
+    String? subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: key,
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider, width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Icon(Icons.open_in_new, size: 18, color: AppColors.textDisabled),
+              ],
+            ),
           ),
         ),
       ),
@@ -242,6 +355,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildTutorialOption(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -264,7 +378,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '앱 사용법',
+                        l10n.settingsTutorialTitle,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -273,7 +387,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '작은 약속을 만들고 확인받는 흐름을 다시 봅니다',
+                        l10n.settingsTutorialDesc,
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -463,11 +577,57 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
 
-    if (confirmed == true && context.mounted) {
-      ref
-          .read(settingsViewModelProvider.notifier)
-          .dispatch(const WithdrawAccountIntent());
+    if (confirmed != true || !context.mounted) return;
+
+    // An email account confirms with its password (Google / Apple sign in
+    // again in their own sheet, started by the view model).
+    String? password;
+    if (ref.read(authServiceProvider).deletionNeedsPassword) {
+      password = await _askPassword(context);
+      if (password == null || !context.mounted) return;
     }
+    ref
+        .read(settingsViewModelProvider.notifier)
+        .dispatch(WithdrawAccountIntent(password: password));
+  }
+
+  Future<String?> _askPassword(BuildContext context) {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(l10n.settingsDeleteAccountPasswordTitle),
+          content: TextField(
+            key: const ValueKey('withdraw-password'),
+            controller: controller,
+            obscureText: true,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: l10n.settingsDeleteAccountPasswordHint,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.settingsCancel),
+            ),
+            TextButton(
+              onPressed: () {
+                final value = controller.text;
+                if (value.isEmpty) return;
+                Navigator.pop(context, value);
+              },
+              child: Text(
+                l10n.settingsDelete,
+                style: TextStyle(color: AppColors.error),
+              ),
+            ),
+          ],
+        );
+      },
+    ).whenComplete(controller.dispose);
   }
 
   Widget _buildDeveloperOption(BuildContext context) {

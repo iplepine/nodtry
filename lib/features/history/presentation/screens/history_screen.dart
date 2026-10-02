@@ -13,6 +13,8 @@ import '../../../../utils/build_flags.dart';
 import '../history_state.dart';
 import '../history_viewmodel.dart';
 import '../history_fake_states.dart';
+import '../../../duo/application/duo_stats_provider.dart';
+import '../../../duo/presentation/duo_widgets.dart';
 import 'package:intl/intl.dart';
 
 /// 기록 탭 (History Tab)
@@ -26,6 +28,17 @@ class HistoryScreen extends ConsumerWidget {
     final historyStateAsync = ref.watch(historyViewModelProvider);
     final myProfileAsync = ref.watch(myProfileProvider);
     final myUid = myProfileAsync.value?.uid ?? 'me';
+    // The same 둘운완 stats as the Now header and the Us hero.
+    final duoStats = ref.watch(duoStatsProvider);
+
+    // A 인정 / 기록 변경 that failed: say so, keep the list.
+    ref.listen(historyActionFailureProvider, (previous, next) {
+      if (previous != null && next != previous) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.nowActionFailed)));
+      }
+    });
 
     ref.listen(historyViewModelProvider, (previous, next) {
       if (next.hasError && !next.isLoading) {
@@ -110,7 +123,16 @@ class HistoryScreen extends ConsumerWidget {
               // 에러가 있어도 데이터가 있으면 보여줌 (Dialog로 에러 알림)
               child: historyStateAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(child: Text('Error: $err')),
+                error: (err, stack) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      AppLocalizations.of(context)!.historyErrorUnknown,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                ),
                 data: (state) {
                   if (state.activeItems.isEmpty &&
                       state.finishedPlanSummaries.isEmpty) {
@@ -119,12 +141,14 @@ class HistoryScreen extends ConsumerWidget {
 
                   return CustomScrollView(
                     slivers: [
-                      // 0. 주간 펄스 카드 — 진행 중인 약속이 하나라도 있을 때.
-                      if (state.activeItems.isNotEmpty)
+                      // 0. 주간 펄스 카드 — this week from the 둘운완 stats.
+                      if (duoStats != null && state.activeItems.isNotEmpty)
                         SliverToBoxAdapter(
                           child: _WeeklyPulseCard(
-                            items: state.activeItems,
-                            myUid: myUid,
+                            stats: duoStats,
+                            partnerLabel:
+                                state.partnerName ??
+                                l10n.historyWeeklyPartnerLabel,
                             l10n: l10n,
                           ),
                         ),
@@ -470,41 +494,26 @@ class HistoryScreen extends ConsumerWidget {
 }
 
 /// 상단 주간 펄스 카드.
-/// 이번 주(월~일)에 나/파트너가 한 행동을 작은 dot row로 시각화한다.
-/// 행동 디자이너 페르소나 김민서가 권한 "ledger → milestone" 전환의 핵심.
+/// 이번 주(월~일) 나/짝꿍의 하루를 둘운완 기준으로 보여 준다 — 지금 탭 헤더,
+/// 우리 탭과 같은 [DuoStats]라서 세 화면의 숫자가 어긋나지 않는다.
 class _WeeklyPulseCard extends StatelessWidget {
-  final List<HistoryItem> items;
-  final String myUid;
+  final DuoStats stats;
+  final String partnerLabel;
   final AppLocalizations l10n;
 
   const _WeeklyPulseCard({
-    required this.items,
-    required this.myUid,
+    required this.stats,
+    required this.partnerLabel,
     required this.l10n,
   });
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    // 월요일 시작 (한국 관례)
-    final today = DateTime(now.year, now.month, now.day);
-    final monday = today.subtract(Duration(days: today.weekday - 1));
-
-    // 7일 × [내 done, 파트너 done] 도트 계산
-    final myDots = <bool>[];
-    final partnerDots = <bool>[];
-    for (var i = 0; i < 7; i++) {
-      final day = monday.add(Duration(days: i));
-      myDots.add(_hasDoneOn(day, myUid: true));
-      partnerDots.add(_hasDoneOn(day, myUid: false));
-    }
-
-    final myCount = myDots.where((d) => d).length;
-    final partnerCount = partnerDots.where((d) => d).length;
-    final hasPartnerData = items.any((it) => it.executorId != myUid);
-    final todayIndex = today.difference(monday).inDays.clamp(0, 6);
+    final myDone = stats.week.where((d) => d.me.isDone).length;
+    final partnerDone = stats.week.where((d) => d.partner.isDone).length;
 
     return Container(
+      key: const ValueKey('history-weekly-pulse'),
       margin: const EdgeInsets.fromLTRB(16, 4, 16, 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -526,13 +535,28 @@ class _WeeklyPulseCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.historyWeeklyPulseTitle,
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.historyWeeklyPulseTitle,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (stats.hasPartner)
+                Text(
+                  l10n.duoWeekDuoDays(stats.weekDuoDays),
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 8),
           Align(
@@ -544,129 +568,28 @@ class _WeeklyPulseCard extends StatelessWidget {
               children: [
                 _CountChip(
                   label: l10n.historyWeeklyMeLabel,
-                  count: myCount,
+                  count: myDone,
                   color: AppColors.primary,
                 ),
-                if (hasPartnerData)
+                if (stats.hasPartner)
                   _CountChip(
-                    label: l10n.historyWeeklyPartnerLabel,
-                    count: partnerCount,
-                    color: AppColors.secondary,
+                    label: partnerLabel,
+                    count: partnerDone,
+                    // Text colour: the readable honey, not the yellow fill.
+                    color: AppColors.accentWine,
                   ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          // 요일 라벨
-          _WeekdayLabels(monday: monday, todayIndex: todayIndex),
-          const SizedBox(height: 6),
-          // 내 도트 행
-          _PulseDotRow(
-            dots: myDots,
-            todayIndex: todayIndex,
-            color: AppColors.primary,
+          const SizedBox(height: 10),
+          DuoWeekDots(
+            week: stats.week,
+            showPartner: stats.hasPartner,
+            meLabel: l10n.historyWeeklyMeLabel,
+            partnerLabel: partnerLabel,
           ),
-          if (hasPartnerData) ...[
-            const SizedBox(height: 6),
-            _PulseDotRow(
-              dots: partnerDots,
-              todayIndex: todayIndex,
-              color: AppColors.secondary,
-            ),
-          ],
         ],
       ),
-    );
-  }
-
-  bool _hasDoneOn(DateTime day, {required bool myUid}) {
-    return items.any((it) {
-      final sameDay =
-          it.date.year == day.year &&
-          it.date.month == day.month &&
-          it.date.day == day.day;
-      if (!sameDay) return false;
-      final isMine = it.executorId == this.myUid || it.executorId == 'me';
-      if (myUid != isMine) return false;
-      return it.status == HistoryStatus.done ||
-          it.status == HistoryStatus.verified ||
-          it.status == HistoryStatus.actuallyDone ||
-          it.status == HistoryStatus.rescued;
-    });
-  }
-}
-
-class _WeekdayLabels extends StatelessWidget {
-  final DateTime monday;
-  final int todayIndex;
-
-  const _WeekdayLabels({required this.monday, required this.todayIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final formatter = DateFormat('E', l10n.localeName);
-    return Row(
-      children: List.generate(7, (i) {
-        final day = monday.add(Duration(days: i));
-        final isToday = i == todayIndex;
-        return Expanded(
-          child: Center(
-            child: Text(
-              formatter.format(day),
-              style: TextStyle(
-                color: isToday
-                    ? AppColors.textPrimary
-                    : AppColors.textDisabled,
-                fontSize: 11,
-                fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
-              ),
-            ),
-          ),
-        );
-      }),
-    );
-  }
-}
-
-class _PulseDotRow extends StatelessWidget {
-  final List<bool> dots;
-  final int todayIndex;
-  final Color color;
-
-  const _PulseDotRow({
-    required this.dots,
-    required this.todayIndex,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(7, (i) {
-        final filled = dots[i];
-        final isToday = i == todayIndex;
-        return Expanded(
-          child: Center(
-            child: Container(
-              width: 14,
-              height: 14,
-              decoration: BoxDecoration(
-                color: filled ? color : Colors.transparent,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: filled
-                      ? color
-                      : (isToday
-                            ? color.withValues(alpha: 0.5)
-                            : AppColors.outline.withValues(alpha: 0.6)),
-                  width: isToday && !filled ? 1.5 : 1,
-                ),
-              ),
-            ),
-          ),
-        );
-      }),
     );
   }
 }

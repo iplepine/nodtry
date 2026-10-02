@@ -76,6 +76,31 @@ class Plan {
   final DateTime? pilotSettledAt; // 파일럿 정산 응답 시간
   final Promise? promise; // 보상/벌칙 약속
 
+  /// The `actions` document id of the owner's most recent `done` record.
+  ///
+  /// Written by `reportCompletion` so the partner's 인정 lands on exactly that
+  /// action instead of whatever action of the day a date-range query returns
+  /// first (it used to pick up skipped/rested records). Optional: plans written
+  /// by older app versions never carry it.
+  final String? lastActionId;
+
+  /// What the promise is about: one of `gym`, `running`, `home_training`,
+  /// `walking`, `pilates`, `yoga`, `stretching`, `swimming`, `climbing`,
+  /// `cycling`, `hiking`, `strength`, `diet`, `other` (pivot spec §9; parse
+  /// with `WorkoutType.fromId`). Null for plans created before the pivot, which
+  /// may not be workouts at all — show neutral 약속 copy for those. Optional and
+  /// written only when set, so older app versions are unaffected.
+  final String? workoutType;
+
+  /// Storage path of the owner's latest proof photo (인증샷),
+  /// `proofs/{uid}/{planId}/{actionId}.jpg`. Never a download URL. Written
+  /// together with [lastActionId] when a 했어 report carries a photo, so the
+  /// partner's card can show it without reading the action. Optional.
+  final String? lastProofPhotoPath;
+
+  /// When [lastProofPhotoPath] was reported. Optional.
+  final DateTime? lastProofAt;
+
   Plan({
     this.id,
     required this.userId,
@@ -105,7 +130,48 @@ class Plan {
     this.pilotExitReason,
     this.pilotSettledAt,
     this.promise,
+    this.lastActionId,
+    this.workoutType,
+    this.lastProofPhotoPath,
+    this.lastProofAt,
   });
+
+  /// Length of a plan period in days (the 4-week window).
+  static const int periodDays = 28;
+
+  /// The period a plan runs for when it is (re)started on [day]: from 00:00 of
+  /// that day to 23:59:59 of the 28th day.
+  static ({DateTime start, DateTime end}) periodStartingOn(DateTime day) {
+    final start = DateTime(day.year, day.month, day.day);
+    final end = DateTime(
+      day.year,
+      day.month,
+      day.day + periodDays - 1,
+      23,
+      59,
+      59,
+    );
+    return (start: start, end: end);
+  }
+
+  /// A copy to seed the plan-create screen when starting this plan over.
+  ///
+  /// It carries the content (items, owner, partner) but no document id and no
+  /// history, so saving it creates a new plan document. `copyWith(id: null)`
+  /// cannot do this — copyWith keeps the current id for a null argument, which
+  /// made "restart" overwrite the finished plan instead of creating a new one.
+  Plan asRestartTemplate() {
+    return Plan(
+      userId: userId,
+      managerId: managerId,
+      startDate: startDate,
+      endDate: endDate,
+      state: state,
+      items: items,
+      createdAt: createdAt,
+      workoutType: workoutType,
+    );
+  }
 
   Plan copyWith({
     String? id,
@@ -136,6 +202,10 @@ class Plan {
     String? pilotExitReason,
     DateTime? pilotSettledAt,
     Promise? promise,
+    String? lastActionId,
+    String? workoutType,
+    String? lastProofPhotoPath,
+    DateTime? lastProofAt,
   }) {
     return Plan(
       id: id ?? this.id,
@@ -167,6 +237,10 @@ class Plan {
       pilotExitReason: pilotExitReason ?? this.pilotExitReason,
       pilotSettledAt: pilotSettledAt ?? this.pilotSettledAt,
       promise: promise ?? this.promise,
+      lastActionId: lastActionId ?? this.lastActionId,
+      workoutType: workoutType ?? this.workoutType,
+      lastProofPhotoPath: lastProofPhotoPath ?? this.lastProofPhotoPath,
+      lastProofAt: lastProofAt ?? this.lastProofAt,
     );
   }
 
@@ -206,6 +280,10 @@ class Plan {
       if (pilotSettledAt != null)
         'pilotSettledAt': Timestamp.fromDate(pilotSettledAt!),
       if (promise != null) 'promise': promise!.toMap(),
+      if (lastActionId != null) 'lastActionId': lastActionId,
+      if (workoutType != null) 'workoutType': workoutType,
+      if (lastProofPhotoPath != null) 'lastProofPhotoPath': lastProofPhotoPath,
+      if (lastProofAt != null) 'lastProofAt': Timestamp.fromDate(lastProofAt!),
     };
   }
 
@@ -281,7 +359,19 @@ class Plan {
       promise: map['promise'] != null
           ? Promise.fromMap(map['promise'] as Map<String, dynamic>)
           : null,
+      lastActionId: map['lastActionId'] as String?,
+      workoutType: _nonEmptyString(map['workoutType']),
+      lastProofPhotoPath: _nonEmptyString(map['lastProofPhotoPath']),
+      lastProofAt: _timestampOrNull(map['lastProofAt']),
     );
+  }
+
+  static String? _nonEmptyString(Object? value) {
+    return value is String && value.isNotEmpty ? value : null;
+  }
+
+  static DateTime? _timestampOrNull(Object? value) {
+    return value is Timestamp ? value.toDate() : null;
   }
 
   /// 현재 연속 달성 횟수 (스트릭) 계산
@@ -673,6 +763,16 @@ class NotificationTime {
       startHour: startHour,
       endHour: endHour,
     );
+  }
+
+  /// The promise's deadline as minutes after midnight — what the partner's
+  /// missed notice and knock wait for — or null when there is none (reminder
+  /// off). A daily reminder fires [alertOffset] minutes before it (the stored
+  /// hour/minute is the fire time); an hourly one runs until [endHour].
+  int? get deadlineMinutes {
+    if (type == 'none') return null;
+    if (isHourly) return endHour.clamp(0, 23) * 60 + minute;
+    return (hour * 60 + minute + alertOffset) % 1440;
   }
 
   int get targetHour {

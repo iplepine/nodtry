@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:math';
 
+import '../features/connect/domain/invite_code.dart' as invite;
 import '../models/relation_model.dart';
 import 'connect_repository.dart';
 
@@ -22,12 +22,8 @@ class MockConnectRepository implements ConnectRepository {
     // 0.5초 지연 시뮬레이션
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // 랜덤 6자리 코드 생성 (영대문자 + 숫자)
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = Random();
-    final code = String.fromCharCodes(
-      Iterable.generate(6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))),
-    );
+    // Same 8-character, easy-to-read codes as the real repository.
+    final code = invite.generateInviteCode();
 
     _myInviteCode = code;
     return code;
@@ -37,8 +33,9 @@ class MockConnectRepository implements ConnectRepository {
   Future<String> connectWithCode(String code) async {
     await Future.delayed(const Duration(milliseconds: 1000));
 
-    if (code == 'ERROR') {
-      throw Exception('Invalid code');
+    if (code == 'ERROR' ||
+        !invite.isValidInviteCode(invite.normalizeInviteCode(code))) {
+      throw const InviteCodeNotFoundException();
     }
 
     // 연결 성공 시뮬레이션

@@ -36,9 +36,10 @@ class AppSettingsNotifier extends Notifier<AppSettingsState> {
     if (stored != null && stored.isNotEmpty) {
       initialLocale = Locale(stored, '');
     }
-    // 저장된 테마가 있으면 그대로 복원, 없으면 default(smokyPlum).
-    final storedTheme = AppThemeType.fromStorageKey(prefs.getString(_kThemeKey));
-    final initialTheme = storedTheme ?? AppThemeType.smokyPlum;
+    // 둘운완 피벗(D-007): 단일 브랜드 팔레트(smokyPlum 키)로 고정한다.
+    // 테마 선택 UI가 숨겨지므로, 예전에 다른 팔레트를 고른 사용자가 그 색에
+    // 갇히지 않도록 저장된 'app.theme' 값은 시작 시 적용하지 않는다.
+    const initialTheme = AppThemeType.smokyPlum;
     // AppColors의 정적 palette도 동기화 — 첫 빌드에서 위젯들이 올바른 색을 읽도록.
     AppColors.setTheme(initialTheme);
     // 세그먼트 차원으로 현재 테마/언어를 유저 프로퍼티에 기록.

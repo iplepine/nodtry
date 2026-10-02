@@ -95,8 +95,8 @@ void main() {
       // Check if "나" (DisplayName) is visible
       expect(find.text('나'), findsWidgets);
 
-      // Check "나의 약속" title
-      expect(find.text('나의 약속'), findsOneWidget);
+      // Check "내 약속" title
+      expect(find.text('내 약속'), findsOneWidget);
 
       // Check Plan Title
       expect(find.text('내 계획 1'), findsOneWidget);
@@ -134,7 +134,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check Empty State Text
-      expect(find.text('아직 실천 메이트가 없어요'), findsOneWidget);
+      expect(find.text('아직 짝꿍이 없어요'), findsOneWidget);
 
       // Check Invite Button (Footer)
       expect(find.byIcon(Icons.send), findsOneWidget);
@@ -200,7 +200,7 @@ void main() {
       // expect(find.text('응원하는 중'), findsOneWidget);
 
       // Check Partner Plan Section Title
-      // expect(find.text('파트너님의 약속'), findsOneWidget);
+      // expect(find.text('파트너의 약속'), findsOneWidget);
 
       // Check Partner Plan
       expect(find.text('파트너 계획 1'), findsOneWidget);

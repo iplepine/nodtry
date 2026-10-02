@@ -5,11 +5,14 @@ import 'now_tab_intent.dart';
 import '../../../models/plan_model.dart';
 import '../../../models/home_state.dart';
 import '../../../models/promise_model.dart';
+import '../../../models/proof_photo.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../widgets/quiet_header.dart';
 import '../../../utils/analytics.dart';
 import '../../../utils/error_reporter.dart';
 import '../domain/usecases/feedback_to_partner_use_case.dart';
+import '../../connect/application/partner_label_provider.dart';
+import '../../proof/domain/proof_analytics.dart';
 
 /// Now Tab의 상태 관리 및 비즈니스 로직을 담당하는 ViewModel
 /// MVI 패턴의 'Model' (State Holder) 역할
@@ -51,6 +54,8 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     final profileByUid = {
       for (final profile in profiles) profile.user.uid: profile.user,
     };
+    // What I call my partner wins over their display name on every card.
+    final label = ref.watch(partnerLabelProvider);
 
     return useCase.executeStream().map((models) {
       // 헤더 정보 계산
@@ -68,12 +73,19 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
       final updatedModels = visibleModels.map((m) {
         int? cWeek;
         int? tWeeks;
+        final isYours = m.state.role == CardRole.yours;
         final resolvedPartnerUid =
-            m.partnerUid ??
-            (m.state.role == CardRole.yours ? m.plan?.userId : null);
+            m.partnerUid ?? (isYours ? m.plan?.userId : null);
         final resolvedPartnerProfile = resolvedPartnerUid == null
             ? null
             : profileByUid[resolvedPartnerUid];
+        // My own cards (a knock, a missed notice) name the connected partner
+        // too — only they can knock — so the badge reads "{애칭}한테서 똑똑이
+        // 왔어요". partnerUid itself stays unset on my cards.
+        final nameUid =
+            resolvedPartnerUid ??
+            (isYours ? null : (m.plan?.managerId ?? label.partnerUid));
+        final nameProfile = nameUid == null ? null : profileByUid[nameUid];
 
         if (m.plan != null && m.plan!.state == PlanState.active) {
           final plan = m.plan!;
@@ -90,9 +102,12 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
           state: m.state,
           plan: m.plan,
           partnerUid: resolvedPartnerUid,
-          partnerName:
-              _nonBlank(m.partnerName) ??
-              _nonBlank(resolvedPartnerProfile?.displayName),
+          partnerName: label.preferredFor(
+            nameUid,
+            displayName:
+                _nonBlank(m.partnerName) ??
+                _nonBlank(nameProfile?.displayName),
+          ),
           partnerImageUrl:
               _nonBlank(m.partnerImageUrl) ??
               _nonBlank(resolvedPartnerProfile?.profileImageUrl),
@@ -129,12 +144,15 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     // 현재 상태가 로딩 중이거나 에러인 경우 처리 불가 (또는 큐잉)
     if (!state.hasValue) return;
 
+    if (intent is CompletePlanIntent) {
+      await complete(intent);
+      return;
+    }
+
     _logIntent(intent);
 
     try {
-      if (intent is CompletePlanIntent) {
-        await _completePlan(intent.planId, intent.message);
-      } else if (intent is CheckPartnerActionIntent) {
+      if (intent is CheckPartnerActionIntent) {
         await _checkPartnerAction(intent.planId);
       } else if (intent is RefreshIntent) {
         // Stream handles updates, but we can force re-fetch if needed.
@@ -163,6 +181,23 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
           intent.reward,
           intent.penalty,
         );
+      } else if (intent is ReplyToPokeIntent) {
+        await ref
+            .read(recordRepositoryProvider)
+            .replyToPoke(
+              intent.planId,
+              toUserId: intent.toUserId,
+              message: intent.message,
+            );
+      } else if (intent is SendCheerIntent) {
+        await ref
+            .read(recordRepositoryProvider)
+            .sendCheer(
+              intent.toUserId,
+              planId: intent.planId,
+              emoji: intent.emoji,
+              message: intent.message,
+            );
       } else if (intent is ProposePromiseIntent) {
         await _proposePromise(intent.planId, intent.reward, intent.penalty);
       } else if (intent is RespondPromiseIntent) {
@@ -195,14 +230,44 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     }
   }
 
+  /// Runs a 했어 report like [dispatch] and says whether the proof photo made
+  /// it, so the screen can tell the user when it was saved without the photo.
+  /// Null when the tab has no state yet (nothing was reported).
+  Future<ProofCompletionResult?> complete(CompletePlanIntent intent) async {
+    if (!state.hasValue) return null;
+    _logIntent(intent);
+    try {
+      final result = await ref
+          .read(recordRepositoryProvider)
+          .reportCompletion(
+            intent.planId,
+            note: intent.message,
+            photo: intent.photo,
+          );
+      if (result.actionId != null) logProofUploaded(result);
+
+      // 알람 업데이트: 오늘 알람 건너뛰기
+      await _updateAlarmToSkipToday(intent.planId);
+      return result;
+    } catch (e, stack) {
+      ErrorReporter.record(
+        e,
+        stack,
+        reason: 'nowTabDispatch:${intent.runtimeType}',
+      );
+      rethrow;
+    }
+  }
+
   /// Now 탭의 모든 사용자 행동을 Analytics 이벤트로 매핑한다. [NowTabIntent]가
   /// sealed라 새 인텐트를 추가하면 이 switch가 컴파일 타임에 누락을 잡아준다.
   /// 메시지/사유 본문은 PII이므로 보내지 않고 존재 여부(boolean)만 기록한다.
   void _logIntent(NowTabIntent intent) {
     switch (intent) {
-      case CompletePlanIntent(:final message):
+      case CompletePlanIntent(:final message, :final photo):
         AnalyticsService.log(AnalyticsEvent.planCompleted, {
           'has_message': message != null && message.isNotEmpty,
+          'has_photo': photo != null,
         });
       case SkipPlanIntent():
         AnalyticsService.log(AnalyticsEvent.planSkipped);
@@ -241,6 +306,13 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
         });
       case AcknowledgePokeIntent():
         AnalyticsService.log(AnalyticsEvent.pokeAcknowledged);
+      case ReplyToPokeIntent(:final kind):
+        AnalyticsService.log(AnalyticsEvent.pokeReplied, {'kind': kind.id});
+      case SendCheerIntent(:final message):
+        AnalyticsService.log(AnalyticsEvent.cheerSent, {
+          'surface': 'missed_card',
+          'has_message': message != null && message.isNotEmpty,
+        });
       case ProposePromiseIntent(:final reward, :final penalty):
         AnalyticsService.log(AnalyticsEvent.promiseProposed, {
           'has_reward': reward != null,
@@ -303,15 +375,6 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     await ref
         .read(recordRepositoryProvider)
         .respondPromise(planId, accept: accept);
-  }
-
-  Future<void> _completePlan(String planId, [String? message]) async {
-    await ref
-        .read(recordRepositoryProvider)
-        .reportCompletion(planId, note: message);
-
-    // 알람 업데이트: 오늘 알람 건너뛰기
-    await _updateAlarmToSkipToday(planId);
   }
 
   Future<void> _checkPartnerAction(String planId) async {

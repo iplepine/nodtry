@@ -55,7 +55,7 @@ class PlanSummaryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
-                  summary.periodString,
+                  l10n.planSummaryWeeks(summary.periodWeeks),
                   style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 13,

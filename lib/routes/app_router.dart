@@ -11,8 +11,12 @@ import '../features/auth/presentation/screens/email_login_screen.dart';
 import '../models/plan_model.dart';
 import '../features/plan/presentation/screens/plan_detail_screen.dart';
 import '../features/plan/presentation/screens/all_plans_screen.dart';
+import '../features/connect/domain/invite_code.dart';
+import '../features/onboarding/domain/onboarding_gate.dart';
+import '../features/onboarding/presentation/onboarding_invite_screen.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/repository_provider.dart';
@@ -28,6 +32,33 @@ class AppRoutes {
   static const String splash = '/';
   static const String connect = '/connect';
   static const String home = '/home';
+
+  /// Invite step after a new user's first login (no partner yet).
+  static const String onboardingInvite = '/onboarding/invite';
+
+  /// An opened invite link: `/i/{CODE}` (the Hosting landing path, also
+  /// reachable as `onmybehalf://app/i/{CODE}`).
+  static const String inviteLink = '/i/:code';
+
+  /// The connect screen with code entry first. [code] is confirmed right
+  /// away; [source] is analytics only.
+  static String connectEntry({
+    String? code,
+    InviteCodeSource? source,
+    String? failureReason,
+  }) {
+    return Uri(
+      path: connect,
+      queryParameters: {
+        'mode': 'enter',
+        if (code != null && code.isNotEmpty) 'code': code,
+        if (source != null) 'source': source.id,
+        if (failureReason != null && failureReason.isNotEmpty)
+          'failure': failureReason,
+      },
+    ).toString();
+  }
+
   static const String developer = '/developer';
   static const String settings = '/settings';
   static const String tutorial = '/tutorial';
@@ -43,7 +74,6 @@ class AppRoutes {
   static const String deepLinkSplash = '/splash';
   static const String deepLinkConnect = '/connect';
   static const String deepLinkHome = '/home';
-  static const String deepLinkDeveloper = '/developer';
 }
 
 /// Firebase [User]의 인증 제공자에서 로그인 방식을 추론한다.
@@ -125,18 +155,42 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isSplash = state.matchedLocation == AppRoutes.splash;
       final isEmailLogin = state.matchedLocation == AppRoutes.emailLogin;
       final isTutorial = state.matchedLocation == AppRoutes.tutorial;
+      final linkCode = inviteCodeFromLocation(state.uri);
 
       // 로그인이 안 되어 있거나 프로필이 없는 경우
       if (user == null || profile == null) {
+        // An invite link opened before sign-in: keep the code so code entry
+        // opens with it right after login, then start at the splash.
+        if (linkCode != null) {
+          try {
+            ref
+                .read(onboardingStoreProvider)
+                .setPendingCodeEntry(
+                  code: linkCode,
+                  source: InviteCodeSource.link.id,
+                );
+          } catch (_) {
+            // No SharedPreferences (tests): the code is simply not kept.
+          }
+          return AppRoutes.splash;
+        }
         // 이미 스플래시나 로그인 화면이면 그대로 둠
         if (isSplash || isEmailLogin || isTutorial) return null;
         // 다른 보호된 화면이면 스플래시로 강제 이동
         return AppRoutes.splash;
       }
 
-      // 로그인이 되어 있는 상태인데 스플래시나 로그인 화면에 머물러 있으면 홈으로 이동
+      if (linkCode != null) {
+        return AppRoutes.connectEntry(
+          code: linkCode,
+          source: InviteCodeSource.link,
+        );
+      }
+
+      // 로그인이 되어 있는 상태인데 스플래시나 로그인 화면에 머물러 있으면
+      // 첫 화면을 고른다: 홈, 초대 단계(새 사용자), 또는 받은 코드 입력.
       if (isSplash || isEmailLogin) {
-        return AppRoutes.home;
+        return _postLoginLocation(ref, profile);
       }
 
       return null;
@@ -150,18 +204,43 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.connect,
         name: 'connect',
-        builder: (context, state) => const ConnectScreen(),
+        builder: (context, state) {
+          final params = state.uri.queryParameters;
+          final extra = state.extra;
+          return ConnectScreen(
+            entryMode: params['mode'] == 'enter',
+            initialCode: params['code'],
+            initialSource: InviteCodeSource.fromId(params['source']),
+            prefetchedOwner: extra is UserModel ? extra : null,
+            initialFailureReason: params['failure'],
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingInvite,
+        name: 'onboarding-invite',
+        builder: (context, state) => const OnboardingInviteScreen(),
+      ),
+      // Always redirected (see inviteCodeFromLocation); the builder is only a
+      // fallback.
+      GoRoute(
+        path: AppRoutes.inviteLink,
+        name: 'invite-link',
+        builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
         path: AppRoutes.home,
         name: 'home',
         builder: (context, state) => const HomeScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.developer,
-        name: 'developer',
-        builder: (context, state) => const DeveloperScreen(),
-      ),
+      // Debug builds only: in a release build `onmybehalf://app/developer`
+      // must not open the developer tools (Guideline 2.3.1).
+      if (kDebugMode)
+        GoRoute(
+          path: AppRoutes.developer,
+          name: 'developer',
+          builder: (context, state) => const DeveloperScreen(),
+        ),
       GoRoute(
         path: AppRoutes.settings,
         name: 'settings',
@@ -216,6 +295,44 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// The invite code in an opened `/i/{CODE}` link, normalized, or null.
+String? inviteCodeFromLocation(Uri uri) {
+  final segments = uri.pathSegments;
+  if (segments.length != 2 || segments.first != 'i') return null;
+  final code = normalizeInviteCode(segments[1]);
+  return isValidInviteCode(code) ? code : null;
+}
+
+/// Where a signed-in user lands from the splash or email login.
+String _postLoginLocation(Ref ref, UserModel profile) {
+  final OnboardingStore store;
+  try {
+    store = ref.read(onboardingStoreProvider);
+  } catch (_) {
+    return AppRoutes.home; // no SharedPreferences (tests): plain home
+  }
+  final partners = ref.read(connectedProfilesProvider);
+  final route = postLoginRoute(
+    legacyUser: store.legacyUser(accountCreatedAt: profile.createdAt),
+    inviteStepDone: store.inviteStepDone,
+    pendingCodeEntry: store.pendingCodeEntry,
+    hasPartner: partners.isLoading ? null : partners.value?.isNotEmpty,
+  );
+  switch (route) {
+    case PostLoginRoute.home:
+      return AppRoutes.home;
+    case PostLoginRoute.inviteStep:
+      return AppRoutes.onboardingInvite;
+    case PostLoginRoute.codeEntry:
+      return AppRoutes.connectEntry(
+        code: store.pendingInviteCode,
+        source: InviteCodeSource.fromId(
+          store.pendingInviteSource ?? InviteCodeSource.manual.id,
+        ),
+      );
+  }
+}
 
 // Deprecated: Use routerProvider instead
 @Deprecated('Use ref.watch(routerProvider) instead')

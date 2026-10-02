@@ -116,9 +116,15 @@ class AutoLoginUseCase {
       await _cancelAllNotificationsUseCase.execute();
 
       // 2. 저장된 알림 설정이 살아 있는 플랜만 재등록한다.
+      // 오늘 이미 기록한 약속은 오늘 알림을 빼고 등록한다 — 다시 울리면
+      // "기록이 없으면 곧 짝꿍한테 알려져요"가 틀린 말이 된다.
+      final now = DateTime.now();
       for (final plan in restorablePlans) {
         final item = plan.items.first;
-        await _settingAlarmUseCase.execute(plan);
+        await _settingAlarmUseCase.execute(
+          plan,
+          skipToday: planHasRecordOn(plan, now),
+        );
         debugPrint(
           '[AutoLoginUseCase] Restored notification for plan: ${item.title}',
         );

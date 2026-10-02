@@ -133,9 +133,23 @@ class AnalyticsEvent {
   static const accountDeleted = 'account_deleted';
 
   // Activation — partner connect
+  /// Legacy name kept for funnel continuity: `{method: copy|share}`.
   static const inviteCodeShared = 'invite_code_shared';
+
+  /// An invite went out: `{channel: kakao|other|unknown|copy, surface}`.
+  static const inviteShared = 'invite_shared';
+
+  /// A code was found or typed and looked up:
+  /// `{source: clipboard|manual|link, matched}`.
+  static const inviteCodeDetected = 'invite_code_detected';
   static const connectCodeSubmitted = 'connect_code_submitted';
+
+  /// `{role: inviter|invitee}` — logged once per live link, by
+  /// partnerLinkBinderProvider.
   static const partnerConnected = 'partner_connected';
+
+  /// `{kind: preset|custom|removed}` — no nickname text (it's personal).
+  static const partnerNicknameSet = 'partner_nickname_set';
   static const connectFailed = 'connect_failed';
   static const partnerDisconnected = 'partner_disconnected';
 
@@ -160,6 +174,28 @@ class AnalyticsEvent {
   static const promiseSettlementAcknowledged =
       'promise_settlement_acknowledged';
   static const pilotSettlementRecorded = 'pilot_settlement_recorded';
+
+  // Proof photo (인증샷) + one-tap 인정
+  static const proofUploaded = 'proof_uploaded';
+  static const partnerReacted = 'partner_reacted';
+
+  // 둘운완 (both kept their promises today) + sharing + store review
+  /// `{streak}` — once per day per device, when today becomes a duo day.
+  static const duoDoneDay = 'duo_done_day';
+
+  /// `{target: kakao|instagram|copy|save|other|unknown, trigger:
+  /// today|milestone|manual, streak}` — the share card went out.
+  static const shareCardShared = 'share_card_shared';
+
+  /// `{trigger: first_duo_day|third_props, count}` — in_app_review was asked
+  /// (the OS decides whether it actually shows).
+  static const reviewPromptShown = 'review_prompt_shown';
+
+  /// `{kind: coming|pass}` — one-tap answer to a knock.
+  static const pokeReplied = 'poke_replied';
+
+  /// `{surface: missed_card}` — encouragement (not 인정) sent.
+  static const cheerSent = 'cheer_sent';
 
   // Focus timer
   static const focusTimerStarted = 'focus_timer_started';

@@ -9,10 +9,10 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
-  String get appTitle => '그래,해봐';
+  String get appTitle => '둘운완';
 
   @override
-  String get splashTagline => '혼자 미루는 약속, 알아봐 주는 한 사람과 이어가요.';
+  String get splashTagline => '둘이 보면, 진짜 하게 돼요.';
 
   @override
   String get loginWithGoogle => 'Google 계정으로 계속하기';
@@ -24,109 +24,37 @@ class AppLocalizationsKo extends AppLocalizations {
   String get loginGuest => '로그인 없이 시작하기';
 
   @override
-  String get privacyMessage => '서로 동의해 연결하고, 기록은 두 사람만 봐요.';
+  String get privacyMessage => '서로 동의해야 연결되고, 인증샷은 짝꿍만 봐요.';
 
   @override
-  String get connectHeadline => '혼자 미루는 약속이 있나요?';
+  String get connectHeadline => '짝꿍을 초대해요';
 
   @override
-  String get connectSubtitle => '실천 메이트 한 사람과 서로의 노력을 알아봐 주세요.';
+  String get connectSubtitle => '코드를 보내면 서로의 운동 약속을 봐줄 수 있어요.';
 
   @override
-  String get createInviteCode => '실천 메이트 초대하기';
+  String get enterInviteCode => '짝꿍한테 받은 코드 입력';
 
   @override
-  String get enterInviteCode => '초대 코드로 연결하기';
-
-  @override
-  String get startSolo => '혼자 시작하기';
-
-  @override
-  String get inviteCode => '초대 코드';
-
-  @override
-  String get copyCode => '코드 복사';
-
-  @override
-  String get shareCode => '공유하기';
+  String get startSolo => '나중에 연결할게요';
 
   @override
   String get codeCopied => '코드가 복사되었어요';
 
   @override
-  String get codeShareMessage => '실천 메이트가 될 사람에게 이 코드를 보내주세요';
+  String get enterCodeBelow => '아래에 코드를 입력해 주세요';
 
   @override
-  String get enterCodeBelow => '아래에 코드를 입력해주세요';
-
-  @override
-  String get sendConnectionRequest => '실천 메이트 요청 보내기';
-
-  @override
-  String get waitingForConnection => '실천 메이트 연결 동의를 기다리고 있어요';
-
-  @override
-  String get homeNowTask => '지금 할 약속이 있어요';
+  String get sendConnectionRequest => '짝꿍 연결하기';
 
   @override
   String get homeDidIt => '했어';
 
   @override
-  String get homeReceivedMessage => '이렇게 할게요';
+  String get homeReceivedMessage => '짝꿍 소식이 왔어요';
 
   @override
-  String get homeCheckIt => '그래, 해봐';
-
-  @override
-  String get homeSentWaiting => '실천 내역을 보냈어요';
-
-  @override
-  String get homeWaitingForCheck => '실천 메이트의 확인을 기다리고 있어요';
-
-  @override
-  String get homeQuietDay => '오늘은 여유로운 날이에요';
-
-  @override
-  String get homeChecked => '그래';
-
-  @override
-  String get homeThankYou => '응원해요 💜';
-
-  @override
-  String get timePassedActorMessage => '조금 늦었지만 괜찮아요';
-
-  @override
-  String get timePassedManagerMessage => '아직 전달된 말이 없어요';
-
-  @override
-  String get timePassedActorSubMessage => '지금 선택해도 돼요';
-
-  @override
-  String get timePassedManagerSubMessage => '오늘은 조용히 지나가고 있어요';
-
-  @override
-  String get pastUncompletedMessage => '조금 늦었지만 괜찮아요';
-
-  @override
-  String get pastUncompletedSubMessage => '지금 선택해도 돼요';
-
-  @override
-  String get pastUncompletedTimeChip => '조금 전';
-
-  @override
-  String homeContextWeek(int week, int total) {
-    return '$total주 중 · $week주차';
-  }
-
-  @override
-  String homeContextEntrusted(String name) {
-    return '$name님과 함께 이어가는 중';
-  }
-
-  @override
-  String homeContextManaging(String name) {
-    return '$name님의 실천을 알아보는 중';
-  }
+  String get homeChecked => '인정';
 
   @override
   String get tabNow => '지금';
@@ -135,7 +63,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tabHistory => '기록';
 
   @override
-  String get tabUs => '메이트';
+  String get tabUs => '우리';
 
   @override
   String get historyEmpty => '아직 기록된 약속이 없어요';
@@ -147,13 +75,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usDefaultNameMe => '나';
 
   @override
-  String get usYouTitle => '실천 메이트';
+  String get usYouTitle => '짝꿍';
 
   @override
-  String get usHeroSubtitle => '서로의 실천을 알아봐 주는 한 사람';
-
-  @override
-  String get usCheerSent => '응원을 보냈어요 ⚡';
+  String get usHeroSubtitle => '서로의 운동 약속을 봐주는 사이';
 
   @override
   String get usCheerTooltip => '응원하기';
@@ -165,16 +90,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usStatusMessagePlaceholder => '상태 메시지 설정';
 
   @override
-  String get usMyIntroduction => '내 소개';
-
-  @override
   String get usMyInviteCode => '내 초대 코드';
-
-  @override
-  String get usBadgeSupported => '지지받는 중';
-
-  @override
-  String get usBadgeCheering => '응원하는 중';
 
   @override
   String get usGuestWarningMessage => '휴대폰을 바꾸거나 앱/데이터를 삭제하면 기록을 잃을 수 있어요.';
@@ -183,39 +99,33 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usGuestWarningAction => '계정 연결하고 기록 지키기';
 
   @override
-  String get usLinkSuccess => '구글 계정이 성공적으로 연결되었습니다!';
-
-  @override
-  String get usLoadError => '연결 정보를 불러오는 중 오류가 발생했습니다.';
+  String get usLoadError => '연결 정보를 불러오지 못했어요.';
 
   @override
   String get usNoInviteCode => '코드 없음';
 
   @override
-  String get usNoName => '이름 없음';
+  String get usUnknownUser => '짝꿍';
 
   @override
-  String get usUnknownUser => '실천 메이트';
-
-  @override
-  String get usDisconnectDialogTitle => '연결 해제';
+  String get usDisconnectDialogTitle => '연결 끊기';
 
   @override
   String usDisconnectDialogContent(String name) {
-    return '$name님과 실천 메이트 연결을 해제할까요?';
+    return '$name하고 짝꿍 연결을 끊을까요?';
   }
 
   @override
-  String get usDisconnectConfirm => '해제';
+  String get usDisconnectConfirm => '끊기';
 
   @override
-  String get usDisconnectSuccess => '실천 메이트 연결이 해제되었어요.';
+  String get usDisconnectSuccess => '짝꿍 연결을 끊었어요.';
 
   @override
-  String get usDisconnectError => '연결을 해제하지 못했어요. 다시 시도해 주세요.';
+  String get usDisconnectError => '연결을 끊지 못했어요. 다시 시도해 주세요.';
 
   @override
-  String get usDisconnectTooltip => '연결 해제';
+  String get usDisconnectTooltip => '연결 끊기';
 
   @override
   String get usCropImageTitle => '프로필 사진 자르기';
@@ -227,285 +137,92 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usProfileEditImageLabel => '프로필 사진 변경';
 
   @override
-  String get usAddConnectionLabel => '실천 메이트 연결';
+  String get usAddConnectionLabel => '짝꿍 연결하기';
 
   @override
   String get usBadgeMutual => '함께하는 중';
 
   @override
-  String get usEmptyMatesTitle => '아직 실천 메이트가 없어요';
+  String get usEmptyMatesTitle => '아직 짝꿍이 없어요';
 
   @override
-  String get usEmptyMatesSubtitle => '한 사람을 초대해 서로의 실천을 알아봐 주세요';
+  String get usEmptyMatesSubtitle => '짝꿍을 초대하고 서로의 운동 약속을 봐줘요';
 
   @override
-  String get usConnectedPeople => '나의 실천 메이트';
+  String get nowNoPlan => '아직 운동 약속이 없어요';
 
   @override
-  String get usManaging => '응원하는 중';
+  String get nowCreatePlan => '+ 운동 약속 걸기';
 
   @override
-  String get usEntrusted => '응원받는 중';
+  String get nowQuietRest => '오늘은 쉬는 날이에요';
 
   @override
-  String get usInviteNew => '한 사람 초대하기';
+  String get nowNoPlanSubtitle => '운동 하나만 정해서 약속을 걸어 봐요';
 
   @override
-  String get usNoConnections => '아직 실천 메이트가 없어요';
-
-  @override
-  String headerWeekProgress(int week, int total) {
-    return '$total주 중 · $week주차';
-  }
-
-  @override
-  String get headerNoPlan => '아직 계획이 없어요';
-
-  @override
-  String get headerPlanEnded => '4주가 끝났어요';
-
-  @override
-  String get nowNoPlan => '지금은 약속이 없어요';
-
-  @override
-  String get nowCreatePlan => '+ 새 약속 정하기';
-
-  @override
-  String nowNextActionIn(String time) {
-    return '다음 행동까지 $time 남았어요';
-  }
-
-  @override
-  String nowNextActionDays(int days) {
-    return '다음 일정까지 D-$days예요';
-  }
-
-  @override
-  String get nowQuietRest => '오늘은 여유로운 날이에요';
-
-  @override
-  String get nowQuietNoAction => '당분간 신경 쓸 일은 없어요';
-
-  @override
-  String get nowNoPlanSubtitle => '한 가지 약속만 정해볼까요?';
-
-  @override
-  String get nowTodayDone => '오늘 약속은 다 챙겼어요 🙌';
+  String get nowTodayDone => '오늘 약속은 다 지켰어요 🙌';
 
   @override
   String nowTodayAllDone(int count) {
-    return '오늘 $count개 다 챙겼어요 🙌';
+    return '오늘 약속 $count개 다 지켰어요 🙌';
   }
 
   @override
-  String get nowPartnerProposed => '이런 약속을 제안했어요';
+  String nowPartnerProposed(String name) {
+    return '$name의 새 약속이 왔어요';
+  }
 
   @override
-  String get nowPartnerAdjusting => '약속을 조금 조정하고 있어요';
+  String get nowPartnerAdjusting => '짝꿍이 약속을 조금 바꿨어요';
 
   @override
-  String get nowPartnerDidIt => '나 했어요!';
+  String get nowActionSkipToday => '오늘은 패스할게';
 
   @override
-  String get nowActionPass => '그냥 넘기기';
-
-  @override
-  String get nowActionSkipToday => '오늘은 넘어가자';
-
-  @override
-  String get nowDeferMenuTooltip => '넘기기';
+  String get nowDeferMenuTooltip => '미루기';
 
   @override
   String get nowDeferLaterTitle => '잠시 후에 할게';
 
   @override
-  String get nowDeferLaterSubtitle => '다음 실천을 먼저 보고, 잠시 후 다시 알려드릴게요';
+  String get nowDeferLaterSubtitle => '다음 약속을 먼저 보여 드리고, 잠시 후 다시 알려 드릴게요';
 
   @override
-  String get nowSkipTodayTitle => '오늘은 안 할게';
+  String get nowSkipTodayTitle => '오늘은 패스할게';
 
   @override
-  String get nowSkipTodaySubtitle => '오늘 이 약속은 넘어가요';
+  String get nowSkipTodaySubtitle => '놓친 날로 남아요 (연속 기록이 끊길 수 있어요)';
+
+  @override
+  String get nowDeferRestSubtitle => '휴식권을 써요 — 연속 기록은 그대로예요';
 
   @override
   String get nowSkipTodayDone => '오늘은 넘어갔어요';
 
   @override
-  String get nowDeferLaterDone => '잠시 후에 다시 알려드릴게요';
+  String get nowDeferLaterDone => '잠시 후에 다시 알려 드릴게요';
 
   @override
-  String get nowDeferReminderTitle => '다시 알려드려요';
+  String get nowDeferReminderTitle => '다시 알려 드려요';
 
   @override
   String get nowDeferReminderBody => '잠시 후에 하기로 한 약속이 있어요';
 
   @override
-  String get nowAddMorePlan => '다른 약속도 만들어볼까요?';
+  String get nowAddMorePlan => '운동 약속 하나 더 걸어 볼까요?';
 
   @override
-  String recordGazeWeekCount(int count) {
-    return '이번 주 약속 중 $count번째';
-  }
-
-  @override
-  String recordGazeWeekProgress(int week, int total) {
-    return '$total주 중 $week주차';
-  }
-
-  @override
-  String recordGazeDoneCount(int count) {
-    return '이미 $count번은 했어요';
-  }
-
-  @override
-  String get managerSuggestionTitle => '이 약속, 한 사람과 이어가면';
-
-  @override
-  String get managerSuggestionSubtitle => '혼자일 때보다 꾸준해질 수 있어요';
-
-  @override
-  String get managerSuggestionAlternative => '서로의 실천을 알아봐 주는 1:1 연결이에요';
-
-  @override
-  String get managerSuggestionButton => '실천 메이트 찾기';
-
-  @override
-  String get managerSuggestionQuestion => '서로의 실천 메이트가 될 사람이 있나요?';
-
-  @override
-  String get planProposal => '내가 정한 약속';
-
-  @override
-  String get planPreparing => '약속 준비 중';
-
-  @override
-  String get planWhatToPromise => '무엇을 약속할까요?';
+  String get planWhatToPromise => '어떤 운동을 약속할까요?';
 
   @override
   String get planPromiseHint => '지킬 수 있을 것 같은 정도면 좋아요';
 
   @override
-  String get planMyPromise => '내가 나에게 한 말';
-
-  @override
-  String get planKeepWatching => '실천 메이트와 이어갈 약속';
-
-  @override
-  String get planActionHint => 'ex) 아이랑 시간 보내기, 책 읽는 시간 만들기';
-
-  @override
-  String get planOneLineEnough => '한 줄만 적어도 돼요';
-
-  @override
-  String get planNext => '다음';
-
-  @override
-  String get planFrequencyTitle => '요 정도면 어떨까요?';
-
-  @override
-  String get planFrequencySubtitle => '완벽하게 안 지켜도 괜찮아요';
-
-  @override
-  String get planDescriptionTitle => '원하면, 구체적으로 적어도 괜찮아요';
-
-  @override
-  String get planDescriptionSubtitle => '나중에 바꿀 수 있어요';
-
-  @override
-  String get planDescriptionLabel => '구체적으로 뭘 할지 적어볼까요?';
-
-  @override
-  String get planDescriptionExample => '예: 집에서 스쿼트랑 스트레칭';
+  String get planActionHint => '예) 헬스장 가서 30분, 저녁 먹고 만 보 걷기';
 
   @override
   String get planDescriptionHint => '예: 집에서 스쿼트랑 스트레칭, 헬스장 가서 하체 운동...';
-
-  @override
-  String get planDescriptionSkip => '건너뛰기';
-
-  @override
-  String get planDescriptionOptional => '이 단계는 건너뛰어도 괜찮아요';
-
-  @override
-  String get planDayTitle => '요일은 안 정해도 돼요';
-
-  @override
-  String get planDaySubtitle => '정해두면 기억하기가 조금 더 쉬워요';
-
-  @override
-  String get planDaySkip => '그냥 그날 컨디션 보고 할게요';
-
-  @override
-  String get planSummaryTitle => '이렇게 제안할 거예요';
-
-  @override
-  String get planSummaryFrequency => '빈도';
-
-  @override
-  String get planSummaryDay => '요일';
-
-  @override
-  String get planSummaryDescription => '설명';
-
-  @override
-  String get planSummaryDayConditional => '컨디션 보고 결정';
-
-  @override
-  String get planSummaryInfo => '실천 메이트가 보고, 서로 동의하면 시작해요.';
-
-  @override
-  String get planSummaryAdjustable => '부담되면 언제든 조정할 수 있어요';
-
-  @override
-  String get planSummarySend => '이렇게 할게요';
-
-  @override
-  String get planSummarySent => '계획 제안이 전송되었어요';
-
-  @override
-  String get planFrequencyLight => '가볍게';
-
-  @override
-  String get planFrequencyModerate => '적당히';
-
-  @override
-  String get planFrequencyMore => '조금 더';
-
-  @override
-  String get planFrequencyWeekly2 => '주 2회';
-
-  @override
-  String get planFrequencyWeekly3 => '주 3회';
-
-  @override
-  String get planFrequencyWeekly4 => '주 4회';
-
-  @override
-  String get planFrequencyLightWithCount => '가볍게 (주 2회)';
-
-  @override
-  String get planFrequencyModerateWithCount => '적당히 (주 3회)';
-
-  @override
-  String get planFrequencyMoreWithCount => '조금 더 (주 4회)';
-
-  @override
-  String get connectConnected => '연결되었어요';
-
-  @override
-  String get connectGoToHome => '홈으로 가기';
-
-  @override
-  String get usPlanSection => '계획';
-
-  @override
-  String get usNoPlanMessage => '현재 계획이 없어요';
-
-  @override
-  String get usNoPlanSubtitle => '새로운 약속을 시작해볼까요?';
-
-  @override
-  String get usStartNewPlan => '새 계획 시작';
 
   @override
   String get dayMonday => '월';
@@ -580,9 +297,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get developerScreenSplash => '스플래시';
 
   @override
-  String get developerScreenLogin => '로그인';
-
-  @override
   String get developerScreenConnect => '연결';
 
   @override
@@ -598,13 +312,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get developerScreenSplashDesc => '앱 시작 화면';
 
   @override
-  String get developerScreenLoginDesc => 'Google/Apple 로그인';
+  String get developerScreenConnectDesc => '짝꿍 연결 화면';
 
   @override
-  String get developerScreenConnectDesc => '실천 메이트 연결 화면';
-
-  @override
-  String get developerScreenHomeDesc => '지금/기록/메이트 탭';
+  String get developerScreenHomeDesc => '지금/기록/우리 탭';
 
   @override
   String get developerScreenSettingsDesc => '언어 및 테마 설정';
@@ -613,40 +324,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get developerScreenActionSelection => '행동 선택';
 
   @override
-  String get developerScreenFrequency => '빈도 설정';
-
-  @override
-  String get developerScreenDaySelection => '요일 선택';
-
-  @override
-  String get developerScreenDescription => '설명';
-
-  @override
-  String get developerScreenSummary => '요약';
-
-  @override
   String get developerScreenActionSelectionDesc => 'Screen 1: 행동 선택';
-
-  @override
-  String get developerScreenFrequencyDesc => 'Screen 2: 반복 빈도';
-
-  @override
-  String get developerScreenDaySelectionDesc => 'Screen 3: 요일 선택';
-
-  @override
-  String get developerScreenDescriptionDesc => 'Screen 3: 구체 행동 설명';
-
-  @override
-  String get developerScreenSummaryDesc => 'Screen 5: 계획 제안 요약';
-
-  @override
-  String get settingsPlanCreation => '계획 생성';
-
-  @override
-  String get settingsPlanCreationTitle => '새 약속 만들기';
-
-  @override
-  String get settingsPlanCreationDesc => '모든 단계를 한 화면에서';
 
   @override
   String get settingsDeveloper => '개발자 메뉴';
@@ -658,7 +336,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usLinkEmailTitle => '이메일 계정 연결';
 
   @override
-  String get usLinkEmailContent => '로그인에 사용할 이메일과 비밀번호를 입력해주세요.';
+  String get usLinkEmailContent => '로그인에 쓸 이메일과 비밀번호를 입력해 주세요.';
 
   @override
   String get usEmailLabel => '이메일';
@@ -671,61 +349,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String headerWithPartner(String name) {
-    return '$name님과 이어가는 중';
+    return '$name하고 함께하는 중';
   }
 
   @override
-  String get usLinkEmailSuccess => '이메일 계정이 성공적으로 연결되었습니다!';
+  String get usLinkEmailSuccess => '이메일 계정을 연결했어요!';
 
   @override
-  String get historyPartnerVerified => '실천 메이트가 확인했어요';
+  String get historyPartnerVerified => '짝꿍이 인정했어요';
 
   @override
-  String get historyMeVerified => '내가 확인했어요';
+  String get historyMeVerified => '내가 인정했어요';
 
   @override
   String get frequencyEveryday => '매일';
 
   @override
-  String get planNotificationTimeOptional => '알림 시간 (선택)';
-
-  @override
-  String get usMyPlanTitle => '나의 약속';
+  String get usMyPlanTitle => '내 약속';
 
   @override
   String usPartnerPlanTitle(String name) {
-    return '$name님의 약속';
+    return '$name의 약속';
   }
-
-  @override
-  String get vagueTimeDinner => '저녁';
-
-  @override
-  String get vagueTimeBedtime => '자기 전';
-
-  @override
-  String get cheerSimple => '그래';
-
-  @override
-  String get cheerMore => '더보기';
-
-  @override
-  String get cheerSheetTitle => '어떻게 응원할까요?';
-
-  @override
-  String get cheerMessageHint => '직접 응원 메시지를 남겨보세요';
-
-  @override
-  String get cheerSend => '보내기';
-
-  @override
-  String get doneSheetTitle => '완료 소감을 남겨보세요';
-
-  @override
-  String get doneMessageHint => '짧은 메모를 남겨주세요';
-
-  @override
-  String get doneButton => '완료하기';
 
   @override
   String get settingsDeveloperDesc => '디버그 메뉴';
@@ -737,13 +382,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsLogout => '로그아웃';
 
   @override
-  String get settingsLogoutDesc => '현재 계정에서 로그아웃합니다';
+  String get settingsLogoutDesc => '지금 계정에서 로그아웃해요';
 
   @override
   String get settingsLogoutDialogTitle => '로그아웃';
 
   @override
-  String get settingsLogoutDialogContent => '정말로 로그아웃하시겠습니까?';
+  String get settingsLogoutDialogContent => '로그아웃할까요?';
 
   @override
   String get settingsLogoutConfirm => '로그아웃';
@@ -752,14 +397,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsDeleteAccount => '회원 탈퇴';
 
   @override
-  String get settingsDeleteAccountDesc => '계정과 모든 데이터를 영구적으로 삭제합니다';
+  String get settingsDeleteAccountDesc => '계정과 모든 기록을 영구적으로 지워요';
 
   @override
   String get settingsDeleteAccountDialogTitle => '회원 탈퇴';
 
   @override
   String get settingsDeleteAccountDialogContent =>
-      '정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
+      '정말 탈퇴할까요? 계정과 기록, 인증샷이 모두 지워지고 되돌릴 수 없어요. 본인 확인을 위해 한 번 더 로그인할 수 있어요.';
 
   @override
   String get settingsCancel => '취소';
@@ -783,94 +428,47 @@ class AppLocalizationsKo extends AppLocalizations {
   String get signUp => '회원가입';
 
   @override
-  String get emailStartMessage => '이메일로 시작하기';
+  String get passwordHint => '비밀번호를 입력해 주세요';
 
   @override
-  String get passwordHint => '비밀번호를 입력해주세요';
+  String get emailHint => '이메일을 입력해 주세요';
 
   @override
-  String get emailHint => '이메일을 입력해주세요';
+  String get invalidEmail => '이메일 형식이 올바르지 않아요';
 
   @override
-  String get invalidEmail => '유효한 이메일 형식이 아닙니다';
+  String get weakPassword => '비밀번호는 6자 이상이어야 해요';
 
   @override
-  String get weakPassword => '비밀번호는 6자 이상이어야 합니다';
+  String get userNotFound => '가입되지 않은 이메일이에요.';
 
   @override
-  String get accountExistsWithDifferentCredential => '이미 가입된 이메일입니다.';
-
-  @override
-  String get userNotFound => '가입되지 않은 이메일입니다.';
-
-  @override
-  String get wrongPassword => '비밀번호가 일치하지 않습니다.';
-
-  @override
-  String get settingsAccountDeletedSuccess => '계정이 삭제되었습니다';
-
-  @override
-  String get settingsAuthServiceNotFound => '인증 서비스를 찾을 수 없습니다';
+  String get settingsAccountDeletedSuccess => '계정을 삭제했어요';
 
   @override
   String get settingsDeleteAccountFailed => '계정을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.';
 
   @override
-  String get reconcileTitle => '정리하기';
+  String get settingsDeleteAccountReauthCancelled =>
+      '다시 로그인해야 탈퇴할 수 있어요. 아무것도 지워지지 않았어요.';
 
   @override
-  String get reconcileActuallyDone => '했어';
+  String get settingsDeleteAccountWrongPassword => '비밀번호가 맞지 않아요. 다시 시도해 주세요.';
 
   @override
-  String get reconcileTookRest => '오늘은 쉬어갔어요';
+  String get settingsDeleteAccountPasswordTitle => '비밀번호 확인';
 
   @override
-  String get reconcileSkip => '넘어갈게요';
+  String get settingsDeleteAccountPasswordHint => '비밀번호';
 
   @override
-  String get reconcileDoneMessage => '기록이 정리되었습니다.';
-
-  @override
-  String get historyFilterAll => '모두';
-
-  @override
-  String get historyFilterMe => '나';
-
-  @override
-  String get historyFilterPartner => '실천 메이트';
-
-  @override
-  String get historyMyActionVerified => '실천 메이트가 확인했어요';
-
-  @override
-  String get historyPartnerActionVerified => '내가 확인했어요';
-
-  @override
-  String get historyPartnerActionWaiting => '내 확인을 기다려요';
-
-  @override
-  String get historyActionSawIt => '봤어요 👍';
-
-  @override
-  String get historyActionCheer => '응원할게 💜';
-
-  @override
-  String get timeChipStillActionable => '아직 할 수 있어요';
+  String get reconcileTookRest => '쉬어갔어요';
 
   @override
   String get timeChipPassed => '지나갔어요';
 
   @override
   String get nowStatusActuallyDone => '했어';
-
-  @override
-  String get nowLateCompletion => '뒤늦게라도 완료!';
-
-  @override
-  String get nowLateJustInTime => '조금 늦게 했어요';
-
-  @override
-  String get nowWithinToday => '오늘 안에 했어요';
 
   @override
   String get timeChipNow => '지금!';
@@ -967,16 +565,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get weekdaySun => '일';
 
   @override
-  String get planTimeQuestion => '몇 시쯤 알려드릴까요?';
-
-  @override
   String get comfortingFuture => '오늘 하루도 수고했어요';
 
   @override
   String get comfortingLate => '늦어도 괜찮아요';
-
-  @override
-  String get comfortingJustDoIt => '오늘 안에만 하면 돼요';
 
   @override
   String get nowDoEarly => '미리 할게';
@@ -1009,7 +601,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsBuyDeveloperCoffee => '개발자에게 커피 사주기';
 
   @override
-  String get settingsCoffeeSubtitle => '따뜻한 커피 한 잔이 큰 힘이 됩니다!';
+  String get settingsCoffeeSubtitle => '따뜻한 커피 한 잔이 큰 힘이 돼요!';
 
   @override
   String get settingsCoffeePurchasing => '결제 처리 중...';
@@ -1018,43 +610,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsStoreUnavailable => '스토어와 연결할 수 없어요. (설정 확인 필요)';
 
   @override
-  String get planMostlyProcrastinated => '주로 미루는 약속';
-
-  @override
-  String get planRecommendedPromises => '추천 약속';
-
-  @override
-  String get planMine => '내 약속';
+  String get planMine => '약속 한 줄';
 
   @override
   String get planClearAction => '비우기';
 
   @override
-  String get planRecommendedFrequency => '추천 빈도';
-
-  @override
-  String get planNoDayMeansDaily => '요일을 선택하지 않으면 매일 하는 약속이 돼요.';
-
-  @override
-  String get planPartnerFallback => '실천 메이트';
-
-  @override
-  String get planActionFallback => '내 약속';
-
-  @override
-  String get planPartnerPreviewLabel => '실천 메이트에게 이렇게 보여요';
-
-  @override
-  String planPartnerPreviewWith(String name, String promise) {
-    return '$name님에게 \"$promise\"를 28일 동안 함께 이어가자고 제안해요.';
-  }
-
-  @override
   String get planPartnerPreviewWithout =>
-      '혼자 시작할 수도 있어요. 실천 메이트와 연결하면 서로 알아보고 똑똑을 주고받아요.';
+      '혼자 시작해도 돼요. 짝꿍과 연결하면 서로 인정해 주고 똑똑을 주고받아요.';
 
   @override
-  String get planConnectPartner => '실천 메이트 연결하기';
+  String get planConnectPartner => '짝꿍 연결하기';
 
   @override
   String get planDayEveryDay => '매일';
@@ -1089,170 +655,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String planTemplatePerWeek(String label, int count) {
-    return '$label · 주 $count';
-  }
-
-  @override
-  String get planCategoryStudyLabel => '공부';
-
-  @override
-  String get planCategoryStudyDescription => '영어, 자격증, 코딩처럼 혼자 미루는 학습';
-
-  @override
-  String get planCategoryExerciseLabel => '운동';
-
-  @override
-  String get planCategoryExerciseDescription => '걷기, 헬스장, 스트레칭처럼 시작이 어려운 움직임';
-
-  @override
-  String get planCategoryVerifiedLabel => '검증된 루틴';
-
-  @override
-  String get planCategoryVerifiedDescription => '신경과학·수면 연구 기반 일상 습관';
-
-  @override
-  String get planCategoryCustomLabel => '직접 입력';
-
-  @override
-  String get planCategoryCustomDescription => '추천 없이 내 약속을 직접 쓰기';
-
-  @override
-  String get planTemplateEnglishLabel => '영어';
-
-  @override
-  String get planTemplateEnglishAction => '영어 문장 10개 소리내어 읽기';
-
-  @override
-  String get planTemplateEnglishDescription => '부담 없이 매일 영어에 노출되는 것을 목표로 해요.';
-
-  @override
-  String get planTemplateCertificateLabel => '자격증';
-
-  @override
-  String get planTemplateCertificateAction => '기출 10문제 풀기';
-
-  @override
-  String get planTemplateCertificateDescription =>
-      '많이 풀기보다 정해진 문제 수를 끊기지 않게 반복해요.';
-
-  @override
-  String get planTemplateCodingLabel => '코딩';
-
-  @override
-  String get planTemplateCodingAction => '30분 코딩 공부 또는 문제 1개';
-
-  @override
-  String get planTemplateCodingDescription => '과한 목표 대신 손을 대는 날을 먼저 확보해요.';
-
-  @override
-  String get planTemplateReadingLabel => '독서';
-
-  @override
-  String get planTemplateReadingAction => '10쪽 읽고 한 줄 기록';
-
-  @override
-  String get planTemplateReadingDescription =>
-      '읽은 흔적을 한 줄로 남겨 실천 메이트가 알아보기 쉽게 해요.';
-
-  @override
-  String get planTemplateWritingLabel => '글쓰기';
-
-  @override
-  String get planTemplateWritingAction => '15분 쓰기 또는 300자 작성';
-
-  @override
-  String get planTemplateWritingDescription => '완성보다 쓰기 시작한 날을 만드는 데 집중해요.';
-
-  @override
-  String get planTemplateWalkingLabel => '걷기';
-
-  @override
-  String get planTemplateWalkingAction => '30분 걷기';
-
-  @override
-  String get planTemplateWalkingDescription =>
-      '운동복을 갖추는 것보다 밖에 나가는 약속을 먼저 만들어요.';
-
-  @override
-  String get planTemplateGymLabel => '헬스장';
-
-  @override
-  String get planTemplateGymAction => '헬스장 가서 30분 운동하기';
-
-  @override
-  String get planTemplateGymDescription => '완벽한 운동보다 헬스장에 도착하는 날을 늘려요.';
-
-  @override
-  String get planTemplateStretchingLabel => '스트레칭';
-
-  @override
-  String get planTemplateStretchingAction => '10분 스트레칭하기';
-
-  @override
-  String get planTemplateStretchingDescription => '짧게라도 몸을 푼 실천을 실천 메이트와 나눠요.';
-
-  @override
-  String get planTemplateMorningLightLabel => '아침 햇빛';
-
-  @override
-  String get planTemplateMorningLightAction => '아침 햇빛 5~10분 보기';
-
-  @override
-  String get planTemplateMorningLightDescription =>
-      '아침 햇빛이 눈에 들어오면 뇌가 \'하루 시작\'을 인식해 저녁 멜라토닌 분비 타이밍이 맞춰져요. 그 결과 밤에 더 빨리, 더 깊이 잠들어요. 야외 5~10분이면 충분하고, 흐린 날엔 10~20분, 비 오는 날엔 20~30분으로 늘리세요. 창문 너머는 핵심 파장이 차단돼 효과가 약하고, 선글라스를 쓰면 빛 감지 세포가 충분히 활성화되지 않아요 (태양을 직접 쳐다보지는 마세요)';
-
-  @override
-  String get planTemplateCaffeineDelayLabel => '카페인 90분 뒤';
-
-  @override
-  String get planTemplateCaffeineDelayAction => '기상 90분 후 첫 카페인 마시기';
-
-  @override
-  String get planTemplateCaffeineDelayDescription =>
-      '기상 직후 마시면 졸음 신호(아데노신)가 나중에 한꺼번에 몰려와 오후에 갑자기 졸려요. 90분 기다린 뒤 마시면 효과도 오래 갑니다';
-
-  @override
-  String get planTemplatePhysioSighLabel => '생리적 한숨';
-
-  @override
-  String get planTemplatePhysioSighAction => '5분 생리적 한숨 호흡하기';
-
-  @override
-  String get planTemplatePhysioSighDescription =>
-      '코로 짧게 한 번, 이어서 한 번 더 들이쉬어 폐를 완전히 부풀린 뒤 입으로 길고 천천히 내쉬어요. 폐포에 갇힌 이산화탄소를 한꺼번에 비워서 심박수가 즉시 내려가요. 111명 대상 RCT에서 명상보다 스트레스·기분 개선 효과가 컸어요. 긴장될 때 한두 번만 해도 좋고, 예방 차원에서 매일 5분 권장';
-
-  @override
-  String get planTemplateFocus90Label => '90분 집중';
-
-  @override
-  String get planTemplateFocus90Action => '90분 집중 1세션';
-
-  @override
-  String get planTemplateFocus90Description =>
-      '뇌는 약 90분 주기로 집중력이 오르내려요(울트라디안 사이클). 오전엔 도파민·노르에피네프린이 가장 풍부해 깊은 몰입이 잘 일어나고, 90분이 지나면 자연스럽게 떨어지니 끝나면 10~30분 쉬는 게 다음 사이클에 좋아요. 사이클 중엔 알림·SNS를 끄고 한 가지에만 집중하세요';
-
-  @override
-  String get planTemplateSleepEnvLabel => '수면 환경';
-
-  @override
-  String get planTemplateSleepEnvAction => '자기 1시간 전 침실 정리';
-
-  @override
-  String get planTemplateSleepEnvDescription =>
-      '잠들기 1시간 전부터 머리 위 밝은 조명을 끄고 간접 조명으로 바꾸면 멜라토닌이 빨리 분비돼 입면이 빨라져요. 침실 온도는 18~20도가 적정 — 잠들 땐 체온이 살짝 떨어져야 깊은 잠과 REM이 늘어요. 자기 직전 뜨거운 샤워는 오히려 체온을 올려 입면을 늦추니, 잠 1~2시간 전에 끝내세요';
-
-  @override
-  String get planTemplateStrength2xLabel => '주 2회 근력운동';
-
-  @override
-  String get planTemplateStrength2xAction => '전신 근력운동 1세션';
-
-  @override
-  String get planTemplateStrength2xDescription =>
-      '근력운동은 주 2회만 해도 근육·근력과 뼈 건강을 지키는 \'최소 효과 용량\'으로, WHO·미국 신체활동 지침이 권장하는 기준이에요. 나이가 들수록 자연히 줄어드는 근육량은 물론 대사·혈당 조절, 자세와 낙상 예방까지 폭넓게 도와요. 스쿼트·힌지(데드리프트)·밀기·당기기 같은 복합 동작 위주로 6~10회 3~4세트, 매주 무게나 횟수를 조금씩 올리세요(점진적 과부하). 같은 부위는 48시간 이상 회복이 필요하니 두 세션은 2~3일 간격을 두고, 충분한 단백질과 수면으로 회복을 채우세요';
-
-  @override
   String get planDayPresetThreeDaysLabel => '주 3일';
 
   @override
@@ -1265,45 +667,185 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDayPresetWeekendLabel => '주말';
 
   @override
-  String get planDayPresetStudyThreeDaysDesc => '첫 주 3회 성공을 먼저 만들기';
-
-  @override
-  String get planDayPresetStudyWeekdaysDesc => '공부 흐름을 주중에 묶기';
-
-  @override
-  String get planDayPresetStudyEveryDayDesc => '짧게라도 매일 실천 메이트와 나누기';
-
-  @override
-  String get planDayPresetExerciseThreeDaysDesc => '월수금 리듬으로 시작하기';
-
-  @override
-  String get planDayPresetExerciseWeekendDesc => '주말에 움직임을 남기기';
-
-  @override
-  String get planDayPresetExerciseEveryDayDesc => '짧은 스트레칭도 매일 서로 알아보기';
-
-  @override
-  String get planDayPresetCustomThreeDaysDesc => '부담을 낮추는 기본값';
-
-  @override
-  String get planDayPresetCustomWeekdaysDesc => '주중 루틴으로 고정하기';
-
-  @override
-  String get planDayPresetCustomEveryDayDesc => '작은 행동을 매일 남기기';
-
-  @override
-  String planStepHeader(int current, int total) {
-    return '약속 준비 중 · $current/$total';
-  }
-
-  @override
-  String get planTellUsActionFirst => '어떤 약속을 할지 알려주세요!';
-
-  @override
-  String get planProposalSaved => '실천 메이트에게 제안했어요.\n서로 이야기해 약속을 맞춰보세요!';
+  String get planTellUsActionFirst => '어떤 운동을 할지 알려 주세요!';
 
   @override
   String get planSaveError => '약속을 저장하지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get planCreateTitle => '운동 약속 걸기';
+
+  @override
+  String get planEditTitle => '약속 수정하기';
+
+  @override
+  String planCreateHeaderWithPartner(String name) {
+    return '$name한테 어떤 운동을 약속할까요?';
+  }
+
+  @override
+  String get planCreateDaysTitle => '어느 요일에 할까요?';
+
+  @override
+  String get planCreateDaysRequired => '하루 이상 골라 주세요';
+
+  @override
+  String planCreateDaysFromPartner(String name) {
+    return '$name 운동 요일에 맞춰 뒀어요';
+  }
+
+  @override
+  String get planCreateDeadlineTitle => '몇 시까지 할까요?';
+
+  @override
+  String get planCreateDeadlineHint => '이 시각에 알림으로 챙겨 드려요';
+
+  @override
+  String get planCreateDeadlineRequired => '마감 시각을 골라 주세요';
+
+  @override
+  String get planDeadlineMorning => '아침 7시';
+
+  @override
+  String get planDeadlineNoon => '점심 12시';
+
+  @override
+  String get planDeadlineEvening => '저녁 7시';
+
+  @override
+  String get planDeadlineNight => '밤 9시';
+
+  @override
+  String get planDeadlineLateNight => '밤 10시';
+
+  @override
+  String get planDeadlineCustom => '직접';
+
+  @override
+  String get planCreateMemoToggle => '메모 남기기 (선택)';
+
+  @override
+  String planCreatePartnerNotice(String name) {
+    return '못 하면 $name한테 알려져요';
+  }
+
+  @override
+  String planCreateCtaWithPartner(String name, String nameWithParticle) {
+    return '🤙 $nameWithParticle 손가락 걸기';
+  }
+
+  @override
+  String get planCreateCtaSolo => '약속 시작하기';
+
+  @override
+  String get planEditCta => '저장하기';
+
+  @override
+  String planSavedWithPartner(String name) {
+    return '$name한테 운동 약속을 걸었어요 🤙';
+  }
+
+  @override
+  String get planSavedSolo => '운동 약속을 시작했어요 💪';
+
+  @override
+  String get planEditSaved => '약속을 수정했어요';
+
+  @override
+  String get planDayPresetTwoDaysLabel => '주 2일';
+
+  @override
+  String get workoutTypeGymLabel => '헬스';
+
+  @override
+  String get workoutTypeGymAction => '헬스장 가서 운동하기';
+
+  @override
+  String get workoutTypeRunningLabel => '러닝';
+
+  @override
+  String get workoutTypeRunningAction => '30분 달리기';
+
+  @override
+  String get workoutTypeHomeTrainingLabel => '홈트';
+
+  @override
+  String get workoutTypeHomeTrainingAction => '홈트 20분 하기';
+
+  @override
+  String get workoutTypeWalkingLabel => '걷기';
+
+  @override
+  String get workoutTypeWalkingAction => '30분 걷기';
+
+  @override
+  String get workoutTypePilatesLabel => '필라테스';
+
+  @override
+  String get workoutTypePilatesAction => '필라테스 수업 가기';
+
+  @override
+  String get workoutTypeYogaLabel => '요가';
+
+  @override
+  String get workoutTypeYogaAction => '요가 30분 하기';
+
+  @override
+  String get workoutTypeStretchingLabel => '스트레칭';
+
+  @override
+  String get workoutTypeStretchingAction => '자기 전 10분 스트레칭';
+
+  @override
+  String get workoutTypeSwimmingLabel => '수영';
+
+  @override
+  String get workoutTypeSwimmingAction => '수영 다녀오기';
+
+  @override
+  String get workoutTypeClimbingLabel => '클라이밍';
+
+  @override
+  String get workoutTypeClimbingAction => '클라이밍 다녀오기';
+
+  @override
+  String get workoutTypeCyclingLabel => '자전거';
+
+  @override
+  String get workoutTypeCyclingAction => '자전거 40분 타기';
+
+  @override
+  String get workoutTypeHikingLabel => '등산';
+
+  @override
+  String get workoutTypeHikingAction => '등산 다녀오기';
+
+  @override
+  String get workoutTypeStrengthLabel => '근력 운동';
+
+  @override
+  String get workoutTypeStrengthAction => '근력 운동 30분 하기';
+
+  @override
+  String get workoutTypeDietLabel => '식단·야식 참기';
+
+  @override
+  String get workoutTypeDietAction => '야식 참기';
+
+  @override
+  String get workoutTypeDietName => '식단';
+
+  @override
+  String get workoutTypeOtherLabel => '직접 입력';
+
+  @override
+  String get workoutTypeOtherName => '운동';
+
+  @override
+  String get workoutTypeCyclingName => '자전거 타기';
+
+  @override
+  String get workoutTypeStrengthName => '근력 운동';
 
   @override
   String get focusTimerPickerTitle => '얼마나 집중할까요?';
@@ -1325,7 +867,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get focusTimerMinuteUnit => '분';
 
   @override
-  String get focusTimerPickFirst => '시간을 골라주세요';
+  String get focusTimerPickFirst => '시간을 골라 주세요';
 
   @override
   String focusTimerStart(int minutes) {
@@ -1370,7 +912,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get focusTimerPause => '잠시 멈춤';
 
   @override
-  String get actionNoteHintDefault => '실천 소감을 남겨보세요 (선택)';
+  String get actionNoteHintDefault => '어땠는지 한마디 (선택)';
 
   @override
   String get planTimeUnset => '시간 미정';
@@ -1412,33 +954,34 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planCardDelete => '삭제';
 
   @override
-  String get planDescriptionTip => 'Tip: \"만약 ~하면, ~한다\" 로 적어보세요';
-
-  @override
-  String get planDescriptionExamples =>
-      '예) \"퇴근하고 집에 도착하면, 바로 운동복으로 갈아입는다\"\n예) \"아이가 잠들면, 책을 30분 읽는다\"';
-
-  @override
-  String get planDescriptionTipFooter => '구체적인 상황을 정하면 실천 확률이 2~3배 높아져요!';
-
-  @override
   String get notifyEditorTitle => '알림 설정';
 
   @override
-  String get notifyEditorSubtitleOn => '똑똑이 살아날 시간을 정해요.';
+  String get notifyEditorSubtitleOn => '약속 시간에 맞춰 알려 드려요.';
 
   @override
   String get notifyEditorSubtitleOff => '알림 없이 기록만 할게요.';
 
   @override
-  String get notifyEditorPromiseTime => '실천 메이트가 알아볼 약속 시간';
+  String get notifyEditorPromiseTime => '짝꿍한테 보이는 약속 시간';
 
   @override
   String get notifyEditorDefaultTimeHint =>
-      '기본 저녁 9시는 하루가 지나기 전에 서로의 실천을 알아보기 좋은 시간이에요.';
+      '기본값 밤 9시는 하루가 끝나기 전에 서로 인정해 주기 좋은 시간이에요.';
 
   @override
-  String get notifyEditorPrealert => '알림 미리받기';
+  String get notifyEditorOffWarningTitle => '알림을 끌까요?';
+
+  @override
+  String notifyEditorOffWarningBody(String name) {
+    return '알림을 끄면 마감도 없어져서, 기록이 없어도 $name한테 알려지지 않아요.';
+  }
+
+  @override
+  String get notifyEditorOffWarningConfirm => '끄기';
+
+  @override
+  String get notifyEditorPrealert => '미리 알림';
 
   @override
   String get notifyEditorOnTime => '제 시간에';
@@ -1480,7 +1023,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String notifyEditorHourlyHint(int interval, int start, int end) {
-    return '$start시부터 $end시까지 $interval시간마다 알려드려요.';
+    return '$start시부터 $end시까지 $interval시간마다 알려 드려요.';
   }
 
   @override
@@ -1490,76 +1033,71 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String promiseChipPenaltyTriggered(String description) {
-    return '벌칙 발동 확정 — $description';
+    return '못 지켰어요 — $description';
   }
 
   @override
   String promiseChipPenaltyImminentOne(String description) {
-    return '한 번만 더 실패하면 벌칙 — $description';
-  }
-
-  @override
-  String promiseChipPenaltyImminent(int count, String description) {
-    return '$count번만 더 실패하면 벌칙 — $description';
+    return '한 번 더 놓치면 — $description';
   }
 
   @override
   String promiseChipRewardAchieved(String description) {
-    return '보상 달성! — $description';
+    return '지켰어요! — $description';
   }
 
   @override
   String promiseChipRewardImminent(int days, String description) {
-    return '보상까지 $days일 더 성공하면 — $description';
+    return '$days일만 더 지키면 — $description';
   }
 
   @override
   String promiseChipSafeBoth(int rewardDays, int penaltyBuffer) {
-    return '보상까지 $rewardDays일 · 벌칙까지 $penaltyBuffer번 여유';
+    return '성공까지 $rewardDays일 · $penaltyBuffer번 더 놓치면 내기';
   }
 
   @override
   String promiseChipSafeRewardOnly(int days, String description) {
-    return '보상까지 $days일 — $description';
+    return '성공까지 $days일 — $description';
   }
 
   @override
   String promiseChipSafePenaltyOnly(int buffer, String description) {
-    return '벌칙까지 $buffer번 여유 — $description';
+    return '$buffer번 더 놓치면 — $description';
   }
 
   @override
-  String get promiseSheetTitle => '약속 조건';
+  String get promiseSheetTitle => '내기';
 
   @override
   String promiseSheetSubtitle(int success, int failed, int remaining) {
-    return '플랜 종료 시 정산돼요. 현재 성공 $success일 · 실패 $failed일 · 남은 예정 $remaining일.';
+    return '약속이 끝나면 결과가 나와요. 지금까지 지킨 날 $success일 · 놓친 날 $failed일 · 남은 날 $remaining일.';
   }
 
   @override
-  String get promiseSheetRewardLabel => '보상';
+  String get promiseSheetRewardLabel => '지키면';
 
   @override
-  String get promiseSheetPenaltyLabel => '벌칙';
+  String get promiseSheetPenaltyLabel => '못 지키면';
 
   @override
   String promiseSheetRewardTarget(int target, int success) {
-    return '$target일 성공하면 달성 — 지금 $success일';
+    return '$target일 지키면 성공 — 지금 $success일';
   }
 
   @override
   String promiseSheetPenaltyImpossible(int target) {
-    return '$target일 성공이 필요한데 더 이상 도달할 수 없어요 — 벌칙 발동 확정';
+    return '$target일 놓쳤어요 — 내기 확정';
   }
 
   @override
   String promiseSheetPenaltyJustOne(int target) {
-    return '$target일 성공 미만 시 발동 — 한 번도 더 실패할 수 없음';
+    return '놓친 날이 $target일이 되면 확정 — 한 번만 더 놓쳐도 내기예요';
   }
 
   @override
   String promiseSheetPenaltyBuffer(int target, int buffer) {
-    return '$target일 성공 미만 시 발동 — $buffer번 더 실패해도 안전';
+    return '놓친 날이 $target일이 되면 확정 — $buffer번 더 놓치면 내기예요';
   }
 
   @override
@@ -1590,19 +1128,19 @@ class AppLocalizationsKo extends AppLocalizations {
       '알림 설정을 저장하지 못했어요. 이전 설정으로 되돌렸어요.';
 
   @override
-  String get historyCardFeedbackHint => '따뜻한 피드백을 남겨주세요 (선택)';
+  String get historyCardFeedbackHint => '한마디 남기기 (선택)';
 
   @override
-  String get historyCardFeedbackButton => '그래';
+  String get historyCardFeedbackButton => '인정!';
 
   @override
-  String get historyCardAcknowledgePractice => '실천 인정';
+  String get historyCardAcknowledgePractice => '짝꿍 인정';
 
   @override
-  String get planSummaryMyDone => '나의 완료';
+  String get planSummaryMyDone => '내가 한 날';
 
   @override
-  String get planSummaryPartnerVerified => '실천 메이트 확인';
+  String get planSummaryPartnerVerified => '짝꿍 인정';
 
   @override
   String planSummaryCount(int count) {
@@ -1610,37 +1148,26 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get connectInviteCodeDetectedTitle => '초대 코드 감지';
-
-  @override
-  String connectInviteCodeDetectedBody(String code) {
-    return '클립보드에서 초대 코드($code)를 발견했습니다.\n붙여넣으시겠습니까?';
-  }
+  String get connectInviteCodeDetectedTitle => '복사해 둔 초대 코드를 찾았어요';
 
   @override
   String get connectCancel => '취소';
 
   @override
-  String get connectPaste => '붙여넣기';
-
-  @override
-  String get connectNotice => '알림';
+  String get connectNotice => '안내';
 
   @override
   String get connectAlreadyConnectedBody =>
-      '이미 실천 메이트 한 명과 연결되어 있어요.\n현재는 서로 동의한 1:1 연결만 지원해요.';
+      '이미 짝꿍과 연결되어 있어요.\n둘운완은 한 사람과만 연결할 수 있어요.';
 
   @override
   String get connectOk => '확인';
 
   @override
-  String get connectSuccess => '실천 메이트와 연결됐어요!';
+  String get allPlansTitleMine => '내 약속 전체';
 
   @override
-  String get allPlansTitleMine => '나의 모든 약속';
-
-  @override
-  String get allPlansTitlePartner => '실천 메이트의 모든 약속';
+  String get allPlansTitlePartner => '짝꿍의 약속 전체';
 
   @override
   String get allPlansEmpty => '등록된 약속이 없어요';
@@ -1652,7 +1179,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get allPlansDeleteBody => '삭제하면 되돌릴 수 없어요.';
 
   @override
-  String get allPlansDeleted => '약속이 삭제되었습니다.';
+  String get allPlansDeleted => '약속을 삭제했어요.';
 
   @override
   String get allPlansDeleteFailed => '삭제하지 못했어요. 다시 시도해 주세요.';
@@ -1664,17 +1191,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get allPlansCancel => '취소';
 
   @override
-  String get historyErrorUnknown => '알 수 없는 오류가 발생했습니다.';
+  String get historyErrorUnknown => '알 수 없는 문제가 생겼어요.';
 
   @override
   String get historyErrorIndexMissing =>
-      '데이터 조회에 필요한 인덱스가 없습니다.\n개발자에게 이 화면을 캡처해서 보내주세요.';
+      '데이터를 불러오는 데 필요한 설정이 빠져 있어요.\n이 화면을 캡처해서 개발자에게 보내 주세요.';
 
   @override
   String get historyErrorAlreadyDeleted => '이미 삭제된 기록이거나 약속이라\n리액션을 남길 수 없어요.';
 
   @override
-  String get historyErrorTitle => '오류 발생';
+  String get historyErrorTitle => '문제가 생겼어요';
 
   @override
   String get historyErrorCreationLink => '생성 링크:';
@@ -1707,10 +1234,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get historyWeeklyMeLabel => '나';
 
   @override
-  String get historyWeeklyPartnerLabel => '실천 메이트';
+  String get historyWeeklyPartnerLabel => '짝꿍';
 
   @override
-  String get historyReconcileTitle => '지난 기록 소명하기';
+  String get historyReconcileTitle => '지난 기록 바로잡기';
 
   @override
   String get historyReconcileSubtitle => '이 날의 약속, 사실 어땠나요?';
@@ -1749,13 +1276,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usEmptyMine => '아직 등록된 약속이 없어요';
 
   @override
-  String get usEmptyPartner => '실천 메이트가 진행 중인 약속이 없어요';
+  String get usEmptyPartner => '짝꿍이 진행 중인 약속이 없어요';
 
   @override
-  String get usCreatePlanShort => '+ 새 약속 정하기';
+  String get usCreatePlanShort => '+ 운동 약속 걸기';
 
   @override
-  String get usCreatePlan => '새 약속 정하기';
+  String get usCreatePlan => '운동 약속 걸기';
 
   @override
   String get usDeletePlanTitle => '약속을 삭제할까요?';
@@ -1764,7 +1291,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usDeletePlanBody => '삭제하면 되돌릴 수 없어요.';
 
   @override
-  String get usPlanDeleted => '약속이 삭제되었습니다.';
+  String get usPlanDeleted => '약속을 삭제했어요.';
 
   @override
   String get usDeleteFailed => '삭제하지 못했어요. 다시 시도해 주세요.';
@@ -1773,7 +1300,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usDelete => '삭제';
 
   @override
-  String get planDetailPracticeHistory => '실천 기록';
+  String get planDetailPracticeHistory => '약속 기록';
 
   @override
   String get planDetailLoadFailed => '기록을 불러오지 못했어요. 다시 시도해 주세요.';
@@ -1782,7 +1309,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailNoRecords => '아직 기록이 없어요.';
 
   @override
-  String get planDetailNotSavedPlan => '저장된 계획이 아닙니다.';
+  String get planDetailNotSavedPlan => '아직 저장되지 않은 약속이에요.';
 
   @override
   String get planDetailRecordDone => '완료';
@@ -1791,28 +1318,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailRecordSkipped => '건너뜀';
 
   @override
-  String get planDetailRecordRested => '휴식';
+  String get planDetailRecordRested => '휴식권';
 
   @override
-  String get planDetailRecordRescued => '실천 인정';
+  String get planDetailRecordRescued => '짝꿍 인정';
 
   @override
-  String get planDetailPokeSent => '똑똑, 문을 두드렸어요!';
+  String get planDetailPokeSent => '짝꿍한테 똑똑을 보냈어요.';
 
   @override
   String get planDetailPokeFailed => '전송하지 못했어요. 다시 시도해 주세요.';
 
   @override
-  String get planDetailPokeDoneToday => '오늘의 똑똑 완료';
+  String get planDetailPokeDoneToday => '오늘 똑똑 보냈어요';
 
   @override
   String get planDetailPokeSending => '전송 중...';
 
   @override
-  String get planDetailPokeAsk => '똑똑... 혹시 잊으셨나요?';
+  String get planDetailPokeAsk => '똑똑 보내기';
 
   @override
-  String get planDetailPokeAlreadyDone => '오늘은 이미 실천했어요';
+  String get planDetailPokeAlreadyDone => '오늘은 이미 했어요';
 
   @override
   String get planDetailDayMon => '월';
@@ -1842,7 +1369,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailTimeUnset => '시간 미정';
 
   @override
-  String get planDetailNotificationSaved => '알림 설정이 저장되었어요.';
+  String get planDetailNotificationSaved => '알림 설정을 저장했어요.';
 
   @override
   String get planDetailNotificationSaveFailed =>
@@ -1855,13 +1382,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailStopTitle => '약속을 그만할까요?';
 
   @override
-  String get planDetailStopBody => '그만하더라도 지금까지의 실천 기록은 유지돼요.';
+  String get planDetailStopBody => '그만해도 지금까지의 기록은 남아요.';
 
   @override
   String get planDetailCancel => '취소';
 
   @override
-  String get planDetailStopped => '약속이 중단되었습니다.';
+  String get planDetailStopped => '약속을 그만뒀어요.';
 
   @override
   String get planDetailActionFailed => '문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
@@ -1881,28 +1408,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get planDetailReplaceBody =>
       '현재 약속은 중단 처리되고\n새로운 약속 만들기로 이동해요.\n기존 기록은 안전하게 보관돼요.';
-
-  @override
-  String get planDetailReport => '실천 리포트';
-
-  @override
-  String get planDetailReportPeriod => '총 기간';
-
-  @override
-  String planDetailReportDays(int count) {
-    return '$count일';
-  }
-
-  @override
-  String get planDetailReportCompleted => '완료 횟수';
-
-  @override
-  String planDetailReportCount(int count) {
-    return '$count회';
-  }
-
-  @override
-  String get planDetailReportRate => '달성률';
 
   @override
   String get planDetailRestartWithScheduleTitle => '새 스케줄로 다시 시작할까요?';
@@ -1938,7 +1443,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String nowSkipDialogBody(String title) {
-    return '$title 약속을 오늘은 건너뜀으로 정리합니다.';
+    return '오늘 \'$title\' 약속은 놓친 날로 남고, 짝꿍한테도 알려져요. 둘이 함께 연속 기록이 끊길 수 있어요.';
   }
 
   @override
@@ -1951,19 +1456,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowSkippedSnackbar => '오늘 약속을 건너뛰었어요.';
 
   @override
-  String get nowApproveCheering => '시작을 응원해요!';
+  String get nowApproveCheering => '좋아요, 시작해요!';
 
   @override
-  String get nowApproveFailed => '승인에 실패했어요.';
+  String get nowApproveFailed => '수락하지 못했어요.';
 
   @override
-  String get nowVerifyDone => '실천을 확인했어요!';
-
-  @override
-  String get nowVerifyFailed => '확인 처리에 실패했어요.';
-
-  @override
-  String get nowRejectDialogTitle => '조금 더 조율해볼까요?';
+  String get nowRejectDialogTitle => '조금 바꿔 볼까요?';
 
   @override
   String get nowRejectLessFrequent => '빈도를 조금 줄여보자';
@@ -1972,13 +1471,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowRejectDifferentTime => '다른 시간대가 좋을 것 같아';
 
   @override
-  String get nowRejectCustom => '직접 입력하기';
+  String get nowRejectCustom => '직접 쓸게';
 
   @override
-  String get nowRejectRequested => '조율을 요청했어요';
+  String get nowRejectRequested => '바꿔 보자고 보냈어요';
 
   @override
-  String get nowRejectCustomDialogTitle => '어떤 점을 조율할까요?';
+  String get nowRejectCustomDialogTitle => '어떻게 바꾸면 좋을까요?';
 
   @override
   String get nowRejectCustomHint => '예: 주 3회로 시작해보는 건 어때?';
@@ -1987,50 +1486,37 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowSend => '보내기';
 
   @override
-  String get nowCheerExcited => '열정적인 응원을 보냈어요! 🔥';
+  String get nowCheerFailed => '응원을 보내지 못했어요.';
 
   @override
-  String get nowCheerLove => '사랑을 담아 응원했어요! ❤️';
+  String get nowPokeNoActivityMessage => '똑똑! 운동 약속 하나 걸어 줘. 내가 봐줄게 🙂';
 
   @override
-  String get nowCheerProud => '멋지다고 전했어요! 👍';
+  String get nowPokeSent => '똑똑을 보냈어요.';
 
   @override
-  String get nowCheerStrength => '힘내라고 응원했어요! 💪';
+  String get nowPokeFailed => '똑똑을 보내지 못했어요.';
 
   @override
-  String get nowCheerFailed => '응원 전송에 실패했어요.';
+  String get nowPokeAgainMessage => '똑똑! 오늘 약속 기다리고 있어 🙂';
 
   @override
-  String get nowPokeNoActivityMessage =>
-      '똑똑! 실천 메이트가 새 약속을 기다려요. 오늘 하나 만들어볼까요?';
+  String get nowPokeAgainSent => '짝꿍한테 똑똑을 보냈어요.';
 
   @override
-  String get nowPokeSent => '똑똑 신호를 보냈어요.';
-
-  @override
-  String get nowPokeFailed => '똑똑 전송에 실패했어요.';
-
-  @override
-  String get nowPokeAgainMessage => '똑똑! 실천 메이트가 기다리고 있어요. 지금 약속을 이어가 볼까요?';
-
-  @override
-  String get nowPokeAgainSent => '똑똑, 오늘 약속을 다시 이어줬어요.';
-
-  @override
-  String get nowSettlementSaved => '4주 정산을 남겼어요.';
+  String get nowSettlementSaved => '4주 돌아보기를 남겼어요.';
 
   @override
   String get nowExitDialogTitle => '이번 4주를 여기서 마무리할까요?';
 
   @override
-  String get nowExitReasonWeakPoke => '똑똑이 실천에 도움이 되지 않았어요';
+  String get nowExitReasonWeakPoke => '똑똑이 별로 도움이 안 됐어요';
 
   @override
   String get nowExitReasonTooBig => '목표가 너무 컸어요';
 
   @override
-  String get nowExitReasonPartnerBurden => '서로 확인하는 방식이 부담됐어요';
+  String get nowExitReasonPartnerBurden => '서로 봐주는 게 부담됐어요';
 
   @override
   String get nowExitReasonCustomLabel => '직접 입력';
@@ -2048,40 +1534,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowRestPassTitle => '휴식권 사용';
 
   @override
-  String get nowRestPassBody => '이번 주 1회 휴식권을 사용합니다.\n스트릭이 유지됩니다.';
+  String get nowRestPassBody => '이번 주 휴식권 1장을 써요.\n연속 기록은 그대로 이어져요.';
 
   @override
   String get nowRestPassConfirm => '사용하기';
 
   @override
-  String get nowRestPassUsed => '오늘은 편히 쉬세요. 스트릭은 유지됩니다!';
+  String get nowRestPassUsed => '오늘은 푹 쉬어요. 연속 기록은 그대로예요!';
 
   @override
   String get nowRestPassAlreadyUsed => '이번 주 휴식권을 이미 사용했어요.';
 
   @override
-  String get nowRestPassError => '오류가 발생했습니다.';
+  String get nowRestPassError => '문제가 생겼어요.';
 
   @override
-  String get nowRescuedSnackbar => '실천을 인정해줬어요! 스트릭이 유지됩니다.';
+  String get nowRescuedSnackbar => '인정해 줬어요! 연속 기록이 이어져요.';
 
   @override
-  String get nowRescueFailed => '실천 인정에 실패했어요.';
+  String get nowRescueFailed => '인정하지 못했어요.';
 
   @override
-  String get nowPromiseAccepted => '약속을 수락했어요!';
+  String get nowPromiseAccepted => '내기 성립! 🤝';
 
   @override
-  String get nowPromiseDeclined => '약속을 거절했어요.';
+  String get nowPromiseDeclined => '이번 내기는 패스했어요.';
 
   @override
-  String get nowPromiseResponseFailed => '약속 응답에 실패했어요.';
+  String get nowPromiseResponseFailed => '내기에 답하지 못했어요.';
 
   @override
-  String get nowPromiseProposed => '약속을 제안했어요!';
+  String get nowPromiseProposed => '내기를 제안했어요!';
 
   @override
-  String get nowPromiseProposeFailed => '약속 제안에 실패했어요.';
+  String get nowPromiseProposeFailed => '내기를 제안하지 못했어요.';
 
   @override
   String nowTimeMinBeforeAlert(int minutes) {
@@ -2104,19 +1590,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get nowKeepFlowing => '대단해요! 이 흐름을 이어가봐요';
-
-  @override
-  String get nowGuideWhen => '\"언제 할지\" 정해 오늘의 시작점을 분명히 해요';
-
-  @override
-  String get nowGuideSmallStart => '작게 시작해도 괜찮아요. 꾸준함이 힘이에요';
-
-  @override
-  String get nowGuideBetterToday => '어제보다 나은 오늘이면 충분해요';
-
-  @override
-  String get nowErrorTitle => '오류 발생';
+  String get nowErrorTitle => '문제가 생겼어요';
 
   @override
   String get nowErrorCreationLink => '생성 링크:';
@@ -2125,42 +1599,39 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowOk => '확인';
 
   @override
-  String get nowRetryLater => '잠시 후 다시 시도해주세요';
+  String get nowRetryLater => '잠시 후 다시 시도해 주세요';
 
   @override
-  String get nowPartnerActionFallback => '실천 메이트의 실천';
+  String get nowPartnerActionFallback => '짝꿍의 약속';
 
   @override
-  String get nowActionNoteHint => '따뜻한 피드백을 남겨주세요 (선택)';
+  String get nowActionNoteHint => '한마디 남기기 (선택)';
 
   @override
-  String get nowVerifyAndSend => '확인하고 보내기';
+  String get nowVerifyAndSend => '인정하고 보내기';
 
   @override
   String nowStreakCount(int count) {
-    return '$count회 연속 달성!';
+    return '$count번 연속 지켰어요!';
   }
 
   @override
   String get nowHeaderAdjustNeeded => '조율이 필요해요';
 
   @override
-  String get nowHeaderPromiseProposed => '약속 제안이 도착했어요';
+  String get nowHeaderPromiseProposed => '내기 제안이 왔어요';
 
   @override
-  String get nowHeaderPromiseSettled => '약속 결과가 나왔어요';
+  String get nowHeaderPromiseSettled => '내기 결과가 나왔어요';
 
   @override
   String get nowPromiseAckButton => '결과 확인하기';
 
   @override
-  String get nowPromiseAckWithNote => '한마디 남기고 닫기';
+  String get nowPromiseAckDialogTitle => '내기 결과';
 
   @override
-  String get nowPromiseAckDialogTitle => '약속 결과 확인';
-
-  @override
-  String get nowPromiseAckDialogHint => '실천 메이트에게 짧게 한마디 남겨주세요 (선택)';
+  String get nowPromiseAckDialogHint => '짝꿍한테 한마디 (선택)';
 
   @override
   String get nowPromiseAckDialogConfirm => '확인했어';
@@ -2169,7 +1640,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowPromiseAckSnackbar => '결과를 확인했어요';
 
   @override
-  String get nowPromiseAckFailed => '결과 확인에 실패했어요';
+  String get nowPromiseAckFailed => '결과를 확인하지 못했어요';
 
   @override
   String get planDetailViewList => '목록';
@@ -2181,10 +1652,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailViewGraph => '그래프';
 
   @override
-  String get planDetailLegendDone => '실천';
+  String get planDetailLegendDone => '완료';
 
   @override
-  String get planDetailLegendRested => '휴식';
+  String get planDetailLegendRested => '휴식권';
 
   @override
   String get planDetailLegendRescued => '인정';
@@ -2204,7 +1675,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get planDetailGraphCompletionRate => '주별 실천율';
+  String get planDetailGraphCompletionRate => '주별 달성률';
 
   @override
   String get planDetailGraphEmpty => '표시할 기록이 없어요.';
@@ -2224,7 +1695,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailProgressStreakLabel => '연속 달성';
 
   @override
-  String get planDetailProgressDoneLabel => '실천';
+  String get planDetailProgressDoneLabel => '완료';
 
   @override
   String get planDetailProgressRemainingLabel => '남음';
@@ -2246,61 +1717,61 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planDetailProgressNoVerdictYet => '아직 결과 나온 날이 없어요';
 
   @override
-  String get planDetailPromiseProgressTitle => '약속 진행률';
+  String get planDetailPromiseProgressTitle => '내기 진행';
 
   @override
-  String get planDetailPromiseRewardLabel => '🏆 보상';
+  String get planDetailPromiseRewardLabel => '🏆 지키면';
 
   @override
-  String get planDetailPromisePenaltyLabel => '⚡ 벌칙';
+  String get planDetailPromisePenaltyLabel => '⚡ 못 지키면';
 
   @override
   String planDetailPromiseRewardNeed(int days) {
-    return '보상까지 $days일 더 필요';
+    return '$days일 더 지키면 성공';
   }
 
   @override
-  String get planDetailPromiseRewardAchieved => '🎉 보상 달성!';
+  String get planDetailPromiseRewardAchieved => '🎉 지켰어요!';
 
   @override
   String planDetailPromisePenaltyBuffer(int buffer) {
-    return '벌칙까지 $buffer번 여유';
+    return '$buffer번 더 놓치면 내기 확정';
   }
 
   @override
-  String get planDetailPromisePenaltyImminent => '이번에 또 놓치면 벌칙';
+  String get planDetailPromisePenaltyImminent => '한 번 더 놓치면 내기 확정';
 
   @override
-  String get planDetailPromisePenaltyTriggered => '⚡ 벌칙 발동 확정';
+  String get planDetailPromisePenaltyTriggered => '⚡ 못 지켰어요 · 내기 확정';
 
   @override
   String get planDetailMoreMenu => '더보기';
 
   @override
-  String get planDetailMenuRestartCompleted => '이 약속으로 다시 만들기';
+  String get planDetailMenuRestartCompleted => '이 약속으로 다시 걸기';
 
   @override
   String get planDetailMenuRestartActive => '새 스케줄로 다시 시작';
 
   @override
-  String get planDetailMenuStop => '약속 중단';
+  String get planDetailMenuStop => '약속 그만하기';
 
   @override
   String planDetailPromiseSuccessFailBreakdown(int success, int fail) {
-    return '성공 $success일 · 실패 $fail일';
+    return '지킨 날 $success일 · 놓친 날 $fail일';
   }
 
   @override
-  String get nowHeaderSettlementNeeded => '4주 정산이 필요해요';
+  String get nowHeaderSettlementNeeded => '4주를 마쳤어요';
 
   @override
-  String get nowHeaderSettlementSub => '똑똑 뒤에 실천이 이어졌는지 확인하고 다음 4주를 정해요.';
+  String get nowHeaderSettlementSub => '4주 동안 어땠는지 돌아보고 다음 4주를 정해요.';
 
   @override
   String get nowMetricCompleted => '완료';
 
   @override
-  String get nowMetricPartnerReact => '실천 메이트 반응';
+  String get nowMetricPartnerReact => '짝꿍 인정';
 
   @override
   String get nowMetricMissed => '놓친 날';
@@ -2316,46 +1787,45 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get nowSettlementWinMessage =>
-      '약속한 목표를 채웠어요. 잘하셨어요! 다음 4주를 이어갈지 정할 차례예요.';
+  String get nowSettlementWinMessage => '약속한 목표를 채웠어요. 멋져요! 다음 4주도 이어갈지 정해요.';
 
   @override
   String get nowSettlementLoseMessage =>
-      '이번엔 목표까지 닿지 못했지만, 함께한 4주는 그대로 남아요. 다음 4주를 어떻게 바꿔볼지 정해요.';
+      '이번엔 목표에 닿지 못했지만, 함께한 4주는 그대로 남아요. 다음 4주를 어떻게 바꿔 볼지 정해요.';
 
   @override
   String get nowSettlementNeutralMessage =>
-      '4주를 끝까지 함께했어요. 이제 다음 4주를 이어갈지 정할 차례예요.';
+      '4주를 끝까지 함께했어요. 이제 다음 4주를 이어갈지 정해요.';
 
   @override
   String nowRewardCondition(int days, String description) {
-    return '$days일 성공 시: $description';
+    return '$days일 지키면: $description';
   }
 
   @override
   String nowPenaltyCondition(int days, String description) {
-    return '$days일 실패 시: $description';
+    return '$days일 놓치면: $description';
   }
 
   @override
   String nowPromiseResult(int success, int fail) {
-    return '성공 $success일 / 실패 $fail일';
+    return '지킨 날 $success일 / 놓친 날 $fail일';
   }
 
   @override
   String get nowAchieved => '달성!';
 
   @override
-  String get nowTriggered => '발동!';
+  String get nowTriggered => '확정!';
 
   @override
   String get nowNotMet => '미달';
 
   @override
-  String get nowDecline => '거절';
+  String get nowDecline => '이번엔 패스';
 
   @override
-  String get nowAccept => '수락';
+  String get nowAccept => '좋아, 콜!';
 
   @override
   String get nowContinueNext4Weeks => '다음 4주 시작하기';
@@ -2370,106 +1840,104 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nowStartFocusTimer => '지금 할게! (집중 타이머)';
 
   @override
-  String get nowRestToday => '오늘은 쉬어갈게요 (휴식권)';
+  String get nowRestToday => '오늘은 쉴게 (휴식권)';
 
   @override
-  String get nowMissedPlanFallback => '지나간 약속';
+  String get nowHeaderTodayAllDone => '오늘 할 일 끝 🎉';
 
   @override
-  String get nowVerifyingDeadline => '확인 대기 · 응원 필요';
+  String nowHeaderConfirmAndPull(String name) {
+    return '$name 오늘 했대요! 인정해 줄래요?';
+  }
 
   @override
-  String get nowHeaderTodayAllDone => '오늘 약속을 다 지켰어요';
+  String nowHeaderWaiting(String name) {
+    return '$name의 약속을 기다리는 중';
+  }
 
   @override
-  String get nowHeaderConfirmAndPull => '서로 확인하고 응원할 시간';
+  String get nowHeaderWaitingAccept => '내기 수락을 기다리는 중';
 
   @override
-  String get nowHeaderWaiting => '기다리는 중';
+  String get nowHeaderPromiseResult => '내기 결과가 나왔어요';
 
   @override
-  String get nowHeaderWaitingAccept => '약속 수락을 기다리는 중';
+  String get nowAdjust => '바꿔 보자';
 
   @override
-  String get nowHeaderPromiseResult => '약속 결과가 나왔어요';
-
-  @override
-  String get nowAdjust => '조율하기';
-
-  @override
-  String get nowApprove => '승인하기';
+  String get nowApprove => '좋아!';
 
   @override
   String get nowPartnerNoNewPlanGuide =>
-      '실천 메이트가 아직 새 약속을 만들지 않았어요. 똑똑으로 함께 시작해볼까요?';
+      '짝꿍이 아직 운동 약속을 걸지 않았어요. 똑똑으로 같이 시작해 볼까요?';
 
   @override
-  String get nowKnockMakePlan => '똑똑! 함께 시작하자고 하기';
+  String get nowKnockMakePlan => '똑똑! 같이 하자';
 
   @override
   String nowPartnerMissedPokeBody(String name) {
-    return '$name님이 놓친 약속을 다시 시작할 수 있게 똑똑을 보내주세요.';
+    return '$name 오늘 약속을 아직 못 했어요. 응원을 보내 볼까요?';
   }
 
   @override
   String nowPartnerQuietPokeBody(String name) {
-    return '$name님의 약속이 아직 조용해요. 알아보고 있다는 똑똑을 보내주세요.';
+    return '$name의 약속이 아직 조용해요. 기다리고 있다고 똑똑을 보내 볼까요?';
   }
 
   @override
-  String get nowKnockPull => '똑똑! 다시 이어주기';
+  String get nowKnockPull => '똑똑 보내기';
 
   @override
-  String get nowRescueYesterday => '어제 실천 인정해주기';
+  String get nowRescueYesterday => '어제 것도 인정해 주기';
 
   @override
-  String get nowVerifyAndCheer => '확인하고 응원하기';
+  String get nowVerifyAndCheer => '인정하기';
 
   @override
-  String get nowMakePromise => '약속 걸기';
+  String get nowMakePromise => '내기 걸기';
 
   @override
-  String get nowPartnerFallback2 => '실천 메이트';
+  String get nowPartnerFallback2 => '짝꿍';
 
   @override
   String nowPartnerAllDone(String name) {
-    return '$name님이 오늘 약속을 다 지켰어요.';
+    return '$name 오늘 약속을 다 지켰어요 🎉';
   }
 
   @override
-  String get nowQuickCheckHelp => '짧게 확인하고 내일의 실천도 함께 이어주세요.';
+  String get nowQuickCheckHelp => '인정 한 번이면 내일도 힘이 나요.';
 
   @override
   String nowLastAction(String title) {
-    return '마지막 실천: $title';
+    return '마지막 기록: $title';
   }
 
   @override
   String nowRewardLine(int days, String description) {
-    return '🏆 $days일 성공 시: $description';
+    return '🏆 $days일 지키면: $description';
   }
 
   @override
   String nowPenaltyLine(int days, String description) {
-    return '⚡ $days일 실패 시: $description';
+    return '⚡ $days일 놓치면: $description';
   }
 
   @override
   String nowResultLine(int success, int fail) {
-    return '결과: 성공 $success일 / 실패 $fail일';
+    return '결과: 지킨 날 $success일 / 놓친 날 $fail일';
   }
 
   @override
   String get nowWaitingApproval => '수락 대기 중...';
 
   @override
-  String get nowRewardAchievedTitle => '🎉 보상 달성!';
+  String get nowRewardAchievedTitle => '🎉 지켰어요!';
 
   @override
-  String get nowPenaltyTriggeredTitle => '⚡ 벌칙 발동!';
+  String get nowPenaltyTriggeredTitle => '⚡ 내기 확정!';
 
   @override
-  String get nowBothTitle => '🎉 보상 달성! + ⚡ 벌칙 발동!';
+  String get nowBothTitle => '🎉 지켰어요! + ⚡ 내기 확정!';
 
   @override
   String get nowConditionNotMet => '조건 미달';
@@ -2481,45 +1949,45 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String nowTotalDaysScheduled(int days, int scheduled) {
-    return '총 $days일짜리 약속 · 실천 예정 $scheduled일';
+    return '총 $days일짜리 약속 · 할 날 $scheduled일';
   }
 
   @override
-  String get nowMakePromiseTitle => '약속 걸기';
+  String get nowMakePromiseTitle => '내기 걸기';
 
   @override
-  String get nowMakePromiseSubtitle => '실천 메이트와 서로 동의하면 약속이 시작돼요';
+  String get nowMakePromiseSubtitle => '짝꿍이 받으면 내기가 시작돼요. 돈 말고 밥·커피·설거지로 걸어요.';
 
   @override
   String nowProgressLine(int success, int failed, int remaining) {
-    return '현재 성공 $success일 · 실패 $failed일 · 남은 예정 $remaining일';
+    return '지금 지킨 날 $success일 · 놓친 날 $failed일 · 남은 날 $remaining일';
   }
 
   @override
   String nowMaxLimitsLine(int reward, int penalty) {
-    return '보상은 최대 $reward일, 벌칙은 최대 $penalty일까지 정할 수 있어요.';
+    return '지킬 날은 최대 $reward일, 놓칠 날은 최대 $penalty일까지 정할 수 있어요.';
   }
 
   @override
-  String get nowRewardTitle => '🏆 보상 (당근)';
+  String get nowRewardTitle => '🏆 지키면';
 
   @override
-  String get nowRewardHint => '예: 치킨 사주기, 맛집 가기';
+  String get nowRewardHint => '예: 🍣 같이 오마카세, 영화 고르기';
 
   @override
-  String get nowRewardTargetLabel => '성공 목표';
+  String get nowRewardTargetLabel => '지킬 날';
 
   @override
-  String get nowPenaltyTitle => '⚡ 벌칙 (채찍)';
+  String get nowPenaltyTitle => '⚡ 못 지키면';
 
   @override
-  String get nowPenaltyHint => '예: 설거지 일주일, 커피 쏘기';
+  String get nowPenaltyHint => '예: 🍗 치킨 쏘기, 설거지 일주일';
 
   @override
-  String get nowPenaltyTargetLabel => '실패 한도';
+  String get nowPenaltyTargetLabel => '놓친 날 기준';
 
   @override
-  String get nowProposePromise => '약속 제안하기';
+  String get nowProposePromise => '내기 제안하기';
 
   @override
   String nowDaysSuffix(int count) {
@@ -2532,39 +2000,36 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get nowPokeReceived => '실천 메이트가 똑똑을 보냈어요';
+  String get nowPokeReceived => '짝꿍이 똑똑을 보냈어요';
 
   @override
   String nowPokeReceivedFromName(String name) {
-    return '$name님이 똑똑을 보냈어요';
+    return '$name한테서 똑똑이 왔어요';
   }
-
-  @override
-  String get nowYesterday => '어제';
 
   @override
   String get nowNoteDateToday => '오늘';
 
   @override
-  String get connectErrorSelfCode => '본인의 초대 코드는 사용할 수 없습니다.';
+  String get connectErrorSelfCode => '내 초대 코드는 쓸 수 없어요.';
 
   @override
-  String get connectErrorFailed => '코드가 올바르지 않거나 연결에 실패했습니다.';
+  String get connectErrorFailed => '코드가 맞지 않거나 연결하지 못했어요.';
 
   @override
-  String get connectErrorDisconnectFailed => '연결을 해제하지 못했어요. 다시 시도해 주세요.';
+  String get connectErrorDisconnectFailed => '연결을 끊지 못했어요. 다시 시도해 주세요.';
 
   @override
-  String get accountLinkErrorAlreadyInUse => '이 계정은 이미 다른 사용자와 연결되어 있습니다.';
+  String get accountLinkErrorAlreadyInUse => '이 계정은 이미 다른 사용자와 연결되어 있어요.';
 
   @override
-  String get accountLinkErrorInvalidCredential => '유효하지 않은 인증 정보입니다.';
+  String get accountLinkErrorInvalidCredential => '인증 정보가 올바르지 않아요.';
 
   @override
-  String get accountLinkErrorNotAllowed => '허용되지 않은 작업입니다.';
+  String get accountLinkErrorNotAllowed => '허용되지 않은 작업이에요.';
 
   @override
-  String get accountLinkErrorGeneric => '계정 연동 중 오류가 발생했습니다.';
+  String get accountLinkErrorGeneric => '계정을 연결하는 중 문제가 생겼어요.';
 
   @override
   String get planCreateErrorNoUser => '사용자 정보를 찾을 수 없어요. 다시 로그인해 주세요.';
@@ -2573,7 +2038,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notifyBannerTitle => '알림이 꺼져 있어요';
 
   @override
-  String get notifyBannerBody => '실천 메이트의 확인과 똑똑을 놓치지 않으려면 알림을 켜주세요.';
+  String get notifyBannerBody => '짝꿍의 인정과 똑똑을 놓치지 않게 알림을 켜 주세요.';
 
   @override
   String get notifyBannerAction => '켜기';
@@ -2585,7 +2050,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get usNameRequired => '이름을 입력해 주세요.';
 
   @override
-  String get usImagePickFailed => '이 이미지를 사용할 수 없어요. 다른 이미지를 골라주세요.';
+  String get usImagePickFailed => '이 이미지를 쓸 수 없어요. 다른 이미지를 골라 주세요.';
 
   @override
   String get settingsLogoutFailed => '로그아웃하지 못했어요. 다시 시도해 주세요.';
@@ -2627,29 +2092,683 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tutorialNext => '다음';
 
   @override
-  String get tutorialStart => '그래, 시작하기';
+  String get tutorialStart => '시작하기';
 
   @override
-  String get tutorialFooter => '처음엔 작은 약속 하나면 충분해요.';
+  String get tutorialFooter => '운동 약속 하나면 시작할 수 있어요.';
 
   @override
-  String get tutorialPage1Title => '할 일을 작게 정해요';
+  String get tutorialPage1Title => '운동 약속을 걸어요';
 
   @override
   String get tutorialPage1Body =>
-      '막연한 목표 대신 오늘 바로 할 수 있는 약속 하나를 만들어요. 작게 시작해야 진짜로 움직일 수 있어요.';
+      '헬스, 러닝, 홈트… 할 운동과 요일을 정해 짝꿍한테 약속해요. 혼자 다짐할 때보다 훨씬 덜 미루게 돼요.';
 
   @override
-  String get tutorialPage2Title => '알아봐 주는 한 사람';
+  String get tutorialPage2Title => '짝꿍이 보고 인정해요';
 
   @override
   String get tutorialPage2Body =>
-      '실천 메이트와 서로 동의해 연결해요. 내 노력을 알아봐 주고, 나도 그 사람의 실천을 응원해요.';
+      '운동하고 인증샷을 올리면 짝꿍한테 바로 보여요. 짝꿍은 탭 한 번으로 인정해 주고, 깜빡한 날엔 똑똑으로 알려 줘요.';
 
   @override
-  String get tutorialPage3Title => '기록으로 다음을 정해요';
+  String get tutorialPage3Title => '둘 다 하면, 둘운완';
 
   @override
-  String get tutorialPage3Body =>
-      '성공과 미룸을 기록해 다음 약속의 크기를 조정해요. 실패도 다음 설계의 재료가 됩니다.';
+  String get tutorialPage3Body => '오늘 둘 다 운동했다면 둘운완이에요. 둘이 함께 쌓아 가는 날들을 같이 봐요.';
+
+  @override
+  String get appUpdateRequiredTitle => '업데이트가 필요해요';
+
+  @override
+  String get appUpdateRequiredBody =>
+      '지금 버전은 더 이상 지원하지 않아요. 최신 버전으로 업데이트하고 계속 이용해 주세요.';
+
+  @override
+  String get appUpdateButton => '업데이트하기';
+
+  @override
+  String get appUpdateSoftTitle => '새 버전이 나왔어요';
+
+  @override
+  String get appUpdateSoftBody => '업데이트하고 새로워진 기능을 만나 보세요.';
+
+  @override
+  String get appUpdateLater => '나중에';
+
+  @override
+  String get appUpdateStoreOpenFailed => '스토어를 열지 못했어요. 스토어 앱에서 직접 업데이트해 주세요.';
+
+  @override
+  String get nowHeaderPartnerAskedAdjust => '짝꿍이 약속을 조금 바꿔 보자고 했어요';
+
+  @override
+  String get nowHeaderPokeWaiting => '똑똑! 짝꿍이 기다리고 있어요';
+
+  @override
+  String nowHeaderMissedNotice(String name) {
+    return '오늘 약속 기록이 없어서 $name한테 알려졌어요';
+  }
+
+  @override
+  String nowHeaderPartnerMissed(String name) {
+    return '$name의 오늘 약속이 아직이에요';
+  }
+
+  @override
+  String get nowHeaderPokeTurn => '똑똑 보낼 차례예요';
+
+  @override
+  String get promiseUntitledFallback => '약속';
+
+  @override
+  String planSummaryWeeks(int count) {
+    return '$count주간';
+  }
+
+  @override
+  String get settingsTutorialTitle => '앱 사용법';
+
+  @override
+  String get settingsTutorialDesc => '운동 약속을 걸고 짝꿍한테 인정받는 흐름을 다시 봐요';
+
+  @override
+  String get notifActionDidIt => '했어';
+
+  @override
+  String get notifActionSkipToday => '오늘은 패스';
+
+  @override
+  String get notifActionSnooze => '10분 뒤에 다시 알려 줘';
+
+  @override
+  String get notifReminderBody => '인증 한 번이면 오늘 기록 끝이에요 📸';
+
+  @override
+  String get notifFallbackTitle => '둘운완';
+
+  @override
+  String get notifChannelRemindersName => '약속 알림';
+
+  @override
+  String get notifChannelRemindersDesc => '정해 둔 시간에 오늘 약속을 알려 줘요';
+
+  @override
+  String get notifChannelGeneralName => '짝꿍 소식';
+
+  @override
+  String get notifChannelGeneralDesc => '짝꿍의 인정, 똑똑, 응원을 알려 줘요';
+
+  @override
+  String get notifChannelScheduledName => '예약 알림';
+
+  @override
+  String get notifChannelScheduledDesc => '정해 둔 시각에 보내는 알림';
+
+  @override
+  String get notifChannelDebugName => '테스트 알림';
+
+  @override
+  String get notifChannelDebugDesc => '알림 테스트용';
+
+  @override
+  String nowHeroQuestion(String emoji, String workout) {
+    return '오늘 $emoji $workout 했어?';
+  }
+
+  @override
+  String nowHeroQuestionDiet(String emoji, String workout) {
+    return '오늘 $emoji $workout 지켰어?';
+  }
+
+  @override
+  String nowHeroQuestionLegacy(String title) {
+    return '오늘 \'$title\' 했어?';
+  }
+
+  @override
+  String get nowProofTakePhoto => '📸 인증샷 찍기';
+
+  @override
+  String get nowHeroVerifyLegacy => '인증하기';
+
+  @override
+  String get nowDidItNoPhoto => '사진 없이 했어';
+
+  @override
+  String get proofSourceSheetTitle => '인증샷 올리기';
+
+  @override
+  String get proofSourceCamera => '📸 카메라로 찍기';
+
+  @override
+  String get proofSourceCameraHint => '\'방금 찍음\'으로 보여요';
+
+  @override
+  String get proofSourceGallery => '🖼️ 앨범에서 고르기';
+
+  @override
+  String get proofSourceGalleryHint => '\'앨범\' 표시와 촬영 날짜가 함께 보여요';
+
+  @override
+  String get proofConsentTitle => '첫 인증샷 전에 알려 드려요';
+
+  @override
+  String get proofConsentOnlyPartner => '연결된 짝꿍 한 명만 볼 수 있어요.';
+
+  @override
+  String get proofConsentLocationRemoved => '위치 정보 같은 사진 정보는 지우고 올려요.';
+
+  @override
+  String get proofConsentAfterDisconnect => '연결을 끊으면 앱에서 더 이상 볼 수 없어요.';
+
+  @override
+  String get proofConsentNoInappropriate => '부적절한 사진은 올리지 말아 주세요.';
+
+  @override
+  String get proofConsentAgree => '알겠어요';
+
+  @override
+  String get proofPreviewTitle => '이 사진으로 인증할까요?';
+
+  @override
+  String get proofPreviewSubmit => '인증하기';
+
+  @override
+  String get proofUploadDone => '인증샷을 보냈어요 📸';
+
+  @override
+  String get proofUploadFailed => '사진은 못 올렸지만 오늘 기록은 남겼어요.';
+
+  @override
+  String get proofPhotoPrepareFailed => '이 사진은 쓸 수 없어요. 다른 사진으로 해 주세요.';
+
+  @override
+  String get proofPickFailed => '카메라나 앨범을 열지 못했어요.';
+
+  @override
+  String proofBadgeCamera(String time) {
+    return '📸 방금 찍음 · $time';
+  }
+
+  @override
+  String get proofBadgeCameraJustNow => '📸 방금 찍음';
+
+  @override
+  String proofBadgeCameraOn(String when) {
+    return '📸 카메라 · $when';
+  }
+
+  @override
+  String proofBadgeGalleryTaken(String date) {
+    return '🖼️ 앨범 · $date 촬영';
+  }
+
+  @override
+  String get proofBadgeGallery => '🖼️ 앨범';
+
+  @override
+  String get proofPhotoLoadFailed => '사진을 불러오지 못했어요';
+
+  @override
+  String get proofPhotoRetry => '다시 불러오기';
+
+  @override
+  String get proofPhotoSemantics => '인증샷';
+
+  @override
+  String get proofViewerMenu => '더보기';
+
+  @override
+  String get proofViewerReport => '신고하기';
+
+  @override
+  String get proofViewerDelete => '사진 삭제';
+
+  @override
+  String get proofDeleteConfirmTitle => '이 인증샷을 지울까요?';
+
+  @override
+  String get proofDeleteConfirmBody => '짝꿍도 더 이상 볼 수 없어요. 기록은 그대로 남아요.';
+
+  @override
+  String get proofDeleteConfirm => '삭제';
+
+  @override
+  String get proofDeleted => '인증샷을 지웠어요.';
+
+  @override
+  String get proofDeleteFailed => '사진을 지우지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get proofReportSubject => '[둘운완] 인증샷 신고';
+
+  @override
+  String proofReportBody(String actionId) {
+    return '어떤 점이 문제인지 알려 주세요.\n\n기록 ID: $actionId';
+  }
+
+  @override
+  String proofReportMailFailed(String email) {
+    return '메일 앱을 열지 못했어요. 이 주소로 보내 주세요: $email';
+  }
+
+  @override
+  String get nowReactHint => '하나만 눌러도 인정이에요';
+
+  @override
+  String get nowReactAddNote => '한마디';
+
+  @override
+  String nowReactSemantics(String emoji) {
+    return '$emoji 보내고 인정하기';
+  }
+
+  @override
+  String nowReactedSnackbar(String emoji) {
+    return '$emoji 인정했어요';
+  }
+
+  @override
+  String get partnerFallbackLabel => '짝꿍';
+
+  @override
+  String get partnerFallbackLabelStart => '짝꿍';
+
+  @override
+  String get connectShareInvite => '카톡으로 초대 보내기';
+
+  @override
+  String get connectCopyCode => '코드 복사';
+
+  @override
+  String get connectHaveCodeTitle => '받은 코드가 있나요?';
+
+  @override
+  String get connectInviteSent => '초대를 보냈어요. 짝꿍이 들어오면 알려 줄게요.';
+
+  @override
+  String get connectShareFailed => '공유 창을 열지 못했어요. 코드를 복사해서 보내 주세요.';
+
+  @override
+  String get connectErrorCodeNotFound => '이 코드를 가진 사람을 찾지 못했어요. 다시 확인해 주세요.';
+
+  @override
+  String get connectErrorCodeFormat => '코드는 영문과 숫자 8자리예요.';
+
+  @override
+  String get connectErrorOwnerTaken => '이미 다른 짝꿍과 연결된 코드예요. 상대에게 새 코드를 받아 주세요.';
+
+  @override
+  String get connectErrorSelfTaken => '이미 연결된 짝꿍이 있어요. 기존 연결을 끊은 뒤 다시 시도해 주세요.';
+
+  @override
+  String get connectErrorCodeChanged => '코드가 바뀌었어요. 상대에게 새 코드를 받아 주세요.';
+
+  @override
+  String get connectErrorLinkUndone =>
+      '연결이 유지되지 않았어요. 이미 다른 짝꿍과 연결된 코드일 수 있어요 — 상대에게 새 코드를 받아 주세요.';
+
+  @override
+  String inviteShareMessage(String code, String link) {
+    return '나 운동 약속 걸었어 🤙 진짜 하는지 봐줘! 둘운완 깔고 코드 $code 넣으면 바로 연결돼 → $link';
+  }
+
+  @override
+  String inviteShareMessageNoPromise(String code, String link) {
+    return '나 운동 약속 걸 거야 🤙 진짜 하는지 봐줘! 둘운완 깔고 코드 $code 넣으면 바로 연결돼 → $link';
+  }
+
+  @override
+  String get inviteShareSubject => '둘운완 초대';
+
+  @override
+  String get inviteHaveCodeLink => '초대 코드 받았어요';
+
+  @override
+  String connectConfirmTitle(String name) {
+    return '$name의 운동 약속을 봐줄래요?';
+  }
+
+  @override
+  String get connectConfirmBody => '연결하면 서로의 운동 약속과 인증샷을 볼 수 있어요.';
+
+  @override
+  String get connectConfirmAccept => '내가 봐줄게';
+
+  @override
+  String connectSuccessTitle(String name) {
+    return '$name하고 연결됐어요 🎉';
+  }
+
+  @override
+  String get connectSuccessBody => '이제 서로의 운동 약속을 봐줄 수 있어요.';
+
+  @override
+  String get connectSuccessAskTitle => '나도 걸래?';
+
+  @override
+  String get connectSuccessAskBody => '둘 다 하면 둘운완이에요.';
+
+  @override
+  String get connectSuccessMakePromise => '나도 걸기';
+
+  @override
+  String get connectSuccessLater => '나중에';
+
+  @override
+  String get connectSuccessDone => '좋아요';
+
+  @override
+  String get nicknameSheetTitle => '짝꿍을 뭐라고 부를까요?';
+
+  @override
+  String nicknameSheetBody(String name) {
+    return '앱 화면과 알림에서 $name 대신 이 애칭으로 보여요.';
+  }
+
+  @override
+  String get nicknamePresetPartner => '짝꿍';
+
+  @override
+  String get nicknamePresetJagi => '자기';
+
+  @override
+  String get nicknamePresetOppa => '오빠';
+
+  @override
+  String get nicknamePresetYeobo => '여보';
+
+  @override
+  String get nicknamePresetAegi => '애기';
+
+  @override
+  String get nicknamePresetCustom => '직접 입력';
+
+  @override
+  String get nicknameCustomHint => '애칭 (10자까지)';
+
+  @override
+  String get nicknameSave => '저장하기';
+
+  @override
+  String get nicknameLater => '나중에 정할게요';
+
+  @override
+  String get nicknameRemove => '애칭 지우기';
+
+  @override
+  String get nicknameSaved => '애칭을 저장했어요.';
+
+  @override
+  String get nicknameRemoved => '애칭을 지웠어요.';
+
+  @override
+  String get nicknameSaveFailed => '애칭을 저장하지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get usSetNickname => '애칭 정하기';
+
+  @override
+  String get usEditNickname => '애칭 바꾸기';
+
+  @override
+  String get onboardingInviteLater => '나중에 초대할게요';
+
+  @override
+  String get nowInviteCardTitle => '짝꿍이 보면 진짜 하게 돼요';
+
+  @override
+  String get nowInviteCardBody => '초대를 보내면 서로의 운동 약속을 봐줄 수 있어요.';
+
+  @override
+  String get nowInviteCardWaitingTitle => '짝꿍을 기다리는 중이에요';
+
+  @override
+  String get nowInviteCardWaitingBody => '아직 안 들어왔어요. 한 번 더 보내 볼까요?';
+
+  @override
+  String get nowInviteCardResend => '초대 다시 보내기';
+
+  @override
+  String get pivotNoticeTitle => '\'그래,해봐\'가 둘운완이 됐어요';
+
+  @override
+  String get pivotNoticeBody => '약속, 기록, 짝꿍 연결은 그대로예요.';
+
+  @override
+  String get pivotNoticeOk => '좋아요';
+
+  @override
+  String duoStreakDays(int count) {
+    return '둘이 함께 $count일째';
+  }
+
+  @override
+  String get duoStreakStart => '오늘 둘 다 하면 둘운완 1일째';
+
+  @override
+  String get duoTodayDone => '오늘 둘운완이에요 🎉';
+
+  @override
+  String get duoMeLabel => '나';
+
+  @override
+  String get duoStatusDone => '완료 ✓';
+
+  @override
+  String get duoStatusVerified => '인정 ❤️';
+
+  @override
+  String get duoStatusWaiting => '인정 대기';
+
+  @override
+  String get duoStatusPending => '아직';
+
+  @override
+  String get duoStatusRested => '휴식권';
+
+  @override
+  String get duoStatusOff => '쉬는 날';
+
+  @override
+  String get duoStatusMissed => '놓침';
+
+  @override
+  String get duoStatusUpcoming => '예정';
+
+  @override
+  String duoPersonStatus(String name, String status) {
+    return '$name $status';
+  }
+
+  @override
+  String duoWeekDuoDays(int count) {
+    return '둘운완 $count일';
+  }
+
+  @override
+  String duoDaySemantics(String day, String me, String partner) {
+    return '$day 나 $me, 짝꿍 $partner';
+  }
+
+  @override
+  String get duoShareButton => '공유 카드 만들기';
+
+  @override
+  String shareCardStreak(int count) {
+    return '#둘운완 연속 $count일';
+  }
+
+  @override
+  String get shareCardNoStreak => '#둘운완';
+
+  @override
+  String get shareCardStores => '스토어에서 \'둘운완\' 검색';
+
+  @override
+  String shareCardPersonDone(String name, String workout) {
+    return '$name ✓ $workout';
+  }
+
+  @override
+  String shareCardPersonOff(String name) {
+    return '$name · 쉬는 날';
+  }
+
+  @override
+  String shareCardPersonRested(String name) {
+    return '$name · 휴식권';
+  }
+
+  @override
+  String shareCardPersonPending(String name) {
+    return '$name · 아직';
+  }
+
+  @override
+  String get shareCardSheetTitleToday => '오늘 둘운완이에요 🎉 자랑해 볼까요?';
+
+  @override
+  String shareCardSheetTitleMilestone(int count) {
+    return '둘이 함께 $count일째! 🎉 자랑해 볼까요?';
+  }
+
+  @override
+  String get shareCardSheetTitleManual => '공유 카드';
+
+  @override
+  String get shareCardShare => '공유하기';
+
+  @override
+  String get shareCardLater => '다음에';
+
+  @override
+  String get shareCardFailed => '공유 카드를 만들지 못했어요.';
+
+  @override
+  String get shareCardOnlyMyPhoto => '카드에는 내 인증샷만 들어가요.';
+
+  @override
+  String get shareCardText => '#둘운완 #오운완 둘이 보면, 진짜 하게 돼요.';
+
+  @override
+  String get shareCardSemantics => '둘운완 공유 카드';
+
+  @override
+  String get nowPokeReplyComing => '지금 간다 🏃';
+
+  @override
+  String get nowPokeReplyPass => '오늘은 봐줘 🙏';
+
+  @override
+  String get nowPokeReplySent => '답장 보냈어요';
+
+  @override
+  String get nowPokeReplyFailed => '답장을 보내지 못했어요.';
+
+  @override
+  String get nowSendCheer => '응원 보내기';
+
+  @override
+  String get nowCheerDefaultMessage => '할 수 있어! 기다릴게 💪';
+
+  @override
+  String get nowCheerSent => '응원을 보냈어요';
+
+  @override
+  String get nowKnockSentToday => '오늘 똑똑 보냈어요';
+
+  @override
+  String get promisePenaltyChicken => '🍗 치킨 쏘기';
+
+  @override
+  String get promisePenaltyCoffee => '☕ 아아 쏘기';
+
+  @override
+  String get promisePenaltyDishes => '🍽️ 설거지 일주일';
+
+  @override
+  String get promisePenaltyMassage => '💆 마사지 10분';
+
+  @override
+  String get promisePenaltyMovie => '🎬 영화 고르기 양보';
+
+  @override
+  String get promisePenaltyPickup => '🚗 데리러 가기';
+
+  @override
+  String get promiseRewardOmakase => '🍣 같이 오마카세';
+
+  @override
+  String get promiseRewardDessert => '🍰 디저트 데이트';
+
+  @override
+  String get promiseRewardMassage => '💆 마사지 10분 받기';
+
+  @override
+  String get promiseRewardMovie => '🎬 영화 고르기 권한';
+
+  @override
+  String get promiseMoneyBlocked =>
+      '돈 내기는 지원하지 않아요. 밥, 커피, 설거지처럼 둘이 할 수 있는 걸로 걸어 주세요.';
+
+  @override
+  String notifReminderBodyWithPartner(String name) {
+    return '기록이 없으면 곧 $name한테 알려져요';
+  }
+
+  @override
+  String get nowRecordQueued => '기록했어요. 연결되면 짝꿍한테 전해져요.';
+
+  @override
+  String get settingsAboutSection => '정보';
+
+  @override
+  String get settingsPrivacyPolicy => '개인정보처리방침';
+
+  @override
+  String get settingsTermsOfUse => '이용약관';
+
+  @override
+  String get settingsContactSupport => '고객지원';
+
+  @override
+  String get settingsContactSupportSubject => '[둘운완] 문의';
+
+  @override
+  String settingsLinkOpenFailed(String email) {
+    return '열지 못했어요. 문의는 $email로 보내 주세요.';
+  }
+
+  @override
+  String get usReportPartner => '짝꿍 신고하기';
+
+  @override
+  String get usReportPartnerSubject => '[둘운완] 짝꿍 신고';
+
+  @override
+  String usReportPartnerBody(String uid) {
+    return '어떤 내용(사진, 한마디, 메시지 등)이 문제인지 알려 주세요. 확인 후 조치할게요.\n\n신고 대상 ID: $uid';
+  }
+
+  @override
+  String get termsViewLink => '이용약관 보기';
+
+  @override
+  String get termsNoticeConnect =>
+      '연결하면 이용약관에 동의하는 거예요. 부적절한 내용이나 괴롭힘은 허용하지 않고, 신고되면 내용과 계정을 정리해요.';
+
+  @override
+  String get termsNoticeInvite =>
+      '초대를 보내면 이용약관에 동의하는 거예요. 부적절한 내용이나 괴롭힘은 허용하지 않아요.';
+
+  @override
+  String get termsNoticePhoto => '올리면 이용약관에 동의하는 거예요. 부적절한 사진이나 괴롭힘은 허용하지 않아요.';
+
+  @override
+  String get planSavedInviteTitle => '약속 걸었어요! 이제 봐 달라고 해 볼까요?';
+
+  @override
+  String get planSavedInviteBody => '짝꿍이 봐주면 진짜 하게 돼요. 카톡으로 코드와 링크를 보내요.';
 }

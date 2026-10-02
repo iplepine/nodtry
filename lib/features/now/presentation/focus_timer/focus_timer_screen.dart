@@ -10,11 +10,7 @@ class FocusTimerScreen extends StatefulWidget {
   final int minutes;
   final String? planTitle;
 
-  const FocusTimerScreen({
-    super.key,
-    required this.minutes,
-    this.planTitle,
-  });
+  const FocusTimerScreen({super.key, required this.minutes, this.planTitle});
 
   @override
   State<FocusTimerScreen> createState() => _FocusTimerScreenState();
@@ -192,7 +188,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
     final progress = _total.inMilliseconds == 0
         ? 0.0
         : (_total.inMilliseconds - remaining.inMilliseconds) /
-            _total.inMilliseconds;
+              _total.inMilliseconds;
     final paused = _pausedRemaining != null;
 
     return PopScope(
@@ -213,7 +209,10 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
           title: Text(
             widget.planTitle == null
                 ? l10n.focusTimerHeader(widget.minutes)
-                : l10n.focusTimerHeaderWithPlan(widget.planTitle!, widget.minutes),
+                : l10n.focusTimerHeaderWithPlan(
+                    widget.planTitle!,
+                    widget.minutes,
+                  ),
             style: TextStyle(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
@@ -237,10 +236,10 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
                         child: CircularProgressIndicator(
                           value: progress.clamp(0.0, 1.0),
                           strokeWidth: 10,
-                          backgroundColor:
-                              AppColors.surface.withValues(alpha: 0.6),
-                          valueColor:
-                              AlwaysStoppedAnimation(AppColors.primary),
+                          backgroundColor: AppColors.surface.withValues(
+                            alpha: 0.6,
+                          ),
+                          valueColor: AlwaysStoppedAnimation(AppColors.primary),
                         ),
                       ),
                       Column(
@@ -275,10 +274,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: _completeNow,
-                    icon: const Icon(
-                      Icons.check_circle_outline,
-                      size: 22,
-                    ),
+                    icon: const Icon(Icons.check_circle_outline, size: 22),
                     label: Text(l10n.focusTimerDoneNow),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -304,7 +300,9 @@ class _FocusTimerScreenState extends State<FocusTimerScreen>
                           foregroundColor: AppColors.textSecondary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        child: Text(paused ? l10n.focusTimerResume : l10n.focusTimerPause),
+                        child: Text(
+                          paused ? l10n.focusTimerResume : l10n.focusTimerPause,
+                        ),
                       ),
                     ),
                     Expanded(

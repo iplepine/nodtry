@@ -182,6 +182,81 @@ void main() {
     expect(result.partnerName, '지민');
   });
 
+  test('partner history uses my nickname for the partner', () async {
+    final nicknamed = UserModel(
+      uid: 'me',
+      displayName: 'Me',
+      partnerNickname: '자기',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    container.dispose();
+    container = ProviderContainer(
+      overrides: [
+        recordRepositoryProvider.overrideWithValue(mockRecordRepository),
+        myProfileProvider.overrideWith((ref) => Stream.value(nicknamed)),
+        connectedProfilesProvider.overrideWith(
+          (ref) => Future.value([
+            ConnectedUser(
+              user: mockPartner,
+              isSupported: true,
+              isCheering: true,
+            ),
+          ]),
+        ),
+      ],
+    );
+    await container.read(connectedProfilesProvider.future);
+
+    final result = await readHistoryState();
+
+    final partnerItem = result.activeItems.firstWhere(
+      (item) => item.executorId == 'partner',
+    );
+    expect(partnerItem.partnerName, '자기');
+    expect(result.partnerName, '자기');
+    // My own records are untouched.
+    final myItem = result.activeItems.firstWhere(
+      (item) => item.executorId == 'me',
+    );
+    expect(myItem.partnerName, isNot('자기'));
+  });
+
+  test('only records of a plan I manage can get my 인정', () async {
+    mockRecordRepository.mockPlans = [
+      activePlan,
+      Plan(
+        id: 'plan_2',
+        userId: 'partner',
+        managerId: 'me',
+        startDate: DateTime.now().subtract(const Duration(days: 7)),
+        endDate: DateTime.now().add(const Duration(days: 7)),
+        state: PlanState.active,
+        items: [],
+        createdAt: DateTime.now(),
+      ),
+    ];
+    mockRecordRepository.mockItems = [
+      itemMe,
+      itemPartner,
+      HistoryItem(
+        id: '3',
+        planId: 'plan_old',
+        date: DateTime.now(),
+        title: 'Before we linked',
+        status: HistoryStatus.done,
+        executorId: 'partner',
+      ),
+    ];
+
+    final result = await readHistoryState();
+
+    HistoryItem byId(String id) =>
+        result.activeItems.firstWhere((item) => item.id == id);
+    expect(byId('2').canVerify, isTrue);
+    expect(byId('3').canVerify, isFalse);
+  });
+
   test('reconcile should call repository and refresh', () async {
     // Arrange
     await readHistoryState();

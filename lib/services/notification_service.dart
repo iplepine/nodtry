@@ -9,29 +9,51 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/widgets.dart';
 
-/// Notification system strings localized by current device locale.
+import '../utils/context_free_l10n.dart';
+
+/// Notification system strings, resolved from the ARB copy.
 /// Why: NotificationService runs outside the widget tree (incl. background
 /// isolates), so we can't reach AppLocalizations through BuildContext here.
+/// [contextFreeL10n] follows the Settings language when the app has reported
+/// it, and the device language otherwise (e.g. in a background isolate).
 String _notifString(String key) {
-  final locale = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
-  final isKo = locale.startsWith('ko');
+  final l10n = contextFreeL10n();
   switch (key) {
     case 'actionDidIt':
-      return isKo ? '했어' : 'Done';
+      return l10n.notifActionDidIt;
     case 'actionSkipToday':
-      return isKo ? '오늘은 패스' : 'Skip today';
+      return l10n.notifActionSkipToday;
     case 'actionSnooze':
-      return isKo ? '10분 후 다시 묻기' : 'Ask again in 10 min';
+      return l10n.notifActionSnooze;
     case 'reminderBody':
-      return isKo
-          ? '오늘 약속, 같이 이어갈까요?'
-          : "Today's promise — want to keep going together?";
+      return l10n.notifReminderBody;
     case 'fallbackTitle':
-      return isKo ? '새 알림' : 'New notification';
+      return l10n.notifFallbackTitle;
+    case 'channelRemindersName':
+      return l10n.notifChannelRemindersName;
+    case 'channelRemindersDesc':
+      return l10n.notifChannelRemindersDesc;
+    case 'channelGeneralName':
+      return l10n.notifChannelGeneralName;
+    case 'channelGeneralDesc':
+      return l10n.notifChannelGeneralDesc;
+    case 'channelScheduledName':
+      return l10n.notifChannelScheduledName;
+    case 'channelScheduledDesc':
+      return l10n.notifChannelScheduledDesc;
+    case 'channelDebugName':
+      return l10n.notifChannelDebugName;
+    case 'channelDebugDesc':
+      return l10n.notifChannelDebugDesc;
     default:
       return key;
   }
 }
+
+/// Android status-bar icon: the monochrome 둘운완 mark from the brand lane
+/// (android/app/src/main/res/drawable-*/ic_stat_duodone.png, also FCM's
+/// default_notification_icon in AndroidManifest.xml).
+const String kAndroidNotificationSmallIcon = '@drawable/ic_stat_duodone';
 
 const String _snoozeActionId = 'snooze_10m';
 const String _didItActionId = 'did_it_now';
@@ -91,13 +113,57 @@ class NotificationSkipRequest {
   const NotificationSkipRequest({this.planId, this.title});
 }
 
+/// A notification the user opened (tapped its body): a partner push, by its
+/// `data.type`, or a plan reminder ([reminderType]). Routed by the home
+/// screen to the screen it is about.
+@immutable
+class NotificationOpenRequest {
+  const NotificationOpenRequest({
+    required this.type,
+    this.planId,
+    this.actionId,
+    this.reason,
+  });
+
+  /// `type` of a local plan reminder (and of a snoozed / deferred one).
+  static const String reminderType = 'reminder';
+
+  /// A push's `data.type` (e.g. `poke`, `partner_connected`) or
+  /// [reminderType].
+  final String type;
+  final String? planId;
+  final String? actionId;
+
+  /// `data.reason` of `partner_connect_failed` (owner_taken | self_taken |
+  /// invalid_code).
+  final String? reason;
+
+  /// The request for a push's `data`, or null without a type.
+  static NotificationOpenRequest? fromData(Map<String, dynamic> data) {
+    String? str(Object? v) => v is String && v.isNotEmpty ? v : null;
+    final type = str(data['type']);
+    if (type == null) return null;
+    return NotificationOpenRequest(
+      type: type,
+      planId: str(data['planId']),
+      actionId: str(data['actionId']),
+      reason: str(data['reason']),
+    );
+  }
+
+  @override
+  String toString() => 'NotificationOpenRequest($type, plan: $planId)';
+}
+
 abstract class PlanReminderScheduler {
   Future<void> requestPermissions();
 
+  /// [body] null means the default reminder text (`notifReminderBody`).
   Future<void> schedulePlanReminder({
     required int planId,
     String? planIdentifier,
     required String title,
+    String? body,
     required int hour,
     required int minute,
     required List<int> days,
@@ -130,15 +196,36 @@ class NotificationService implements PlanReminderScheduler {
       StreamController<NotificationInputRequest>.broadcast();
   final StreamController<NotificationSkipRequest> _skipRequestController =
       StreamController<NotificationSkipRequest>.broadcast();
+  final StreamController<NotificationOpenRequest> _openRequestController =
+      StreamController<NotificationOpenRequest>.broadcast();
 
   bool _isInitialized = false;
   NotificationInputRequest? _pendingInputRequest;
   NotificationSkipRequest? _pendingSkipRequest;
+  NotificationOpenRequest? _pendingOpenRequest;
 
   Stream<NotificationInputRequest> get inputRequests =>
       _inputRequestController.stream;
   Stream<NotificationSkipRequest> get skipRequests =>
       _skipRequestController.stream;
+
+  /// Opened notifications (body taps), for the home screen to route.
+  Stream<NotificationOpenRequest> get openRequests =>
+      _openRequestController.stream;
+
+  NotificationOpenRequest? takePendingOpenRequest() {
+    final request = _pendingOpenRequest;
+    _pendingOpenRequest = null;
+    return request;
+  }
+
+  /// A push opened from the background or a cold start
+  /// (`onMessageOpenedApp` / `getInitialMessage`): routed like a tap on the
+  /// same push shown in the foreground.
+  void emitPushOpen(Map<String, dynamic> data) {
+    final request = NotificationOpenRequest.fromData(data);
+    if (request != null) _emitOpenRequest(request);
+  }
 
   NotificationInputRequest? takePendingInputRequest() {
     final request = _pendingInputRequest;
@@ -160,7 +247,7 @@ class NotificationService implements PlanReminderScheduler {
     await _configureLocalTimezone();
 
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings(kAndroidNotificationSmallIcon);
 
     final DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
@@ -307,6 +394,7 @@ class NotificationService implements PlanReminderScheduler {
     required int planId,
     String? planIdentifier,
     required String title,
+    String? body,
     required int hour,
     required int minute,
     required List<int> days,
@@ -316,6 +404,7 @@ class NotificationService implements PlanReminderScheduler {
     int endHour = 0,
   }) async {
     final normalizedPlanId = _normalizePlanNotificationBaseId(planId);
+    final reminderBody = body ?? _notifString('reminderBody');
 
     await cancelPlanReminders(planId);
 
@@ -324,6 +413,7 @@ class NotificationService implements PlanReminderScheduler {
         normalizedPlanId: normalizedPlanId,
         planIdentifier: planIdentifier,
         title: title,
+        body: reminderBody,
         minute: minute,
         days: days,
         intervalHours: intervalHours,
@@ -335,7 +425,6 @@ class NotificationService implements PlanReminderScheduler {
     }
 
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    final body = _notifString('reminderBody');
 
     for (final int day in days) {
       final tz.TZDateTime firstInstance = _firstInstanceOfDayAndTime(
@@ -362,7 +451,7 @@ class NotificationService implements PlanReminderScheduler {
         await _scheduleSinglePlanReminder(
           id: id,
           title: title,
-          body: body,
+          body: reminderBody,
           scheduledDate: scheduledDate,
           planIdentifier: planIdentifier,
         );
@@ -378,6 +467,7 @@ class NotificationService implements PlanReminderScheduler {
     required int normalizedPlanId,
     String? planIdentifier,
     required String title,
+    required String body,
     required int minute,
     required List<int> days,
     required int intervalHours,
@@ -393,7 +483,6 @@ class NotificationService implements PlanReminderScheduler {
     if (end < start) return;
 
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    final body = _notifString('reminderBody');
     final daySet = days.toSet();
 
     final List<tz.TZDateTime> instances = [];
@@ -451,8 +540,8 @@ class NotificationService implements PlanReminderScheduler {
   }) async {
     final notificationDetails = _buildNotificationDetails(
       channelId: 'plan_reminders',
-      channelName: 'Plan Reminders',
-      channelDescription: 'Notifications for your daily plans',
+      channelName: _notifString('channelRemindersName'),
+      channelDescription: _notifString('channelRemindersDesc'),
       includeReminderActions: true,
     );
 
@@ -558,8 +647,8 @@ class NotificationService implements PlanReminderScheduler {
       body,
       _buildNotificationDetails(
         channelId: 'debug_notifications',
-        channelName: 'Debug Notifications',
-        channelDescription: 'Notifications for testing purposes',
+        channelName: _notifString('channelDebugName'),
+        channelDescription: _notifString('channelDebugDesc'),
       ),
       payload: _buildPayload(originalId: id, title: title, body: body),
     );
@@ -583,9 +672,8 @@ class NotificationService implements PlanReminderScheduler {
       body,
       _buildNotificationDetails(
         channelId: 'general_notifications',
-        channelName: 'General Notifications',
-        channelDescription:
-            'Notifications for encouragement and accountability check-ins',
+        channelName: _notifString('channelGeneralName'),
+        channelDescription: _notifString('channelGeneralDesc'),
         includeReminderActions: opensInput,
       ),
       payload: _buildPayload(
@@ -594,6 +682,9 @@ class NotificationService implements PlanReminderScheduler {
         body: body,
         planId: planId,
         opensInput: opensInput,
+        type: message.data['type']?.toString(),
+        actionId: message.data['actionId']?.toString(),
+        reason: message.data['reason']?.toString(),
       ),
     );
   }
@@ -609,8 +700,8 @@ class NotificationService implements PlanReminderScheduler {
   }) async {
     final notificationDetails = _buildNotificationDetails(
       channelId: 'scheduled_notifications',
-      channelName: 'Scheduled Notifications',
-      channelDescription: 'Specific time notifications',
+      channelName: _notifString('channelScheduledName'),
+      channelDescription: _notifString('channelScheduledDesc'),
       includeReminderActions: opensInput,
     );
     final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
@@ -663,9 +754,8 @@ class NotificationService implements PlanReminderScheduler {
     await _ensureInitializedForActionHandling();
 
     final payload = _parsePayload(response.payload);
-    if (response.actionId == _didItActionId ||
-        (response.actionId == null &&
-            _payloadOpensInputOnNotificationTap(payload))) {
+    // The explicit 했어 action: the quick note-only record.
+    if (response.actionId == _didItActionId) {
       _emitInputRequest(
         NotificationInputRequest(
           planId: payload['planId'] as String?,
@@ -673,6 +763,33 @@ class NotificationService implements PlanReminderScheduler {
         ),
       );
       return;
+    }
+
+    // A body tap opens the screen the notification is about: a partner push
+    // by its type; a plan reminder focuses that promise on the Now tab with
+    // the check-in choices (📸 인증샷 찍기 first) instead of a note dialog.
+    if (response.actionId == null) {
+      final pushType = payload['type'];
+      if (pushType is String && pushType.isNotEmpty) {
+        _emitOpenRequest(
+          NotificationOpenRequest(
+            type: pushType,
+            planId: payload['planId'] as String?,
+            actionId: payload['actionId'] as String?,
+            reason: payload['reason'] as String?,
+          ),
+        );
+        return;
+      }
+      if (_payloadOpensInputOnNotificationTap(payload)) {
+        _emitOpenRequest(
+          NotificationOpenRequest(
+            type: NotificationOpenRequest.reminderType,
+            planId: payload['planId'] as String?,
+          ),
+        );
+        return;
+      }
     }
 
     if (response.actionId == _skipTodayActionId) {
@@ -723,6 +840,15 @@ class NotificationService implements PlanReminderScheduler {
     }
 
     _pendingInputRequest = request;
+  }
+
+  void _emitOpenRequest(NotificationOpenRequest request) {
+    if (_openRequestController.hasListener) {
+      _openRequestController.add(request);
+      return;
+    }
+
+    _pendingOpenRequest = request;
   }
 
   void _emitSkipRequest(NotificationSkipRequest request) {
@@ -786,6 +912,9 @@ class NotificationService implements PlanReminderScheduler {
     required String body,
     String? planId,
     bool opensInput = false,
+    String? type,
+    String? actionId,
+    String? reason,
   }) {
     return jsonEncode(<String, Object?>{
       'originalId': originalId,
@@ -793,6 +922,9 @@ class NotificationService implements PlanReminderScheduler {
       'body': body,
       if (planId != null && planId.isNotEmpty) 'planId': planId,
       'opensInput': opensInput,
+      if (type != null && type.isNotEmpty) 'type': type,
+      if (actionId != null && actionId.isNotEmpty) 'actionId': actionId,
+      if (reason != null && reason.isNotEmpty) 'reason': reason,
     });
   }
 

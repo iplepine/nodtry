@@ -6,6 +6,23 @@ import '../../../providers/repository_provider.dart';
 import '../../../models/history_item.dart';
 import '../../../models/plan_model.dart';
 import '../../../models/plan_summary.dart';
+import '../../../utils/context_free_l10n.dart';
+import '../../../utils/error_reporter.dart';
+import '../../connect/application/partner_label_provider.dart';
+
+/// Bumped when a 인정 / 기록 변경 from the 기록 tab fails, so the screen can
+/// say so in a snackbar instead of replacing the whole list with an error.
+class HistoryActionFailureNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void report() => state++;
+}
+
+final historyActionFailureProvider =
+    NotifierProvider<HistoryActionFailureNotifier, int>(
+      HistoryActionFailureNotifier.new,
+    );
 
 class HistoryViewModel extends StreamNotifier<HistoryState> {
   @override
@@ -40,6 +57,8 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
       for (final connectedUser in connectedUsers)
         connectedUser.user.uid: connectedUser.user,
     };
+    // What I call my partner (nickname) wins over their display name.
+    final label = ref.watch(partnerLabelProvider);
 
     final recordRepo = ref.watch(recordRepositoryProvider);
 
@@ -59,8 +78,22 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         allPlans.addAll(partnerPlans);
       }
 
+      // Plans I manage: only their records can get my 인정 (the action rules
+      // deny the rest, e.g. the partner's plans that ended before we linked).
+      final managedPlanIds = {
+        for (final plan in allPlans)
+          if (plan.managerId == myUid && plan.id != null) plan.id!,
+      };
+
       // 3. Join connected profile info needed by partner-side history cards.
-      final enrichedItems = allItems.map((item) {
+      final enrichedItems = allItems.map((original) {
+        final item = original.executorId == myUid
+            ? original
+            : original.copyWith(
+                canVerify:
+                    original.planId != null &&
+                    managedPlanIds.contains(original.planId),
+              );
         final executorProfile = connectedProfilesByUid[item.executorId];
         if (executorProfile == null) {
           return item;
@@ -68,12 +101,15 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
 
         final existingName = _nonBlank(item.partnerName);
         final existingImageUrl = _nonBlank(item.partnerImageUrl);
-        final profileName =
-            _nonBlank(executorProfile.displayName) ??
-            _nonBlank(executorProfile.email);
+        // Never the partner's email: it isn't on their profile any more,
+        // and an email is not a name to show.
+        final profileName = _nonBlank(executorProfile.displayName);
 
         return item.copyWith(
-          partnerName: existingName ?? profileName,
+          partnerName: label.preferredFor(
+            item.executorId,
+            displayName: existingName ?? profileName,
+          ),
           partnerImageUrl:
               existingImageUrl ?? _nonBlank(executorProfile.profileImageUrl),
         );
@@ -115,7 +151,9 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         finishedPlanSummaries.add(
           PlanSummary(
             planId: plan.id ?? '',
-            title: plan.items.isNotEmpty ? plan.items.first.title : '제목 없음',
+            title: plan.items.isNotEmpty
+                ? plan.items.first.title
+                : contextFreeL10n().promiseUntitledFallback,
             startDate: plan.startDate,
             endDate: plan.endDate,
             myCount: count,
@@ -145,7 +183,10 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
       }
 
       final partnerName = connectedUsers.isNotEmpty
-          ? connectedUsers.first.user.displayName
+          ? label.preferredFor(
+              connectedUsers.first.user.uid,
+              displayName: connectedUsers.first.user.displayName,
+            )
           : null;
 
       return HistoryState(
@@ -170,7 +211,11 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
       } else if (intent is ReconcileIntent) {
         await _reconcile(intent.historyId, intent.status);
       } else if (intent is VerifyHistoryIntent) {
-        await _verify(intent.historyId, message: intent.message);
+        await _verify(
+          intent.historyId,
+          message: intent.message,
+          reaction: intent.reaction,
+        );
       } else if (intent is SetFilterIntent) {
         state = AsyncValue.data(state.value!.copyWith(filter: intent.filter));
         // Filtering is done in the stream naturally when state.value.filter changes?
@@ -184,6 +229,12 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
         // OR make the filtering happen more reactively.
       }
     } catch (e, stack) {
+      if (intent is VerifyHistoryIntent || intent is ReconcileIntent) {
+        // A failed action is transient: keep the list, tell the user.
+        ErrorReporter.record(e, stack, reason: 'historyDispatch');
+        ref.read(historyActionFailureProvider.notifier).report();
+        return;
+      }
       state = AsyncValue.error(e, stack);
     }
   }
@@ -196,10 +247,14 @@ class HistoryViewModel extends StreamNotifier<HistoryState> {
     ref.invalidateSelf();
   }
 
-  Future<void> _verify(String historyId, {String? message}) async {
+  Future<void> _verify(
+    String historyId, {
+    String? message,
+    String? reaction,
+  }) async {
     await ref
         .read(recordRepositoryProvider)
-        .verifyHistoryItem(historyId, message: message);
+        .verifyHistoryItem(historyId, message: message, reaction: reaction);
     ref.invalidateSelf();
   }
 

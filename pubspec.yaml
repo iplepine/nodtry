@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.58+80
+version: 1.1.0+81
 
 environment:
   sdk: ^3.8.1
@@ -54,7 +54,6 @@ dependencies:
   intl: ^0.20.2
   freezed_annotation: ^3.1.0
   flutter_dotenv: ^6.0.0
-  flutter_native_splash: ^2.4.7
   firebase_messaging: ^16.1.0
   firebase_crashlytics: ^5.0.0
   firebase_analytics: ^12.4.2
@@ -65,13 +64,20 @@ dependencies:
   in_app_purchase: ^3.3.0
   sign_in_with_apple: ^7.0.1
   crypto: ^3.0.7
-  lottie: ^3.3.1
   flutter_svg: ^2.2.3
+  package_info_plus: ^9.0.1
+  url_launcher: ^6.3.2
+  image: ^4.10.1
+  path_provider: ^2.1.6
+  share_plus: ^12.0.2
+  in_app_review: ^2.0.12
+  # Invite-code callables (resolveInviteCode / redeemInviteCode). Locked at
+  # 6.3.2, the release that matches firebase_core 4.10 / cloud_firestore 6.5;
+  # newer ones pull a whole Firebase SDK upgrade.
+  cloud_functions: ^6.3.2
 
 dev_dependencies:
   flutter_test:
-    sdk: flutter
-  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -81,28 +87,43 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.14.4
+  # Generates the native splash (`dart run flutter_native_splash:create`);
+  # nothing in lib/ uses it at runtime.
+  flutter_native_splash: ^2.4.7
 
   freezed: ^3.2.3
   build_runner: ^2.7.1
+  # Pinned: newer releases force a Firebase SDK upgrade (cloud_firestore >=6.7).
+  fake_cloud_firestore: 4.1.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+# 둘운완 / DuoDone brand icon (Heart-Check). Masters + guide: assets/brand/,
+# docs/design/BRAND.md. Regenerate with `dart run flutter_launcher_icons`.
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "app_icon.png"
-  adaptive_icon_background: "#F8FAF7"
-  adaptive_icon_foreground: "app_icon.png"
+  image_path: "assets/brand/icon_1024.png" # opaque, full-bleed (no baked corners)
+  adaptive_icon_background: "assets/brand/icon_background.png" # coral gradient
+  adaptive_icon_foreground: "assets/brand/icon_foreground.png" # mark in 66% safe zone
+  adaptive_icon_foreground_inset: 0 # safe zone is already baked into the PNG
+  adaptive_icon_monochrome: "assets/brand/icon_monochrome.png" # Android 13 themed
   min_sdk_android: 23
   remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/brand/icon_1024.png"
+    background_color: "#FFF8F6"
+    theme_color: "#D92653"
 
+# Regenerate with `dart run flutter_native_splash:create`.
 flutter_native_splash:
-  color: "#F8FAF7" # Mint × Orange background
-  image: "splash_icon.png"
+  color: "#FFF8F6" # brand background (matches in-app AppColors.background)
+  image: "assets/brand/splash_logo.png" # 4x source: 384px tile = 96pt/dp
   android_12:
-    image: "splash_icon.png"
-    icon_background_color: "#F8FAF7"
+    image: "assets/brand/splash_android12.png" # 1152 canvas, disc in centre 2/3
+    color: "#FFF8F6"
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -115,7 +136,6 @@ flutter:
 
   assets:
     - .env
-    - assets/animations/
     - assets/icons/reactions/
     - assets/images/
     - assets/images/google_logo.png

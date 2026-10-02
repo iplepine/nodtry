@@ -42,6 +42,7 @@ class _FakeScheduler implements PlanReminderScheduler {
     required int planId,
     String? planIdentifier,
     required String title,
+    String? body,
     required int hour,
     required int minute,
     required List<int> days,
@@ -134,12 +135,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final l10n = await AppLocalizations.delegate.load(const Locale('en'));
     expect(
-      find.textContaining('restart a missed promise'),
+      find.text(l10n.nowPartnerMissedPokeBody('Jimin')),
       findsOneWidget,
       reason: 'expected the missed-promise body for hasMissedNotice: true',
     );
-    expect(find.textContaining('promise is quiet'), findsNothing);
+    expect(find.text(l10n.nowPartnerQuietPokeBody('Jimin')), findsNothing);
   });
 
   testWidgets('an English quiet knock still shows the quiet body', (
@@ -150,8 +152,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('promise is quiet'), findsOneWidget);
-    expect(find.textContaining('restart a missed promise'), findsNothing);
+    final l10n = await AppLocalizations.delegate.load(const Locale('en'));
+    expect(find.text(l10n.nowPartnerQuietPokeBody('Jimin')), findsOneWidget);
+    expect(find.text(l10n.nowPartnerMissedPokeBody('Jimin')), findsNothing);
   });
 
   testWidgets('the Korean missed-promise knock keeps working', (tester) async {
@@ -160,6 +163,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('놓친 약속'), findsWidgets);
+    final l10n = await AppLocalizations.delegate.load(const Locale('ko'));
+    expect(find.text(l10n.nowPartnerMissedPokeBody('Jimin')), findsOneWidget);
+    // Particle-safe copy: the name is never followed by 님.
+    expect(find.textContaining('Jimin님'), findsNothing);
   });
 }

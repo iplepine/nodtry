@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:nod_try/theme/app_colors.dart';
@@ -17,8 +16,16 @@ import '../../../../widgets/plan/plan_card.dart';
 import '../../../../providers/plan_list_provider.dart';
 import '../us_state.dart';
 import '../us_viewmodel.dart';
+import '../widgets/disconnect_partner_dialog.dart';
+import '../../../connect/application/partner_label_provider.dart';
+import '../../../duo/application/duo_stats_provider.dart';
+import '../../../duo/presentation/duo_share_card.dart';
+import '../../../duo/presentation/duo_widgets.dart';
+import '../../../connect/presentation/widgets/invite_share_panel.dart';
+import '../../../connect/presentation/widgets/partner_nickname_sheet.dart';
+import '../../../../core/legal_links.dart';
+import '../../../proof/domain/proof_labels.dart' show kSupportEmail;
 import '../../../../utils/ui_error_codes.dart';
-import '../../../../utils/analytics.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -104,8 +111,9 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                         ? me.displayName!
                         : l10n.usDefaultNameMe,
                     myImageUrl: me.profileImageUrl,
-                    partnerName: partner.displayName ?? '',
+                    partnerName: ref.watch(partnerLabelProvider).resolve(l10n),
                     partnerImageUrl: partner.profileImageUrl,
+                    stats: ref.watch(duoStatsProvider),
                     l10n: l10n,
                   );
                 },
@@ -163,7 +171,8 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                                               decoration: BoxDecoration(
                                                 border: Border(
                                                   bottom: BorderSide(
-                                                    color: AppColors.warningStrong,
+                                                    color:
+                                                        AppColors.warningStrong,
                                                     width: 1.0,
                                                   ),
                                                 ),
@@ -176,8 +185,10 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                                                     .textTheme
                                                     .bodyMedium
                                                     ?.copyWith(
-                                                      color: AppColors.warningStrong,
-                                                      fontWeight: FontWeight.bold,
+                                                      color: AppColors
+                                                          .warningStrong,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                               ),
                                             ),
@@ -212,6 +223,8 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                           user?.profileImageUrl,
                         ),
                         inviteCode: user?.inviteCode,
+                        onCopyInviteCode: () =>
+                            copyInviteWithFeedback(context, ref, surface: 'us'),
                         hasConnectedPartner: state.connectedProfiles.isNotEmpty,
                       ),
 
@@ -248,8 +261,14 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                             previousUser.profileImageUrl,
                           ),
                           inviteCode: previousUser.inviteCode,
+                          onCopyInviteCode: () => copyInviteWithFeedback(
+                            context,
+                            ref,
+                            surface: 'us',
+                          ),
                           // 에러 fallback 경로 — 가능하면 마지막으로 알려진 connectedProfiles 사용.
-                          hasConnectedPartner: ref
+                          hasConnectedPartner:
+                              ref
                                   .read(usViewModelProvider)
                                   .value
                                   ?.connectedProfiles
@@ -435,7 +454,8 @@ class _UsScreenState extends ConsumerState<UsScreen> {
               // dispatch reports link failures as state, never by throwing, so
               // the outcome has to be read back before claiming success.
               final failed =
-                  ref.read(usViewModelProvider).value?.errorNotification != null;
+                  ref.read(usViewModelProvider).value?.errorNotification !=
+                  null;
               if (!failed) {
                 messenger.showSnackBar(
                   SnackBar(content: Text(l10n.usLinkEmailSuccess)),
@@ -484,6 +504,9 @@ class _MeSection extends StatelessWidget {
   final String? inviteCode;
   final VoidCallback onEditProfile;
 
+  /// Copies the code (and logs `invite_shared {channel: copy}`).
+  final VoidCallback onCopyInviteCode;
+
   /// 파트너가 이미 연결된 상태인지. 연결됨이면 초대 코드 행을 카드에서 숨김
   /// (페르소나 합의: 사용자가 더 안 쓸 정보가 큰 자리 차지하는 것 해소).
   final bool hasConnectedPartner;
@@ -495,6 +518,7 @@ class _MeSection extends StatelessWidget {
     this.profileImageUrl,
     this.inviteCode,
     required this.onEditProfile,
+    required this.onCopyInviteCode,
     this.hasConnectedPartner = false,
   });
 
@@ -690,17 +714,7 @@ class _MeSection extends StatelessWidget {
                     ],
                   ),
                   onTap: () {
-                    if (inviteCode != null) {
-                      Clipboard.setData(ClipboardData(text: inviteCode!));
-                      AnalyticsService.log(
-                        AnalyticsEvent.inviteCodeShared,
-                        {'method': 'copy'},
-                      );
-
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(l10n.codeCopied)));
-                    }
+                    if (inviteCode != null) onCopyInviteCode();
                   },
                 ),
               ],
@@ -766,6 +780,7 @@ class _YouSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final label = ref.watch(partnerLabelProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -816,29 +831,42 @@ class _YouSection extends ConsumerWidget {
         if (connectedProfiles.isEmpty)
           _buildEmptyState(context)
         else
-          ...connectedProfiles.map(
-            (person) => Column(
+          ...connectedProfiles.map((person) {
+            final isPartner = person.user.uid == label.partnerUid;
+            final name =
+                label.preferredFor(
+                  person.user.uid,
+                  displayName: person.user.displayName,
+                ) ??
+                l10n.usUnknownUser;
+            return Column(
               children: [
                 _PersonCard(
                   person: person,
                   l10n: l10n,
+                  title: name,
+                  // With a nickname, the real name stays visible underneath.
+                  realName: isPartner && label.hasNickname
+                      ? partnerDisplayNameOrNull(person.user.displayName)
+                      : null,
+                  hasNickname: isPartner && label.hasNickname,
+                  onEditNickname: () => showPartnerNicknameSheet(context),
                   onDisconnect: () =>
                       _showDisconnectDialog(context, ref, person),
+                  onReport: () => _reportPartner(context, ref, person),
                 ),
                 // 파트너 계획 리스트 추가
                 Padding(
                   padding: const EdgeInsets.only(left: 1, right: 1, bottom: 24),
                   child: _ActivePlanListSection(
                     userId: person.user.uid,
-                    title: l10n.usPartnerPlanTitle(
-                      person.user.displayName ?? l10n.usUnknownUser,
-                    ),
+                    title: l10n.usPartnerPlanTitle(name),
                     isMe: false,
                   ),
                 ),
               ],
-            ),
-          ),
+            );
+          }),
         const SizedBox(height: 24),
       ],
     );
@@ -849,56 +877,7 @@ class _YouSection extends ConsumerWidget {
     WidgetRef ref,
     ConnectedUser person,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.usDisconnectDialogTitle),
-        content: Text(
-          l10n.usDisconnectDialogContent(
-            person.user.displayName ?? l10n.usUnknownUser,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              l10n.usDisconnectConfirm,
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      try {
-        await ref
-            .read(disconnectConnectionUseCaseProvider)
-            .execute(person.user.uid);
-        // 목록 갱신 -> Stream이므로 자동 갱신되지만 connectedProfilesProvider는 FutureProvider라 invalidate 필요
-        // 사실 ConnectRepository가 변경되면 Stream은 반응하지만, connectedProfiles는 FutureProvider라서...
-        // Repository에서 status 변경을 감지하고 invalidate 해줘야 함?
-        // 아니면 여기서 수동으로 invalidate.
-        ref.invalidate(connectedProfilesProvider);
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.usDisconnectSuccess)));
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.usDisconnectError)),
-          );
-        }
-      }
-    }
+    await confirmAndDisconnectPartner(context, ref, person);
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -960,15 +939,53 @@ class _YouSection extends ConsumerWidget {
 }
 
 /// 사람 카드
+/// A `mailto:` report about the partner to the support inbox, with their id
+/// (nothing else personal). Disconnecting stays the way to block them.
+Future<void> _reportPartner(
+  BuildContext context,
+  WidgetRef ref,
+  ConnectedUser person,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final uri = supportMailUri(
+    subject: l10n.usReportPartnerSubject,
+    body: l10n.usReportPartnerBody(person.user.uid),
+  );
+  final opened = await ref.read(externalLinkLauncherProvider)(uri);
+  if (!opened) {
+    messenger?.showSnackBar(
+      SnackBar(content: Text(l10n.proofReportMailFailed(kSupportEmail))),
+    );
+  }
+}
+
 class _PersonCard extends StatelessWidget {
   final ConnectedUser person; // ConnectedUser 사용
   final AppLocalizations l10n;
+
+  /// What I call this person: nickname ?? display name ?? 짝꿍.
+  final String title;
+
+  /// The display name, shown under [title] when a nickname is set.
+  final String? realName;
+  final bool hasNickname;
+  final VoidCallback onEditNickname;
   final VoidCallback onDisconnect;
+
+  /// 짝꿍 신고하기: anything the partner sends (photos, notes, messages,
+  /// promises) can be reported, not only a single photo.
+  final VoidCallback onReport;
 
   const _PersonCard({
     required this.person,
     required this.l10n,
+    required this.title,
+    this.realName,
+    required this.hasNickname,
+    required this.onEditNickname,
     required this.onDisconnect,
+    required this.onReport,
   });
 
   @override
@@ -982,9 +999,8 @@ class _PersonCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            // TODO: 상세 관계 화면 이동?
-          },
+          key: const ValueKey('us-partner-card'),
+          onTap: onEditNickname,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -1017,8 +1033,8 @@ class _PersonCard extends StatelessWidget {
                     radius: 20,
                     backgroundColor: AppColors.secondary,
                     child: Text(
-                      (person.user.displayName?.isNotEmpty ?? false)
-                          ? person.user.displayName![0]
+                      title.isNotEmpty
+                          ? String.fromCharCode(title.runes.first)
                           : '?',
                       style: TextStyle(
                         color: AppColors.textPrimary,
@@ -1032,12 +1048,22 @@ class _PersonCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        person.user.displayName ?? l10n.usNoName,
+                        title,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
                         ),
                       ),
+                      if (realName != null && realName!.trim().isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          realName!,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                       if (person.user.statusMessage != null &&
                           person.user.statusMessage!.isNotEmpty) ...[
                         const SizedBox(height: 4),
@@ -1053,29 +1079,53 @@ class _PersonCard extends StatelessWidget {
                       Wrap(
                         spacing: 6,
                         runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
+                          // A couple is one mutual pair. The one-way
+                          // 지지받는 중 / 응원하는 중 badges framed the link as
+                          // one person watching the other, so they are hidden.
                           if (person.isMutual)
                             _RelationshipBadge(
                               text: l10n.usBadgeMutual,
                               color: AppColors.primary,
                               textColor: Colors.white,
-                            )
-                          else ...[
-                            if (person.isSupported)
-                              _RelationshipBadge(
-                                text: l10n.usBadgeSupported,
-                                color: AppColors.neutralBadge,
-                                textColor: AppColors.textSecondary,
+                            ),
+                          InkWell(
+                            key: const ValueKey('us-edit-nickname'),
+                            onTap: onEditNickname,
+                            borderRadius: BorderRadius.circular(6),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
                               ),
-                            if (person.isCheering)
-                              _RelationshipBadge(
-                                text: l10n.usBadgeCheering,
-                                color: AppColors.primary.withValues(
-                                  alpha: 0.15,
-                                ),
-                                textColor: AppColors.primary,
+                              decoration: BoxDecoration(
+                                color: AppColors.primarySoft,
+                                borderRadius: BorderRadius.circular(6),
                               ),
-                          ],
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.edit_rounded,
+                                    size: 11,
+                                    color: AppColors.primaryPressed,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    hasNickname
+                                        ? l10n.usEditNickname
+                                        : l10n.usSetNickname,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primaryPressed,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -1092,6 +1142,21 @@ class _PersonCard extends StatelessWidget {
                   tooltip: l10n.usDisconnectTooltip,
                   position: PopupMenuPosition.under,
                   itemBuilder: (context) => [
+                    PopupMenuItem<String>(
+                      key: const ValueKey('us-report-partner'),
+                      value: 'report',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.flag_outlined,
+                            color: AppColors.textSecondary,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(l10n.usReportPartner),
+                        ],
+                      ),
+                    ),
                     PopupMenuItem<String>(
                       value: 'disconnect',
                       child: Row(
@@ -1113,6 +1178,8 @@ class _PersonCard extends StatelessWidget {
                   onSelected: (value) {
                     if (value == 'disconnect') {
                       onDisconnect();
+                    } else if (value == 'report') {
+                      onReport();
                     }
                   },
                 ),
@@ -1238,9 +1305,9 @@ class _EditProfileDialogContentState
       // the camera badge with nothing happening at all.
       ErrorReporter.record(e, stack, reason: 'pickProfileImage');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.l10n.usImagePickFailed)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(widget.l10n.usImagePickFailed)));
       }
     }
   }
@@ -1296,7 +1363,10 @@ class _EditProfileDialogContentState
     return AlertDialog(
       scrollable: true,
       backgroundColor: AppColors.surface,
-      title: Text(widget.l10n.usEditProfile, style: TextStyle(color: AppColors.textPrimary)),
+      title: Text(
+        widget.l10n.usEditProfile,
+        style: TextStyle(color: AppColors.textPrimary),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1459,7 +1529,10 @@ class _EditProfileDialogContentState
         else
           TextButton(
             onPressed: _save,
-            child: Text(widget.l10n.usSave, style: TextStyle(color: AppColors.primary)),
+            child: Text(
+              widget.l10n.usSave,
+              style: TextStyle(color: AppColors.primary),
+            ),
           ),
       ],
     );
@@ -1602,18 +1675,9 @@ class _ActivePlanListSection extends ConsumerWidget {
                     onDelete: isMe
                         ? () => _showDeletePlanDialog(context, ref, plan)
                         : null,
-                    // 파트너 약속에만 응원 액션 노출. 백엔드 dispatch는 후속 작업,
-                    // 지금은 즉각적인 SnackBar로 피드백 루프만 시각화.
-                    onCheer: !isMe
-                        ? () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.usCheerSent),
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          }
-                        : null,
+                    // No cheer button here: it only showed a "sent" snackbar
+                    // and never reached the partner. 인정/응원 lives on the
+                    // Now tab where it is actually delivered.
                   ),
                 ),
                 if (isMe)
@@ -1662,7 +1726,10 @@ class _ActivePlanListSection extends ConsumerWidget {
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ),
-          error: (err, stack) => Text('Error: $err'),
+          error: (err, stack) => Text(
+            l10n.historyErrorUnknown,
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
         ),
       ],
     );
@@ -1679,7 +1746,10 @@ class _ActivePlanListSection extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(l10n.usCancel, style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                l10n.usCancel,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -1690,11 +1760,17 @@ class _ActivePlanListSection extends ConsumerWidget {
                     await ref.read(settingAlarmUseCaseProvider).cancel(plan);
 
                     // 2. Delete plan from repository
-                    await ref.read(recordRepositoryProvider).deletePlan(plan.id!);
+                    await ref
+                        .read(recordRepositoryProvider)
+                        .deletePlan(plan.id!);
 
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppLocalizations.of(context)!.usPlanDeleted)),
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!.usPlanDeleted,
+                          ),
+                        ),
                       );
                       // Refresh plans by invalidating the provider
                       ref.invalidate(activePlansProvider(userId));
@@ -1702,13 +1778,20 @@ class _ActivePlanListSection extends ConsumerWidget {
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.usDeleteFailed)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.usDeleteFailed,
+                        ),
+                      ),
+                    );
                   }
                 }
               },
-              child: Text(l10n.usDelete, style: TextStyle(color: AppColors.error)),
+              child: Text(
+                l10n.usDelete,
+                style: TextStyle(color: AppColors.error),
+              ),
             ),
           ],
         );
@@ -1720,11 +1803,15 @@ class _ActivePlanListSection extends ConsumerWidget {
 /// Us 헤더 카드 — 두 사람의 공동 정체성을 시각화하는 진입 카드.
 /// 김민서 페르소나의 권고: "Me / You가 병렬로 나열되어 '우리'가 어디에도 없다.
 /// 두 거실을 잇는 같이 보는 창문 하나가 필요하다."
+///
+/// With the duo stats in (spec §4.7): "둘이 함께 N일째", this week's dots for
+/// both of us and the share-card button.
 class _UsHeroCard extends StatelessWidget {
   final String myName;
   final String? myImageUrl;
   final String partnerName;
   final String? partnerImageUrl;
+  final DuoStats? stats;
   final AppLocalizations l10n;
 
   const _UsHeroCard({
@@ -1732,12 +1819,16 @@ class _UsHeroCard extends StatelessWidget {
     required this.myImageUrl,
     required this.partnerName,
     required this.partnerImageUrl,
+    required this.stats,
     required this.l10n,
   });
 
   @override
   Widget build(BuildContext context) {
+    final stats = this.stats;
+    final hasStats = stats != null && stats.hasPartner;
     return Container(
+      key: const ValueKey('us-hero'),
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1755,61 +1846,100 @@ class _UsHeroCard extends StatelessWidget {
           width: 0.8,
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 두 아바타 겹침 — 시각적 공동 정체성의 핵심 모티프.
-          SizedBox(
-            width: 80,
-            height: 44,
-            child: Stack(
+          Row(
+            children: [
+              // 두 아바타 겹침 — 시각적 공동 정체성의 핵심 모티프.
+              SizedBox(
+                width: 80,
+                height: 44,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 0,
+                      child: _HeroAvatar(imageUrl: myImageUrl, name: myName),
+                    ),
+                    Positioned(
+                      left: 36,
+                      child: _HeroAvatar(
+                        imageUrl: partnerImageUrl,
+                        name: partnerName,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$myName · $partnerName',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hasStats
+                          ? duoStreakHeadline(l10n, stats.streak)
+                          : l10n.usHeroSubtitle,
+                      key: const ValueKey('us-hero-streak'),
+                      style: TextStyle(
+                        color: hasStats
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                        fontSize: hasStats ? 14 : 12,
+                        fontWeight: hasStats
+                            ? FontWeight.w800
+                            : FontWeight.w400,
+                        height: 1.4,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (hasStats) ...[
+            const SizedBox(height: 14),
+            DuoWeekDots(
+              week: stats.week,
+              showPartner: true,
+              meLabel: l10n.duoMeLabel,
+              partnerLabel: partnerName,
+            ),
+            const SizedBox(height: 10),
+            Row(
               children: [
-                Positioned(
-                  left: 0,
-                  child: _HeroAvatar(
-                    imageUrl: myImageUrl,
-                    name: myName,
+                Expanded(
+                  child: Text(
+                    stats.todayIsDuoDone
+                        ? l10n.duoTodayDone
+                        : l10n.duoWeekDuoDays(stats.weekDuoDays),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-                Positioned(
-                  left: 36,
-                  child: _HeroAvatar(
-                    imageUrl: partnerImageUrl,
-                    name: partnerName,
-                  ),
-                ),
+                const DuoShareButton(),
               ],
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '$myName · $partnerName',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  l10n.usHeroSubtitle,
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                    height: 1.4,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
+          ],
         ],
       ),
     );
@@ -1833,10 +1963,8 @@ class _HeroAvatar extends StatelessWidget {
         ),
         child: CachedNetworkImage(
           imageUrl: imageUrl!,
-          imageBuilder: (context, imageProvider) => CircleAvatar(
-            radius: radius,
-            backgroundImage: imageProvider,
-          ),
+          imageBuilder: (context, imageProvider) =>
+              CircleAvatar(radius: radius, backgroundImage: imageProvider),
           placeholder: (context, url) => CircleAvatar(
             radius: radius,
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),

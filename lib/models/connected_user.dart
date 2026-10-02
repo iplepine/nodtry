@@ -8,10 +8,16 @@ class ConnectedUser {
   final bool isSupported; // 내가 이 사람에게 지지받고 있음 (User is Manager)
   final bool isCheering; // 내가 이 사람을 응원하고 있음 (User is Executor)
 
+  /// When the current link with this person was made (relation
+  /// `connectedAt ?? createdAt`, the earliest of the pair's docs), or null
+  /// when unknown. Bounds the 둘운완 streak to days as a couple.
+  final DateTime? linkedAt;
+
   ConnectedUser({
     required this.user,
     required this.isSupported,
     required this.isCheering,
+    this.linkedAt,
   });
 
   bool get isMutual => isSupported && isCheering;

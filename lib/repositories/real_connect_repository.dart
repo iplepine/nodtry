@@ -1,60 +1,115 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:math';
+import 'package:flutter/foundation.dart';
+import '../features/connect/domain/invite_code.dart' as invite;
 import '../models/relation_model.dart';
 import '../utils/error_reporter.dart';
 import 'connect_repository.dart';
+import 'invite_code_callables.dart';
 
 /// Firestore 기반 실제 연결 데이터 저장소
+///
+/// Reads are participant-scoped (firestore.rules.next): relations by
+/// `executorId == me` / `managerId == me`, never another user's; invite codes
+/// are redeemed by the `redeemInviteCode` callable, not by querying users.
 class RealConnectRepository implements ConnectRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  // final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  // final FirebaseAuth _auth = FirebaseAuth.instance;
+  RealConnectRepository({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+    CallableInvoker? callables,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance,
+       _callables = callables ?? firebaseCallableInvoker;
+
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
+  final CallableInvoker _callables;
 
   @override
   Future<String> connectWithCode(String code) async {
     final me = _auth.currentUser;
     if (me == null) throw Exception('Not authenticated');
 
+    final normalized = invite.normalizeInviteCode(code);
+    if (!invite.isValidInviteCode(normalized)) {
+      throw const InviteCodeNotFoundException();
+    }
+
+    try {
+      final data = await _callables(kRedeemInviteCodeCallable, {
+        'code': normalized,
+      });
+      return RedeemedInvite.fromData(data).partnerId;
+    } catch (e) {
+      switch (inviteCallableFailureOf(e)) {
+        case InviteCallableFailure.unavailable:
+          // Backend without the callable yet (works under firestore.rules
+          // only; by the rules.next flip the callable is deployed).
+          return _connectWithCodeDirectly(me, normalized);
+        case InviteCallableFailure.notFound:
+        case InviteCallableFailure.codeFormat:
+          throw const InviteCodeNotFoundException();
+        case InviteCallableFailure.selfCode:
+          throw const InviteCodeIsMineException();
+        case InviteCallableFailure.selfTaken:
+          throw const InviteLinkRefusedException('self_taken');
+        case InviteCallableFailure.ownerTaken:
+          throw const InviteLinkRefusedException('owner_taken');
+        case InviteCallableFailure.rateLimited:
+        case null:
+          rethrow;
+      }
+    }
+  }
+
+  /// The pre-callable path (builds ≤80 did only this): find the code's owner
+  /// by querying users, then write both relation docs. The users query is
+  /// denied under firestore.rules.next.
+  Future<String> _connectWithCodeDirectly(User me, String normalized) async {
     // 1. 코드로 유저 검색
     final userQuery = await _firestore
         .collection('users')
-        .where('inviteCode', isEqualTo: code)
+        .where('inviteCode', isEqualTo: normalized)
         .limit(1)
         .get();
 
     if (userQuery.docs.isEmpty) {
-      throw Exception('User not found');
+      throw const InviteCodeNotFoundException();
     }
 
-    final targetUserDoc = userQuery.docs.first;
-    final targetUserId = targetUserDoc.id;
+    final targetUserId = userQuery.docs.first.id;
+    if (targetUserId == me.uid) {
+      throw const InviteCodeIsMineException();
+    }
 
-    // 2. 이미 연결되어 있는지 확인 (옵션)
-    // (MVP에서는 일단 중복 체크 없이 생성하거나, 클라이언트에서 필터링)
-
-    // 3. Relations 생성 (양방향 — 상호지지)
+    // 2. Relations 생성 (양방향 — 상호지지)
+    //
+    // Both docs carry who shared the code (`inviterId`) and the code that was
+    // used (`inviteCode`). The server's onRelationCreated uses them to pick the
+    // inviter for the 연결 push and to undo a link made with a code the owner
+    // no longer holds; it also enforces the 1:1 limit. Old clients write
+    // neither field, so both are optional on the server side.
     final batch = _firestore.batch();
+    final link = <String, Object>{
+      'status': 'active',
+      'inviterId': targetUserId,
+      'inviteCode': normalized,
+      'createdAt': FieldValue.serverTimestamp(),
+      'connectedAt': FieldValue.serverTimestamp(),
+    };
 
     // A: 초대자(Target) = Manager, 참여자(Me) = Executor
     batch.set(_firestore.collection('relations').doc(), {
       'managerId': targetUserId,
       'executorId': me.uid,
-      'status': 'active',
-      'createdAt': FieldValue.serverTimestamp(),
-      'connectedAt': FieldValue.serverTimestamp(),
+      ...link,
     });
 
     // B: 참여자(Me) = Manager, 초대자(Target) = Executor
     batch.set(_firestore.collection('relations').doc(), {
       'managerId': me.uid,
       'executorId': targetUserId,
-      'status': 'active',
-      'createdAt': FieldValue.serverTimestamp(),
-      'connectedAt': FieldValue.serverTimestamp(),
+      ...link,
     });
 
     await batch.commit();
@@ -67,16 +122,8 @@ class RealConnectRepository implements ConnectRepository {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
 
-    // Simple 8-char random code (UPPERCASE + DIGITS)
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = Random();
-    final code = List.generate(
-      8,
-      (index) => chars[rnd.nextInt(chars.length)],
-    ).join();
-    // Ideally use Random.secure() but simple logic for now
-
-    // Check uniqueness omitted for MVP (Low collision probability for small scale)
+    // Easy-to-read alphabet + Random.secure (lib/features/connect/domain).
+    final code = invite.generateInviteCode();
 
     await _firestore.collection('users').doc(user.uid).update({
       'inviteCode': code,
@@ -123,7 +170,9 @@ class RealConnectRepository implements ConnectRepository {
       return list;
     } catch (e, s) {
       ErrorReporter.record(e, s, reason: 'getConnections');
-      return [];
+      // Rethrown, not []: "couldn't load" must not read as "no partner" —
+      // a plan saved then lost its manager (and the partner their notices).
+      rethrow;
     }
   }
 
@@ -156,25 +205,35 @@ class RealConnectRepository implements ConnectRepository {
     final me = _auth.currentUser;
     if (me == null) throw Exception('Not authenticated');
 
-    // 나와 상대방이 연결된 문서 찾기 (executor or manager)
+    // 나와 상대방이 연결된 문서 찾기 (executor or manager). My relations
+    // (the participant shape rules.next allows), narrowed to this partner.
     final query = await _firestore
         .collection('relations')
         .where(
           Filter.or(
-            Filter.and(
-              Filter('executorId', isEqualTo: me.uid),
-              Filter('managerId', isEqualTo: targetUserId),
-            ),
-            Filter.and(
-              Filter('executorId', isEqualTo: targetUserId),
-              Filter('managerId', isEqualTo: me.uid),
-            ),
+            Filter('executorId', isEqualTo: me.uid),
+            Filter('managerId', isEqualTo: me.uid),
           ),
         )
         .get();
 
     for (final doc in query.docs) {
-      await doc.reference.delete();
+      final data = doc.data();
+      final withTarget =
+          (data['executorId'] == me.uid && data['managerId'] == targetUserId) ||
+          (data['executorId'] == targetUserId && data['managerId'] == me.uid);
+      if (withTarget) await doc.reference.delete();
+    }
+
+    // The nickname I had for this partner must not carry over to the next
+    // one. The server clears it too (onRelationDeleted); doing it here makes
+    // it immediate and covers a server that isn't deployed yet.
+    try {
+      await _firestore.collection('users').doc(me.uid).update({
+        'partnerNickname': FieldValue.delete(),
+      });
+    } catch (e) {
+      debugPrint('[RealConnectRepository] nickname clear skipped: $e');
     }
   }
 

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../services/auth_service.dart';
 import '../settings_state.dart';
 import '../../../../providers/app_settings_provider.dart';
 import '../../../../providers/repository_provider.dart';
@@ -33,13 +35,13 @@ class SettingsViewModel extends AsyncNotifier<SettingsState> {
       ref.read(appSettingsProvider.notifier).setTheme(intent.theme);
       state = AsyncValue.data(prevState.copyWith(currentTheme: intent.theme));
     } else if (intent is WithdrawAccountIntent) {
-      await _withdraw();
+      await _withdraw(password: intent.password);
     } else if (intent is LogoutIntent) {
       await _logout();
     }
   }
 
-  Future<void> _withdraw() async {
+  Future<void> _withdraw({String? password}) async {
     final prevState = state.value!;
     // Deleting an account is irreversible and the row stays on screen while it
     // runs, so a second tap must not start a second deletion.
@@ -51,8 +53,28 @@ class SettingsViewModel extends AsyncNotifier<SettingsState> {
 
     try {
       final withdrawUseCase = ref.read(withdrawUseCaseProvider);
-      await withdrawUseCase.execute();
+      await withdrawUseCase.execute(password: password);
       state = AsyncValue.data(state.value!.copyWith(isWithdrawing: false));
+    } on ReauthCancelledException {
+      // Nothing was deleted: say why, so the user can try again.
+      state = AsyncValue.data(
+        state.value!.copyWith(
+          isWithdrawing: false,
+          errorMessage: SettingsErrorCode.withdrawReauthCancelled,
+        ),
+      );
+    } on FirebaseAuthException catch (e, stack) {
+      ErrorReporter.record(e, stack, reason: 'withdrawAccount');
+      final wrongPassword =
+          e.code == 'wrong-password' || e.code == 'invalid-credential';
+      state = AsyncValue.data(
+        state.value!.copyWith(
+          isWithdrawing: false,
+          errorMessage: wrongPassword
+              ? SettingsErrorCode.withdrawWrongPassword
+              : SettingsErrorCode.withdrawFailed,
+        ),
+      );
     } catch (e, stack) {
       ErrorReporter.record(e, stack, reason: 'withdrawAccount');
       // A code, not `e.toString()`: this used to put the raw exception in front

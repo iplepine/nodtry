@@ -217,7 +217,6 @@ class _PromiseProgressBlock extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final success = plan.completedDayCount();
     final failed = plan.failedDayCount();
-    final remaining = plan.remainingScheduledDayCount();
     final reward = promise.reward;
     final penalty = promise.penalty;
 
@@ -265,7 +264,7 @@ class _PromiseProgressBlock extends StatelessWidget {
           _PromiseRow(
             label: l10n.planDetailPromisePenaltyLabel,
             description: penalty.description,
-            statusText: _penaltyStatusText(l10n, penalty, success, remaining),
+            statusText: _penaltyStatusText(l10n, penalty, failed),
             progress: _penaltyProgress(penalty, failed),
             color: AppColors.warningBorder,
           ),
@@ -284,16 +283,17 @@ class _PromiseProgressBlock extends StatelessWidget {
     return l10n.planDetailPromiseRewardNeed(needed);
   }
 
+  /// Same rule as settlement: the bet is on once missed days reach
+  /// `penalty.targetDays`.
   String _penaltyStatusText(
     AppLocalizations l10n,
     PromisePenalty penalty,
-    int success,
-    int remaining,
+    int failed,
   ) {
-    final buffer = (success + remaining) - penalty.targetDays;
-    if (buffer < 0) return l10n.planDetailPromisePenaltyTriggered;
-    if (buffer == 0) return l10n.planDetailPromisePenaltyImminent;
-    return l10n.planDetailPromisePenaltyBuffer(buffer);
+    final missesLeft = penalty.targetDays - failed;
+    if (missesLeft <= 0) return l10n.planDetailPromisePenaltyTriggered;
+    if (missesLeft == 1) return l10n.planDetailPromisePenaltyImminent;
+    return l10n.planDetailPromisePenaltyBuffer(missesLeft);
   }
 
   double _penaltyProgress(PromisePenalty penalty, int failed) {

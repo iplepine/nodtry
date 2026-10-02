@@ -16,7 +16,7 @@ class DatabaseService {
     if (!snapshot.exists) {
       await userRef.set({
         'uid': user.uid,
-        'email': user.email,
+        // No 'email': users docs are readable by any signed-in user.
         'displayName': user.displayName ?? '나', // 기본값
         'profileImageUrl': user.photoURL,
         'createdAt': FieldValue.serverTimestamp(),

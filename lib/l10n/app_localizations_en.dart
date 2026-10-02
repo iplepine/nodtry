@@ -9,11 +9,10 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Nod&Try';
+  String get appTitle => 'DuoDone';
 
   @override
-  String get splashTagline =>
-      'Keep the promises you put off with one person who notices.';
+  String get splashTagline => 'When your partner sees it, you actually do it.';
 
   @override
   String get loginWithGoogle => 'Continue with Google';
@@ -26,112 +25,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyMessage =>
-      'You both choose to connect.\nYour records stay between you.';
+      'You both agree to connect.\nProof photos are seen only by your partner.';
 
   @override
-  String get connectHeadline => 'Keep the promises you put off';
+  String get connectHeadline => 'Invite your partner';
 
   @override
   String get connectSubtitle =>
-      'Connect with one accountability partner. They notice your effort, and you notice theirs.';
+      'Send your code so you can back each other\'s workout promises.';
 
   @override
-  String get createInviteCode => 'Invite an accountability partner';
+  String get enterInviteCode => 'Enter your partner\'s code';
 
   @override
-  String get enterInviteCode => 'Enter Invite Code';
-
-  @override
-  String get startSolo => 'Start Solo';
-
-  @override
-  String get inviteCode => 'Invite Code';
-
-  @override
-  String get copyCode => 'Copy';
-
-  @override
-  String get shareCode => 'Share';
+  String get startSolo => 'I\'ll connect later';
 
   @override
   String get codeCopied => 'Code copied';
 
   @override
-  String get codeShareMessage =>
-      'Share this code with your accountability partner';
-
-  @override
   String get enterCodeBelow => 'Enter the code below';
 
   @override
-  String get sendConnectionRequest => 'Send accountability partner request';
-
-  @override
-  String get waitingForConnection =>
-      'Waiting for them to accept your connection';
-
-  @override
-  String get homeNowTask => 'You can do it now';
+  String get sendConnectionRequest => 'Connect as partners';
 
   @override
   String get homeDidIt => 'Did it';
 
   @override
-  String get homeReceivedMessage => 'I\'ll do this';
+  String get homeReceivedMessage => 'News from your partner';
 
   @override
-  String get homeCheckIt => 'Nod&Try';
-
-  @override
-  String get homeSentWaiting => 'I sent my work';
-
-  @override
-  String get homeWaitingForCheck => 'Waiting for their check-in';
-
-  @override
-  String get homeQuietDay => 'You can rest for a while now';
-
-  @override
-  String get homeChecked => 'Okay';
-
-  @override
-  String get homeThankYou => 'Thank you';
-
-  @override
-  String get timePassedActorMessage => 'No record delivered yet';
-
-  @override
-  String get timePassedManagerMessage => 'No words delivered yet';
-
-  @override
-  String get timePassedActorSubMessage => 'It\'s okay to start now';
-
-  @override
-  String get timePassedManagerSubMessage => 'The day is passing quietly';
-
-  @override
-  String get pastUncompletedMessage => 'Scheduled a little while ago';
-
-  @override
-  String get pastUncompletedSubMessage => 'There was a previous promise';
-
-  @override
-  String get pastUncompletedTimeChip => 'Just before';
-
-  @override
-  String homeContextWeek(int week, int total) {
-    return '$week of $total weeks';
-  }
-
-  @override
-  String homeContextEntrusted(String name) {
-    return 'Keeping it going with $name';
-  }
-
-  @override
-  String homeContextManaging(String name) {
-    return 'Noticing $name\'s effort';
-  }
+  String get homeChecked => 'Props';
 
   @override
   String get tabNow => 'Now';
@@ -140,7 +65,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabHistory => 'History';
 
   @override
-  String get tabUs => 'Together';
+  String get tabUs => 'Us';
 
   @override
   String get historyEmpty => 'No promises recorded yet';
@@ -152,13 +77,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usDefaultNameMe => 'Me';
 
   @override
-  String get usYouTitle => 'Accountability partner';
+  String get usYouTitle => 'Partner';
 
   @override
-  String get usHeroSubtitle => 'One person who notices, both ways';
-
-  @override
-  String get usCheerSent => 'Cheer sent ⚡';
+  String get usHeroSubtitle => 'Backing each other\'s workouts';
 
   @override
   String get usCheerTooltip => 'Send cheer';
@@ -170,16 +92,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usStatusMessagePlaceholder => 'Set status message';
 
   @override
-  String get usMyIntroduction => 'My Introduction';
-
-  @override
   String get usMyInviteCode => 'My Invite Code';
-
-  @override
-  String get usBadgeSupported => 'Supported';
-
-  @override
-  String get usBadgeCheering => 'Cheering';
 
   @override
   String get usGuestWarningMessage =>
@@ -189,26 +102,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usGuestWarningAction => 'Link Account to Keep Records';
 
   @override
-  String get usLinkSuccess => 'Google account linked successfully!';
-
-  @override
-  String get usLoadError => 'Error loading connections';
+  String get usLoadError => 'Couldn\'t load your connection.';
 
   @override
   String get usNoInviteCode => 'No Code';
 
   @override
-  String get usNoName => 'No Name';
-
-  @override
-  String get usUnknownUser => 'Accountability partner';
+  String get usUnknownUser => 'Partner';
 
   @override
   String get usDisconnectDialogTitle => 'Disconnect';
 
   @override
   String usDisconnectDialogContent(String name) {
-    return 'Disconnect $name as your accountability partner?';
+    return 'Disconnect from $name?';
   }
 
   @override
@@ -233,91 +140,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usProfileEditImageLabel => 'Change profile picture';
 
   @override
-  String get usAddConnectionLabel => 'Connect accountability partner';
+  String get usAddConnectionLabel => 'Connect your partner';
 
   @override
   String get usBadgeMutual => 'Together';
 
   @override
-  String get usEmptyMatesTitle => 'No accountability partner yet';
+  String get usEmptyMatesTitle => 'No partner yet';
 
   @override
   String get usEmptyMatesSubtitle =>
-      'Invite one person and notice each other\'s effort';
+      'Invite your partner and back each other\'s workout promises';
 
   @override
-  String get usConnectedPeople => 'Your accountability partner';
+  String get nowNoPlan => 'No workout promise yet';
 
   @override
-  String get usManaging => 'Supporting them';
+  String get nowCreatePlan => '+ Make a workout promise';
 
   @override
-  String get usEntrusted => 'Supported by them';
+  String get nowQuietRest => 'Today\'s a rest day';
 
   @override
-  String get usInviteNew => 'Invite one person';
+  String get nowNoPlanSubtitle => 'Pick one workout and make it a promise';
 
   @override
-  String get usNoConnections => 'No accountability partner yet';
-
-  @override
-  String headerWeekProgress(int week, int total) {
-    return '$week of $total weeks';
-  }
-
-  @override
-  String get headerNoPlan => 'No plan yet';
-
-  @override
-  String get headerPlanEnded => 'Plan ended';
-
-  @override
-  String get nowNoPlan => 'No promise for now';
-
-  @override
-  String get nowCreatePlan => 'Create Plan';
-
-  @override
-  String nowNextActionIn(String time) {
-    return 'Next action in $time';
-  }
-
-  @override
-  String nowNextActionDays(int days) {
-    return 'Next schedule in D-$days';
-  }
-
-  @override
-  String get nowQuietRest => 'You can rest for a while now';
-
-  @override
-  String get nowQuietNoAction => 'No need to worry for a while';
-
-  @override
-  String get nowNoPlanSubtitle => 'Start with one promise you can share';
-
-  @override
-  String get nowTodayDone => 'Took care of everything today 🙌';
+  String get nowTodayDone => 'All of today\'s promises kept 🙌';
 
   @override
   String nowTodayAllDone(int count) {
-    return 'Took care of all $count today 🙌';
+    return 'Kept all $count promises today 🙌';
   }
 
   @override
-  String get nowPartnerProposed => 'Proposed this promise';
+  String nowPartnerProposed(String name) {
+    return '$name sent a new promise';
+  }
 
   @override
-  String get nowPartnerAdjusting => 'Adjusting the promise a bit';
+  String get nowPartnerAdjusting => 'Your partner tweaked a promise';
 
   @override
-  String get nowPartnerDidIt => 'I did it!';
-
-  @override
-  String get nowActionPass => 'Just skip';
-
-  @override
-  String get nowActionSkipToday => 'Let\'s skip today';
+  String get nowActionSkipToday => 'Skip today';
 
   @override
   String get nowDeferMenuTooltip => 'Set aside';
@@ -327,13 +191,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nowDeferLaterSubtitle =>
-      'See your next to-do now; we\'ll nudge you again later';
+      'We\'ll show your next promise now and nudge you again later';
 
   @override
-  String get nowSkipTodayTitle => 'Not today';
+  String get nowSkipTodayTitle => 'Skip today';
 
   @override
-  String get nowSkipTodaySubtitle => 'Skip this promise for today';
+  String get nowSkipTodaySubtitle => 'Counts as missed — your streak may reset';
+
+  @override
+  String get nowDeferRestSubtitle => 'Use a rest pass — your streak stays';
 
   @override
   String get nowSkipTodayDone => 'Skipped for today';
@@ -348,181 +215,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowDeferReminderBody => 'You set a promise aside for later';
 
   @override
-  String get nowAddMorePlan => 'Shall we make another promise?';
+  String get nowAddMorePlan => 'Add another workout promise?';
 
   @override
-  String recordGazeWeekCount(int count) {
-    return '${count}th promise this week';
-  }
-
-  @override
-  String recordGazeWeekProgress(int week, int total) {
-    return 'Week $week of $total';
-  }
-
-  @override
-  String recordGazeDoneCount(int count) {
-    return 'Already done $count times';
-  }
-
-  @override
-  String get managerSuggestionTitle => 'Keep this promise with one person';
-
-  @override
-  String get managerSuggestionSubtitle =>
-      'An accountability partner can help it stick';
-
-  @override
-  String get managerSuggestionAlternative =>
-      'Notice each other\'s effort in a mutual 1:1 connection';
-
-  @override
-  String get managerSuggestionButton => 'Choose one person';
-
-  @override
-  String get managerSuggestionQuestion =>
-      'Who could be your accountability partner?';
-
-  @override
-  String get planProposal => 'My Promise';
-
-  @override
-  String get planPreparing => 'Preparing promise';
-
-  @override
-  String get planWhatToPromise => 'What would you like to promise?';
+  String get planWhatToPromise => 'Which workout will you promise?';
 
   @override
   String get planPromiseHint => 'Something you think you can keep';
 
   @override
-  String get planMyPromise => 'A promise I made to myself';
-
-  @override
-  String get planKeepWatching => 'A promise to keep together';
-
-  @override
   String get planActionHint =>
-      'e.g., Spending time with kids, Making time to read';
-
-  @override
-  String get planOneLineEnough => 'Just one line is enough';
-
-  @override
-  String get planNext => 'Next';
-
-  @override
-  String get planFrequencyTitle => 'How about this much?';
-
-  @override
-  String get planFrequencySubtitle =>
-      'It\'s okay if you don\'t keep it perfectly';
-
-  @override
-  String get planDescriptionTitle => 'You can write it in detail if you want';
-
-  @override
-  String get planDescriptionSubtitle => 'You can change it later';
-
-  @override
-  String get planDescriptionLabel => 'What specifically would you like to do?';
-
-  @override
-  String get planDescriptionExample => 'e.g., Squats and stretching at home';
+      'e.g., 30 min at the gym, a 10k-step walk after dinner';
 
   @override
   String get planDescriptionHint =>
       'e.g., Squats and stretching at home, leg workout at gym...';
-
-  @override
-  String get planDescriptionSkip => 'Skip';
-
-  @override
-  String get planDescriptionOptional => 'You can skip this step';
-
-  @override
-  String get planDayTitle => 'You don\'t have to set days';
-
-  @override
-  String get planDaySubtitle =>
-      'But choosing them can make it easier to remember.';
-
-  @override
-  String get planDaySkip => 'I\'ll decide based on how I feel that day';
-
-  @override
-  String get planSummaryTitle => 'This is what I\'ll propose';
-
-  @override
-  String get planSummaryFrequency => 'Frequency';
-
-  @override
-  String get planSummaryDay => 'Days';
-
-  @override
-  String get planSummaryDescription => 'Description';
-
-  @override
-  String get planSummaryDayConditional => 'Decide based on condition';
-
-  @override
-  String get planSummaryInfo =>
-      'Your accountability partner will review it. It starts when you both agree.';
-
-  @override
-  String get planSummaryAdjustable =>
-      'You can adjust anytime if it\'s too much';
-
-  @override
-  String get planSummarySend => 'I\'ll do this';
-
-  @override
-  String get planSummarySent => 'Plan proposal has been sent';
-
-  @override
-  String get planFrequencyLight => 'Lightly';
-
-  @override
-  String get planFrequencyModerate => 'Moderately';
-
-  @override
-  String get planFrequencyMore => 'A bit more';
-
-  @override
-  String get planFrequencyWeekly2 => '2 times/week';
-
-  @override
-  String get planFrequencyWeekly3 => '3 times/week';
-
-  @override
-  String get planFrequencyWeekly4 => '4 times/week';
-
-  @override
-  String get planFrequencyLightWithCount => 'Lightly (2 times/week)';
-
-  @override
-  String get planFrequencyModerateWithCount => 'Moderately (3 times/week)';
-
-  @override
-  String get planFrequencyMoreWithCount => 'A bit more (4 times/week)';
-
-  @override
-  String get connectConnected => 'Connected';
-
-  @override
-  String get connectGoToHome => 'Go to Home';
-
-  @override
-  String get usPlanSection => 'Plan';
-
-  @override
-  String get usNoPlanMessage => 'No current plan';
-
-  @override
-  String get usNoPlanSubtitle => 'Would you like to start a new promise?';
-
-  @override
-  String get usStartNewPlan => 'Start New Plan';
 
   @override
   String get dayMonday => 'Mon';
@@ -597,9 +304,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get developerScreenSplash => 'Splash';
 
   @override
-  String get developerScreenLogin => 'Login';
-
-  @override
   String get developerScreenConnect => 'Connect';
 
   @override
@@ -615,14 +319,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get developerScreenSplashDesc => 'App launch screen';
 
   @override
-  String get developerScreenLoginDesc => 'Google/Apple login';
+  String get developerScreenConnectDesc => 'Partner connection screen';
 
   @override
-  String get developerScreenConnectDesc =>
-      'Accountability partner connection screen';
-
-  @override
-  String get developerScreenHomeDesc => 'Now/History/Together tabs';
+  String get developerScreenHomeDesc => 'Now/History/Us tabs';
 
   @override
   String get developerScreenSettingsDesc => 'Language and theme settings';
@@ -631,41 +331,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get developerScreenActionSelection => 'Action Selection';
 
   @override
-  String get developerScreenFrequency => 'Frequency';
-
-  @override
-  String get developerScreenDaySelection => 'Day Selection';
-
-  @override
-  String get developerScreenDescription => 'Description';
-
-  @override
-  String get developerScreenSummary => 'Summary';
-
-  @override
   String get developerScreenActionSelectionDesc => 'Screen 1: Action selection';
-
-  @override
-  String get developerScreenFrequencyDesc => 'Screen 2: Repeat frequency';
-
-  @override
-  String get developerScreenDaySelectionDesc => 'Screen 4: Day selection';
-
-  @override
-  String get developerScreenDescriptionDesc =>
-      'Screen 3: Specific action description';
-
-  @override
-  String get developerScreenSummaryDesc => 'Screen 5: Plan proposal summary';
-
-  @override
-  String get settingsPlanCreation => 'Plan Creation';
-
-  @override
-  String get settingsPlanCreationTitle => 'Create New Promise';
-
-  @override
-  String get settingsPlanCreationDesc => 'All steps in one screen';
 
   @override
   String get settingsDeveloper => 'Developer Menu';
@@ -691,61 +357,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String headerWithPartner(String name) {
-    return 'Keeping it going with $name';
+    return 'Together with $name';
   }
 
   @override
-  String get usLinkEmailSuccess => 'Email account linked successfully!';
+  String get usLinkEmailSuccess => 'Email account linked!';
 
   @override
-  String get historyPartnerVerified => 'Accountability partner checked';
+  String get historyPartnerVerified => 'Your partner gave props';
 
   @override
-  String get historyMeVerified => 'I verified';
+  String get historyMeVerified => 'You gave props';
 
   @override
-  String get frequencyEveryday => 'Everyday';
+  String get frequencyEveryday => 'Every day';
 
   @override
-  String get planNotificationTimeOptional => 'Notification time (Optional)';
-
-  @override
-  String get usMyPlanTitle => 'My Promise';
+  String get usMyPlanTitle => 'My promises';
 
   @override
   String usPartnerPlanTitle(String name) {
-    return '$name\'s Promise';
+    return '$name\'s promises';
   }
-
-  @override
-  String get vagueTimeDinner => 'Dinner';
-
-  @override
-  String get vagueTimeBedtime => 'Bedtime';
-
-  @override
-  String get cheerSimple => 'Okay';
-
-  @override
-  String get cheerMore => 'More';
-
-  @override
-  String get cheerSheetTitle => 'How to Cheer?';
-
-  @override
-  String get cheerMessageHint => 'Leave a cheer message';
-
-  @override
-  String get cheerSend => 'Send';
-
-  @override
-  String get doneSheetTitle => 'Share your thoughts';
-
-  @override
-  String get doneMessageHint => 'Leave a short note';
-
-  @override
-  String get doneButton => 'Complete';
 
   @override
   String get settingsDeveloperDesc => 'Debug menu';
@@ -757,13 +390,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLogout => 'Log out';
 
   @override
-  String get settingsLogoutDesc => 'Log out from your current account';
+  String get settingsLogoutDesc => 'Log out of your current account';
 
   @override
   String get settingsLogoutDialogTitle => 'Log out';
 
   @override
-  String get settingsLogoutDialogContent => 'Are you sure you want to log out?';
+  String get settingsLogoutDialogContent => 'Log out now?';
 
   @override
   String get settingsLogoutConfirm => 'Log out';
@@ -773,14 +406,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDeleteAccountDesc =>
-      'Permanently delete your account and data';
+      'Permanently delete your account and records';
 
   @override
   String get settingsDeleteAccountDialogTitle => 'Delete Account';
 
   @override
   String get settingsDeleteAccountDialogContent =>
-      'Are you sure you want to delete your account? This action cannot be undone.';
+      'Delete your account? Your account, records and proof photos will be erased, and this can\'t be undone. You may be asked to sign in once more to confirm.';
 
   @override
   String get settingsCancel => 'Cancel';
@@ -804,9 +437,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signUp => 'Sign Up';
 
   @override
-  String get emailStartMessage => 'Start with Email';
-
-  @override
   String get passwordHint => 'Enter your password';
 
   @override
@@ -819,81 +449,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weakPassword => 'Password must be at least 6 characters';
 
   @override
-  String get accountExistsWithDifferentCredential =>
-      'Account already exists with a different credential';
+  String get userNotFound => 'No account found for that email.';
 
   @override
-  String get userNotFound => 'No user found for that email.';
-
-  @override
-  String get wrongPassword => 'Wrong password provided for that user.';
-
-  @override
-  String get settingsAccountDeletedSuccess => 'Account deleted successfully';
-
-  @override
-  String get settingsAuthServiceNotFound => 'Auth Service not found';
+  String get settingsAccountDeletedSuccess => 'Account deleted';
 
   @override
   String get settingsDeleteAccountFailed =>
       'We couldn\'t delete your account. Please try again.';
 
   @override
-  String get reconcileTitle => 'Reconcile';
+  String get settingsDeleteAccountReauthCancelled =>
+      'You need to sign in again to delete your account. Nothing was deleted.';
 
   @override
-  String get reconcileActuallyDone => 'Actually did it';
+  String get settingsDeleteAccountWrongPassword =>
+      'That password isn\'t right. Please try again.';
 
   @override
-  String get reconcileTookRest => 'Took a break today';
+  String get settingsDeleteAccountPasswordTitle => 'Confirm your password';
 
   @override
-  String get reconcileSkip => 'Skip';
+  String get settingsDeleteAccountPasswordHint => 'Password';
 
   @override
-  String get reconcileDoneMessage => 'Record has been reconciled.';
-
-  @override
-  String get historyFilterAll => 'All';
-
-  @override
-  String get historyFilterMe => 'My Action';
-
-  @override
-  String get historyFilterPartner => 'Accountability partner';
-
-  @override
-  String get historyMyActionVerified => 'They checked it';
-
-  @override
-  String get historyPartnerActionVerified => 'I checked it';
-
-  @override
-  String get historyPartnerActionWaiting => 'Waiting for me';
-
-  @override
-  String get historyActionSawIt => 'Saw it 👍';
-
-  @override
-  String get historyActionCheer => 'Cheering you 💜';
-
-  @override
-  String get timeChipStillActionable => 'Still actionable';
+  String get reconcileTookRest => 'Took a rest';
 
   @override
   String get timeChipPassed => 'Passed';
 
   @override
   String get nowStatusActuallyDone => 'Actually did it';
-
-  @override
-  String get nowLateCompletion => 'Completed even if late!';
-
-  @override
-  String get nowLateJustInTime => 'Did it a bit late';
-
-  @override
-  String get nowWithinToday => 'Done within today';
 
   @override
   String get timeChipNow => 'Now!';
@@ -990,16 +576,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weekdaySun => 'Sun';
 
   @override
-  String get planTimeQuestion => 'When should I notify you?';
-
-  @override
   String get comfortingFuture => 'Great job today';
 
   @override
   String get comfortingLate => 'Late is okay';
-
-  @override
-  String get comfortingJustDoIt => 'Just do it today';
 
   @override
   String get nowDoEarly => 'Do it now';
@@ -1043,45 +623,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Can\'t connect to the store. Please check your settings.';
 
   @override
-  String get planMostlyProcrastinated => 'What you usually put off';
-
-  @override
-  String get planRecommendedPromises => 'Suggested promises';
-
-  @override
-  String get planMine => 'My promise';
+  String get planMine => 'Your promise in one line';
 
   @override
   String get planClearAction => 'Clear';
 
   @override
-  String get planRecommendedFrequency => 'Suggested frequency';
-
-  @override
-  String get planNoDayMeansDaily =>
-      'Without picking days, this becomes a daily promise.';
-
-  @override
-  String get planPartnerFallback => 'your accountability partner';
-
-  @override
-  String get planActionFallback => 'my promise';
-
-  @override
-  String get planPartnerPreviewLabel =>
-      'What your accountability partner will see';
-
-  @override
-  String planPartnerPreviewWith(String name, String promise) {
-    return 'Invite $name to keep \"$promise\" with you for 28 days.';
-  }
-
-  @override
   String get planPartnerPreviewWithout =>
-      'You can start solo. Connect an accountability partner to notice each other\'s effort and exchange knocks.';
+      'You can start solo. Connect your partner to give each other props and knocks.';
 
   @override
-  String get planConnectPartner => 'Connect an accountability partner';
+  String get planConnectPartner => 'Connect your partner';
 
   @override
   String get planDayEveryDay => 'Every day';
@@ -1091,7 +643,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String planDayCountFormat(int count) {
-    return '$count days/week';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days/week',
+      one: '1 day/week',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1107,189 +665,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String planTimeFormatNoMinute(String period, int hour) {
-    return '$period $hour';
+    return '$hour $period';
   }
 
   @override
   String planTimeFormatWithMinute(String period, int hour, String minute) {
-    return '$period $hour:$minute';
+    return '$hour:$minute $period';
   }
-
-  @override
-  String planTemplatePerWeek(String label, int count) {
-    return '$label · $count/wk';
-  }
-
-  @override
-  String get planCategoryStudyLabel => 'Study';
-
-  @override
-  String get planCategoryStudyDescription =>
-      'Self-study you keep putting off — English, certifications, coding';
-
-  @override
-  String get planCategoryExerciseLabel => 'Exercise';
-
-  @override
-  String get planCategoryExerciseDescription =>
-      'Movement that\'s hard to start — walking, gym, stretching';
-
-  @override
-  String get planCategoryVerifiedLabel => 'Verified routines';
-
-  @override
-  String get planCategoryVerifiedDescription =>
-      'Daily habits grounded in neuroscience and sleep research';
-
-  @override
-  String get planCategoryCustomLabel => 'Custom';
-
-  @override
-  String get planCategoryCustomDescription =>
-      'Write your own promise without picking a template';
-
-  @override
-  String get planTemplateEnglishLabel => 'English';
-
-  @override
-  String get planTemplateEnglishAction => 'Read 10 English sentences aloud';
-
-  @override
-  String get planTemplateEnglishDescription =>
-      'Aim for low-pressure daily exposure to English.';
-
-  @override
-  String get planTemplateCertificateLabel => 'Certification';
-
-  @override
-  String get planTemplateCertificateAction => 'Solve 10 past exam questions';
-
-  @override
-  String get planTemplateCertificateDescription =>
-      'Repeat a fixed count without breaking the streak instead of cramming.';
-
-  @override
-  String get planTemplateCodingLabel => 'Coding';
-
-  @override
-  String get planTemplateCodingAction => '30 min of coding or one problem';
-
-  @override
-  String get planTemplateCodingDescription =>
-      'Secure the days you actually touch code before chasing big goals.';
-
-  @override
-  String get planTemplateReadingLabel => 'Reading';
-
-  @override
-  String get planTemplateReadingAction => 'Read 10 pages and log one line';
-
-  @override
-  String get planTemplateReadingDescription =>
-      'Leave a one-line trace so your accountability partner can notice it easily.';
-
-  @override
-  String get planTemplateWritingLabel => 'Writing';
-
-  @override
-  String get planTemplateWritingAction => 'Write for 15 min or 300 characters';
-
-  @override
-  String get planTemplateWritingDescription =>
-      'Focus on starting days, not finished pieces.';
-
-  @override
-  String get planTemplateWalkingLabel => 'Walking';
-
-  @override
-  String get planTemplateWalkingAction => 'Walk 30 minutes';
-
-  @override
-  String get planTemplateWalkingDescription =>
-      'Commit to stepping outside before worrying about gear.';
-
-  @override
-  String get planTemplateGymLabel => 'Gym';
-
-  @override
-  String get planTemplateGymAction => 'Go to the gym and work out for 30 min';
-
-  @override
-  String get planTemplateGymDescription =>
-      'Increase days you arrive at the gym rather than perfect workouts.';
-
-  @override
-  String get planTemplateStretchingLabel => 'Stretching';
-
-  @override
-  String get planTemplateStretchingAction => 'Stretch for 10 minutes';
-
-  @override
-  String get planTemplateStretchingDescription =>
-      'Share even a short stretch with your accountability partner.';
-
-  @override
-  String get planTemplateMorningLightLabel => 'Morning light';
-
-  @override
-  String get planTemplateMorningLightAction =>
-      'Get 5–10 minutes of morning sunlight';
-
-  @override
-  String get planTemplateMorningLightDescription =>
-      'Morning sunlight hitting your eyes tells the brain the day has started, locking in tonight\'s melatonin release so you fall asleep faster and deeper. 5–10 minutes outdoors is enough on clear days; stretch to 10–20 on cloudy ones, 20–30 in rain. Windows block the key wavelengths and sunglasses dampen the light-sensing cells (never stare directly at the sun)';
-
-  @override
-  String get planTemplateCaffeineDelayLabel => 'Delay caffeine';
-
-  @override
-  String get planTemplateCaffeineDelayAction =>
-      'First caffeine 90 minutes after waking';
-
-  @override
-  String get planTemplateCaffeineDelayDescription =>
-      'Caffeine right after waking only blocks sleep-signal molecules (adenosine) for a while — they pile up and hit at once later, causing an afternoon slump. Wait 90 minutes for cleaner, longer-lasting energy';
-
-  @override
-  String get planTemplatePhysioSighLabel => 'Physiological sigh';
-
-  @override
-  String get planTemplatePhysioSighAction => '5 minutes of physiological sighs';
-
-  @override
-  String get planTemplatePhysioSighDescription =>
-      'Take a short inhale through the nose, then a second one to fully inflate the lungs, and exhale slowly through the mouth. This dumps trapped CO₂ in one shot and drops heart rate immediately. An RCT (n=111) showed it beat meditation for stress and mood. Even one or two reps help in the moment; 5 minutes daily is the preventive dose';
-
-  @override
-  String get planTemplateFocus90Label => '90-min focus';
-
-  @override
-  String get planTemplateFocus90Action => 'One 90-minute focus session';
-
-  @override
-  String get planTemplateFocus90Description =>
-      'The brain runs on ~90-minute focus cycles (ultradian rhythm). Mornings are richest in dopamine and norepinephrine, so deep work lands best then, and attention naturally drops after 90 min — give yourself 10–30 minutes off before the next cycle. Kill notifications and stay on one task throughout';
-
-  @override
-  String get planTemplateSleepEnvLabel => 'Sleep environment';
-
-  @override
-  String get planTemplateSleepEnvAction =>
-      'Dim and cool the bedroom an hour before bed';
-
-  @override
-  String get planTemplateSleepEnvDescription =>
-      'An hour before bed, switch off overhead lights and use indirect lamps — that\'s when melatonin starts to rise, speeding sleep onset. Keep the bedroom at 18–20°C; your body needs a slight temperature drop for deep sleep and REM. A hot shower right before bed actually delays sleep, so finish 1–2 hours earlier';
-
-  @override
-  String get planTemplateStrength2xLabel => 'Strength 2×/week';
-
-  @override
-  String get planTemplateStrength2xAction => 'One full-body strength session';
-
-  @override
-  String get planTemplateStrength2xDescription =>
-      'Strength training just twice a week is the \'minimum effective dose\' for preserving muscle, strength, and bone density — the bar set by the WHO and US physical-activity guidelines. It protects the muscle you naturally lose with age and supports metabolism, blood-sugar control, posture, and fall prevention. Favor compound moves — squat, hinge (deadlift), push, pull — for 3–4 sets of 6–10 reps, nudging the weight or reps up each week (progressive overload). The same muscles need 48+ hours to recover, so space the two sessions 2–3 days apart and back them with protein and sleep';
 
   @override
   String get planDayPresetThreeDaysLabel => '3 days/wk';
@@ -1304,55 +686,186 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDayPresetWeekendLabel => 'Weekend';
 
   @override
-  String get planDayPresetStudyThreeDaysDesc =>
-      'Build three wins in the first week';
-
-  @override
-  String get planDayPresetStudyWeekdaysDesc =>
-      'Anchor your study to the weekdays';
-
-  @override
-  String get planDayPresetStudyEveryDayDesc =>
-      'Share something with your accountability partner each day, even briefly';
-
-  @override
-  String get planDayPresetExerciseThreeDaysDesc =>
-      'Start with a Mon/Wed/Fri rhythm';
-
-  @override
-  String get planDayPresetExerciseWeekendDesc =>
-      'Leave a movement trace on weekends';
-
-  @override
-  String get planDayPresetExerciseEveryDayDesc =>
-      'Notice each other\'s daily effort, even a short stretch';
-
-  @override
-  String get planDayPresetCustomThreeDaysDesc => 'A low-pressure default';
-
-  @override
-  String get planDayPresetCustomWeekdaysDesc =>
-      'Lock it in as a weekday routine';
-
-  @override
-  String get planDayPresetCustomEveryDayDesc =>
-      'Leave a small action every day';
-
-  @override
-  String planStepHeader(int current, int total) {
-    return 'Preparing promise · $current/$total';
-  }
-
-  @override
-  String get planTellUsActionFirst => 'Tell us what you want to promise!';
-
-  @override
-  String get planProposalSaved =>
-      'Proposal sent.\nTalk it through with your accountability partner!';
+  String get planTellUsActionFirst => 'Tell us which workout you\'ll do!';
 
   @override
   String get planSaveError =>
       'We couldn\'t save your promise. Please try again.';
+
+  @override
+  String get planCreateTitle => 'New workout promise';
+
+  @override
+  String get planEditTitle => 'Edit promise';
+
+  @override
+  String planCreateHeaderWithPartner(String name) {
+    return 'Which workout will you promise $name?';
+  }
+
+  @override
+  String get planCreateDaysTitle => 'Which days?';
+
+  @override
+  String get planCreateDaysRequired => 'Pick at least one day';
+
+  @override
+  String planCreateDaysFromPartner(String name) {
+    return 'Matched to $name\'s workout days';
+  }
+
+  @override
+  String get planCreateDeadlineTitle => 'Done by when?';
+
+  @override
+  String get planCreateDeadlineHint => 'We\'ll remind you at this time';
+
+  @override
+  String get planCreateDeadlineRequired => 'Pick a deadline';
+
+  @override
+  String get planDeadlineMorning => '7 AM';
+
+  @override
+  String get planDeadlineNoon => 'Noon';
+
+  @override
+  String get planDeadlineEvening => '7 PM';
+
+  @override
+  String get planDeadlineNight => '9 PM';
+
+  @override
+  String get planDeadlineLateNight => '10 PM';
+
+  @override
+  String get planDeadlineCustom => 'Custom';
+
+  @override
+  String get planCreateMemoToggle => 'Add a note (optional)';
+
+  @override
+  String planCreatePartnerNotice(String name) {
+    return 'Miss it and $name will know';
+  }
+
+  @override
+  String planCreateCtaWithPartner(String name, String nameWithParticle) {
+    return '🤙 Pinky promise with $name';
+  }
+
+  @override
+  String get planCreateCtaSolo => 'Start my promise';
+
+  @override
+  String get planEditCta => 'Save changes';
+
+  @override
+  String planSavedWithPartner(String name) {
+    return 'Workout promise made with $name 🤙';
+  }
+
+  @override
+  String get planSavedSolo => 'Your workout promise has started 💪';
+
+  @override
+  String get planEditSaved => 'Promise updated';
+
+  @override
+  String get planDayPresetTwoDaysLabel => '2 days/wk';
+
+  @override
+  String get workoutTypeGymLabel => 'Gym';
+
+  @override
+  String get workoutTypeGymAction => 'Hit the gym';
+
+  @override
+  String get workoutTypeRunningLabel => 'Running';
+
+  @override
+  String get workoutTypeRunningAction => 'Run for 30 minutes';
+
+  @override
+  String get workoutTypeHomeTrainingLabel => 'Home workout';
+
+  @override
+  String get workoutTypeHomeTrainingAction => '20-minute home workout';
+
+  @override
+  String get workoutTypeWalkingLabel => 'Walking';
+
+  @override
+  String get workoutTypeWalkingAction => 'Walk for 30 minutes';
+
+  @override
+  String get workoutTypePilatesLabel => 'Pilates';
+
+  @override
+  String get workoutTypePilatesAction => 'Go to Pilates class';
+
+  @override
+  String get workoutTypeYogaLabel => 'Yoga';
+
+  @override
+  String get workoutTypeYogaAction => '30 minutes of yoga';
+
+  @override
+  String get workoutTypeStretchingLabel => 'Stretching';
+
+  @override
+  String get workoutTypeStretchingAction => 'Stretch for 10 minutes before bed';
+
+  @override
+  String get workoutTypeSwimmingLabel => 'Swimming';
+
+  @override
+  String get workoutTypeSwimmingAction => 'Go for a swim';
+
+  @override
+  String get workoutTypeClimbingLabel => 'Climbing';
+
+  @override
+  String get workoutTypeClimbingAction => 'Go climbing';
+
+  @override
+  String get workoutTypeCyclingLabel => 'Cycling';
+
+  @override
+  String get workoutTypeCyclingAction => 'Ride a bike for 40 minutes';
+
+  @override
+  String get workoutTypeHikingLabel => 'Hiking';
+
+  @override
+  String get workoutTypeHikingAction => 'Go hiking';
+
+  @override
+  String get workoutTypeStrengthLabel => 'Strength';
+
+  @override
+  String get workoutTypeStrengthAction => '30 minutes of strength training';
+
+  @override
+  String get workoutTypeDietLabel => 'Diet · no late snacks';
+
+  @override
+  String get workoutTypeDietAction => 'No late-night snacks';
+
+  @override
+  String get workoutTypeDietName => 'Diet';
+
+  @override
+  String get workoutTypeOtherLabel => 'Custom';
+
+  @override
+  String get workoutTypeOtherName => 'Workout';
+
+  @override
+  String get workoutTypeCyclingName => 'Cycling';
+
+  @override
+  String get workoutTypeStrengthName => 'Strength training';
 
   @override
   String get focusTimerPickerTitle => 'How long do you want to focus?';
@@ -1421,13 +934,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get focusTimerPause => 'Pause';
 
   @override
-  String get actionNoteHintDefault => 'Share your thoughts (optional)';
+  String get actionNoteHintDefault => 'How did it go? (optional)';
 
   @override
   String get planTimeUnset => 'Time not set';
 
   @override
-  String get planDaysEveryday => 'Everyday';
+  String get planDaysEveryday => 'Every day';
 
   @override
   String get planDaysWeekdays => 'Weekdays';
@@ -1463,32 +976,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planCardDelete => 'Delete';
 
   @override
-  String get planDescriptionTip => 'Tip: try \"If X, then Y\"';
-
-  @override
-  String get planDescriptionExamples =>
-      'e.g. \"When I get home from work, I change into workout clothes\"\ne.g. \"When the kids fall asleep, I read for 30 minutes\"';
-
-  @override
-  String get planDescriptionTipFooter =>
-      'A specific situation makes you 2–3× more likely to follow through!';
-
-  @override
   String get notifyEditorTitle => 'Notifications';
 
   @override
-  String get notifyEditorSubtitleOn => 'Pick when we should poke you.';
+  String get notifyEditorSubtitleOn =>
+      'We\'ll remind you at your promise time.';
 
   @override
   String get notifyEditorSubtitleOff => 'Track without notifications.';
 
   @override
-  String get notifyEditorPromiseTime =>
-      'Promise time your accountability partner can see';
+  String get notifyEditorPromiseTime => 'Promise time your partner sees';
 
   @override
   String get notifyEditorDefaultTimeHint =>
-      '9 PM is a good default for noticing each other\'s effort before the day ends.';
+      '9 PM is a good default — there\'s still time to give each other props before the day ends.';
+
+  @override
+  String get notifyEditorOffWarningTitle => 'Turn off the reminder?';
+
+  @override
+  String notifyEditorOffWarningBody(String name) {
+    return 'Without a reminder there\'s no deadline, so $name won\'t hear about a missed day.';
+  }
+
+  @override
+  String get notifyEditorOffWarningConfirm => 'Turn off';
 
   @override
   String get notifyEditorPrealert => 'Pre-alert';
@@ -1543,76 +1056,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String promiseChipPenaltyTriggered(String description) {
-    return 'Penalty locked in — $description';
+    return 'Missed it — $description';
   }
 
   @override
   String promiseChipPenaltyImminentOne(String description) {
-    return 'Just one more miss triggers the penalty — $description';
-  }
-
-  @override
-  String promiseChipPenaltyImminent(int count, String description) {
-    return '$count more misses triggers the penalty — $description';
+    return 'One more miss and it\'s $description';
   }
 
   @override
   String promiseChipRewardAchieved(String description) {
-    return 'Reward earned! — $description';
+    return 'Kept it! — $description';
   }
 
   @override
   String promiseChipRewardImminent(int days, String description) {
-    return '$days more day(s) to the reward — $description';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days more days',
+      one: '1 more day',
+    );
+    return '$_temp0 to win — $description';
   }
 
   @override
   String promiseChipSafeBoth(int rewardDays, int penaltyBuffer) {
-    return '$rewardDays days to reward · $penaltyBuffer misses safe';
+    String _temp0 = intl.Intl.pluralLogic(
+      rewardDays,
+      locale: localeName,
+      other: '$rewardDays days',
+      one: '1 day',
+    );
+    return '$_temp0 to win · $penaltyBuffer more misses and the bet\'s on';
   }
 
   @override
   String promiseChipSafeRewardOnly(int days, String description) {
-    return '$days days to reward — $description';
+    return '$days days to win — $description';
   }
 
   @override
   String promiseChipSafePenaltyOnly(int buffer, String description) {
-    return '$buffer misses safe — $description';
+    String _temp0 = intl.Intl.pluralLogic(
+      buffer,
+      locale: localeName,
+      other: '$buffer more misses',
+      one: 'One more miss',
+    );
+    return '$_temp0 and it\'s $description';
   }
 
   @override
-  String get promiseSheetTitle => 'Promise terms';
+  String get promiseSheetTitle => 'The bet';
 
   @override
   String promiseSheetSubtitle(int success, int failed, int remaining) {
-    return 'Settled when the plan ends. Currently $success done · $failed missed · $remaining days left.';
+    return 'Settled when the promise ends. So far $success kept · $failed missed · $remaining to go.';
   }
 
   @override
-  String get promiseSheetRewardLabel => 'Reward';
+  String get promiseSheetRewardLabel => 'If kept';
 
   @override
-  String get promiseSheetPenaltyLabel => 'Penalty';
+  String get promiseSheetPenaltyLabel => 'If missed';
 
   @override
   String promiseSheetRewardTarget(int target, int success) {
-    return '$target successful days to earn it — currently $success';
+    return 'Keep $target days to win — $success so far';
   }
 
   @override
   String promiseSheetPenaltyImpossible(int target) {
-    return 'Needed $target successful days but you can no longer reach it — penalty locked in';
+    String _temp0 = intl.Intl.pluralLogic(
+      target,
+      locale: localeName,
+      other: '$target days',
+      one: '1 day',
+    );
+    return '$_temp0 missed — the bet\'s on';
   }
 
   @override
   String promiseSheetPenaltyJustOne(int target) {
-    return 'Triggers below $target successful days — you can\'t miss even once more';
+    return 'On at $target missed days — one more miss and it\'s on';
   }
 
   @override
   String promiseSheetPenaltyBuffer(int target, int buffer) {
-    return 'Triggers below $target successful days — $buffer more misses are safe';
+    return 'On at $target missed days — $buffer more misses and it\'s on';
   }
 
   @override
@@ -1643,19 +1175,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t save notification setting. Reverted to the previous one.';
 
   @override
-  String get historyCardFeedbackHint => 'Leave a warm note (optional)';
+  String get historyCardFeedbackHint => 'Add a word (optional)';
 
   @override
-  String get historyCardFeedbackButton => 'OK';
+  String get historyCardFeedbackButton => 'Props!';
 
   @override
-  String get historyCardAcknowledgePractice => 'Acknowledge practice';
+  String get historyCardAcknowledgePractice => 'Partner props';
 
   @override
-  String get planSummaryMyDone => 'My completions';
+  String get planSummaryMyDone => 'Days I did it';
 
   @override
-  String get planSummaryPartnerVerified => 'Accountability partner checked';
+  String get planSummaryPartnerVerified => 'Partner props';
 
   @override
   String planSummaryCount(int count) {
@@ -1663,37 +1195,27 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get connectInviteCodeDetectedTitle => 'Invite code detected';
-
-  @override
-  String connectInviteCodeDetectedBody(String code) {
-    return 'We found an invite code ($code) in your clipboard.\nPaste it?';
-  }
+  String get connectInviteCodeDetectedTitle =>
+      'We found an invite code you copied';
 
   @override
   String get connectCancel => 'Cancel';
 
   @override
-  String get connectPaste => 'Paste';
-
-  @override
-  String get connectNotice => 'Notice';
+  String get connectNotice => 'Heads up';
 
   @override
   String get connectAlreadyConnectedBody =>
-      'You already have one accountability partner.\nFor now, Nodtry supports one mutual connection at a time.';
+      'You\'re already connected with a partner.\nDuoDone connects you with one person at a time.';
 
   @override
   String get connectOk => 'OK';
 
   @override
-  String get connectSuccess => 'Accountability partner connected!';
-
-  @override
   String get allPlansTitleMine => 'My promises';
 
   @override
-  String get allPlansTitlePartner => 'Accountability partner\'s promises';
+  String get allPlansTitlePartner => 'Your partner\'s promises';
 
   @override
   String get allPlansEmpty => 'No promises yet';
@@ -1718,18 +1240,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allPlansCancel => 'Cancel';
 
   @override
-  String get historyErrorUnknown => 'An unknown error occurred.';
+  String get historyErrorUnknown => 'Something unexpected went wrong.';
 
   @override
   String get historyErrorIndexMissing =>
-      'Database index missing for this query.\nPlease screenshot this and send it to the developer.';
+      'A database index is missing for this query.\nPlease screenshot this and send it to the developer.';
 
   @override
   String get historyErrorAlreadyDeleted =>
       'This record or promise was already deleted,\nso a reaction can\'t be left.';
 
   @override
-  String get historyErrorTitle => 'Error';
+  String get historyErrorTitle => 'Something went wrong';
 
   @override
   String get historyErrorCreationLink => 'Creation link:';
@@ -1762,10 +1284,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyWeeklyMeLabel => 'Me';
 
   @override
-  String get historyWeeklyPartnerLabel => 'Accountability partner';
+  String get historyWeeklyPartnerLabel => 'Partner';
 
   @override
-  String get historyReconcileTitle => 'Reconcile past record';
+  String get historyReconcileTitle => 'Fix a past record';
 
   @override
   String get historyReconcileSubtitle => 'What actually happened on this day?';
@@ -1805,14 +1327,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usEmptyMine => 'No promises yet';
 
   @override
-  String get usEmptyPartner =>
-      'Your accountability partner has no active promises';
+  String get usEmptyPartner => 'Your partner has no active promises';
 
   @override
-  String get usCreatePlanShort => '+ New promise';
+  String get usCreatePlanShort => '+ Workout promise';
 
   @override
-  String get usCreatePlan => 'New promise';
+  String get usCreatePlan => 'Make a workout promise';
 
   @override
   String get usDeletePlanTitle => 'Delete this promise?';
@@ -1830,7 +1351,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usDelete => 'Delete';
 
   @override
-  String get planDetailPracticeHistory => 'Practice log';
+  String get planDetailPracticeHistory => 'Log';
 
   @override
   String get planDetailLoadFailed =>
@@ -1840,7 +1361,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDetailNoRecords => 'No records yet.';
 
   @override
-  String get planDetailNotSavedPlan => 'Plan not saved.';
+  String get planDetailNotSavedPlan => 'This promise isn\'t saved yet.';
 
   @override
   String get planDetailRecordDone => 'Done';
@@ -1849,26 +1370,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDetailRecordSkipped => 'Skipped';
 
   @override
-  String get planDetailRecordRested => 'Rested';
+  String get planDetailRecordRested => 'Rest pass';
 
   @override
-  String get planDetailRecordRescued => 'Acknowledged';
+  String get planDetailRecordRescued => 'Partner props';
 
   @override
-  String get planDetailPokeSent => 'Knock knock — door tapped!';
+  String get planDetailPokeSent => 'Knock sent to your partner.';
 
   @override
   String get planDetailPokeFailed =>
       'We couldn\'t send that. Please try again.';
 
   @override
-  String get planDetailPokeDoneToday => 'Knock sent for today';
+  String get planDetailPokeDoneToday => 'Knocked today';
 
   @override
   String get planDetailPokeSending => 'Sending…';
 
   @override
-  String get planDetailPokeAsk => 'Knock knock… are you forgetting?';
+  String get planDetailPokeAsk => 'Send a knock';
 
   @override
   String get planDetailPokeAlreadyDone => 'Already done today';
@@ -1945,28 +1466,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your current promise will be stopped and you\'ll move to create a new one.\nExisting records are kept safe.';
 
   @override
-  String get planDetailReport => 'Practice report';
-
-  @override
-  String get planDetailReportPeriod => 'Total period';
-
-  @override
-  String planDetailReportDays(int count) {
-    return '$count days';
-  }
-
-  @override
-  String get planDetailReportCompleted => 'Completions';
-
-  @override
-  String planDetailReportCount(int count) {
-    return '$count times';
-  }
-
-  @override
-  String get planDetailReportRate => 'Achievement rate';
-
-  @override
   String get planDetailRestartWithScheduleTitle =>
       'Restart with a new schedule?';
 
@@ -2001,7 +1500,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String nowSkipDialogBody(String title) {
-    return 'We\'ll mark $title as skipped for today.';
+    return '\'$title\' will count as missed today, and your partner will be told. Your streak together may reset.';
   }
 
   @override
@@ -2014,19 +1513,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowSkippedSnackbar => 'Skipped today\'s promise.';
 
   @override
-  String get nowApproveCheering => 'Cheering you on!';
+  String get nowApproveCheering => 'Great — it\'s on!';
 
   @override
-  String get nowApproveFailed => 'Approval failed.';
+  String get nowApproveFailed => 'Couldn\'t accept.';
 
   @override
-  String get nowVerifyDone => 'Practice verified!';
-
-  @override
-  String get nowVerifyFailed => 'Verification failed.';
-
-  @override
-  String get nowRejectDialogTitle => 'Want to adjust a bit more?';
+  String get nowRejectDialogTitle => 'Want to tweak it a bit?';
 
   @override
   String get nowRejectLessFrequent => 'Lower the frequency';
@@ -2035,13 +1528,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowRejectDifferentTime => 'Try a different time slot';
 
   @override
-  String get nowRejectCustom => 'Custom message';
+  String get nowRejectCustom => 'I\'ll write my own';
 
   @override
-  String get nowRejectRequested => 'Adjustment requested';
+  String get nowRejectRequested => 'Sent your suggestion';
 
   @override
-  String get nowRejectCustomDialogTitle => 'What would you like to adjust?';
+  String get nowRejectCustomDialogTitle => 'What would you change?';
 
   @override
   String get nowRejectCustomHint =>
@@ -2051,53 +1544,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowSend => 'Send';
 
   @override
-  String get nowCheerExcited => 'Sent excited support! 🔥';
-
-  @override
-  String get nowCheerLove => 'Sent your love! ❤️';
-
-  @override
-  String get nowCheerProud => 'Said you\'re awesome! 👍';
-
-  @override
-  String get nowCheerStrength => 'Said hang in there! 💪';
-
-  @override
   String get nowCheerFailed => 'Couldn\'t send cheer.';
 
   @override
   String get nowPokeNoActivityMessage =>
-      'Knock knock! Your accountability partner is ready. Make one promise for today?';
+      'Knock knock! Make a workout promise — I\'ve got your back 🙂';
 
   @override
-  String get nowPokeSent => 'Sent a knock signal.';
+  String get nowPokeSent => 'Knock sent.';
 
   @override
   String get nowPokeFailed => 'Couldn\'t send the knock.';
 
   @override
   String get nowPokeAgainMessage =>
-      'Knock knock! Your accountability partner is here. Ready to keep today\'s promise going?';
+      'Knock knock! Waiting on today\'s promise 🙂';
 
   @override
-  String get nowPokeAgainSent =>
-      'Knock sent to help today\'s promise continue.';
+  String get nowPokeAgainSent => 'Knock sent to your partner.';
 
   @override
-  String get nowSettlementSaved => '4-week settlement saved.';
+  String get nowSettlementSaved => 'Saved your 4-week wrap-up.';
 
   @override
   String get nowExitDialogTitle => 'Wrap up this 4-week round here?';
 
   @override
-  String get nowExitReasonWeakPoke => 'Knocks didn\'t help me follow through';
+  String get nowExitReasonWeakPoke => 'Knocks didn\'t really help';
 
   @override
   String get nowExitReasonTooBig => 'The goal was too big';
 
   @override
-  String get nowExitReasonPartnerBurden =>
-      'Checking in on each other felt heavy';
+  String get nowExitReasonPartnerBurden => 'Backing each other felt like a lot';
 
   @override
   String get nowExitReasonCustomLabel => 'Other';
@@ -2117,7 +1596,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nowRestPassBody =>
-      'Use one rest pass this week.\nYour streak stays intact.';
+      'Use this week\'s rest pass.\nYour streak stays intact.';
 
   @override
   String get nowRestPassConfirm => 'Use it';
@@ -2130,29 +1609,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'You already used this week\'s rest pass.';
 
   @override
-  String get nowRestPassError => 'An error occurred.';
+  String get nowRestPassError => 'Something went wrong.';
 
   @override
-  String get nowRescuedSnackbar =>
-      'Acknowledged the practice! Streak preserved.';
+  String get nowRescuedSnackbar => 'Props given! Their streak lives on.';
 
   @override
-  String get nowRescueFailed => 'Couldn\'t acknowledge practice.';
+  String get nowRescueFailed => 'Couldn\'t give props.';
 
   @override
-  String get nowPromiseAccepted => 'Accepted the promise!';
+  String get nowPromiseAccepted => 'Bet\'s on! 🤝';
 
   @override
-  String get nowPromiseDeclined => 'Declined the promise.';
+  String get nowPromiseDeclined => 'Passed on this bet.';
 
   @override
-  String get nowPromiseResponseFailed => 'Couldn\'t send promise response.';
+  String get nowPromiseResponseFailed => 'Couldn\'t answer the bet.';
 
   @override
-  String get nowPromiseProposed => 'Proposed the promise!';
+  String get nowPromiseProposed => 'Bet proposed!';
 
   @override
-  String get nowPromiseProposeFailed => 'Couldn\'t propose the promise.';
+  String get nowPromiseProposeFailed => 'Couldn\'t propose the bet.';
 
   @override
   String nowTimeMinBeforeAlert(int minutes) {
@@ -2175,20 +1653,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get nowKeepFlowing => 'Great! Keep this flow going';
-
-  @override
-  String get nowGuideWhen =>
-      'Pick when you\'ll do it so today\'s starting point is clear';
-
-  @override
-  String get nowGuideSmallStart => 'Starting small is fine. Consistency wins';
-
-  @override
-  String get nowGuideBetterToday => 'Better than yesterday is enough';
-
-  @override
-  String get nowErrorTitle => 'Error';
+  String get nowErrorTitle => 'Something went wrong';
 
   @override
   String get nowErrorCreationLink => 'Creation link:';
@@ -2200,49 +1665,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowRetryLater => 'Please try again later';
 
   @override
-  String get nowPartnerActionFallback => 'Accountability partner\'s practice';
+  String get nowPartnerActionFallback => 'Your partner\'s promise';
 
   @override
-  String get nowActionNoteHint => 'Leave a warm note (optional)';
+  String get nowActionNoteHint => 'Add a word (optional)';
 
   @override
-  String get nowVerifyAndSend => 'Verify and send';
+  String get nowVerifyAndSend => 'Give props & send';
 
   @override
   String nowStreakCount(int count) {
-    return '$count days in a row!';
+    return '$count in a row!';
   }
 
   @override
   String get nowHeaderAdjustNeeded => 'Adjustment needed';
 
   @override
-  String get nowHeaderPromiseProposed => 'Promise proposal arrived';
+  String get nowHeaderPromiseProposed => 'A bet proposal arrived';
 
   @override
-  String get nowHeaderPromiseSettled => 'Promise result is out';
+  String get nowHeaderPromiseSettled => 'The bet result is in';
 
   @override
   String get nowPromiseAckButton => 'See the result';
 
   @override
-  String get nowPromiseAckWithNote => 'Leave a word and close';
+  String get nowPromiseAckDialogTitle => 'Bet result';
 
   @override
-  String get nowPromiseAckDialogTitle => 'Promise result';
-
-  @override
-  String get nowPromiseAckDialogHint =>
-      'Leave a quick word for your accountability partner (optional)';
+  String get nowPromiseAckDialogHint => 'A word for your partner (optional)';
 
   @override
   String get nowPromiseAckDialogConfirm => 'Got it';
 
   @override
-  String get nowPromiseAckSnackbar => 'Result acknowledged';
+  String get nowPromiseAckSnackbar => 'Result checked';
 
   @override
-  String get nowPromiseAckFailed => 'Could not acknowledge the result';
+  String get nowPromiseAckFailed => 'Couldn\'t confirm the result';
 
   @override
   String get planDetailViewList => 'List';
@@ -2257,10 +1718,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDetailLegendDone => 'Done';
 
   @override
-  String get planDetailLegendRested => 'Rested';
+  String get planDetailLegendRested => 'Rest pass';
 
   @override
-  String get planDetailLegendRescued => 'Rescued';
+  String get planDetailLegendRescued => 'Props';
 
   @override
   String get planDetailLegendSkipped => 'Skipped';
@@ -2277,7 +1738,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get planDetailGraphCompletionRate => 'Weekly completion rate';
+  String get planDetailGraphCompletionRate => 'Weekly completion';
 
   @override
   String get planDetailGraphEmpty => 'Nothing to plot yet.';
@@ -2319,118 +1780,136 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDetailProgressNoVerdictYet => 'No verdicts in yet';
 
   @override
-  String get planDetailPromiseProgressTitle => 'Promise progress';
+  String get planDetailPromiseProgressTitle => 'Bet progress';
 
   @override
-  String get planDetailPromiseRewardLabel => '🏆 Reward';
+  String get planDetailPromiseRewardLabel => '🏆 If kept';
 
   @override
-  String get planDetailPromisePenaltyLabel => '⚡ Penalty';
+  String get planDetailPromisePenaltyLabel => '⚡ If missed';
 
   @override
   String planDetailPromiseRewardNeed(int days) {
-    return '$days more day(s) to reward';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days more days',
+      one: '1 more day',
+    );
+    return '$_temp0 to win';
   }
 
   @override
-  String get planDetailPromiseRewardAchieved => '🎉 Reward achieved!';
+  String get planDetailPromiseRewardAchieved => '🎉 Kept it!';
 
   @override
   String planDetailPromisePenaltyBuffer(int buffer) {
-    return '$buffer miss(es) of room';
+    return '$buffer more misses and the bet\'s on';
   }
 
   @override
   String get planDetailPromisePenaltyImminent =>
-      'One more miss triggers penalty';
+      'One more miss and the bet\'s on';
 
   @override
-  String get planDetailPromisePenaltyTriggered => '⚡ Penalty triggered';
+  String get planDetailPromisePenaltyTriggered => '⚡ Missed · the bet\'s on';
 
   @override
   String get planDetailMoreMenu => 'More';
 
   @override
-  String get planDetailMenuRestartCompleted => 'Make a new plan from this';
+  String get planDetailMenuRestartCompleted => 'New promise from this one';
 
   @override
   String get planDetailMenuRestartActive => 'Restart with new schedule';
 
   @override
-  String get planDetailMenuStop => 'Stop plan';
+  String get planDetailMenuStop => 'Stop promise';
 
   @override
   String planDetailPromiseSuccessFailBreakdown(int success, int fail) {
-    return '$success done · $fail missed';
+    return '$success kept · $fail missed';
   }
 
   @override
-  String get nowHeaderSettlementNeeded => '4-week settlement needed';
+  String get nowHeaderSettlementNeeded => 'Your 4 weeks are up';
 
   @override
   String get nowHeaderSettlementSub =>
-      'See whether action followed the knock, then choose the next 4 weeks.';
+      'Look back on these 4 weeks and decide on the next round.';
 
   @override
   String get nowMetricCompleted => 'Completed';
 
   @override
-  String get nowMetricPartnerReact => 'Accountability partner reactions';
+  String get nowMetricPartnerReact => 'Partner props';
 
   @override
   String get nowMetricMissed => 'Missed days';
 
   @override
   String nowMetricDaysSuffix(int count) {
-    return '$count days';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
   }
 
   @override
   String nowMetricCountSuffix(int count) {
-    return '$count times';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: '1 time',
+    );
+    return '$_temp0';
   }
 
   @override
   String get nowSettlementWinMessage =>
-      'You hit the goal you set together. Nicely done! Time to decide whether to keep going for another 4 weeks.';
+      'You hit the goal you set. Nicely done! Decide whether to keep going for another 4 weeks.';
 
   @override
   String get nowSettlementLoseMessage =>
-      'You didn\'t quite reach the goal this time, but the 4 weeks you shared still count. Decide what to adjust for the next 4 weeks.';
+      'You didn\'t quite reach the goal this time, but the 4 weeks you shared still count. Decide what to adjust for the next round.';
 
   @override
   String get nowSettlementNeutralMessage =>
-      'You made it through the whole 4 weeks together. Time to decide whether to continue for another round.';
+      'You made it through the whole 4 weeks together. Decide whether to go another round.';
 
   @override
   String nowRewardCondition(int days, String description) {
-    return '$days successful days: $description';
+    return 'Keep $days days: $description';
   }
 
   @override
   String nowPenaltyCondition(int days, String description) {
-    return '$days failed days: $description';
+    return 'Miss $days days: $description';
   }
 
   @override
   String nowPromiseResult(int success, int fail) {
-    return 'Successes $success / Failures $fail';
+    return '$success kept / $fail missed';
   }
 
   @override
   String get nowAchieved => 'Achieved!';
 
   @override
-  String get nowTriggered => 'Triggered!';
+  String get nowTriggered => 'It\'s on!';
 
   @override
   String get nowNotMet => 'Not met';
 
   @override
-  String get nowDecline => 'Decline';
+  String get nowDecline => 'Pass';
 
   @override
-  String get nowAccept => 'Accept';
+  String get nowAccept => 'I\'m in!';
 
   @override
   String get nowContinueNext4Weeks => 'Start the next 4 weeks';
@@ -2448,104 +1927,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nowRestToday => 'Rest today (rest pass)';
 
   @override
-  String get nowMissedPlanFallback => 'Past promise';
+  String get nowHeaderTodayAllDone => 'All done for today 🎉';
 
   @override
-  String get nowVerifyingDeadline => 'Waiting for verification · cheer needed';
+  String nowHeaderConfirmAndPull(String name) {
+    return '$name did it! Give them props?';
+  }
 
   @override
-  String get nowHeaderTodayAllDone => 'All today\'s promises kept';
+  String nowHeaderWaiting(String name) {
+    return 'Waiting for $name\'s promise';
+  }
 
   @override
-  String get nowHeaderConfirmAndPull => 'Time to check in and cheer them on';
+  String get nowHeaderWaitingAccept => 'Waiting for them to accept the bet';
 
   @override
-  String get nowHeaderWaiting => 'Waiting';
+  String get nowHeaderPromiseResult => 'The bet result is in';
 
   @override
-  String get nowHeaderWaitingAccept => 'Waiting for promise approval';
+  String get nowAdjust => 'Let\'s tweak it';
 
   @override
-  String get nowHeaderPromiseResult => 'Promise result is out';
-
-  @override
-  String get nowAdjust => 'Adjust';
-
-  @override
-  String get nowApprove => 'Approve';
+  String get nowApprove => 'Sounds good!';
 
   @override
   String get nowPartnerNoNewPlanGuide =>
-      'Your accountability partner hasn\'t made a new promise yet. Knock and start together?';
+      'Your partner hasn\'t made a workout promise yet. Send a knock to start together?';
 
   @override
-  String get nowKnockMakePlan => 'Knock! Ask to start together';
+  String get nowKnockMakePlan => 'Knock! Let\'s do this together';
 
   @override
   String nowPartnerMissedPokeBody(String name) {
-    return 'Send $name a knock to help them restart a missed promise.';
+    return '$name hasn\'t done today\'s promise yet. Send a cheer?';
   }
 
   @override
   String nowPartnerQuietPokeBody(String name) {
-    return '$name\'s promise is quiet. Send a knock to show you noticed.';
+    return '$name\'s promise is still quiet. Send a knock to say you\'re waiting?';
   }
 
   @override
-  String get nowKnockPull => 'Knock! Help them restart';
+  String get nowKnockPull => 'Send a knock';
 
   @override
-  String get nowRescueYesterday => 'Acknowledge yesterday';
+  String get nowRescueYesterday => 'Give props for yesterday';
 
   @override
-  String get nowVerifyAndCheer => 'Verify and cheer';
+  String get nowVerifyAndCheer => 'Give props';
 
   @override
-  String get nowMakePromise => 'Make a promise';
+  String get nowMakePromise => 'Make a bet';
 
   @override
-  String get nowPartnerFallback2 => 'accountability partner';
+  String get nowPartnerFallback2 => 'Your partner';
 
   @override
   String nowPartnerAllDone(String name) {
-    return '$name kept all today\'s promises.';
+    return '$name kept every promise today 🎉';
   }
 
   @override
-  String get nowQuickCheckHelp =>
-      'Check in briefly and keep tomorrow\'s promise visible too.';
+  String get nowQuickCheckHelp => 'Giving props keeps them going tomorrow.';
 
   @override
   String nowLastAction(String title) {
-    return 'Last action: $title';
+    return 'Last check-in: $title';
   }
 
   @override
   String nowRewardLine(int days, String description) {
-    return '🏆 $days successful days: $description';
+    return '🏆 Keep $days days: $description';
   }
 
   @override
   String nowPenaltyLine(int days, String description) {
-    return '⚡ $days failed days: $description';
+    return '⚡ Miss $days days: $description';
   }
 
   @override
   String nowResultLine(int success, int fail) {
-    return 'Result: Successes $success / Failures $fail';
+    return 'Result: $success kept / $fail missed';
   }
 
   @override
   String get nowWaitingApproval => 'Waiting for approval…';
 
   @override
-  String get nowRewardAchievedTitle => '🎉 Reward earned!';
+  String get nowRewardAchievedTitle => '🎉 Kept it!';
 
   @override
-  String get nowPenaltyTriggeredTitle => '⚡ Penalty triggered!';
+  String get nowPenaltyTriggeredTitle => '⚡ The bet\'s on!';
 
   @override
-  String get nowBothTitle => '🎉 Reward earned! + ⚡ Penalty triggered!';
+  String get nowBothTitle => '🎉 Kept it! + ⚡ The bet\'s on!';
 
   @override
   String get nowConditionNotMet => 'Conditions not met';
@@ -2557,50 +2033,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String nowTotalDaysScheduled(int days, int scheduled) {
-    return 'A $days-day promise · $scheduled practice days planned';
+    return 'A $days-day promise · $scheduled days scheduled';
   }
 
   @override
-  String get nowMakePromiseTitle => 'Make a promise';
+  String get nowMakePromiseTitle => 'Make a bet';
 
   @override
   String get nowMakePromiseSubtitle =>
-      'It starts when you and your accountability partner agree';
+      'The bet starts once your partner accepts. Bet treats and chores, not money.';
 
   @override
   String nowProgressLine(int success, int failed, int remaining) {
-    return 'Currently $success successes · $failed failures · $remaining days remaining';
+    return 'So far $success kept · $failed missed · $remaining to go';
   }
 
   @override
   String nowMaxLimitsLine(int reward, int penalty) {
-    return 'Reward up to $reward days, penalty up to $penalty days.';
+    return 'Set up to $reward days to keep and up to $penalty misses.';
   }
 
   @override
-  String get nowRewardTitle => '🏆 Reward (carrot)';
+  String get nowRewardTitle => '🏆 If kept';
 
   @override
-  String get nowRewardHint => 'e.g. treat to chicken, fancy dinner';
+  String get nowRewardHint => 'e.g. 🍣 sushi date, you pick the movie';
 
   @override
-  String get nowRewardTargetLabel => 'Success target';
+  String get nowRewardTargetLabel => 'Days to keep';
 
   @override
-  String get nowPenaltyTitle => '⚡ Penalty (stick)';
+  String get nowPenaltyTitle => '⚡ If missed';
 
   @override
-  String get nowPenaltyHint => 'e.g. dishes for a week, buy coffee';
+  String get nowPenaltyHint => 'e.g. 🍗 buy the chicken, dishes for a week';
 
   @override
-  String get nowPenaltyTargetLabel => 'Failure limit';
+  String get nowPenaltyTargetLabel => 'Miss limit';
 
   @override
-  String get nowProposePromise => 'Propose promise';
+  String get nowProposePromise => 'Propose the bet';
 
   @override
   String nowDaysSuffix(int count) {
-    return '$count days';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2609,15 +2091,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get nowPokeReceived => 'Your accountability partner sent a knock';
+  String get nowPokeReceived => 'Your partner sent a knock';
 
   @override
   String nowPokeReceivedFromName(String name) {
     return '$name sent a knock';
   }
-
-  @override
-  String get nowYesterday => 'Yesterday';
 
   @override
   String get nowNoteDateToday => 'Today';
@@ -2657,7 +2136,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifyBannerBody =>
-      'Turn them on so you don\'t miss your accountability partner\'s check-ins and knocks.';
+      'Turn them on so you don\'t miss your partner\'s props and knocks.';
 
   @override
   String get notifyBannerAction => 'Turn on';
@@ -2716,29 +2195,739 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tutorialNext => 'Next';
 
   @override
-  String get tutorialStart => 'Okay, let\'s start';
+  String get tutorialStart => 'Get started';
 
   @override
-  String get tutorialFooter => 'One small promise is enough to begin.';
+  String get tutorialFooter => 'One workout promise is all it takes to start.';
 
   @override
-  String get tutorialPage1Title => 'Keep it small';
+  String get tutorialPage1Title => 'Make a workout promise';
 
   @override
   String get tutorialPage1Body =>
-      'Instead of a vague goal, make one promise you can keep today. Starting small is what gets you moving.';
+      'Gym, running, home workouts — pick what and when, then promise it to your partner. It\'s much harder to skip than a promise to yourself.';
 
   @override
-  String get tutorialPage2Title => 'One person who notices';
+  String get tutorialPage2Title => 'Your partner sees it, and gives props';
 
   @override
   String get tutorialPage2Body =>
-      'Connect with an accountability partner by mutual choice. They notice your effort, and you cheer on theirs.';
+      'Snap a proof photo after your workout and your partner sees it right away. One tap from them is props — and they\'ll knock on the days you forget.';
 
   @override
-  String get tutorialPage3Title => 'Let your record shape what\'s next';
+  String get tutorialPage3Title => 'Both done? That\'s DuoDone';
 
   @override
   String get tutorialPage3Body =>
-      'Track what you kept and what you put off, then size your next promise to match. Even a miss is material for the next one.';
+      'When you both work out, that\'s a DuoDone day. Watch the days you\'ve stacked up together.';
+
+  @override
+  String get appUpdateRequiredTitle => 'Update required';
+
+  @override
+  String get appUpdateRequiredBody =>
+      'This version is no longer supported. Update to the latest version to keep going.';
+
+  @override
+  String get appUpdateButton => 'Update';
+
+  @override
+  String get appUpdateSoftTitle => 'A new version is here';
+
+  @override
+  String get appUpdateSoftBody =>
+      'Update to get the latest features and fixes.';
+
+  @override
+  String get appUpdateLater => 'Later';
+
+  @override
+  String get appUpdateStoreOpenFailed =>
+      'Couldn\'t open the store. Please update from the store app.';
+
+  @override
+  String get nowHeaderPartnerAskedAdjust => 'Your partner suggested a tweak';
+
+  @override
+  String get nowHeaderPokeWaiting => 'Knock knock! Your partner is waiting';
+
+  @override
+  String nowHeaderMissedNotice(String name) {
+    return 'No check-in yet today, so $name got a heads-up';
+  }
+
+  @override
+  String nowHeaderPartnerMissed(String name) {
+    return '$name\'s promise is still open today';
+  }
+
+  @override
+  String get nowHeaderPokeTurn => 'Your turn to send a knock';
+
+  @override
+  String get promiseUntitledFallback => 'Promise';
+
+  @override
+  String planSummaryWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '1 week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsTutorialTitle => 'How it works';
+
+  @override
+  String get settingsTutorialDesc =>
+      'See again how workout promises and props work';
+
+  @override
+  String get notifActionDidIt => 'Did it';
+
+  @override
+  String get notifActionSkipToday => 'Skip today';
+
+  @override
+  String get notifActionSnooze => 'Remind me in 10 min';
+
+  @override
+  String get notifReminderBody => 'One check-in and today is logged 📸';
+
+  @override
+  String get notifFallbackTitle => 'DuoDone';
+
+  @override
+  String get notifChannelRemindersName => 'Promise reminders';
+
+  @override
+  String get notifChannelRemindersDesc =>
+      'Reminders at the times you set for your promises';
+
+  @override
+  String get notifChannelGeneralName => 'Partner updates';
+
+  @override
+  String get notifChannelGeneralDesc =>
+      'Props, knocks, and cheers from your partner';
+
+  @override
+  String get notifChannelScheduledName => 'Scheduled reminders';
+
+  @override
+  String get notifChannelScheduledDesc => 'Notifications at a time you picked';
+
+  @override
+  String get notifChannelDebugName => 'Test notifications';
+
+  @override
+  String get notifChannelDebugDesc => 'For testing notifications';
+
+  @override
+  String nowHeroQuestion(String emoji, String workout) {
+    return '$emoji $workout done today?';
+  }
+
+  @override
+  String nowHeroQuestionDiet(String emoji, String workout) {
+    return '$emoji $workout on track today?';
+  }
+
+  @override
+  String nowHeroQuestionLegacy(String title) {
+    return 'Did you do \'$title\' today?';
+  }
+
+  @override
+  String get nowProofTakePhoto => '📸 Take a proof photo';
+
+  @override
+  String get nowHeroVerifyLegacy => 'Check in';
+
+  @override
+  String get nowDidItNoPhoto => 'Did it, no photo';
+
+  @override
+  String get proofSourceSheetTitle => 'Add a proof photo';
+
+  @override
+  String get proofSourceCamera => '📸 Take with camera';
+
+  @override
+  String get proofSourceCameraHint => 'Shows as just taken';
+
+  @override
+  String get proofSourceGallery => '🖼️ Choose from album';
+
+  @override
+  String get proofSourceGalleryHint => 'Shows as an album photo with its date';
+
+  @override
+  String get proofConsentTitle => 'Before your first proof photo';
+
+  @override
+  String get proofConsentOnlyPartner => 'Only your partner can see it.';
+
+  @override
+  String get proofConsentLocationRemoved =>
+      'Location and other photo info are removed before upload.';
+
+  @override
+  String get proofConsentAfterDisconnect =>
+      'If you disconnect, it can no longer be seen in the app.';
+
+  @override
+  String get proofConsentNoInappropriate =>
+      'Please don\'t upload inappropriate photos.';
+
+  @override
+  String get proofConsentAgree => 'Got it';
+
+  @override
+  String get proofPreviewTitle => 'Send this proof?';
+
+  @override
+  String get proofPreviewSubmit => 'Send proof';
+
+  @override
+  String get proofUploadDone => 'Proof photo sent 📸';
+
+  @override
+  String get proofUploadFailed =>
+      'Couldn\'t upload the photo, but today\'s record is saved.';
+
+  @override
+  String get proofPhotoPrepareFailed =>
+      'Couldn\'t use that photo. Please try another one.';
+
+  @override
+  String get proofPickFailed => 'Couldn\'t open the camera or album.';
+
+  @override
+  String proofBadgeCamera(String time) {
+    return '📸 Just taken · $time';
+  }
+
+  @override
+  String get proofBadgeCameraJustNow => '📸 Just taken';
+
+  @override
+  String proofBadgeCameraOn(String when) {
+    return '📸 Camera · $when';
+  }
+
+  @override
+  String proofBadgeGalleryTaken(String date) {
+    return '🖼️ Album · taken $date';
+  }
+
+  @override
+  String get proofBadgeGallery => '🖼️ Album';
+
+  @override
+  String get proofPhotoLoadFailed => 'Couldn\'t load the photo';
+
+  @override
+  String get proofPhotoRetry => 'Try again';
+
+  @override
+  String get proofPhotoSemantics => 'Proof photo';
+
+  @override
+  String get proofViewerMenu => 'More';
+
+  @override
+  String get proofViewerReport => 'Report';
+
+  @override
+  String get proofViewerDelete => 'Delete photo';
+
+  @override
+  String get proofDeleteConfirmTitle => 'Delete this proof photo?';
+
+  @override
+  String get proofDeleteConfirmBody =>
+      'Your partner won\'t see it anymore. The record itself stays.';
+
+  @override
+  String get proofDeleteConfirm => 'Delete';
+
+  @override
+  String get proofDeleted => 'Proof photo deleted.';
+
+  @override
+  String get proofDeleteFailed =>
+      'Couldn\'t delete the photo. Please try again.';
+
+  @override
+  String get proofReportSubject => '[DuoDone] Report a proof photo';
+
+  @override
+  String proofReportBody(String actionId) {
+    return 'Please tell us what\'s wrong with this photo.\n\nRecord ID: $actionId';
+  }
+
+  @override
+  String proofReportMailFailed(String email) {
+    return 'Couldn\'t open your mail app. Please email us at $email.';
+  }
+
+  @override
+  String get nowReactHint => 'One tap gives props';
+
+  @override
+  String get nowReactAddNote => 'Add a note';
+
+  @override
+  String nowReactSemantics(String emoji) {
+    return 'Give props with $emoji';
+  }
+
+  @override
+  String nowReactedSnackbar(String emoji) {
+    return 'Props sent $emoji';
+  }
+
+  @override
+  String get partnerFallbackLabel => 'your partner';
+
+  @override
+  String get partnerFallbackLabelStart => 'Your partner';
+
+  @override
+  String get connectShareInvite => 'Send an invite';
+
+  @override
+  String get connectCopyCode => 'Copy code';
+
+  @override
+  String get connectHaveCodeTitle => 'Got a code from your partner?';
+
+  @override
+  String get connectInviteSent =>
+      'Invite sent. We\'ll let you know when your partner joins.';
+
+  @override
+  String get connectShareFailed =>
+      'Couldn\'t open the share sheet. Copy the code and send it instead.';
+
+  @override
+  String get connectErrorCodeNotFound =>
+      'We couldn\'t find anyone with that code. Please check it and try again.';
+
+  @override
+  String get connectErrorCodeFormat => 'Codes are 8 letters and numbers.';
+
+  @override
+  String get connectErrorOwnerTaken =>
+      'That code\'s owner is already connected to someone. Ask them for a new code.';
+
+  @override
+  String get connectErrorSelfTaken =>
+      'You\'re already connected to a partner. Disconnect first, then try again.';
+
+  @override
+  String get connectErrorCodeChanged =>
+      'That code has changed. Ask your partner for the new one.';
+
+  @override
+  String get connectErrorLinkUndone =>
+      'The connection didn\'t hold. The code may belong to someone who\'s already connected — ask for a new code.';
+
+  @override
+  String inviteShareMessage(String code, String link) {
+    return 'I made a workout promise 🤙 Back me up! Get DuoDone and enter code $code to connect → $link';
+  }
+
+  @override
+  String inviteShareMessageNoPromise(String code, String link) {
+    return 'I\'m making a workout promise 🤙 Back me up! Get DuoDone and enter code $code to connect → $link';
+  }
+
+  @override
+  String get inviteShareSubject => 'DuoDone invite';
+
+  @override
+  String get inviteHaveCodeLink => 'I got an invite code';
+
+  @override
+  String connectConfirmTitle(String name) {
+    return 'Back $name\'s workout promises?';
+  }
+
+  @override
+  String get connectConfirmBody =>
+      'Once connected, you\'ll see each other\'s workout promises and proof photos.';
+
+  @override
+  String get connectConfirmAccept => 'I\'ve got you';
+
+  @override
+  String connectSuccessTitle(String name) {
+    return 'You\'re connected with $name 🎉';
+  }
+
+  @override
+  String get connectSuccessBody =>
+      'Now you can back each other\'s workout promises.';
+
+  @override
+  String get connectSuccessAskTitle => 'Make one too?';
+
+  @override
+  String get connectSuccessAskBody => 'When you both do it, that\'s DuoDone.';
+
+  @override
+  String get connectSuccessMakePromise => 'Make mine';
+
+  @override
+  String get connectSuccessLater => 'Later';
+
+  @override
+  String get connectSuccessDone => 'Great';
+
+  @override
+  String get nicknameSheetTitle => 'What do you call your partner?';
+
+  @override
+  String nicknameSheetBody(String name) {
+    return 'We\'ll show this instead of $name in the app and notifications.';
+  }
+
+  @override
+  String get nicknamePresetPartner => 'Partner';
+
+  @override
+  String get nicknamePresetJagi => 'Babe';
+
+  @override
+  String get nicknamePresetOppa => 'Honey';
+
+  @override
+  String get nicknamePresetYeobo => 'Love';
+
+  @override
+  String get nicknamePresetAegi => 'Baby';
+
+  @override
+  String get nicknamePresetCustom => 'Type my own';
+
+  @override
+  String get nicknameCustomHint => 'Nickname (up to 10 characters)';
+
+  @override
+  String get nicknameSave => 'Save';
+
+  @override
+  String get nicknameLater => 'I\'ll decide later';
+
+  @override
+  String get nicknameRemove => 'Remove nickname';
+
+  @override
+  String get nicknameSaved => 'Nickname saved.';
+
+  @override
+  String get nicknameRemoved => 'Nickname removed.';
+
+  @override
+  String get nicknameSaveFailed =>
+      'Couldn\'t save the nickname. Please try again.';
+
+  @override
+  String get usSetNickname => 'Set a nickname';
+
+  @override
+  String get usEditNickname => 'Change nickname';
+
+  @override
+  String get onboardingInviteLater => 'I\'ll invite later';
+
+  @override
+  String get nowInviteCardTitle =>
+      'You actually do it when your partner sees it';
+
+  @override
+  String get nowInviteCardBody =>
+      'Send an invite so you can back each other\'s workout promises.';
+
+  @override
+  String get nowInviteCardWaitingTitle => 'Waiting for your partner';
+
+  @override
+  String get nowInviteCardWaitingBody =>
+      'They haven\'t joined yet. Send it again?';
+
+  @override
+  String get nowInviteCardResend => 'Send it again';
+
+  @override
+  String get pivotNoticeTitle => 'Nod&Try is now DuoDone';
+
+  @override
+  String get pivotNoticeBody =>
+      'Your promises, history and partner connection are all still here.';
+
+  @override
+  String get pivotNoticeOk => 'Got it';
+
+  @override
+  String duoStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Together for $count days',
+      one: 'Together for 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get duoStreakStart => 'Both check in today for day 1';
+
+  @override
+  String get duoTodayDone => 'You both did it today 🎉';
+
+  @override
+  String get duoMeLabel => 'Me';
+
+  @override
+  String get duoStatusDone => 'done ✓';
+
+  @override
+  String get duoStatusVerified => 'props ❤️';
+
+  @override
+  String get duoStatusWaiting => 'awaiting props';
+
+  @override
+  String get duoStatusPending => 'not yet';
+
+  @override
+  String get duoStatusRested => 'rest pass';
+
+  @override
+  String get duoStatusOff => 'day off';
+
+  @override
+  String get duoStatusMissed => 'missed';
+
+  @override
+  String get duoStatusUpcoming => 'coming up';
+
+  @override
+  String duoPersonStatus(String name, String status) {
+    return '$name · $status';
+  }
+
+  @override
+  String duoWeekDuoDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count duo days',
+      one: '1 duo day',
+      zero: 'No duo days yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duoDaySemantics(String day, String me, String partner) {
+    return '$day: me $me, partner $partner';
+  }
+
+  @override
+  String get duoShareButton => 'Make a share card';
+
+  @override
+  String shareCardStreak(int count) {
+    return '#DuoDone $count-day streak';
+  }
+
+  @override
+  String get shareCardNoStreak => '#DuoDone';
+
+  @override
+  String get shareCardStores => 'Search \'DuoDone\' in your app store';
+
+  @override
+  String shareCardPersonDone(String name, String workout) {
+    return '$name ✓ $workout';
+  }
+
+  @override
+  String shareCardPersonOff(String name) {
+    return '$name · day off';
+  }
+
+  @override
+  String shareCardPersonRested(String name) {
+    return '$name · rest pass';
+  }
+
+  @override
+  String shareCardPersonPending(String name) {
+    return '$name · not yet';
+  }
+
+  @override
+  String get shareCardSheetTitleToday =>
+      'You both did it today 🎉 Show it off?';
+
+  @override
+  String shareCardSheetTitleMilestone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days together 🎉 Show it off?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareCardSheetTitleManual => 'Share card';
+
+  @override
+  String get shareCardShare => 'Share';
+
+  @override
+  String get shareCardLater => 'Later';
+
+  @override
+  String get shareCardFailed => 'Couldn\'t make the share card.';
+
+  @override
+  String get shareCardOnlyMyPhoto => 'Only your own photo goes on the card.';
+
+  @override
+  String get shareCardText =>
+      '#DuoDone When your partner sees it, you actually do it.';
+
+  @override
+  String get shareCardSemantics => 'DuoDone share card';
+
+  @override
+  String get nowPokeReplyComing => 'On my way 🏃';
+
+  @override
+  String get nowPokeReplyPass => 'Go easy on me 🙏';
+
+  @override
+  String get nowPokeReplySent => 'Reply sent';
+
+  @override
+  String get nowPokeReplyFailed => 'Couldn\'t send the reply.';
+
+  @override
+  String get nowSendCheer => 'Send a cheer';
+
+  @override
+  String get nowCheerDefaultMessage => 'You\'ve got this! I\'m waiting 💪';
+
+  @override
+  String get nowCheerSent => 'Cheer sent';
+
+  @override
+  String get nowKnockSentToday => 'Knocked today';
+
+  @override
+  String get promisePenaltyChicken => '🍗 Buy the chicken';
+
+  @override
+  String get promisePenaltyCoffee => '☕ Buy the iced coffee';
+
+  @override
+  String get promisePenaltyDishes => '🍽️ Dishes for a week';
+
+  @override
+  String get promisePenaltyMassage => '💆 10-minute massage';
+
+  @override
+  String get promisePenaltyMovie => '🎬 They pick the movie';
+
+  @override
+  String get promisePenaltyPickup => '🚗 Pick-up duty';
+
+  @override
+  String get promiseRewardOmakase => '🍣 Omakase together';
+
+  @override
+  String get promiseRewardDessert => '🍰 Dessert date';
+
+  @override
+  String get promiseRewardMassage => '💆 A 10-minute massage';
+
+  @override
+  String get promiseRewardMovie => '🎬 You pick the movie';
+
+  @override
+  String get promiseMoneyBlocked =>
+      'Money bets aren\'t supported. Bet something you can do together, like a meal, coffee or the dishes.';
+
+  @override
+  String notifReminderBodyWithPartner(String name) {
+    return 'No check-in yet? We\'ll let $name know soon.';
+  }
+
+  @override
+  String get nowRecordQueued =>
+      'Saved. It\'ll reach your partner once you\'re back online.';
+
+  @override
+  String get settingsAboutSection => 'About';
+
+  @override
+  String get settingsPrivacyPolicy => 'Privacy policy';
+
+  @override
+  String get settingsTermsOfUse => 'Terms of use';
+
+  @override
+  String get settingsContactSupport => 'Contact support';
+
+  @override
+  String get settingsContactSupportSubject => '[DuoDone] Support';
+
+  @override
+  String settingsLinkOpenFailed(String email) {
+    return 'Couldn\'t open it. You can reach us at $email.';
+  }
+
+  @override
+  String get usReportPartner => 'Report partner';
+
+  @override
+  String get usReportPartnerSubject => '[DuoDone] Report a partner';
+
+  @override
+  String usReportPartnerBody(String uid) {
+    return 'Tell us what\'s wrong (a photo, note or message). We\'ll review it and act.\n\nReported account ID: $uid';
+  }
+
+  @override
+  String get termsViewLink => 'View terms of use';
+
+  @override
+  String get termsNoticeConnect =>
+      'By connecting you agree to the Terms of Use. Objectionable content and abusive behavior aren\'t tolerated — reported content and accounts are removed.';
+
+  @override
+  String get termsNoticeInvite =>
+      'Sending an invite means you agree to the Terms of Use. Objectionable content and abuse aren\'t tolerated.';
+
+  @override
+  String get termsNoticePhoto =>
+      'By posting you agree to the Terms of Use. Objectionable photos and abuse aren\'t tolerated.';
+
+  @override
+  String get planSavedInviteTitle =>
+      'Promise made! Ask your partner to back you up?';
+
+  @override
+  String get planSavedInviteBody =>
+      'With your partner watching, you\'ll actually do it. Send them your code and link.';
 }

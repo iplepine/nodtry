@@ -35,7 +35,7 @@ class HistoryFakeStates {
         id: '2',
         planId: 'plan_reading',
         date: DateTime.now().subtract(const Duration(hours: 5)),
-        title: '책 30분 읽기',
+        title: '홈트 30분',
         status: HistoryStatus.done,
         executorId: 'partner',
         partnerName: '지민',
@@ -46,7 +46,7 @@ class HistoryFakeStates {
         id: '3',
         planId: 'plan_vitamin',
         date: DateTime.now().subtract(const Duration(days: 1)),
-        title: '영양제 챙겨먹기',
+        title: '저녁 먹고 만 보 걷기',
         status: HistoryStatus.verified,
         executorId: 'me',
         isVerifiedByPartner: true,
@@ -62,7 +62,7 @@ class HistoryFakeStates {
     finishedPlanSummaries: [
       PlanSummary(
         planId: 'plan_completed_1',
-        title: '매일 물 2L 마시기',
+        title: '스쿼트 100개',
         startDate: DateTime.now().subtract(const Duration(days: 28)),
         endDate: DateTime.now().subtract(const Duration(days: 1)),
         myCount: 25,
@@ -86,7 +86,7 @@ class HistoryFakeStates {
         id: 'today_1',
         planId: 'plan_active_1',
         date: DateTime.now(),
-        title: '명상 10분',
+        title: '요가 20분',
         status: HistoryStatus.done,
         executorId: 'me',
       ),
@@ -108,7 +108,7 @@ class HistoryFakeStates {
         id: 'yesterday_1',
         planId: 'plan_active_1',
         date: DateTime.now().subtract(const Duration(days: 1)),
-        title: '명상 10분',
+        title: '요가 20분',
         status: HistoryStatus.actuallyDone,
         executorId: 'me',
         note: '늦었지만 완료했어요!',
@@ -131,7 +131,7 @@ class HistoryFakeStates {
     finishedPlanSummaries: [
       PlanSummary(
         planId: 'plan_finished_1',
-        title: '아침 일찍 일어나기',
+        title: '아침 러닝 3km',
         startDate: DateTime.now().subtract(const Duration(days: 30)),
         endDate: DateTime.now().subtract(const Duration(days: 3)),
         myCount: 22,
@@ -168,15 +168,7 @@ class HistoryFakeStates {
   static HistoryState get manyItems {
     final activeItems = <HistoryItem>[];
     final executors = ['me', 'partner'];
-    final titles = [
-      '아침 조깅',
-      '책 읽기',
-      '영양제 먹기',
-      '명상하기',
-      '스트레칭',
-      '물 마시기',
-      '일기 쓰기',
-    ];
+    final titles = ['아침 조깅', '홈트', '걷기', '요가', '스트레칭', '필라테스', '자전거'];
     final statuses = [
       HistoryStatus.done,
       HistoryStatus.verified,
@@ -210,7 +202,7 @@ class HistoryFakeStates {
       finishedPlanSummaries: [
         PlanSummary(
           planId: 'old_plan_1',
-          title: '매일 독서 30분',
+          title: '매일 홈트 30분',
           startDate: DateTime.now().subtract(const Duration(days: 60)),
           endDate: DateTime.now().subtract(const Duration(days: 30)),
           myCount: 28,
@@ -224,7 +216,7 @@ class HistoryFakeStates {
         ),
         PlanSummary(
           planId: 'old_plan_3',
-          title: '아침 명상',
+          title: '아침 스트레칭',
           startDate: DateTime.now().subtract(const Duration(days: 120)),
           endDate: DateTime.now().subtract(const Duration(days: 90)),
           myCount: 25,
@@ -249,7 +241,7 @@ class HistoryFakeStates {
         id: 't2',
         planId: 'plan_2',
         date: DateTime.now().subtract(const Duration(hours: 2)),
-        title: '실천 메이트가 확인한 약속',
+        title: '짝꿍이 인정한 약속',
         status: HistoryStatus.verified,
         executorId: 'me',
         isVerifiedByPartner: true,
@@ -258,7 +250,7 @@ class HistoryFakeStates {
         id: 't3',
         planId: 'plan_3',
         date: DateTime.now().subtract(const Duration(hours: 4)),
-        title: '실천 메이트가 완료한 약속',
+        title: '짝꿍이 완료한 약속',
         status: HistoryStatus.done,
         executorId: 'partner',
         partnerName: '지민',
@@ -269,7 +261,7 @@ class HistoryFakeStates {
         id: 't4',
         planId: 'plan_4',
         date: DateTime.now().subtract(const Duration(hours: 6)),
-        title: '내가 확인한 메이트 약속',
+        title: '내가 인정한 짝꿍 약속',
         status: HistoryStatus.done,
         executorId: 'partner',
         isVerifiedByMe: true,

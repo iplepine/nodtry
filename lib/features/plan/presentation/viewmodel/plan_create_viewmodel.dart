@@ -1,11 +1,16 @@
 import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../plan_create_state.dart';
+
+import '../../../../models/connected_user.dart';
 import '../../../../models/plan_model.dart';
-import '../../../../providers/repository_provider.dart';
 import '../../../../providers/home_provider.dart';
+import '../../../../providers/repository_provider.dart';
+import '../../../../repositories/connect_repository.dart' show ConnectionStatus;
 import '../../../../utils/analytics.dart';
-import '../../domain/study_plan_template.dart';
+import '../../domain/workout_template.dart';
+import '../plan_create_state.dart';
 
 /// Thrown when a plan save is attempted without a resolved signed-in user.
 /// The UI maps this to a localized message (view model has no l10n access).
@@ -13,14 +18,50 @@ class PlanCreateAuthException implements Exception {
   const PlanCreateAuthException();
 }
 
+/// Thrown when a save is attempted while something required is missing, so
+/// the screen never reports a save that did not happen.
+class PlanCreateIncompleteException implements Exception {
+  final PlanCreateMissing missing;
+  const PlanCreateIncompleteException(this.missing);
+
+  @override
+  String toString() => 'PlanCreateIncompleteException($missing)';
+}
+
 final planCreateViewModelProvider =
     AsyncNotifierProvider<PlanCreateViewModel, PlanCreateState>(
       PlanCreateViewModel.new,
     );
 
+/// Parameters of the `plan_created` analytics event.
+///
+/// `template_edited` is true when a tile was used and the user then changed
+/// its promise line, days or deadline.
+@visibleForTesting
+Map<String, Object> planCreatedAnalyticsParams(
+  PlanCreateState state,
+  Plan plan, {
+  required bool isEdit,
+}) {
+  final template = state.appliedTemplate;
+  final actionEdited =
+      template != null &&
+      template.action.isNotEmpty &&
+      state.action.trim() != template.action.trim();
+  return {
+    'is_edit': isEdit,
+    'frequency': plan.items.first.days.length,
+    'has_partner': plan.managerId != null,
+    'workout_type': plan.workoutType ?? 'none',
+    'template_id': template?.id ?? 'none',
+    'template_edited':
+        template != null && (state.editedAfterTemplate || actionEdited),
+  };
+}
+
 class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
   static const _defaultSelectedDays = {0, 2, 4};
-  static const _studySprintDurationDays = 28;
+  static const _allDays = {0, 1, 2, 3, 4, 5, 6};
 
   @override
   FutureOr<PlanCreateState> build() {
@@ -30,139 +71,194 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
   PlanCreateState _initialState() {
     return PlanCreateState(
       selectedDays: _defaultSelectedDays,
-      notificationTime: _defaultNotificationTime(),
+      notificationTime: _defaultDeadline(),
     );
   }
 
-  NotificationTime _defaultNotificationTime() {
-    return NotificationTime.custom(21, 0);
+  NotificationTime _defaultDeadline() {
+    return NotificationTime.custom(kDefaultDeadlineHour, 0);
+  }
+
+  /// Weekdays (0 = Monday) of the partner's most recently created active
+  /// plan, or null when the partner has none.
+  @visibleForTesting
+  static Set<int>? partnerDaySuggestion(List<Plan> partnerPlans) {
+    final candidates =
+        partnerPlans
+            .where(
+              (plan) => plan.state == PlanState.active && plan.items.isNotEmpty,
+            )
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    for (final plan in candidates) {
+      final days = plan.items.first.days
+          .where((day) => day >= DateTime.monday && day <= DateTime.sunday)
+          .map((day) => day - 1)
+          .toSet();
+      if (days.isNotEmpty) return days;
+    }
+    return null;
   }
 
   Future<void> dispatch(PlanCreateIntent intent) async {
     final prevState = state.value!;
 
-    if (intent is ResetIntent) {
-      state = AsyncValue.data(_initialState());
-    } else if (intent is UpdateActionIntent) {
-      state = AsyncValue.data(
-        prevState.copyWith(
-          action: intent.action,
-          selectedCategoryId: planCategoryCustom,
-          selectedTemplateId: null,
-        ),
-      );
-    } else if (intent is UpdateDescriptionIntent) {
-      state = AsyncValue.data(
-        prevState.copyWith(
-          description: intent.description,
-          selectedCategoryId: planCategoryCustom,
-          selectedTemplateId: null,
-        ),
-      );
-    } else if (intent is ToggleDayIntent) {
-      final newDays = Set<int>.from(prevState.selectedDays);
-      if (newDays.contains(intent.dayIndex)) {
-        newDays.remove(intent.dayIndex);
-      } else {
-        newDays.add(intent.dayIndex);
-      }
-      state = AsyncValue.data(
-        prevState.copyWith(selectedDays: newDays, selectedTemplateId: null),
-      );
-    } else if (intent is UpdateSelectedDaysIntent) {
-      state = AsyncValue.data(
-        prevState.copyWith(
-          selectedDays: Set<int>.from(intent.selectedDays),
-          selectedTemplateId: null,
-        ),
-      );
-    } else if (intent is UpdateNotificationTimeIntent) {
-      state = AsyncValue.data(
-        prevState.copyWith(
-          notificationTime: intent.notificationTime,
-          selectedTemplateId: null,
-        ),
-      );
-    } else if (intent is ApplyStudyTemplateIntent) {
-      state = AsyncValue.data(
-        prevState.copyWith(
-          action: intent.template.action,
-          description: intent.template.description,
-          selectedDays: Set<int>.from(intent.template.selectedDayIndexes),
-          notificationTime: intent.template.notificationTime,
-          selectedCategoryId: intent.template.categoryId,
-          selectedTemplateId: intent.template.id,
-        ),
-      );
-    } else if (intent is SelectPlanCategoryIntent) {
-      if (intent.category.id == planCategoryCustom) {
+    switch (intent) {
+      case ResetIntent():
+        state = AsyncValue.data(_initialState());
+      case UpdateActionIntent(:final action):
+        if (action == prevState.action) return;
+        // Typing keeps the selected workout; only the analytics flag notices.
+        state = AsyncValue.data(prevState.copyWith(action: action));
+      case UpdateDescriptionIntent(:final description):
+        if (description == prevState.description) return;
+        state = AsyncValue.data(prevState.copyWith(description: description));
+      case ToggleDayIntent(:final dayIndex):
+        final newDays = Set<int>.from(prevState.selectedDays);
+        if (!newDays.remove(dayIndex)) newDays.add(dayIndex);
+        state = AsyncValue.data(_withDays(prevState, newDays));
+      case UpdateSelectedDaysIntent(:final selectedDays):
+        state = AsyncValue.data(
+          _withDays(prevState, Set<int>.from(selectedDays)),
+        );
+      case UpdateNotificationTimeIntent(:final notificationTime):
         state = AsyncValue.data(
           prevState.copyWith(
-            action: '',
-            description: '',
-            selectedDays: _defaultSelectedDays,
-            notificationTime: _defaultNotificationTime(),
-            selectedCategoryId: planCategoryCustom,
-            selectedTemplateId: null,
+            notificationTime: notificationTime,
+            deadlineLocked: true,
+            editedAfterTemplate: prevState.appliedTemplate != null,
           ),
         );
-      } else {
-        state = AsyncValue.data(
-          prevState.copyWith(
-            action: '',
-            description: '',
-            selectedDays: _defaultSelectedDays,
-            notificationTime: _defaultNotificationTime(),
-            selectedCategoryId: intent.category.id,
-            selectedTemplateId: null,
-          ),
-        );
-      }
-    } else if (intent is NextStepIntent) {
-      if (prevState.currentStep < 3) {
-        state = AsyncValue.data(
-          prevState.copyWith(currentStep: prevState.currentStep + 1),
-        );
-      }
-    } else if (intent is PrevStepIntent) {
-      if (prevState.currentStep > 1) {
-        state = AsyncValue.data(
-          prevState.copyWith(currentStep: prevState.currentStep - 1),
-        );
-      }
-    } else if (intent is InitializePlanIntent) {
-      final plan = intent.plan;
-      final item = plan.items.first;
+      case SelectWorkoutIntent(:final template):
+        state = AsyncValue.data(_applyTemplate(prevState, template));
+      case InitializePlanIntent(:final plan):
+        state = AsyncValue.data(_fromPlan(plan));
+      case PrefillPartnerDaysIntent():
+        await _prefillPartnerDays();
+      case SavePlanIntent():
+        await _savePlan();
+    }
+  }
+
+  PlanCreateState _withDays(PlanCreateState prev, Set<int> days) {
+    return prev.copyWith(
+      selectedDays: days,
+      daysLocked: true,
+      editedAfterTemplate: prev.appliedTemplate != null,
+    );
+  }
+
+  PlanCreateState _applyTemplate(PlanCreateState prev, WorkoutTemplate t) {
+    // The tile's line fills an empty field or replaces the previous tile's
+    // untouched line. Anything typed by hand (or an edited plan's title) stays.
+    final previousLine = prev.appliedTemplate?.action.trim();
+    final current = prev.action.trim();
+    final lineIsReplaceable =
+        current.isEmpty || (previousLine != null && current == previousLine);
+    final action = lineIsReplaceable ? t.action : prev.action;
+
+    return prev.copyWith(
+      action: action,
+      workoutType: t.type,
+      appliedTemplate: t,
+      editedAfterTemplate: false,
+      selectedDays: prev.daysLocked
+          ? null
+          : Set<int>.from(t.selectedDayIndexes),
+      notificationTime: prev.deadlineLocked ? null : t.deadline,
+    );
+  }
+
+  PlanCreateState _fromPlan(Plan plan) {
+    final item = plan.items.firstOrNull;
+    // Older plans stored no weekdays to mean "every day"; say so explicitly.
+    final days =
+        item?.days
+            .where((day) => day >= DateTime.monday && day <= DateTime.sunday)
+            .map((day) => day - 1)
+            .toSet() ??
+        <int>{};
+    final storedTime = item?.notificationTime;
+    // A deadline is required now; an old "no reminder" plan gets the default.
+    final deadline = storedTime == null || storedTime.type == 'none'
+        ? _defaultDeadline()
+        : storedTime;
+
+    return PlanCreateState(
+      action: item?.title ?? '',
+      description: item?.description ?? '',
+      selectedDays: days.isEmpty ? _allDays : days,
+      notificationTime: deadline,
+      workoutType: WorkoutType.fromId(plan.workoutType),
+      daysLocked: true,
+      deadlineLocked: true,
+      existingPlanId: plan.id,
+      originalPlan: plan,
+    );
+  }
+
+  Future<void> _prefillPartnerDays() async {
+    bool applies(PlanCreateState? s) =>
+        s != null &&
+        s.existingPlanId == null &&
+        s.originalPlan == null &&
+        !s.daysLocked;
+    if (!applies(state.value)) return;
+
+    try {
+      final partners = await ref.read(connectedProfilesProvider.future);
+      final partnerUid = partners.firstOrNull?.user.uid;
+      if (partnerUid == null) return;
+      final plans = await ref
+          .read(recordRepositoryProvider)
+          .getPlansByUserId(partnerUid);
+      final days = partnerDaySuggestion(plans);
+      if (days == null) return;
+
+      // The user may have started editing while this was loading.
+      final latest = state.value;
+      if (!applies(latest)) return;
       state = AsyncValue.data(
-        prevState.copyWith(
-          existingPlanId: plan.id,
-          originalPlan: plan,
-          action: item.title,
-          description: item.description ?? '',
-          selectedDays: item.days.map((d) => d - 1).toSet(), // 1-7 -> 0-6
-          notificationTime: item.notificationTime ?? _defaultNotificationTime(),
-          selectedCategoryId: planCategoryCustom,
-          selectedTemplateId: null,
+        latest!.copyWith(
+          selectedDays: days,
+          daysLocked: true,
+          partnerSuggestedDays: days,
         ),
       );
-    } else if (intent is SavePlanIntent) {
-      await _savePlan();
+    } catch (e) {
+      // Only a suggestion; the regular defaults stay.
+      debugPrint('[PlanCreate] partner day suggestion skipped: $e');
+    }
+  }
+
+  Future<List<ConnectedUser>?> _connectedPartners() async {
+    final loaded = ref.read(connectedProfilesProvider).value;
+    if (loaded != null) return loaded;
+    try {
+      return await ref
+          .read(connectedProfilesProvider.future)
+          .timeout(const Duration(seconds: 5));
+    } catch (e) {
+      debugPrint('[PlanCreate] connected profiles unavailable: $e');
+      return null;
     }
   }
 
   Future<void> _savePlan() async {
     final prevState = state.value!;
-    if (prevState.action.trim().isEmpty) return;
     // A second tap while the first save is still in flight would run the whole
     // create path again with `existingPlanId` still null, writing a duplicate
-    // plan document (and a duplicate approval request to the partner).
+    // plan document (and a duplicate push to the partner).
     if (prevState.isSaving) return;
+    final missing = prevState.missingField;
+    if (missing != null) throw PlanCreateIncompleteException(missing);
 
     state = AsyncValue.data(
       prevState.copyWith(isSaving: true, errorMessage: null),
     );
 
     String? createdPlanId;
+    Plan? savedPlan;
     try {
       final userState = ref.read(myProfileProvider);
       final userId = userState.asData?.value?.uid;
@@ -171,125 +267,77 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         throw const PlanCreateAuthException();
       }
 
-      final finalDays = prevState.selectedDays.isEmpty
-          ? [1, 2, 3, 4, 5, 6, 7]
-          : prevState.selectedDays.map((d) => d + 1).toList();
-      finalDays.sort();
-
-      final now = DateTime.now();
-      final endOfStartDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
-
+      final days = prevState.selectedDays.map((d) => d + 1).toList()..sort();
       final planItem = PlanItem(
-        title: prevState.action,
-        count: finalDays.length, // Frequency is now determined by dayscount
-        days: finalDays,
+        title: prevState.action.trim(),
+        count: days.length,
+        days: days,
         notificationTime: prevState.notificationTime,
         description: prevState.description,
       );
 
-      final connectedProfiles = ref.read(connectedProfilesProvider).value;
-      final managerId = connectedProfiles?.firstOrNull?.user.uid;
+      final partners = await _connectedPartners();
+      final now = DateTime.now();
+      final isEdit = prevState.existingPlanId != null;
 
-      // 파트너가 없으면 승인 받을 사람이 없으므로 즉시 active 로 시작한다.
-      // 파트너가 생긴 뒤 새로 만드는 약속은 기존대로 pendingApproval 로 가서 승인 흐름을 탄다.
-      final initialState = managerId == null
-          ? PlanState.active
-          : PlanState.pendingApproval;
-
-      final plan = Plan(
-        id: prevState.existingPlanId, // null for restart/new
-        userId: userId,
-        managerId: managerId,
-        startDate: now, // Always reset start date for new/restart
-        endDate: endOfStartDay.add(
-          const Duration(days: _studySprintDurationDays - 1),
-        ),
-        state: initialState,
-        items: [planItem],
-        createdAt: now, // Reset created
-        completedDates: prevState.existingPlanId != null
-            ? (prevState.originalPlan?.completedDates ?? [])
-            : [], // Reset history
-        skippedDates: prevState.existingPlanId != null
-            ? (prevState.originalPlan?.skippedDates ?? [])
-            : [],
-        verifiedDates: prevState.existingPlanId != null
-            ? (prevState.originalPlan?.verifiedDates ?? [])
-            : [], // Reset history
-        rescuedDates: prevState.existingPlanId != null
-            ? (prevState.originalPlan?.rescuedDates ?? [])
-            : [],
-        restedDates: prevState.existingPlanId != null
-            ? (prevState.originalPlan?.restedDates ?? [])
-            : [],
-        lastCheerMessage: prevState.existingPlanId != null
-            ? prevState.originalPlan?.lastCheerMessage
-            : null,
-        lastCheerType: prevState.existingPlanId != null
-            ? prevState.originalPlan?.lastCheerType
-            : null,
-        lastCheerAt: prevState.existingPlanId != null
-            ? prevState.originalPlan?.lastCheerAt
-            : null,
-        lastPokeMessage: prevState.existingPlanId != null
-            ? prevState.originalPlan?.lastPokeMessage
-            : null,
-        lastPokeAt: prevState.existingPlanId != null
-            ? prevState.originalPlan?.lastPokeAt
-            : null,
-        lastPokeAcknowledgedAt: prevState.existingPlanId != null
-            ? prevState.originalPlan?.lastPokeAcknowledgedAt
-            : null,
-        lastMissedNotifiedAt: prevState.existingPlanId != null
-            ? prevState.originalPlan?.lastMissedNotifiedAt
-            : null,
-        lastMissedItemTitle: prevState.existingPlanId != null
-            ? prevState.originalPlan?.lastMissedItemTitle
-            : null,
-        lastActionNote: prevState.existingPlanId != null
-            ? prevState.originalPlan?.lastActionNote
-            : null,
-        lastComment: prevState.existingPlanId != null
-            ? prevState.originalPlan?.lastComment
-            : null,
-        pilotNextPlanIntent: prevState.existingPlanId != null
-            ? prevState.originalPlan?.pilotNextPlanIntent
-            : null,
-        pilotExitReason: prevState.existingPlanId != null
-            ? prevState.originalPlan?.pilotExitReason
-            : null,
-        pilotSettledAt: prevState.existingPlanId != null
-            ? prevState.originalPlan?.pilotSettledAt
-            : null,
-      );
+      final Plan plan;
+      if (isEdit) {
+        plan = _editedPlan(
+          prevState,
+          planItem,
+          userId: userId,
+          partners: partners,
+          now: now,
+        );
+      } else {
+        final period = Plan.periodStartingOn(now);
+        // New promises start right away, partner or not. The partner is told
+        // by the server's creation push; there is no approval step.
+        plan = Plan(
+          userId: userId,
+          managerId: partners?.firstOrNull?.user.uid,
+          startDate: period.start,
+          endDate: period.end,
+          state: PlanState.active,
+          items: [planItem],
+          createdAt: now,
+          lastUpdatedBy: userId,
+          // A copy of an older plan keeps having no type (it may not be a
+          // workout); a brand-new promise typed without a tile is "other".
+          workoutType:
+              prevState.workoutType?.id ??
+              (prevState.originalPlan == null ? WorkoutType.other.id : null),
+        );
+      }
 
       String planId;
-      if (prevState.existingPlanId != null) {
+      if (isEdit) {
         await ref.read(recordRepositoryProvider).updatePlan(plan);
         planId = prevState.existingPlanId!;
       } else {
         planId = await ref.read(createNewPlanUseCaseProvider).execute(plan);
       }
 
-      AnalyticsService.log(AnalyticsEvent.planCreated, {
-        'is_edit': prevState.existingPlanId != null,
-        'frequency': finalDays.length,
-        'has_partner': managerId != null,
-      });
-
-      // The plan now exists in Firestore. Remember its id before anything else
-      // can fail, so a retry updates that document instead of creating a second
-      // one (alarm scheduling below is the realistic failure point).
+      // The plan now exists in Firestore. Remember it before anything else
+      // can fail, so a retry updates that document instead of creating a
+      // second one (alarm scheduling below is the realistic failure point).
       createdPlanId = planId;
+      savedPlan = plan.copyWith(id: planId);
+
+      AnalyticsService.log(
+        AnalyticsEvent.planCreated,
+        planCreatedAnalyticsParams(prevState, plan, isEdit: isEdit),
+      );
 
       ref.invalidate(homeCardStateProvider);
-      // 생성된 ID가 반영된 Plan 객체로 알람 설정
-      await ref
-          .read(settingAlarmUseCaseProvider)
-          .execute(plan.copyWith(id: planId));
+      await ref.read(settingAlarmUseCaseProvider).execute(savedPlan);
 
       state = AsyncValue.data(
-        prevState.copyWith(isSaving: false, existingPlanId: planId),
+        prevState.copyWith(
+          isSaving: false,
+          existingPlanId: planId,
+          originalPlan: savedPlan,
+        ),
       );
     } catch (e) {
       state = AsyncValue.data(
@@ -297,12 +345,107 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           isSaving: false,
           errorMessage: e.toString(),
           // Keep whatever id we had if the failure landed before the write —
-          // `existingPlanId` now takes an explicit null, so passing
-          // `createdPlanId` straight through would clear it on an edit retry.
+          // `existingPlanId` takes an explicit null, so passing `createdPlanId`
+          // straight through would clear it on an edit retry.
           existingPlanId: createdPlanId ?? prevState.existingPlanId,
+          originalPlan: savedPlan,
         ),
       );
       rethrow;
     }
+  }
+
+  /// The couple link is known to be gone (the relation stream says none).
+  bool _linkConfirmedGone() {
+    try {
+      return ref.read(connectionStatusStreamProvider).value ==
+          ConnectionStatus.none;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// The saved version of the plan being edited.
+  ///
+  /// A running (active) plan keeps its period, state and history: editing the
+  /// promise must not restart the 4 weeks or ask for approval again. A legacy
+  /// pending or rejected plan has not really started, so it becomes active
+  /// with a fresh period from today (the same reset as approving it).
+  Plan _editedPlan(
+    PlanCreateState prevState,
+    PlanItem planItem, {
+    required String userId,
+    required List<ConnectedUser>? partners,
+    required DateTime now,
+  }) {
+    final planId = prevState.existingPlanId!;
+    final original = prevState.originalPlan?.id == planId
+        ? prevState.originalPlan
+        : null;
+
+    final DateTime startDate;
+    final DateTime endDate;
+    final PlanState planState;
+    if (original == null ||
+        original.state == PlanState.pendingApproval ||
+        original.state == PlanState.rejected ||
+        original.state == PlanState.draft) {
+      final period = Plan.periodStartingOn(now);
+      startDate = period.start;
+      endDate = period.end;
+      planState = PlanState.active;
+    } else {
+      startDate = original.startDate;
+      endDate = original.endDate;
+      planState = original.state;
+    }
+    // Use the partner as connected now; keep the stored one when the
+    // connection list could not be loaded — or came back empty while the link
+    // itself isn't confirmed gone (an empty list must never silently detach
+    // the partner from a running promise).
+    final connected = partners?.firstOrNull?.user.uid;
+    final String? managerId;
+    if (connected != null) {
+      managerId = connected;
+    } else if (partners != null && _linkConfirmedGone()) {
+      managerId = null;
+    } else {
+      managerId = original?.managerId;
+    }
+
+    return Plan(
+      id: planId,
+      userId: userId,
+      managerId: managerId,
+      startDate: startDate,
+      endDate: endDate,
+      state: planState,
+      items: [planItem],
+      createdAt: original?.createdAt ?? now,
+      completedDates: original?.completedDates ?? const [],
+      skippedDates: original?.skippedDates ?? const [],
+      verifiedDates: original?.verifiedDates ?? const [],
+      rescuedDates: original?.rescuedDates ?? const [],
+      restedDates: original?.restedDates ?? const [],
+      lastCheerMessage: original?.lastCheerMessage,
+      lastCheerType: original?.lastCheerType,
+      lastCheerAt: original?.lastCheerAt,
+      lastPokeMessage: original?.lastPokeMessage,
+      lastPokeAt: original?.lastPokeAt,
+      lastPokeAcknowledgedAt: original?.lastPokeAcknowledgedAt,
+      lastMissedNotifiedAt: original?.lastMissedNotifiedAt,
+      lastMissedItemTitle: original?.lastMissedItemTitle,
+      lastActionNote: original?.lastActionNote,
+      lastComment: original?.lastComment,
+      // The partner gets the "promise changed" push only when the editor is
+      // recorded as the last writer.
+      lastUpdatedBy: userId,
+      pilotNextPlanIntent: original?.pilotNextPlanIntent,
+      pilotExitReason: original?.pilotExitReason,
+      pilotSettledAt: original?.pilotSettledAt,
+      promise: original?.promise,
+      lastActionId: original?.lastActionId,
+      workoutType: prevState.workoutType?.id ?? original?.workoutType,
+    );
   }
 }

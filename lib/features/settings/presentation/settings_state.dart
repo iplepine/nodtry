@@ -30,7 +30,9 @@ class ChangeThemeIntent extends SettingsIntent {
 }
 
 class WithdrawAccountIntent extends SettingsIntent {
-  const WithdrawAccountIntent();
+  /// An email account's password, to sign in again before the deletion.
+  final String? password;
+  const WithdrawAccountIntent({this.password});
 }
 
 class LogoutIntent extends SettingsIntent {

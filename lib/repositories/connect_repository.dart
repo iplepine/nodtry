@@ -8,18 +8,47 @@ enum ConnectionStatus {
   rejected, // 거절됨 (옵션)
 }
 
-/// 1:1 실천 메이트 연결 관련 데이터 저장소 인터페이스
+/// No user holds the code that was entered.
+class InviteCodeNotFoundException implements Exception {
+  const InviteCodeNotFoundException();
+  @override
+  String toString() => 'InviteCodeNotFoundException';
+}
+
+/// The code that was entered is the user's own.
+class InviteCodeIsMineException implements Exception {
+  const InviteCodeIsMineException();
+  @override
+  String toString() => 'InviteCodeIsMineException';
+}
+
+/// The server refused the link because one of us already has a partner.
+/// [reason] is the server's `self_taken` (I do) or `owner_taken` (the code's
+/// owner does) — the same values a `partner_connect_failed` push carries.
+class InviteLinkRefusedException implements Exception {
+  const InviteLinkRefusedException(this.reason);
+  final String reason;
+  @override
+  String toString() => 'InviteLinkRefusedException($reason)';
+}
+
+/// 1:1 짝꿍 연결 관련 데이터 저장소 인터페이스
 abstract class ConnectRepository {
   /// 초대 코드 생성
   ///
-  /// 6자리 영문/숫자 조합 코드를 생성하여 반환합니다.
-  /// 내 정보(users)에 저장됩니다.
+  /// 8자리 코드(0/O/1/I/L 없는 알파벳, Random.secure)를 만들어 내 정보(users)에
+  /// 저장하고 반환합니다.
   Future<String> generateInviteCode();
 
-  /// 코드로 연결 요청
+  /// 초대 코드로 연결하고 연결된 상대방(코드 주인)의 UID를 반환합니다.
   ///
-  /// 상대방의 코드를 입력하여 연결을 요청합니다.
-  /// relations 컬렉션에  /// 초대 코드로 연결 (반환값: 연결된 상대방(매니저)의 UID)
+  /// 코드는 정규화(공백·하이픈 제거, 대문자)해서 찾습니다. 코드 주인이 없으면
+  /// [InviteCodeNotFoundException], 내 코드면 [InviteCodeIsMineException],
+  /// 둘 중 누가 이미 짝꿍이 있으면 [InviteLinkRefusedException].
+  /// 서버 callable `redeemInviteCode`가 양방향 relations 문서 두 개
+  /// (`inviterId`·`inviteCode` 포함)를 씁니다. callable이 아직 배포되지 않은
+  /// 백엔드에서는 예전처럼 users를 코드로 찾아 앱이 직접 씁니다(rules.next
+  /// 전환 전에만 동작). 1:1 제한은 서버(onRelationCreated)가 강제합니다.
   Future<String> connectWithCode(String code);
 
   /// 내 초대 코드 조회
@@ -30,7 +59,7 @@ abstract class ConnectRepository {
   /// 나와 관련된 모든 활성/대기 연결을 조회합니다.
   Future<List<RelationModel>> getConnections();
 
-  /// 연결 해제
+  /// 연결 해제. 내가 정한 짝꿍 애칭(`users/{me}.partnerNickname`)도 지운다.
   Future<void> disconnectByUser(String targetUserId);
 
   /// 연결 상태 스트림
