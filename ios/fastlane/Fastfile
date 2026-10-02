@@ -70,6 +70,17 @@ platform :ios do
     # "The sandbox is not in sync with the Podfile.lock". gym's clean-archive
     # does not run pod install itself. LANG/LC_ALL are forced to UTF-8 above so
     # CocoaPods doesn't choke on the project's Korean strings.
+    #
+    # Run a Flutter release build first. Since the Flutter 3.44 SwiftPM
+    # migration, Flutter (re)generates ios/Flutter/ephemeral/Packages/
+    # FlutterGeneratedPluginSwiftPackage on each `flutter build`; a package left
+    # behind by a simulator/debug build declares iOS 13.0, and gym's plain
+    # `xcodebuild archive` then fails with "package product 'firebase-core'
+    # requires minimum platform version 15.0 … this target supports 13.0".
+    # A release build regenerates it for the project's deployment target (15.0)
+    # and refreshes Generated.xcconfig with this version/build number.
+    sh("cd #{Shellwords.escape(repo_root)} && flutter build ios --release --no-codesign " \
+       "--build-name=#{app_version} --build-number=#{build_number}")
     cocoapods(try_repo_update_on_error: true)
     prepare_release_notes
     build_app(
