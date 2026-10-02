@@ -11,13 +11,31 @@ default_platform(:ios)
 platform :ios do
   ipa_filename = "nodtry.ipa"
   copyright_text = "#{Time.now.year} Devho"
-  pubspec_path = File.expand_path("../../pubspec.yaml", __dir__)
+  repo_root = File.expand_path("../..", __dir__)
+  pubspec_path = File.join(repo_root, "pubspec.yaml")
   pubspec_version = File.read(pubspec_path, encoding: "UTF-8").match(/^version:\s*([^\s]+)/)[1]
   app_version, build_number = pubspec_version.split("+")
   app_store_version = ENV["APP_STORE_VERSION"] || app_version
-  release_notes_script = File.expand_path("../../scripts/generate_ios_release_notes.sh", __dir__)
+  release_notes_script = File.join(repo_root, "scripts/generate_ios_release_notes.sh")
+  metadata_dir = File.expand_path("metadata", __dir__)
 
+  # "What's New" comes from the hand-written
+  # ios/fastlane/metadata/{ko,en-US}/release_notes.txt by default.
+  #
+  # The commit-subject generator only runs when GENERATE_RELEASE_NOTES=1, and it
+  # refuses to run while metadata/ has uncommitted or untracked changes, so it
+  # can never silently overwrite hand-written notes. Its keyword rules predate
+  # the 둘운완 pivot and can emit generic text (App Store 2.3.12) or notes for
+  # removed features (2.3.1), so review its output before uploading.
   private_lane :prepare_release_notes do
+    unless ENV["GENERATE_RELEASE_NOTES"] == "1"
+      UI.message("Using hand-written release notes in #{metadata_dir} (set GENERATE_RELEASE_NOTES=1 to regenerate them from commit subjects).")
+      next
+    end
+    dirty = sh("git -C #{Shellwords.escape(repo_root)} status --porcelain -- #{Shellwords.escape(metadata_dir)}", log: false).strip
+    unless dirty.empty?
+      UI.user_error!("ios/fastlane/metadata has uncommitted changes; commit the hand-written release notes first or unset GENERATE_RELEASE_NOTES.\n#{dirty}")
+    end
     sh("bash #{Shellwords.escape(release_notes_script)}")
   end
 
@@ -35,8 +53,12 @@ platform :ios do
     )
   end
 
-  desc "Push a new release build to the App Store"
-  lane :release do
+  # Shared by `release` and `release_manual`: build the IPA and upload it with
+  # metadata and screenshots, then submit for review.
+  # overwrite_screenshots replaces every screenshot set of each uploaded locale,
+  # so screenshots deleted locally (e.g. the old 01_login..04_us) do not stay
+  # live next to the new ones.
+  private_lane :build_and_submit do |options|
     api_key = app_store_connect_api_key(
       key_id: "XXU6VU63TR",
       issuer_id: "6b17b540-3b79-4d8c-beaf-ca1c83e566f1",
@@ -65,9 +87,10 @@ platform :ios do
       app_version: app_store_version,
       force: true,
       skip_screenshots: false,
+      overwrite_screenshots: true,
       skip_metadata: false,
       submit_for_review: true,
-      automatic_release: true,
+      automatic_release: options[:automatic_release],
       # Apple Review 거부 후 닫히지 않은 채로 남은 이전 제출이 있으면
       # "review submission already in progress"로 새 제출이 막힌다.
       # 자동으로 reject한 뒤 새 빌드로 다시 제출하도록 둔다.
@@ -75,6 +98,17 @@ platform :ios do
       copyright: copyright_text,
       precheck_include_in_app_purchases: false
     )
+  end
+
+  desc "Build, upload and submit for review; RELEASES AUTOMATICALLY once approved"
+  desc "Use release_manual when the release must go live at a chosen time (e.g. the 둘운완 pivot)"
+  lane :release do
+    build_and_submit(automatic_release: true)
+  end
+
+  desc "Build, upload and submit for review; you release manually in App Store Connect after approval"
+  lane :release_manual do
+    build_and_submit(automatic_release: false)
   end
 
   desc "Upload screenshots + metadata only, do NOT submit for review"
@@ -91,6 +125,7 @@ platform :ios do
       force: true,
       skip_binary_upload: true,
       skip_screenshots: false,
+      overwrite_screenshots: true,
       skip_metadata: false,
       skip_app_version_update: true,
       submit_for_review: false,
@@ -99,7 +134,7 @@ platform :ios do
     )
   end
 
-  desc "Update App Store metadata only"
+  desc "Update App Store metadata + screenshots only, do NOT submit for review"
   lane :metadata_only do
     api_key = app_store_connect_api_key(
       key_id: "XXU6VU63TR",
@@ -113,11 +148,11 @@ platform :ios do
       force: true,
       skip_binary_upload: true,
       skip_screenshots: false,
+      overwrite_screenshots: true,
       skip_metadata: false,
       skip_app_version_update: true,
-      submit_for_review: true,
-      automatic_release: true,
-      reject_if_possible: true,
+      submit_for_review: false,
+      automatic_release: false,
       copyright: copyright_text,
       precheck_include_in_app_purchases: false
     )

@@ -3,26 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>고객 지원 - 그래, 해봐</title>
+  <title>고객 지원 - 둘운완 (DuoDone)</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', Roboto, sans-serif;
       line-height: 1.8;
       max-width: 800px;
       margin: 0 auto;
       padding: 40px 20px;
-      color: #333;
-      background: #fafafa;
+      color: #2B1B21;
+      background: #FFF8F6;
     }
     h1 { font-size: 28px; margin-bottom: 8px; }
-    h2 { font-size: 20px; margin-top: 36px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+    h2 { font-size: 20px; margin-top: 36px; border-bottom: 1px solid #EADADD; padding-bottom: 6px; }
     p, li { font-size: 15px; }
     ul { padding-left: 20px; }
-    .subtitle { color: #888; font-size: 14px; margin-bottom: 32px; }
-    a { color: #1a73e8; }
+    .subtitle { color: #6F5C63; font-size: 14px; margin-bottom: 32px; }
+    .brand { color: #D92653; }
+    a { color: #B81C45; }
     .contact-card {
       background: #fff;
-      border: 1px solid #e0e0e0;
+      border: 1px solid #EADADD;
       border-radius: 12px;
       padding: 24px;
       margin: 20px 0;
@@ -31,46 +32,173 @@
     .contact-card p { margin: 8px 0; }
     .faq-item { margin-bottom: 20px; }
     .faq-item strong { display: block; margin-bottom: 4px; }
+    .lang-toggle { text-align: right; margin-bottom: 20px; }
+    .lang-toggle a { cursor: pointer; padding: 6px 14px; border: 1px solid #EADADD; border-radius: 6px; text-decoration: none; font-size: 14px; background: #fff; }
+    .section-en { display: none; }
   </style>
 </head>
 <body>
+
+<div class="lang-toggle">
+  <a onclick="toggleLang('ko')">한국어</a>
+  <a onclick="toggleLang('en')">English</a>
+</div>
+
+<!-- ===== 한국어 ===== -->
+<div id="lang-ko" class="section-ko">
   <h1>고객 지원</h1>
-  <p class="subtitle">그래, 해봐 | devho</p>
+  <p class="subtitle"><span class="brand">둘운완</span> (DuoDone) | devho</p>
 
   <div class="contact-card">
     <h3>문의하기</h3>
-    <p>앱 사용 중 문제가 발생하거나 궁금한 점이 있으시면 아래 이메일로 연락해주세요.</p>
+    <p>앱을 쓰다가 문제가 생기거나 궁금한 점이 있으면 아래 이메일로 알려 주세요.</p>
     <p><strong>이메일:</strong> <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a></p>
-    <p>영업일 기준 1~2일 이내에 답변드리겠습니다.</p>
+    <p>영업일 기준 1~2일 안에 답장드려요.</p>
   </div>
 
   <h2>자주 묻는 질문</h2>
 
   <div class="faq-item">
-    <strong>Q. 계정을 삭제하고 싶어요.</strong>
-    <p>앱 내 설정 > 계정 관리 > 회원 탈퇴에서 직접 삭제할 수 있습니다. 삭제된 데이터는 복구할 수 없습니다.</p>
+    <strong>Q. '그래, 해봐' 앱은 어디 갔나요?</strong>
+    <p>그래,해봐가 둘운완이 됐어요. 약속, 기록, 짝꿍 연결은 그대로예요. 앱을 업데이트하면 새 이름과 아이콘으로 바뀌어요.</p>
   </div>
 
   <div class="faq-item">
-    <strong>Q. 파트너와 연결이 안 돼요.</strong>
-    <p>초대 코드를 정확히 입력했는지 확인해주세요. 문제가 계속되면 이메일로 문의해주세요.</p>
+    <strong>Q. 인증샷은 누가 볼 수 있나요?</strong>
+    <p>나와 연결된 짝꿍 1명만 볼 수 있어요. 공개 피드는 없어요. 사진은 올리기 전에 위치 정보(GPS) 같은 메타데이터를 지워요.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. 올린 인증샷을 지우고 싶어요.</strong>
+    <p>인증샷 보기 화면에서 내 사진을 삭제할 수 있어요. 짝꿍 연결을 끊으면 상대방은 앱에서 내 인증샷을 더 이상 볼 수 없고, 회원 탈퇴 시 모든 인증샷이 삭제돼요.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. 짝꿍과 연결이 안 돼요.</strong>
+    <p>둘운완은 한 사람과만 연결되는 1:1 앱이에요. 초대 코드를 정확히 입력했는지, 상대방이 이미 다른 사람과 연결돼 있지 않은지 확인해 주세요. 문제가 계속되면 이메일로 문의해 주세요.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. 운동을 안 하면 짝꿍에게 어떻게 알려지나요?</strong>
+    <p>짝꿍과 함께하는 운동 약속에 마감 시각까지 기록이 없으면, 잠시 뒤 짝꿍에게 알림이 가요. 쉬어야 하는 날엔 '오늘은 쉴게'로 휴식권을 쓸 수 있어요.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. 내기에 돈을 걸 수 있나요?</strong>
+    <p>아니요. 둘운완의 내기는 치킨, 커피, 설거지처럼 돈이 오가지 않는 약속만 지원해요.</p>
   </div>
 
   <div class="faq-item">
     <strong>Q. 알림이 오지 않아요.</strong>
-    <p>기기 설정에서 '그래,해봐' 앱의 알림 권한이 허용되어 있는지 확인해주세요.</p>
+    <p>기기 설정에서 '둘운완' 앱의 알림 권한이 허용되어 있는지 확인해 주세요.</p>
+  </div>
+
+  <div class="faq-item" id="delete-account">
+    <strong>Q. 계정을 삭제하고 싶어요.</strong>
+    <p><strong>앱에서:</strong> 설정 &gt; 계정 관리 &gt; 회원 탈퇴에서 바로 삭제할 수 있어요.</p>
+    <p><strong>앱 없이(이미 앱을 지웠다면):</strong> <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a>으로 제목을 "계정 삭제 요청"으로 해서 메일을 보내 주세요. 계정에 연결된 이메일 주소에서 보내면 본인 확인이 빨라요. 본인 확인 후 <strong>30일 이내</strong>에 계정 정보, 운동 약속·기록, 인증샷, 프로필, 건강 관련 정보를 모두 삭제해요.</p>
+    <p>앱 이용 통계와 오류 로그(Firebase Analytics·Crashlytics)는 수집일로부터 최대 14개월 보관한 뒤 자동으로 삭제돼요. 삭제된 데이터와 인증샷은 복구할 수 없어요. 자세한 내용은 <a href="../privacy-policy/#delete-ko">개인정보처리방침 7절</a>에 있어요.</p>
   </div>
 
   <div class="faq-item">
     <strong>Q. 데이터가 사라졌어요.</strong>
-    <p>게스트 로그인 상태에서 앱을 삭제하면 데이터가 유실될 수 있습니다. Google 또는 Apple 계정을 연결하면 데이터가 안전하게 보관됩니다.</p>
+    <p>게스트로 쓰다가 앱을 삭제하면 데이터가 사라질 수 있어요. Google 또는 Apple 계정을 연결하면 데이터가 안전하게 보관돼요.</p>
   </div>
 
   <h2>앱 정보</h2>
   <ul>
-    <li>앱 이름: 그래, 해봐</li>
+    <li>앱 이름: 둘운완 (DuoDone) — 이전 이름: 그래, 해봐</li>
     <li>개발자: devho</li>
     <li><a href="../privacy-policy/">개인정보처리방침</a></li>
   </ul>
+</div>
+
+<!-- ===== English ===== -->
+<div id="lang-en" class="section-en">
+  <h1>Support</h1>
+  <p class="subtitle"><span class="brand">DuoDone</span> (둘운완) | devho</p>
+
+  <div class="contact-card">
+    <h3>Contact us</h3>
+    <p>If something goes wrong or you have a question, email us.</p>
+    <p><strong>Email:</strong> <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a></p>
+    <p>We usually reply within 1–2 business days.</p>
+  </div>
+
+  <h2>FAQ</h2>
+
+  <div class="faq-item">
+    <strong>Q. What happened to Nodtry?</strong>
+    <p>Nodtry is now DuoDone. Your promises, history, and partner connection stay the same. Update the app to see the new name and icon.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. Who can see my proof photos?</strong>
+    <p>Only your one connected partner. There is no public feed. Location (GPS) and other metadata are removed before upload.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. How do I delete a proof photo?</strong>
+    <p>You can delete your own photo from the photo viewer. If you disconnect from your partner, they can no longer see your photos in the app, and deleting your account deletes all of your photos.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. I can't connect with my partner.</strong>
+    <p>DuoDone is a 1:1 app, so each person can connect with one partner. Check the invite code and make sure your partner isn't already connected with someone else. If it still doesn't work, email us.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. How does my partner find out if I skip?</strong>
+    <p>If a workout promise you share has no record by its deadline, your partner gets a notification a little later. On days you need a break, use a rest pass.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. Can we bet money?</strong>
+    <p>No. Bets in DuoDone are non-monetary only, like buying chicken, coffee, or doing the dishes.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. I'm not getting notifications.</strong>
+    <p>Check that notifications are allowed for DuoDone in your device settings.</p>
+  </div>
+
+  <div class="faq-item" id="delete-account-en">
+    <strong>Q. How do I delete my account?</strong>
+    <p><strong>In the app:</strong> go to Settings &gt; Account &gt; Delete Account.</p>
+    <p><strong>Without the app (for example, if you already uninstalled it):</strong> email <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a> with the subject "Account deletion request". Sending it from the email address linked to your account speeds up identity verification. After we verify your identity, we delete your account information, workout promises and history, proof photos, profile and health-related data within <strong>30 days</strong>.</p>
+    <p>Usage statistics and crash logs (Firebase Analytics, Crashlytics) are kept for up to 14 months from collection and then deleted automatically. Deleted data and photos cannot be recovered. For details, see <a href="../privacy-policy/#delete-en">Section 7 of the Privacy Policy</a>.</p>
+  </div>
+
+  <div class="faq-item">
+    <strong>Q. My data is gone.</strong>
+    <p>If you used the app as a guest and then deleted it, your data may be lost. Link a Google or Apple account to keep your data safe.</p>
+  </div>
+
+  <h2>About</h2>
+  <ul>
+    <li>App name: DuoDone (둘운완) — formerly Nodtry (그래, 해봐)</li>
+    <li>Developer: devho</li>
+    <li><a href="../privacy-policy/">Privacy Policy</a></li>
+  </ul>
+</div>
+
+<script>
+  function toggleLang(lang) {
+    document.getElementById('lang-ko').style.display = lang === 'ko' ? 'block' : 'none';
+    document.getElementById('lang-en').style.display = lang === 'en' ? 'block' : 'none';
+  }
+  // A link to an anchor (e.g. #delete-account-en, the account-deletion URL
+  // registered in Play Console) opens the language section that contains it.
+  function showHashTarget() {
+    var target = null;
+    try { target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null; } catch (e) {}
+    if (!target) return false;
+    toggleLang(document.getElementById('lang-en').contains(target) ? 'en' : 'ko');
+    target.scrollIntoView();
+    return true;
+  }
+  if (!showHashTarget() && !(navigator.language || 'ko').toLowerCase().startsWith('ko')) { toggleLang('en'); }
+  window.addEventListener('hashchange', showHashTarget);
+</script>
 </body>
 </html>

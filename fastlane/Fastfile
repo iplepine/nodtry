@@ -53,6 +53,21 @@ lane :release_all do
   threads.each(&:join)
 end
 
+desc "Build and upload Android (production) + iOS (release_manual): iOS waits for a manual release after approval"
+desc "Android publishes when review passes unless Play Console managed publishing is ON"
+lane :release_all_manual do
+  sh("cd #{Shellwords.escape(project_root)} && flutter build appbundle --release")
+
+  threads = []
+  threads << Thread.new do
+    sh("cd #{Shellwords.escape(File.join(project_root, "android"))} && fastlane production")
+  end
+  threads << Thread.new do
+    sh("cd #{Shellwords.escape(File.join(project_root, "ios"))} && fastlane release_manual")
+  end
+  threads.each(&:join)
+end
+
 desc "Upload only (skip build) - Android internal + iOS beta"
 lane :upload_all do
   normalize_ios_ipa_name(project_root)

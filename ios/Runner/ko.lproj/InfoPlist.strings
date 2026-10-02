@@ -1,2 +1,9 @@
-CFBundleDisplayName = "그래,해봐";
-CFBundleName = "그래,해봐";
+/* 홈 화면 표시명. App Store 이름("둘운완 - 커플 오운완 운동 인증")과 토큰 일치 필수(Guideline 2.3.8). */
+CFBundleDisplayName = "둘운완";
+CFBundleName = "둘운완";
+
+/* 권한 안내 문구 (docs/product/PIVOT_DUOUNWAN_SPEC.md 5절) */
+NSCameraUsageDescription = "운동 인증샷을 찍어 연결된 짝꿍에게 보여주기 위해 카메라를 사용해요.";
+NSPhotoLibraryUsageDescription = "앨범에 있는 운동 사진을 인증샷으로 올리거나 프로필 사진을 고르기 위해 사진 보관함에 접근해요.";
+/* 추가 전용 접근: 공유 카드 공유 시트의 '이미지 저장'. 이 키가 없으면 iOS가 앱을 종료한다. */
+NSPhotoLibraryAddUsageDescription = "공유 카드를 사진 앱에 저장하기 위해 사용해요.";

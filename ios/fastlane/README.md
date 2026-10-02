@@ -29,7 +29,17 @@ Push a new beta build to TestFlight
 [bundle exec] fastlane ios release
 ```
 
-Push a new release build to the App Store
+Build, upload and submit for review; RELEASES AUTOMATICALLY once approved
+
+Use release_manual when the release must go live at a chosen time (e.g. the 둘운완 pivot)
+
+### ios release_manual
+
+```sh
+[bundle exec] fastlane ios release_manual
+```
+
+Build, upload and submit for review; you release manually in App Store Connect after approval
 
 ### ios upload_assets
 
@@ -45,7 +55,7 @@ Upload screenshots + metadata only, do NOT submit for review
 [bundle exec] fastlane ios metadata_only
 ```
 
-Update App Store metadata only
+Update App Store metadata + screenshots only, do NOT submit for review
 
 ----
 

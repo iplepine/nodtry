@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#F8FAF7</color>
+    <!-- Flat fallback of the icon gradient (#FF6B5E -> #FF3577). The adaptive
+         icon itself uses @drawable/ic_launcher_background. -->
+    <color name="ic_launcher_background">#FF506A</color>
+    <!-- Notification accent (small icon tint / FCM default_notification_color).
+         Brand primary, see docs/design/BRAND.md -->
+    <color name="notification_color">#D92653</color>
 </resources>

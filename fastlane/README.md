@@ -29,6 +29,16 @@ Build and upload Android (internal) + iOS (beta) simultaneously
 
 Build and upload Android (production) + iOS (release) simultaneously
 
+### release_all_manual
+
+```sh
+[bundle exec] fastlane release_all_manual
+```
+
+Build and upload Android (production) + iOS (release_manual): iOS waits for a manual release after approval
+
+Android publishes when review passes unless Play Console managed publishing is ON
+
 ### upload_all
 
 ```sh

@@ -3,28 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>개인정보처리방침 - 그래, 해봐</title>
+  <title>개인정보처리방침 - 둘운완 (DuoDone)</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', Roboto, sans-serif;
       line-height: 1.8;
       max-width: 800px;
       margin: 0 auto;
       padding: 40px 20px;
-      color: #333;
-      background: #fafafa;
+      color: #2B1B21;
+      background: #FFF8F6;
     }
     h1 { font-size: 28px; margin-bottom: 8px; }
-    h2 { font-size: 20px; margin-top: 36px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+    h2 { font-size: 20px; margin-top: 36px; border-bottom: 1px solid #EADADD; padding-bottom: 6px; }
+    h3 { font-size: 16px; margin-top: 24px; }
     p, li { font-size: 15px; }
-    ul { padding-left: 20px; }
-    .updated { color: #888; font-size: 14px; margin-bottom: 32px; }
-    a { color: #1a73e8; }
-    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
-    th, td { border: 1px solid #ddd; padding: 10px 12px; font-size: 14px; text-align: left; }
-    th { background: #f5f5f5; }
+    ul, ol { padding-left: 20px; }
+    .updated { color: #6F5C63; font-size: 14px; margin-bottom: 32px; }
+    .brand { color: #D92653; }
+    a { color: #B81C45; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; background: #fff; }
+    th, td { border: 1px solid #EADADD; padding: 10px 12px; font-size: 14px; text-align: left; vertical-align: top; }
+    th { background: #FFE8ED; }
+    .note { background: #fff; border: 1px solid #EADADD; border-radius: 12px; padding: 14px 18px; }
     .lang-toggle { text-align: right; margin-bottom: 20px; }
-    .lang-toggle a { cursor: pointer; padding: 6px 14px; border: 1px solid #ddd; border-radius: 6px; text-decoration: none; font-size: 14px; }
+    .lang-toggle a { cursor: pointer; padding: 6px 14px; border: 1px solid #EADADD; border-radius: 6px; text-decoration: none; font-size: 14px; background: #fff; }
     .section-en { display: none; }
   </style>
 </head>
@@ -38,81 +41,124 @@
 <!-- ===== 한국어 ===== -->
 <div id="lang-ko" class="section-ko">
   <h1>개인정보처리방침</h1>
-  <p class="updated">시행일: 2026년 3월 24일</p>
+  <p class="updated">시행일: 2026년 10월 2일 · <span class="brand">둘운완</span> (DuoDone)</p>
 
-  <p>그래, 해봐(이하 "앱")는 파트너와 함께 계획을 지켜나가는 책임 관리 앱입니다. 본 개인정보처리방침은 앱이 수집하는 정보, 이용 목적, 보관 및 삭제 방법을 안내합니다.</p>
+  <p>둘운완(이하 "앱")은 연인·부부가 서로의 운동 약속을 봐주는 1:1 앱이에요. 이 방침은 앱이 어떤 정보를 왜 수집하고, 누구와 공유하며, 언제 어떻게 지우는지 안내해요.</p>
+  <p class="note">앱 이름이 <strong>그래, 해봐</strong>에서 <strong>둘운완</strong>으로 바뀌었어요. 운영자, 계정, 기존 약속과 기록, 짝꿍 연결은 그대로예요.</p>
 
   <h2>1. 수집하는 개인정보 항목</h2>
   <table>
     <tr><th>항목</th><th>수집 목적</th><th>수집 방법</th></tr>
-    <tr><td>이메일 주소, 로그인 ID (Firebase Auth UID)</td><td>회원 식별 및 계정 관리</td><td>회원가입 시</td></tr>
-    <tr><td>닉네임, 프로필 이미지</td><td>서비스 내 프로필 표시</td><td>사용자 직접 입력</td></tr>
-    <tr><td>약속 데이터 (계획, 실천 기록, 완료 상태, 소감)</td><td>핵심 서비스 기능 제공</td><td>서비스 이용 중 생성</td></tr>
-    <tr><td>건강 관련 데이터 (운동, 식단 등 계획에 포함될 경우)</td><td>계획 관리 및 파트너 확인</td><td>사용자 자발적 입력</td></tr>
-    <tr><td>기기 정보 (기기 모델, OS 버전, 앱 버전)</td><td>푸시 알림 발송 및 오류 해결</td><td>자동 수집</td></tr>
+    <tr><td>이메일 주소, 로그인 ID(Firebase Auth UID), 소셜 로그인 시 제공되는 이름</td><td>회원 식별 및 계정 관리</td><td>회원가입·로그인 시</td></tr>
+    <tr><td>닉네임, 프로필 이미지, 짝꿍 애칭(내가 짝꿍을 부르는 호칭)</td><td>앱 안에서 프로필·호칭 표시</td><td>사용자 직접 입력</td></tr>
+    <tr><td>운동 약속 데이터(운동 종류, 요일, 마감 시각, 완료·휴식 기록, 소감)</td><td>핵심 기능 제공(약속 관리, 짝꿍 확인)</td><td>서비스 이용 중 생성</td></tr>
+    <tr><td><strong>인증샷</strong>(운동 사진), 촬영 방식(카메라/앨범), 촬영 시각</td><td>운동 약속 인증을 연결된 짝꿍에게 보여주기(아래 2절)</td><td>사용자가 직접 촬영·선택(선택 사항)</td></tr>
+    <tr><td>짝꿍과 주고받은 인정 리액션, 응원·똑똑 메시지, 내기(보상·벌칙) 내용</td><td>짝꿍 간 소통 기능 제공</td><td>서비스 이용 중 생성</td></tr>
+    <tr><td>건강 관련 정보(운동·식단 등 약속에 포함된 경우)</td><td>약속 관리 및 짝꿍 확인</td><td>사용자 자발적 입력</td></tr>
+    <tr><td>기기 정보(기기 모델, OS 버전), 앱 빌드 번호, 시간대, 언어 설정, 푸시 토큰</td><td>알림 발송, 마감 시각 계산, 버전 호환 안내</td><td>자동 수집</td></tr>
+    <tr><td>오류 로그(앱 충돌 정보, 로그인 ID와 함께 기록)</td><td>오류 분석 및 해결</td><td>자동 수집(Firebase Crashlytics)</td></tr>
+    <tr><td>앱 이용 기록(화면·기능 사용 이벤트, IP 주소로 추정한 대략적인 국가·지역)</td><td>서비스 품질 개선 및 통계</td><td>자동 수집(Google Analytics for Firebase)</td></tr>
   </table>
+  <p>앱은 광고 ID를 수집하지 않고, 정확한 위치 정보(GPS)도 수집하지 않아요. 대략적인 국가·지역은 이용 통계에만 써요.</p>
 
-  <h2>2. 개인정보 이용 목적</h2>
+  <h2>2. 인증샷</h2>
   <ul>
-    <li>계획 생성, 추적, 파트너 연결 등 핵심 기능 제공</li>
-    <li>알림 및 리마인더 발송</li>
-    <li>회원 식별 및 계정 관리</li>
-    <li>서비스 품질 개선 및 신규 기능 개발</li>
+    <li><strong>수집 항목:</strong> 사진 이미지, 촬영 방식(카메라/앨범), 촬영 시각(카메라는 찍은 시각, 앨범은 사진에 기록된 원본 촬영일이 있으면 그 날짜).</li>
+    <li><strong>이용 목적:</strong> 내가 한 운동을 연결된 짝꿍에게 보여주고, 짝꿍이 인정(리액션)할 수 있게 하기 위해서예요. 얼굴 인식 등 다른 분석이나 광고에 쓰지 않아요.</li>
+    <li><strong>공개 범위:</strong> 나와 <strong>연결된 짝꿍 1명만</strong> 볼 수 있어요. 공개 피드나 다른 사용자에게 보여주는 기능은 없어요.</li>
+    <li><strong>위치 정보 제거:</strong> 사진은 올리기 전에 내 기기에서 크기를 줄이고 다시 저장해요. 이 과정에서 사진에 들어 있던 위치(GPS)·기기 정보 등 메타데이터(EXIF)를 모두 지우고, 원본 사진은 서버로 보내지 않아요.</li>
+    <li><strong>저장 위치:</strong> Cloud Storage for Firebase(Google LLC)에 저장해요. 짝꿍의 앱은 사진을 빠르게 보여주기 위해 기기에 임시로 저장(캐시)할 수 있어요.</li>
+    <li><strong>삭제:</strong>
+      <ul>
+        <li>내 인증샷을 삭제하면 서버에서 바로 지워져요.</li>
+        <li>짝꿍 연결을 끊으면 상대방은 앱에서 내 인증샷을 더 이상 볼 수 없어요. 상대방 앱에 남은 임시 저장본도 지우도록 되어 있지만, 상대방이 이미 캡처하거나 저장한 화면은 회수할 수 없어요.</li>
+        <li>회원 탈퇴 시 내 인증샷은 모두 삭제돼요.</li>
+      </ul>
+    </li>
+    <li><strong>주의:</strong> 인증샷에는 얼굴이나 몸이 나올 수 있어요. 보여주고 싶은 사진만 올려 주세요. 다른 사람이 나온 사진이나 부적절한 사진은 올리지 말아 주세요. 사진 보기 화면에서 신고하거나 연결을 끊을 수 있어요.</li>
   </ul>
-  <p>당사는 개인정보를 <strong>광고 목적으로 판매하거나 제3자에게 제공하지 않습니다.</strong> 건강 관련 데이터는 마케팅이나 광고 목적으로 절대 공유하지 않습니다.</p>
 
-  <h2>3. 제3자 제공 및 위탁</h2>
-  <p>앱 운영을 위해 다음 제3자 서비스를 이용합니다:</p>
+  <h2>3. 개인정보 이용 목적</h2>
+  <ul>
+    <li>운동 약속 만들기, 인증, 짝꿍 연결·인정·응원 등 핵심 기능 제공</li>
+    <li>마감 리마인더와 짝꿍 소식 알림 발송</li>
+    <li>회원 식별 및 계정 관리</li>
+    <li>오류 해결, 서비스 품질 개선 및 신규 기능 개발</li>
+  </ul>
+  <p>개인정보를 <strong>판매하거나 광고 목적으로 제3자에게 제공하지 않아요.</strong> 건강 관련 정보와 인증샷은 마케팅이나 광고에 절대 쓰지 않아요.</p>
+
+  <h2>4. 처리 위탁</h2>
+  <p>앱 운영을 위해 아래 업무를 Google LLC에 맡기고 있어요. 각 서비스는 Google의 개인정보처리방침(<a href="https://policies.google.com/privacy">policies.google.com/privacy</a>)에 따라 데이터를 처리해요.</p>
   <table>
-    <tr><th>서비스</th><th>제공업체</th><th>이용 목적</th></tr>
-    <tr><td>Firebase Authentication</td><td>Google LLC</td><td>사용자 인증</td></tr>
-    <tr><td>Cloud Firestore</td><td>Google LLC</td><td>데이터 저장</td></tr>
-    <tr><td>Firebase Cloud Messaging</td><td>Google LLC</td><td>푸시 알림</td></tr>
+    <tr><th>수탁자</th><th>서비스</th><th>위탁 업무</th></tr>
+    <tr><td rowspan="7">Google LLC</td><td>Firebase Authentication</td><td>로그인·회원 인증</td></tr>
+    <tr><td>Cloud Firestore</td><td>계정·약속·기록 데이터 저장</td></tr>
+    <tr><td>Cloud Storage for Firebase</td><td>인증샷·프로필 이미지 저장</td></tr>
+    <tr><td>Cloud Functions for Firebase</td><td>알림 발송, 연결·탈퇴 시 데이터 정리 등 서버 처리</td></tr>
+    <tr><td>Firebase Cloud Messaging</td><td>푸시 알림 전송</td></tr>
+    <tr><td>Firebase Crashlytics</td><td>앱 오류(충돌) 로그 수집·분석</td></tr>
+    <tr><td>Google Analytics for Firebase</td><td>앱 이용 통계 분석(광고 ID 미사용)</td></tr>
   </table>
-  <p>해당 서비스는 각 사의 개인정보처리방침에 따라 데이터를 처리합니다.</p>
+  <p>Apple 또는 Google 계정으로 로그인하면 해당 회사에서 이메일 등 로그인에 필요한 정보만 받아요.</p>
 
-  <h2>4. 개인정보 보관 기간</h2>
+  <h2>5. 개인정보의 국외 이전</h2>
+  <p>위 위탁 업무를 위해 개인정보가 아래와 같이 국외로 이전돼요.</p>
+  <table>
+    <tr><th>이전받는 자</th><td>Google LLC (1600 Amphitheatre Parkway, Mountain View, CA 94043, USA)<br>연락처: <a href="https://support.google.com/policies/troubleshooter/7575787">Google 개인정보 문의</a></td></tr>
+    <tr><th>이전되는 국가</th><td>미국 등 Google LLC가 데이터센터를 운영하는 국가</td></tr>
+    <tr><th>이전 항목</th><td>1절의 수집 항목(인증샷 포함)</td></tr>
+    <tr><th>이전 일시 및 방법</th><td>앱을 이용할 때 수시로, 암호화된 네트워크(HTTPS/TLS)를 통해 전송</td></tr>
+    <tr><th>이용 목적</th><td>4절의 위탁 업무 수행</td></tr>
+    <tr><th>보유·이용 기간</th><td>회원 탈퇴 또는 위탁 계약 종료 시까지(6절의 보관 기간을 따름)</td></tr>
+    <tr><th>거부 방법 및 결과</th><td>국외 이전을 원하지 않으면 회원 탈퇴로 거부할 수 있어요. 다만 국외 이전은 서비스 제공에 꼭 필요해서, 거부하면 앱을 이용할 수 없어요.</td></tr>
+  </table>
+
+  <h2>6. 개인정보 보관 기간</h2>
   <table>
     <tr><th>데이터 유형</th><th>보관 기간</th></tr>
-    <tr><td>계정 정보 (이메일, 닉네임, 프로필)</td><td>회원 탈퇴 시까지</td></tr>
-    <tr><td>약속/실천 데이터</td><td>회원 탈퇴 시까지</td></tr>
-    <tr><td>건강 관련 데이터</td><td>회원 탈퇴 시까지</td></tr>
-    <tr><td>기기 정보 및 로그</td><td>수집일로부터 1년</td></tr>
+    <tr><td>계정 정보(이메일, 닉네임, 프로필, 짝꿍 애칭)</td><td>회원 탈퇴 시까지</td></tr>
+    <tr><td>운동 약속·기록·리액션·응원 데이터</td><td>회원 탈퇴 시까지</td></tr>
+    <tr><td>인증샷</td><td>사용자가 삭제하거나 회원 탈퇴할 때까지</td></tr>
+    <tr><td>건강 관련 정보</td><td>회원 탈퇴 시까지</td></tr>
+    <tr><td>기기 정보, 오류 로그, 이용 통계</td><td>수집일로부터 최대 14개월</td></tr>
   </table>
-  <p>보관 기간이 경과하거나 처리 목적이 달성된 경우, 해당 개인정보를 지체 없이 파기합니다.</p>
+  <p>보관 기간이 지나거나 처리 목적을 달성하면 해당 개인정보를 지체 없이 파기해요.</p>
 
-  <h2>5. 개인정보 삭제 방법</h2>
-  <p>사용자는 언제든지 다음 방법으로 개인정보를 삭제할 수 있습니다:</p>
+  <h2 id="delete-ko">7. 개인정보 삭제 방법</h2>
   <ul>
-    <li><strong>앱 내 삭제:</strong> 설정 &gt; 계정 삭제를 통해 모든 데이터를 즉시 삭제할 수 있습니다.</li>
-    <li><strong>이메일 요청:</strong> <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a>으로 삭제 요청을 보내실 수 있습니다.</li>
+    <li><strong>앱에서 삭제:</strong> 설정 &gt; 계정 관리 &gt; 회원 탈퇴에서 계정과 모든 데이터(인증샷 포함)를 삭제할 수 있어요. 인증샷은 사진별로 따로 삭제할 수도 있어요.</li>
+    <li><strong>이메일 요청(앱 없이도 가능):</strong> <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a>으로 삭제를 요청할 수 있어요. 앱을 이미 지웠어도 요청할 수 있어요.</li>
   </ul>
-  <p>삭제 요청 시 처리 절차:</p>
+  <p>삭제 요청 처리 절차:</p>
   <ol>
-    <li>요청 접수 후 본인 확인</li>
-    <li>계정 정보, 약속 데이터, 프로필 정보, 건강 관련 데이터 등 모든 개인정보를 <strong>30일 이내</strong>에 완전 파기</li>
-    <li>전자적 파일은 복구 불가능한 기술적 방법으로 영구 삭제</li>
+    <li>요청을 받으면 본인 여부를 확인해요.</li>
+    <li>계정 정보, 약속·기록, 인증샷, 프로필, 건강 관련 정보 등 모든 개인정보를 <strong>30일 이내</strong>에 완전히 파기해요. 단, 6절의 기기 정보·오류 로그·이용 통계는 수집일로부터 최대 14개월 보관한 뒤 자동으로 삭제돼요.</li>
+    <li>전자 파일은 복구할 수 없는 기술적 방법으로 영구 삭제해요.</li>
   </ol>
 
-  <h2>6. 이용자의 권리</h2>
+  <h2>8. 이용자의 권리</h2>
   <ul>
     <li>개인정보 열람 요청</li>
     <li>설정 &gt; 프로필 수정을 통한 개인정보 수정</li>
-    <li>언제든지 계정 삭제 및 모든 관련 데이터 삭제 요청</li>
-    <li>개인정보 수집에 대한 동의 철회</li>
+    <li>언제든지 계정 및 모든 관련 데이터 삭제 요청</li>
+    <li>개인정보 수집·이용 동의 철회</li>
   </ul>
 
-  <h2>7. 데이터 보안</h2>
-  <p>암호화된 데이터 전송(HTTPS/TLS), Google Firebase의 보안 클라우드 인프라를 포함한 적절한 보안 조치를 시행하여 개인정보를 보호합니다.</p>
+  <h2>9. 데이터 보안</h2>
+  <p>데이터는 암호화된 통신(HTTPS/TLS)으로 전송하고 Google Firebase의 보안 클라우드 인프라에 저장해요. 인증샷은 서버 규칙으로 본인과 연결된 짝꿍만 읽을 수 있도록 제한해요.</p>
 
-  <h2>8. 아동 개인정보 보호</h2>
-  <p>본 앱은 만 14세 미만의 아동을 대상으로 하지 않으며, 만 14세 미만 아동의 개인정보를 고의로 수집하지 않습니다.</p>
+  <h2>10. 아동 개인정보 보호</h2>
+  <p>앱은 만 14세 미만 아동을 대상으로 하지 않으며, 만 14세 미만 아동의 개인정보를 고의로 수집하지 않아요.</p>
 
-  <h2>9. 개인정보처리방침 변경</h2>
-  <p>본 방침은 수시로 업데이트될 수 있으며, 변경 사항은 시행일과 함께 이 페이지에 게시됩니다.</p>
+  <h2>11. 개인정보처리방침 변경</h2>
+  <p>이 방침은 바뀔 수 있으며, 변경 사항은 시행일과 함께 이 페이지에 게시해요.</p>
+  <ul>
+    <li>2026년 10월 2일: 앱 이름 변경(그래, 해봐 → 둘운완), 인증샷 항목 추가, 처리 위탁(Cloud Storage·Cloud Functions·Crashlytics·Analytics)과 국외 이전 안내 추가</li>
+    <li>2026년 3월 24일: 최초 시행</li>
+  </ul>
 
-  <h2>10. 문의</h2>
-  <p>개인정보처리방침에 대한 문의사항이 있으시면 아래로 연락해 주세요:</p>
+  <h2>12. 문의</h2>
+  <p>개인정보처리방침에 대한 문의는 아래로 연락해 주세요.</p>
   <ul>
     <li>개인정보 보호책임자: 박정호</li>
     <li>이메일: <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a></li>
@@ -122,79 +168,123 @@
 <!-- ===== English ===== -->
 <div id="lang-en" class="section-en">
   <h1>Privacy Policy</h1>
-  <p class="updated">Effective Date: March 24, 2026</p>
+  <p class="updated">Effective Date: October 2, 2026 · <span class="brand">DuoDone</span> (둘운완)</p>
 
-  <p>Geurae, Haebwa ("we", "our", or "the App") is an accountability app that helps users keep their plans with a partner. This Privacy Policy explains how we collect, use, store, and delete your information.</p>
+  <p>DuoDone ("we", "our", or "the App") is a 1:1 app where couples keep an eye on each other's workout promises. This Privacy Policy explains what we collect and why, who we share it with, and when and how it is deleted.</p>
+  <p class="note">The App has been renamed from <strong>Nodtry (그래, 해봐)</strong> to <strong>DuoDone (둘운완)</strong>. The operator, your account, existing promises and history, and your partner connection stay the same.</p>
 
   <h2>1. Information We Collect</h2>
   <table>
     <tr><th>Data</th><th>Purpose</th><th>Method</th></tr>
-    <tr><td>Email address, Login ID (Firebase Auth UID)</td><td>Account identification and management</td><td>At sign-up</td></tr>
-    <tr><td>Nickname, profile image</td><td>In-app profile display</td><td>User input</td></tr>
-    <tr><td>Plan data (plans, practice records, completion status, reflections)</td><td>Core service features</td><td>Generated during use</td></tr>
-    <tr><td>Health-related data (exercise, diet, etc. if included in plans)</td><td>Plan management and partner confirmation</td><td>Voluntary user input</td></tr>
-    <tr><td>Device information (model, OS version, app version)</td><td>Push notifications and troubleshooting</td><td>Automatic collection</td></tr>
+    <tr><td>Email address, login ID (Firebase Auth UID), name provided by social sign-in</td><td>Account identification and management</td><td>At sign-up / sign-in</td></tr>
+    <tr><td>Nickname, profile image, partner nickname (what you call your partner)</td><td>In-app profile and name display</td><td>User input</td></tr>
+    <tr><td>Workout promise data (workout type, days, deadline, done/rest records, notes)</td><td>Core features (promise tracking, partner check-ins)</td><td>Generated during use</td></tr>
+    <tr><td><strong>Proof photos</strong> (workout photos), capture source (camera/album), capture time</td><td>Showing your workout to your connected partner (Section 2)</td><td>Taken or selected by you (optional)</td></tr>
+    <tr><td>Reactions, cheers and knock messages exchanged with your partner, bet (reward/penalty) details</td><td>Partner communication features</td><td>Generated during use</td></tr>
+    <tr><td>Health-related data (exercise, diet, etc. if included in promises)</td><td>Promise management and partner check-ins</td><td>Voluntary user input</td></tr>
+    <tr><td>Device information (model, OS version), app build number, time zone, language setting, push token</td><td>Notifications, deadline calculation, version compatibility notices</td><td>Automatic</td></tr>
+    <tr><td>Crash logs (recorded with your login ID)</td><td>Troubleshooting</td><td>Automatic (Firebase Crashlytics)</td></tr>
+    <tr><td>App usage events (screens and features used, approximate country/region estimated from IP address)</td><td>Service improvement and statistics</td><td>Automatic (Google Analytics for Firebase)</td></tr>
   </table>
+  <p>The App does not collect the advertising ID or precise (GPS) location. Approximate country/region is used only for usage statistics.</p>
 
-  <h2>2. How We Use Your Information</h2>
+  <h2>2. Proof Photos</h2>
   <ul>
-    <li>Provide core service features (plan creation, tracking, partner connection)</li>
-    <li>Send notifications and reminders</li>
-    <li>Member identification and account management</li>
-    <li>Improve service quality and develop new features</li>
+    <li><strong>What:</strong> the photo, how it was captured (camera/album), and when (camera: the time you took it; album: the original capture date recorded in the photo, if any).</li>
+    <li><strong>Why:</strong> to show the workout you did to your connected partner so they can acknowledge it with a reaction. We do not use photos for facial recognition, other analysis, or advertising.</li>
+    <li><strong>Who can see it:</strong> only you and <strong>your one connected partner</strong>. There is no public feed and no sharing with other users.</li>
+    <li><strong>Location removed:</strong> before upload, the App resizes and re-encodes the photo on your device, which removes all metadata (EXIF) such as GPS location and device details. The original photo is never sent to our servers.</li>
+    <li><strong>Where it is stored:</strong> Cloud Storage for Firebase (Google LLC). Your partner's app may keep a temporary on-device copy (cache) to display it quickly.</li>
+    <li><strong>Deletion:</strong>
+      <ul>
+        <li>When you delete a proof photo, it is removed from our servers right away.</li>
+        <li>When you disconnect from your partner, they can no longer see your photos in the App. Their app is designed to clear its temporary copy, but screenshots or saves they already made cannot be recalled.</li>
+        <li>When you delete your account, all of your proof photos are deleted.</li>
+      </ul>
+    </li>
+    <li><strong>Please note:</strong> proof photos may show your face or body, so only upload photos you are comfortable sharing. Do not upload photos of other people or inappropriate content. You can report a photo or disconnect from the photo viewer.</li>
   </ul>
-  <p>We do <strong>not</strong> sell your personal data or use it for advertising. Health-related data is never shared with third parties for marketing or advertising.</p>
 
-  <h2>3. Third-Party Services</h2>
+  <h2>3. How We Use Your Information</h2>
+  <ul>
+    <li>Provide core features (workout promises, proof, partner connection, reactions, cheers)</li>
+    <li>Send deadline reminders and partner notifications</li>
+    <li>Identify members and manage accounts</li>
+    <li>Fix errors, improve service quality, and develop new features</li>
+  </ul>
+  <p>We do <strong>not</strong> sell your personal data or share it with third parties for advertising. Health-related data and proof photos are never used for marketing or advertising.</p>
+
+  <h2>4. Service Providers (Processors)</h2>
+  <p>We entrust the following tasks to Google LLC. Each service processes data under Google's Privacy Policy (<a href="https://policies.google.com/privacy">policies.google.com/privacy</a>).</p>
   <table>
-    <tr><th>Service</th><th>Provider</th><th>Purpose</th></tr>
-    <tr><td>Firebase Authentication</td><td>Google LLC</td><td>User authentication</td></tr>
-    <tr><td>Cloud Firestore</td><td>Google LLC</td><td>Data storage</td></tr>
-    <tr><td>Firebase Cloud Messaging</td><td>Google LLC</td><td>Push notifications</td></tr>
+    <tr><th>Processor</th><th>Service</th><th>Task</th></tr>
+    <tr><td rowspan="7">Google LLC</td><td>Firebase Authentication</td><td>Sign-in and authentication</td></tr>
+    <tr><td>Cloud Firestore</td><td>Account, promise and history data storage</td></tr>
+    <tr><td>Cloud Storage for Firebase</td><td>Proof photo and profile image storage</td></tr>
+    <tr><td>Cloud Functions for Firebase</td><td>Server processing such as notifications and clean-up on disconnect or account deletion</td></tr>
+    <tr><td>Firebase Cloud Messaging</td><td>Push notification delivery</td></tr>
+    <tr><td>Firebase Crashlytics</td><td>Crash log collection and analysis</td></tr>
+    <tr><td>Google Analytics for Firebase</td><td>App usage statistics (no advertising ID)</td></tr>
   </table>
-  <p>These services process data in accordance with their own privacy policies.</p>
+  <p>If you sign in with Apple or Google, we receive only the information needed to sign you in, such as your email address.</p>
 
-  <h2>4. Data Retention Period</h2>
+  <h2>5. International Data Transfer</h2>
+  <p>To perform the tasks above, personal data is transferred outside Korea as follows.</p>
+  <table>
+    <tr><th>Recipient</th><td>Google LLC (1600 Amphitheatre Parkway, Mountain View, CA 94043, USA)<br>Contact: <a href="https://support.google.com/policies/troubleshooter/7575787">Google privacy inquiries</a></td></tr>
+    <tr><th>Country</th><td>United States and other countries where Google LLC operates data centers</td></tr>
+    <tr><th>Data transferred</th><td>The items in Section 1 (including proof photos)</td></tr>
+    <tr><th>When and how</th><td>Whenever you use the App, over encrypted connections (HTTPS/TLS)</td></tr>
+    <tr><th>Purpose</th><td>The processing tasks in Section 4</td></tr>
+    <tr><th>Retention</th><td>Until account deletion or the end of the processing agreement (see Section 6)</td></tr>
+    <tr><th>How to refuse</th><td>You can refuse the transfer by deleting your account. Because the transfer is necessary to provide the service, the App cannot be used without it.</td></tr>
+  </table>
+
+  <h2>6. Data Retention Period</h2>
   <table>
     <tr><th>Data Type</th><th>Retention Period</th></tr>
-    <tr><td>Account information (email, nickname, profile)</td><td>Until account deletion</td></tr>
-    <tr><td>Plan and practice data</td><td>Until account deletion</td></tr>
+    <tr><td>Account information (email, nickname, profile, partner nickname)</td><td>Until account deletion</td></tr>
+    <tr><td>Workout promises, history, reactions and cheers</td><td>Until account deletion</td></tr>
+    <tr><td>Proof photos</td><td>Until you delete them or delete your account</td></tr>
     <tr><td>Health-related data</td><td>Until account deletion</td></tr>
-    <tr><td>Device information and logs</td><td>1 year from collection</td></tr>
+    <tr><td>Device information, crash logs and usage statistics</td><td>Up to 14 months from collection</td></tr>
   </table>
   <p>Data is destroyed without delay once the retention period expires or the purpose of processing is fulfilled.</p>
 
-  <h2>5. How to Delete Your Data</h2>
-  <p>You can delete your personal data at any time through the following methods:</p>
+  <h2 id="delete-en">7. How to Delete Your Data</h2>
   <ul>
-    <li><strong>In-App Deletion:</strong> Go to Settings &gt; Delete Account to immediately delete all your data.</li>
-    <li><strong>Email Request:</strong> Send a deletion request to <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a>.</li>
+    <li><strong>In the App:</strong> go to Settings &gt; Account &gt; Delete Account to delete your account and all data, including proof photos. You can also delete individual proof photos.</li>
+    <li><strong>By email (no app needed):</strong> send a deletion request to <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a>. You can do this even if you have already uninstalled the App.</li>
   </ul>
   <p>Deletion process:</p>
   <ol>
-    <li>Identity verification upon receiving the request</li>
-    <li>All personal information including account data, plan data, profile information, and health-related data will be permanently destroyed within <strong>30 days</strong></li>
-    <li>Electronic files are permanently deleted using technical methods that prevent recovery</li>
+    <li>We verify your identity when we receive the request.</li>
+    <li>All personal data, including account data, promises and history, proof photos, profile information and health-related data, is permanently destroyed within <strong>30 days</strong>. Device information, crash logs and usage statistics (Section 6) are kept for up to 14 months from collection and then deleted automatically.</li>
+    <li>Electronic files are permanently deleted using methods that prevent recovery.</li>
   </ol>
 
-  <h2>6. Your Rights</h2>
+  <h2>8. Your Rights</h2>
   <ul>
     <li>Request access to your personal information</li>
-    <li>Modify your profile through Settings &gt; Edit Profile</li>
+    <li>Edit your profile through Settings &gt; Edit Profile</li>
     <li>Delete your account and all associated data at any time</li>
-    <li>Withdraw consent for data collection</li>
+    <li>Withdraw consent to data collection and use</li>
   </ul>
 
-  <h2>7. Data Security</h2>
-  <p>We implement appropriate security measures including encrypted data transmission (HTTPS/TLS) and secure cloud infrastructure provided by Google Firebase.</p>
+  <h2>9. Data Security</h2>
+  <p>Data is transmitted over encrypted connections (HTTPS/TLS) and stored on Google Firebase's secure cloud infrastructure. Server rules restrict proof photos so that only you and your connected partner can read them.</p>
 
-  <h2>8. Children's Privacy</h2>
-  <p>The App is not intended for children under the age of 14. We do not knowingly collect personal information from children under 14.</p>
+  <h2>10. Children's Privacy</h2>
+  <p>The App is not intended for children under 14. We do not knowingly collect personal information from children under 14.</p>
 
-  <h2>9. Changes to This Policy</h2>
-  <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated effective date.</p>
+  <h2>11. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy. Changes will be posted on this page with the effective date.</p>
+  <ul>
+    <li>October 2, 2026: App renamed (Nodtry → DuoDone); proof photos added; processors (Cloud Storage, Cloud Functions, Crashlytics, Analytics) and international transfer disclosed</li>
+    <li>March 24, 2026: First version</li>
+  </ul>
 
-  <h2>10. Contact Us</h2>
+  <h2>12. Contact Us</h2>
   <ul>
     <li>Privacy Officer: Jungho Park</li>
     <li>Email: <a href="mailto:devhohouse@gmail.com">devhohouse@gmail.com</a></li>
@@ -206,6 +296,19 @@
     document.getElementById('lang-ko').style.display = lang === 'ko' ? 'block' : 'none';
     document.getElementById('lang-en').style.display = lang === 'en' ? 'block' : 'none';
   }
+  // A link to an anchor (e.g. #delete-ko / #delete-en) opens the language
+  // section that contains it.
+  function showHashTarget() {
+    var target = null;
+    try { target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null; } catch (e) {}
+    if (!target) return false;
+    toggleLang(document.getElementById('lang-en').contains(target) ? 'en' : 'ko');
+    target.scrollIntoView();
+    return true;
+  }
+  // Otherwise show English by default for non-Korean browsers.
+  if (!showHashTarget() && !(navigator.language || 'ko').toLowerCase().startsWith('ko')) { toggleLang('en'); }
+  window.addEventListener('hashchange', showHashTarget);
 </script>
 </body>
 </html>

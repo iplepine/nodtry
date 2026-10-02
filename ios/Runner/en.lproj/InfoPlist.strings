@@ -1,2 +1,9 @@
-CFBundleDisplayName = "Nodtry";
-CFBundleName = "Nodtry";
+/* Home-screen name. Must share a token with the App Store name ("DuoDone: Couple Workout Proof"), Guideline 2.3.8. */
+CFBundleDisplayName = "DuoDone";
+CFBundleName = "DuoDone";
+
+/* Permission prompts (see docs/product/PIVOT_DUOUNWAN_SPEC.md section 5) */
+NSCameraUsageDescription = "DuoDone uses the camera to take workout proof photos to show your connected partner.";
+NSPhotoLibraryUsageDescription = "DuoDone accesses your photo library so you can upload a workout photo from your album as proof or choose a profile photo.";
+/* Add-only access: "Save Image" on the share card's share sheet. Without this key iOS terminates the app. */
+NSPhotoLibraryAddUsageDescription = "DuoDone saves your share card to Photos when you choose Save Image.";

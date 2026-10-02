@@ -1,11 +1,11 @@
 {
-    "name": "mind_gardener",
-    "short_name": "mind_gardener",
+    "name": "둘운완 · DuoDone",
+    "short_name": "둘운완",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFF8F6",
+    "theme_color": "#D92653",
+    "description": "연인·부부가 서로의 운동 약속을 봐주는 앱. 둘이 보면, 진짜 하게 돼요.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

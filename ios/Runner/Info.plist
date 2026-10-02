@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Nodtry</string>
+	<string>DuoDone</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Nodtry</string>
+	<string>DuoDone</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -45,13 +45,13 @@
 		<string>_dartVmService._tcp</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Nod&amp;Try requires access to your camera to take a profile picture.</string>
+	<string>DuoDone uses the camera to take workout proof photos to show your connected partner.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>DuoDone saves your share card to Photos when you choose Save Image.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Nod&amp;Try requires access to your photo library to select a profile picture.</string>
-	<key>NSUserNotificationsUsageDescription</key>
-	<string>We need to send you notifications to remind you of your planned activities.</string>
+	<string>DuoDone accesses your photo library so you can upload a workout photo from your album as proof or choose a profile photo.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -1,7 +1,9 @@
-What's New
+Nodtry is now DuoDone.
+Your promises, history, and partner connection stay the same.
 
-- You can now edit and delete a promise right from its card.
-- Fixed cases where confirming a practice or sending a knock failed but looked like it succeeded.
-- An accidental double tap no longer creates duplicate promises or partner connections.
-- Fixed the focus timer showing the wrong remaining time for sessions longer than an hour.
-- Cleaned up awkward English wording and the first-run tutorial translations.
+- New name, new icon: both of you done today = DuoDone!
+- Workout promises: pick a workout, the days, and a deadline, and you're set.
+- Proof photos: snap your workout and your partner acknowledges it with a ❤️.
+- Skip it and your partner knows: no record by the deadline means a heads-up for your partner.
+- Together for N days: see the days you both showed up and share them with a card.
+- Proof photos are visible only to your connected partner, and location data is removed before upload.
