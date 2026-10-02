@@ -1,3 +1,12 @@
+<!-- COMMIT_STATUS START -->
+> **커밋 상태**
+> - 기준 커밋: `ca33b3afce18d181a507f9c3b524991d4fdbb21a` (`feat/couple-workout-pivot`)
+> - 최근 커밋: `ca33b3afce18` docs: 둘운완 pivot spec, decision D-007, launch plan and runbook
+> - 커밋 일시: `2026-10-03T07:18:28+09:00`
+> - 워킹트리: `dirty (40 files)`
+> - 문서 갱신: `2026-10-03 07:19:00 +0900`
+<!-- COMMIT_STATUS END -->
+
 # 인증샷(Proof Photo) 정책
 
 마지막 갱신: 2026-10-03 (1.1.0+81, 피벗 S4·backend) · 스펙 §4.4~4.5, §5 · 사용자 용어 `오운완 인증` / 사진이 있으면 `인증샷`

@@ -1,3 +1,12 @@
+<!-- COMMIT_STATUS START -->
+> **커밋 상태**
+> - 기준 커밋: `ca33b3afce18d181a507f9c3b524991d4fdbb21a` (`feat/couple-workout-pivot`)
+> - 최근 커밋: `ca33b3afce18` docs: 둘운완 pivot spec, decision D-007, launch plan and runbook
+> - 커밋 일시: `2026-10-03T07:18:28+09:00`
+> - 워킹트리: `dirty (6 files)`
+> - 문서 갱신: `2026-10-03 07:18:56 +0900`
+<!-- COMMIT_STATUS END -->
+
 # 둘운완 ASO
 
 > 작성 2026-10-02 · 김삿갓 / 마케팅실장 · 검토 황희 / 리스크 감시역

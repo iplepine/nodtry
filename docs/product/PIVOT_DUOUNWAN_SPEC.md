@@ -1,3 +1,12 @@
+<!-- COMMIT_STATUS START -->
+> **커밋 상태**
+> - 기준 커밋: `ca33b3afce18d181a507f9c3b524991d4fdbb21a` (`feat/couple-workout-pivot`)
+> - 최근 커밋: `ca33b3afce18` docs: 둘운완 pivot spec, decision D-007, launch plan and runbook
+> - 커밋 일시: `2026-10-03T07:18:28+09:00`
+> - 워킹트리: `dirty (24 files)`
+> - 문서 갱신: `2026-10-03 07:18:58 +0900`
+<!-- COMMIT_STATUS END -->
+
 # 둘운완 피벗 스펙 (v2, 2026-10-02)
 
 > 대표 지시(2026-10-02): "커플이 봐주면 내가 하기로 한 운동을 실제로 더 한다. 진짜 핵심 기능만 최대한 강조해서 스토어 카테고리 Top 10에 들 수 있게 개선. 앱 이름·이미지 변경 포함 전권 위임."
