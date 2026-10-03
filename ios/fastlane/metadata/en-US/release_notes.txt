@@ -3,7 +3,7 @@ Your promises, history, and partner connection stay the same.
 
 - New name, new icon: both of you done today = DuoDone!
 - Workout promises: pick a workout, the days, and a deadline, and you're set.
-- Proof photos: snap your workout and your partner acknowledges it with a ❤️.
+- Proof photos: snap your workout and your partner acknowledges it with a .
 - Skip it and your partner knows: no record by the deadline means a heads-up for your partner.
 - Together for N days: see the days you both showed up and share them with a card.
 - Proof photos are visible only to your connected partner, and location data is removed before upload.
