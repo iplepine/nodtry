@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:nod_try/theme/app_colors.dart';
 import '../../../../widgets/app_underlined_text.dart';
+import '../../../../widgets/notification_focus_frame.dart';
 import '../../../../widgets/quiet_header.dart';
 import '../../../../models/history_item.dart';
 import '../../../../widgets/history/history_card.dart';
@@ -15,15 +18,110 @@ import '../history_viewmodel.dart';
 import '../history_fake_states.dart';
 import '../../../duo/application/duo_stats_provider.dart';
 import '../../../duo/presentation/duo_widgets.dart';
+import '../../../now/application/notification_routing.dart';
 import 'package:intl/intl.dart';
 
 /// 기록 탭 (History Tab)
 /// 우리가 나눈 약속의 흔적을 보는 곳
-class HistoryScreen extends ConsumerWidget {
+class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+  /// An opened notification: bring its record (or promise) into view once
+  /// the list is in.
+  NotificationFocusRequest? _pendingFocus;
+
+  /// Runs once the list was in without [_pendingFocus]'s record; when it is
+  /// over, the request is dropped (see [notificationFocusGrace]).
+  Timer? _pendingFocusGrace;
+  bool _pendingFocusGraceOver = false;
+
+  /// The focused record's id (or [historySummaryKey]) and a new token per
+  /// focus (see [NotificationFocusFrame]).
+  String? _focusedId;
+  int _focusToken = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pending = ref.read(historyFocusRequestProvider);
+      if (pending != null) _queueFocus(pending);
+    });
+  }
+
+  @override
+  void dispose() {
+    _pendingFocusGrace?.cancel();
+    super.dispose();
+  }
+
+  void _queueFocus(NotificationFocusRequest request) {
+    if (!mounted) return;
+    _dropPendingFocus();
+    _pendingFocus = request;
+    // Consumed here; cleared outside the listener that delivered it.
+    Future.microtask(() {
+      if (mounted) ref.read(historyFocusRequestProvider.notifier).clear();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openPendingFocusIfReady();
+    });
+  }
+
+  void _openPendingFocusIfReady() {
+    final request = _pendingFocus;
+    if (!mounted || request == null) return;
+    final now = DateTime.now();
+    if (request.isExpired(now)) {
+      _dropPendingFocus();
+      return;
+    }
+    final state = ref.read(historyViewModelProvider).value;
+    if (state == null || state.isLoading) return;
+
+    final id = locateHistoryItem(state, request);
+    if (id != null) {
+      _dropPendingFocus();
+      setState(() {
+        _focusedId = id;
+        _focusToken++;
+      });
+      // Taken in by the frame on this build; a list rebuilt later must not
+      // focus it again.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _focusedId = null);
+      });
+      return;
+    }
+
+    // The first list can come from the cache, before the server's.
+    if (!_pendingFocusGraceOver) {
+      _pendingFocusGrace ??= Timer(notificationFocusGrace, () {
+        _pendingFocusGraceOver = true;
+        _openPendingFocusIfReady();
+      });
+      return;
+    }
+    _dropPendingFocus();
+  }
+
+  void _dropPendingFocus() {
+    _pendingFocus = null;
+    _pendingFocusGrace?.cancel();
+    _pendingFocusGrace = null;
+    _pendingFocusGraceOver = false;
+  }
+
+  /// The [NotificationFocusFrame] token of the card for [id].
+  int? _focusTokenFor(String id) => _focusedId == id ? _focusToken : null;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final historyStateAsync = ref.watch(historyViewModelProvider);
     final myProfileAsync = ref.watch(myProfileProvider);
@@ -40,7 +138,18 @@ class HistoryScreen extends ConsumerWidget {
       }
     });
 
+    // An opened notification (routed here by the home screen or the Now
+    // tab).
+    ref.listen(historyFocusRequestProvider, (previous, next) {
+      if (next != null) _queueFocus(next);
+    });
+
     ref.listen(historyViewModelProvider, (previous, next) {
+      if (_pendingFocus != null && next.hasValue) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openPendingFocusIfReady();
+        });
+      }
       if (next.hasError && !next.isLoading) {
         if (previous?.hasError != true) {
           final error = next.error;
@@ -168,14 +277,25 @@ class HistoryScreen extends ConsumerWidget {
                       // 2. 종료된 약속 섹션
                       if (state.finishedPlanSummaries.isNotEmpty) ...[
                         _buildSectionHeader(context, l10n.historySectionFinished),
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            final summary = state.finishedPlanSummaries[index];
-                            return PlanSummaryCard(summary: summary);
-                          }, childCount: state.finishedPlanSummaries.length),
+                        // Built up front (a short list), so a notification
+                        // about an ended promise can scroll to its summary.
+                        SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (final summary
+                                  in state.finishedPlanSummaries)
+                                NotificationFocusFrame(
+                                  focusToken: _focusTokenFor(
+                                    historySummaryKey(summary.planId),
+                                  ),
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(24),
+                                  ),
+                                  child: PlanSummaryCard(summary: summary),
+                                ),
+                            ],
+                          ),
                         ),
                       ],
 
@@ -274,11 +394,15 @@ class HistoryScreen extends ConsumerWidget {
 
         widgets.add(
           SliverToBoxAdapter(
-            child: HistoryCard(
-              item: item,
-              isMe: isMe,
-              showTitle: showTitle,
-              onReconcile: () => _showReconcileSheet(context, ref, item),
+            child: NotificationFocusFrame(
+              focusToken: _focusTokenFor(item.id),
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
+              child: HistoryCard(
+                item: item,
+                isMe: isMe,
+                showTitle: showTitle,
+                onReconcile: () => _showReconcileSheet(context, ref, item),
+              ),
             ),
           ),
         );

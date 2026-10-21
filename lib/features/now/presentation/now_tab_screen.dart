@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/app_underlined_text.dart';
+import '../../../widgets/notification_focus_frame.dart';
 import '../../../widgets/quiet_header.dart';
 import '../../../widgets/reaction_icon.dart';
 import '../../../widgets/time_chip.dart';
@@ -81,10 +82,21 @@ class _NowTabState extends ConsumerState<NowTab>
   bool _isHandlingNotificationSkip = false;
   final Set<String> _autoAcknowledgedPokes = {};
 
-  /// A reminder / knock that was opened: focus its promise with the check-in
-  /// choices once the cards are in.
-  NowCheckInRequest? _pendingCheckIn;
+  /// An opened notification: bring its promise's card into view (with the
+  /// check-in choices for a reminder / knock) once the cards are in.
+  NotificationFocusRequest? _pendingFocus;
   bool _isHandlingCheckIn = false;
+
+  /// Runs once the cards were in without [_pendingFocus]'s promise; when it
+  /// is over, the promise is looked for elsewhere (see
+  /// [notificationFocusGrace]).
+  Timer? _pendingFocusGrace;
+  bool _pendingFocusGraceOver = false;
+
+  /// The card an opened notification is about, and a new token per focus
+  /// (see [NotificationFocusFrame]).
+  NowCardSpot? _focusedSpot;
+  int _focusToken = 0;
 
   /// A record is being saved (photo upload, server ack): the faded cards
   /// take no taps and a spinner shows instead.
@@ -161,8 +173,8 @@ class _NowTabState extends ConsumerState<NowTab>
         _queueNotificationSkip(pendingSkipRequest);
       }
 
-      final pendingCheckIn = ref.read(nowCheckInRequestProvider);
-      if (pendingCheckIn != null) _queueCheckIn(pendingCheckIn);
+      final pendingFocus = ref.read(nowFocusRequestProvider);
+      if (pendingFocus != null) _queueFocus(pendingFocus);
     });
   }
 
@@ -170,6 +182,7 @@ class _NowTabState extends ConsumerState<NowTab>
   void dispose() {
     _notificationInputSubscription?.cancel();
     _notificationSkipSubscription?.cancel();
+    _pendingFocusGrace?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -589,49 +602,126 @@ class _NowTabState extends ConsumerState<NowTab>
     return _skipCard(targetCard);
   }
 
-  void _queueCheckIn(NowCheckInRequest request) {
+  void _queueFocus(NotificationFocusRequest request) {
     if (!mounted) return;
-    _pendingCheckIn = request;
+    _dropPendingFocus();
+    _pendingFocus = request;
     // Consumed here; cleared outside the listener that delivered it.
     Future.microtask(() {
-      if (mounted) ref.read(nowCheckInRequestProvider.notifier).clear();
+      if (mounted) ref.read(nowFocusRequestProvider.notifier).clear();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _openPendingCheckInIfReady();
+      _openPendingFocusIfReady();
     });
   }
 
-  /// An opened reminder / knock: brings its promise's card up and offers the
-  /// same choices as the hero (📸 인증샷 찍기 first) — the tap used to open a
-  /// note-only dialog that recorded without a photo.
-  void _openPendingCheckInIfReady() {
+  /// An opened notification: brings its promise's card into view. A
+  /// reminder / knock also offers the same choices as the hero (📸 인증샷
+  /// 찍기 first) — the tap used to open a note-only dialog that recorded
+  /// without a photo. A promise that isn't on today's cards is looked for on
+  /// the 기록 tab.
+  void _openPendingFocusIfReady() {
     if (!mounted ||
         _isHandlingCheckIn ||
         _isHandlingNotificationInput ||
         _isHandlingNotificationSkip) {
       return;
     }
-    final request = _pendingCheckIn;
+    final request = _pendingFocus;
     if (request == null) return;
-    // A card that never shows up (already recorded, another day) is not
-    // waited for: no sheet popping up minutes later.
-    if (DateTime.now().difference(request.at) > const Duration(seconds: 30)) {
-      _pendingCheckIn = null;
+    final now = DateTime.now();
+    // A card that never shows up is not waited for: no jump or sheet popping
+    // up minutes later.
+    if (request.isExpired(now)) {
+      _dropPendingFocus();
       return;
     }
     final nowState = ref.read(nowTabViewModelProvider).value;
     if (nowState == null) return;
-    final card = _findCheckInCard(nowState, planId: request.planId);
-    if (card == null) return; // maybe after the next update
+    final planId = request.planId;
 
-    _pendingCheckIn = null;
-    final carousel = nowState.primaryCarouselCards;
-    final index = carousel.indexWhere((c) => c.plan?.id == card.plan?.id);
-    if (index >= 0) _goToCarouselIndex(index, carousel.length);
-    _isHandlingCheckIn = true;
-    unawaited(
-      _showCheckInSheet(card).whenComplete(() => _isHandlingCheckIn = false),
-    );
+    if (request.checkIn) {
+      final card = _findCheckInCard(nowState, planId: planId);
+      if (card != null) {
+        _dropPendingFocus();
+        final spot = locateNowCard(nowState, card.plan!.id!);
+        if (spot != null) _focusSpot(nowState, spot);
+        _isHandlingCheckIn = true;
+        unawaited(
+          _showCheckInSheet(
+            card,
+          ).whenComplete(() => _isHandlingCheckIn = false),
+        );
+        return;
+      }
+    }
+
+    // Already recorded (no check-in to offer) or not a check-in: just show
+    // the card.
+    final spot = planId == null ? null : locateNowCard(nowState, planId);
+    if (spot != null) {
+      _dropPendingFocus();
+      _focusSpot(nowState, spot);
+      return;
+    }
+
+    // Not on the cards (yet): the first snapshot can come from the cache, so
+    // give the server's a moment before looking elsewhere.
+    if (!_pendingFocusGraceOver) {
+      _pendingFocusGrace ??= Timer(notificationFocusGrace, () {
+        _pendingFocusGraceOver = true;
+        _openPendingFocusIfReady();
+      });
+      return;
+    }
+    _dropPendingFocus();
+    if (planId != null) {
+      // Not today's (an earlier day's record, an ended promise): on 기록.
+      ref
+          .read(historyFocusRequestProvider.notifier)
+          .request(planId, actionId: request.actionId, day: request.day);
+    }
+  }
+
+  void _dropPendingFocus() {
+    _pendingFocus = null;
+    _pendingFocusGrace?.cancel();
+    _pendingFocusGrace = null;
+    _pendingFocusGraceOver = false;
+  }
+
+  /// Brings the card at [spot] up: the carousel turns to it, and the card
+  /// scrolls into view with a short outline.
+  void _focusSpot(NowTabState state, NowCardSpot spot) {
+    if (spot.area == NowCardArea.carousel) {
+      final carousel = state.primaryCarouselCards;
+      // Known now, so the next snapshot of the same cards doesn't turn the
+      // carousel back to the first one.
+      _carouselSignature = _carouselSignatureFor(carousel);
+      _goToCarouselIndex(spot.index, carousel.length);
+    }
+    setState(() {
+      _focusedSpot = spot;
+      _focusToken++;
+    });
+    // Taken in by the frame on this build; a card that moves into that slot
+    // later must not be focused.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _focusedSpot = null);
+    });
+  }
+
+  /// The [NotificationFocusFrame] token of the card at [area] / [index].
+  int? _focusTokenFor(NowCardArea area, [int index = 0]) {
+    final spot = _focusedSpot;
+    if (spot == null) return null;
+    final matches = switch (area) {
+      // One slot shows the carousel's active card (or the lone primary).
+      NowCardArea.carousel || NowCardArea.primary =>
+        spot.area == NowCardArea.carousel || spot.area == NowCardArea.primary,
+      _ => spot.area == area && spot.index == index,
+    };
+    return matches ? _focusToken : null;
   }
 
   HomeCardModel? _findCheckInCard(NowTabState state, {String? planId}) {
@@ -1775,18 +1865,18 @@ class _NowTabState extends ConsumerState<NowTab>
     // Provider 구독
     final homeStateAsync = ref.watch(nowTabViewModelProvider);
 
-    // An opened reminder / knock (routed here by the home screen).
-    ref.listen(nowCheckInRequestProvider, (previous, next) {
-      if (next != null) _queueCheckIn(next);
+    // An opened notification (routed here by the home screen).
+    ref.listen(nowFocusRequestProvider, (previous, next) {
+      if (next != null) _queueFocus(next);
     });
 
     // 데이터 변경 감지하여 애니메이션 트리거
     ref.listen(nowTabViewModelProvider, (previous, next) {
       if (!next.hasValue) return;
 
-      if (_pendingCheckIn != null) {
+      if (_pendingFocus != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _openPendingCheckInIfReady();
+          _openPendingFocusIfReady();
         });
       }
 
@@ -1802,6 +1892,9 @@ class _NowTabState extends ConsumerState<NowTab>
       }
 
       if (previous?.value == null) {
+        _carouselSignature = _carouselSignatureFor(
+          next.value!.primaryCarouselCards,
+        );
         _onDataLoaded();
         return;
       }
@@ -1893,15 +1986,25 @@ class _NowTabState extends ConsumerState<NowTab>
         _onDataLoaded();
       }
 
-      // Primary 캐러셀 구성이 바뀌면 active index 를 첫번째로 리셋한다.
-      final nextSignature = _carouselSignatureFor(
-        nextUiState.primaryCarouselCards,
-      );
+      // Primary 캐러셀 구성이 바뀌면 보던 카드(약속)에 머물고, 그 카드가
+      // 빠졌으면 첫번째로 리셋한다. (알림으로 맞춰 둔 카드가 다음 스냅샷에
+      // 첫 카드로 되돌아가지 않게.)
+      final nextCarousel = nextUiState.primaryCarouselCards;
+      final nextSignature = _carouselSignatureFor(nextCarousel);
       if (nextSignature != _carouselSignature) {
+        final prevCarousel = prevUiState.primaryCarouselCards;
+        String? activePlanId;
+        if (prevCarousel.isNotEmpty) {
+          final active = _primaryActiveIndex.clamp(0, prevCarousel.length - 1);
+          activePlanId = prevCarousel[active].plan?.id;
+        }
+        final kept = activePlanId == null
+            ? -1
+            : nextCarousel.indexWhere((c) => c.plan?.id == activePlanId);
         if (mounted) {
           setState(() {
             _carouselSignature = nextSignature;
-            _primaryActiveIndex = 0;
+            _primaryActiveIndex = kept >= 0 ? kept : 0;
           });
         }
       }
@@ -1987,73 +2090,78 @@ class _NowTabState extends ConsumerState<NowTab>
                                   alignment: Alignment.centerRight,
                                   child: FractionallySizedBox(
                                     widthFactor: 0.9,
-                                    child: _PrimaryExecutorCard(
-                                      // 키를 부여해 스와이프 시 위젯 상태가 새 카드로 재구성되게 한다.
-                                      key: ValueKey(
-                                        '${primaryExecutorCard.state.name}:${primaryExecutorCard.plan?.id ?? ""}',
+                                    child: NotificationFocusFrame(
+                                      focusToken: _focusTokenFor(
+                                        NowCardArea.carousel,
                                       ),
-                                      model: primaryExecutorCard,
-                                      onPokeReply: _pokeReplyFor(
-                                        primaryExecutorCard,
+                                      child: _PrimaryExecutorCard(
+                                        // 키를 부여해 스와이프 시 위젯 상태가 새 카드로 재구성되게 한다.
+                                        key: ValueKey(
+                                          '${primaryExecutorCard.state.name}:${primaryExecutorCard.plan?.id ?? ""}',
+                                        ),
+                                        model: primaryExecutorCard,
+                                        onPokeReply: _pokeReplyFor(
+                                          primaryExecutorCard,
+                                        ),
+                                        onDidIt: _handleDidIt,
+                                        onProofPhoto: _handleProofPhoto,
+                                        onFocusTimer: _kFocusTimerEnabled
+                                            ? _handleFocusTimer
+                                            : null,
+                                        onSkip: _handleSkip,
+                                        onRest: _handleRest,
+                                        onCreatePlan: _handleCreatePlan,
+                                        onModify: () => _handleModify(
+                                          primaryExecutorCard,
+                                        ), // Added
+                                        onAcceptPromise: () =>
+                                            _handleRespondPromise(
+                                              primaryExecutorCard,
+                                              true,
+                                            ),
+                                        onRejectPromise: () =>
+                                            _handleRespondPromise(
+                                              primaryExecutorCard,
+                                              false,
+                                            ),
+                                        onContinueAfterSettlement: () =>
+                                            _handleContinueAfterSettlement(
+                                              primaryExecutorCard,
+                                            ),
+                                        onExitAfterSettlement: () =>
+                                            _handleExitAfterSettlement(
+                                              primaryExecutorCard,
+                                            ),
+                                        onAcknowledgePromiseSettled: () =>
+                                            _handleAcknowledgePromiseSettled(
+                                              primaryExecutorCard,
+                                            ),
+                                        onDismissOptions: () =>
+                                            _showActionDeferSheet(
+                                              primaryExecutorCard,
+                                            ),
+                                        onTap: () =>
+                                            _handleCardTap(primaryExecutorCard),
+                                        onHorizontalSwipe:
+                                            carouselCards.length > 1
+                                            ? (details) => _handleCarouselSwipe(
+                                                details,
+                                                carouselCards.length,
+                                              )
+                                            : null,
+                                        timeChipText: _getTimeChipText(
+                                          primaryExecutorCard,
+                                        ),
+                                        timeChipType: _getTimeChipType(
+                                          primaryExecutorCard,
+                                        ),
+                                        exactTimeText: _getExactTimeText(
+                                          primaryExecutorCard,
+                                        ),
                                       ),
-                                      onDidIt: _handleDidIt,
-                                      onProofPhoto: _handleProofPhoto,
-                                      onFocusTimer: _kFocusTimerEnabled
-                                          ? _handleFocusTimer
-                                          : null,
-                                      onSkip: _handleSkip,
-                                      onRest: _handleRest,
-                                      onCreatePlan: _handleCreatePlan,
-                                      onModify: () => _handleModify(
-                                        primaryExecutorCard,
-                                      ), // Added
-                                      onAcceptPromise: () =>
-                                          _handleRespondPromise(
-                                            primaryExecutorCard,
-                                            true,
-                                          ),
-                                      onRejectPromise: () =>
-                                          _handleRespondPromise(
-                                            primaryExecutorCard,
-                                            false,
-                                          ),
-                                      onContinueAfterSettlement: () =>
-                                          _handleContinueAfterSettlement(
-                                            primaryExecutorCard,
-                                          ),
-                                      onExitAfterSettlement: () =>
-                                          _handleExitAfterSettlement(
-                                            primaryExecutorCard,
-                                          ),
-                                      onAcknowledgePromiseSettled: () =>
-                                          _handleAcknowledgePromiseSettled(
-                                            primaryExecutorCard,
-                                          ),
-                                      onDismissOptions: () =>
-                                          _showActionDeferSheet(
-                                            primaryExecutorCard,
-                                          ),
-                                      onTap: () =>
-                                          _handleCardTap(primaryExecutorCard),
-                                      onHorizontalSwipe:
-                                          carouselCards.length > 1
-                                          ? (details) => _handleCarouselSwipe(
-                                              details,
-                                              carouselCards.length,
-                                            )
-                                          : null,
-                                      timeChipText: _getTimeChipText(
-                                        primaryExecutorCard,
-                                      ),
-                                      timeChipType: _getTimeChipType(
-                                        primaryExecutorCard,
-                                      ),
-                                      exactTimeText: _getExactTimeText(
-                                        primaryExecutorCard,
-                                      ),
+                                      // Glassmorphism wrapper
+                                    ).wrapWithGlass(),
                                     ),
-                                    // Glassmorphism wrapper
-                                  ).wrapWithGlass(),
                                 ),
                               ),
                             ),
@@ -2094,8 +2202,9 @@ class _NowTabState extends ConsumerState<NowTab>
                         ],
                         // Secondary Executor Cards (My Contexts)
                         if (secondaryExecutorCards.isNotEmpty) ...[
-                          ...secondaryExecutorCards.map(
-                            (state) => Padding(
+                          for (final (index, state)
+                              in secondaryExecutorCards.indexed)
+                            Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: FadeTransition(
                                 opacity: _secondaryFadeAnimation,
@@ -2103,23 +2212,31 @@ class _NowTabState extends ConsumerState<NowTab>
                                   alignment: Alignment.centerRight,
                                   child: FractionallySizedBox(
                                     widthFactor: 0.85,
-                                    child: _SecondaryExecutorCard(
-                                      model: state,
-                                      timeChipText: _getTimeChipText(state),
-                                      timeChipType: _getTimeChipType(state),
-                                      exactTimeText: _getExactTimeText(state),
+                                    child: NotificationFocusFrame(
+                                      focusToken: _focusTokenFor(
+                                        NowCardArea.secondary,
+                                        index,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(16),
+                                      ),
+                                      child: _SecondaryExecutorCard(
+                                        model: state,
+                                        timeChipText: _getTimeChipText(state),
+                                        timeChipType: _getTimeChipType(state),
+                                        exactTimeText: _getExactTimeText(state),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
                           const SizedBox(height: 24),
                         ],
                         // Manager Area (Partner's Requests)
                         if (managerCards.isNotEmpty) ...[
-                          ...managerCards.map((card) {
-                            return Padding(
+                          for (final (index, card) in managerCards.indexed)
+                            Padding(
                               padding: const EdgeInsets.only(bottom: 16),
                               child: FadeTransition(
                                 opacity: _managerFadeAnimation,
@@ -2127,51 +2244,56 @@ class _NowTabState extends ConsumerState<NowTab>
                                   alignment: Alignment.centerLeft,
                                   child: FractionallySizedBox(
                                     widthFactor: 0.88,
-                                    child: _ManagerQuickCard(
-                                      model: card,
-                                      partnerName: card.partnerName,
-                                      onApprove: () => _handleApprove(card),
-                                      onReject: () => _handleReject(card),
-                                      onReact: (emoji) =>
-                                          _handleReact(card, emoji),
-                                      onAddNote: () =>
-                                          _handleReactWithNote(card),
-                                      onPokeUser: () => _handlePokeUser(card),
-                                      onPokePartner: () =>
-                                          _handlePokePartner(card),
-                                      onSendCheer: () => _handleSendCheer(card),
-                                      cheerSent:
-                                          card.plan?.id != null &&
-                                          _cheeredPlans.contains(
-                                            _todayKeyFor(card.plan!.id!),
-                                          ),
-                                      knockSent:
-                                          knockedToday(
-                                            card.plan,
-                                            now: DateTime.now(),
-                                          ) ||
-                                          (card.plan?.id != null &&
-                                              _knockedPlans.contains(
-                                                _todayKeyFor(card.plan!.id!),
-                                              )),
-                                      onRescue: _kRescueButtonEnabled
-                                          ? () => _handleRescue(card)
-                                          : null,
-                                      onProposePromise: () =>
-                                          _handleProposePromise(card),
-                                      onAcknowledgePromiseSettled: () =>
-                                          _handleAcknowledgePromiseSettled(
-                                            card,
-                                          ),
-                                      timeChipText: _getTimeChipText(card),
-                                      timeChipType: _getTimeChipType(card),
-                                      exactTimeText: _getExactTimeText(card),
-                                    ).wrapWithGlass(),
+                                    child: NotificationFocusFrame(
+                                      focusToken: _focusTokenFor(
+                                        NowCardArea.manager,
+                                        index,
+                                      ),
+                                      child: _ManagerQuickCard(
+                                        model: card,
+                                        partnerName: card.partnerName,
+                                        onApprove: () => _handleApprove(card),
+                                        onReject: () => _handleReject(card),
+                                        onReact: (emoji) =>
+                                            _handleReact(card, emoji),
+                                        onAddNote: () =>
+                                            _handleReactWithNote(card),
+                                        onPokeUser: () => _handlePokeUser(card),
+                                        onPokePartner: () =>
+                                            _handlePokePartner(card),
+                                        onSendCheer: () => _handleSendCheer(card),
+                                        cheerSent:
+                                            card.plan?.id != null &&
+                                            _cheeredPlans.contains(
+                                              _todayKeyFor(card.plan!.id!),
+                                            ),
+                                        knockSent:
+                                            knockedToday(
+                                              card.plan,
+                                              now: DateTime.now(),
+                                            ) ||
+                                            (card.plan?.id != null &&
+                                                _knockedPlans.contains(
+                                                  _todayKeyFor(card.plan!.id!),
+                                                )),
+                                        onRescue: _kRescueButtonEnabled
+                                            ? () => _handleRescue(card)
+                                            : null,
+                                        onProposePromise: () =>
+                                            _handleProposePromise(card),
+                                        onAcknowledgePromiseSettled: () =>
+                                            _handleAcknowledgePromiseSettled(
+                                              card,
+                                            ),
+                                        timeChipText: _getTimeChipText(card),
+                                        timeChipType: _getTimeChipType(card),
+                                        exactTimeText: _getExactTimeText(card),
+                                      ).wrapWithGlass(),
+                                    ),
                                   ),
                                 ),
                               ),
-                            );
-                          }),
+                            ),
                         ],
                         const SizedBox(height: 24),
                       ],

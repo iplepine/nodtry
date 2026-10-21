@@ -1,7 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../models/history_item.dart';
+import '../../../models/home_state.dart';
 import '../../../services/notification_service.dart'
     show NotificationOpenRequest;
+import '../../history/presentation/history_state.dart';
+import '../presentation/now_tab_state.dart';
 
 /// Where an opened notification takes the user.
 enum NotificationOpenTarget {
@@ -54,31 +59,177 @@ NotificationOpenTarget notificationOpenTargetFor(String type) {
   }
 }
 
-/// A request to focus a promise on the Now tab with its check-in choices.
-class NowCheckInRequest {
-  const NowCheckInRequest({required this.planId, required this.at});
-
-  /// The promise; null focuses the first card that asks for a check-in.
-  final String? planId;
-
-  /// When it was asked: a request that waits too long (the card never
-  /// showed up) is dropped instead of popping up later.
-  final DateTime at;
+/// Where [request] lands: [notificationOpenTargetFor] its type, except that
+/// a record of an earlier day (`actionDate`) is on the 기록 tab — today's
+/// cards only show today.
+NotificationOpenTarget notificationOpenTargetForRequest(
+  NotificationOpenRequest request, {
+  DateTime? now,
+}) {
+  final target = notificationOpenTargetFor(request.type);
+  final day = request.actionDate;
+  if (target == NotificationOpenTarget.now &&
+      day != null &&
+      !_isSameDay(day, now ?? DateTime.now())) {
+    return NotificationOpenTarget.history;
+  }
+  return target;
 }
 
-/// Set by the home screen when a reminder or a knock is opened; the Now tab
-/// handles it once its cards are loaded and clears it.
-class NowCheckInRequestNotifier extends Notifier<NowCheckInRequest?> {
-  @override
-  NowCheckInRequest? build() => null;
+/// How long an opened notification waits for its promise to show up. A
+/// request that waits longer (the card never came) is dropped instead of
+/// jumping or popping up minutes later.
+const Duration notificationFocusTimeout = Duration(seconds: 30);
 
-  void request(String? planId) =>
-      state = NowCheckInRequest(planId: planId, at: DateTime.now());
+/// How long a tab waits, once it has data, for a promise that isn't there:
+/// the first snapshot can come from the cache, before the server's.
+const Duration notificationFocusGrace = Duration(seconds: 3);
+
+/// A request to bring the promise an opened notification is about into view
+/// (and, for a reminder or a knock, offer its check-in choices).
+@immutable
+class NotificationFocusRequest {
+  const NotificationFocusRequest({
+    required this.planId,
+    required this.at,
+    this.actionId,
+    this.day,
+    this.checkIn = false,
+  });
+
+  /// The promise; null (check-in only) focuses the first card that asks
+  /// for a check-in.
+  final String? planId;
+
+  /// The record (`actions/{id}`), when the notification is about one.
+  final String? actionId;
+
+  /// The day of that record, when known.
+  final DateTime? day;
+
+  /// Offer the check-in choices (📸 인증샷 찍기 / 사진 없이 했어 / 오늘은 쉴게).
+  final bool checkIn;
+
+  /// When it was asked (see [notificationFocusTimeout]).
+  final DateTime at;
+
+  bool isExpired(DateTime now) => now.difference(at) > notificationFocusTimeout;
+}
+
+/// Set by the home screen when a notification is opened; the tab handles it
+/// once its data is in and clears it.
+class NotificationFocusNotifier extends Notifier<NotificationFocusRequest?> {
+  @override
+  NotificationFocusRequest? build() => null;
+
+  void request(
+    String? planId, {
+    String? actionId,
+    DateTime? day,
+    bool checkIn = false,
+  }) => state = NotificationFocusRequest(
+    planId: planId,
+    actionId: actionId,
+    day: day,
+    checkIn: checkIn,
+    at: DateTime.now(),
+  );
 
   void clear() => state = null;
 }
 
-final nowCheckInRequestProvider =
-    NotifierProvider<NowCheckInRequestNotifier, NowCheckInRequest?>(
-      NowCheckInRequestNotifier.new,
+/// A promise to focus on the Now tab.
+final nowFocusRequestProvider =
+    NotifierProvider<NotificationFocusNotifier, NotificationFocusRequest?>(
+      NotificationFocusNotifier.new,
     );
+
+/// A promise (or record) to focus on the 기록 tab. The home screen switches to
+/// the tab when one is set — also by the Now tab, for a promise that isn't on
+/// today's cards.
+final historyFocusRequestProvider =
+    NotifierProvider<NotificationFocusNotifier, NotificationFocusRequest?>(
+      NotificationFocusNotifier.new,
+    );
+
+/// Where a card shows on the Now tab.
+enum NowCardArea { carousel, primary, secondary, manager }
+
+typedef NowCardSpot = ({NowCardArea area, int index});
+
+/// Whether [card] is about [planId] (a 오늘 완료 card lists every plan done
+/// today).
+bool nowCardShowsPlan(HomeCardModel card, String planId) =>
+    card.plan?.id == planId ||
+    card.completedPlans.any((plan) => plan.id == planId);
+
+/// The visible card of [planId] on the Now tab, or null when it isn't on
+/// today's cards (some cards are kept off the screen, see
+/// [HomeCardStatePriority]).
+NowCardSpot? locateNowCard(NowTabState state, String planId) {
+  final carousel = state.primaryCarouselCards;
+  for (var i = 0; i < carousel.length; i++) {
+    if (nowCardShowsPlan(carousel[i], planId)) {
+      return (area: NowCardArea.carousel, index: i);
+    }
+  }
+  final primary = state.primaryCard;
+  if (carousel.isEmpty &&
+      primary != null &&
+      nowCardShowsPlan(primary, planId)) {
+    return (area: NowCardArea.primary, index: 0);
+  }
+  for (var i = 0; i < state.secondaryCards.length; i++) {
+    if (nowCardShowsPlan(state.secondaryCards[i], planId)) {
+      return (area: NowCardArea.secondary, index: i);
+    }
+  }
+  for (var i = 0; i < state.managerCards.length; i++) {
+    if (nowCardShowsPlan(state.managerCards[i], planId)) {
+      return (area: NowCardArea.manager, index: i);
+    }
+  }
+  return null;
+}
+
+/// What to focus on the 기록 tab: a record's id, or [historySummaryKey] of an
+/// ended promise's summary; null when [request] has nothing there.
+///
+/// The record itself when its id is known; else the promise's record of
+/// [NotificationFocusRequest.day]; else its latest record; else, for an
+/// ended promise, its summary.
+String? locateHistoryItem(
+  HistoryState state,
+  NotificationFocusRequest request,
+) {
+  final actionId = request.actionId;
+  if (actionId != null) {
+    for (final item in state.activeItems) {
+      if (item.id == actionId) return item.id;
+    }
+  }
+  final planId = request.planId;
+  if (planId == null) return null;
+  final records = state.activeItems.where((item) => item.planId == planId);
+  final day = request.day;
+  if (day != null) {
+    for (final item in records) {
+      if (_isSameDay(item.date, day)) return item.id;
+    }
+  }
+  HistoryItem? latest;
+  for (final item in records) {
+    if (latest == null || item.date.isAfter(latest.date)) latest = item;
+  }
+  if (latest != null) return latest.id;
+  for (final summary in state.finishedPlanSummaries) {
+    if (summary.planId == planId) return historySummaryKey(planId);
+  }
+  return null;
+}
+
+/// The [locateHistoryItem] id of an ended promise's summary card.
+String historySummaryKey(String planId) => 'summary:$planId';
+
+bool _isSameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;

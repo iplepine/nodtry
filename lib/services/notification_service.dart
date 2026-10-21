@@ -123,6 +123,7 @@ class NotificationOpenRequest {
     this.planId,
     this.actionId,
     this.reason,
+    this.actionDate,
   });
 
   /// `type` of a local plan reminder (and of a snoozed / deferred one).
@@ -138,7 +139,13 @@ class NotificationOpenRequest {
   /// invalid_code).
   final String? reason;
 
-  /// The request for a push's `data`, or null without a type.
+  /// The day of the record the push is about (`data.actionDate`, epoch
+  /// millis): a record of an earlier day is on the 기록 tab, not on today's
+  /// cards. Null from servers that don't send it.
+  final DateTime? actionDate;
+
+  /// The request for a push's `data` (or a shown push's payload), or null
+  /// without a type.
   static NotificationOpenRequest? fromData(Map<String, dynamic> data) {
     String? str(Object? v) => v is String && v.isNotEmpty ? v : null;
     final type = str(data['type']);
@@ -148,7 +155,16 @@ class NotificationOpenRequest {
       planId: str(data['planId']),
       actionId: str(data['actionId']),
       reason: str(data['reason']),
+      actionDate: _dateFromMillis(data['actionDate']),
     );
+  }
+
+  static DateTime? _dateFromMillis(Object? value) {
+    final millis = value is num
+        ? value.toInt()
+        : int.tryParse('${value ?? ''}');
+    if (millis == null || millis <= 0) return null;
+    return DateTime.fromMillisecondsSinceEpoch(millis);
   }
 
   @override
@@ -685,6 +701,7 @@ class NotificationService implements PlanReminderScheduler {
         type: message.data['type']?.toString(),
         actionId: message.data['actionId']?.toString(),
         reason: message.data['reason']?.toString(),
+        actionDate: message.data['actionDate']?.toString(),
       ),
     );
   }
@@ -769,16 +786,9 @@ class NotificationService implements PlanReminderScheduler {
     // by its type; a plan reminder focuses that promise on the Now tab with
     // the check-in choices (📸 인증샷 찍기 first) instead of a note dialog.
     if (response.actionId == null) {
-      final pushType = payload['type'];
-      if (pushType is String && pushType.isNotEmpty) {
-        _emitOpenRequest(
-          NotificationOpenRequest(
-            type: pushType,
-            planId: payload['planId'] as String?,
-            actionId: payload['actionId'] as String?,
-            reason: payload['reason'] as String?,
-          ),
-        );
+      final pushRequest = NotificationOpenRequest.fromData(payload);
+      if (pushRequest != null) {
+        _emitOpenRequest(pushRequest);
         return;
       }
       if (_payloadOpensInputOnNotificationTap(payload)) {
@@ -915,6 +925,7 @@ class NotificationService implements PlanReminderScheduler {
     String? type,
     String? actionId,
     String? reason,
+    String? actionDate,
   }) {
     return jsonEncode(<String, Object?>{
       'originalId': originalId,
@@ -925,6 +936,7 @@ class NotificationService implements PlanReminderScheduler {
       if (type != null && type.isNotEmpty) 'type': type,
       if (actionId != null && actionId.isNotEmpty) 'actionId': actionId,
       if (reason != null && reason.isNotEmpty) 'reason': reason,
+      if (actionDate != null && actionDate.isNotEmpty) 'actionDate': actionDate,
     });
   }
 

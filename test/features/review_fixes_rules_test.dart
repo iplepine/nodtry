@@ -3,15 +3,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nod_try/core/services/app_version_gate.dart';
 import 'package:nod_try/features/connect/domain/invite_code.dart';
 import 'package:nod_try/features/connect/domain/partner_label.dart';
+import 'package:nod_try/features/history/presentation/history_state.dart';
 import 'package:nod_try/features/now/application/notification_routing.dart';
 import 'package:nod_try/features/now/presentation/cards/check_in_question.dart';
 import 'package:nod_try/features/now/presentation/cards/now_card_rules.dart';
+import 'package:nod_try/features/now/presentation/now_tab_state.dart';
 import 'package:nod_try/features/now/presentation/promise/active_promise_chip.dart';
 import 'package:nod_try/features/plan/application/reminder_copy_refresh.dart';
 import 'package:nod_try/features/plan/domain/workout_template.dart';
 import 'package:nod_try/features/plan/presentation/widgets/plan_schedule_pickers.dart';
 import 'package:nod_try/l10n/app_localizations.dart';
+import 'package:nod_try/models/history_item.dart';
+import 'package:nod_try/models/home_state.dart';
 import 'package:nod_try/models/plan_model.dart';
+import 'package:nod_try/models/plan_summary.dart';
 import 'package:nod_try/models/promise_model.dart';
 import 'package:nod_try/services/notification_service.dart';
 import 'package:nod_try/utils/ui_error_codes.dart';
@@ -107,6 +112,140 @@ void main() {
       expect(request.reason, 'owner_taken');
       expect(request.planId, isNull);
       expect(NotificationOpenRequest.fromData({'title': 'x'}), isNull);
+    });
+
+    test('an earlier day\'s record opens 기록, today\'s its card', () {
+      final now = DateTime(2026, 10, 21, 9);
+      NotificationOpenRequest completed(DateTime? day) =>
+          NotificationOpenRequest.fromData({
+            'type': 'action_completed',
+            'planId': 'p1',
+            'actionId': 'a1',
+            if (day != null) 'actionDate': '${day.millisecondsSinceEpoch}',
+          })!;
+
+      final yesterday = completed(DateTime(2026, 10, 20, 23, 30));
+      expect(yesterday.actionDate, DateTime(2026, 10, 20, 23, 30));
+      expect(
+        notificationOpenTargetForRequest(yesterday, now: now),
+        NotificationOpenTarget.history,
+      );
+      expect(
+        notificationOpenTargetForRequest(
+          completed(DateTime(2026, 10, 21, 7)),
+          now: now,
+        ),
+        NotificationOpenTarget.now,
+      );
+      // Older servers send no date: today's card.
+      expect(
+        notificationOpenTargetForRequest(completed(null), now: now),
+        NotificationOpenTarget.now,
+      );
+      // A reminder stays a check-in whatever the date.
+      expect(
+        notificationOpenTargetForRequest(
+          const NotificationOpenRequest(
+            type: NotificationOpenRequest.reminderType,
+          ),
+          now: now,
+        ),
+        NotificationOpenTarget.nowCheckIn,
+      );
+    });
+
+    test('a promise is found where the Now tab shows it', () {
+      HomeCardModel card(HomeCardState state, String id) => HomeCardModel(
+        state: state,
+        plan: _plan(id: id),
+      );
+      final state = NowTabState(
+        allCards: const [],
+        primaryCard: card(HomeCardState.nowAction, 'mine-1'),
+        primaryCarouselCards: [
+          card(HomeCardState.nowAction, 'mine-1'),
+          card(HomeCardState.nextAction, 'mine-2'),
+        ],
+        secondaryCards: [card(HomeCardState.overdue, 'mine-3')],
+        managerCards: [
+          card(HomeCardState.partnerNoPlan, 'none'),
+          HomeCardModel(
+            state: HomeCardState.partnerTodayComplete,
+            plan: _plan(id: 'partner-1'),
+            completedPlans: [
+              _plan(id: 'partner-1'),
+              _plan(id: 'partner-2'),
+            ],
+          ),
+        ],
+      );
+
+      expect(locateNowCard(state, 'mine-2'), (
+        area: NowCardArea.carousel,
+        index: 1,
+      ));
+      expect(locateNowCard(state, 'mine-3'), (
+        area: NowCardArea.secondary,
+        index: 0,
+      ));
+      // A 오늘 완료 card stands for every plan done today.
+      expect(locateNowCard(state, 'partner-2'), (
+        area: NowCardArea.manager,
+        index: 1,
+      ));
+      expect(locateNowCard(state, 'elsewhere'), isNull);
+    });
+
+    test('기록 focuses the record, else the promise\'s record of the day, '
+        'else its latest, else its summary', () {
+      HistoryItem item(String id, String planId, DateTime date) => HistoryItem(
+        id: id,
+        planId: planId,
+        date: date,
+        title: '러닝',
+        status: HistoryStatus.done,
+        executorId: 'partner',
+      );
+      final state = HistoryState(
+        activeItems: [
+          item('a3', 'p1', DateTime(2026, 10, 21, 8)),
+          item('a2', 'p1', DateTime(2026, 10, 20, 8)),
+          item('b1', 'p2', DateTime(2026, 10, 19, 8)),
+        ],
+        finishedPlanSummaries: [
+          PlanSummary(
+            planId: 'old',
+            title: '스쿼트',
+            startDate: DateTime(2026, 9, 1),
+            endDate: DateTime(2026, 9, 30),
+            myCount: 10,
+          ),
+        ],
+      );
+      NotificationFocusRequest request(
+        String planId, {
+        String? actionId,
+        DateTime? day,
+      }) => NotificationFocusRequest(
+        planId: planId,
+        actionId: actionId,
+        day: day,
+        at: DateTime(2026, 10, 21),
+      );
+
+      expect(locateHistoryItem(state, request('p1', actionId: 'a2')), 'a2');
+      expect(
+        locateHistoryItem(state, request('p1', day: DateTime(2026, 10, 20))),
+        'a2',
+      );
+      expect(locateHistoryItem(state, request('p1')), 'a3');
+      // A record id the list doesn't have yet: the promise's latest.
+      expect(locateHistoryItem(state, request('p2', actionId: 'gone')), 'b1');
+      expect(
+        locateHistoryItem(state, request('old')),
+        historySummaryKey('old'),
+      );
+      expect(locateHistoryItem(state, request('nowhere')), isNull);
     });
 
     test('a failure reason maps to its own explanation', () {

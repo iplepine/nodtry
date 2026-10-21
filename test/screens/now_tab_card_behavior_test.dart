@@ -904,9 +904,9 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        ProviderScope.containerOf(
-          tester.element(find.byType(NowTab)),
-        ).read(nowCheckInRequestProvider.notifier).request('plan-1');
+        ProviderScope.containerOf(tester.element(find.byType(NowTab)))
+            .read(nowFocusRequestProvider.notifier)
+            .request('plan-1', checkIn: true);
         await tester.pumpAndSettle();
 
         expect(
@@ -919,6 +919,67 @@ void main() {
         );
         // Not the old note-only dialog.
         expect(find.byType(TextField), findsNothing);
+      });
+
+      testWidgets('an opened notification turns the carousel to its promise', (
+        tester,
+      ) async {
+        HomeCardModel mine(String id, String title, int hour) => HomeCardModel(
+          state: HomeCardState.nextAction,
+          plan: _plan(
+            id: id,
+            title: title,
+            userId: 'me',
+            managerId: null,
+            time: NotificationTime.custom(hour, 0),
+          ),
+        );
+        await tester.pumpWidget(
+          _wrap([
+            mine('plan-1', '헬스장 가기', 22),
+            mine('plan-2', '저녁 산책', 23),
+          ], locale),
+        );
+        await tester.pumpAndSettle();
+        expect(find.textContaining('헬스장 가기'), findsWidgets);
+        expect(find.textContaining('저녁 산책'), findsNothing);
+
+        ProviderScope.containerOf(
+          tester.element(find.byType(NowTab)),
+        ).read(nowFocusRequestProvider.notifier).request('plan-2');
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('저녁 산책'), findsWidgets);
+        expect(find.textContaining('헬스장 가기'), findsNothing);
+      });
+
+      testWidgets('a promise not on today\'s cards is looked for on 기록', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _wrap([
+            HomeCardModel(
+              state: HomeCardState.nextAction,
+              plan: _plan(userId: 'me', managerId: null),
+            ),
+          ], locale),
+        );
+        await tester.pumpAndSettle();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(NowTab)),
+        );
+        container
+            .read(nowFocusRequestProvider.notifier)
+            .request('ended-plan', actionId: 'a1');
+        await tester.pump();
+        // Not before the server's snapshot had a chance.
+        expect(container.read(historyFocusRequestProvider), isNull);
+
+        await tester.pump(notificationFocusGrace);
+        final handedOver = container.read(historyFocusRequestProvider);
+        expect(handedOver?.planId, 'ended-plan');
+        expect(handedOver?.actionId, 'a1');
       });
 
       testWidgets('a knock on my card names the partner', (tester) async {

@@ -57,10 +57,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   /// Takes an opened notification to its screen (see
-  /// [notificationOpenTargetFor]).
+  /// [notificationOpenTargetForRequest]) and the promise it is about.
   void _routeOpened(local_notifications.NotificationOpenRequest request) {
     if (!mounted) return;
-    final target = notificationOpenTargetFor(request.type);
+    final target = notificationOpenTargetForRequest(request);
     if (target == NotificationOpenTarget.none) return;
 
     final router = GoRouter.maybeOf(context);
@@ -71,10 +71,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return;
     }
 
-    // Back to the tabs from whatever was pushed on top (plan detail …).
-    if (!(ModalRoute.of(context)?.isCurrent ?? true)) {
-      router?.go(AppRoutes.home);
-    }
+    _backToTabs();
     final index = switch (target) {
       NotificationOpenTarget.history => 1,
       NotificationOpenTarget.us => 2,
@@ -84,13 +81,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     switch (target) {
       case NotificationOpenTarget.nowCheckIn:
-        ref.read(nowCheckInRequestProvider.notifier).request(request.planId);
+        ref
+            .read(nowFocusRequestProvider.notifier)
+            .request(request.planId, checkIn: true);
+      case NotificationOpenTarget.now:
+        // The promise's card (a partner's record, a 인정, a proposal …); one
+        // that isn't on today's cards is looked for on 기록.
+        if (request.planId != null) {
+          ref
+              .read(nowFocusRequestProvider.notifier)
+              .request(
+                request.planId,
+                actionId: request.actionId,
+                day: request.actionDate,
+              );
+        }
+      case NotificationOpenTarget.history:
+        ref
+            .read(historyFocusRequestProvider.notifier)
+            .request(
+              request.planId,
+              actionId: request.actionId,
+              day: request.actionDate,
+            );
       case NotificationOpenTarget.us:
         // A new partner: the nickname sheet comes from the home prompts.
         _schedulePrompts();
       default:
         break;
     }
+  }
+
+  /// Closes whatever is on top of the tabs: pushed screens (plan detail …)
+  /// and the sheets / dialogs open on home itself — the promise would
+  /// otherwise be focused under them.
+  void _backToTabs() {
+    final homeRoute = ModalRoute.of(context);
+    if (homeRoute == null || homeRoute.isCurrent) return;
+    Navigator.of(
+      context,
+    ).popUntil((route) => route == homeRoute || route.isFirst);
   }
 
   /// Rename notice / first-login clipboard look / nickname sheet — at most
@@ -138,6 +168,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    // A promise to show on 기록 — from a notification, or handed over by the
+    // Now tab when it isn't on today's cards.
+    ref.listen(historyFocusRequestProvider, (previous, next) {
+      if (next != null && _currentIndex != 1) {
+        setState(() => _currentIndex = 1);
+      }
+    });
 
     // A partner appearing (or the profile loading) can make a prompt due.
     ref.listen(partnerLabelProvider, (previous, next) {
