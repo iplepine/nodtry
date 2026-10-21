@@ -47,6 +47,7 @@ import {
     hasTimedItem,
     lateItemFromYesterday,
 } from "./schedule";
+import {pairsOf, previousSeoulDay} from "./stats";
 import {generateUniqueInviteCode, normalizeInviteCode} from "./inviteCode";
 import {FieldOps, SYSTEM_LINK, actionManagerFor, managerStampFor, millisOf, unlinkUpdate} from "./planLinks";
 
@@ -1758,3 +1759,54 @@ export const redeemInviteCode = functions.https.onCall(async (data, context) => 
     }
     return {partnerId: ownerId, alreadyLinked: result === "already_linked"};
 });
+
+/**
+ * Nightly operations stats for the Asia/Seoul day that just ended, written to
+ * dailyStats/{YYYY-MM-DD} (server-only: no client rule matches it). Counts use
+ * Firestore aggregation; only `activeUsers` reads docs (userId field only).
+ * Re-running a day overwrites it, so a retry is harmless.
+ */
+export const aggregateDailyStats = functions
+    .runWith({timeoutSeconds: 300})
+    .pubsub.schedule("10 0 * * *")
+    .timeZone("Asia/Seoul")
+    .onRun(async () => {
+        const day = previousSeoulDay(new Date());
+        const from = Timestamp.fromDate(day.start);
+        const to = Timestamp.fromDate(day.end);
+        const inDay = (collection: string, field: string) =>
+            db().collection(collection).where(field, ">=", from).where(field, "<", to);
+        const count = async (query: admin.firestore.Query) => (await query.count().get()).data().count;
+
+        const [
+            newUsers, newRelationDocs, doneRecords, cheers,
+            totalUsers, totalRelationDocs, activePlans, doneSnap,
+        ] = await Promise.all([
+            count(inDay("users", "createdAt")),
+            count(inDay("relations", "createdAt")),
+            count(db().collection("actions").where("type", "==", "done")
+                .where("createdAt", ">=", from).where("createdAt", "<", to)),
+            count(inDay("cheers", "createdAt")),
+            count(db().collection("users")),
+            count(db().collection("relations")),
+            count(db().collection("plans").where("state", "==", "active")),
+            db().collection("actions").where("type", "==", "done")
+                .where("createdAt", ">=", from).where("createdAt", "<", to)
+                .select("userId").get(),
+        ]);
+        const activeUsers = new Set(doneSnap.docs.map((d) => d.get("userId"))).size;
+
+        await db().collection("dailyStats").doc(day.key).set({
+            date: day.key,
+            newUsers,
+            newCouples: pairsOf(newRelationDocs),
+            doneRecords,
+            activeUsers,
+            cheers,
+            totalUsers,
+            totalCouples: pairsOf(totalRelationDocs),
+            activePlans,
+            computedAt: FieldValue.serverTimestamp(),
+        });
+        functions.logger.info("dailyStats written", {date: day.key, newUsers, doneRecords, activeUsers});
+    });

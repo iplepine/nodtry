@@ -94,3 +94,16 @@
 1. 릴리스 빌드에 `-FIRDebugEnabled`(iOS) / `adb shell setprop debug.firebase.analytics.app com.devho.nodtry.app`(Android)로 DebugView 연결.
 2. 두 기기로 초대 공유 → 링크/클립보드 감지 → 연결 → 애칭 → 약속 → 인증샷 → 인정 → 둘운완 데이 → 공유 카드 순서로 ★ 8종이 모두 들어오는지 본다.
 3. 파라미터 값이 위 표의 열거값과 같은지 확인한다.
+
+## 8. 서버 일일 집계 (`dailyStats`)
+클라이언트 이벤트로는 알 수 없는 전체 현황용. Cloud Function `aggregateDailyStats`가 매일 00:10(KST)에 **전날(KST)** 값을 Firestore `dailyStats/{YYYY-MM-DD}`에 쓴다(서버 전용, 클라이언트 규칙 없음 — Firebase 콘솔에서 확인). 같은 날을 다시 돌리면 덮어쓴다.
+
+| 필드 | 뜻 |
+|---|---|
+| `newUsers` | 그날 가입 수 (`users.createdAt`) |
+| `newCouples` | 그날 새로 연결된 커플 수 (`relations`는 2문서/쌍이라 반올림 절반) |
+| `doneRecords` | 그날 `했어` 기록 수 (`actions.type=done`) |
+| `activeUsers` | 그날 `했어`를 1건 이상 남긴 고유 사용자 수 |
+| `cheers` | 그날 인정·응원·똑똑 등 `cheers` 문서 수 |
+| `totalUsers`, `totalCouples`, `activePlans` | 집계 시점 누적/현재 값 |
+| `computedAt` | 기록 시각 |
