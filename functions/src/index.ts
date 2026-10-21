@@ -204,6 +204,12 @@ function asId(value: unknown): string | null {
     return typeof value === "string" && value.length > 0 ? value : null;
 }
 
+/** `actionDate` (epoch millis) of an action's day for push data, when known. */
+function actionDateData(action: Data): {actionDate?: string} {
+    const millis = millisOf(action.date ?? action.createdAt);
+    return millis > 0 ? {actionDate: String(millis)} : {};
+}
+
 async function getUser(uid: string | null): Promise<Data | null> {
     if (!uid) return null;
     const snap = await db().collection("users").doc(uid).get();
@@ -1055,6 +1061,8 @@ export const onActionCompleted = functions
                 senderName: who,
                 userId,
                 actionId: context.params.actionId,
+                // The record's day: an earlier day's opens 기록, not today's card.
+                ...actionDateData(action),
                 hasProof: withProof ? "true" : "false",
             });
         } catch (error) {
@@ -1272,6 +1280,9 @@ export const notifyUnverifiedActions = functions
                 const delivered = await sendCopy(managerId, fcmToken, copy, {
                     type: "verify_reminder",
                     planId,
+                    // The record to open on 기록.
+                    actionId: doc.id,
+                    ...actionDateData(action),
                     userId,
                     senderName: who,
                     itemTitle,
