@@ -654,7 +654,10 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 32),
+          // Invitees skip the tutorial, so this is where they learn the loop.
+          _buildHowItWorks(l10n),
+          const SizedBox(height: 24),
           if (_submittedHere) ...[
             Container(
               padding: const EdgeInsets.all(20),
@@ -733,6 +736,62 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                 child: Text(l10n.connectSuccessDone),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHowItWorks(AppLocalizations l10n) {
+    Widget step(IconData icon, String text) => Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.primarySoft,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 18, color: AppColors.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.4,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return Container(
+      key: const ValueKey('connect-success-how'),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.connectHowTitle,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          step(Icons.photo_camera_rounded, l10n.connectHowProof),
+          step(Icons.favorite_rounded, l10n.connectHowAck),
+          step(Icons.local_fire_department_rounded, l10n.connectHowDuo),
         ],
       ),
     );

@@ -2460,6 +2460,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get connectSuccessDone => '좋아요';
 
   @override
+  String get connectHowTitle => '이렇게 해요';
+
+  @override
+  String get connectHowProof => '운동하면 인증샷을 올려요';
+
+  @override
+  String get connectHowAck => '짝꿍 인증샷엔 탭 한 번으로 인정해 줘요';
+
+  @override
+  String get connectHowDuo => '둘 다 운동한 날이 둘운완이에요';
+
+  @override
   String get nicknameSheetTitle => '짝꿍을 뭐라고 부를까요?';
 
   @override

@@ -375,6 +375,10 @@ void main() {
                 as _FakeUsers;
         expect(users.nicknames, ['자기']);
 
+        // They skipped the tutorial, so the loop is explained here.
+        expect(find.text(ko.connectHowTitle), findsOneWidget);
+        expect(find.text(ko.connectHowAck), findsOneWidget);
+
         // The person who entered the code is asked to make their own promise.
         expect(find.text(ko.connectSuccessAskTitle), findsOneWidget);
         expect(find.text(ko.connectSuccessMakePromise), findsOneWidget);

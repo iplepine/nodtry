@@ -4568,6 +4568,30 @@ abstract class AppLocalizations {
   /// **'Great'**
   String get connectSuccessDone;
 
+  /// Heading of the three-step loop explainer on the connect success state (invitees skip the tutorial)
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get connectHowTitle;
+
+  /// Loop step 1 on the connect success state
+  ///
+  /// In en, this message translates to:
+  /// **'Work out, then post a proof photo'**
+  String get connectHowProof;
+
+  /// Loop step 2 on the connect success state: the one-tap acknowledgement (인정)
+  ///
+  /// In en, this message translates to:
+  /// **'One tap on your partner\'s photo gives them props'**
+  String get connectHowAck;
+
+  /// Loop step 3 on the connect success state
+  ///
+  /// In en, this message translates to:
+  /// **'A day you both work out is a DuoDone day'**
+  String get connectHowDuo;
+
   /// Title of the nickname sheet
   ///
   /// In en, this message translates to:

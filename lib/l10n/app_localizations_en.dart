@@ -2590,6 +2590,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connectSuccessDone => 'Great';
 
   @override
+  String get connectHowTitle => 'How it works';
+
+  @override
+  String get connectHowProof => 'Work out, then post a proof photo';
+
+  @override
+  String get connectHowAck =>
+      'One tap on your partner\'s photo gives them props';
+
+  @override
+  String get connectHowDuo => 'A day you both work out is a DuoDone day';
+
+  @override
   String get nicknameSheetTitle => 'What do you call your partner?';
 
   @override

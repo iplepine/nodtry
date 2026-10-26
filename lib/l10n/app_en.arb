@@ -2162,6 +2162,22 @@
   "@connectSuccessDone": {
     "description": "Button on the success state for the person who shared the code"
   },
+  "connectHowTitle": "How it works",
+  "@connectHowTitle": {
+    "description": "Heading of the three-step loop explainer on the connect success state (invitees skip the tutorial)"
+  },
+  "connectHowProof": "Work out, then post a proof photo",
+  "@connectHowProof": {
+    "description": "Loop step 1 on the connect success state"
+  },
+  "connectHowAck": "One tap on your partner's photo gives them props",
+  "@connectHowAck": {
+    "description": "Loop step 2 on the connect success state: the one-tap acknowledgement (인정)"
+  },
+  "connectHowDuo": "A day you both work out is a DuoDone day",
+  "@connectHowDuo": {
+    "description": "Loop step 3 on the connect success state"
+  },
   "nicknameSheetTitle": "What do you call your partner?",
   "@nicknameSheetTitle": {
     "description": "Title of the nickname sheet"
