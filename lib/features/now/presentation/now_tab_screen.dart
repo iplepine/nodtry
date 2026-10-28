@@ -25,6 +25,7 @@ import '../../duo/application/duo_stats_provider.dart';
 import '../../duo/presentation/duo_widgets.dart';
 import '../../../providers/repository_provider.dart';
 import '../application/notification_routing.dart';
+import '../../../services/notification_quick_actions.dart';
 import '../application/poke_reply_store.dart';
 import '../../plan/domain/workout_template.dart';
 import '../../proof/domain/proof_analytics.dart';
@@ -640,7 +641,24 @@ class _NowTabState extends ConsumerState<NowTab>
     if (nowState == null) return;
     final planId = request.planId;
 
-    if (request.checkIn) {
+    // A push's button: run it on the promise's card, like the card's own
+    // button. A card that isn't there (or doesn't fit) is just shown below.
+    final quickAction = request.quickAction;
+    if (quickAction != null && planId != null) {
+      final spot = locateNowCard(nowState, planId);
+      final card = spot == null ? null : nowCardAt(nowState, spot);
+      if (spot != null &&
+          card?.plan?.id == planId &&
+          quickActionFitsArea(quickAction, spot.area) &&
+          _quickActionApplies(card!, quickAction)) {
+        _dropPendingFocus();
+        _focusSpot(nowState, spot);
+        unawaited(_runQuickAction(card, quickAction));
+        return;
+      }
+    }
+
+    if (request.checkIn && quickAction == null) {
       final card = _findCheckInCard(nowState, planId: planId);
       if (card != null) {
         _dropPendingFocus();
@@ -680,6 +698,48 @@ class _NowTabState extends ConsumerState<NowTab>
       ref
           .read(historyFocusRequestProvider.notifier)
           .request(planId, actionId: request.actionId, day: request.day);
+    }
+  }
+
+  /// Whether the card still offers [action]'s button: the push may be
+  /// answered late (already 인정, already replied, no longer missed).
+  bool _quickActionApplies(HomeCardModel card, NotificationQuickAction action) {
+    final plan = card.plan;
+    if (plan?.id == null) return false;
+    final now = DateTime.now();
+    return switch (action) {
+      NotificationQuickAction.props =>
+        card.state == HomeCardState.partnerAction ||
+            card.state == HomeCardState.partnerTodayComplete,
+      NotificationQuickAction.cheer =>
+        leadsWithCheer(card.state, hasMissedNotice: card.hasMissedNotice) &&
+            !_cheeredPlans.contains(_todayKeyFor(plan!.id!)),
+      NotificationQuickAction.pokeComing || NotificationQuickAction.pokePass =>
+        showsPokeReplies(plan, now: now) &&
+            !ref.read(pokeReplyStoreProvider).hasReplied(plan!.id!, now),
+    };
+  }
+
+  Future<void> _runQuickAction(
+    HomeCardModel card,
+    NotificationQuickAction action,
+  ) async {
+    final planId = card.plan!.id!;
+    switch (action) {
+      case NotificationQuickAction.props:
+        await _runGuarded('react:$planId', () async {
+          await _sendReaction(
+            card,
+            kProofReactions.first,
+            surface: 'notification',
+          );
+        });
+      case NotificationQuickAction.pokeComing:
+        await _handlePokeReply(card, PokeReplyKind.coming);
+      case NotificationQuickAction.pokePass:
+        await _handlePokeReply(card, PokeReplyKind.pass);
+      case NotificationQuickAction.cheer:
+        await _handleSendCheer(card);
     }
   }
 

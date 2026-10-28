@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/history_item.dart';
 import '../../../models/home_state.dart';
+import '../../../services/notification_quick_actions.dart';
 import '../../../services/notification_service.dart'
     show NotificationOpenRequest;
 import '../../history/presentation/history_state.dart';
@@ -95,6 +96,7 @@ class NotificationFocusRequest {
     this.actionId,
     this.day,
     this.checkIn = false,
+    this.quickAction,
   });
 
   /// The promise; null (check-in only) focuses the first card that asks
@@ -109,6 +111,10 @@ class NotificationFocusRequest {
 
   /// Offer the check-in choices (📸 인증샷 찍기 / 사진 없이 했어 / 오늘은 쉴게).
   final bool checkIn;
+
+  /// The push's button the user answered with: run on the card instead of
+  /// just showing it (and instead of the check-in choices).
+  final NotificationQuickAction? quickAction;
 
   /// When it was asked (see [notificationFocusTimeout]).
   final DateTime at;
@@ -127,11 +133,13 @@ class NotificationFocusNotifier extends Notifier<NotificationFocusRequest?> {
     String? actionId,
     DateTime? day,
     bool checkIn = false,
+    NotificationQuickAction? quickAction,
   }) => state = NotificationFocusRequest(
     planId: planId,
     actionId: actionId,
     day: day,
     checkIn: checkIn,
+    quickAction: quickAction,
     at: DateTime.now(),
   );
 
@@ -191,6 +199,27 @@ NowCardSpot? locateNowCard(NowTabState state, String planId) {
   }
   return null;
 }
+
+/// The card at [spot] in [state].
+HomeCardModel? nowCardAt(NowTabState state, NowCardSpot spot) {
+  final list = switch (spot.area) {
+    NowCardArea.carousel => state.primaryCarouselCards,
+    NowCardArea.primary => [?state.primaryCard],
+    NowCardArea.secondary => state.secondaryCards,
+    NowCardArea.manager => state.managerCards,
+  };
+  return spot.index < list.length ? list[spot.index] : null;
+}
+
+/// Whether [action] can run on a card in [area]: 인정 and 응원 are answers to
+/// the partner's card; a knock reply is about my own promise.
+bool quickActionFitsArea(NotificationQuickAction action, NowCardArea area) =>
+    switch (action) {
+      NotificationQuickAction.props ||
+      NotificationQuickAction.cheer => area == NowCardArea.manager,
+      NotificationQuickAction.pokeComing ||
+      NotificationQuickAction.pokePass => area != NowCardArea.manager,
+    };
 
 /// What to focus on the 기록 tab: a record's id, or [historySummaryKey] of an
 /// ended promise's summary; null when [request] has nothing there.

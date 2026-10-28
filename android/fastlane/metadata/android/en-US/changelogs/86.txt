@@ -1,0 +1,6 @@
+Easier to use with your partner.
+
+- Give props, answer a knock, or send a cheer right from the notification.
+- Tapping a notification now takes you straight to the record it is about.
+- Once you connect with your partner, a quick guide shows how DuoDone works.
+- Bug fixes and stability improvements.

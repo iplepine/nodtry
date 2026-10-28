@@ -9,7 +9,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/widgets.dart';
 
+import '../utils/analytics.dart';
 import '../utils/context_free_l10n.dart';
+import 'notification_quick_actions.dart';
 
 /// Notification system strings, resolved from the ARB copy.
 /// Why: NotificationService runs outside the widget tree (incl. background
@@ -25,6 +27,14 @@ String _notifString(String key) {
       return l10n.notifActionSkipToday;
     case 'actionSnooze':
       return l10n.notifActionSnooze;
+    case 'actionProps':
+      return l10n.notifActionProps;
+    case 'actionCheer':
+      return l10n.notifActionCheer;
+    case 'actionPokeComing':
+      return l10n.nowPokeReplyComing;
+    case 'actionPokePass':
+      return l10n.nowPokeReplyPass;
     case 'reminderBody':
       return l10n.notifReminderBody;
     case 'fallbackTitle':
@@ -124,6 +134,7 @@ class NotificationOpenRequest {
     this.actionId,
     this.reason,
     this.actionDate,
+    this.quickAction,
   });
 
   /// `type` of a local plan reminder (and of a snoozed / deferred one).
@@ -144,9 +155,15 @@ class NotificationOpenRequest {
   /// cards. Null from servers that don't send it.
   final DateTime? actionDate;
 
+  /// The button the push was answered with, or null for a body tap.
+  final NotificationQuickAction? quickAction;
+
   /// The request for a push's `data` (or a shown push's payload), or null
-  /// without a type.
-  static NotificationOpenRequest? fromData(Map<String, dynamic> data) {
+  /// without a type. [actionId] is the tapped button's id, if any.
+  static NotificationOpenRequest? fromData(
+    Map<String, dynamic> data, {
+    String? actionId,
+  }) {
     String? str(Object? v) => v is String && v.isNotEmpty ? v : null;
     final type = str(data['type']);
     if (type == null) return null;
@@ -156,6 +173,7 @@ class NotificationOpenRequest {
       actionId: str(data['actionId']),
       reason: str(data['reason']),
       actionDate: _dateFromMillis(data['actionDate']),
+      quickAction: NotificationQuickAction.fromId(actionId),
     );
   }
 
@@ -168,7 +186,8 @@ class NotificationOpenRequest {
   }
 
   @override
-  String toString() => 'NotificationOpenRequest($type, plan: $planId)';
+  String toString() =>
+      'NotificationOpenRequest($type, plan: $planId, action: $quickAction)';
 }
 
 abstract class PlanReminderScheduler {
@@ -237,9 +256,13 @@ class NotificationService implements PlanReminderScheduler {
 
   /// A push opened from the background or a cold start
   /// (`onMessageOpenedApp` / `getInitialMessage`): routed like a tap on the
-  /// same push shown in the foreground.
-  void emitPushOpen(Map<String, dynamic> data) {
-    final request = NotificationOpenRequest.fromData(data);
+  /// same push shown in the foreground. [actionIdentifier] is the button it
+  /// was answered with (iOS; null or the default action for a body tap).
+  void emitPushOpen(Map<String, dynamic> data, {String? actionIdentifier}) {
+    final request = NotificationOpenRequest.fromData(
+      data,
+      actionId: actionIdentifier,
+    );
     if (request != null) _emitOpenRequest(request);
   }
 
@@ -294,6 +317,22 @@ class NotificationService implements PlanReminderScheduler {
                 ),
               ],
             ),
+            // Partner pushes: the server sets these as `aps.category`.
+            for (final MapEntry(key: category, value: actions)
+                in kQuickActionCategories.entries)
+              DarwinNotificationCategory(
+                category,
+                actions: <DarwinNotificationAction>[
+                  for (final action in actions)
+                    DarwinNotificationAction.plain(
+                      action.id,
+                      _quickActionLabel(action),
+                      options: <DarwinNotificationActionOption>{
+                        DarwinNotificationActionOption.foreground,
+                      },
+                    ),
+                ],
+              ),
           ],
         );
 
@@ -681,6 +720,7 @@ class NotificationService implements PlanReminderScheduler {
     final notificationId = _notificationIdForRemoteMessage(message);
     final planId = message.data['planId'];
     final opensInput = _remoteMessageOpensInput(message);
+    final category = message.data['category']?.toString();
 
     await flutterLocalNotificationsPlugin.show(
       notificationId,
@@ -690,7 +730,10 @@ class NotificationService implements PlanReminderScheduler {
         channelId: 'general_notifications',
         channelName: _notifString('channelGeneralName'),
         channelDescription: _notifString('channelGeneralDesc'),
-        includeReminderActions: opensInput,
+        // A knock is answered with its reply buttons, not the reminder's.
+        includeReminderActions:
+            opensInput && quickActionsForCategory(category).isEmpty,
+        quickActionCategory: category,
       ),
       payload: _buildPayload(
         originalId: notificationId,
@@ -771,6 +814,29 @@ class NotificationService implements PlanReminderScheduler {
     await _ensureInitializedForActionHandling();
 
     final payload = _parsePayload(response.payload);
+    final quickAction = NotificationQuickAction.fromId(response.actionId);
+    // A partner push this app drew itself (foreground, or data-only on
+    // Android): logged like one the OS drew (see core NotificationService).
+    final pushType = payload['type'];
+    if (pushType is String &&
+        pushType != NotificationOpenRequest.reminderType &&
+        (response.actionId == null || quickAction != null)) {
+      AnalyticsService.log(AnalyticsEvent.notificationOpened, {
+        'type': pushType,
+        'action': quickAction?.analyticsId ?? 'none',
+      });
+    }
+
+    // A partner push's button: open the app on that card and act there.
+    if (quickAction != null) {
+      final request = NotificationOpenRequest.fromData(
+        payload,
+        actionId: response.actionId,
+      );
+      if (request != null) _emitOpenRequest(request);
+      return;
+    }
+
     // The explicit 했어 action: the quick note-only record.
     if (response.actionId == _didItActionId) {
       _emitInputRequest(
@@ -881,7 +947,29 @@ class NotificationService implements PlanReminderScheduler {
     required String channelName,
     required String channelDescription,
     bool includeReminderActions = false,
+    String? quickActionCategory,
   }) {
+    final quickActions = quickActionsForCategory(quickActionCategory);
+    if (quickActions.isNotEmpty) {
+      return NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          channelName,
+          channelDescription: channelDescription,
+          importance: Importance.max,
+          priority: Priority.high,
+          actions: <AndroidNotificationAction>[
+            for (final action in quickActions)
+              AndroidNotificationAction(
+                action.id,
+                _quickActionLabel(action),
+                showsUserInterface: true,
+              ),
+          ],
+        ),
+        iOS: DarwinNotificationDetails(categoryIdentifier: quickActionCategory),
+      );
+    }
     return NotificationDetails(
       android: AndroidNotificationDetails(
         channelId,
@@ -997,6 +1085,13 @@ class NotificationService implements PlanReminderScheduler {
         '${message.data['type'] ?? ''}:${message.data['planId'] ?? ''}:${message.sentTime?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}';
     return source.hashCode & 0x7fffffff;
   }
+
+  String _quickActionLabel(NotificationQuickAction action) => switch (action) {
+    NotificationQuickAction.props => _notifString('actionProps'),
+    NotificationQuickAction.pokeComing => _notifString('actionPokeComing'),
+    NotificationQuickAction.pokePass => _notifString('actionPokePass'),
+    NotificationQuickAction.cheer => _notifString('actionCheer'),
+  };
 
   bool _remoteMessageOpensInput(RemoteMessage message) {
     final type = message.data['type'];

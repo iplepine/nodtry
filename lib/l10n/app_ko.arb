@@ -804,6 +804,8 @@
   "notifActionDidIt": "했어",
   "notifActionSkipToday": "오늘은 패스",
   "notifActionSnooze": "10분 뒤에 다시 알려 줘",
+  "notifActionProps": "❤️ 인정",
+  "notifActionCheer": "💪 응원 보내기",
   "notifReminderBody": "인증 한 번이면 오늘 기록 끝이에요 📸",
   "notifFallbackTitle": "둘운완",
   "notifChannelRemindersName": "약속 알림",

@@ -4070,6 +4070,18 @@ abstract class AppLocalizations {
   /// **'Remind me in 10 min'**
   String get notifActionSnooze;
 
+  /// Button on a partner's proof push: one-tap 인정 (opens the app and sends it)
+  ///
+  /// In en, this message translates to:
+  /// **'❤️ Give props'**
+  String get notifActionProps;
+
+  /// Button on a partner's missed-workout push: send encouragement (opens the app and sends it)
+  ///
+  /// In en, this message translates to:
+  /// **'💪 Send a cheer'**
+  String get notifActionCheer;
+
   /// Body of the local promise reminder (title is the promise). Neutral: may be a legacy non-workout plan
   ///
   /// In en, this message translates to:

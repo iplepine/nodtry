@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/repository_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/notification_service.dart' as local_notifications;
+import '../../services/notification_quick_actions.dart';
 import '../../utils/analytics.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
@@ -77,8 +78,12 @@ class NotificationService {
         FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
           AnalyticsService.log(AnalyticsEvent.notificationOpened, {
             'type': message.data['type']?.toString() ?? 'unknown',
+            'action': _quickActionParam(message.actionIdentifier),
           });
-          _localNotifications.emitPushOpen(message.data);
+          _localNotifications.emitPushOpen(
+            message.data,
+            actionIdentifier: message.actionIdentifier,
+          );
         });
       } catch (error, stack) {
         _logMessagingError('listen', error, stack);
@@ -91,8 +96,12 @@ class NotificationService {
         AnalyticsService.log(AnalyticsEvent.notificationOpened, {
           'type': initialMessage.data['type']?.toString() ?? 'unknown',
           'cold_start': true,
+          'action': _quickActionParam(initialMessage.actionIdentifier),
         });
-        _localNotifications.emitPushOpen(initialMessage.data);
+        _localNotifications.emitPushOpen(
+          initialMessage.data,
+          actionIdentifier: initialMessage.actionIdentifier,
+        );
       }
     }
 
@@ -155,6 +164,11 @@ class NotificationService {
       await _registerCurrentToken();
     }
   }
+
+  /// `notification_opened.action`: the button's analytics id, or `none` for
+  /// a body tap.
+  static String _quickActionParam(String? actionIdentifier) =>
+      NotificationQuickAction.fromId(actionIdentifier)?.analyticsId ?? 'none';
 
   Future<void> _showLocalNotification(RemoteMessage message) async {
     await _localNotifications.showRemoteMessageNotification(message);

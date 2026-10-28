@@ -844,6 +844,36 @@ class _DeveloperScreenState extends ConsumerState<DeveloperScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              // Partner pushes with buttons, drawn the way a data-only push
+              // is (the planId is fake: the app just opens on a tap).
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final (label, type, category) in const [
+                    ('인증샷 알림', 'action_completed', 'partner_proof'),
+                    ('똑똑 알림', 'poke', 'poke_reply'),
+                    ('놓침 알림', 'action_missed', 'partner_missed'),
+                  ])
+                    OutlinedButton(
+                      key: ValueKey('dev-quick-push-$category'),
+                      onPressed: () => NotificationService()
+                          .showRemoteMessageNotification(
+                            RemoteMessage(
+                              messageId: 'dev-$category',
+                              data: {
+                                'type': type,
+                                'category': category,
+                                'planId': 'dev-plan',
+                                'title': '[테스트] $label',
+                                'body': '버튼이 보이는지 확인하세요.',
+                              },
+                            ),
+                          ),
+                      child: Text(label),
+                    ),
+                ],
+              ),
             ],
           ),
         ),

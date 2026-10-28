@@ -1748,6 +1748,14 @@
   "@notifActionSnooze": {
     "description": "Notification action button: snooze 10 minutes"
   },
+  "notifActionProps": "❤️ Give props",
+  "@notifActionProps": {
+    "description": "Button on a partner's proof push: one-tap 인정 (opens the app and sends it)"
+  },
+  "notifActionCheer": "💪 Send a cheer",
+  "@notifActionCheer": {
+    "description": "Button on a partner's missed-workout push: send encouragement (opens the app and sends it)"
+  },
   "notifReminderBody": "One check-in and today is logged 📸",
   "@notifReminderBody": {
     "description": "Body of the local promise reminder (title is the promise). Neutral: may be a legacy non-workout plan"

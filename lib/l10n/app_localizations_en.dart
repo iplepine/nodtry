@@ -2295,6 +2295,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifActionSnooze => 'Remind me in 10 min';
 
   @override
+  String get notifActionProps => '❤️ Give props';
+
+  @override
+  String get notifActionCheer => '💪 Send a cheer';
+
+  @override
   String get notifReminderBody => 'One check-in and today is logged 📸';
 
   @override

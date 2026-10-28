@@ -381,7 +381,7 @@ class _SpyBatch extends Fake implements WriteBatch {
   }
 
   @override
-  void update(DocumentReference document, Map<Object, Object?> data) {
+  void update<T>(DocumentReference<T> document, T data) {
     _inner.update(document, data);
   }
 

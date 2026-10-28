@@ -83,7 +83,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       case NotificationOpenTarget.nowCheckIn:
         ref
             .read(nowFocusRequestProvider.notifier)
-            .request(request.planId, checkIn: true);
+            .request(
+              request.planId,
+              checkIn: true,
+              quickAction: request.quickAction,
+            );
       case NotificationOpenTarget.now:
         // The promise's card (a partner's record, a 인정, a proposal …); one
         // that isn't on today's cards is looked for on 기록.
@@ -94,6 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 request.planId,
                 actionId: request.actionId,
                 day: request.actionDate,
+                quickAction: request.quickAction,
               );
         }
       case NotificationOpenTarget.history:

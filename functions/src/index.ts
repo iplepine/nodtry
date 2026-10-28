@@ -48,6 +48,7 @@ import {
     lateItemFromYesterday,
 } from "./schedule";
 import {pairsOf, previousSeoulDay} from "./stats";
+import {NOTIFICATION_ACTIONS_BUILD, buildMessagePayload, quickActionCategory} from "./push";
 import {generateUniqueInviteCode, normalizeInviteCode} from "./inviteCode";
 import {FieldOps, SYSTEM_LINK, actionManagerFor, managerStampFor, millisOf, unlinkUpdate} from "./planLinks";
 
@@ -96,48 +97,6 @@ const FIELD_OPS: FieldOps = {
     deleteField: () => FieldValue.delete(),
     serverTimestamp: () => FieldValue.serverTimestamp(),
 };
-
-function buildMessagePayload(
-    token: string,
-    title: string,
-    body: string,
-    data: {[key: string]: string},
-): admin.messaging.Message {
-    return {
-        token,
-        notification: {
-            title,
-            body,
-        },
-        data: {
-            ...data,
-            title,
-            body,
-        },
-        android: {
-            priority: "high",
-            notification: {
-                channelId: "general_notifications",
-                sound: "default",
-            },
-        },
-        apns: {
-            headers: {
-                "apns-priority": "10",
-                "apns-push-type": "alert",
-            },
-            payload: {
-                aps: {
-                    alert: {
-                        title,
-                        body,
-                    },
-                    sound: "default",
-                },
-            },
-        },
-    };
-}
 
 /**
  * Sends a message and cleans up dead tokens.
@@ -188,13 +147,25 @@ async function sendAndCleanup(
     }
 }
 
+/**
+ * Sends [copy] to the recipient. A push with buttons (see
+ * quickActionCategory) carries its category; to builds that draw such
+ * pushes themselves it goes data-only, so Android shows the buttons too.
+ * Without [recipient] (or on older builds) it stays a plain notification.
+ */
 async function sendCopy(
     recipientUserId: string,
     fcmToken: string,
     copy: PushCopy,
     data: {[key: string]: string},
+    recipient: Data | null = null,
 ): Promise<boolean> {
-    return sendAndCleanup(buildMessagePayload(fcmToken, copy.title, copy.body, data), recipientUserId);
+    const category = quickActionCategory(data);
+    const dataOnly = category !== null && clientBuildOf(recipient) >= await notificationActionsBuild();
+    return sendAndCleanup(
+        buildMessagePayload(fcmToken, copy.title, copy.body, data, {category, dataOnly}),
+        recipientUserId,
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -718,6 +689,28 @@ async function legacyLinksOpen(): Promise<boolean> {
     return millisOf(snap.data()?.legacyLinkUntil) > Date.now();
 }
 
+let actionsBuildCache: {value: number; at: number} | null = null;
+
+/**
+ * First build that gets data-only pushes with buttons: NOTIFICATION_ACTIONS_BUILD,
+ * unless ops sets config/app.notificationActionsBuild (e.g. very high, to send
+ * every build plain notifications again without a deploy). Cached 5 minutes.
+ */
+async function notificationActionsBuild(): Promise<number> {
+    if (actionsBuildCache && Date.now() - actionsBuildCache.at < 5 * 60 * 1000) {
+        return actionsBuildCache.value;
+    }
+    let value = NOTIFICATION_ACTIONS_BUILD;
+    try {
+        const configured = Number((await db().collection("config").doc("app").get()).data()?.notificationActionsBuild);
+        if (Number.isFinite(configured) && configured > 0) value = configured;
+    } catch (error) {
+        console.warn("config/app read failed, using the default actions build", error);
+    }
+    actionsBuildCache = {value, at: Date.now()};
+    return value;
+}
+
 /** Marks docs as undone (so their delete trigger resets nothing), then deletes them. */
 async function deleteAsUndone(docs: DocSnap[]): Promise<void> {
     await Promise.all(docs.map((doc) => lockRef(`relation_undo_${doc.id}`).set(lockStamp())));
@@ -950,7 +943,7 @@ export const onCheerCreated = functions.firestore
                 planId: pairPlan ? planId ?? "" : "",
                 senderName: who,
                 message,
-            });
+            }, recipient);
         } catch (error) {
             console.error("Error sending notification:", error);
         }
@@ -1065,7 +1058,7 @@ export const onActionCompleted = functions
                 // The record's day: an earlier day's opens 기록, not today's card.
                 ...actionDateData(action),
                 hasProof: withProof ? "true" : "false",
-            });
+            }, manager);
         } catch (error) {
             console.error("Error sending completion notification:", error);
         }
@@ -1176,7 +1169,7 @@ export const notifyMissedActions = functions
                     senderName: who,
                     itemTitle,
                     ...(lateDay ? {day: lateDay} : {}),
-                });
+                }, manager);
                 if (!delivered) {
                     if (lateKey) await releaseLock(lateKey).catch(() => undefined);
                     continue;

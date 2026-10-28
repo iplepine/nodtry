@@ -2182,6 +2182,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notifActionSnooze => '10분 뒤에 다시 알려 줘';
 
   @override
+  String get notifActionProps => '❤️ 인정';
+
+  @override
+  String get notifActionCheer => '💪 응원 보내기';
+
+  @override
   String get notifReminderBody => '인증 한 번이면 오늘 기록 끝이에요 📸';
 
   @override

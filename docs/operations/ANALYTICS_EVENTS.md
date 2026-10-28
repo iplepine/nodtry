@@ -68,7 +68,7 @@
 ## 4. 알림·설정·기타
 | 이벤트 | 상태 | 파라미터 / 메모 |
 |---|---|---|
-| `notification_opened` | 기존 | `type`(푸시 `data.type`, 신규 `poke_reply`·`partner_connected`·`partner_connect_failed` 포함), `cold_start` |
+| `notification_opened` | 변경 | `type`(푸시 `data.type`, 신규 `poke_reply`·`partner_connected`·`partner_connect_failed` 포함), `cold_start`, `action`(1.1.1+86~: 알림 버튼 `props`·`poke_coming`·`poke_pass`·`cheer`, 본문 탭은 `none`). 버튼으로 실행된 인정·답장·응원은 각각 `partner_reacted`(`surface: notification`)·`poke_replied`·`cheer_sent`로도 기록 |
 | `notification_permission_result` | 기존 | `granted` |
 | `notification_banner_shown`, `notification_banner_tapped` | 기존 | 권한 배너 |
 | `locale_changed` | 기존 | `locale` |
