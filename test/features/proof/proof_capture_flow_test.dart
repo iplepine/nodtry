@@ -162,6 +162,55 @@ void main() {
     expect(find.text(l10n.proofPhotoPrepareFailed), findsOneWidget);
   });
 
+  testWidgets('preview actions stay above Android system navigation', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(393, 852);
+    tester.view.devicePixelRatio = 1;
+    tester.view.viewPadding = const FakeViewPadding(bottom: 48);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetViewPadding);
+
+    final upload = ProofPhotoUpload(
+      bytes: img.encodeJpg(img.Image(width: 800, height: 600)),
+      source: ProofSource.camera,
+      takenAt: DateTime(2026, 11, 5, 8, 47),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ko'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                key: const ValueKey('open-proof-preview'),
+                onPressed: () => showProofPreviewSheet(
+                  context,
+                  upload: upload,
+                  title: '팔굽혀펴기 50개',
+                ),
+                child: const Text('preview'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('open-proof-preview')));
+    await tester.pumpAndSettle();
+
+    final submit = find.byKey(const ValueKey('proof-preview-submit'));
+    expect(submit, findsOneWidget);
+    final usableBottom = tester.view.physicalSize.height - 48;
+    expect(tester.getRect(submit).bottom, lessThanOrEqualTo(usableBottom));
+    expect(tester.takeException(), isNull);
+  });
+
   group('viewer menu', () {
     final bytes = img.encodeJpg(img.Image(width: 4, height: 4));
     const path = 'proofs/partner-uid/plan-1/action-7.jpg';

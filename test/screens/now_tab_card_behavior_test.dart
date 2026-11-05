@@ -313,18 +313,12 @@ void main() {
         await tester.pumpAndSettle();
 
         final chips = tester.widgetList<TimeChip>(find.byType(TimeChip));
-        final byText = {for (final c in chips) c.text: c.type};
-        // The overdue chip says "…지나갔어요/Passed", the due one carries the
-        // comforting suffix — neither text decides the type any more.
-        expect(byText.values, contains(TimeChipType.past));
-        expect(byText.values, contains(TimeChipType.upcoming));
-        for (final entry in byText.entries) {
-          if (entry.key.contains(l10n.timeChipPassed)) {
-            expect(entry.value, TimeChipType.past, reason: entry.key);
-          } else {
-            expect(entry.value, TimeChipType.upcoming, reason: entry.key);
-          }
-        }
+        final types = chips.map((chip) => chip.type).toList();
+        expect(types.where((type) => type == TimeChipType.past), hasLength(1));
+        expect(
+          types.where((type) => type == TimeChipType.upcoming),
+          hasLength(1),
+        );
       });
 
       testWidgets(

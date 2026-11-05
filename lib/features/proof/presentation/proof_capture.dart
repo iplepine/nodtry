@@ -410,15 +410,20 @@ class _ProofPreviewSheetState extends State<ProofPreviewSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final mediaQuery = MediaQuery.of(context);
     final badge = proofSourceBadgeLabel(
       l10n,
       source: widget.upload.source,
       takenAt: widget.upload.takenAt,
     );
-    final maxPhotoHeight = MediaQuery.sizeOf(context).height * 0.45;
+    final keyboardInset = mediaQuery.viewInsets.bottom;
+    final bottomInset = keyboardInset > 0
+        ? keyboardInset
+        : mediaQuery.viewPadding.bottom;
+    final maxPhotoHeight = mediaQuery.size.height * 0.45;
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      padding: EdgeInsets.only(bottom: bottomInset),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
         child: Column(
