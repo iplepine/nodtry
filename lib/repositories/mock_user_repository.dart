@@ -124,5 +124,12 @@ class MockUserRepository implements UserRepository {
   }
 
   @override
+  Future<void> updateAllowPartnerPhotoInShareCard(bool allow) async {
+    final user = _mockUser;
+    if (user == null) return;
+    _mockUser = user.copyWith(allowPartnerPhotoInShareCard: allow);
+  }
+
+  @override
   Future<void> markTermsAccepted() async {}
 }

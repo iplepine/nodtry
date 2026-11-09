@@ -32,6 +32,15 @@ class UserModel {
   /// device keeps its own flag first (spec §9).
   final bool? pivotNoticeSeen;
 
+  /// I let my partner put my proof photo (인증샷) on the share cards they
+  /// make (`users/{uid}.allowPartnerPhotoInShareCard`). Optional; missing
+  /// means no — older documents and builds never opt anyone in.
+  final bool? allowPartnerPhotoInShareCard;
+
+  /// [allowPartnerPhotoInShareCard], with missing read as false.
+  bool get allowsPartnerPhotoInShareCard =>
+      allowPartnerPhotoInShareCard ?? false;
+
   bool get isAnonymous => loginType == LoginType.guest;
 
   UserModel({
@@ -49,6 +58,7 @@ class UserModel {
     this.locale,
     this.partnerNickname,
     this.pivotNoticeSeen,
+    this.allowPartnerPhotoInShareCard,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -68,6 +78,9 @@ class UserModel {
       partnerNickname: _nicknameOf(data['partnerNickname']),
       pivotNoticeSeen: data['pivotNoticeSeen'] is bool
           ? data['pivotNoticeSeen'] as bool
+          : null,
+      allowPartnerPhotoInShareCard: data['allowPartnerPhotoInShareCard'] is bool
+          ? data['allowPartnerPhotoInShareCard'] as bool
           : null,
     );
   }
@@ -97,6 +110,9 @@ class UserModel {
       pivotNoticeSeen: json['pivotNoticeSeen'] is bool
           ? json['pivotNoticeSeen'] as bool
           : null,
+      allowPartnerPhotoInShareCard: json['allowPartnerPhotoInShareCard'] is bool
+          ? json['allowPartnerPhotoInShareCard'] as bool
+          : null,
     );
   }
 
@@ -114,6 +130,8 @@ class UserModel {
       if (locale != null) 'locale': locale,
       if (partnerNickname != null) 'partnerNickname': partnerNickname,
       if (pivotNoticeSeen != null) 'pivotNoticeSeen': pivotNoticeSeen,
+      if (allowPartnerPhotoInShareCard != null)
+        'allowPartnerPhotoInShareCard': allowPartnerPhotoInShareCard,
     };
   }
 
@@ -133,6 +151,8 @@ class UserModel {
       if (locale != null) 'locale': locale,
       if (partnerNickname != null) 'partnerNickname': partnerNickname,
       if (pivotNoticeSeen != null) 'pivotNoticeSeen': pivotNoticeSeen,
+      if (allowPartnerPhotoInShareCard != null)
+        'allowPartnerPhotoInShareCard': allowPartnerPhotoInShareCard,
     };
   }
 
@@ -146,6 +166,7 @@ class UserModel {
     String? partnerNickname,
     bool clearPartnerNickname = false,
     bool? pivotNoticeSeen,
+    bool? allowPartnerPhotoInShareCard,
   }) {
     return UserModel(
       uid: uid,
@@ -164,6 +185,8 @@ class UserModel {
           ? null
           : (partnerNickname ?? this.partnerNickname),
       pivotNoticeSeen: pivotNoticeSeen ?? this.pivotNoticeSeen,
+      allowPartnerPhotoInShareCard:
+          allowPartnerPhotoInShareCard ?? this.allowPartnerPhotoInShareCard,
     );
   }
 }

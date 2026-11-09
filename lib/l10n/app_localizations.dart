@@ -5167,6 +5167,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'With your partner watching, you\'ll actually do it. Send them your code and link.'**
   String get planSavedInviteBody;
+
+  /// Settings section heading for share card options
+  ///
+  /// In en, this message translates to:
+  /// **'Share card'**
+  String get sharePhotoConsentSection;
+
+  /// Settings switch: let the partner put my proof photo on the share cards they make (users/{uid}.allowPartnerPhotoInShareCard)
+  ///
+  /// In en, this message translates to:
+  /// **'Let my partner put my proof photo on their share cards'**
+  String get sharePhotoConsentSettingTitle;
+
+  /// Helper under the share-card photo consent switch
+  ///
+  /// In en, this message translates to:
+  /// **'When off, their cards only show their own photo'**
+  String get sharePhotoConsentSettingHelper;
+
+  /// Snackbar when saving the share-card photo consent fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the setting. Please try again.'**
+  String get sharePhotoConsentSaveFailed;
+
+  /// Share sheet hint when the partner has not allowed their photo on my cards
+  ///
+  /// In en, this message translates to:
+  /// **'If your partner allows it, you can put both photos on the card'**
+  String get sharePhotoConsentHint;
+
+  /// Share sheet layout toggle: only my photo
+  ///
+  /// In en, this message translates to:
+  /// **'Just mine'**
+  String get sharePhotoConsentLayoutSingle;
+
+  /// Share sheet layout toggle: my photo and my partner's, split
+  ///
+  /// In en, this message translates to:
+  /// **'Both of us'**
+  String get sharePhotoConsentLayoutTogether;
+
+  /// Share sheet note under the card in the together layout
+  ///
+  /// In en, this message translates to:
+  /// **'Your partner\'s proof photo goes on too, since they allowed it.'**
+  String get sharePhotoConsentTogetherNote;
 }
 
 class _AppLocalizationsDelegate
