@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small widget: 2x1, resizable to 2x2 (DuoWidgetSmallProvider). The data
+     comes from the app; updatePeriodMillis only re-checks the date so a
+     snapshot from yesterday stops showing yesterday's statuses. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/duo_widget_small_description"
+    android:initialLayout="@layout/duo_widget_small"
+    android:minWidth="110dp"
+    android:minHeight="40dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="40dp"
+    android:maxResizeWidth="250dp"
+    android:maxResizeHeight="260dp"
+    android:previewLayout="@layout/duo_widget_small"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="3600000"
+    android:widgetCategory="home_screen" />

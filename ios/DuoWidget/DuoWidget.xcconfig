@@ -1,0 +1,4 @@
+// DuoWidget extension: takes FLUTTER_BUILD_NAME / FLUTTER_BUILD_NUMBER from
+// Flutter's Generated.xcconfig so its CFBundleShortVersionString and
+// CFBundleVersion always match Runner's (App Store rejects a mismatch).
+#include "../Flutter/Generated.xcconfig"

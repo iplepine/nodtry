@@ -2949,4 +2949,42 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get planSavedInviteBody =>
       'With your partner watching, you\'ll actually do it. Send them your code and link.';
+
+  @override
+  String homeWidgetStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Together $count days',
+      one: 'Together 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeWidgetStreakZero => 'Both work out today for day 1';
+
+  @override
+  String get homeWidgetTodayDuoDone => 'Both done today 🎉';
+
+  @override
+  String get homeWidgetMe => 'Me';
+
+  @override
+  String get homeWidgetStatusDone => 'Done';
+
+  @override
+  String get homeWidgetStatusDoneProof => 'Done 📸';
+
+  @override
+  String get homeWidgetStatusRested => 'Rest pass';
+
+  @override
+  String get homeWidgetStatusPending => 'Not yet';
+
+  @override
+  String get homeWidgetStatusOff => 'Day off';
+
+  @override
+  String get homeWidgetStale => 'Open to see today';
 }

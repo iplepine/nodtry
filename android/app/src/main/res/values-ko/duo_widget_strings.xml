@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 홈 화면 위젯 (한국어). 실제 문구는 앱이 저장한 스냅샷에서 오고, 여기는
+     위젯 선택 화면 설명과 데이터가 없을 때의 안내만 둔다. -->
+<resources>
+    <string name="duo_widget_small_description">둘이 함께한 날과 오늘 기록을 한눈에 봐요</string>
+    <string name="duo_widget_medium_description">둘이 함께한 날과 나·짝꿍의 오늘 운동을 보여줘요</string>
+    <string name="duo_widget_placeholder_title">둘운완</string>
+    <string name="duo_widget_placeholder_body">앱을 열고 짝꿍과 연결해요</string>
+    <string name="duo_widget_preview_headline">둘이 함께 3일째</string>
+    <string name="duo_widget_preview_me">나</string>
+    <string name="duo_widget_preview_partner">짝꿍</string>
+    <string name="duo_widget_preview_done">완료</string>
+    <string name="duo_widget_preview_pending">아직</string>
+    <string name="duo_widget_preview_summary">나 완료 · 짝꿍 아직</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widget (English). The live copy comes from the app's snapshot;
+     these are the picker descriptions and the placeholder before any data.
+     Korean: values-ko/duo_widget_strings.xml -->
+<resources>
+    <string name="duo_widget_small_description">Your duo streak and today at a glance</string>
+    <string name="duo_widget_medium_description">Your duo streak and today\'s workouts for you and your partner</string>
+    <string name="duo_widget_placeholder_title">DuoDone</string>
+    <string name="duo_widget_placeholder_body">Open the app and connect with your partner</string>
+    <string name="duo_widget_preview_headline">Together 3 days</string>
+    <string name="duo_widget_preview_me">Me</string>
+    <string name="duo_widget_preview_partner">Partner</string>
+    <string name="duo_widget_preview_done">Done</string>
+    <string name="duo_widget_preview_pending">Not yet</string>
+    <string name="duo_widget_no_status" translatable="false">–</string>
+    <string name="duo_widget_preview_summary">Me Done · Partner Not yet</string>
+</resources>

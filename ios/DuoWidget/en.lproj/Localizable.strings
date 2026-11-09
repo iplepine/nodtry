@@ -1,0 +1,11 @@
+/* Home/lock-screen widget (English). The live copy comes from the app's
+   snapshot; these are the gallery texts and the placeholder before any data. */
+"widget_display_name" = "DuoDone";
+"widget_description" = "Your duo streak and today for you and your partner";
+"placeholder_title" = "DuoDone";
+"placeholder_body" = "Open the app and connect with your partner";
+"preview_headline" = "Together 3 days";
+"preview_me" = "Me";
+"preview_partner" = "Partner";
+"preview_done" = "Done";
+"preview_pending" = "Not yet";

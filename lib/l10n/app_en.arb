@@ -2623,5 +2623,50 @@
   "@planSavedInviteTitle": {
     "description": "Sheet after the first solo promise is saved"
   },
-  "planSavedInviteBody": "With your partner watching, you'll actually do it. Send them your code and link."
+  "planSavedInviteBody": "With your partner watching, you'll actually do it. Send them your code and link.",
+  "homeWidgetStreak": "{count, plural, =1{Together 1 day} other{Together {count} days}}",
+  "@homeWidgetStreak": {
+    "description": "Home/lock-screen widget headline: the duo streak",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeWidgetStreakZero": "Both work out today for day 1",
+  "@homeWidgetStreakZero": {
+    "description": "Home widget headline when the duo streak is 0"
+  },
+  "homeWidgetTodayDuoDone": "Both done today 🎉",
+  "@homeWidgetTodayDuoDone": {
+    "description": "Home widget badge when today is a duo day"
+  },
+  "homeWidgetMe": "Me",
+  "@homeWidgetMe": {
+    "description": "Home widget label for the user"
+  },
+  "homeWidgetStatusDone": "Done",
+  "@homeWidgetStatusDone": {
+    "description": "Home widget: today's workout recorded"
+  },
+  "homeWidgetStatusDoneProof": "Done 📸",
+  "@homeWidgetStatusDoneProof": {
+    "description": "Home widget: today's workout recorded with a proof photo"
+  },
+  "homeWidgetStatusRested": "Rest pass",
+  "@homeWidgetStatusRested": {
+    "description": "Home widget: today covered by a rest pass"
+  },
+  "homeWidgetStatusPending": "Not yet",
+  "@homeWidgetStatusPending": {
+    "description": "Home widget: today's workout not recorded yet"
+  },
+  "homeWidgetStatusOff": "Day off",
+  "@homeWidgetStatusOff": {
+    "description": "Home widget: nothing scheduled today"
+  },
+  "homeWidgetStale": "Open to see today",
+  "@homeWidgetStale": {
+    "description": "Home widget status when the saved snapshot is from an earlier day"
+  }
 }

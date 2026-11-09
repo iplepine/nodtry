@@ -83,14 +83,40 @@ platform :ios do
        "--build-name=#{app_version} --build-number=#{build_number}")
     cocoapods(try_repo_update_on_error: true)
     prepare_release_notes
+    # Automatic signing through the App Store Connect API key, for both the
+    # archive and the export. Since 1.2.0 the app embeds the DuoWidget
+    # extension (com.devho.nodtry.app.widget) and both share the App Group
+    # group.com.devho.nodtry.app; -allowProvisioningUpdates lets xcodebuild
+    # register those identifiers/capabilities and create the matching
+    # profiles instead of failing on a missing provisioning profile.
+    # On 2026-11-09 xcodebuild rejected this key ("Authentication failed:
+    # Make sure a bearer token was provided") although the same key works for
+    # the App Store Connect API; xcodebuild's provisioning most likely needs
+    # the key's role raised to Admin. XCODE_PROVISIONING_UPDATES=0 skips these
+    # flags when the identifiers and profiles were set up by hand in the
+    # developer portal / Xcode instead.
+    auth_key_path = File.expand_path("AuthKey_XXU6VU63TR.p8", __dir__)
+    signing_xcargs = if ENV["XCODE_PROVISIONING_UPDATES"] == "0"
+                       ""
+                     else
+                       "-allowProvisioningUpdates " \
+                         "-authenticationKeyPath #{Shellwords.escape(auth_key_path)} " \
+                         "-authenticationKeyID XXU6VU63TR " \
+                         "-authenticationKeyIssuerID 6b17b540-3b79-4d8c-beaf-ca1c83e566f1"
+                     end
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       export_method: "app-store",
+      export_options: {
+        signingStyle: "automatic",
+        teamID: "TCCFRB2YAV"
+      },
+      export_xcargs: signing_xcargs,
       output_directory: "../build/ios/ipa",
       output_name: ipa_filename,
       clean: true,
-      xcargs: "FLUTTER_BUILD_NAME=#{app_version} FLUTTER_BUILD_NUMBER=#{build_number}"
+      xcargs: "FLUTTER_BUILD_NAME=#{app_version} FLUTTER_BUILD_NUMBER=#{build_number} #{signing_xcargs}"
     )
     upload_to_app_store(
       api_key: api_key,

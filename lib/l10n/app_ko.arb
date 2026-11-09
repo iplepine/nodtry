@@ -986,5 +986,15 @@
   "termsNoticeInvite": "초대를 보내면 이용약관에 동의하는 거예요. 부적절한 내용이나 괴롭힘은 허용하지 않아요.",
   "termsNoticePhoto": "올리면 이용약관에 동의하는 거예요. 부적절한 사진이나 괴롭힘은 허용하지 않아요.",
   "planSavedInviteTitle": "약속 걸었어요! 이제 봐 달라고 해 볼까요?",
-  "planSavedInviteBody": "짝꿍이 봐주면 진짜 하게 돼요. 카톡으로 코드와 링크를 보내요."
+  "planSavedInviteBody": "짝꿍이 봐주면 진짜 하게 돼요. 카톡으로 코드와 링크를 보내요.",
+  "homeWidgetStreak": "둘이 함께 {count}일째",
+  "homeWidgetStreakZero": "오늘 둘 다 하면 1일째",
+  "homeWidgetTodayDuoDone": "오늘 둘운완이에요 🎉",
+  "homeWidgetMe": "나",
+  "homeWidgetStatusDone": "완료",
+  "homeWidgetStatusDoneProof": "인증샷 📸",
+  "homeWidgetStatusRested": "휴식권",
+  "homeWidgetStatusPending": "아직",
+  "homeWidgetStatusOff": "쉬는 날",
+  "homeWidgetStale": "앱에서 오늘을 확인해요"
 }

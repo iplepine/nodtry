@@ -5167,6 +5167,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'With your partner watching, you\'ll actually do it. Send them your code and link.'**
   String get planSavedInviteBody;
+
+  /// Home/lock-screen widget headline: the duo streak
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Together 1 day} other{Together {count} days}}'**
+  String homeWidgetStreak(int count);
+
+  /// Home widget headline when the duo streak is 0
+  ///
+  /// In en, this message translates to:
+  /// **'Both work out today for day 1'**
+  String get homeWidgetStreakZero;
+
+  /// Home widget badge when today is a duo day
+  ///
+  /// In en, this message translates to:
+  /// **'Both done today 🎉'**
+  String get homeWidgetTodayDuoDone;
+
+  /// Home widget label for the user
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get homeWidgetMe;
+
+  /// Home widget: today's workout recorded
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get homeWidgetStatusDone;
+
+  /// Home widget: today's workout recorded with a proof photo
+  ///
+  /// In en, this message translates to:
+  /// **'Done 📸'**
+  String get homeWidgetStatusDoneProof;
+
+  /// Home widget: today covered by a rest pass
+  ///
+  /// In en, this message translates to:
+  /// **'Rest pass'**
+  String get homeWidgetStatusRested;
+
+  /// Home widget: today's workout not recorded yet
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet'**
+  String get homeWidgetStatusPending;
+
+  /// Home widget: nothing scheduled today
+  ///
+  /// In en, this message translates to:
+  /// **'Day off'**
+  String get homeWidgetStatusOff;
+
+  /// Home widget status when the saved snapshot is from an earlier day
+  ///
+  /// In en, this message translates to:
+  /// **'Open to see today'**
+  String get homeWidgetStale;
 }
 
 class _AppLocalizationsDelegate
