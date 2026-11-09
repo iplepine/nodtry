@@ -15,6 +15,13 @@ abstract class UserRepository {
   /// 쿼리는 firestore.rules.next에서 거부). 없거나 못 읽은 프로필은 빠진다.
   Future<List<UserModel>> getUsersByIds(List<String> uids);
 
+  /// 짝꿍([uid])이 내가 만드는 공유 카드에 자기 인증샷을 넣어도 된다고 했는지
+  /// (`users/{uid}.allowPartnerPhotoInShareCard`, 없으면 false)를 **서버에서**
+  /// 읽는다. 오프라인 캐시는 쓰지 않는다 — 철회가 아직 안 내려온 낡은 true로
+  /// 카드를 만들면 안 되니까. 못 읽으면(오프라인 포함) 던진다; 부르는 쪽은
+  /// false로 본다.
+  Future<bool> fetchPartnerPhotoShareConsent(String uid);
+
   /// 초대 코드 주인 조회 (`resolveInviteCode` callable; 확인 시트에 보일
   /// uid·이름·사진만 채워진다). 형식이 틀리거나 주인이 없으면 null, 내
   /// 코드면 InviteCodeIsMineException. 그 밖의 실패(오프라인, 요청 제한)는

@@ -311,6 +311,7 @@ void main() {
     Future<_Sharer> open(
       WidgetTester tester, {
       required bool allowed,
+      bool Function()? allowedNow,
       Set<String> failing = const {},
       List<String>? fetched,
     }) async {
@@ -368,7 +369,8 @@ void main() {
               ),
             ),
             shareCardPartnerConsentProvider.overrideWithValue(
-              (uid) async => uid == 'partner' && allowed,
+              (uid) async =>
+                  uid == 'partner' && (allowedNow?.call() ?? allowed),
             ),
             proofPhotoCacheProvider.overrideWithValue(
               ProofPhotoCache(
@@ -422,6 +424,36 @@ void main() {
       expect(
         logs.where((l) => l.contains('share_card_shared')).single,
         contains('layout: together'),
+      );
+    });
+
+    testWidgets('partner turns it off while the sheet is open: no together '
+        'share, back to single', (tester) async {
+      var consent = true;
+      final sharer = await open(
+        tester,
+        allowed: true,
+        allowedNow: () => consent,
+      );
+      await tester.tap(find.text('둘 사진 같이'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('share-card-together')), findsOneWidget);
+
+      consent = false;
+      await tester.tap(find.text('공유하기'));
+      await tester.pumpAndSettle();
+      expect(sharer.count, 0, reason: 'what they withdrew is never shared');
+      expect(find.byKey(const ValueKey('share-card-together')), findsNothing);
+      expect(find.byKey(const ValueKey('share-layout-together')), findsNothing);
+      expect(find.text('짝꿍이 허용하면 둘 사진을 같이 넣을 수 있어요'), findsOneWidget);
+
+      // The single card still shares.
+      await tester.tap(find.text('공유하기'));
+      await tester.pumpAndSettle();
+      expect(sharer.count, 1);
+      expect(
+        logs.where((l) => l.contains('share_card_shared')).single,
+        contains('layout: single'),
       );
     });
 

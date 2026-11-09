@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -19,6 +17,7 @@ import '../../../utils/analytics.dart';
 import '../../connect/application/partner_label_provider.dart';
 import '../../plan/domain/workout_template.dart';
 import '../../proof/data/proof_photo_cache.dart';
+import '../../proof/data/share_card_temp_files.dart';
 import '../application/duo_stats_provider.dart';
 
 /// Why the share card was opened (analytics `trigger`).
@@ -517,7 +516,16 @@ abstract class ShareCardSharer {
 }
 
 class SharePlusShareCardSharer implements ShareCardSharer {
-  const SharePlusShareCardSharer();
+  SharePlusShareCardSharer({
+    required ShareCardTempFiles files,
+    Future<ShareResult> Function(ShareParams params)? share,
+  }) : _files = files,
+       _share = share ?? SharePlus.instance.share;
+
+  final ShareCardTempFiles _files;
+
+  /// The system share sheet (`SharePlus.instance.share`); a seam for tests.
+  final Future<ShareResult> Function(ShareParams params) _share;
 
   @override
   Future<ShareCardResult> sharePng(
@@ -525,16 +533,21 @@ class SharePlusShareCardSharer implements ShareCardSharer {
     required String text,
     Rect? origin,
   }) async {
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/duodone_share_card.png');
-    await file.writeAsBytes(png, flush: true);
-    final result = await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path, mimeType: 'image/png')],
-        text: text,
-        sharePositionOrigin: origin,
-      ),
-    );
+    final file = await _files.writeCard(png);
+    final ShareResult result;
+    try {
+      result = await _share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'image/png')],
+          text: text,
+          sharePositionOrigin: origin,
+        ),
+      );
+    } finally {
+      // The share sheet is done with it (Android shares its own copy), so
+      // the card, which may hold my partner's photo, doesn't stay behind.
+      await _files.deleteCard();
+    }
     switch (result.status) {
       case ShareResultStatus.dismissed:
         return const ShareCardResult(shared: false, target: 'dismissed');
@@ -550,20 +563,28 @@ class SharePlusShareCardSharer implements ShareCardSharer {
 }
 
 final shareCardSharerProvider = Provider<ShareCardSharer>(
-  (ref) => const SharePlusShareCardSharer(),
+  (ref) =>
+      SharePlusShareCardSharer(files: ref.watch(shareCardTempFilesProvider)),
 );
 
 /// Whether [partnerUid] lets their 인증샷 go on the share cards I make
 /// (`users/{partnerUid}.allowPartnerPhotoInShareCard`, missing = false).
-/// Read fresh from their users doc when the sheet opens, so a partner who
-/// just turned it off is never on the next card. Overridden in tests.
+/// Read from the server (never the offline cache) when the sheet opens and
+/// again right before a together card is captured, so a partner who turned
+/// it off is not on the next card. Any failure, offline included, is false.
+/// Overridden in tests.
 final shareCardPartnerConsentProvider =
     Provider<Future<bool> Function(String partnerUid)>(
       (ref) => (partnerUid) async {
-        final users = await ref.read(userRepositoryProvider).getUsersByIds([
-          partnerUid,
-        ]);
-        return users.firstOrNull?.allowsPartnerPhotoInShareCard ?? false;
+        try {
+          return await ref
+              .read(userRepositoryProvider)
+              .fetchPartnerPhotoShareConsent(partnerUid)
+              .timeout(kShareCardPhotoTimeout);
+        } catch (e) {
+          debugPrint('[DuoShareSheet] partner photo consent unknown: $e');
+          return false;
+        }
       },
     );
 
@@ -800,6 +821,13 @@ class _DuoShareSheetState extends ConsumerState<DuoShareSheet> {
     return box.localToGlobal(Offset.zero) & box.size;
   }
 
+  /// Asks the server again, right before a together card is captured.
+  Future<bool> _partnerStillAllows() async {
+    final partnerUid = widget.partnerUid;
+    if (partnerUid == null) return false;
+    return ref.read(shareCardPartnerConsentProvider)(partnerUid);
+  }
+
   Future<void> _share() async {
     if (_busy) return;
     setState(() => _busy = true);
@@ -807,6 +835,21 @@ class _DuoShareSheetState extends ConsumerState<DuoShareSheet> {
     final messenger = ScaffoldMessenger.maybeOf(context);
     final card = _data;
     try {
+      if (card.layout == ShareCardLayout.together &&
+          !await _partnerStillAllows()) {
+        // They turned it off while the sheet was open: show the single card
+        // (and the consent hint) instead of sharing what they withdrew.
+        if (mounted) {
+          setState(() {
+            _partnerAllowed = false;
+            _togetherMine = null;
+            _togetherPartner = null;
+            _busy = false;
+          });
+        }
+        return;
+      }
+      if (!mounted) return;
       final photos = [?card.photo, ?card.partnerPhoto];
       if (photos.isNotEmpty) {
         // Make sure the photos are decoded and painted before the capture.

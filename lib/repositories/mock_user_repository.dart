@@ -43,6 +43,11 @@ class MockUserRepository implements UserRepository {
   }
 
   @override
+  Future<bool> fetchPartnerPhotoShareConsent(String uid) async {
+    return _mockUser?.allowsPartnerPhotoInShareCard ?? false;
+  }
+
+  @override
   Future<UserModel?> getUserByInviteCode(String code) async {
     await Future.delayed(const Duration(milliseconds: 300));
     final normalized = normalizeInviteCode(code);

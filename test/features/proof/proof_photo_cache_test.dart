@@ -6,11 +6,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nod_try/features/proof/data/proof_photo_cache.dart';
+import 'package:nod_try/features/proof/data/share_card_temp_files.dart';
 import 'package:nod_try/providers/repository_provider.dart';
 import 'package:nod_try/repositories/connect_repository.dart';
 
 class _SpyCache extends ProofPhotoCache {
   _SpyCache() : super(fetch: (_) async => null, directory: () async => null);
+
+  int clears = 0;
+
+  @override
+  Future<void> clear() async {
+    clears++;
+  }
+}
+
+class _SpyShareFiles extends ShareCardTempFiles {
+  _SpyShareFiles() : super(directory: () async => null);
 
   int clears = 0;
 
@@ -157,11 +169,13 @@ void main() {
   group('proofPhotoCacheBinderProvider', () {
     late StreamController<ConnectionStatus> status;
     late _SpyCache cache;
+    late _SpyShareFiles shareFiles;
     late ProviderContainer container;
 
     setUp(() {
       status = StreamController<ConnectionStatus>();
       cache = _SpyCache();
+      shareFiles = _SpyShareFiles();
       container = ProviderContainer(
         overrides: [
           connectionStatusStreamProvider.overrideWith((ref) => status.stream),
@@ -169,6 +183,7 @@ void main() {
             (ref) => const Stream<User?>.empty(),
           ),
           proofPhotoCacheProvider.overrideWithValue(cache),
+          shareCardTempFilesProvider.overrideWithValue(shareFiles),
         ],
       );
       container.listen(proofPhotoCacheBinderProvider, (_, _) {});
@@ -190,6 +205,7 @@ void main() {
 
       await emit(ConnectionStatus.none);
       expect(cache.clears, 1);
+      expect(shareFiles.clears, 1, reason: 'the share card copy goes too');
 
       await emit(ConnectionStatus.none);
       expect(cache.clears, 1, reason: 'no repeat without a change');

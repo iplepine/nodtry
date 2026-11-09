@@ -232,6 +232,18 @@ class RealUserRepository implements UserRepository {
   }
 
   @override
+  Future<bool> fetchPartnerPhotoShareConsent(String uid) async {
+    // Server only: a cached doc may still say true after the partner turned
+    // it off. Offline, this throws and the caller treats it as "no".
+    final doc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .get(const GetOptions(source: Source.server));
+    if (!doc.exists) return false;
+    return UserModel.fromFirestore(doc).allowsPartnerPhotoInShareCard;
+  }
+
+  @override
   Future<UserModel?> getUserByInviteCode(String code) async {
     final normalized = normalizeInviteCode(code);
     if (!isValidInviteCode(normalized)) return null;

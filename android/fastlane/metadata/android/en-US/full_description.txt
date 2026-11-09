@@ -13,9 +13,9 @@ FUN BETS, NOT MONEY
 · Miss it and you buy the chicken. Keep it and you both go out for sushi.
 · Couple bets and penalties stay non-monetary: the dishes, a coffee, a massage, picking the movie.
 
-PROOF PHOTOS STAY BETWEEN YOU TWO
+PROOF PHOTOS STAY BETWEEN YOU TWO BY DEFAULT
 · DuoDone is 1:1. You connect with exactly one partner, and there is no public feed.
-· Only your connected partner can see your proof photos.
+· By default, only your connected partner can see your proof photos. If you allow it, your partner can put yours on a share card.
 · Location data is removed from photos before upload.
 · Delete your photos anytime. If you disconnect, your partner can no longer see them in the app. You can report a photo you're uncomfortable with.
 

@@ -23,7 +23,7 @@
 - [ ] **[사전]** 개인정보처리방침과 지원 페이지를 새 이름으로 갱신하고, 현재 스토어에 등록된 URL이 200으로 열리는지 확인한다. 반영할 내용:
   - 서비스명 `둘운완(DuoDone)`(구 그래,해봐)
   - 수집 항목 추가: 인증샷(사진), 운동 종류·완료 기록, 애칭, 한마디·내기 문구, 시간대·언어·앱 빌드
-  - 인증샷 제공 대상은 연결된 짝꿍 1명뿐이다. 업로드 전 위치 정보(EXIF/GPS)를 지운다는 사실을 적는다.
+  - 인증샷 제공 대상은 기본적으로 연결된 짝꿍 1명뿐이다(1.2.0+: 내가 설정에서 허용하면 짝꿍이 자기 기기에서 만드는 공유 카드에 들어가 짝꿍이 앱 밖으로 공유할 수 있다 — 개인정보처리방침 2절). 업로드 전 위치 정보(EXIF/GPS)를 지운다는 사실을 적는다.
   - 보관·파기: 본인이 삭제하거나 탈퇴하면 서버에서 삭제한다.
     - 연결을 해제하면 "앱에서 더 이상 볼 수 없음"까지만 약속한다. 상대 기기에 남은 캡처는 회수할 수 없다.
   - 처리 위탁: Google Firebase(Cloud Firestore·Cloud Storage·Cloud Functions·Authentication·FCM·Analytics·Crashlytics)
@@ -216,7 +216,7 @@ Two demo accounts are already connected to each other. Account A is in the Sign-
 
 PRIVATE 1:1 SHARING, NOT A PUBLIC FEED
 - In the app, two people connect only when the invitee enters the inviter's invite code or opens the inviter's invite link. Each person can be connected to only one partner at a time. Our server enforces this 1:1 limit and issues both people new invite codes after each connection.
-- Proof photos are visible only to that one connected partner. There is no public feed, search, follower system, or messaging with strangers.
+- By default, proof photos are visible only to that one connected partner. If a user turns on "share-card photos" in Settings (off by default), their partner can put that user's photo on a streak share card, rendered on the partner's device, and share it outside the app; turning it off keeps the photo off the next card. There is no public feed, search, follower system, or messaging with strangers.
 - Location metadata (EXIF/GPS) is removed on the device before upload.
 - Before the first photo upload, users accept a one-time notice that inappropriate photos are not allowed.
 

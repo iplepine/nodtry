@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../../models/history_item.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../repositories/connect_repository.dart';
+import 'share_card_temp_files.dart';
 
 /// Thrown by [ProofPhotoCache.load] when a photo can't be shown: the read was
 /// denied (e.g. after disconnecting), the object is gone, or the network
@@ -220,12 +221,14 @@ final proofActionMetaProvider = FutureProvider.autoDispose
       }
     });
 
-/// Watch once from the app root: clears [proofPhotoCacheProvider] when the
+/// Watch once from the app root: clears [proofPhotoCacheProvider] and the
+/// share card's temporary files ([shareCardTempFilesProvider]) when the
 /// couple disconnects (from either side) or the signed-in account changes.
 final proofPhotoCacheBinderProvider = Provider<void>((ref) {
   void clear(String reason) {
     debugPrint('[ProofPhotoCache] clearing ($reason)');
     unawaited(ref.read(proofPhotoCacheProvider).clear());
+    unawaited(ref.read(shareCardTempFilesProvider).clear());
   }
 
   ref.listen<AsyncValue<ConnectionStatus>>(connectionStatusStreamProvider, (
