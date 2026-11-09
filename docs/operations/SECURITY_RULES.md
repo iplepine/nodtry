@@ -1,10 +1,10 @@
 <!-- COMMIT_STATUS START -->
 > **커밋 상태**
-> - 기준 커밋: `ca33b3afce18d181a507f9c3b524991d4fdbb21a` (`feat/couple-workout-pivot`)
-> - 최근 커밋: `ca33b3afce18` docs: 둘운완 pivot spec, decision D-007, launch plan and runbook
-> - 커밋 일시: `2026-10-03T07:18:28+09:00`
-> - 워킹트리: `dirty (18 files)`
-> - 문서 갱신: `2026-10-03 07:18:57 +0900`
+> - 기준 커밋: `f72f60758ae2fc892593170dcd8bb6729a076090` (`release/1.2.0`)
+> - 최근 커밋: `f72f60758ae2` feat(records): read plan record days actions-first + idempotent actions backfill
+> - 커밋 일시: `2026-11-10T01:55:27+09:00`
+> - 워킹트리: `dirty (2 files)`
+> - 문서 갱신: `2026-11-10 01:55:32 +0900`
 <!-- COMMIT_STATUS END -->
 
 # Firestore / Storage Security Rules
