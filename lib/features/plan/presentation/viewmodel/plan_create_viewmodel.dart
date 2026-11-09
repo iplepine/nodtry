@@ -512,6 +512,8 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       managerId = original?.managerId;
     }
 
+    // The record arrays as stored, never the days merged in from actions.
+    final records = original?.persistedRecordDates;
     return Plan(
       id: planId,
       userId: userId,
@@ -521,11 +523,11 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       state: planState,
       items: [planItem],
       createdAt: original?.createdAt ?? now,
-      completedDates: original?.completedDates ?? const [],
-      skippedDates: original?.skippedDates ?? const [],
-      verifiedDates: original?.verifiedDates ?? const [],
-      rescuedDates: original?.rescuedDates ?? const [],
-      restedDates: original?.restedDates ?? const [],
+      completedDates: records?.completed ?? const [],
+      skippedDates: records?.skipped ?? const [],
+      verifiedDates: records?.verified ?? const [],
+      rescuedDates: records?.rescued ?? const [],
+      restedDates: records?.rested ?? const [],
       lastCheerMessage: original?.lastCheerMessage,
       lastCheerType: original?.lastCheerType,
       lastCheerAt: original?.lastCheerAt,

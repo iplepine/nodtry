@@ -99,6 +99,7 @@
 | 짝꿍 기록 | `actions where userId == partner && managerId == me orderBy date desc` |
 | 짝꿍 약속 타임라인 | `actions where planId == X && managerId == me orderBy date desc` |
 | 내 약속 타임라인·오늘 기록 확인 | `actions where planId == X && userId == me (orderBy date desc 또는 date 범위)` |
+| 약속 기록일(actions 우선, 빌드 88+) | `actions where userId == me && date >= W orderBy date desc` · 짝꿍 것: `actions where userId == partner && managerId == me && date >= W orderBy date desc` (W = 35일 전 이전의 월요일, `PlanActionRecordsSource`) |
 | 짝꿍이 공유한 기록 전체 | `actions where managerId == me` |
 | 기록 탭 양쪽 합치기 | `actions where (userId == me OR managerId == me)` 또는 위 두 쿼리를 따로 |
 | action 단건(푸시에서 열기·인정 트랜잭션) | `actions/{id}` get — 소유자, 스탬프된 매니저, plan의 현재 매니저 |

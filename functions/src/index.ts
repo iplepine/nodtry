@@ -73,6 +73,7 @@ import {generateUniqueInviteCode, normalizeInviteCode} from "./inviteCode";
 import {FieldOps, SYSTEM_LINK, actionManagerFor, managerStampFor, millisOf, unlinkUpdate} from "./planLinks";
 import {deleteInviteOf, inviteReminderFunction, markInvitesConnected} from "./inviteReminder";
 import {weeklyAllowsMissedNotice, weeklySettlementCorrection, weeklyTargetOf} from "./weekly";
+import {isBackfilledAction} from "./actionsBackfill";
 import {
     TOGETHER_BUILD,
     TogetherClaim,
@@ -1193,6 +1194,10 @@ export const onPlanCreated = functions
  * they haven't recorded it today, their build can confirm, and it is the
  * first such claim on that plan today. Otherwise the record is relayed as
  * usual.
+ *
+ * A backfilled action (`backfilled: true`, scripts/migrations/
+ * backfill_plan_actions.js — a past record that only the plan arrays had) is
+ * stamped like any other but never relayed.
  */
 export const onActionCompleted = functions
     .runWith({failurePolicy: true})
@@ -1203,6 +1208,7 @@ export const onActionCompleted = functions
         if (!action) return;
 
         await reconcileActionManagers([snapshot.ref]);
+        if (isBackfilledAction(action)) return;
 
         const userId = asId(action.userId);
         const planId = asId(action.planId);
@@ -1506,8 +1512,9 @@ export const notifyUnverifiedActions = functions
 
         const pending = snap.docs.filter((doc) => {
             const action = doc.data();
-            // Not verified and not nudged yet.
-            return !action.verifiedBy && !action.verifyReminderSentAt &&
+            // Not verified and not nudged yet (and a real record, not a
+            // backfilled copy of an old one).
+            return !action.verifiedBy && !action.verifyReminderSentAt && !isBackfilledAction(action) &&
                 asId(action.planId) && asId(action.userId);
         });
         const plans = await getDocs("plans", pending.map((doc) => asId(doc.data().planId)));

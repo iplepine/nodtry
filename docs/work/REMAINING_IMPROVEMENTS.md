@@ -87,6 +87,41 @@ P0/P1/P2 개선 스윕에서 **안전하게 완결·검증된 항목은 코드�
 
 각 단계는 별도 PR로, 단계 사이에 운영 데이터로 검증 후 진행한다.
 
+### 진행 상황 (2026-11-10, release/1.2.0) — 1~4단계 코드 완료, 5~6단계 미착수
+- **1단계 읽기 경로 (빌드 88+)**: `lib/models/plan_action_records.dart`가 plan의 기록일을 actions에서
+  읽고 actions가 없는 날은 배열로 채운다(유형별·날짜별 **합집합**: 어느 쪽에 있든 사라지지 않는다).
+  `lib/repositories/plan_action_records_source.dart`가 홈 카드 스트림·`getPlansByUserIdStream`·
+  `getAllPlansByUserIdStream`(둘운완 통계·약속 상세·우리 탭)에 붙는다. 읽기는 소유자당 리스너 1개,
+  기간 한정: `actions where userId == me && date >= W orderBy date desc`, 짝꿍 것은
+  `userId == partner && managerId == me && date >= W` (W = 35일 전 이전의 월요일 — 진행 중 약속의
+  28일 전체가 들어가고, 한 주 내내 같은 값이라 화면들이 같은 리스너를 공유한다). 기존 인덱스
+  (`userId+date desc`, `userId+managerId+date desc`)로 충분해 인덱스 추가 없음. 규칙 변경 없음
+  (두 규칙 모두 허용, `rules-tests/test-next/client_queries.test.js`). 스트림은 배열만으로 먼저
+  내보내고 actions가 오면 다시 내보낸다(늦어지지 않음). actions 쿼리가 실패하면 배열만 쓴다.
+  W 이전 날짜·나에게 공유되지 않은 짝꿍 기록(스탬프 없는 레거시)은 배열 그대로.
+  주 N회(`weeklyTarget`)·같이 했어(`hasRecordOn`, `isTogetherDueToday`)·리마인더 스킵·둘운완 통계는
+  모두 병합된 필드를 읽으므로 같은 결과(`test/models/plan_action_records_test.dart`). 상대의
+  "같이 했어" 기록은 내 약속 id를 담아도 상대 plan의 기록이라 내 약속에 합쳐지지 않는다.
+  일회성 `getPlansByUserId`(알림 예약·자동 로그인)와 쓰기 경로의 판정(휴식권 주 1회, 나도 했어
+  중복, 내기 정산, 서버 함수)은 배열 그대로 — 같은 기기가 배열을 동시에 쓰므로 동일하다.
+- **2단계 듀얼 라이트 유지**: 쓰기는 그대로. 병합된 Plan을 다시 저장해도(`updatePlan`) 저장된
+  배열만 쓴다(`Plan.storedRecordDates`/`persistedRecordDates`) — actions 날짜가 배열로 복사되지 않는다.
+- **3단계 백필**: `scripts/migrations/backfill_plan_actions.js` (순수 계획 함수는
+  `functions/src/actionsBackfill.ts`, 테스트 `functions/test/actionsBackfill.test.js`, 에뮬레이터
+  `rules-tests/functions/migrations.test.js`). 기본 dry-run, `--verify`, `--apply --guard-deployed`,
+  `--user`/`--plan`으로 표본 실행. id `backfill_{planId}_{type}_{YYYYMMDD}`(소유자 시간대 날짜)라 재실행·동시
+  실행에도 중복 없음. `createdAt`은 기록 당시 시각(최근 createdAt을 보는 스케줄 함수가 새 기록으로
+  세지 않게). `onActionCompleted`·`notifyUnverifiedActions`는 `backfilled: true`를 푸시하지 않는다
+  (managerId 스탬프는 함). `verifiedDates`는 백필하지 않는다(누가 인정했는지 배열로 알 수 없음) —
+  `--verify`가 보고하고, 앱은 배열과 합쳐 보여 준다.
+- **4단계 검증**: `--verify`가 plan별 배열 날짜 vs actions 날짜(유형별 + 인정)를 비교해 불일치만 출력.
+  백필 후 "only in arrays"가 verified 외 0이어야 한다. "only in actions"는 배열이 놓친 날(빌드 88+만 보임).
+- **배포 순서**: functions 배포(가드) → `--verify`·dry-run 리포트 승인 → `--apply --guard-deployed` →
+  `--verify` 재확인. 인덱스·규칙·호스팅 배포는 필요 없다.
+- **5~6단계 전제(미착수)**: 빌드 ≤87이 사실상 없어질 것, 서버 함수(`weekly.ts`, `schedule.ts`,
+  `index.ts`의 `hasCoveredToday`/`verifiedDates` 길이 비교)와 쓰기 경로 판정을 actions로 옮길 것,
+  `verifiedDates`만 있는 날의 처리 결정, W 이전 기간(통계 연속 기록)을 actions로 읽을 방법.
+
 ---
 
 ## 4. (P2) Pretendard 경량 폰트 자산 복구 — 코드 완료, 기기 지표 확인 대기

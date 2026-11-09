@@ -11,6 +11,7 @@ import '../models/proof_photo.dart';
 import '../models/together_log.dart';
 import '../utils/context_free_l10n.dart';
 import '../utils/error_reporter.dart';
+import 'plan_action_records_source.dart';
 import 'proof_photo_storage.dart';
 import 'record_repository.dart';
 
@@ -129,6 +130,13 @@ class RealRecordRepository implements RecordRepository {
   final ProofPhotoStorage _proofStorage;
   final Duration _proofUploadTimeout;
 
+  /// Merges each streamed plan's `actions` into its record days (actions
+  /// first, the plan arrays for the rest; see [PlanActionRecordsSource]).
+  late final PlanActionRecordsSource _actionRecords = PlanActionRecordsSource(
+    firestore: _firestore,
+    auth: _auth,
+  );
+
   /// [userId]'s plans that I may read: all of my own, or — for my partner —
   /// only the ones I manage (`userId == partner && managerId == me`; a query
   /// on the partner's uid alone is denied under firestore.rules.next).
@@ -172,7 +180,20 @@ class RealRecordRepository implements RecordRepository {
             Filter('managerId', isEqualTo: user.uid),
           ),
         )
-        .snapshots(includeMetadataChanges: true);
+        .snapshots(includeMetadataChanges: true)
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => Plan.fromMap(doc.data(), doc.id))
+              .where(
+                (p) =>
+                    p.state == PlanState.active ||
+                    p.state == PlanState.pendingApproval ||
+                    p.state == PlanState.completed ||
+                    p.state == PlanState.rejected ||
+                    p.promise?.status == PromiseStatus.settled,
+              )
+              .toList(),
+        );
 
     final relationsStream = _firestore
         .collection('relations')
@@ -184,30 +205,17 @@ class RealRecordRepository implements RecordRepository {
         )
         .snapshots();
 
-    return Rx.combineLatest2(plansStream, relationsStream, (
-      QuerySnapshot planSnapshot,
-      QuerySnapshot relationSnapshot,
-    ) {
-      final plans = planSnapshot.docs
-          .map(
-            (doc) => Plan.fromMap(doc.data() as Map<String, dynamic>, doc.id),
-          )
-          .where(
-            (p) =>
-                p.state == PlanState.active ||
-                p.state == PlanState.pendingApproval ||
-                p.state == PlanState.completed ||
-                p.state == PlanState.rejected ||
-                p.promise?.status == PromiseStatus.settled,
-          )
-          .toList();
+    return Rx.combineLatest2(
+      _actionRecords.attach(plansStream),
+      relationsStream,
+      (List<Plan> plans, QuerySnapshot relationSnapshot) {
+        final relations = relationSnapshot.docs
+            .map((doc) => RelationModel.fromFirestore(doc))
+            .toList();
 
-      final relations = relationSnapshot.docs
-          .map((doc) => RelationModel.fromFirestore(doc))
-          .toList();
-
-      return _processPlans(plans, user.uid, relations: relations);
-    }).doOnError((e, s) {
+        return _processPlans(plans, user.uid, relations: relations);
+      },
+    ).doOnError((e, s) {
       debugPrint('[RealRecordRepository] Stream Error: $e');
     });
   }
@@ -781,25 +789,29 @@ class RealRecordRepository implements RecordRepository {
 
   @override
   Stream<List<Plan>> getPlansByUserIdStream(String userId) {
-    return _readablePlansOf(userId).snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Plan.fromMap(doc.data(), doc.id))
-          .where(
-            (p) =>
-                p.state == PlanState.active ||
-                p.state == PlanState.pendingApproval,
-          )
-          .toList();
-    });
+    return _actionRecords.attach(
+      _readablePlansOf(userId).snapshots().map((snapshot) {
+        return snapshot.docs
+            .map((doc) => Plan.fromMap(doc.data(), doc.id))
+            .where(
+              (p) =>
+                  p.state == PlanState.active ||
+                  p.state == PlanState.pendingApproval,
+            )
+            .toList();
+      }),
+    );
   }
 
   @override
   Stream<List<Plan>> getAllPlansByUserIdStream(String userId) {
-    return _readablePlansOf(userId).snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Plan.fromMap(doc.data(), doc.id))
-          .toList();
-    });
+    return _actionRecords.attach(
+      _readablePlansOf(userId).snapshots().map((snapshot) {
+        return snapshot.docs
+            .map((doc) => Plan.fromMap(doc.data(), doc.id))
+            .toList();
+      }),
+    );
   }
 
   /// 특정 아이템 하나만 포함된 임시 Plan 객체 생성 (UI 노출용)
@@ -840,6 +852,7 @@ class RealRecordRepository implements RecordRepository {
       goalTitle: original.goalTitle,
       goalDate: original.goalDate,
       weeklyTarget: original.weeklyTarget,
+      storedRecordDates: original.storedRecordDates,
     );
   }
 

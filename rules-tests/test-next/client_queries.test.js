@@ -39,6 +39,8 @@ const RULES = firestoreRulesFile();
 // Today's window for _todayDoneActionRef: the whole of fixture day 1 (UTC).
 const DAY1_START = Timestamp.fromMillis(Date.UTC(2026, 9, 1, 0, 0, 0));
 const DAY1_END = Timestamp.fromMillis(Date.UTC(2026, 9, 1, 23, 59, 59));
+// PlanActionRecordsSource's window start (any instant; here: fixture day 2).
+const RECORDS_WINDOW = Timestamp.fromMillis(Date.UTC(2026, 9, 2, 0, 0, 0));
 
 /**
  * The app's queries. `as` is the signed-in participant; strangers send the
@@ -111,6 +113,29 @@ const QUERIES = [
         build: (db) => query(collection(db, "actions"),
             where("userId", "==", "bob"), where("managerId", "==", "alice"), orderBy("date", "desc")),
         // bLegacy (unstamped, build ≤80) appears once the server / backfill stamps it.
+        expect: ["b1"],
+        ordered: true,
+    },
+    {
+        name: "actions where userId == me && date >= W orderBy date desc (actions-first plan records)",
+        app: "PlanActionRecordsSource (getHomeCardStatesStream, getPlansByUserIdStream, getAllPlansByUserIdStream): " +
+            "my plans' recent records, W = a Monday ≥35 days back",
+        as: "alice",
+        modes: ["listen"],
+        build: (db) => query(collection(db, "actions"),
+            where("userId", "==", "alice"), where("date", ">=", RECORDS_WINDOW), orderBy("date", "desc")),
+        expect: ["aLegacy", "a2"],
+        ordered: true,
+    },
+    {
+        name: "actions where userId == partner && managerId == me && date >= W orderBy date desc " +
+            "(actions-first plan records)",
+        app: "PlanActionRecordsSource: the recent records of the partner's plans I manage",
+        as: "alice",
+        modes: ["listen"],
+        build: (db) => query(collection(db, "actions"),
+            where("userId", "==", "bob"), where("managerId", "==", "alice"), where("date", ">=", DAY1_START),
+            orderBy("date", "desc")),
         expect: ["b1"],
         ordered: true,
     },

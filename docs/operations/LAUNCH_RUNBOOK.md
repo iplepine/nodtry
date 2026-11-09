@@ -133,6 +133,7 @@ curl -sI https://nod-try.web.app/get | head -1            # 200
 - 멱등이어야 한다(두 번째 실행 시 변경 0건).
 - 대상 예: 관계가 없는데 managerId가 남은 plans. 최종 대상은 스크립트 리포트로 확정한다.
 - 1.1.0(81) 필수: `scripts/migrations/clear_stale_manager_ids.js` 다음에 `scripts/migrations/backfill_action_manager_ids.js`(3단계 functions 배포 **뒤**). 81은 짝꿍 기록·약속 타임라인을 `actions.managerId == me`로만 읽으므로, 백필 전에 쓰인 기록은 81 사용자에게 안 보인다(SECURITY_RULES.md "읽기 축소"). 이 스크립트들은 `--restore`가 없다 — 복원은 JSON-lines 백업의 `previous` 값으로 한다.
+- 1.2.0(88) 이후 선택: `scripts/migrations/backfill_plan_actions.js` — plans 기록 배열에만 있고 `actions`가 없는 날의 기록을 만든다(`backfilled: true`, 결정적 id). **`backfilled` 가드가 든 functions 배포 뒤에만** `--apply --guard-deployed`로 돌린다(아니면 기록마다 짝꿍 푸시). 먼저 `--verify`로 불일치를 보고, dry-run 리포트 승인 후 실행. 되돌리기는 백업의 `id`(전부 `backfilled: true`) 삭제. 상세: `docs/work/REMAINING_IMPROVEMENTS.md` §3.
 
 ```bash
 # 인증: 서비스 계정 키는 레포 밖 경로에만 둔다. 커밋 금지

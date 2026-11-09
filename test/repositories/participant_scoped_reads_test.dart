@@ -209,13 +209,22 @@ void main() {
       },
     );
 
-    test('the home stream: plans and relations OR-ed on me', () async {
-      await records().getHomeCardStatesStream().first;
+    test('the home stream: plans and relations OR-ed on me, then each '
+        "owner's recent actions", () async {
+      final stream = records().getHomeCardStatesStream();
+      await stream.take(2).last;
 
-      expect(spy.shapes, [
+      expect(spy.shapes.take(2), [
         'plans where userId == alice || managerId == alice',
         'relations where executorId == alice || managerId == alice',
       ]);
+      // The actions-first read path (plan_action_records_source.dart): one
+      // bounded listener per plan owner.
+      expect(spy.shapes.skip(2).toSet(), {
+        'actions where userId == alice && date >= <time> orderBy date desc',
+        'actions where userId == bob && managerId == alice && '
+            'date >= <time> orderBy date desc',
+      });
     });
   });
 

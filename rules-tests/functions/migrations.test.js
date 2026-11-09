@@ -109,6 +109,88 @@ describe("migrations (emulator)", () => {
         assert.deepEqual(await state(), after);
     });
 
+    it("backfill_plan_actions: dry run and verify read only, --apply creates the missing days once, " +
+        "stamped and never pushed", async () => {
+        const a = uid("alice");
+        const b = uid("bob");
+        for (const id of [a, b]) {
+            await db.doc(`users/${id}`).set({displayName: id, fcmToken: `token-${id}`, timezone: "Asia/Seoul",
+                inviteCode: `C${randomUUID().slice(0, 7).toUpperCase()}`});
+        }
+        const planId = `${a}_plan`;
+        const at = (n, hour = 12) => Timestamp.fromDate(new Date(Date.UTC(2026, 8, n, hour - 9)));
+        await db.doc(`plans/${planId}`).set({
+            userId: a, state: "active", items: [{title: "헬스장 가기", days: [1, 2, 3, 4, 5, 6, 7], count: 7}],
+            completedDates: [at(1), at(2), at(2, 20)], skippedDates: [at(3)], restedDates: [], rescuedDates: [at(4)],
+            verifiedDates: [at(1)],
+        });
+        const stamp = {inviterId: a, inviteCode: (await db.doc(`users/${a}`).get()).data().inviteCode,
+            status: "active", createdAt: FieldValue.serverTimestamp()};
+        const batch = db.batch();
+        batch.set(db.collection("relations").doc(), {managerId: a, executorId: b, ...stamp});
+        batch.set(db.collection("relations").doc(), {managerId: b, executorId: a, ...stamp});
+        await batch.commit();
+        await waitFor(async () => (await db.doc(`plans/${planId}`).get()).data().managerId === b, {label: "link"});
+        // The 1st already has its record (with 인정); the 2nd, 3rd and 4th only live in the arrays.
+        const existing = await db.collection("actions").add({userId: a, planId, type: "done", date: at(1),
+            verifiedBy: b, createdAt: at(1)});
+        await waitFor(async () => (await existing.get()).data().managerId === b, {label: "trigger stamp"});
+        await sleep(2500); // its push (an old record, but a new action) has gone out
+        const pushesBefore = (await db.collection("emulatorPushes").where("to", "==", b).get()).size;
+        const backfilled = async () => (await db.collection("actions").where("planId", "==", planId)
+            .where("backfilled", "==", true).get()).docs;
+
+        const dry = await migrate("backfill_plan_actions.js", ["--plan", planId]);
+        assert.equal(dry.code, 0, dry.out);
+        assert.match(dry.out, /actions to create: 3/);
+        assert.match(dry.out, /Dry run only/);
+        const verify = await migrate("backfill_plan_actions.js", ["--plan", planId, "--verify"]);
+        assert.equal(verify.code, 0, verify.out);
+        assert.match(verify.out, /1 with a mismatch/);
+        assert.match(verify.out, /done: arrays 2 days, actions 1 days; only in arrays: 2026-09-02/);
+        assert.equal((await backfilled()).length, 0);
+
+        const refused = await migrate("backfill_plan_actions.js", ["--plan", planId, "--apply"]);
+        assert.equal(refused.code, 1, refused.out);
+        assert.match(refused.out, /--guard-deployed/);
+
+        const backup = path.join(scratch, "plan-actions.jsonl");
+        const applied = await migrate("backfill_plan_actions.js",
+            ["--plan", planId, "--apply", "--guard-deployed", "--backup", backup]);
+        assert.equal(applied.code, 0, applied.out);
+        assert.match(applied.out, /Created 3 actions/);
+        const docs = await backfilled();
+        assert.deepEqual(docs.map((d) => d.id).sort(), [
+            `backfill_${planId}_done_20260902`, `backfill_${planId}_rescued_20260904`,
+            `backfill_${planId}_skipped_20260903`,
+        ]);
+        const done = docs.find((d) => d.id.includes("_done_")).data();
+        assert.equal(done.userId, a);
+        assert.equal(done.type, "done");
+        assert.equal(done.title, "헬스장 가기");
+        assert.equal(done.date.toMillis(), at(2).toMillis(), "the day's first moment");
+        assert.equal(done.createdAt.toMillis(), at(2).toMillis());
+        assert.deepEqual(readBackup(backup).map((line) => line.id).sort(), docs.map((d) => d.id).sort());
+        // Shared with the partner like any record (the trigger stamps it), but not pushed.
+        for (const doc of docs) {
+            await waitFor(async () => (await doc.ref.get()).data().managerId === b, {label: "backfill stamp"});
+        }
+        await sleep(2500);
+        assert.equal((await db.collection("emulatorPushes").where("to", "==", b).get()).size, pushesBefore);
+        // The arrays are untouched.
+        const plan = (await db.doc(`plans/${planId}`).get()).data();
+        assert.equal(plan.completedDates.length, 3);
+        assert.equal(plan.verifiedDates.length, 1);
+
+        const rerun = await migrate("backfill_plan_actions.js", ["--plan", planId, "--apply", "--guard-deployed",
+            "--backup", path.join(scratch, "plan-actions-again.jsonl")]);
+        assert.equal(rerun.code, 0, rerun.out);
+        assert.match(rerun.out, /Nothing to create/);
+        assert.equal((await backfilled()).length, 3);
+        const clean = await migrate("backfill_plan_actions.js", ["--plan", planId, "--verify"]);
+        assert.match(clean.out, /0 with a mismatch/);
+    });
+
     it("strip_user_emails: refuses before minBuild 81, then removes the field with a backup", async () => {
         const withEmail = uid("e");
         const withNull = uid("n");

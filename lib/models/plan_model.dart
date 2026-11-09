@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'plan_action_records.dart';
 import 'promise_model.dart';
 import 'together_log.dart';
 import 'weekly_target.dart';
@@ -125,6 +126,25 @@ class Plan {
   /// `done` ([lastActionId]). Optional; older builds ignore it.
   final TogetherMark? lastTogether;
 
+  /// The record arrays as stored on the plan document, when the five record
+  /// fields above were merged with the plan's `actions`
+  /// (`plan_action_records.dart`); null when they are the stored arrays.
+  /// [toMap] writes these, so saving a merged plan never copies action days
+  /// into the arrays.
+  final PlanRecordDates? storedRecordDates;
+
+  /// The record arrays to write back: [storedRecordDates], or the record
+  /// fields themselves for a plan read straight from its document.
+  PlanRecordDates get persistedRecordDates =>
+      storedRecordDates ??
+      PlanRecordDates(
+        completed: completedDates,
+        skipped: skippedDates,
+        verified: verifiedDates,
+        rescued: rescuedDates,
+        rested: restedDates,
+      );
+
   Plan({
     this.id,
     required this.userId,
@@ -162,6 +182,7 @@ class Plan {
     this.goalDate,
     this.weeklyTarget,
     this.lastTogether,
+    this.storedRecordDates,
   });
 
   /// Length of a plan period in days (the 4-week window).
@@ -242,6 +263,10 @@ class Plan {
     int? weeklyTarget,
     TogetherMark? lastTogether,
 
+    /// Replaces [storedRecordDates]. Without it a copy keeps them — unless a
+    /// record list is replaced, which makes the new lists the stored ones.
+    PlanRecordDates? storedRecordDates,
+
     /// Drops [goalTitle] and [goalDate] (a null argument keeps them).
     bool clearGoal = false,
 
@@ -288,10 +313,20 @@ class Plan {
           ? null
           : weeklyTarget ?? this.weeklyTarget,
       lastTogether: lastTogether ?? this.lastTogether,
+      storedRecordDates:
+          storedRecordDates ??
+          (completedDates != null ||
+                  skippedDates != null ||
+                  verifiedDates != null ||
+                  rescuedDates != null ||
+                  restedDates != null
+              ? null
+              : this.storedRecordDates),
     );
   }
 
   Map<String, dynamic> toMap() {
+    final records = persistedRecordDates;
     return {
       'userId': userId,
       'managerId': managerId,
@@ -300,13 +335,19 @@ class Plan {
       'state': state.toMap(),
       'items': items.map((x) => x.toMap()).toList(),
       'createdAt': Timestamp.fromDate(createdAt),
-      'completedDates': completedDates
+      'completedDates': records.completed
           .map((d) => Timestamp.fromDate(d))
           .toList(),
-      'skippedDates': skippedDates.map((d) => Timestamp.fromDate(d)).toList(),
-      'verifiedDates': verifiedDates.map((d) => Timestamp.fromDate(d)).toList(),
-      'rescuedDates': rescuedDates.map((d) => Timestamp.fromDate(d)).toList(),
-      'restedDates': restedDates.map((d) => Timestamp.fromDate(d)).toList(),
+      'skippedDates': records.skipped
+          .map((d) => Timestamp.fromDate(d))
+          .toList(),
+      'verifiedDates': records.verified
+          .map((d) => Timestamp.fromDate(d))
+          .toList(),
+      'rescuedDates': records.rescued
+          .map((d) => Timestamp.fromDate(d))
+          .toList(),
+      'restedDates': records.rested.map((d) => Timestamp.fromDate(d)).toList(),
       if (lastCheerMessage != null) 'lastCheerMessage': lastCheerMessage,
       if (lastCheerType != null) 'lastCheerType': lastCheerType,
       if (lastCheerAt != null) 'lastCheerAt': Timestamp.fromDate(lastCheerAt!),
