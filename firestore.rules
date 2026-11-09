@@ -180,5 +180,7 @@ service cloud.firestore {
     // Server-only collections (serverLocks for push dedupe / rate limits /
     // link processing) have no match here, so clients can neither read nor
     // write them.
+    // pushQuota/{uid}_{YYYYMMDD} (daily push cap counters) is server-only the
+    // same way: no match, so all client access is denied.
   }
 }

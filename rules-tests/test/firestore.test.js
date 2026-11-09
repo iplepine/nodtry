@@ -57,6 +57,13 @@ describe("firestore.rules", () => {
             await assertFails(getDoc(doc(dbOf("alice"), "serverLocks/poke_planA_2026-10-02")));
             await assertFails(setDoc(doc(dbOf("alice"), "serverLocks/x"), {at: 1}));
         });
+
+        it("pushQuota is closed to clients, even for the owner's own counter", async () => {
+            await assertFails(getDoc(doc(dbOf("alice"), "pushQuota/alice_20261109")));
+            await assertFails(setDoc(doc(dbOf("alice"), "pushQuota/alice_20261109"), {count: 0}));
+            await assertFails(deleteDoc(doc(dbOf("alice"), "pushQuota/alice_20261109")));
+            await assertFails(getDoc(doc(dbOf(null), "pushQuota/alice_20261109")));
+        });
     });
 
     describe("actions", () => {

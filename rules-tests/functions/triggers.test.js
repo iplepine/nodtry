@@ -41,8 +41,11 @@ async function expectPushes(uid, count, label) {
     return pushes;
 }
 
-const AUTH_EMULATOR = "http://127.0.0.1:9099";
-const FUNCTIONS_EMULATOR = `http://127.0.0.1:5001/${PROJECT_ID}/us-central1`;
+// emulators:exec sets FIREBASE_AUTH_EMULATOR_HOST; FUNCTIONS_EMULATOR_PORT
+// is only needed when the emulators run on non-default ports.
+const AUTH_EMULATOR = `http://${process.env.FIREBASE_AUTH_EMULATOR_HOST || "127.0.0.1:9099"}`;
+const FUNCTIONS_EMULATOR =
+    `http://127.0.0.1:${process.env.FUNCTIONS_EMULATOR_PORT || 5001}/${PROJECT_ID}/us-central1`;
 
 /** A guest account on the auth emulator: {uid, idToken}. */
 async function signUpAnonymously() {
@@ -141,7 +144,7 @@ describe("Cloud Functions triggers (emulator)", () => {
     before(async () => {
         await waitFor(async () => {
             try {
-                const res = await fetch(`http://127.0.0.1:5001/${PROJECT_ID}/us-central1/__probe`);
+                const res = await fetch(`${FUNCTIONS_EMULATOR}/__probe`);
                 return res.status > 0;
             } catch {
                 return false;
@@ -262,6 +265,70 @@ describe("Cloud Functions triggers (emulator)", () => {
         assert.equal(pushes[0].data.type, "poke_reply");
         assert.equal(pushes[0].notification.title, "💬 alice의 답장");
         assert.equal(pushes[0].notification.body, "지금 간다 🏃");
+    });
+
+    it("daily push cap: extra cheers stop at 5 pushes a day, core pushes still arrive", async () => {
+        const {a, b, planId} = await linkedPair(); // a already got 1 push (partner_connected)
+        for (let i = 0; i < 7; i++) {
+            await db.collection("cheers").add({
+                fromUserId: b, toUserId: a, planId, reactionType: "💪", message: `cheer ${i}`,
+            });
+        }
+        let pushes = await expectPushes(a, 5, "capped cheers");
+        assert.equal(pushes.filter((p) => p.data.type === "cheer").length, 4);
+        // a knocks on b; b's reply to it is core: delivered over the secondary limit.
+        await db.collection("cheers").add({fromUserId: a, toUserId: b, planId, reactionType: "poke", message: ""});
+        await expectPushes(b, 1, "knock");
+        await db.collection("cheers").add({fromUserId: b, toUserId: a, planId, reactionType: "reply", message: "go"});
+        pushes = await expectPushes(a, 6, "core reply after the cap");
+        assert.equal(pushes.filter((p) => p.data.type === "poke_reply").length, 1);
+        // A second reply is only standard (still under 8 here).
+        await db.collection("cheers").add({fromUserId: b, toUserId: a, planId, reactionType: "reply", message: "again"});
+        await expectPushes(a, 7, "standard second reply");
+        const quota = (await db.collection("pushQuota").get()).docs.filter((doc) => doc.id.startsWith(`${a}_`));
+        assert.equal(quota.length, 1);
+        const counter = quota[0].data();
+        assert.equal(counter.count, 7);
+        assert.equal(counter.suppressed, 3);
+        assert.equal(counter.core, 2);
+        assert.equal(counter.standard, 1);
+        assert.equal(counter.secondary, 4);
+        assert.ok(counter.expireAt.toMillis() > Date.now() + 2 * 86400000, "expireAt for the TTL policy");
+    });
+
+    it("daily push cap: a reply with no knock today is not core", async () => {
+        const {a, b, planId} = await linkedPair();
+        for (let i = 0; i < 7; i++) {
+            await db.collection("plans").doc(`${b}_extra${i}`).set({userId: b, managerId: a, state: "active", items: []});
+        }
+        // 1 connected + 3 core proposals + 4 standard ones = 8 = the cap.
+        await expectPushes(a, 8, "proposals up to the cap");
+        await db.collection("cheers").add({fromUserId: b, toUserId: a, planId, reactionType: "reply", message: "hi"});
+        await expectPushes(a, 8, "unprompted reply dropped at the cap");
+    });
+
+    it("daily push cap: only the first 인정 of a plan today is core", async () => {
+        const {a, b, planId} = await linkedPair();
+        for (let i = 0; i < 4; i++) {
+            await db.collection("cheers").add({fromUserId: b, toUserId: a, planId, reactionType: "💪", message: `${i}`});
+        }
+        await expectPushes(a, 5, "secondary limit reached");
+        await db.doc(`plans/${planId}`).update({completedDates: FieldValue.arrayUnion(Timestamp.now()), lastUpdatedBy: a});
+        for (let i = 0; i < 3; i++) {
+            await db.collection("cheers").add({fromUserId: b, toUserId: a, planId, reactionType: "🔥"});
+        }
+        const pushes = await expectPushes(a, 6, "one core 인정");
+        assert.equal(pushes.filter((p) => p.notification?.title === "🔥 bob의 인정 도착!").length, 1);
+    });
+
+    it("an 'en' recipient gets English copy, same data.type", async () => {
+        const {a, b, planId} = await linkedPair();
+        await db.doc(`users/${b}`).update({locale: "en"});
+        await db.collection("cheers").add({fromUserId: a, toUserId: b, planId, reactionType: "reply", message: ""});
+        const [reply] = await expectPushes(b, 1, "english reply");
+        assert.equal(reply.data.type, "poke_reply");
+        assert.equal(reply.data.title, "💬 alice replied");
+        assert.equal(reply.data.body, "Replied to your knock");
     });
 
     it("strangers cannot push through cheers", async () => {
