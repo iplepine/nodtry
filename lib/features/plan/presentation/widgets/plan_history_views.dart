@@ -183,8 +183,11 @@ class _MonthGrid extends StatelessWidget {
     if (_containsDate(plan.rescuedDates, date)) return _DayStatus.rescued;
     if (_containsDate(plan.skippedDates, date)) return _DayStatus.skipped;
 
-    final isScheduled = scheduledWeekdays.isEmpty ||
-        scheduledWeekdays.contains(date.weekday);
+    // 주 N회: only a must-do day is "scheduled" (missed once past); any
+    // other unlogged day is neutral.
+    final isScheduled = plan.isWeekly
+        ? plan.isDueOn(date)
+        : scheduledWeekdays.isEmpty || scheduledWeekdays.contains(date.weekday);
     if (!isScheduled) return _DayStatus.notScheduled;
 
     if (date.isBefore(today)) return _DayStatus.missed;
@@ -410,6 +413,7 @@ class PlanHistoryGraphView extends StatelessWidget {
     final start = _dateOnly(plan.startDate);
     final end = _dateOnly(plan.endDate);
     if (end.isBefore(start)) return const [];
+    if (plan.isWeekly) return _weeklyTargetStats(plan, start, end);
 
     final scheduledWeekdays = plan.items.expand((i) => i.days).toSet();
     final today = _dateOnly(DateTime.now());
@@ -441,6 +445,23 @@ class PlanHistoryGraphView extends StatelessWidget {
     }
     return weeks;
   }
+}
+
+/// 주 N회: one bar per Monday–Sunday week, its credits against its target.
+List<_WeekStats> _weeklyTargetStats(Plan plan, DateTime start, DateTime end) {
+  final weeks = <_WeekStats>[];
+  var day = start;
+  while (!day.isAfter(end)) {
+    final week = plan.weeklyWeekOf(day)!;
+    weeks.add(
+      _WeekStats(
+        scheduled: week.target,
+        done: week.credited < week.target ? week.credited : week.target,
+      ),
+    );
+    day = DateTime(day.year, day.month, day.day + (8 - day.weekday));
+  }
+  return weeks;
 }
 
 class _WeekStats {

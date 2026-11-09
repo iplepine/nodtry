@@ -23,12 +23,20 @@
 ///   workouts from before the partner joined (or with a previous partner)
 ///   don't carry into the streak.
 ///
+/// A 주 N회 plan (`Plan.weeklyTarget`, see `weekly_target.dart`) makes a day
+/// scheduled only when it is a must-do day: its done days count as usual, an
+/// unlogged day is neutral ([DuoDayStatus.off]) while the week can still be
+/// completed, and an unlogged must-do day is a miss that ends the streak.
+/// Future days show as [DuoDayStatus.upcoming] only when they are must-do if
+/// nothing else is logged.
+///
 /// Stopped, draft, pending-approval and rejected plans never make a day
 /// scheduled (a stopped plan keeps its end date, so its days after the stop
 /// are unknown); their done records still count.
 library;
 
 import '../../../models/plan_model.dart';
+import '../../../models/weekly_target.dart';
 
 /// One person's day.
 enum DuoDayStatus {
@@ -354,9 +362,27 @@ class _PlanDays {
     }
     if (plan.items.isEmpty) return false;
     if (date.isBefore(_start) || date.isAfter(_end)) return false;
+    final target = plan.weeklyTarget;
+    if (target != null) {
+      final monday = weeklyWeekStartOf(date);
+      final week = _weeks[monday] ??= evaluateWeeklyWeekAt(
+        weeklyTarget: target,
+        day: date,
+        periodStart: _start,
+        periodEnd: _end,
+        isCredited: (key) =>
+            completed.contains(key) ||
+            rested.contains(key) ||
+            rescued.contains(key),
+      );
+      return week.mustDo[date.weekday - 1];
+    }
     // Old plans saved without days meant "every day".
     return _weekdays.isEmpty || _weekdays.contains(date.weekday);
   }
+
+  /// Weekly plans: each Monday's week, evaluated once.
+  final Map<DateTime, WeeklyWeek> _weeks = {};
 
   /// The first day this plan can matter: its start, or an earlier record.
   DateTime get earliestDay {

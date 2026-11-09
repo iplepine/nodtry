@@ -352,6 +352,13 @@ class MockRecordRepository implements RecordRepository {
   }
 
   @override
+  Future<void> clearWeeklyTarget(String planId) async {
+    final planIndex = _mockPlans.indexWhere((p) => p.id == planId);
+    if (planIndex == -1) return;
+    await updatePlan(_mockPlans[planIndex].copyWith(clearWeeklyTarget: true));
+  }
+
+  @override
   Future<void> deletePlan(String planId) async {
     await Future.delayed(const Duration(milliseconds: 500));
     _mockHomeCardModels.removeWhere((m) => m.plan?.id == planId);

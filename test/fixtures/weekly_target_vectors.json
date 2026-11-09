@@ -1,0 +1,20 @@
+{
+  "_doc": "주 N회 자유 요일 must-do vectors, shared by test/models/weekly_target_test.dart and functions/test/weekly.test.js so the app (lib/models/weekly_target.dart) and the server (functions/src/weekly.ts) agree. Each string is Monday..Sunday, 1 = true.",
+  "cases": [
+    {"name": "3x, nothing logged: the last three days are must-do", "target": 3, "inPeriod": "1111111", "credited": "0000000", "weekTarget": 3, "creditedCount": 0, "mustDo": "0000111"},
+    {"name": "3x, Mon+Tue done: only Sunday is must-do", "target": 3, "inPeriod": "1111111", "credited": "1100000", "weekTarget": 3, "creditedCount": 2, "mustDo": "0000001"},
+    {"name": "3x, met by Friday: nothing is must-do", "target": 3, "inPeriod": "1111111", "credited": "1010100", "weekTarget": 3, "creditedCount": 3, "mustDo": "0000000"},
+    {"name": "3x, Friday missed: the week is lost, every day after stays must-do", "target": 3, "inPeriod": "1111111", "credited": "0000010", "weekTarget": 3, "creditedCount": 1, "mustDo": "0000111"},
+    {"name": "1x, done on Sunday", "target": 1, "inPeriod": "1111111", "credited": "0000001", "weekTarget": 1, "creditedCount": 1, "mustDo": "0000001"},
+    {"name": "6x, nothing logged: Tuesday on", "target": 6, "inPeriod": "1111111", "credited": "0000000", "weekTarget": 6, "creditedCount": 0, "mustDo": "0111111"},
+    {"name": "6x, Monday done: Wednesday on", "target": 6, "inPeriod": "1111111", "credited": "1000000", "weekTarget": 6, "creditedCount": 1, "mustDo": "0011111"},
+    {"name": "3x, period starts Saturday: prorated to 1", "target": 3, "inPeriod": "0000011", "credited": "0000000", "weekTarget": 1, "creditedCount": 0, "mustDo": "0000001"},
+    {"name": "3x, period ends Friday: 5 days keep 3", "target": 3, "inPeriod": "1111100", "credited": "0000000", "weekTarget": 3, "creditedCount": 0, "mustDo": "0011100"},
+    {"name": "6x, period starts Wednesday: 5 of 5", "target": 6, "inPeriod": "0011111", "credited": "0000000", "weekTarget": 5, "creditedCount": 0, "mustDo": "0011111"},
+    {"name": "2x, a rest pass on Friday credits the week", "target": 2, "inPeriod": "1111111", "credited": "0000100", "weekTarget": 2, "creditedCount": 1, "mustDo": "0000001"},
+    {"name": "3x, records before the period start are ignored", "target": 3, "inPeriod": "0001111", "credited": "1100000", "weekTarget": 2, "creditedCount": 0, "mustDo": "0000011"},
+    {"name": "2x, a single day in the period", "target": 2, "inPeriod": "1000000", "credited": "0000000", "weekTarget": 1, "creditedCount": 0, "mustDo": "1000000"},
+    {"name": "no day of the week in the period", "target": 3, "inPeriod": "0000000", "credited": "1111111", "weekTarget": 0, "creditedCount": 0, "mustDo": "0000000"},
+    {"name": "4x, done on must-do Thursday keeps the rest must-do", "target": 4, "inPeriod": "1111111", "credited": "0001000", "weekTarget": 4, "creditedCount": 1, "mustDo": "0001111"}
+  ]
+}

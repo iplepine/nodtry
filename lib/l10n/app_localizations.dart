@@ -5407,6 +5407,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open to see today'**
   String get homeWidgetStale;
+
+  /// Plan create: toggle segment for fixed weekdays
+  ///
+  /// In en, this message translates to:
+  /// **'Pick days'**
+  String get planScheduleModeFixed;
+
+  /// Plan create: toggle segment for N workouts a week on any days
+  ///
+  /// In en, this message translates to:
+  /// **'N times a week'**
+  String get planScheduleModeWeekly;
+
+  /// Weekly target of a 주 N회 promise
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1x a week} other{{count}x a week}}'**
+  String planWeeklyTargetLabel(int count);
+
+  /// Weekly target stepper: decrease button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'One less'**
+  String get planWeeklyTargetDecrease;
+
+  /// Weekly target stepper: increase button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'One more'**
+  String get planWeeklyTargetIncrease;
+
+  /// Plan create: hint under the weekly target stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Any days you like. Deadline reminders only come on days you can\'t skip if you want to hit this week\'s goal.'**
+  String get planWeeklyHint;
+
+  /// Progress of a 주 N회 promise this week (credited days / target)
+  ///
+  /// In en, this message translates to:
+  /// **'This week {done}/{target}'**
+  String weeklyProgressThisWeek(int done, int target);
+
+  /// Now tab hero when a weekly promise already met this week's target
+  ///
+  /// In en, this message translates to:
+  /// **'This week\'s goal: done 🎉'**
+  String get nowWeeklyGoalMet;
+
+  /// Now tab hero sub line once the weekly target is met
+  ///
+  /// In en, this message translates to:
+  /// **'Extra workouts still add to your streak'**
+  String get nowWeeklyGoalMetSub;
 }
 
 class _AppLocalizationsDelegate

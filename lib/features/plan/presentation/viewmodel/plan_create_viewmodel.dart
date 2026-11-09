@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../models/connected_user.dart';
 import '../../../../models/plan_model.dart';
+import '../../../../models/weekly_target.dart';
 import '../../../../providers/home_provider.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../repositories/connect_repository.dart' show ConnectionStatus;
@@ -51,7 +52,8 @@ Map<String, Object> planCreatedAnalyticsParams(
       state.action.trim() != template.action.trim();
   return {
     'is_edit': isEdit,
-    'frequency': plan.items.first.days.length,
+    'frequency': plan.weeklyTarget ?? plan.items.first.days.length,
+    'schedule_mode': plan.isWeekly ? 'weekly' : 'fixed',
     'has_partner': plan.managerId != null,
     'workout_type': plan.workoutType ?? 'none',
     'template_id': template?.id ?? 'none',
@@ -63,6 +65,9 @@ Map<String, Object> planCreatedAnalyticsParams(
 class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
   static const _defaultSelectedDays = {0, 2, 4};
   static const _allDays = {0, 1, 2, 3, 4, 5, 6};
+
+  /// The 주 N회 stepper's first value when nothing suggests another.
+  static const defaultWeeklyTarget = 3;
 
   @override
   FutureOr<PlanCreateState> build() {
@@ -87,7 +92,11 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
     final candidates =
         partnerPlans
             .where(
-              (plan) => plan.state == PlanState.active && plan.items.isNotEmpty,
+              // A 주 N회 plan lists all seven days but has no fixed ones.
+              (plan) =>
+                  plan.state == PlanState.active &&
+                  plan.items.isNotEmpty &&
+                  !plan.isWeekly,
             )
             .toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -122,6 +131,25 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         state = AsyncValue.data(
           _withDays(prevState, Set<int>.from(selectedDays)),
         );
+      case SetWeeklyModeIntent(:final weekly):
+        if (weekly == prevState.isWeekly) return;
+        state = AsyncValue.data(
+          prevState.copyWith(
+            weeklyTarget: weekly ? _weeklyTargetFrom(prevState) : null,
+            daysLocked: true,
+            editedAfterTemplate: prevState.appliedTemplate != null,
+          ),
+        );
+      case UpdateWeeklyTargetIntent(:final target):
+        final clamped = target.clamp(kWeeklyTargetMin, kWeeklyTargetMax);
+        if (!prevState.isWeekly || clamped == prevState.weeklyTarget) return;
+        state = AsyncValue.data(
+          prevState.copyWith(
+            weeklyTarget: clamped,
+            daysLocked: true,
+            editedAfterTemplate: prevState.appliedTemplate != null,
+          ),
+        );
       case UpdateNotificationTimeIntent(:final notificationTime):
         state = AsyncValue.data(
           prevState.copyWith(
@@ -150,6 +178,13 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       case SavePlanIntent():
         await _savePlan();
     }
+  }
+
+  /// The stepper's first value: as many as the weekdays picked so far.
+  static int _weeklyTargetFrom(PlanCreateState prev) {
+    final picked = prev.selectedDays.length;
+    if (picked < kWeeklyTargetMin) return defaultWeeklyTarget;
+    return picked.clamp(kWeeklyTargetMin, kWeeklyTargetMax);
   }
 
   PlanCreateState _withDays(PlanCreateState prev, Set<int> days) {
@@ -204,10 +239,18 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         (plan.id != null ||
             !storedGoal.isBefore(planGoalDateOnly(DateTime.now())));
 
+    final weekly = plan.weeklyTarget;
     return PlanCreateState(
       action: item?.title ?? '',
       description: item?.description ?? '',
-      selectedDays: days.isEmpty ? _allDays : days,
+      // A weekly plan stores all seven days (for older builds); switching it
+      // to fixed days starts from the usual default instead of 매일.
+      selectedDays: weekly != null
+          ? _defaultSelectedDays
+          : days.isEmpty
+          ? _allDays
+          : days,
+      weeklyTarget: weekly,
       notificationTime: deadline,
       workoutType: WorkoutType.fromId(plan.workoutType),
       daysLocked: true,
@@ -296,7 +339,12 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         throw const PlanCreateAuthException();
       }
 
-      final days = prevState.selectedDays.map((d) => d + 1).toList()..sort();
+      // 주 N회: all seven weekdays, so builds without `weeklyTarget` still
+      // list (and remind) the promise; the target itself rides alongside.
+      final weeklyTarget = prevState.weeklyTarget;
+      final days = weeklyTarget != null
+          ? [for (var d = DateTime.monday; d <= DateTime.sunday; d++) d]
+          : (prevState.selectedDays.map((d) => d + 1).toList()..sort());
       final planItem = PlanItem(
         title: prevState.action.trim(),
         count: days.length,
@@ -339,6 +387,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
               (prevState.originalPlan == null ? WorkoutType.other.id : null),
           goalTitle: goal.title,
           goalDate: goal.date,
+          weeklyTarget: weeklyTarget,
         );
       }
 
@@ -359,6 +408,10 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
             goalTitle: plan.goalTitle,
             goalDate: plan.goalDate,
           );
+        }
+        // Same for a 주 N회 plan switched back to fixed weekdays.
+        if (before?.weeklyTarget != null && plan.weeklyTarget == null) {
+          await repository.clearWeeklyTarget(planId);
         }
       } else {
         planId = await ref.read(createNewPlanUseCaseProvider).execute(plan);
@@ -492,6 +545,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       promise: original?.promise,
       lastActionId: original?.lastActionId,
       workoutType: prevState.workoutType?.id ?? original?.workoutType,
+      weeklyTarget: prevState.weeklyTarget,
     );
   }
 }

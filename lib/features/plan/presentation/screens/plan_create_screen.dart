@@ -20,6 +20,7 @@ import '../plan_create_state.dart';
 import '../viewmodel/plan_create_viewmodel.dart';
 import '../widgets/plan_goal_editor.dart';
 import '../widgets/plan_schedule_pickers.dart';
+import '../widgets/plan_weekly_target_picker.dart';
 import '../widgets/workout_tile_grid.dart';
 
 /// Making (or editing) a workout promise on one screen: workout tile → one-line
@@ -323,7 +324,9 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
               ),
               _BottomBar(
                 summary: l10n.planPreviewMeta(
-                  planState.selectedDays.isEmpty
+                  planState.weeklyTarget != null
+                      ? l10n.planWeeklyTargetLabel(planState.weeklyTarget!)
+                      : planState.selectedDays.isEmpty
                       ? '-'
                       : planDaysLabel(l10n, planState.selectedDays),
                   planDeadlineLabel(l10n, planState.notificationTime),
@@ -411,14 +414,27 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
         const SizedBox(height: 28),
         _SectionLabel(l10n.planCreateDaysTitle),
         const SizedBox(height: 10),
-        PlanWeekdayPicker(
-          selectedDays: planState.selectedDays,
-          presets: workoutFrequencyPresets(l10n),
-          onDayToggle: (index) => _viewModel.dispatch(ToggleDayIntent(index)),
-          onPresetSelected: (days) =>
-              _viewModel.dispatch(UpdateSelectedDaysIntent(days)),
+        PlanScheduleModeToggle(
+          weekly: planState.isWeekly,
+          onChanged: (w) => _viewModel.dispatch(SetWeeklyModeIntent(w)),
         ),
-        if (planState.selectedDays.isEmpty)
+        const SizedBox(height: 12),
+        if (planState.weeklyTarget case final target?)
+          PlanWeeklyTargetStepper(
+            target: target,
+            onChanged: (n) => _viewModel.dispatch(UpdateWeeklyTargetIntent(n)),
+          )
+        else
+          PlanWeekdayPicker(
+            selectedDays: planState.selectedDays,
+            presets: workoutFrequencyPresets(l10n),
+            onDayToggle: (i) => _viewModel.dispatch(ToggleDayIntent(i)),
+            onPresetSelected: (days) =>
+                _viewModel.dispatch(UpdateSelectedDaysIntent(days)),
+          ),
+        if (planState.isWeekly)
+          const SizedBox.shrink()
+        else if (planState.selectedDays.isEmpty)
           _Hint(l10n.planCreateDaysRequired, emphasized: true)
         else if (hasPartner && planState.showsPartnerDays)
           _Hint(l10n.planCreateDaysFromPartner(partnerName)),

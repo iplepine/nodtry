@@ -112,14 +112,22 @@ service cloud.firestore {
             || (data.goalTitle is string && data.goalTitle.size() <= 40))
           && (!('goalDate' in data) || data.goalDate is timestamp);
       }
+      // Optional 주 N회 target (build >= 88): an int 1-6. Absent = fixed
+      // weekdays (the items still list all seven days for older builds).
+      function weeklyOk(data) {
+        return !('weeklyTarget' in data)
+          || (data.weeklyTarget is int && data.weeklyTarget >= 1 && data.weeklyTarget <= 6);
+      }
       allow read: if isSignedIn();
       allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId
         && !request.resource.data.keys().hasAny(['managerSince', 'managerSinceUid'])
-        && goalOk(request.resource.data);
+        && goalOk(request.resource.data)
+        && weeklyOk(request.resource.data);
       allow update: if planParticipant(resource.data)
         && request.resource.data.userId == resource.data.userId
         && !changedKeys().hasAny(['managerSince', 'managerSinceUid'])
-        && (!changedKeys().hasAny(['goalTitle', 'goalDate']) || goalOk(request.resource.data));
+        && (!changedKeys().hasAny(['goalTitle', 'goalDate']) || goalOk(request.resource.data))
+        && (!changedKeys().hasAny(['weeklyTarget']) || weeklyOk(request.resource.data));
       allow delete: if isSignedIn() && request.auth.uid == resource.data.userId;
     }
 

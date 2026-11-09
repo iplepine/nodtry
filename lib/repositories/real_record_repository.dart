@@ -258,7 +258,7 @@ class RealRecordRepository implements RecordRepository {
             (plan) =>
                 plan.state == PlanState.active &&
                 _isPlanActiveOn(plan, today) &&
-                _hasScheduledItemOn(plan, todayWeekday),
+                _isDueToday(plan, today),
           )
           .toList();
       if (todayActivePlans.isEmpty) continue;
@@ -355,7 +355,11 @@ class RealRecordRepository implements RecordRepository {
 
     // --- Part 2: My Actions (Executor Role) -> Mine ---
     final myPlans = plans.where((p) => p.userId == myUid);
-    final List<({Plan plan, PlanItem item, int timeInMin, bool hasTime})>
+    // `relaxed`: a 주 N회 plan on a day it can skip (not must-do). It still
+    // asks all day, but never turns overdue or "지금 실천".
+    final List<
+      ({Plan plan, PlanItem item, int timeInMin, bool hasTime, bool relaxed})
+    >
     allTodayItems = [];
     bool hasAnyPlanToday = false;
 
@@ -480,6 +484,7 @@ class RealRecordRepository implements RecordRepository {
           item: item,
           timeInMin: timeInMin,
           hasTime: hasTime,
+          relaxed: plan.isWeekly && !plan.isDueOn(today),
         ));
       }
     }
@@ -489,10 +494,10 @@ class RealRecordRepository implements RecordRepository {
       allTodayItems.sort((a, b) => a.timeInMin.compareTo(b.timeInMin));
 
       final upcomingItems = allTodayItems
-          .where((i) => i.timeInMin >= nowInMinutes)
+          .where((i) => i.relaxed || i.timeInMin >= nowInMinutes)
           .toList();
       final pastItems = allTodayItems
-          .where((i) => i.timeInMin < nowInMinutes)
+          .where((i) => !i.relaxed && i.timeInMin < nowInMinutes)
           .toList();
 
       // 오늘 남은 항목을 시각 기준으로 둘로 나눈다.
@@ -501,11 +506,13 @@ class RealRecordRepository implements RecordRepository {
       // 아직 시간이 한참 남은 항목까지 "지금 실천"으로 띄워 "당장 해야 할 것 같은"
       // 압박을 주던 문제를 줄이기 위함이다.
       for (var upcoming in upcomingItems) {
-        final isDue = isDueNowItem(
-          hasTime: upcoming.hasTime,
-          timeInMin: upcoming.timeInMin,
-          nowInMinutes: nowInMinutes,
-        );
+        final isDue =
+            !upcoming.relaxed &&
+            isDueNowItem(
+              hasTime: upcoming.hasTime,
+              timeInMin: upcoming.timeInMin,
+              nowInMinutes: nowInMinutes,
+            );
         if (isDue) {
           final streak = upcoming.plan.currentStreak;
           mineCards.add(
@@ -604,7 +611,10 @@ class RealRecordRepository implements RecordRepository {
                 isRescuedToday;
             final hasPokedToday = _isSameDay(plan.lastPokeAt, today);
 
-            if (!isHandledToday && !hasPokedToday) {
+            // 주 N회: only a must-do day can be late (any other day the
+            // partner may simply pick another day this week).
+            final dueToday = !plan.isWeekly || plan.isDueOn(today);
+            if (!isHandledToday && !hasPokedToday && dueToday) {
               // 약속 시간이 10분 이상 지난 항목이 있어야 똑똑 노출
               // (아침부터 저녁 약속까지 종일 똑똑이 떠 있는 것을 방지)
               const pokeDelayMinutes = 10;
@@ -643,9 +653,11 @@ class RealRecordRepository implements RecordRepository {
                           d.day == yesterday.day,
                     );
                 // 어제가 스케줄 날인 경우에만 rescue 가능
-                final yesterdayScheduled = plan.items.any(
-                  (item) => item.days.contains(yesterday.weekday),
-                );
+                final yesterdayScheduled = plan.isWeekly
+                    ? plan.isDueOn(yesterday)
+                    : plan.items.any(
+                        (item) => item.days.contains(yesterday.weekday),
+                      );
 
                 yoursCards.add(
                   HomeCardModel(
@@ -826,6 +838,7 @@ class RealRecordRepository implements RecordRepository {
       lastProofAt: original.lastProofAt,
       goalTitle: original.goalTitle,
       goalDate: original.goalDate,
+      weeklyTarget: original.weeklyTarget,
     );
   }
 
@@ -859,6 +872,14 @@ class RealRecordRepository implements RecordRepository {
 
   bool _hasScheduledItemOn(Plan plan, int weekday) {
     return plan.items.any((item) => item.days.contains(weekday));
+  }
+
+  /// The plan expects something of [today]: a scheduled weekday, or — for a
+  /// 주 N회 plan, whose items list every day — a must-do day or a day it was
+  /// done anyway.
+  bool _isDueToday(Plan plan, DateTime today) {
+    if (!plan.isWeekly) return _hasScheduledItemOn(plan, today.weekday);
+    return _containsDate(plan.completedDates, today) || plan.isDueOn(today);
   }
 
   bool _isPlanActiveOn(Plan plan, DateTime target) {
@@ -1055,6 +1076,13 @@ class RealRecordRepository implements RecordRepository {
       };
     }
     await _firestore.collection('plans').doc(planId).update(update);
+  }
+
+  @override
+  Future<void> clearWeeklyTarget(String planId) async {
+    await _firestore.collection('plans').doc(planId).update({
+      'weeklyTarget': FieldValue.delete(),
+    });
   }
 
   @override
@@ -2298,7 +2326,11 @@ class RealRecordRepository implements RecordRepository {
             );
       }).length;
 
-      var failDays = scheduledDates.length - successDays;
+      // 주 N회: the must-do days missed (each week's shortfall), not every
+      // unlogged day of the period.
+      var failDays = plan.isWeekly
+          ? plan.failedDayCount(asOf: cutoff.add(const Duration(days: 1)))
+          : scheduledDates.length - successDays;
       if (failDays < 0) failDays = 0;
 
       // 판정

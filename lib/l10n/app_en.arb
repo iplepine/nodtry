@@ -2785,5 +2785,54 @@
   "homeWidgetStale": "Open to see today",
   "@homeWidgetStale": {
     "description": "Home widget status when the saved snapshot is from an earlier day"
+  },
+  "planScheduleModeFixed": "Pick days",
+  "@planScheduleModeFixed": {
+    "description": "Plan create: toggle segment for fixed weekdays"
+  },
+  "planScheduleModeWeekly": "N times a week",
+  "@planScheduleModeWeekly": {
+    "description": "Plan create: toggle segment for N workouts a week on any days"
+  },
+  "planWeeklyTargetLabel": "{count, plural, =1{1x a week} other{{count}x a week}}",
+  "@planWeeklyTargetLabel": {
+    "description": "Weekly target of a 주 N회 promise",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "planWeeklyTargetDecrease": "One less",
+  "@planWeeklyTargetDecrease": {
+    "description": "Weekly target stepper: decrease button tooltip"
+  },
+  "planWeeklyTargetIncrease": "One more",
+  "@planWeeklyTargetIncrease": {
+    "description": "Weekly target stepper: increase button tooltip"
+  },
+  "planWeeklyHint": "Any days you like. Deadline reminders only come on days you can't skip if you want to hit this week's goal.",
+  "@planWeeklyHint": {
+    "description": "Plan create: hint under the weekly target stepper"
+  },
+  "weeklyProgressThisWeek": "This week {done}/{target}",
+  "@weeklyProgressThisWeek": {
+    "description": "Progress of a 주 N회 promise this week (credited days / target)",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "nowWeeklyGoalMet": "This week's goal: done 🎉",
+  "@nowWeeklyGoalMet": {
+    "description": "Now tab hero when a weekly promise already met this week's target"
+  },
+  "nowWeeklyGoalMetSub": "Extra workouts still add to your streak",
+  "@nowWeeklyGoalMetSub": {
+    "description": "Now tab hero sub line once the weekly target is met"
   }
 }

@@ -49,7 +49,7 @@
 ## 3. 약속·일일 루프
 | 이벤트 | 상태 | 파라미터 / 메모 |
 |---|---|---|
-| `plan_created` | 변경 | `is_edit`, `frequency`(요일 수), `has_partner` + 신규 `workout_type`(id 또는 `none`), `template_id`(타일 id 또는 `none`), `template_edited`(0·1). 알림 설정 실패 후 재시도하면 `is_edit=1`로 한 번 더 기록될 수 있음 |
+| `plan_created` | 변경 | `is_edit`, `frequency`(요일 수, 주 N회면 N), `schedule_mode`(`fixed`·`weekly`, 1.2.0+), `has_partner` + 신규 `workout_type`(id 또는 `none`), `template_id`(타일 id 또는 `none`), `template_edited`(0·1). 알림 설정 실패 후 재시도하면 `is_edit=1`로 한 번 더 기록될 수 있음 |
 | `plan_completed` | 변경 | `has_message` + 신규 `has_photo` |
 | `plan_skipped`, `plan_passed`, `plan_rest_used` | 기존 | — |
 | `plan_rescued` | 미발생에 가까움 | rescue 버튼 숨김 |

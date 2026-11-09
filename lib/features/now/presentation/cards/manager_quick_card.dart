@@ -737,12 +737,14 @@ class _ManagerQuickCard extends StatelessWidget {
     final periodStr =
         '${start.month}.${start.day}(${getWeekday(start)}) - ${end.month}.${end.day}(${getWeekday(end)})';
 
-    // Days: Mon, Wed, Fri
-    final daysStr = item.days.length == 7
-        ? l10n.frequencyEveryday
-        : item.days
-              .map((d) => TimeFormatter.getWeekdayName(l10n, d))
-              .join(', ');
+    // Days: Mon, Wed, Fri — or 주 3회 · 이번 주 2/3회
+    final daysStr =
+        weeklyScheduleLabel(l10n, plan) ??
+        (item.days.length == 7
+            ? l10n.frequencyEveryday
+            : item.days
+                  .map((d) => TimeFormatter.getWeekdayName(l10n, d))
+                  .join(', '));
 
     return SizedBox(
       width: double.infinity,

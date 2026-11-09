@@ -8,7 +8,8 @@ enum PlanCreateMissing {
   /// The one-line promise is empty.
   action,
 
-  /// No weekday picked. There is no "no day means every day" rule any more.
+  /// No weekday picked (fixed-weekday mode only). There is no "no day means
+  /// every day" rule any more.
   days,
 
   /// No deadline. Every new promise needs one: it is the reminder time and the
@@ -20,8 +21,13 @@ class PlanCreateState {
   final String action;
   final String description;
 
-  /// Weekdays, 0 = Monday … 6 = Sunday. At least one is required.
+  /// Weekdays, 0 = Monday … 6 = Sunday. At least one is required unless
+  /// [weeklyTarget] is set.
   final Set<int> selectedDays;
+
+  /// 주 N회 자유롭게: workouts a week (1–6) on any days, or null for the
+  /// fixed weekdays in [selectedDays] (요일 정하기).
+  final int? weeklyTarget;
 
   /// The deadline. Never `type: 'none'` once initialized.
   final NotificationTime notificationTime;
@@ -63,6 +69,7 @@ class PlanCreateState {
     this.action = '',
     this.description = '',
     this.selectedDays = const {},
+    this.weeklyTarget,
     required this.notificationTime,
     this.workoutType,
     this.appliedTemplate,
@@ -84,15 +91,21 @@ class PlanCreateState {
   /// The first thing that still blocks saving, or null when it can be saved.
   PlanCreateMissing? get missingField {
     if (action.trim().isEmpty) return PlanCreateMissing.action;
-    if (selectedDays.isEmpty) return PlanCreateMissing.days;
+    if (weeklyTarget == null && selectedDays.isEmpty) {
+      return PlanCreateMissing.days;
+    }
     if (notificationTime.type == 'none') return PlanCreateMissing.deadline;
     return null;
   }
 
   bool get canSave => missingField == null;
 
+  /// 주 N회 mode is on.
+  bool get isWeekly => weeklyTarget != null;
+
   /// Whether the selected days are still the partner's suggestion.
   bool get showsPartnerDays {
+    if (isWeekly) return false;
     final suggested = partnerSuggestedDays;
     return suggested != null &&
         suggested.length == selectedDays.length &&
@@ -103,6 +116,7 @@ class PlanCreateState {
     String? action,
     String? description,
     Set<int>? selectedDays,
+    Object? weeklyTarget = _unset,
     NotificationTime? notificationTime,
     Object? workoutType = _unset,
     Object? appliedTemplate = _unset,
@@ -126,6 +140,9 @@ class PlanCreateState {
       action: action ?? this.action,
       description: description ?? this.description,
       selectedDays: selectedDays ?? this.selectedDays,
+      weeklyTarget: weeklyTarget == _unset
+          ? this.weeklyTarget
+          : weeklyTarget as int?,
       notificationTime: notificationTime ?? this.notificationTime,
       workoutType: workoutType == _unset
           ? this.workoutType
@@ -181,6 +198,18 @@ class ToggleDayIntent extends PlanCreateIntent {
 class UpdateSelectedDaysIntent extends PlanCreateIntent {
   final Set<int> selectedDays;
   const UpdateSelectedDaysIntent(this.selectedDays);
+}
+
+/// 요일 정하기 ([weekly] false) or 주 N회 자유롭게 ([weekly] true).
+class SetWeeklyModeIntent extends PlanCreateIntent {
+  final bool weekly;
+  const SetWeeklyModeIntent(this.weekly);
+}
+
+/// The 주 N회 stepper changed (clamped to 1–6).
+class UpdateWeeklyTargetIntent extends PlanCreateIntent {
+  final int target;
+  const UpdateWeeklyTargetIntent(this.target);
 }
 
 class UpdateNotificationTimeIntent extends PlanCreateIntent {

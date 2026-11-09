@@ -93,6 +93,7 @@ class _FakePlanReminderScheduler implements PlanReminderScheduler {
     int intervalHours = 0,
     int startHour = 0,
     int endHour = 0,
+    List<DateTime>? onlyDates,
   }) async {
     if (failOnce) {
       failOnce = false;
@@ -847,6 +848,7 @@ void main() {
       expect(planCreatedAnalyticsParams(untouched, plan, isEdit: false), {
         'is_edit': false,
         'frequency': 3,
+        'schedule_mode': 'fixed',
         'has_partner': true,
         'workout_type': 'yoga',
         'template_id': 'yoga',
@@ -885,6 +887,7 @@ void main() {
       expect(planCreatedAnalyticsParams(noTemplate, legacy, isEdit: true), {
         'is_edit': true,
         'frequency': 1,
+        'schedule_mode': 'fixed',
         'has_partner': false,
         'workout_type': 'none',
         'template_id': 'none',

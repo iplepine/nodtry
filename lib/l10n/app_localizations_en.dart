@@ -3118,4 +3118,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeWidgetStale => 'Open to see today';
+
+  @override
+  String get planScheduleModeFixed => 'Pick days';
+
+  @override
+  String get planScheduleModeWeekly => 'N times a week';
+
+  @override
+  String planWeeklyTargetLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '${count}x a week',
+      one: '1x a week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planWeeklyTargetDecrease => 'One less';
+
+  @override
+  String get planWeeklyTargetIncrease => 'One more';
+
+  @override
+  String get planWeeklyHint =>
+      'Any days you like. Deadline reminders only come on days you can\'t skip if you want to hit this week\'s goal.';
+
+  @override
+  String weeklyProgressThisWeek(int done, int target) {
+    return 'This week $done/$target';
+  }
+
+  @override
+  String get nowWeeklyGoalMet => 'This week\'s goal: done 🎉';
+
+  @override
+  String get nowWeeklyGoalMetSub => 'Extra workouts still add to your streak';
 }

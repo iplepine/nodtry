@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'promise_model.dart';
+import 'weekly_target.dart';
 
 enum PlanState {
   draft,
@@ -111,6 +112,13 @@ class Plan {
   /// only when set, so older app builds are unaffected.
   final DateTime? goalDate;
 
+  /// 주 N회 자유 요일: how many days a week (1–6) the owner works out, on any
+  /// days (see `weekly_target.dart` for the rules). Null = the classic fixed
+  /// weekdays in [PlanItem.days]. A weekly plan stores all seven weekdays in
+  /// its items so builds without this field (≤ 1.1.2+87) still list it — as
+  /// "매일". Optional: written only when set.
+  final int? weeklyTarget;
+
   Plan({
     this.id,
     required this.userId,
@@ -146,6 +154,7 @@ class Plan {
     this.lastProofAt,
     this.goalTitle,
     this.goalDate,
+    this.weeklyTarget,
   });
 
   /// Length of a plan period in days (the 4-week window).
@@ -184,6 +193,7 @@ class Plan {
       workoutType: workoutType,
       goalTitle: goalTitle,
       goalDate: goalDate,
+      weeklyTarget: weeklyTarget,
     );
   }
 
@@ -222,9 +232,13 @@ class Plan {
     DateTime? lastProofAt,
     String? goalTitle,
     DateTime? goalDate,
+    int? weeklyTarget,
 
     /// Drops [goalTitle] and [goalDate] (a null argument keeps them).
     bool clearGoal = false,
+
+    /// Drops [weeklyTarget]: back to fixed weekdays.
+    bool clearWeeklyTarget = false,
   }) {
     return Plan(
       id: id ?? this.id,
@@ -262,6 +276,9 @@ class Plan {
       lastProofAt: lastProofAt ?? this.lastProofAt,
       goalTitle: clearGoal ? null : goalTitle ?? this.goalTitle,
       goalDate: clearGoal ? null : goalDate ?? this.goalDate,
+      weeklyTarget: clearWeeklyTarget
+          ? null
+          : weeklyTarget ?? this.weeklyTarget,
     );
   }
 
@@ -307,6 +324,7 @@ class Plan {
       if (lastProofAt != null) 'lastProofAt': Timestamp.fromDate(lastProofAt!),
       if (goalDate != null && goalTitle != null) 'goalTitle': goalTitle,
       if (goalDate != null) 'goalDate': goalDateToStored(goalDate!),
+      if (weeklyTarget != null) 'weeklyTarget': weeklyTarget,
     };
   }
 
@@ -388,6 +406,7 @@ class Plan {
       lastProofAt: _timestampOrNull(map['lastProofAt']),
       goalTitle: _nonEmptyString(map['goalTitle']),
       goalDate: goalDateFromStored(map['goalDate']),
+      weeklyTarget: parseWeeklyTarget(map['weeklyTarget']),
     );
   }
 
@@ -423,9 +442,102 @@ class Plan {
     return value is Timestamp ? value.toDate() : null;
   }
 
+  // --- 주 N회 자유 요일 (weeklyTarget) --------------------------------------
+
+  /// A 주 N회 promise (any days), not fixed weekdays.
+  bool get isWeekly => weeklyTarget != null;
+
+  /// Days with a credit for a weekly plan: done, rescued or rested.
+  Set<int> get _weeklyCreditKeys =>
+      weeklyDayKeys([...completedDates, ...rescuedDates, ...restedDates]);
+
+  /// The Monday–Sunday week of [day] evaluated for this weekly plan, or null
+  /// for a fixed-weekday plan. [creditedToday] treats [today] as credited (a
+  /// record just written, before the plan document caught up).
+  WeeklyWeek? weeklyWeekOf(
+    DateTime day, {
+    DateTime? today,
+    bool creditedToday = false,
+  }) {
+    final target = weeklyTarget;
+    if (target == null) return null;
+    final credits = _weeklyCreditKeys;
+    if (creditedToday) credits.add(weeklyDayKey(today ?? DateTime.now()));
+    return evaluateWeeklyWeekAt(
+      weeklyTarget: target,
+      day: day,
+      periodStart: startDate,
+      periodEnd: endDate,
+      isCredited: credits.contains,
+    );
+  }
+
+  /// "이번 주 2/3회": this week's credits and target (credits may exceed it),
+  /// or null for a fixed-weekday plan.
+  ({int done, int target})? weeklyProgress({DateTime? asOf}) {
+    final week = weeklyWeekOf(asOf ?? DateTime.now());
+    if (week == null) return null;
+    return (done: week.credited, target: week.target);
+  }
+
+  /// This week's target is reached (weekly plans only).
+  bool isWeeklyGoalMet({DateTime? asOf}) =>
+      weeklyWeekOf(asOf ?? DateTime.now())?.isMet ?? false;
+
+  /// Whether this plan asks for a record on [date] — a missing one is a miss
+  /// once the day is over. Fixed weekdays: one of the item weekdays (none
+  /// stored meant every day). Weekly: a must-do day. Does not check the plan
+  /// period for fixed weekdays (callers do); a weekly week does.
+  bool isDueOn(DateTime date) {
+    final week = weeklyWeekOf(date);
+    if (week != null) return week.mustDo[date.toLocal().weekday - 1];
+    final weekdays = items.expand((i) => i.days).toSet();
+    return weekdays.isEmpty || weekdays.contains(date.toLocal().weekday);
+  }
+
+  /// Every day of the period, each Monday–Sunday week evaluated once.
+  Iterable<({DateTime date, WeeklyWeek week})> _weeklyPeriodDays() sync* {
+    final start = _dateOnly(startDate);
+    final end = _dateOnly(endDate);
+    WeeklyWeek? week;
+    var day = start;
+    while (!day.isAfter(end)) {
+      if (week == null || day.weekday == DateTime.monday) {
+        week = weeklyWeekOf(day);
+      }
+      yield (date: day, week: week!);
+      day = DateTime(day.year, day.month, day.day + 1);
+    }
+  }
+
+  int _weeklyStreak() {
+    final credits = _weeklyCreditKeys;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final start = _dateOnly(startDate);
+    final weeks = <DateTime, WeeklyWeek>{};
+    var streak = 0;
+    for (var i = 0; i < 365; i++) {
+      final date = DateTime(today.year, today.month, today.day - i);
+      if (date.isBefore(start)) break;
+      if (credits.contains(weeklyDayKey(date))) {
+        streak++;
+        continue;
+      }
+      // Today is still open; an unlogged neutral day neither counts nor
+      // breaks; a missed must-do day ends the run.
+      if (i == 0) continue;
+      final monday = weeklyWeekStartOf(date);
+      final week = weeks[monday] ??= weeklyWeekOf(date)!;
+      if (week.mustDo[date.weekday - 1]) break;
+    }
+    return streak;
+  }
+
   /// 현재 연속 달성 횟수 (스트릭) 계산
   int get currentStreak {
     if (items.isEmpty) return 0;
+    if (isWeekly) return _weeklyStreak();
 
     // 모든 아이템의 요일을 합산
     final scheduledDays = items.expand((i) => i.days).toSet();
@@ -494,6 +606,8 @@ class Plan {
       return !date.isBefore(mondayDate) && date.isBefore(sundayDate);
     }).length;
 
+    // 주 N회: once the week's target is met there is nothing left to excuse.
+    if (isWeeklyGoalMet(asOf: now)) return false;
     return usedThisWeek < 1;
   }
 
@@ -510,7 +624,7 @@ class Plan {
   /// 요일 정보가 없으면 전체 기간을 기준으로 삼아 기존 데이터도 안전하게
   /// 처리한다.
   int get scheduledDayCount {
-    final count = _scheduledDates.length;
+    final count = isWeekly ? _weeklyScheduledCount : _scheduledDates.length;
     return count < 1 ? 1 : count;
   }
 
@@ -525,8 +639,18 @@ class Plan {
   }
 
   /// 현재 시점에서 실패로 확정된 예정일 수.
+  ///
+  /// Weekly: the must-do days before today without a credit.
   int failedDayCount({DateTime? asOf}) {
     final today = _dateOnly(asOf ?? DateTime.now());
+    if (isWeekly) {
+      return _weeklyPeriodDays().where((d) {
+        final i = d.date.weekday - 1;
+        return d.date.isBefore(today) &&
+            d.week.mustDo[i] &&
+            !d.week.creditedDays[i];
+      }).length;
+    }
     final completed = _uniqueDatesInRange(
       completedDates,
       _dateOnly(startDate),
@@ -538,8 +662,12 @@ class Plan {
   }
 
   /// 아직 성공/실패 어느 쪽으로도 갈 수 있는 남은 예정일 수.
+  ///
+  /// Weekly: the credits still needed this week (no more than its open days
+  /// left) plus the targets of the weeks still ahead.
   int remainingScheduledDayCount({DateTime? asOf}) {
     final today = _dateOnly(asOf ?? DateTime.now());
+    if (isWeekly) return _weeklyRemaining(today);
     final completed = _uniqueDatesInRange(
       completedDates,
       _dateOnly(startDate),
@@ -562,6 +690,40 @@ class Plan {
     final limit =
         failedDayCount(asOf: asOf) + remainingScheduledDayCount(asOf: asOf);
     return limit < 1 ? 1 : limit;
+  }
+
+  int get _weeklyScheduledCount {
+    var total = 0;
+    for (final d in _weeklyPeriodDays()) {
+      // Count each week once, on its first day inside the period.
+      if (d.date.weekday == DateTime.monday || d.date == _dateOnly(startDate)) {
+        total += d.week.target;
+      }
+    }
+    return total;
+  }
+
+  int _weeklyRemaining(DateTime today) {
+    var total = 0;
+    WeeklyWeek? current;
+    var openDays = 0;
+    void flush() {
+      final week = current;
+      if (week == null) return;
+      total += week.needed < openDays ? week.needed : openDays;
+    }
+
+    for (final d in _weeklyPeriodDays()) {
+      if (!identical(d.week, current)) {
+        flush();
+        current = d.week;
+        openDays = 0;
+      }
+      final i = d.date.weekday - 1;
+      if (!d.date.isBefore(today) && !d.week.creditedDays[i]) openDays++;
+    }
+    flush();
+    return total;
   }
 
   DateTime _cutoffDate(DateTime? asOf) {

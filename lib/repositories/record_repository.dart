@@ -70,6 +70,10 @@ abstract class RecordRepository {
     DateTime? goalDate,
   });
 
+  /// Removes the plan's `weeklyTarget` (주 N회 → fixed weekdays). [updatePlan]
+  /// leaves fields missing from `toMap` alone, so it can't drop it.
+  Future<void> clearWeeklyTarget(String planId);
+
   /// 특정 계획을 삭제합니다.
   Future<void> deletePlan(String planId);
 

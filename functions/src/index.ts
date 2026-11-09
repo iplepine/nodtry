@@ -70,6 +70,7 @@ import {
 import {generateUniqueInviteCode, normalizeInviteCode} from "./inviteCode";
 import {FieldOps, SYSTEM_LINK, actionManagerFor, managerStampFor, millisOf, unlinkUpdate} from "./planLinks";
 import {deleteInviteOf, inviteReminderFunction, markInvitesConnected} from "./inviteReminder";
+import {weeklyAllowsMissedNotice, weeklySettlementCorrection, weeklyTargetOf} from "./weekly";
 
 admin.initializeApp();
 
@@ -1147,6 +1148,7 @@ export const onPlanCreated = functions
                 workout: workoutInfo(plan.workoutType, lang),
                 itemTitle: clip(item.title, 30),
                 days: item.days,
+                weeklyTarget: weeklyTargetOf(plan),
                 notificationTime: item.notificationTime,
                 pendingApproval: plan.state === "pending_approval",
                 lang,
@@ -1240,10 +1242,17 @@ function inPlanPeriod(plan: Data, day: LocalDateParts, timeZone: string): boolea
     return !isAfterLocalDay(plan.startDate, day, timeZone) && !isBeforeLocalDay(plan.endDate, day, timeZone);
 }
 
+/**
+ * Whether `day` still waits for a record: inside the period, nothing recorded,
+ * not relayed yet — and, for a 주 N회 plan (`weeklyTarget`), a must-do day. On
+ * any other day of a weekly plan an unlogged day is neutral, so no missed
+ * notice goes out (its items carry all seven weekdays for older builds).
+ */
 function awaitingRecord(plan: Data, day: LocalDateParts, timeZone: string): boolean {
     return inPlanPeriod(plan, day, timeZone) &&
         !hasCoveredToday(plan, day, timeZone) &&
-        !isSameLocalDay(plan.lastMissedNotifiedAt, day, timeZone);
+        !isSameLocalDay(plan.lastMissedNotifiedAt, day, timeZone) &&
+        weeklyAllowsMissedNotice(plan, day, timeZone);
 }
 
 type MissedNotice = {
@@ -1512,6 +1521,22 @@ export const onPlanUpdated = functions
             if (synced > 0) console.log(`Plan ${planId}: managerId re-synced on ${synced} actions`);
         }
 
+        // 2. A 주 N회 plan's 내기 just settled by a build that doesn't know
+        //    weeklyTarget (≤ 1.1.2+87 counts every unlogged day as a miss):
+        //    recount it in the owner's zone. Best effort, logged on failure.
+        if (weeklyTargetOf(after) !== null) {
+            try {
+                const owner = await getUser(userId);
+                const fix = weeklySettlementCorrection(before, after, timeZoneOf(owner), new Date());
+                if (fix) {
+                    await change.after.ref.update({...fix, lastUpdatedBy: "system_weekly_settlement"});
+                    console.log(`Plan ${planId}: weekly settlement recounted`, fix);
+                }
+            } catch (error) {
+                console.error(`Plan ${planId}: weekly settlement recount failed:`, error);
+            }
+        }
+
         try {
             // System writes (missed notice, link/unlink, cleanup) never push.
             if (!managerId || !lastUpdatedBy || lastUpdatedBy.startsWith("system_")) return;
@@ -1532,7 +1557,8 @@ export const onPlanUpdated = functions
             const isImportantChange =
                 JSON.stringify(before.items) !== JSON.stringify(after.items) ||
                 before.startDate?.seconds !== after.startDate?.seconds ||
-                before.endDate?.seconds !== after.endDate?.seconds;
+                before.endDate?.seconds !== after.endDate?.seconds ||
+                (before.weeklyTarget ?? null) !== (after.weeklyTarget ?? null);
             if (!hasNewPoke && !isApproved && !isRejected && !isVerified && !isImportantChange) return;
 
             const [recipient, sender] = await Promise.all([getUser(toUserId), getUser(lastUpdatedBy)]);

@@ -247,7 +247,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
       if (result.actionId != null) logProofUploaded(result);
 
       // 알람 업데이트: 오늘 알람 건너뛰기
-      await _updateAlarmToSkipToday(intent.planId);
+      await _updateAlarmToSkipToday(intent.planId, credited: true);
       return result;
     } catch (e, stack) {
       ErrorReporter.record(
@@ -380,7 +380,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
   Future<void> _checkPartnerAction(String planId) async {
     // Legacy support or specific use case
     await ref.read(recordRepositoryProvider).reportCompletion(planId);
-    await _updateAlarmToSkipToday(planId);
+    await _updateAlarmToSkipToday(planId, credited: true);
   }
 
   Future<void> _skipPlan(String planId) async {
@@ -388,7 +388,12 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
     await _updateAlarmToSkipToday(planId);
   }
 
-  Future<void> _updateAlarmToSkipToday(String planId) async {
+  /// [credited]: today's record was a done / rest, which a 주 N회 plan
+  /// counts toward its week (the card's plan doesn't list it yet).
+  Future<void> _updateAlarmToSkipToday(
+    String planId, {
+    bool credited = false,
+  }) async {
     try {
       final currentAllCards = state.asData?.value.allCards ?? [];
       Plan? targetPlan;
@@ -401,7 +406,11 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
       final settingAlarm = ref.read(settingAlarmUseCaseProvider);
       if (targetPlan != null) {
-        await settingAlarm.execute(targetPlan, skipToday: true);
+        await settingAlarm.execute(
+          targetPlan,
+          skipToday: true,
+          creditedToday: credited,
+        );
       } else {
         // Plan은 못 찾았지만 최소한 오늘 예약된 알림은 끄기 위해 cancel.
         // 다음 plan 업데이트/앱 재시작에서 다시 schedule 된다.
@@ -506,7 +515,7 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
 
   Future<void> _restPlan(String planId) async {
     await ref.read(recordRepositoryProvider).reportRest(planId);
-    await _updateAlarmToSkipToday(planId);
+    await _updateAlarmToSkipToday(planId, credited: true);
   }
 
   Future<void> _acknowledgePromiseSettlement(

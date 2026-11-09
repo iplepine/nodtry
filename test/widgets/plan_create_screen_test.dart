@@ -70,6 +70,7 @@ class _NoopScheduler implements PlanReminderScheduler {
     int intervalHours = 0,
     int startHour = 0,
     int endHour = 0,
+    List<DateTime>? onlyDates,
   }) async {}
 }
 
@@ -260,6 +261,37 @@ void main() {
     expect(repository.createdPlan!.managerId, isNull);
     expect(repository.createdPlan!.state, PlanState.active);
     expect(find.text('운동 약속을 시작했어요 💪'), findsOneWidget);
+  });
+
+  testWidgets('주 N회 자유롭게: toggle, stepper and save', (tester) async {
+    final repository = _FakeRecordRepository();
+    await _pumpScreen(tester, repository: repository, partnerName: '자기');
+
+    expect(find.text('요일 정하기'), findsOneWidget);
+    await _tapVisible(
+      tester,
+      find.byKey(const ValueKey('schedule-mode-weekly')),
+    );
+    // The weekday chips give way to the stepper (Mon/Wed/Fri → 주 3회).
+    expect(find.byKey(const ValueKey('weekday-0')), findsNothing);
+    expect(find.text('주 3회'), findsWidgets);
+    await _tapVisible(tester, find.byKey(const ValueKey('weekly-target-plus')));
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('weekly-target-value')))
+          .data,
+      '주 4회',
+    );
+
+    await _tapVisible(tester, find.byKey(const ValueKey('workout-tile-gym')));
+    // A tile keeps the chosen mode.
+    expect(find.byKey(const ValueKey('weekly-target-value')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('plan-create-cta')));
+    await tester.pumpAndSettle();
+
+    final plan = repository.createdPlan!;
+    expect(plan.weeklyTarget, 4);
+    expect(plan.items.single.days, [1, 2, 3, 4, 5, 6, 7]);
   });
 
   testWidgets('says what is missing instead of saving', (tester) async {

@@ -206,6 +206,11 @@ abstract class PlanReminderScheduler {
     int intervalHours,
     int startHour,
     int endHour,
+
+    /// When set (a 주 N회 plan), fire only on these local calendar dates —
+    /// within the next weeks the reminder grid holds — instead of every
+    /// [days] weekday.
+    List<DateTime>? onlyDates,
   });
 
   Future<void> cancelPlanReminders(int planId);
@@ -457,6 +462,7 @@ class NotificationService implements PlanReminderScheduler {
     int intervalHours = 0,
     int startHour = 0,
     int endHour = 0,
+    List<DateTime>? onlyDates,
   }) async {
     final normalizedPlanId = _normalizePlanNotificationBaseId(planId);
     final reminderBody = body ?? _notifString('reminderBody');
@@ -475,11 +481,53 @@ class NotificationService implements PlanReminderScheduler {
         startHour: startHour,
         endHour: endHour,
         skipToday: skipToday,
+        onlyDates: onlyDates,
       );
       return;
     }
 
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+
+    if (onlyDates != null) {
+      // The same id grid: (weekday, weeks after this Monday).
+      final thisMonday = DateTime.utc(
+        now.year,
+        now.month,
+        now.day - (now.weekday - 1),
+      );
+      for (final date in onlyDates) {
+        final scheduledDate = tz.TZDateTime(
+          tz.local,
+          date.year,
+          date.month,
+          date.day,
+          hour,
+          minute,
+        );
+        if (scheduledDate.isBefore(now)) continue;
+        if (skipToday && _isSameLocalDay(scheduledDate, now)) continue;
+        final week =
+            DateTime.utc(
+              date.year,
+              date.month,
+              date.day,
+            ).difference(thisMonday).inDays ~/
+            7;
+        if (week < 0 || week >= _planNotificationWeeksAhead) continue;
+        await _scheduleSinglePlanReminder(
+          id: _buildPlanDayWeekNotificationId(
+            normalizedPlanId,
+            scheduledDate.weekday,
+            week,
+          ),
+          title: title,
+          body: reminderBody,
+          scheduledDate: scheduledDate,
+          planIdentifier: planIdentifier,
+        );
+      }
+      return;
+    }
 
     for (final int day in days) {
       final tz.TZDateTime firstInstance = _firstInstanceOfDayAndTime(
@@ -529,8 +577,12 @@ class NotificationService implements PlanReminderScheduler {
     required int startHour,
     required int endHour,
     required bool skipToday,
+    List<DateTime>? onlyDates,
   }) async {
     if (days.isEmpty) return;
+    final onlyDays = onlyDates
+        ?.map((d) => d.year * 10000 + d.month * 100 + d.day)
+        .toSet();
 
     final step = intervalHours < 1 ? 1 : intervalHours;
     final start = startHour.clamp(0, 23);
@@ -554,6 +606,10 @@ class NotificationService implements PlanReminderScheduler {
         now.day,
       ).add(Duration(days: dayOffset));
       if (!daySet.contains(base.weekday)) continue;
+      if (onlyDays != null &&
+          !onlyDays.contains(base.year * 10000 + base.month * 100 + base.day)) {
+        continue;
+      }
       if (skipToday && _isSameLocalDay(base, now)) continue;
 
       for (int h = start; h <= end; h += step) {

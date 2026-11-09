@@ -371,6 +371,37 @@ describe("Cloud Functions triggers (emulator)", () => {
         assert.equal(pushes[0].notification.body, "🏋️ 헬스 · 월·수·금 07:30까지 · 봐줄 거지? 👀");
     });
 
+    it("주 N회: plan-created copy says 주 3회; an old build's settlement is recounted", async () => {
+        const {a, b} = await linkedPair();
+        const ts = (iso) => Timestamp.fromDate(new Date(iso));
+        const weekly = {
+            userId: a, managerId: b, state: "active", workoutType: "running", weeklyTarget: 3,
+            items: [{title: "러닝", days: [1, 2, 3, 4, 5, 6, 7], notificationTime: {type: "custom", hour: 21, minute: 0}}],
+            startDate: ts("2026-09-27T15:00:00Z"), endDate: ts("2026-10-25T14:59:59Z"),
+            // Mon, Wed, Fri of each of the four weeks (KST): every week met.
+            completedDates: [0, 7, 14, 21].flatMap((w) => [0, 2, 4].map((d) =>
+                ts(new Date(Date.UTC(2026, 8, 28 + w + d, 10)).toISOString()))),
+            promise: {status: "active", proposerId: b, reward: {title: "치킨", targetDays: 12},
+                penalty: {title: "설거지", targetDays: 3}},
+        };
+        await db.doc(`plans/${a}_weekly`).set(weekly);
+        const pushes = await expectPushes(b, 1, "weekly plan created");
+        assert.equal(pushes[0].notification.body, "🏃 러닝 · 주 3회 21:00까지 · 봐줄 거지? 👀");
+
+        // What build ≤87 writes: 28 listed days - 12 done = 16 "misses".
+        await db.doc(`plans/${a}_weekly`).update({
+            "promise.status": "settled", "promise.settledAt": ts("2026-10-26T01:00:00Z"),
+            "promise.settledSuccessDays": 12, "promise.settledFailDays": 16,
+            "promise.settlementResult": "both_met",
+        });
+        await waitFor(async () => (await plan(`${a}_weekly`)).promise.settledFailDays === 0,
+            {label: "weekly recount"});
+        const fixed = await plan(`${a}_weekly`);
+        assert.equal(fixed.promise.settlementResult, "reward_achieved");
+        assert.equal(fixed.promise.settledSuccessDays, 12);
+        assert.equal(fixed.lastUpdatedBy, "system_weekly_settlement");
+    });
+
     it("a manager that is not a linked partner is detached", async () => {
         const a = uid("alice");
         const m = uid("mallory");

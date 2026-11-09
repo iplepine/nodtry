@@ -2923,4 +2923,35 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get homeWidgetStale => '앱에서 오늘을 확인해요';
+
+  @override
+  String get planScheduleModeFixed => '요일 정하기';
+
+  @override
+  String get planScheduleModeWeekly => '주 N회 자유롭게';
+
+  @override
+  String planWeeklyTargetLabel(int count) {
+    return '주 $count회';
+  }
+
+  @override
+  String get planWeeklyTargetDecrease => '한 번 줄이기';
+
+  @override
+  String get planWeeklyTargetIncrease => '한 번 늘리기';
+
+  @override
+  String get planWeeklyHint => '요일은 그때그때 골라요. 이번 주를 채우려면 꼭 해야 하는 날에만 마감 알림이 가요';
+
+  @override
+  String weeklyProgressThisWeek(int done, int target) {
+    return '이번 주 $done/$target회';
+  }
+
+  @override
+  String get nowWeeklyGoalMet => '이번 주 목표 달성 🎉';
+
+  @override
+  String get nowWeeklyGoalMetSub => '더 하면 연속 기록에 더해져요';
 }

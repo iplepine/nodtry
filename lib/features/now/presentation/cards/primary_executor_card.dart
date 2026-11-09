@@ -282,7 +282,7 @@ class _PrimaryExecutorCard extends StatelessWidget {
     if (hero) {
       children.add(
         Text(
-          todayCheckInQuestion(l10n, model.plan!),
+          todayCheckInHeadline(l10n, model.plan!),
           key: const ValueKey('now-hero-question'),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             color: AppColors.textPrimary,
@@ -332,6 +332,22 @@ class _PrimaryExecutorCard extends StatelessWidget {
           ),
         );
       }
+    }
+
+    // 주 N회: 이번 주 2/3회 (or the goal-met line).
+    final weeklyLine = hero ? todayCheckInWeeklyLine(l10n, model.plan!) : null;
+    if (weeklyLine != null) {
+      children.add(const SizedBox(height: 6));
+      children.add(
+        Text(
+          weeklyLine,
+          key: const ValueKey('now-hero-weekly'),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.primary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
     }
 
     // 스트릭 배지

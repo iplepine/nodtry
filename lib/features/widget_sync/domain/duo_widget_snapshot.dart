@@ -197,6 +197,35 @@ bool _sameDay(DateTime a, DateTime b) {
   return la.year == lb.year && la.month == lb.month && la.day == lb.day;
 }
 
+/// `이번 주 1/3회` for a person who is not done today ([status] pending or
+/// off) while one of their running 주 N회 plans still needs workouts this
+/// week; null otherwise (the plain status word applies).
+String? duoWidgetWeeklyText(
+  DuoWidgetPersonStatus status,
+  List<Plan> plans,
+  DateTime today,
+  AppLocalizations l10n,
+) {
+  if (status != DuoWidgetPersonStatus.pending &&
+      status != DuoWidgetPersonStatus.notScheduled) {
+    return null;
+  }
+  final day = DateTime(today.year, today.month, today.day);
+  for (final plan in plans) {
+    if (plan.state != PlanState.active || !plan.isWeekly) continue;
+    final start = DateTime(
+      plan.startDate.year,
+      plan.startDate.month,
+      plan.startDate.day,
+    );
+    if (day.isBefore(start) || day.isAfter(plan.endDate)) continue;
+    final progress = plan.weeklyProgress(asOf: day);
+    if (progress == null || progress.done >= progress.target) continue;
+    return l10n.weeklyProgressThisWeek(progress.done, progress.target);
+  }
+  return null;
+}
+
 String duoWidgetStatusText(
   DuoWidgetPersonStatus status,
   AppLocalizations l10n,
@@ -224,12 +253,17 @@ DuoWidgetSnapshot? buildDuoWidgetSnapshot({
 }) {
   if (stats == null || !stats.hasPartner) return null;
   final today = stats.today.date;
-  final meStatus = duoWidgetStatusOf(stats.today.me, myPlans, today);
-  final partnerStatus = duoWidgetStatusOf(
-    stats.today.partner,
-    partnerPlans,
-    today,
-  );
+  DuoWidgetPerson person(String name, DuoPersonDay day, List<Plan> plans) {
+    final status = duoWidgetStatusOf(day, plans, today);
+    final weekly = duoWidgetWeeklyText(status, plans, today, l10n);
+    return DuoWidgetPerson(
+      name: name,
+      // An open 주 N회 week still asks for a workout on a neutral day.
+      status: weekly != null ? DuoWidgetPersonStatus.pending : status,
+      statusText: weekly ?? duoWidgetStatusText(status, l10n),
+    );
+  }
+
   final duoDone = stats.todayIsDuoDone;
   return DuoWidgetSnapshot(
     date: duoWidgetDateKey(today),
@@ -239,16 +273,8 @@ DuoWidgetSnapshot? buildDuoWidgetSnapshot({
         : l10n.homeWidgetStreakZero,
     duoDoneToday: duoDone,
     badge: duoDone ? l10n.homeWidgetTodayDuoDone : null,
-    me: DuoWidgetPerson(
-      name: l10n.homeWidgetMe,
-      status: meStatus,
-      statusText: duoWidgetStatusText(meStatus, l10n),
-    ),
-    partner: DuoWidgetPerson(
-      name: partnerName,
-      status: partnerStatus,
-      statusText: duoWidgetStatusText(partnerStatus, l10n),
-    ),
+    me: person(l10n.homeWidgetMe, stats.today.me, myPlans),
+    partner: person(partnerName, stats.today.partner, partnerPlans),
     staleText: l10n.homeWidgetStale,
     locale: l10n.localeName.startsWith('ko') ? 'ko' : 'en',
   );

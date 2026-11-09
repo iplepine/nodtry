@@ -226,6 +226,18 @@ export function formatDays(days: unknown, lang: Lang = "ko"): string {
     return unique.map((d) => labels[d - 1]).join("·");
 }
 
+/**
+ * The schedule part of a plan summary: "주 3회" / "3x a week" for a 주 N회 plan
+ * (`weeklyTarget`, its items list all seven weekdays), the weekdays otherwise.
+ */
+export function formatSchedule(days: unknown, weeklyTarget: unknown, lang: Lang = "ko"): string {
+    if (typeof weeklyTarget === "number" && Number.isInteger(weeklyTarget) &&
+        weeklyTarget >= 1 && weeklyTarget <= 6) {
+        return lang === "en" ? `${weeklyTarget}x a week` : `주 ${weeklyTarget}회`;
+    }
+    return formatDays(days, lang);
+}
+
 export function formatDeadline(notificationTime: unknown, lang: Lang = "ko"): string {
     if (!notificationTime || typeof notificationTime !== "object") return "";
     const time = notificationTime as {type?: unknown; hour?: unknown; minute?: unknown};
@@ -241,6 +253,8 @@ export function planCreatedCopy(input: {
     workout: WorkoutInfo | null;
     itemTitle: string;
     days: unknown;
+    /** `plans.weeklyTarget` (주 N회), when set. */
+    weeklyTarget?: unknown;
     notificationTime: unknown;
     pendingApproval: boolean;
     lang?: Lang;
@@ -265,8 +279,10 @@ export function planCreatedCopy(input: {
         title = en ? `🤙 ${capWho(who)} made a promise` : `🤙 ${who} 약속 걸었어`;
         head = quotedTitle(input.itemTitle, lang);
     }
-    const schedule = [formatDays(input.days, lang), formatDeadline(input.notificationTime, lang)]
-        .filter((part) => part).join(" ");
+    const schedule = [
+        formatSchedule(input.days, input.weeklyTarget, lang),
+        formatDeadline(input.notificationTime, lang),
+    ].filter((part) => part).join(" ");
     const summary = [head, schedule].filter((part) => part).join(" · ");
     const ask = en ?
         (input.pendingApproval ? "Can you take a look?" : "You've got my back, right? 👀") :

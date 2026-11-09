@@ -1026,5 +1026,14 @@
   "homeWidgetStatusRested": "휴식권",
   "homeWidgetStatusPending": "아직",
   "homeWidgetStatusOff": "쉬는 날",
-  "homeWidgetStale": "앱에서 오늘을 확인해요"
+  "homeWidgetStale": "앱에서 오늘을 확인해요",
+  "planScheduleModeFixed": "요일 정하기",
+  "planScheduleModeWeekly": "주 N회 자유롭게",
+  "planWeeklyTargetLabel": "주 {count}회",
+  "planWeeklyTargetDecrease": "한 번 줄이기",
+  "planWeeklyTargetIncrease": "한 번 늘리기",
+  "planWeeklyHint": "요일은 그때그때 골라요. 이번 주를 채우려면 꼭 해야 하는 날에만 마감 알림이 가요",
+  "weeklyProgressThisWeek": "이번 주 {done}/{target}회",
+  "nowWeeklyGoalMet": "이번 주 목표 달성 🎉",
+  "nowWeeklyGoalMetSub": "더 하면 연속 기록에 더해져요"
 }

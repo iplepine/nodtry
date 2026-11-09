@@ -243,6 +243,7 @@ class FakePlanReminderScheduler implements PlanReminderScheduler {
     int intervalHours = 0,
     int startHour = 0,
     int endHour = 0,
+    List<DateTime>? onlyDates,
   }) async {}
 }
 

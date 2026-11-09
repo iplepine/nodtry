@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../../models/plan_model.dart';
+import '../../../../models/weekly_target.dart';
 import '../../../../services/notification_service.dart';
 import '../../../../utils/context_free_l10n.dart';
 import '../workout_template.dart';
@@ -71,7 +72,16 @@ class SettingAlarmUseCase {
        _afterPermissionRequest = afterPermissionRequest,
        _l10n = l10n ?? contextFreeL10n;
 
-  Future<void> execute(Plan plan, {bool skipToday = false}) async {
+  /// (Re)schedules [plan]'s deadline reminders. [skipToday] drops today's
+  /// (already recorded). [creditedToday] says today's record was a done /
+  /// rest that the passed [plan] may not list yet — a 주 N회 plan then
+  /// predicts its must-do days with it.
+  Future<void> execute(
+    Plan plan, {
+    bool skipToday = false,
+    bool creditedToday = false,
+    DateTime? now,
+  }) async {
     final item = plan.items.firstOrNull;
     if (item == null) return;
 
@@ -117,6 +127,11 @@ class SettingAlarmUseCase {
       intervalHours: notificationTime.intervalHours,
       startHour: notificationTime.startHour,
       endHour: notificationTime.endHour,
+      onlyDates: weeklyReminderDates(
+        plan,
+        now: now ?? DateTime.now(),
+        creditedToday: creditedToday,
+      ),
     );
   }
 
@@ -152,6 +167,42 @@ class SettingAlarmUseCase {
         notificationTime != null &&
         notificationTime.type != 'none';
   }
+}
+
+/// The days a 주 N회 plan's deadline reminder fires, from [now] over the next
+/// four weeks: its predicted must-do days without a credit — what the week
+/// needs if nothing else is logged (the reminder says the partner will hear
+/// about a missing record, which is true only then). Recomputed whenever the
+/// reminders are rescheduled (a record, app start). Null for a fixed-weekday
+/// plan.
+List<DateTime>? weeklyReminderDates(
+  Plan plan, {
+  required DateTime now,
+  bool creditedToday = false,
+}) {
+  if (!plan.isWeekly) return null;
+  final today = DateTime(now.year, now.month, now.day);
+  final start = DateTime(
+    plan.startDate.year,
+    plan.startDate.month,
+    plan.startDate.day,
+  );
+  final end = DateTime(plan.endDate.year, plan.endDate.month, plan.endDate.day);
+  final dates = <DateTime>[];
+  final weeks = <DateTime, WeeklyWeek>{};
+  for (var i = 0; i < 28; i++) {
+    final day = DateTime(today.year, today.month, today.day + i);
+    if (day.isAfter(end)) break;
+    if (day.isBefore(start)) continue;
+    final week = weeks[weeklyWeekStartOf(day)] ??= plan.weeklyWeekOf(
+      day,
+      today: today,
+      creditedToday: creditedToday,
+    )!;
+    final index = day.weekday - 1;
+    if (week.mustDo[index] && !week.creditedDays[index]) dates.add(day);
+  }
+  return dates;
 }
 
 /// Whether [plan] already has a record (done, skipped, rested or rescued) on

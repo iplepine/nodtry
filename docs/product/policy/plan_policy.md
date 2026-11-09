@@ -66,7 +66,14 @@
 - 짝꿍의 약속은 읽기 전용(인정·응원·똑똑·내기 제안만).
 - 서버 불변식: `managerId`는 연결된 짝꿍이어야 한다. 아니면 `onPlanCreated`/`onPlanUpdated`가 해제한다.
 - 운동 문구: `workoutType`이 있으면 운동 카피(식단은 `식단`, `운동`·`오운완` 표현 안 씀), 없으면 중립 `약속` 카피.
-- 분석: `plan_created {is_edit, frequency, has_partner, workout_type, template_id, template_edited}`
+- 분석: `plan_created {is_edit, frequency, schedule_mode, has_partner, workout_type, template_id, template_edited}`
+- 주 N회 자유 요일(`weeklyTarget` 1–6, 1.2.0+): 요일 단계에서 `요일 정하기 | 주 N회 자유롭게` 토글 + N 스테퍼, 마감 시간은 그대로 필수. 저장 시 `items[].days`는 7요일 전부(구버전 호환), 고정 요일로 되돌리면 `weeklyTarget` 필드를 삭제한다.
+  - 주 = 소유자 시간대의 월–일. 기간에 일부만 걸친 주는 목표를 비례·올림(토요일 시작 주 3회 → 첫 주말 1회).
+  - 인정되는 날 = 완료·인정(rescue)·휴식권. 건너뛰기는 아님. 휴식권은 주 1회 그대로, 주 목표를 채운 뒤엔 숨김.
+  - 기록 없는 날은 중립. 남은 날(그날 포함)이 아직 필요한 횟수 이하이면 **꼭 해야 하는 날**(must-do) — 그날 기록이 없으면 놓침. 주 목표를 못 채우게 된 뒤엔 남은 날이 모두 must-do.
+  - 둘운완 스트릭: 완료한 날은 쌓이고, 중립일은 건너뛰고, must-do 놓침에서 끊긴다. 4주 정산 실패일 = must-do 놓친 날(주별 부족분), 예정일 = 주별 목표 합.
+  - 지금 탭: 이번 주 목표를 채울 때까지 매일 체크인 카드(`이번 주 2/3회`). 채운 뒤엔 `이번 주 목표 달성 🎉` + 추가 기록 가능(스트릭에 반영). must-do가 아닌 날은 마감이 지나도 '지남' 카드·똑똑이 뜨지 않는다.
+  - 알림: 로컬 마감 알림과 서버 놓침 알림(`notifyMissedActions`)은 must-do 날에만. 규칙(로직)은 `lib/models/weekly_target.dart` ↔ `functions/src/weekly.ts`, 공용 벡터 `test/fixtures/weekly_target_vectors.json`.
 
 ## 알려진 한계
 - 수정 저장은 화면을 연 시점의 약속 전체를 다시 쓴다. 그 사이 짝꿍 인정이 들어오면 덮일 수 있다(피벗 이전부터 존재).

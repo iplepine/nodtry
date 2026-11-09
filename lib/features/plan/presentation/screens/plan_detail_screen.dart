@@ -14,6 +14,7 @@ import 'package:nod_try/providers/repository_provider.dart';
 import '../widgets/plan_goal_detail_row.dart';
 import '../widgets/plan_history_views.dart';
 import '../widgets/plan_progress_card.dart';
+import '../weekly_labels.dart';
 
 enum _HistoryViewMode { list, calendar, graph }
 
@@ -168,7 +169,12 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                     _buildInfoRow(
                       context,
                       icon: Icons.calendar_today,
-                      label: _getDaysText(days, AppLocalizations.of(context)!),
+                      label:
+                          weeklyScheduleLabel(
+                            AppLocalizations.of(context)!,
+                            plan,
+                          ) ??
+                          _getDaysText(days, AppLocalizations.of(context)!),
                     ),
                     const SizedBox(height: 24),
                     _buildInfoRow(

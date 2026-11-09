@@ -288,6 +288,37 @@ describe("firestore.rules", () => {
         });
     });
 
+    describe("plans: optional 주 N회 weeklyTarget", () => {
+        const allDays = [{title: "러닝", days: [1, 2, 3, 4, 5, 6, 7], count: 7}];
+
+        it("a plan can be created and updated with an int 1-6, or have it removed", async () => {
+            await assertSucceeds(setDoc(doc(dbOf("alice"), "plans/weekly1"), {
+                userId: "alice", state: "active", items: allDays, weeklyTarget: 3,
+            }));
+            await assertSucceeds(updateDoc(doc(dbOf("alice"), "plans/planA"), {weeklyTarget: 1}));
+            await assertSucceeds(updateDoc(doc(dbOf("alice"), "plans/planA"), {weeklyTarget: 6}));
+            await assertSucceeds(updateDoc(doc(dbOf("alice"), "plans/planA"), {weeklyTarget: deleteField()}));
+        });
+
+        it("anything but an int 1-6 is refused", async () => {
+            for (const bad of [0, 7, 2.5, "3", true]) {
+                await assertFails(setDoc(doc(dbOf("alice"), "plans/weekly2"), {
+                    userId: "alice", state: "active", items: allDays, weeklyTarget: bad,
+                }));
+                await assertFails(updateDoc(doc(dbOf("alice"), "plans/planA"), {weeklyTarget: bad}));
+            }
+        });
+
+        it("updates that leave the target alone still work on a plan that has one", async () => {
+            await testEnv.withSecurityRulesDisabled(async (ctx) => {
+                await updateDoc(doc(ctx.firestore(), "plans/planA"), {weeklyTarget: 9});
+            });
+            await assertSucceeds(updateDoc(doc(dbOf("bob"), "plans/planA"), {
+                lastPokeAt: serverTimestamp(), lastUpdatedBy: "bob",
+            }));
+        });
+    });
+
     describe("actions: owner's own plan, manager 인정 only", () => {
         it("actions can only be added to the writer's own plan", async () => {
             await testEnv.withSecurityRulesDisabled(async (ctx) => {

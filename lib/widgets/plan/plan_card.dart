@@ -4,6 +4,7 @@ import '../../models/plan_model.dart';
 import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../features/plan/presentation/widgets/plan_goal_label.dart';
+import '../../features/plan/presentation/weekly_labels.dart';
 
 enum _PlanCardAction { edit, delete }
 
@@ -53,8 +54,11 @@ class PlanCard extends StatelessWidget {
       l10n.weekdaySun,
     ];
     final daysSet = item.days.toSet();
+    final weeklyLabel = weeklyScheduleLabel(l10n, plan);
     final String daysString;
-    if (daysSet.length == 7) {
+    if (weeklyLabel != null) {
+      daysString = weeklyLabel;
+    } else if (daysSet.length == 7) {
       daysString = l10n.planDaysEveryday;
     } else if (daysSet.length == 5 &&
         daysSet.containsAll({1, 2, 3, 4, 5})) {
