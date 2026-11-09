@@ -24,7 +24,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get loginGuest => '로그인 없이 시작하기';
 
   @override
-  String get privacyMessage => '서로 동의해야 연결되고, 인증샷은 짝꿍만 봐요.';
+  String get privacyMessage => '서로 동의해야 연결되고, 인증샷은 기본적으로 짝꿍만 봐요.';
 
   @override
   String get connectHeadline => '짝꿍을 초대해요';
@@ -2260,7 +2260,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get proofConsentTitle => '첫 인증샷 전에 알려 드려요';
 
   @override
-  String get proofConsentOnlyPartner => '연결된 짝꿍 한 명만 볼 수 있어요.';
+  String get proofConsentOnlyPartner =>
+      '기본적으로 연결된 짝꿍 한 명만 볼 수 있어요. 공유 카드에는 설정에서 허용할 때만 들어가요.';
 
   @override
   String get proofConsentLocationRemoved => '위치 정보 같은 사진 정보는 지우고 올려요.';
@@ -2873,7 +2874,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get sharePhotoConsentSettingTitle => '짝꿍이 만드는 공유 카드에 내 인증샷 넣기 허용';
 
   @override
-  String get sharePhotoConsentSettingHelper => '끄면 짝꿍 카드에는 짝꿍 사진만 들어가요';
+  String get sharePhotoConsentSettingHelper =>
+      '켜면 짝꿍이 내 사진이 든 카드를 앱 밖에 공유할 수 있어요. 끄면 다음 카드부터 빠져요';
 
   @override
   String get sharePhotoConsentSaveFailed => '설정을 저장하지 못했어요. 다시 시도해 주세요.';

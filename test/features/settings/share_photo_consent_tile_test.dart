@@ -52,7 +52,10 @@ void main() {
     await tester.pumpWidget(_app(users, _me()));
 
     expect(find.text('짝꿍이 만드는 공유 카드에 내 인증샷 넣기 허용'), findsOneWidget);
-    expect(find.text('끄면 짝꿍 카드에는 짝꿍 사진만 들어가요'), findsOneWidget);
+    expect(
+      find.text('켜면 짝꿍이 내 사진이 든 카드를 앱 밖에 공유할 수 있어요. 끄면 다음 카드부터 빠져요'),
+      findsOneWidget,
+    );
     expect(_switchValue(tester), isFalse);
 
     await tester.tap(

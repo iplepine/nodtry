@@ -41,7 +41,7 @@
 <!-- ===== 한국어 ===== -->
 <div id="lang-ko" class="section-ko">
   <h1>개인정보처리방침</h1>
-  <p class="updated">시행일: 2026년 10월 2일 · <span class="brand">둘운완</span> (DuoDone)</p>
+  <p class="updated">시행일: 2026년 11월 10일 · <span class="brand">둘운완</span> (DuoDone)</p>
 
   <table>
     <tr><th>앱 이름</th><td>둘운완 (DuoDone) — 이전 이름: 그래, 해봐 / Nodtry (Google Play 등록정보에는 "Nodtry: Accountability Partner"로 표시될 수 있어요)</td></tr>
@@ -59,21 +59,29 @@
     <tr><th>항목</th><th>수집 목적</th><th>수집 방법</th></tr>
     <tr><td>이메일 주소, 로그인 ID(Firebase Auth UID), 소셜 로그인 시 제공되는 이름</td><td>회원 식별 및 계정 관리</td><td>회원가입·로그인 시</td></tr>
     <tr><td>닉네임, 프로필 이미지, 짝꿍 애칭(내가 짝꿍을 부르는 호칭)</td><td>앱 안에서 프로필·호칭 표시</td><td>사용자 직접 입력</td></tr>
-    <tr><td>운동 약속 데이터(운동 종류, 요일, 마감 시각, 완료·휴식 기록, 소감)</td><td>핵심 기능 제공(약속 관리, 짝꿍 확인)</td><td>서비스 이용 중 생성</td></tr>
-    <tr><td><strong>인증샷</strong>(운동 사진), 촬영 방식(카메라/앨범), 촬영 시각</td><td>운동 약속 인증을 연결된 짝꿍에게 보여주기(아래 2절)</td><td>사용자가 직접 촬영·선택(선택 사항)</td></tr>
+    <tr><td>운동 약속 데이터(운동 종류, 요일, 마감 시각, 목표(D-day) 이름·날짜, 완료·휴식 기록, 소감)</td><td>핵심 기능 제공(약속 관리, 짝꿍 확인)</td><td>서비스 이용 중 생성</td></tr>
+    <tr><td><strong>인증샷</strong>(운동 사진), 촬영 방식(카메라/앨범), 촬영 시각</td><td>운동 약속 인증을 연결된 짝꿍에게 보여주기, 내가 허용하면 짝꿍이 만드는 공유 카드에 넣기(아래 2절)</td><td>사용자가 직접 촬영·선택(선택 사항)</td></tr>
     <tr><td>짝꿍과 주고받은 인정 리액션, 응원·똑똑 메시지, 내기(보상·벌칙) 내용</td><td>짝꿍 간 소통 기능 제공</td><td>서비스 이용 중 생성</td></tr>
+    <tr><td>공유 카드 사진 허용 여부(켬/끔, 기본 끔)</td><td>짝꿍이 만드는 공유 카드에 내 인증샷을 넣어도 되는지 확인(아래 2절)</td><td>설정에서 사용자가 직접 선택</td></tr>
+    <tr><td>초대 기록(초대한 사람의 로그인 ID, 초대 코드, 처음·마지막 공유 시각, 공유 횟수, 초대 리마인더 발송 횟수·시각, 연결된 시각)</td><td>초대 링크·코드로 짝꿍 연결, 짝꿍이 아직 들어오지 않았을 때 초대 리마인더 알림 보내기(아래 3절)</td><td>초대 메시지를 공유하거나 코드를 복사할 때 생성</td></tr>
     <tr><td>건강 관련 정보(운동·식단 등 약속에 포함된 경우)</td><td>약속 관리 및 짝꿍 확인</td><td>사용자 자발적 입력</td></tr>
     <tr><td>기기 정보(기기 모델, OS 버전), 앱 빌드 번호, 시간대, 언어 설정, 푸시 토큰</td><td>알림 발송, 마감 시각 계산, 버전 호환 안내</td><td>자동 수집</td></tr>
+    <tr><td>알림 발송 횟수(받는 사람별 하루 집계)</td><td>하루에 알림이 너무 많이 가지 않도록 발송 수 제한</td><td>알림을 보낼 때 서버에서 자동 생성</td></tr>
     <tr><td>오류 로그(앱 충돌 정보, 로그인 ID와 함께 기록)</td><td>오류 분석 및 해결</td><td>자동 수집(Firebase Crashlytics)</td></tr>
     <tr><td>앱 이용 기록(화면·기능 사용 이벤트, IP 주소로 추정한 대략적인 국가·지역)</td><td>서비스 품질 개선 및 통계</td><td>자동 수집(Google Analytics for Firebase)</td></tr>
   </table>
   <p>앱은 광고 ID를 수집하지 않고, 정확한 위치 정보(GPS)도 수집하지 않아요. 대략적인 국가·지역은 이용 통계에만 써요.</p>
+  <p><strong>내 기기에만 저장되는 정보:</strong></p>
+  <ul>
+    <li><strong>홈 화면·잠금 화면 위젯:</strong> 위젯에 보여줄 나와 짝꿍의 호칭(애칭 → 짝꿍 이름 → 짝꿍), 오늘 운동 상태, 함께한 날 수를 내 기기의 위젯 저장 공간에 저장해요. 서버로 보내지 않고, 사진·소감·메시지·약속 내용은 넣지 않아요. 잠금 화면 위젯은 기기가 잠겨 있어도 보이니, 원하지 않으면 위젯을 빼 주세요. 로그아웃하거나 연결을 끊으면 지워져요.</li>
+    <li><strong>초대 링크:</strong> 초대 링크(nod-try.web.app/i/…)로 앱을 열면 링크 속 초대 코드를 연결 단계에서 쓸 때까지 내 기기에 잠시 저장해요.</li>
+  </ul>
 
   <h2>2. 인증샷</h2>
   <ul>
     <li><strong>수집 항목:</strong> 사진 이미지, 촬영 방식(카메라/앨범), 촬영 시각(카메라는 찍은 시각, 앨범은 사진에 기록된 원본 촬영일이 있으면 그 날짜).</li>
     <li><strong>이용 목적:</strong> 내가 한 운동을 연결된 짝꿍에게 보여주고, 짝꿍이 인정(리액션)할 수 있게 하기 위해서예요. 얼굴 인식 등 다른 분석이나 광고에 쓰지 않아요.</li>
-    <li><strong>공개 범위:</strong> 나와 <strong>연결된 짝꿍 1명만</strong> 볼 수 있어요. 공개 피드나 다른 사용자에게 보여주는 기능은 없어요.</li>
+    <li><strong>공개 범위:</strong> 기본적으로 나와 <strong>연결된 짝꿍 1명만</strong> 볼 수 있어요. 공개 피드나 다른 사용자에게 보여주는 기능은 없어요. 다만 아래 '공유 카드'를 내가 켜면, 짝꿍이 내 인증샷이 들어간 카드를 앱 밖으로 공유할 수 있어요.</li>
     <li><strong>위치 정보 제거:</strong> 사진은 올리기 전에 내 기기에서 크기를 줄이고 다시 저장해요. 이 과정에서 사진에 들어 있던 위치(GPS)·기기 정보 등 메타데이터(EXIF)를 모두 지우고, 원본 사진은 서버로 보내지 않아요.</li>
     <li><strong>저장 위치:</strong> Cloud Storage for Firebase(Google LLC)에 저장해요. 짝꿍의 앱은 사진을 빠르게 보여주기 위해 기기에 임시로 저장(캐시)할 수 있어요.</li>
     <li><strong>삭제:</strong>
@@ -83,6 +91,14 @@
         <li>회원 탈퇴 시 내 인증샷은 모두 삭제돼요.</li>
       </ul>
     </li>
+    <li><strong>공유 카드(선택, 기본 꺼짐):</strong> 설정의 <strong>'짝꿍이 만드는 공유 카드에 내 인증샷 넣기 허용'</strong>을 켜면, 짝꿍이 자기 기기에서 만드는 공유 카드 이미지에 내 인증샷(카드 날짜의 사진, 없으면 가장 최근 사진)을 같이 넣을 수 있어요.
+      <ul>
+        <li>카드는 짝꿍의 기기 안에서 만들어져요. 카드를 만들려고 사진을 서버에 새로 올리거나 카드 이미지를 둘운완 서버에 저장하지 않아요. 카드 이미지는 공유를 위해 짝꿍 기기의 임시 폴더에 잠시 저장돼요.</li>
+        <li>짝꿍은 카드를 인스타그램·카카오톡 등 앱 밖으로 공유할 수 있어요. 공유는 짝꿍이 직접 하는 일이고, 한번 공유된 카드는 둘운완이 회수하거나 지울 수 없어요. 공유된 곳에서는 그 서비스의 정책이 적용돼요.</li>
+        <li>설정에서 언제든 끌 수 있어요. 끄면 그다음에 만드는 카드부터 내 인증샷이 빠지고, 이미 만들었거나 공유한 카드는 바뀌지 않아요.</li>
+        <li>꺼져 있어도 짝꿍은 자기 인증샷만 넣은 카드를 만들 수 있어요. 카드에는 둘의 오늘 운동 기록(운동 종류, 했는지·쉬었는지)과 함께한 날 수, 짝꿍이 나를 부르는 애칭(없으면 '짝꿍')이 들어가고, 내 실명이나 이메일은 들어가지 않아요.</li>
+      </ul>
+    </li>
     <li><strong>주의:</strong> 인증샷에는 얼굴이나 몸이 나올 수 있어요. 보여주고 싶은 사진만 올려 주세요. 다른 사람이 나온 사진이나 부적절한 사진은 올리지 말아 주세요. 사진 보기 화면에서 신고하거나 연결을 끊을 수 있어요.</li>
   </ul>
 
@@ -90,6 +106,8 @@
   <ul>
     <li>운동 약속 만들기, 인증, 짝꿍 연결·인정·응원 등 핵심 기능 제공</li>
     <li>마감 리마인더와 짝꿍 소식 알림 발송</li>
+    <li>초대 리마인더: 초대를 공유했는데 짝꿍이 아직 연결하지 않았으면, 마지막 공유 후 약 24시간·72시간에 최대 2번, 내 시간대 기준 오전 10시~오후 9시 사이에만 알려 드려요. 연결되거나 탈퇴하면 보내지 않아요.</li>
+    <li>하루 알림 수 제한: 받는 사람마다 하루에 받은 알림 수를 세어, 꼭 필요한 알림이 아니면 하루 상한을 넘었을 때 보내지 않아요.</li>
     <li>회원 식별 및 계정 관리</li>
     <li>오류 해결, 서비스 품질 개선 및 신규 기능 개발</li>
   </ul>
@@ -99,13 +117,14 @@
   <p>앱 운영을 위해 아래 업무를 Google LLC에 맡기고 있어요. 각 서비스는 Google의 개인정보처리방침(<a href="https://policies.google.com/privacy">policies.google.com/privacy</a>)에 따라 데이터를 처리해요.</p>
   <table>
     <tr><th>수탁자</th><th>서비스</th><th>위탁 업무</th></tr>
-    <tr><td rowspan="7">Google LLC</td><td>Firebase Authentication</td><td>로그인·회원 인증</td></tr>
+    <tr><td rowspan="8">Google LLC</td><td>Firebase Authentication</td><td>로그인·회원 인증</td></tr>
     <tr><td>Cloud Firestore</td><td>계정·약속·기록 데이터 저장</td></tr>
     <tr><td>Cloud Storage for Firebase</td><td>인증샷·프로필 이미지 저장</td></tr>
-    <tr><td>Cloud Functions for Firebase</td><td>알림 발송, 연결·탈퇴 시 데이터 정리 등 서버 처리</td></tr>
+    <tr><td>Cloud Functions for Firebase</td><td>알림 발송(초대 리마인더·하루 알림 수 제한 포함), 연결·탈퇴 시 데이터 정리 등 서버 처리</td></tr>
     <tr><td>Firebase Cloud Messaging</td><td>푸시 알림 전송</td></tr>
     <tr><td>Firebase Crashlytics</td><td>앱 오류(충돌) 로그 수집·분석</td></tr>
     <tr><td>Google Analytics for Firebase</td><td>앱 이용 통계 분석(광고 ID 미사용)</td></tr>
+    <tr><td>Firebase Hosting</td><td>초대 링크·안내 웹페이지 제공</td></tr>
   </table>
   <p>Apple 또는 Google 계정으로 로그인하면 해당 회사에서 이메일 등 로그인에 필요한 정보만 받아요.</p>
 
@@ -128,6 +147,9 @@
     <tr><td>운동 약속·기록·리액션·응원 데이터</td><td>회원 탈퇴 시까지</td></tr>
     <tr><td>인증샷</td><td>사용자가 삭제하거나 회원 탈퇴할 때까지</td></tr>
     <tr><td>건강 관련 정보</td><td>회원 탈퇴 시까지</td></tr>
+    <tr><td>공유 카드 사진 허용 여부, 초대 기록</td><td>회원 탈퇴 시까지(초대 리마인더는 연결되면 더 보내지 않아요)</td></tr>
+    <tr><td>알림 발송 횟수</td><td>집계한 날로부터 약 3일 뒤 자동 삭제</td></tr>
+    <tr><td>위젯 정보, 기기에 저장한 초대 코드</td><td>내 기기에만 저장. 위젯 정보는 로그아웃·연결 해제 시, 초대 코드는 연결 단계에서 쓰면 지워지고, 앱을 지우면 모두 지워져요</td></tr>
     <tr><td>기기 정보, 오류 로그, 이용 통계</td><td>수집일로부터 최대 14개월</td></tr>
   </table>
   <p>보관 기간이 지나거나 처리 목적을 달성하면 해당 개인정보를 지체 없이 파기해요.</p>
@@ -153,7 +175,7 @@
   </ul>
 
   <h2>9. 데이터 보안</h2>
-  <p>데이터는 암호화된 통신(HTTPS/TLS)으로 전송하고 Google Firebase의 보안 클라우드 인프라에 저장해요. 인증샷은 서버 규칙으로 본인과 연결된 짝꿍만 읽을 수 있도록 제한해요.</p>
+  <p>데이터는 암호화된 통신(HTTPS/TLS)으로 전송하고 Google Firebase의 보안 클라우드 인프라에 저장해요. 인증샷은 서버 규칙으로 본인과 연결된 짝꿍만 읽을 수 있도록 제한해요. 공유 카드는 짝꿍 기기에서 만들어지고, 내가 허용한 경우에만 내 인증샷이 들어가요(2절).</p>
 
   <h2>10. 아동 개인정보 보호</h2>
   <p>앱은 만 14세 미만 아동을 대상으로 하지 않으며, 만 14세 미만 아동의 개인정보를 고의로 수집하지 않아요.</p>
@@ -161,6 +183,7 @@
   <h2>11. 개인정보처리방침 변경</h2>
   <p>이 방침은 바뀔 수 있으며, 변경 사항은 시행일과 함께 이 페이지에 게시해요.</p>
   <ul>
+    <li>2026년 11월 10일: 공유 카드에 내 인증샷 넣기(선택, 기본 꺼짐) 안내, 홈·잠금 화면 위젯, 초대 링크·초대 리마인더, 하루 알림 수 제한, 운동 목표(D-day) 항목 추가, 처리 위탁에 Firebase Hosting 추가</li>
     <li>2026년 10월 2일: 앱 이름 변경(그래, 해봐 → 둘운완), 인증샷 항목 추가, 처리 위탁(Cloud Storage·Cloud Functions·Crashlytics·Analytics)과 국외 이전 안내 추가</li>
     <li>2026년 3월 24일: 최초 시행</li>
   </ul>
@@ -176,7 +199,7 @@
 <!-- ===== English ===== -->
 <div id="lang-en" class="section-en">
   <h1>Privacy Policy</h1>
-  <p class="updated">Effective Date: October 2, 2026 · <span class="brand">DuoDone</span> (둘운완)</p>
+  <p class="updated">Effective Date: November 10, 2026 · <span class="brand">DuoDone</span> (둘운완)</p>
 
   <table>
     <tr><th>App name</th><td>DuoDone (둘운완) — formerly Nodtry / 그래, 해봐 (the Google Play listing may still show "Nodtry: Accountability Partner")</td></tr>
@@ -194,21 +217,29 @@
     <tr><th>Data</th><th>Purpose</th><th>Method</th></tr>
     <tr><td>Email address, login ID (Firebase Auth UID), name provided by social sign-in</td><td>Account identification and management</td><td>At sign-up / sign-in</td></tr>
     <tr><td>Nickname, profile image, partner nickname (what you call your partner)</td><td>In-app profile and name display</td><td>User input</td></tr>
-    <tr><td>Workout promise data (workout type, days, deadline, done/rest records, notes)</td><td>Core features (promise tracking, partner check-ins)</td><td>Generated during use</td></tr>
-    <tr><td><strong>Proof photos</strong> (workout photos), capture source (camera/album), capture time</td><td>Showing your workout to your connected partner (Section 2)</td><td>Taken or selected by you (optional)</td></tr>
+    <tr><td>Workout promise data (workout type, days, deadline, goal (D-day) name and date, done/rest records, notes)</td><td>Core features (promise tracking, partner check-ins)</td><td>Generated during use</td></tr>
+    <tr><td><strong>Proof photos</strong> (workout photos), capture source (camera/album), capture time</td><td>Showing your workout to your connected partner; if you allow it, including it in share cards your partner makes (Section 2)</td><td>Taken or selected by you (optional)</td></tr>
     <tr><td>Reactions, cheers and knock messages exchanged with your partner, bet (reward/penalty) details</td><td>Partner communication features</td><td>Generated during use</td></tr>
+    <tr><td>Share-card photo setting (on/off, off by default)</td><td>Whether your partner may put your proof photo on the share cards they make (Section 2)</td><td>Chosen by you in Settings</td></tr>
+    <tr><td>Invite records (inviter's login ID, invite code, first and last share time, share count, number and time of invite reminders sent, time of connection)</td><td>Connecting through an invite link or code; sending invite reminders while your partner hasn't joined yet (Section 3)</td><td>Created when you share your invite or copy your code</td></tr>
     <tr><td>Health-related data (exercise, diet, etc. if included in promises)</td><td>Promise management and partner check-ins</td><td>Voluntary user input</td></tr>
     <tr><td>Device information (model, OS version), app build number, time zone, language setting, push token</td><td>Notifications, deadline calculation, version compatibility notices</td><td>Automatic</td></tr>
+    <tr><td>Notification counts (per recipient, per day)</td><td>Limiting how many notifications are sent per day</td><td>Created by the server when a notification is sent</td></tr>
     <tr><td>Crash logs (recorded with your login ID)</td><td>Troubleshooting</td><td>Automatic (Firebase Crashlytics)</td></tr>
     <tr><td>App usage events (screens and features used, approximate country/region estimated from IP address)</td><td>Service improvement and statistics</td><td>Automatic (Google Analytics for Firebase)</td></tr>
   </table>
   <p>The App does not collect the advertising ID or precise (GPS) location. Approximate country/region is used only for usage statistics.</p>
+  <p><strong>Stored only on your device:</strong></p>
+  <ul>
+    <li><strong>Home-screen and lock-screen widgets:</strong> the names shown (you, and your partner's nickname, display name or "your partner"), today's workout status and your streak are saved in your device's widget storage. They are not sent to our servers, and no photos, notes, messages or promise text are included. Lock-screen widgets are visible while your device is locked, so remove the widget if you prefer. The data is cleared when you sign out or disconnect.</li>
+    <li><strong>Invite links:</strong> when you open the App from an invite link (nod-try.web.app/i/…), the invite code in it is kept on your device until it is used to connect.</li>
+  </ul>
 
   <h2>2. Proof Photos</h2>
   <ul>
     <li><strong>What:</strong> the photo, how it was captured (camera/album), and when (camera: the time you took it; album: the original capture date recorded in the photo, if any).</li>
     <li><strong>Why:</strong> to show the workout you did to your connected partner so they can acknowledge it with a reaction. We do not use photos for facial recognition, other analysis, or advertising.</li>
-    <li><strong>Who can see it:</strong> only you and <strong>your one connected partner</strong>. There is no public feed and no sharing with other users.</li>
+    <li><strong>Who can see it:</strong> by default, only you and <strong>your one connected partner</strong>. There is no public feed and no sharing with other users. If you turn on the share-card setting below, your partner may share a card containing your proof photo outside the App.</li>
     <li><strong>Location removed:</strong> before upload, the App resizes and re-encodes the photo on your device, which removes all metadata (EXIF) such as GPS location and device details. The original photo is never sent to our servers.</li>
     <li><strong>Where it is stored:</strong> Cloud Storage for Firebase (Google LLC). Your partner's app may keep a temporary on-device copy (cache) to display it quickly.</li>
     <li><strong>Deletion:</strong>
@@ -218,6 +249,14 @@
         <li>When you delete your account, all of your proof photos are deleted.</li>
       </ul>
     </li>
+    <li><strong>Share cards (optional, off by default):</strong> if you turn on <strong>"Let my partner put my proof photo on their share cards"</strong> in Settings, your partner can include your proof photo (the photo from the card's day, or else your most recent one) in a share-card image they create on their own device.
+      <ul>
+        <li>The card is created on your partner's device. No photo is uploaded to our servers to make it, and the card image is not stored on DuoDone servers. The card image is briefly saved in a temporary folder on your partner's device so it can be shared.</li>
+        <li>Your partner may share the card outside the App, for example on Instagram or KakaoTalk. Sharing is your partner's own action; once a card has been shared, DuoDone cannot recall or delete it, and the policies of the service it was shared to apply.</li>
+        <li>You can turn the setting off at any time. Cards made after that will not include your photo; cards already made or shared are not affected.</li>
+        <li>Even with the setting off, your partner can make a card with only their own photo. Cards show both of your workouts for the day (workout type, done or rested), your streak and the nickname your partner uses for you (or "Your partner"), never your real name or email.</li>
+      </ul>
+    </li>
     <li><strong>Please note:</strong> proof photos may show your face or body, so only upload photos you are comfortable sharing. Do not upload photos of other people or inappropriate content. You can report a photo or disconnect from the photo viewer.</li>
   </ul>
 
@@ -225,6 +264,8 @@
   <ul>
     <li>Provide core features (workout promises, proof, partner connection, reactions, cheers)</li>
     <li>Send deadline reminders and partner notifications</li>
+    <li>Invite reminders: if you shared an invite and your partner hasn't connected yet, we remind you up to 2 times, about 24 and 72 hours after your last share, only between 10:00 and 21:00 in your time zone. They stop once you connect or delete your account.</li>
+    <li>Daily notification limit: we count the notifications each person receives per day and, except for essential ones, stop sending once the daily limit is reached.</li>
     <li>Identify members and manage accounts</li>
     <li>Fix errors, improve service quality, and develop new features</li>
   </ul>
@@ -234,13 +275,14 @@
   <p>We entrust the following tasks to Google LLC. Each service processes data under Google's Privacy Policy (<a href="https://policies.google.com/privacy">policies.google.com/privacy</a>).</p>
   <table>
     <tr><th>Processor</th><th>Service</th><th>Task</th></tr>
-    <tr><td rowspan="7">Google LLC</td><td>Firebase Authentication</td><td>Sign-in and authentication</td></tr>
+    <tr><td rowspan="8">Google LLC</td><td>Firebase Authentication</td><td>Sign-in and authentication</td></tr>
     <tr><td>Cloud Firestore</td><td>Account, promise and history data storage</td></tr>
     <tr><td>Cloud Storage for Firebase</td><td>Proof photo and profile image storage</td></tr>
-    <tr><td>Cloud Functions for Firebase</td><td>Server processing such as notifications and clean-up on disconnect or account deletion</td></tr>
+    <tr><td>Cloud Functions for Firebase</td><td>Server processing such as notifications (including invite reminders and the daily notification limit) and clean-up on disconnect or account deletion</td></tr>
     <tr><td>Firebase Cloud Messaging</td><td>Push notification delivery</td></tr>
     <tr><td>Firebase Crashlytics</td><td>Crash log collection and analysis</td></tr>
     <tr><td>Google Analytics for Firebase</td><td>App usage statistics (no advertising ID)</td></tr>
+    <tr><td>Firebase Hosting</td><td>Invite links and informational web pages</td></tr>
   </table>
   <p>If you sign in with Apple or Google, we receive only the information needed to sign you in, such as your email address.</p>
 
@@ -263,6 +305,9 @@
     <tr><td>Workout promises, history, reactions and cheers</td><td>Until account deletion</td></tr>
     <tr><td>Proof photos</td><td>Until you delete them or delete your account</td></tr>
     <tr><td>Health-related data</td><td>Until account deletion</td></tr>
+    <tr><td>Share-card photo setting, invite records</td><td>Until account deletion (invite reminders stop once you connect)</td></tr>
+    <tr><td>Notification counts</td><td>Deleted automatically about 3 days after the day counted</td></tr>
+    <tr><td>Widget data, invite code saved on your device</td><td>On your device only. Widget data is cleared on sign-out or disconnect, the invite code once it is used to connect, and both when you uninstall the App</td></tr>
     <tr><td>Device information, crash logs and usage statistics</td><td>Up to 14 months from collection</td></tr>
   </table>
   <p>Data is destroyed without delay once the retention period expires or the purpose of processing is fulfilled.</p>
@@ -288,7 +333,7 @@
   </ul>
 
   <h2>9. Data Security</h2>
-  <p>Data is transmitted over encrypted connections (HTTPS/TLS) and stored on Google Firebase's secure cloud infrastructure. Server rules restrict proof photos so that only you and your connected partner can read them.</p>
+  <p>Data is transmitted over encrypted connections (HTTPS/TLS) and stored on Google Firebase's secure cloud infrastructure. Server rules restrict proof photos so that only you and your connected partner can read them. Share cards are created on your partner's device and include your proof photo only if you allowed it (Section 2).</p>
 
   <h2>10. Children's Privacy</h2>
   <p>The App is not intended for children under 14. We do not knowingly collect personal information from children under 14.</p>
@@ -296,6 +341,7 @@
   <h2>11. Changes to This Policy</h2>
   <p>We may update this Privacy Policy. Changes will be posted on this page with the effective date.</p>
   <ul>
+    <li>November 10, 2026: Added share cards with your proof photo (optional, off by default), home-screen and lock-screen widgets, invite links and invite reminders, the daily notification limit, and workout goals (D-day); added Firebase Hosting as a processor</li>
     <li>October 2, 2026: App renamed (Nodtry → DuoDone); proof photos added; processors (Cloud Storage, Cloud Functions, Crashlytics, Analytics) and international transfer disclosed</li>
     <li>March 24, 2026: First version</li>
   </ul>

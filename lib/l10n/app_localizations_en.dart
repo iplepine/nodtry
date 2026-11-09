@@ -25,7 +25,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyMessage =>
-      'You both agree to connect.\nProof photos are seen only by your partner.';
+      'You both agree to connect.\nBy default, only your partner sees your proof photos.';
 
   @override
   String get connectHeadline => 'Invite your partner';
@@ -2375,7 +2375,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proofConsentTitle => 'Before your first proof photo';
 
   @override
-  String get proofConsentOnlyPartner => 'Only your partner can see it.';
+  String get proofConsentOnlyPartner =>
+      'By default, only your partner can see it. It goes on their share cards only if you allow it in Settings.';
 
   @override
   String get proofConsentLocationRemoved =>
@@ -3060,7 +3061,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sharePhotoConsentSettingHelper =>
-      'When off, their cards only show their own photo';
+      'When on, your partner can share cards with your photo outside the app. Turning it off applies to new cards';
 
   @override
   String get sharePhotoConsentSaveFailed =>

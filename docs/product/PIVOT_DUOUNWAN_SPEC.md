@@ -67,7 +67,7 @@
 - 푸시 호환: `data.type` 값 변경 금지. workoutType 있으면 운동 카피, 없으면 중립 카피. 인증샷 문구는 수신자 clientBuild가 피벗 빌드 이상일 때만. 구버전이 저장한 `실천 메이트` 똑똑 문구는 서버가 새 기본 문구로 대체. 인정 이중 푸시 제거. 마감 판정은 `users.timezone`(없으면 Asia/Seoul).
 - action type·PlanState·PromiseStatus 값 추가 금지. 새 필드는 전부 optional.
 - 기존 사용자 1회 공지: `'그래,해봐'가 둘운완이 됐어요. 약속, 기록, 짝꿍 연결은 그대로예요.`
-- 권한 문구(ko/en 현지화): 카메라 `운동 인증샷을 찍어 연결된 짝꿍에게 보여주기 위해 카메라를 사용해요.` / 사진 `앨범에 있는 운동 사진을 인증샷으로, 또는 프로필 사진으로 올리기 위해 사진 보관함에 접근해요.`(모든 사용처 명시 — 5.1.1). 대외·인앱 개인정보 문구는 사실만: `인증샷은 짝꿍만 봐요`(Storage 규칙으로 보장). 기록 전체가 둘만 보인다는 주장은 읽기 규칙 축소(`firestore.rules.next`) 배포 전까지 금지.
+- 권한 문구(ko/en 현지화): 카메라 `운동 인증샷을 찍어 연결된 짝꿍에게 보여주기 위해 카메라를 사용해요.` / 사진 `앨범에 있는 운동 사진을 인증샷으로, 또는 프로필 사진으로 올리기 위해 사진 보관함에 접근해요.`(모든 사용처 명시 — 5.1.1). 대외·인앱 개인정보 문구는 사실만: `인증샷은 기본적으로 짝꿍만 봐요`(Storage 규칙으로 보장; 1.2.0+ 내가 허용하면 짝꿍이 만드는 공유 카드에 들어가 앱 밖으로 공유될 수 있어 '기본적으로' 한정어 필수 — `allowPartnerPhotoInShareCard`, 개인정보처리방침 2절). 기록 전체가 둘만 보인다는 주장은 읽기 규칙 축소(`firestore.rules.next`) 배포 전까지 금지.
 
 ## 6. 이번 릴리스 범위
 포함: 위 1~5절 전부 + 버그 수정(인정이 엉뚱한 action에 기록, verifyHistoryItem lastUpdatedBy, 재시작 덮어쓰기, 승인 시 기간 리셋, rescue 버튼 숨김, 가짜 응원 버튼, 문자열 결합 로직 제거) + 집중 타이머·공부/검증 루틴·단방향 배지·테마 선택 숨김/제거 + 퍼널 계측(invite_shared, invite_code_detected, partner_connected{role}, proof_uploaded, partner_reacted, duo_done_day, share_card_shared, review_prompt_shown) + 스토어 자산(이름·아이콘·스플래시·메타데이터·캡션 스크린샷 6장·Play 피처 그래픽) + 개인정보처리방침/지원 페이지 + Hosting 초대 랜딩(`/i/{code}`).

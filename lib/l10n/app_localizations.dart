@@ -131,7 +131,7 @@ abstract class AppLocalizations {
   /// Privacy message shown at bottom of login screen
   ///
   /// In en, this message translates to:
-  /// **'You both agree to connect.\nProof photos are seen only by your partner.'**
+  /// **'You both agree to connect.\nBy default, only your partner sees your proof photos.'**
   String get privacyMessage;
 
   /// Headline on connect screen
@@ -4217,7 +4217,7 @@ abstract class AppLocalizations {
   /// Consent sheet line: who can see proof photos
   ///
   /// In en, this message translates to:
-  /// **'Only your partner can see it.'**
+  /// **'By default, only your partner can see it. It goes on their share cards only if you allow it in Settings.'**
   String get proofConsentOnlyPartner;
 
   /// Consent sheet line: EXIF/GPS is stripped
@@ -5315,7 +5315,7 @@ abstract class AppLocalizations {
   /// Helper under the share-card photo consent switch
   ///
   /// In en, this message translates to:
-  /// **'When off, their cards only show their own photo'**
+  /// **'When on, your partner can share cards with your photo outside the app. Turning it off applies to new cards'**
   String get sharePhotoConsentSettingHelper;
 
   /// Snackbar when saving the share-card photo consent fails

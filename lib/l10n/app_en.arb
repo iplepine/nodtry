@@ -20,7 +20,7 @@
   "@loginGuest": {
     "description": "Button to start the app without logging in (Guest Mode)"
   },
-  "privacyMessage": "You both agree to connect.\nProof photos are seen only by your partner.",
+  "privacyMessage": "You both agree to connect.\nBy default, only your partner sees your proof photos.",
   "@privacyMessage": {
     "description": "Privacy message shown at bottom of login screen"
   },
@@ -1865,7 +1865,7 @@
   "@proofConsentTitle": {
     "description": "One-time consent sheet title shown before the first proof photo"
   },
-  "proofConsentOnlyPartner": "Only your partner can see it.",
+  "proofConsentOnlyPartner": "By default, only your partner can see it. It goes on their share cards only if you allow it in Settings.",
   "@proofConsentOnlyPartner": {
     "description": "Consent sheet line: who can see proof photos"
   },
@@ -2717,7 +2717,7 @@
   "@sharePhotoConsentSettingTitle": {
     "description": "Settings switch: let the partner put my proof photo on the share cards they make (users/{uid}.allowPartnerPhotoInShareCard)"
   },
-  "sharePhotoConsentSettingHelper": "When off, their cards only show their own photo",
+  "sharePhotoConsentSettingHelper": "When on, your partner can share cards with your photo outside the app. Turning it off applies to new cards",
   "@sharePhotoConsentSettingHelper": {
     "description": "Helper under the share-card photo consent switch"
   },
