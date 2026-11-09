@@ -1,7 +1,9 @@
-Easier to use with your partner.
+Working out together just got easier.
 
-- Give props, answer a knock, or send a cheer right from the notification.
-- Tapping a notification now takes you straight to the record it is about.
-- Once you connect with your partner, a quick guide shows how DuoDone works.
-- Fixed navigation controls covering the proof photo submit button.
-- Bug fixes and stability improvements.
+- Home & lock screen widgets show your streak together.
+- N times a week: no fixed days, just hit your weekly count.
+- Did it together: one log, your partner just taps "Me too".
+- D-day goals: count down to a trip, wedding or photo shoot.
+- Share cards can include both photos, with your partner's OK.
+- Invite links open the app and connect you right away.
+- Smarter notifications, now in English too. Bug fixes.
