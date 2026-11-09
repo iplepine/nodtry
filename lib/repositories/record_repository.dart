@@ -61,6 +61,15 @@ abstract class RecordRepository {
   /// replayed record arrays from when the editor opened.
   Future<void> updatePlanItems(String planId, List<PlanItem> items);
 
+  /// Sets the plan's D-day goal (`goalTitle` / `goalDate`), or removes both
+  /// when [goalDate] is null. Touches nothing else — not `lastUpdatedBy`, so
+  /// the partner gets no "약속 바꿨어" push for a goal edit.
+  Future<void> updatePlanGoal(
+    String planId, {
+    String? goalTitle,
+    DateTime? goalDate,
+  });
+
   /// 특정 계획을 삭제합니다.
   Future<void> deletePlan(String planId);
 

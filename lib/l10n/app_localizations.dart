@@ -5167,6 +5167,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'With your partner watching, you\'ll actually do it. Send them your code and link.'**
   String get planSavedInviteBody;
+
+  /// Plan create: collapsed row that reveals the optional D-day goal
+  ///
+  /// In en, this message translates to:
+  /// **'Goal date (optional)'**
+  String get planGoalToggle;
+
+  /// Goal preset chip; also fills the goal title
+  ///
+  /// In en, this message translates to:
+  /// **'Trip'**
+  String get planGoalPresetTrip;
+
+  /// Goal preset chip; also fills the goal title
+  ///
+  /// In en, this message translates to:
+  /// **'Wedding'**
+  String get planGoalPresetWedding;
+
+  /// Goal preset chip (바디프로필, a fitness photo shoot); also fills the goal title
+  ///
+  /// In en, this message translates to:
+  /// **'Photo shoot'**
+  String get planGoalPresetBodyProfile;
+
+  /// Goal preset chip: type your own goal title
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get planGoalPresetCustom;
+
+  /// No description provided for @planGoalTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Jeju trip'**
+  String get planGoalTitleHint;
+
+  /// No description provided for @planGoalPickDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get planGoalPickDate;
+
+  /// No description provided for @planGoalRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove goal'**
+  String get planGoalRemove;
+
+  /// No description provided for @planGoalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The countdown shows on your promise card, for your partner too.'**
+  String get planGoalHint;
+
+  /// No description provided for @planGoalNeedsDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date to show the countdown'**
+  String get planGoalNeedsDate;
+
+  /// Countdown label on promise cards, before the goal date
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}} to {title}'**
+  String planGoalLabelBefore(int days, String title);
+
+  /// Countdown label without a goal title
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}} to go'**
+  String planGoalLabelBeforeUntitled(int days);
+
+  /// Countdown label on the goal date
+  ///
+  /// In en, this message translates to:
+  /// **'{title} is today!'**
+  String planGoalLabelToday(String title);
+
+  /// Countdown label on the goal date, without a title
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s D-day!'**
+  String get planGoalLabelTodayUntitled;
+
+  /// Shown for up to 7 days after the goal date
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}} since {title}'**
+  String planGoalLabelAfter(int days, String title);
+
+  /// No description provided for @planGoalLabelAfterUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}} since D-day'**
+  String planGoalLabelAfterUntitled(int days);
+
+  /// No description provided for @planGoalDetailAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a goal date'**
+  String get planGoalDetailAdd;
+
+  /// No description provided for @planGoalSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal date'**
+  String get planGoalSheetTitle;
+
+  /// No description provided for @planGoalSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get planGoalSave;
+
+  /// No description provided for @planGoalSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal date saved'**
+  String get planGoalSaved;
+
+  /// No description provided for @planGoalRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal date removed'**
+  String get planGoalRemoved;
+
+  /// No description provided for @planGoalSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save. Please try again.'**
+  String get planGoalSaveError;
 }
 
 class _AppLocalizationsDelegate

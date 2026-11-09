@@ -2789,4 +2789,80 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get planSavedInviteBody => '짝꿍이 봐주면 진짜 하게 돼요. 카톡으로 코드와 링크를 보내요.';
+
+  @override
+  String get planGoalToggle => '목표 날짜 (선택)';
+
+  @override
+  String get planGoalPresetTrip => '여행';
+
+  @override
+  String get planGoalPresetWedding => '결혼식';
+
+  @override
+  String get planGoalPresetBodyProfile => '바디프로필';
+
+  @override
+  String get planGoalPresetCustom => '직접 입력';
+
+  @override
+  String get planGoalTitleHint => '예: 제주 여행';
+
+  @override
+  String get planGoalPickDate => '날짜 고르기';
+
+  @override
+  String get planGoalRemove => '목표 지우기';
+
+  @override
+  String get planGoalHint => '약속 카드에 D-day가 보여요. 짝꿍도 같이 봐요.';
+
+  @override
+  String get planGoalNeedsDate => '날짜를 고르면 D-day가 보여요';
+
+  @override
+  String planGoalLabelBefore(int days, String title) {
+    return 'D-$days · $title';
+  }
+
+  @override
+  String planGoalLabelBeforeUntitled(int days) {
+    return 'D-$days';
+  }
+
+  @override
+  String planGoalLabelToday(String title) {
+    return 'D-day · $title';
+  }
+
+  @override
+  String get planGoalLabelTodayUntitled => '오늘이 D-day예요';
+
+  @override
+  String planGoalLabelAfter(int days, String title) {
+    return 'D+$days · $title';
+  }
+
+  @override
+  String planGoalLabelAfterUntitled(int days) {
+    return 'D+$days';
+  }
+
+  @override
+  String get planGoalDetailAdd => '목표 날짜 추가하기';
+
+  @override
+  String get planGoalSheetTitle => '목표 날짜';
+
+  @override
+  String get planGoalSave => '저장';
+
+  @override
+  String get planGoalSaved => '목표 날짜를 저장했어요';
+
+  @override
+  String get planGoalRemoved => '목표 날짜를 지웠어요';
+
+  @override
+  String get planGoalSaveError => '저장하지 못했어요. 다시 시도해 주세요.';
 }

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../models/plan_model.dart';
 import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
+import '../../features/plan/presentation/widgets/plan_goal_label.dart';
 
 enum _PlanCardAction { edit, delete }
 
@@ -218,6 +219,7 @@ class PlanCard extends StatelessWidget {
                           fontSize: 12,
                         ),
                       ),
+                      PlanGoalLabel(plan: plan, topSpacing: 6),
                     ],
                   ),
                 ),

@@ -43,6 +43,7 @@ import 'cards/now_card_rules.dart';
 import 'focus_timer/focus_timer_picker.dart';
 import 'focus_timer/focus_timer_screen.dart';
 import 'promise/active_promise_chip.dart';
+import '../../plan/presentation/widgets/plan_goal_label.dart';
 import 'widgets/promise_proposal_sheet.dart';
 
 part 'cards/card_shared.dart';

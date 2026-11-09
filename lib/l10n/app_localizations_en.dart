@@ -2949,4 +2949,105 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get planSavedInviteBody =>
       'With your partner watching, you\'ll actually do it. Send them your code and link.';
+
+  @override
+  String get planGoalToggle => 'Goal date (optional)';
+
+  @override
+  String get planGoalPresetTrip => 'Trip';
+
+  @override
+  String get planGoalPresetWedding => 'Wedding';
+
+  @override
+  String get planGoalPresetBodyProfile => 'Photo shoot';
+
+  @override
+  String get planGoalPresetCustom => 'Custom';
+
+  @override
+  String get planGoalTitleHint => 'e.g. Jeju trip';
+
+  @override
+  String get planGoalPickDate => 'Pick a date';
+
+  @override
+  String get planGoalRemove => 'Remove goal';
+
+  @override
+  String get planGoalHint =>
+      'The countdown shows on your promise card, for your partner too.';
+
+  @override
+  String get planGoalNeedsDate => 'Pick a date to show the countdown';
+
+  @override
+  String planGoalLabelBefore(int days, String title) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0 to $title';
+  }
+
+  @override
+  String planGoalLabelBeforeUntitled(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0 to go';
+  }
+
+  @override
+  String planGoalLabelToday(String title) {
+    return '$title is today!';
+  }
+
+  @override
+  String get planGoalLabelTodayUntitled => 'It\'s D-day!';
+
+  @override
+  String planGoalLabelAfter(int days, String title) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0 since $title';
+  }
+
+  @override
+  String planGoalLabelAfterUntitled(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0 since D-day';
+  }
+
+  @override
+  String get planGoalDetailAdd => 'Add a goal date';
+
+  @override
+  String get planGoalSheetTitle => 'Goal date';
+
+  @override
+  String get planGoalSave => 'Save';
+
+  @override
+  String get planGoalSaved => 'Goal date saved';
+
+  @override
+  String get planGoalRemoved => 'Goal date removed';
+
+  @override
+  String get planGoalSaveError => 'Couldn\'t save. Please try again.';
 }

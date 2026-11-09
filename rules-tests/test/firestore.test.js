@@ -251,6 +251,43 @@ describe("firestore.rules", () => {
         });
     });
 
+    describe("plans: optional D-day goal", () => {
+        const goalDate = Timestamp.fromDate(new Date(Date.UTC(2026, 11, 2)));
+
+        it("a plan can be created and updated with a goal", async () => {
+            await assertSucceeds(setDoc(doc(dbOf("alice"), "plans/goal1"), {
+                userId: "alice", state: "active", goalTitle: "제주 여행", goalDate,
+            }));
+            await assertSucceeds(updateDoc(doc(dbOf("alice"), "plans/planA"), {
+                goalTitle: "가".repeat(20), goalDate,
+            }));
+            // size() counts UTF-16 units: 20 emoji are 40 of them, the cap.
+            await assertSucceeds(updateDoc(doc(dbOf("alice"), "plans/planA"), {
+                goalTitle: "💪".repeat(20),
+            }));
+            await assertSucceeds(updateDoc(doc(dbOf("alice"), "plans/planA"), {
+                goalTitle: deleteField(), goalDate: deleteField(),
+            }));
+        });
+
+        it("a goal title over 40 UTF-16 units or a non-timestamp date is refused", async () => {
+            await assertFails(setDoc(doc(dbOf("alice"), "plans/goal2"), {
+                userId: "alice", state: "active", goalTitle: "가".repeat(41), goalDate,
+            }));
+            await assertFails(updateDoc(doc(dbOf("alice"), "plans/planA"), {goalTitle: 42}));
+            await assertFails(updateDoc(doc(dbOf("alice"), "plans/planA"), {goalDate: "2026-12-02"}));
+        });
+
+        it("updates that leave the goal alone still work on a plan that has one", async () => {
+            await testEnv.withSecurityRulesDisabled(async (ctx) => {
+                await updateDoc(doc(ctx.firestore(), "plans/planA"), {goalTitle: "x".repeat(30), goalDate: 1});
+            });
+            await assertSucceeds(updateDoc(doc(dbOf("bob"), "plans/planA"), {
+                lastPokeAt: serverTimestamp(), lastUpdatedBy: "bob",
+            }));
+        });
+    });
+
     describe("actions: owner's own plan, manager 인정 only", () => {
         it("actions can only be added to the writer's own plan", async () => {
             await testEnv.withSecurityRulesDisabled(async (ctx) => {

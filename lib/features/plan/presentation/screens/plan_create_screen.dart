@@ -18,6 +18,7 @@ import '../../../onboarding/domain/onboarding_gate.dart';
 import '../../domain/workout_template.dart';
 import '../plan_create_state.dart';
 import '../viewmodel/plan_create_viewmodel.dart';
+import '../widgets/plan_goal_editor.dart';
 import '../widgets/plan_schedule_pickers.dart';
 import '../widgets/workout_tile_grid.dart';
 
@@ -440,6 +441,14 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
           ),
         ],
         const SizedBox(height: 24),
+        PlanGoalEditor(
+          title: planState.goalTitle,
+          date: planState.goalDate,
+          initiallyExpanded: widget.planToEdit?.goalDate != null,
+          onTitleChanged: (t) => _viewModel.dispatch(UpdateGoalTitleIntent(t)),
+          onDateChanged: (d) => _viewModel.dispatch(UpdateGoalDateIntent(d)),
+          onClear: () => _viewModel.dispatch(const ClearGoalIntent()),
+        ),
         _buildMemo(l10n),
       ],
     );

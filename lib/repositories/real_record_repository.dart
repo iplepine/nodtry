@@ -824,6 +824,8 @@ class RealRecordRepository implements RecordRepository {
       workoutType: original.workoutType,
       lastProofPhotoPath: original.lastProofPhotoPath,
       lastProofAt: original.lastProofAt,
+      goalTitle: original.goalTitle,
+      goalDate: original.goalDate,
     );
   }
 
@@ -1035,6 +1037,24 @@ class RealRecordRepository implements RecordRepository {
       'items': items.map((item) => item.toMap()).toList(),
       if (user != null) 'lastUpdatedBy': user.uid,
     });
+  }
+
+  @override
+  Future<void> updatePlanGoal(
+    String planId, {
+    String? goalTitle,
+    DateTime? goalDate,
+  }) async {
+    final Map<String, Object> update;
+    if (goalDate == null) {
+      update = Plan.goalDeletes();
+    } else {
+      update = {
+        'goalDate': Plan.goalDateToStored(goalDate),
+        'goalTitle': goalTitle ?? FieldValue.delete(),
+      };
+    }
+    await _firestore.collection('plans').doc(planId).update(update);
   }
 
   @override

@@ -101,6 +101,16 @@ class Plan {
   /// When [lastProofPhotoPath] was reported. Optional.
   final DateTime? lastProofAt;
 
+  /// What the couple is working out toward ("제주 여행"), shown next to the
+  /// D-day. At most 20 characters. Optional; only meaningful with [goalDate].
+  final String? goalTitle;
+
+  /// The D-day itself, a calendar date (local midnight here). Stored as a
+  /// Timestamp at UTC midnight of that date ([goalDateToStored]) so both
+  /// partners see the same day whatever their time zones. Optional: written
+  /// only when set, so older app builds are unaffected.
+  final DateTime? goalDate;
+
   Plan({
     this.id,
     required this.userId,
@@ -134,6 +144,8 @@ class Plan {
     this.workoutType,
     this.lastProofPhotoPath,
     this.lastProofAt,
+    this.goalTitle,
+    this.goalDate,
   });
 
   /// Length of a plan period in days (the 4-week window).
@@ -170,6 +182,8 @@ class Plan {
       items: items,
       createdAt: createdAt,
       workoutType: workoutType,
+      goalTitle: goalTitle,
+      goalDate: goalDate,
     );
   }
 
@@ -206,6 +220,11 @@ class Plan {
     String? workoutType,
     String? lastProofPhotoPath,
     DateTime? lastProofAt,
+    String? goalTitle,
+    DateTime? goalDate,
+
+    /// Drops [goalTitle] and [goalDate] (a null argument keeps them).
+    bool clearGoal = false,
   }) {
     return Plan(
       id: id ?? this.id,
@@ -241,6 +260,8 @@ class Plan {
       workoutType: workoutType ?? this.workoutType,
       lastProofPhotoPath: lastProofPhotoPath ?? this.lastProofPhotoPath,
       lastProofAt: lastProofAt ?? this.lastProofAt,
+      goalTitle: clearGoal ? null : goalTitle ?? this.goalTitle,
+      goalDate: clearGoal ? null : goalDate ?? this.goalDate,
     );
   }
 
@@ -284,6 +305,8 @@ class Plan {
       if (workoutType != null) 'workoutType': workoutType,
       if (lastProofPhotoPath != null) 'lastProofPhotoPath': lastProofPhotoPath,
       if (lastProofAt != null) 'lastProofAt': Timestamp.fromDate(lastProofAt!),
+      if (goalDate != null && goalTitle != null) 'goalTitle': goalTitle,
+      if (goalDate != null) 'goalDate': goalDateToStored(goalDate!),
     };
   }
 
@@ -363,8 +386,34 @@ class Plan {
       workoutType: _nonEmptyString(map['workoutType']),
       lastProofPhotoPath: _nonEmptyString(map['lastProofPhotoPath']),
       lastProofAt: _timestampOrNull(map['lastProofAt']),
+      goalTitle: _nonEmptyString(map['goalTitle']),
+      goalDate: goalDateFromStored(map['goalDate']),
     );
   }
+
+  /// The stored form of a goal [date]: UTC midnight of its calendar date.
+  static Timestamp goalDateToStored(DateTime date) =>
+      Timestamp.fromDate(DateTime.utc(date.year, date.month, date.day));
+
+  /// A stored goal date read back as local midnight of the same calendar
+  /// date, or null when [value] is not a Timestamp.
+  ///
+  /// Written values are UTC midnight; one written as a *local* midnight
+  /// instead (the console, another client) is rounded to the nearest UTC day,
+  /// so a date picked in Seoul (midnight KST = 15:00 UTC the day before) still
+  /// reads as the picked day.
+  static DateTime? goalDateFromStored(Object? value) {
+    if (value is! Timestamp) return null;
+    final utc = value.toDate().toUtc().add(const Duration(hours: 12));
+    return DateTime(utc.year, utc.month, utc.day);
+  }
+
+  /// Field values that remove the goal from a stored plan, for an `update()`
+  /// (which leaves fields missing from [toMap] untouched).
+  static Map<String, Object> goalDeletes() => {
+    'goalTitle': FieldValue.delete(),
+    'goalDate': FieldValue.delete(),
+  };
 
   static String? _nonEmptyString(Object? value) {
     return value is String && value.isNotEmpty ? value : null;
