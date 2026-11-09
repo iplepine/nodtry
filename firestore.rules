@@ -177,6 +177,35 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // invites/{inviterUid}
+    // Invite re-engagement: the app upserts it whenever the user shares their
+    // invite. Only the inviter reads or writes their own doc; nobody lists the
+    // collection. The client writes only {inviterUid, code, createdAt,
+    // lastSharedAt, shareCount}, with server timestamps; remindersSent,
+    // remindersCycleAt, lastReminderAt and connectedAt are server-only
+    // (functions/src/inviteReminder.ts). Never deleted by clients (account
+    // deletion removes it server-side).
+    match /invites/{inviterUid} {
+      function inviteShareOk(data) {
+        return data.inviterUid == inviterUid
+          && data.code is string && data.code.size() >= 4 && data.code.size() <= 16
+          && data.lastSharedAt == request.time
+          && data.shareCount is int;
+      }
+      allow get: if isUser(inviterUid);
+      allow list: if false;
+      allow create: if isUser(inviterUid)
+        && request.resource.data.keys().hasOnly(['inviterUid', 'code', 'createdAt', 'lastSharedAt', 'shareCount'])
+        && inviteShareOk(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.shareCount == 1;
+      allow update: if isUser(inviterUid)
+        && changedKeys().hasOnly(['code', 'lastSharedAt', 'shareCount'])
+        && inviteShareOk(request.resource.data)
+        && request.resource.data.shareCount == resource.data.shareCount + 1;
+      allow delete: if false;
+    }
+
     // Server-only collections (serverLocks for push dedupe / rate limits /
     // link processing) have no match here, so clients can neither read nor
     // write them.

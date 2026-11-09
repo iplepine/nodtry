@@ -69,6 +69,7 @@ import {
 } from "./pushPolicy";
 import {generateUniqueInviteCode, normalizeInviteCode} from "./inviteCode";
 import {FieldOps, SYSTEM_LINK, actionManagerFor, managerStampFor, millisOf, unlinkUpdate} from "./planLinks";
+import {deleteInviteOf, inviteReminderFunction, markInvitesConnected} from "./inviteReminder";
 
 admin.initializeApp();
 
@@ -992,6 +993,7 @@ async function announceLink(outcome: LinkOutcome, a: string, b: string): Promise
 /** Codes are single-use: both are re-issued once the link stands. */
 async function finishLink(key: string, a: string, b: string): Promise<void> {
     await Promise.all([rotateInviteCode(a), rotateInviteCode(b)]);
+    await markInvitesConnected([a, b]).catch((error) => console.warn("invites connectedAt not marked", error));
     await setLinkState(key, "done");
 }
 
@@ -1816,6 +1818,7 @@ export const onAuthUserDeleted = functions.auth.user().onDelete(async (user) => 
         ["proof photos", () => bucket.deleteFiles({prefix: `proofs/${uid}/`})],
         ["profile images", () => bucket.deleteFiles({prefix: `users/${uid}/`})],
         ["user doc and its private data", () => db().recursiveDelete(db().collection("users").doc(uid))],
+        ["invite reminder state", () => deleteInviteOf(uid)],
     ];
 
     for (const [name, step] of steps) {
@@ -1987,3 +1990,6 @@ export const aggregateDailyStats = functions
         });
         functions.logger.info("dailyStats written", {date: day.key, newUsers, doneRecords, activeUsers});
     });
+
+// Invite re-engagement reminders (hourly; see inviteReminder.ts).
+export const sendInviteReminders = inviteReminderFunction({tokenOf, send: sendCopy});
