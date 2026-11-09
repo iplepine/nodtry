@@ -45,23 +45,44 @@ P0/P1/P2 개선 스윕에서 **안전하게 완결·검증된 항목은 코드�
 
 ---
 
-## 2. (P2 #7) `now_tab_screen.dart` (4,558줄) 분해
+## 2. (P2 #7) 대형 UI 파일 분해 (`now_tab_screen.dart` 4,558줄 → 750줄) — ✅ 완료
 
 ### 원칙
 테스트 커버리지가 얕은 대형 stateful 위젯의 빅뱅 리팩토링은 회귀 위험이 크다.
-**동작 보존 + 테스트로 검증되는 단위로만** 점진 추출한다.
+**동작 보존 + 테스트로 검증되는 단위로만** 점진 추출한다. 로직·카피 변경 없음.
 
-### 안전한 1차 슬라이스 — ✅ 완료
+### 1차 슬라이스 — ✅ 완료
 - `PromiseProposalSheet`(+`_PromiseProposalSheetState`, 409줄)를
   `lib/features/now/presentation/widgets/promise_proposal_sheet.dart`로 **순수 이동**.
-  외부 file-level 참조가 없어 자기완결적이었고, `test/widgets/promise_proposal_sheet_test.dart`
-  import만 갱신해 그대로 통과(동작 보존 검증). `now_tab_screen.dart` 4,558 → 4,149줄.
+  `now_tab_screen.dart` 4,558 → 4,149줄 (이후 카드 위젯 part 분리로 2,612줄).
 
-### 이후 슬라이스
-- 애니메이션 로직 → mixin 추출.
-- 알림 스트림 구독(`StreamSubscription`) → 별도 controller.
-- 카드 빌더들(`_PrimaryCard`/`_SecondaryCard`/매니저 카드) → 위젯 파일 분리.
-- 각 추출마다 위젯 테스트를 먼저 추가해 동작을 고정한 뒤 이동.
+### 2차 슬라이스 (release/1.2.0) — ✅ 완료: 세 파일 모두 900줄 미만
+같은 라이브러리의 **part 파일**로 순수 이동(라이브러리-private 유지, public API 변화 없음).
+
+| 파일 | 전 | 후 | 분리된 part |
+|---|---:|---:|---|
+| `now/presentation/now_tab_screen.dart` | 2,612 | 750 | `now_tab_parts/` — `now_tab_record_actions`(했어·사진·휴식·건너뛰기·미루기), `now_tab_notification_handling`(알림 입력/스킵 큐·포커스·퀵액션·체크인 시트), `now_tab_partner_actions`(승인/조정·똑똑·응원·반응·약속·정산), `now_tab_header_and_chips`(헤더·타임칩), `now_tab_fake_state_selector`(디버그) |
+| `now/presentation/cards/primary_executor_card.dart` | 1,397 | 394 | `cards/primary_executor_message`(텍스트 블록), `primary_executor_details`(약속·정산 상세), `primary_executor_buttons`(상태별 버튼) |
+| `us/presentation/screens/us_screen.dart` | 2,008 | 502 | `screens/us_parts/` — `us_me_section`, `us_you_section`(짝꿍 카드·신고), `us_edit_profile_dialog`, `us_active_plan_list`, `us_hero_card` |
+
+- 메서드 묶음은 `extension _X on _NowTabState` / `on _PrimaryExecutorCard`로 감싸 본문을
+  그대로 옮겼다. 위젯 클래스(`_MeSection` 등)는 그대로 이동.
+- 이동으로 생긴 기계적 변경 2가지(동작 동일):
+  `setState`는 `@protected`라 extension에서 직접 못 불러 `_NowTabState._setState(fn) => setState(fn)`
+  래퍼를 두고 8곳을 `_setState`로 호출, static `_todayKeyFor`는 extension에서 비한정 호출이
+  안 돼 같은 본문의 top-level 함수로 이동.
+- 이동 전 특성(characterization) 테스트 추가 → 분리 전 코드(HEAD)에서도 통과 확인 후 이동:
+  `test/screens/now_tab_primary_states_test.dart`(13건: 계획 없음/여유/완료 단일·체크리스트/
+  반려/약속 제안·정산/파일럿 정산/이따·아무 때나, 미루기 시트, 조정 사유 다이얼로그, 그만하기
+  사유 다이얼로그), `test/screens/tabs/us_tab_characterization_test.dart`(6건: 게스트 경고+연결
+  시트, 프로필 편집 다이얼로그, 상태 메시지 placeholder, 약속 삭제 확인, 짝꿍 메뉴).
+- 각 파일 분리 후 전체 `flutter test` 그린, `flutter analyze` 0건.
+
+### 남은 후속(선택)
+- `now_tab_screen.dart`의 `build`(~500줄) 안 카드 리스트 조립부를 위젯으로 추출.
+- `_NowTabState` 필드(애니메이션·알림 구독)를 별도 controller로 — 상태 소유권이 바뀌므로
+  순수 이동이 아니다. 별도 작업 + 위젯 테스트 선행.
+- `manager_quick_card.dart`(761줄)는 900줄 미만이라 이번 범위 밖.
 
 ---
 
