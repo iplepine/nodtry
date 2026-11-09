@@ -3050,4 +3050,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planGoalSaveError => 'Couldn\'t save. Please try again.';
+
+  @override
+  String get sharePhotoConsentSection => 'Share card';
+
+  @override
+  String get sharePhotoConsentSettingTitle =>
+      'Let my partner put my proof photo on their share cards';
+
+  @override
+  String get sharePhotoConsentSettingHelper =>
+      'When off, their cards only show their own photo';
+
+  @override
+  String get sharePhotoConsentSaveFailed =>
+      'Couldn\'t save the setting. Please try again.';
+
+  @override
+  String get sharePhotoConsentHint =>
+      'If your partner allows it, you can put both photos on the card';
+
+  @override
+  String get sharePhotoConsentLayoutSingle => 'Just mine';
+
+  @override
+  String get sharePhotoConsentLayoutTogether => 'Both of us';
+
+  @override
+  String get sharePhotoConsentTogetherNote =>
+      'Your partner\'s proof photo goes on too, since they allowed it.';
 }

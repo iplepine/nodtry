@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../settings_state.dart';
 import '../viewmodel/settings_viewmodel.dart';
+import '../widgets/share_photo_consent_tile.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_theme_enum.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -172,6 +173,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildDeveloperOption(context),
                 const SizedBox(height: 32),
               ],
+
+              // 공유 카드 — 짝꿍 카드에 내 인증샷을 넣어도 되는지 (동의).
+              Text(
+                l10n.sharePhotoConsentSection,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const SharePhotoConsentTile(),
+              const SizedBox(height: 32),
 
               // 알림 설정 (New)
               _buildTutorialOption(context),

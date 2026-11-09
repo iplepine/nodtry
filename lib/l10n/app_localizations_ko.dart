@@ -2865,4 +2865,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get planGoalSaveError => '저장하지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get sharePhotoConsentSection => '공유 카드';
+
+  @override
+  String get sharePhotoConsentSettingTitle => '짝꿍이 만드는 공유 카드에 내 인증샷 넣기 허용';
+
+  @override
+  String get sharePhotoConsentSettingHelper => '끄면 짝꿍 카드에는 짝꿍 사진만 들어가요';
+
+  @override
+  String get sharePhotoConsentSaveFailed => '설정을 저장하지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get sharePhotoConsentHint => '짝꿍이 허용하면 둘 사진을 같이 넣을 수 있어요';
+
+  @override
+  String get sharePhotoConsentLayoutSingle => '내 사진만';
+
+  @override
+  String get sharePhotoConsentLayoutTogether => '둘 사진 같이';
+
+  @override
+  String get sharePhotoConsentTogetherNote => '짝꿍이 허용한 인증샷이 같이 들어가요.';
 }

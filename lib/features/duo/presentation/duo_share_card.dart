@@ -13,6 +13,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/plan_model.dart';
 import '../../../models/proof_photo.dart';
+import '../../../providers/repository_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/analytics.dart';
 import '../../connect/application/partner_label_provider.dart';
@@ -35,9 +36,22 @@ enum DuoShareTrigger {
   final String id;
 }
 
-/// Everything the 9:16 share card shows. Never the partner's photo (v1: no
-/// consent flow for it) and never their real name — they appear as the
-/// nickname I gave them, else 짝꿍.
+/// How the card uses photos (analytics `layout`).
+enum ShareCardLayout {
+  /// My 인증샷 only (or no photo at all).
+  single('single'),
+
+  /// My 인증샷 and my partner's, split top / bottom. Only when they allowed
+  /// it (`users/{partner}.allowPartnerPhotoInShareCard`).
+  together('together');
+
+  const ShareCardLayout(this.id);
+  final String id;
+}
+
+/// Everything the 9:16 share card shows. The partner's photo only when they
+/// allowed it ([ShareCardLayout.together]), and never their real name — they
+/// appear as the nickname I gave them, else 짝꿍.
 class DuoShareCardData {
   const DuoShareCardData({
     required this.streak,
@@ -47,6 +61,7 @@ class DuoShareCardData {
     required this.me,
     required this.partner,
     this.photo,
+    this.partnerPhoto,
   });
 
   final int streak;
@@ -58,6 +73,14 @@ class DuoShareCardData {
 
   /// My proof photo (인증샷) of the card's day, JPEG bytes.
   final Uint8List? photo;
+
+  /// My partner's 인증샷, only when they allowed it. With [photo] it makes
+  /// the together layout; alone it is never shown.
+  final Uint8List? partnerPhoto;
+
+  ShareCardLayout get layout => photo != null && partnerPhoto != null
+      ? ShareCardLayout.together
+      : ShareCardLayout.single;
 }
 
 /// The Storage path of my proof photo for the card's [day]: the newest (by
@@ -83,6 +106,76 @@ String? shareCardProofPhotoPathOf(
     }
   }
   return latestPath;
+}
+
+/// The photo for one person in the together layout: the card [day]'s
+/// ([shareCardProofPhotoPathOf]) when there is one, else the newest photo
+/// across [plans] (by `lastProofAt`). Paths that aren't the plan owner's
+/// (`proofs/{userId}/…`) are skipped.
+String? shareCardLatestProofPhotoPathOf(
+  Iterable<Plan> plans, {
+  required DateTime day,
+}) {
+  final sameDay = shareCardProofPhotoPathOf(plans, day: day);
+  if (sameDay != null) return sameDay;
+  String? latestPath;
+  DateTime? latestAt;
+  for (final plan in plans) {
+    final path = plan.lastProofPhotoPath;
+    final at = plan.lastProofAt;
+    if (path == null || path.isEmpty || at == null) continue;
+    if (parseProofPhotoPath(path)?.ownerUid != plan.userId) continue;
+    if (latestAt == null || at.isAfter(latestAt)) {
+      latestAt = at;
+      latestPath = path;
+    }
+  }
+  return latestPath;
+}
+
+/// The two Storage paths the together layout would load, or null when it
+/// isn't offered: my partner hasn't allowed their photo on my cards
+/// ([partnerAllowed], `users/{partner}.allowPartnerPhotoInShareCard`,
+/// missing = false), or either of us has no 인증샷.
+///
+/// Only the partner's plans I manage count — Storage lets a manager read
+/// those photos only (and only ones since they became its manager; a photo
+/// that still can't be read just keeps the card on the single layout).
+({String mine, String partner})? shareCardTogetherPhotoPathsOf({
+  required bool partnerAllowed,
+  required String? myUid,
+  required String? partnerUid,
+  required Iterable<Plan> myPlans,
+  required Iterable<Plan> partnerPlans,
+  required DateTime day,
+}) {
+  if (!partnerAllowed || myUid == null || partnerUid == null) return null;
+  if (myUid == partnerUid) return null;
+  final mine = shareCardLatestProofPhotoPathOf(
+    myPlans.where((plan) => plan.userId == myUid),
+    day: day,
+  );
+  if (mine == null) return null;
+  final partner = shareCardLatestProofPhotoPathOf(
+    partnerPlans.where(
+      (plan) => plan.userId == partnerUid && plan.managerId == myUid,
+    ),
+    day: day,
+  );
+  if (partner == null) return null;
+  return (mine: mine, partner: partner);
+}
+
+/// The layouts the sheet offers: together only when my partner allowed it
+/// and both photos actually loaded.
+List<ShareCardLayout> shareCardLayoutsOf({
+  required bool partnerAllowed,
+  required bool hasMyPhoto,
+  required bool hasPartnerPhoto,
+}) {
+  return partnerAllowed && hasMyPhoto && hasPartnerPhoto
+      ? const [ShareCardLayout.single, ShareCardLayout.together]
+      : const [ShareCardLayout.single];
 }
 
 /// One person's line on the card: "나 ✓ 🏃 러닝", "짝꿍 · 쉬는 날" …
@@ -125,6 +218,9 @@ class DuoShareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final photo = data.photo;
+    final partnerPhoto = data.layout == ShareCardLayout.together
+        ? data.partnerPhoto
+        : null;
     final date = DateFormat(
       l10n.localeName.startsWith('ko') ? 'yyyy.MM.dd (E)' : 'MMM d, yyyy',
       l10n.localeName,
@@ -138,13 +234,10 @@ class DuoShareCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (photo != null)
-              Image.memory(
-                photo,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-                errorBuilder: (context, error, stack) => _gradientBackground(),
-              )
+            if (photo != null && partnerPhoto != null)
+              _togetherBackground(photo, partnerPhoto)
+            else if (photo != null)
+              _photo(photo)
             else
               _gradientBackground(),
             // Legibility scrim over the photo.
@@ -255,7 +348,80 @@ class DuoShareCard extends StatelessWidget {
                 ],
               ),
             ),
+            if (partnerPhoto != null) ...[
+              // Whose photo is whose, top-right of each half.
+              Positioned(
+                top: 32,
+                right: 28,
+                child: _nameChip(data.meLabel, const ValueKey('share-card-me')),
+              ),
+              Positioned(
+                top: _togetherHalf + _togetherGap + 14,
+                right: 28,
+                child: _nameChip(
+                  data.partnerLabel,
+                  const ValueKey('share-card-partner'),
+                ),
+              ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  static const double _togetherGap = 2;
+  static const double _togetherHalf = (640 - _togetherGap) / 2;
+
+  Widget _photo(Uint8List bytes) {
+    return Image.memory(
+      bytes,
+      fit: BoxFit.cover,
+      gaplessPlayback: true,
+      errorBuilder: (context, error, stack) => _gradientBackground(),
+    );
+  }
+
+  /// Mine on top, my partner's below, with a thin white seam.
+  Widget _togetherBackground(Uint8List mine, Uint8List partner) {
+    return ColoredBox(
+      key: const ValueKey('share-card-together'),
+      color: Colors.white,
+      child: Column(
+        children: [
+          SizedBox(
+            height: _togetherHalf,
+            width: double.infinity,
+            child: _photo(mine),
+          ),
+          const SizedBox(height: _togetherGap),
+          SizedBox(
+            height: _togetherHalf,
+            width: double.infinity,
+            child: _photo(partner),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _nameChip(String label, Key key) {
+    return Container(
+      key: key,
+      constraints: const BoxConstraints(maxWidth: 140),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.32),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -387,6 +553,29 @@ final shareCardSharerProvider = Provider<ShareCardSharer>(
   (ref) => const SharePlusShareCardSharer(),
 );
 
+/// Whether [partnerUid] lets their 인증샷 go on the share cards I make
+/// (`users/{partnerUid}.allowPartnerPhotoInShareCard`, missing = false).
+/// Read fresh from their users doc when the sheet opens, so a partner who
+/// just turned it off is never on the next card. Overridden in tests.
+final shareCardPartnerConsentProvider =
+    Provider<Future<bool> Function(String partnerUid)>(
+      (ref) => (partnerUid) async {
+        final users = await ref.read(userRepositoryProvider).getUsersByIds([
+          partnerUid,
+        ]);
+        return users.firstOrNull?.allowsPartnerPhotoInShareCard ?? false;
+      },
+    );
+
+/// My partner's plans, or null without a partner or while they load.
+final partnerDuoPlansProvider = Provider.autoDispose<List<Plan>?>((ref) {
+  final partnerUid = ref.watch(
+    partnerLabelProvider.select((label) => label.partnerUid),
+  );
+  if (partnerUid == null) return null;
+  return ref.watch(duoPlansProvider(partnerUid)).value;
+});
+
 // ---------------------------------------------------------------------------
 // The sheet
 // ---------------------------------------------------------------------------
@@ -420,19 +609,31 @@ Future<bool> showDuoShareCardSheet(
   final l10n = AppLocalizations.of(context)!;
   final data = duoShareCardDataOf(ref, l10n);
   if (data == null) return false;
-  // Only ever my own photo (spec §4.8: never the partner's in v1), and only
-  // the card day's.
+  // The single layout: only my own photo, and only the card day's. The
+  // partner's joins only in the together layout, when they allowed it.
   final photoPath = shareCardProofPhotoPathOf(
     ref.read(myDuoPlansProvider) ?? const [],
     day: data.date,
   );
+  String? myUid;
+  try {
+    myUid = ref.read(myProfileProvider).value?.uid;
+  } catch (_) {
+    // No profile: no together layout.
+  }
+  final partnerUid = ref.read(partnerLabelProvider).partnerUid;
   final shared = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
     backgroundColor: Colors.transparent,
-    builder: (_) =>
-        DuoShareSheet(data: data, trigger: trigger, photoPath: photoPath),
+    builder: (_) => DuoShareSheet(
+      data: data,
+      trigger: trigger,
+      photoPath: photoPath,
+      myUid: myUid,
+      partnerUid: partnerUid,
+    ),
   );
   return shared ?? false;
 }
@@ -446,6 +647,8 @@ class DuoShareSheet extends ConsumerStatefulWidget {
     required this.data,
     required this.trigger,
     this.photoPath,
+    this.myUid,
+    this.partnerUid,
   });
 
   final DuoShareCardData data;
@@ -453,6 +656,11 @@ class DuoShareSheet extends ConsumerStatefulWidget {
 
   /// My latest proof photo (Storage path), loaded while the sheet is open.
   final String? photoPath;
+
+  /// Me and my partner, for the together layout; without either the sheet
+  /// only offers the single layout.
+  final String? myUid;
+  final String? partnerUid;
 
   @override
   ConsumerState<DuoShareSheet> createState() => _DuoShareSheetState();
@@ -465,6 +673,15 @@ class _DuoShareSheetState extends ConsumerState<DuoShareSheet> {
   Uint8List? _photo;
   bool _photoLoading = false;
 
+  /// Whether my partner allows their photo on my cards; null until known.
+  bool? _partnerAllowed;
+
+  /// The together layout's photos (mine may be an earlier day's than
+  /// [_photo]); both or neither.
+  Uint8List? _togetherMine;
+  Uint8List? _togetherPartner;
+  ShareCardLayout _layout = ShareCardLayout.single;
+
   @override
   void initState() {
     super.initState();
@@ -473,6 +690,60 @@ class _DuoShareSheetState extends ConsumerState<DuoShareSheet> {
     if (_photo == null && path != null) {
       _photoLoading = true;
       _loadPhoto(path);
+    }
+    _loadTogether();
+  }
+
+  List<ShareCardLayout> get _layouts => shareCardLayoutsOf(
+    partnerAllowed: _partnerAllowed ?? false,
+    hasMyPhoto: _togetherMine != null,
+    hasPartnerPhoto: _togetherPartner != null,
+  );
+
+  ShareCardLayout get _effectiveLayout =>
+      _layouts.contains(_layout) ? _layout : ShareCardLayout.single;
+
+  /// Asks whether my partner allowed it, then loads both photos. Any failure
+  /// (no consent, no photo, Storage denies an older photo, slow network)
+  /// just leaves the single layout.
+  Future<void> _loadTogether() async {
+    final myUid = widget.myUid;
+    final partnerUid = widget.partnerUid;
+    if (myUid == null || partnerUid == null) return;
+    var allowed = false;
+    try {
+      allowed = await ref
+          .read(shareCardPartnerConsentProvider)(partnerUid)
+          .timeout(kShareCardPhotoTimeout);
+    } catch (e) {
+      debugPrint('[DuoShareSheet] partner photo consent unknown: $e');
+    }
+    if (!mounted) return;
+    setState(() => _partnerAllowed = allowed);
+    if (!allowed) return;
+
+    final paths = shareCardTogetherPhotoPathsOf(
+      partnerAllowed: allowed,
+      myUid: myUid,
+      partnerUid: partnerUid,
+      myPlans: ref.read(myDuoPlansProvider) ?? const [],
+      partnerPlans: ref.read(partnerDuoPlansProvider) ?? const [],
+      day: widget.data.date,
+    );
+    if (paths == null) return;
+    try {
+      final cache = ref.read(proofPhotoCacheProvider);
+      final photos = await Future.wait([
+        cache.load(paths.mine),
+        cache.load(paths.partner),
+      ]).timeout(kShareCardPhotoTimeout);
+      if (!mounted) return;
+      setState(() {
+        _togetherMine = photos[0];
+        _togetherPartner = photos[1];
+      });
+    } catch (e) {
+      debugPrint('[DuoShareSheet] single layout only: $e');
     }
   }
 
@@ -503,7 +774,12 @@ class _DuoShareSheetState extends ConsumerState<DuoShareSheet> {
       partnerLabel: data.partnerLabel,
       me: data.me,
       partner: data.partner,
-      photo: _photo,
+      photo: _effectiveLayout == ShareCardLayout.together
+          ? _togetherMine
+          : _photo,
+      partnerPhoto: _effectiveLayout == ShareCardLayout.together
+          ? _togetherPartner
+          : null,
     );
   }
 
@@ -529,15 +805,16 @@ class _DuoShareSheetState extends ConsumerState<DuoShareSheet> {
     setState(() => _busy = true);
     final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.maybeOf(context);
+    final card = _data;
     try {
-      final photo = _photo;
-      if (photo != null) {
-        // Make sure the photo is decoded and painted before the capture.
+      final photos = [?card.photo, ?card.partnerPhoto];
+      if (photos.isNotEmpty) {
+        // Make sure the photos are decoded and painted before the capture.
         try {
-          await precacheImage(
-            MemoryImage(photo),
-            context,
-          ).timeout(const Duration(seconds: 2));
+          await Future.wait([
+            for (final photo in photos)
+              precacheImage(MemoryImage(photo), context),
+          ]).timeout(const Duration(seconds: 2));
           await WidgetsBinding.instance.endOfFrame;
         } catch (_) {
           // Capture whatever is on screen.
@@ -553,6 +830,7 @@ class _DuoShareSheetState extends ConsumerState<DuoShareSheet> {
           'target': result.target,
           'trigger': widget.trigger.id,
           'streak': widget.data.streak,
+          'layout': card.layout.id,
         });
         if (mounted) Navigator.of(context).pop(true);
         return;
@@ -568,8 +846,15 @@ class _DuoShareSheetState extends ConsumerState<DuoShareSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final media = MediaQuery.of(context);
-    // Preview height: whatever fits next to the title and buttons.
-    final previewHeight = (media.size.height * 0.56).clamp(220.0, 520.0);
+    final layouts = _layouts;
+    final layout = _effectiveLayout;
+    // Preview height: whatever fits next to the title, the layout toggle
+    // and the buttons.
+    final previewHeight =
+        (media.size.height * 0.56 - (layouts.length > 1 ? 48 : 0)).clamp(
+          200.0,
+          520.0,
+        );
 
     return Container(
       decoration: BoxDecoration(
@@ -611,11 +896,47 @@ class _DuoShareSheetState extends ConsumerState<DuoShareSheet> {
               ),
             ),
           ),
+          if (layouts.length > 1) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final option in layouts)
+                  ChoiceChip(
+                    key: ValueKey('share-layout-${option.id}'),
+                    label: Text(switch (option) {
+                      ShareCardLayout.single =>
+                        l10n.sharePhotoConsentLayoutSingle,
+                      ShareCardLayout.together =>
+                        l10n.sharePhotoConsentLayoutTogether,
+                    }),
+                    selected: layout == option,
+                    onSelected: _busy
+                        ? null
+                        : (_) => setState(() => _layout = option),
+                  ),
+              ],
+            ),
+          ],
           const SizedBox(height: 10),
           Text(
-            l10n.shareCardOnlyMyPhoto,
+            layout == ShareCardLayout.together
+                ? l10n.sharePhotoConsentTogetherNote
+                : l10n.shareCardOnlyMyPhoto,
+            key: const ValueKey('share-sheet-photo-note'),
+            textAlign: TextAlign.center,
             style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
           ),
+          if (_partnerAllowed == false) ...[
+            const SizedBox(height: 2),
+            Text(
+              l10n.sharePhotoConsentHint,
+              key: const ValueKey('share-sheet-consent-hint'),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textDisabled, fontSize: 12),
+            ),
+          ],
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,

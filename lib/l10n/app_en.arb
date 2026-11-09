@@ -2708,5 +2708,37 @@
   "planGoalSave": "Save",
   "planGoalSaved": "Goal date saved",
   "planGoalRemoved": "Goal date removed",
-  "planGoalSaveError": "Couldn't save. Please try again."
+  "planGoalSaveError": "Couldn't save. Please try again.",
+  "sharePhotoConsentSection": "Share card",
+  "@sharePhotoConsentSection": {
+    "description": "Settings section heading for share card options"
+  },
+  "sharePhotoConsentSettingTitle": "Let my partner put my proof photo on their share cards",
+  "@sharePhotoConsentSettingTitle": {
+    "description": "Settings switch: let the partner put my proof photo on the share cards they make (users/{uid}.allowPartnerPhotoInShareCard)"
+  },
+  "sharePhotoConsentSettingHelper": "When off, their cards only show their own photo",
+  "@sharePhotoConsentSettingHelper": {
+    "description": "Helper under the share-card photo consent switch"
+  },
+  "sharePhotoConsentSaveFailed": "Couldn't save the setting. Please try again.",
+  "@sharePhotoConsentSaveFailed": {
+    "description": "Snackbar when saving the share-card photo consent fails"
+  },
+  "sharePhotoConsentHint": "If your partner allows it, you can put both photos on the card",
+  "@sharePhotoConsentHint": {
+    "description": "Share sheet hint when the partner has not allowed their photo on my cards"
+  },
+  "sharePhotoConsentLayoutSingle": "Just mine",
+  "@sharePhotoConsentLayoutSingle": {
+    "description": "Share sheet layout toggle: only my photo"
+  },
+  "sharePhotoConsentLayoutTogether": "Both of us",
+  "@sharePhotoConsentLayoutTogether": {
+    "description": "Share sheet layout toggle: my photo and my partner's, split"
+  },
+  "sharePhotoConsentTogetherNote": "Your partner's proof photo goes on too, since they allowed it.",
+  "@sharePhotoConsentTogetherNote": {
+    "description": "Share sheet note under the card in the together layout"
+  }
 }

@@ -46,6 +46,10 @@ abstract class UserRepository {
   /// 베스트 에포트 — 기기 플래그가 우선이다.
   Future<void> markPivotNoticeSeen();
 
+  /// 짝꿍이 만드는 공유 카드에 내 인증샷을 넣어도 되는지 저장한다
+  /// (`users/{me}.allowPartnerPhotoInShareCard`). 실패하면 던진다.
+  Future<void> updateAllowPartnerPhotoInShareCard(bool allow);
+
   /// Records that I agreed to the terms of use (`users/{me}.termsAcceptedAt`,
   /// `termsVersion`) when connecting with a partner or sending an invite.
   /// Best-effort; never throws.

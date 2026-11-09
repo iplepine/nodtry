@@ -94,6 +94,7 @@
 - `actions/{id}`: `proofPhotoPath` (string `proofs/{uid}/{planId}/{actionId}.jpg`), `proofSource` (`camera|gallery`), `proofTakenAt` (Timestamp, 카메라=촬영 시각, 앨범=EXIF 원본 촬영일 있으면 그 값), `reaction` (string 이모지, 짝꿍이 인정할 때).
 - `cheers/{id}`: 기존 필드 + `reactionType: 'reply'`(똑똑 원탭 답장, `message`에 답장 문구). 기존 `'poke'`/이모지 값 유지.
 - `users/{uid}`: `clientBuild` (int), `timezone` (IANA string), `locale` (`ko|en`), `partnerNickname` (string ≤10자, 내가 짝꿍을 부르는 애칭), `pivotNoticeSeen` (bool, 선택 — 로컬 저장 우선).
+- `users/{uid}.allowPartnerPhotoInShareCard` (bool, 없으면 false, 1.2.0+): 짝꿍이 만드는 공유 카드에 내 인증샷을 넣어도 된다는 동의(설정 화면 토글). 짝꿍이 허용하고 둘 다 인증샷이 있으면(같은 날 우선, 없으면 각자 최신) 공유 시트에서 `내 사진만 / 둘 사진 같이`(9:16 상하 분할) 레이아웃 선택. 짝꿍 사진은 기존 `proofs/…` 경로 + Storage 규칙(내가 매니저인 약속, managerSince 이후)으로만 읽고, 실패하면 단일 레이아웃. 시트를 열 때 짝꿍 users 문서를 새로 읽어 동의 철회를 바로 반영. 규칙 변경 없음(users는 소유자 쓰기·로그인 사용자 get 허용 — rules.next 포함). `share_card_shared`에 `layout: single|together`.
 - `config/app`: `{minBuild: int, latestBuild: int}` — 공개 read, 쓰기 금지(콘솔/admin만).
 - 푸시 `data.type` 기존 값 유지. 신규 타입 추가 시 구버전이 무시해도 안전해야 함(`partner_connected`, `poke_reply`).
 - Storage: `proofs/{ownerUid}/{planId}/{actionId}.jpg` (image/jpeg, <3MB).

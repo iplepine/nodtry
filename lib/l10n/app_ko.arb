@@ -1008,5 +1008,13 @@
   "planGoalSave": "저장",
   "planGoalSaved": "목표 날짜를 저장했어요",
   "planGoalRemoved": "목표 날짜를 지웠어요",
-  "planGoalSaveError": "저장하지 못했어요. 다시 시도해 주세요."
+  "planGoalSaveError": "저장하지 못했어요. 다시 시도해 주세요.",
+  "sharePhotoConsentSection": "공유 카드",
+  "sharePhotoConsentSettingTitle": "짝꿍이 만드는 공유 카드에 내 인증샷 넣기 허용",
+  "sharePhotoConsentSettingHelper": "끄면 짝꿍 카드에는 짝꿍 사진만 들어가요",
+  "sharePhotoConsentSaveFailed": "설정을 저장하지 못했어요. 다시 시도해 주세요.",
+  "sharePhotoConsentHint": "짝꿍이 허용하면 둘 사진을 같이 넣을 수 있어요",
+  "sharePhotoConsentLayoutSingle": "내 사진만",
+  "sharePhotoConsentLayoutTogether": "둘 사진 같이",
+  "sharePhotoConsentTogetherNote": "짝꿍이 허용한 인증샷이 같이 들어가요."
 }

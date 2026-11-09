@@ -184,7 +184,8 @@ class AnalyticsEvent {
   static const duoDoneDay = 'duo_done_day';
 
   /// `{target: kakao|instagram|copy|save|other|unknown, trigger:
-  /// today|milestone|manual, streak}` — the share card went out.
+  /// today|milestone|manual, streak, layout: single|together}` — the share
+  /// card went out.
   static const shareCardShared = 'share_card_shared';
 
   /// `{trigger: first_duo_day|third_props, count}` — in_app_review was asked

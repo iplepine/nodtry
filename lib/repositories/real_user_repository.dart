@@ -424,6 +424,16 @@ class RealUserRepository implements UserRepository {
   }
 
   @override
+  Future<void> updateAllowPartnerPhotoInShareCard(bool allow) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user');
+    await _firestore.collection('users').doc(user.uid).update({
+      'allowPartnerPhotoInShareCard': allow,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
   Future<void> markTermsAccepted() async {
     final user = _auth.currentUser;
     if (user == null) return;
