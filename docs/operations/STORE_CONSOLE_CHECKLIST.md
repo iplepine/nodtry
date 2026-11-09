@@ -47,6 +47,15 @@
 | Android 병합 매니페스트에 `AD_ID`, `CAMERA`, `READ_MEDIA_IMAGES`가 없다 | Play 광고 ID·사진 권한 신고 |
 | 공유 카드와 iOS 스크린샷에 "Google Play" 글자가 없다(또는 대표가 위험을 수용) | Apple 2.3.10 |
 
+**1.2.0부터: 초대 링크(Universal Links) 서명 준비.** iOS 빌드 전에 끝낸다.
+
+- [ ] **[사전]** Apple Developer → Identifiers → `com.devho.nodtry.app`에서 **Associated Domains**를 켠다. 위젯이 같은 빌드에 들어가면 **App Groups**(`group.com.devho.nodtry.app`)도 함께 켠다.
+  - 이유: `Runner.entitlements`에 `com.apple.developer.associated-domains`가 추가됐다. 이 entitlement가 없는 기존 App Store 프로파일로 빌드하면 `fastlane ios release`의 archive/export가 "Provisioning profile doesn't include the com.apple.developer.associated-domains entitlement"로 실패한다.
+- [ ] **[사전]** 프로파일을 새로 받는다. 방법은 둘 중 하나다.
+  - Fastfile `build_and_submit`의 `build_app`에 `-allowProvisioningUpdates`와 App Store Connect API 키 인증을 넣는 변경(위젯 작업 브랜치)을 먼저 머지한다.
+  - 또는 로컬 Xcode에서 Runner 타깃 → Signing & Capabilities를 열어 Automatic signing이 프로파일을 한 번 갱신하게 한다.
+- [ ] **[사전]** Hosting 배포 뒤 `https://nod-try.web.app/.well-known/apple-app-site-association`과 `/.well-known/assetlinks.json`이 200, `application/json`으로 열리는지 확인한다(`nod-try.firebaseapp.com`도 같다).
+
 ## B. App Store Connect
 
 ### B1. 앱 정보

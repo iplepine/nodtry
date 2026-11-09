@@ -7,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../routes/app_router.dart';
 // Removed unused AuthService import
 import '../../../../theme/app_colors.dart';
+import '../../../connect/application/invite_link_binder.dart';
 import '../../../onboarding/domain/onboarding_gate.dart';
 import '../../../tutorial/presentation/tutorial_screen.dart';
 
@@ -139,6 +140,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Widget build(BuildContext context) {
     final authState =
         ref.watch(authViewModelProvider).value ?? const AuthState();
+
+    // An invite link opened while the tutorial is up: the code is already
+    // kept, so leave the tutorial for sign-in → code entry (spec §4.1).
+    ref.listen<String?>(openedInviteLinkProvider, (prev, next) {
+      if (next != null && _showTutorial) _finishTutorial(haveInviteCode: true);
+    });
 
     // Listen to errors
     ref.listen(authViewModelProvider, (prev, next) {

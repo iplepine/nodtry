@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["TCCFRB2YAV.com.devho.nodtry.app"],
+        "components": [
+          {
+            "/": "/i/*",
+            "comment": "Invite links: /i/{CODE} opens code entry in the app"
+          }
+        ]
+      }
+    ]
+  }
+}

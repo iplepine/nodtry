@@ -16,6 +16,7 @@ import 'core/services/client_metadata_sync.dart';
 import 'core/services/notification_service.dart';
 import 'features/proof/data/proof_photo_cache.dart';
 import 'features/connect/application/partner_link_binder.dart';
+import 'features/connect/application/invite_link_binder.dart';
 import 'features/plan/application/reminder_copy_refresh.dart';
 import 'features/onboarding/domain/onboarding_gate.dart';
 import 'features/widget_sync/application/duo_widget_binder.dart';
@@ -90,6 +91,14 @@ void main() async {
     overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
   );
 
+  // Opened from an invite link: keep the code before the splash decides on
+  // the tutorial (an invitee skips it). The link itself is routed once by
+  // incomingLinkBinderProvider.
+  await stashLaunchInviteLink(
+    OnboardingStore(prefs),
+    container.read(incomingLinkSourceProvider),
+  );
+
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(
@@ -152,6 +161,9 @@ class OnMyBehalfApp extends ConsumerWidget {
     // Home-screen / lock-screen widgets: duo streak + today, cleared on
     // sign-out or disconnect.
     ref.watch(duoWidgetBinderProvider);
+    // Invite links (Universal Links / App Links / onmybehalf://) open code
+    // entry, through sign-in if needed.
+    ref.watch(incomingLinkBinderProvider);
 
     // 현재 테마에 따라 ThemeData 가져오기 (5개 테마 모두 지원)
     final themeData = AppTheme.themeOf(settingsState.currentTheme);

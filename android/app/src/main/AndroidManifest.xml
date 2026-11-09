@@ -46,6 +46,24 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="onmybehalf"/>
             </intent-filter>
+            <!-- Invite links (Android App Links): https://nod-try.web.app/i/{CODE}
+                 opens the app when installed. Verified against
+                 hosting/public/.well-known/assetlinks.json. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="nod-try.web.app"/>
+                <data android:host="nod-try.firebaseapp.com"/>
+                <data android:pathPrefix="/i/"/>
+            </intent-filter>
+            <!-- Incoming links are handled once, by app_links
+                 (lib/features/connect/application/invite_link_binder.dart),
+                 not also by Flutter's built-in deep linking. -->
+            <meta-data
+                android:name="flutter_deeplinking_enabled"
+                android:value="false" />
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

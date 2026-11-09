@@ -76,6 +76,7 @@ dependencies:
   # newer ones pull a whole Firebase SDK upgrade.
   cloud_functions: ^6.3.2
   home_widget: ^0.10.0
+  app_links: ^7.2.2
 
 dev_dependencies:
   flutter_test:
