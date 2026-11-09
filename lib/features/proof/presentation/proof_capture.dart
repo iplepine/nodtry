@@ -63,7 +63,7 @@ Future<Uint8List?> pickProofImageWithImagePicker(ProofSource source) async {
 
 Future<SharedPreferences> _prefs(WidgetRef ref) async {
   try {
-    return ref.read(sharedPreferencesProvider);
+    return await ref.read(sharedPreferencesProvider);
   } catch (_) {
     // Not overridden (some tests): fall back to the plugin instance.
     return SharedPreferences.getInstance();

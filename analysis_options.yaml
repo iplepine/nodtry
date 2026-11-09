@@ -16,6 +16,12 @@ analyzer:
   # errors that have nothing to do with this project.
   exclude:
     - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   # The lint rules applied to this project can be customized in the
