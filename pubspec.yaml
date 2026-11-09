@@ -75,6 +75,7 @@ dependencies:
   # 6.3.2, the release that matches firebase_core 4.10 / cloud_firestore 6.5;
   # newer ones pull a whole Firebase SDK upgrade.
   cloud_functions: ^6.3.2
+  home_widget: ^0.10.0
 
 dev_dependencies:
   flutter_test:

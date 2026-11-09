@@ -1,0 +1,11 @@
+/* 홈 화면·잠금 화면 위젯 (한국어). 실제 문구는 앱이 저장한 스냅샷에서 오고,
+   여기는 위젯 갤러리 설명과 데이터가 없을 때의 안내만 둔다. */
+"widget_display_name" = "둘운완";
+"widget_description" = "둘이 함께한 날과 나·짝꿍의 오늘 운동을 보여줘요";
+"placeholder_title" = "둘운완";
+"placeholder_body" = "앱을 열고 짝꿍과 연결해요";
+"preview_headline" = "둘이 함께 3일째";
+"preview_me" = "나";
+"preview_partner" = "짝꿍";
+"preview_done" = "완료";
+"preview_pending" = "아직";

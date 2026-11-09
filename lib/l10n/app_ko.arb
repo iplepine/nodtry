@@ -1016,5 +1016,15 @@
   "sharePhotoConsentHint": "짝꿍이 허용하면 둘 사진을 같이 넣을 수 있어요",
   "sharePhotoConsentLayoutSingle": "내 사진만",
   "sharePhotoConsentLayoutTogether": "둘 사진 같이",
-  "sharePhotoConsentTogetherNote": "짝꿍이 허용한 인증샷이 같이 들어가요."
+  "sharePhotoConsentTogetherNote": "짝꿍이 허용한 인증샷이 같이 들어가요.",
+  "homeWidgetStreak": "둘이 함께 {count}일째",
+  "homeWidgetStreakZero": "오늘 둘 다 하면 1일째",
+  "homeWidgetTodayDuoDone": "오늘 둘운완이에요 🎉",
+  "homeWidgetMe": "나",
+  "homeWidgetStatusDone": "완료",
+  "homeWidgetStatusDoneProof": "인증샷 📸",
+  "homeWidgetStatusRested": "휴식권",
+  "homeWidgetStatusPending": "아직",
+  "homeWidgetStatusOff": "쉬는 날",
+  "homeWidgetStale": "앱에서 오늘을 확인해요"
 }

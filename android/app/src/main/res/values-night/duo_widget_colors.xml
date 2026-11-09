@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widget palette (dark). -->
+<resources>
+    <color name="duo_widget_background">#FF221619</color>
+    <color name="duo_widget_card">#FF35252A</color>
+    <color name="duo_widget_primary">#FFFF6F8E</color>
+    <color name="duo_widget_text">#FFF7ECEE</color>
+    <color name="duo_widget_text_secondary">#FFC4AEB2</color>
+</resources>

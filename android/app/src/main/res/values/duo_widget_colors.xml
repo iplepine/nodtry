@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widget palette (light). Dark variants: values-night. Brand
+     primary #D92653, background #FFF8F6 (docs/design/BRAND.md). -->
+<resources>
+    <color name="duo_widget_background">#FFFFF8F6</color>
+    <color name="duo_widget_card">#FFFFEDEA</color>
+    <color name="duo_widget_primary">#FFD92653</color>
+    <color name="duo_widget_text">#FF2B1A1E</color>
+    <color name="duo_widget_text_secondary">#FF7A6266</color>
+</resources>

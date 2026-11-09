@@ -2889,4 +2889,36 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get sharePhotoConsentTogetherNote => '짝꿍이 허용한 인증샷이 같이 들어가요.';
+
+  @override
+  String homeWidgetStreak(int count) {
+    return '둘이 함께 $count일째';
+  }
+
+  @override
+  String get homeWidgetStreakZero => '오늘 둘 다 하면 1일째';
+
+  @override
+  String get homeWidgetTodayDuoDone => '오늘 둘운완이에요 🎉';
+
+  @override
+  String get homeWidgetMe => '나';
+
+  @override
+  String get homeWidgetStatusDone => '완료';
+
+  @override
+  String get homeWidgetStatusDoneProof => '인증샷 📸';
+
+  @override
+  String get homeWidgetStatusRested => '휴식권';
+
+  @override
+  String get homeWidgetStatusPending => '아직';
+
+  @override
+  String get homeWidgetStatusOff => '쉬는 날';
+
+  @override
+  String get homeWidgetStale => '앱에서 오늘을 확인해요';
 }

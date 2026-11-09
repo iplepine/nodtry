@@ -15,6 +15,7 @@ import '../routes/app_router.dart';
 import '../services/notification_service.dart' as local_notifications;
 import '../widgets/notification_permission_banner.dart';
 import 'package:go_router/go_router.dart';
+import 'package:home_widget/home_widget.dart';
 import 'dart:async';
 
 /// 홈 화면 - 하단 탭 구조
@@ -39,6 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   bool _promptRunning = false;
   StreamSubscription<local_notifications.NotificationOpenRequest>?
   _openSubscription;
+  StreamSubscription<Uri?>? _widgetClickSubscription;
 
   @override
   void initState() {
@@ -54,6 +56,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       final pending = notifications.takePendingOpenRequest();
       if (pending != null) _routeOpened(pending);
     });
+
+    // A tap on the home-screen / lock-screen widget while the app is running:
+    // back to the Now tab (a cold start opens there anyway).
+    try {
+      _widgetClickSubscription = HomeWidget.widgetClicked.listen((uri) {
+        if (uri != null) _openNowFromWidget();
+      }, onError: (Object _) {});
+    } catch (_) {
+      // No home_widget plugin (tests).
+    }
+  }
+
+  void _openNowFromWidget() {
+    if (!mounted) return;
+    _backToTabs();
+    if (_currentIndex != 0) setState(() => _currentIndex = 0);
   }
 
   /// Takes an opened notification to its screen (see
@@ -159,6 +177,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void dispose() {
     _openSubscription?.cancel();
+    _widgetClickSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

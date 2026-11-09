@@ -18,6 +18,7 @@ import 'features/proof/data/proof_photo_cache.dart';
 import 'features/connect/application/partner_link_binder.dart';
 import 'features/plan/application/reminder_copy_refresh.dart';
 import 'features/onboarding/domain/onboarding_gate.dart';
+import 'features/widget_sync/application/duo_widget_binder.dart';
 import 'services/notification_service.dart' as local_notifications;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -147,6 +148,10 @@ class OnMyBehalfApp extends ConsumerWidget {
     // Queued reminders follow the link: partner line added after linking,
     // dropped after unlinking, renamed with the nickname.
     ref.watch(reminderLinkRefreshBinderProvider);
+
+    // Home-screen / lock-screen widgets: duo streak + today, cleared on
+    // sign-out or disconnect.
+    ref.watch(duoWidgetBinderProvider);
 
     // 현재 테마에 따라 ThemeData 가져오기 (5개 테마 모두 지원)
     final themeData = AppTheme.themeOf(settingsState.currentTheme);
