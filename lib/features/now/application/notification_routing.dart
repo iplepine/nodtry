@@ -27,6 +27,10 @@ enum NotificationOpenTarget {
   /// Code entry, with why the link didn't hold.
   connect,
 
+  /// The invite screen (my code + share), for an inviter whose partner
+  /// hasn't joined yet (`invite_reminder`).
+  invite,
+
   /// Unknown type: just bring the app up.
   none,
 }
@@ -55,6 +59,8 @@ NotificationOpenTarget notificationOpenTargetFor(String type) {
       return NotificationOpenTarget.us;
     case 'partner_connect_failed':
       return NotificationOpenTarget.connect;
+    case 'invite_reminder':
+      return NotificationOpenTarget.invite;
     default:
       return NotificationOpenTarget.none;
   }

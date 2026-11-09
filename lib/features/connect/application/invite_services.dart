@@ -11,6 +11,7 @@ import '../../../providers/repository_provider.dart';
 import '../../../utils/analytics.dart';
 import '../../onboarding/domain/onboarding_gate.dart';
 import '../domain/invite_code.dart';
+import 'invite_tracker.dart';
 
 // ---------------------------------------------------------------------------
 // Share sheet
@@ -252,6 +253,22 @@ Future<bool> _hasActivePromise(WidgetRef ref, String uid) async {
   }
 }
 
+/// `invites/{uid}` for the server's "짝꿍이 아직 안 들어왔어요" reminder; in
+/// the background, so a slow or failing write never holds up the share.
+void _trackInviteShare(
+  WidgetRef ref, {
+  required String uid,
+  required String code,
+}) {
+  final InviteTracker tracker;
+  try {
+    tracker = ref.read(inviteTrackerProvider);
+  } catch (_) {
+    return;
+  }
+  unawaited(recordInviteShare(tracker, uid: uid, code: code));
+}
+
 /// Opens the share sheet with my invite message. [surface] says where the
 /// button was (`connect`, `onboarding`, `now_card`, `us`).
 Future<InviteShareResult> shareMyInvite(
@@ -279,6 +296,7 @@ Future<InviteShareResult> shareMyInvite(
   if (!result.shared) return result;
 
   await ref.read(inviteSharedAtProvider.notifier).record(DateTime.now());
+  _trackInviteShare(ref, uid: profile.uid, code: code);
   AnalyticsService.log(AnalyticsEvent.inviteShared, {
     'channel': result.channel,
     'surface': surface,
@@ -290,10 +308,12 @@ Future<InviteShareResult> shareMyInvite(
 
 /// Copies my invite code. Returns false when there is no code yet.
 Future<bool> copyMyInviteCode(WidgetRef ref, {required String surface}) async {
-  final code = ref.read(myProfileProvider).value?.inviteCode;
-  if (code == null || code.isEmpty) return false;
+  final profile = ref.read(myProfileProvider).value;
+  final code = profile?.inviteCode;
+  if (profile == null || code == null || code.isEmpty) return false;
   await ref.read(inviteClipboardProvider).writeText(code);
   await ref.read(inviteSharedAtProvider.notifier).record(DateTime.now());
+  _trackInviteShare(ref, uid: profile.uid, code: code);
   AnalyticsService.log(AnalyticsEvent.inviteShared, {
     'channel': 'copy',
     'surface': surface,

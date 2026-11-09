@@ -70,11 +70,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
       return;
     }
+    if (target == NotificationOpenTarget.invite) {
+      // "짝꿍이 아직 안 들어왔어요": my code and the share button first. Once
+      // a partner is in, the 우리 tab instead.
+      final hasPartner =
+          ref.read(connectedProfilesProvider).value?.isNotEmpty ?? false;
+      if (!hasPartner) {
+        router?.push(AppRoutes.connect);
+        return;
+      }
+    }
 
     _backToTabs();
     final index = switch (target) {
       NotificationOpenTarget.history => 1,
-      NotificationOpenTarget.us => 2,
+      NotificationOpenTarget.us || NotificationOpenTarget.invite => 2,
       _ => 0,
     };
     if (index != _currentIndex) setState(() => _currentIndex = index);
