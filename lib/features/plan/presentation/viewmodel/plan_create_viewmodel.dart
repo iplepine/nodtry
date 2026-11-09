@@ -9,6 +9,7 @@ import '../../../../providers/home_provider.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../repositories/connect_repository.dart' show ConnectionStatus;
 import '../../../../utils/analytics.dart';
+import '../../domain/plan_goal.dart';
 import '../../domain/workout_template.dart';
 import '../plan_create_state.dart';
 
@@ -133,6 +134,17 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         state = AsyncValue.data(_applyTemplate(prevState, template));
       case InitializePlanIntent(:final plan):
         state = AsyncValue.data(_fromPlan(plan));
+      case UpdateGoalTitleIntent(:final title):
+        if (title == prevState.goalTitle) return;
+        state = AsyncValue.data(prevState.copyWith(goalTitle: title));
+      case UpdateGoalDateIntent(:final date):
+        state = AsyncValue.data(
+          prevState.copyWith(goalDate: planGoalDateOnly(date)),
+        );
+      case ClearGoalIntent():
+        state = AsyncValue.data(
+          prevState.copyWith(goalTitle: '', goalDate: null),
+        );
       case PrefillPartnerDaysIntent():
         await _prefillPartnerDays();
       case SavePlanIntent():
@@ -184,6 +196,14 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         ? _defaultDeadline()
         : storedTime;
 
+    // A restart copy (no id) keeps a goal that is still ahead; one already
+    // passed would only be noise on the new promise.
+    final storedGoal = plan.goalDate;
+    final keepGoal =
+        storedGoal != null &&
+        (plan.id != null ||
+            !storedGoal.isBefore(planGoalDateOnly(DateTime.now())));
+
     return PlanCreateState(
       action: item?.title ?? '',
       description: item?.description ?? '',
@@ -194,7 +214,16 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       deadlineLocked: true,
       existingPlanId: plan.id,
       originalPlan: plan,
+      goalTitle: keepGoal ? plan.goalTitle ?? '' : '',
+      goalDate: keepGoal ? storedGoal : null,
     );
+  }
+
+  /// The goal to save from [s]: the title only travels with a date.
+  static ({String? title, DateTime? date}) _goalOf(PlanCreateState s) {
+    final date = s.goalDate;
+    if (date == null) return (title: null, date: null);
+    return (title: normalizePlanGoalTitle(s.goalTitle), date: date);
   }
 
   Future<void> _prefillPartnerDays() async {
@@ -279,6 +308,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       final partners = await _connectedPartners();
       final now = DateTime.now();
       final isEdit = prevState.existingPlanId != null;
+      final goal = _goalOf(prevState);
 
       final Plan plan;
       if (isEdit) {
@@ -288,7 +318,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           userId: userId,
           partners: partners,
           now: now,
-        );
+        ).copyWith(goalTitle: goal.title, goalDate: goal.date);
       } else {
         final period = Plan.periodStartingOn(now);
         // New promises start right away, partner or not. The partner is told
@@ -307,13 +337,29 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           workoutType:
               prevState.workoutType?.id ??
               (prevState.originalPlan == null ? WorkoutType.other.id : null),
+          goalTitle: goal.title,
+          goalDate: goal.date,
         );
       }
 
       String planId;
       if (isEdit) {
-        await ref.read(recordRepositoryProvider).updatePlan(plan);
+        final repository = ref.read(recordRepositoryProvider);
+        await repository.updatePlan(plan);
         planId = prevState.existingPlanId!;
+        // update() leaves fields missing from toMap alone, so a removed goal
+        // (or title) has to be deleted explicitly.
+        final before = prevState.originalPlan;
+        final removesGoal =
+            (before?.goalDate != null && plan.goalDate == null) ||
+            (before?.goalTitle != null && plan.goalTitle == null);
+        if (removesGoal) {
+          await repository.updatePlanGoal(
+            planId,
+            goalTitle: plan.goalTitle,
+            goalDate: plan.goalDate,
+          );
+        }
       } else {
         planId = await ref.read(createNewPlanUseCaseProvider).execute(plan);
       }

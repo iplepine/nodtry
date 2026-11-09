@@ -2623,5 +2623,90 @@
   "@planSavedInviteTitle": {
     "description": "Sheet after the first solo promise is saved"
   },
-  "planSavedInviteBody": "With your partner watching, you'll actually do it. Send them your code and link."
+  "planSavedInviteBody": "With your partner watching, you'll actually do it. Send them your code and link.",
+  "planGoalToggle": "Goal date (optional)",
+  "@planGoalToggle": {
+    "description": "Plan create: collapsed row that reveals the optional D-day goal"
+  },
+  "planGoalPresetTrip": "Trip",
+  "@planGoalPresetTrip": {
+    "description": "Goal preset chip; also fills the goal title"
+  },
+  "planGoalPresetWedding": "Wedding",
+  "@planGoalPresetWedding": {
+    "description": "Goal preset chip; also fills the goal title"
+  },
+  "planGoalPresetBodyProfile": "Photo shoot",
+  "@planGoalPresetBodyProfile": {
+    "description": "Goal preset chip (바디프로필, a fitness photo shoot); also fills the goal title"
+  },
+  "planGoalPresetCustom": "Custom",
+  "@planGoalPresetCustom": {
+    "description": "Goal preset chip: type your own goal title"
+  },
+  "planGoalTitleHint": "e.g. Jeju trip",
+  "planGoalPickDate": "Pick a date",
+  "planGoalRemove": "Remove goal",
+  "planGoalHint": "The countdown shows on your promise card, for your partner too.",
+  "planGoalNeedsDate": "Pick a date to show the countdown",
+  "planGoalLabelBefore": "{days, plural, =1{1 day} other{{days} days}} to {title}",
+  "@planGoalLabelBefore": {
+    "description": "Countdown label on promise cards, before the goal date",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planGoalLabelBeforeUntitled": "{days, plural, =1{1 day} other{{days} days}} to go",
+  "@planGoalLabelBeforeUntitled": {
+    "description": "Countdown label without a goal title",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "planGoalLabelToday": "{title} is today!",
+  "@planGoalLabelToday": {
+    "description": "Countdown label on the goal date",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planGoalLabelTodayUntitled": "It's D-day!",
+  "@planGoalLabelTodayUntitled": {
+    "description": "Countdown label on the goal date, without a title"
+  },
+  "planGoalLabelAfter": "{days, plural, =1{1 day} other{{days} days}} since {title}",
+  "@planGoalLabelAfter": {
+    "description": "Shown for up to 7 days after the goal date",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planGoalLabelAfterUntitled": "{days, plural, =1{1 day} other{{days} days}} since D-day",
+  "@planGoalLabelAfterUntitled": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "planGoalDetailAdd": "Add a goal date",
+  "planGoalSheetTitle": "Goal date",
+  "planGoalSave": "Save",
+  "planGoalSaved": "Goal date saved",
+  "planGoalRemoved": "Goal date removed",
+  "planGoalSaveError": "Couldn't save. Please try again."
 }

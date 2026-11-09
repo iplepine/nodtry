@@ -11,6 +11,7 @@ import '../../../connect/application/partner_label_provider.dart';
 // import '../../../../features/plan/domain/usecases/setting_alarm_use_case.dart'; // Unused
 import '../../../../models/history_item.dart';
 import 'package:nod_try/providers/repository_provider.dart';
+import '../widgets/plan_goal_detail_row.dart';
 import '../widgets/plan_history_views.dart';
 import '../widgets/plan_progress_card.dart';
 
@@ -186,6 +187,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
                                 _showEditNotificationDialog(context, ref, plan)
                           : null,
                     ),
+                    PlanGoalDetailRow(plan: plan, editable: isMine),
                     const SizedBox(height: 32),
 
                     // Actions (Partner Only)

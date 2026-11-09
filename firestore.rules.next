@@ -114,12 +114,22 @@ service cloud.firestore {
         return isSignedIn() &&
           (request.auth.uid == data.userId || request.auth.uid == data.get('managerId', null));
       }
+      // Optional D-day goal (build >= 88): goalTitle at most 20 characters —
+      // size() counts UTF-16 units, so 40 leaves room for emoji — and
+      // goalDate a timestamp (UTC midnight of the picked date).
+      function goalOk(data) {
+        return (!('goalTitle' in data)
+            || (data.goalTitle is string && data.goalTitle.size() <= 40))
+          && (!('goalDate' in data) || data.goalDate is timestamp);
+      }
       allow get, list: if planParticipant(resource.data);
       allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId
-        && !request.resource.data.keys().hasAny(['managerSince', 'managerSinceUid']);
+        && !request.resource.data.keys().hasAny(['managerSince', 'managerSinceUid'])
+        && goalOk(request.resource.data);
       allow update: if planParticipant(resource.data)
         && request.resource.data.userId == resource.data.userId
-        && !changedKeys().hasAny(['managerSince', 'managerSinceUid']);
+        && !changedKeys().hasAny(['managerSince', 'managerSinceUid'])
+        && (!changedKeys().hasAny(['goalTitle', 'goalDate']) || goalOk(request.resource.data));
       allow delete: if isSignedIn() && request.auth.uid == resource.data.userId;
     }
 

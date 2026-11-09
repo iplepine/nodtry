@@ -52,6 +52,13 @@ class PlanCreateState {
   final String? existingPlanId;
   final Plan? originalPlan;
 
+  /// The optional D-day goal's title as typed ("제주 여행"); saved only with a
+  /// [goalDate].
+  final String goalTitle;
+
+  /// The optional D-day goal (a calendar date). Null = no goal.
+  final DateTime? goalDate;
+
   const PlanCreateState({
     this.action = '',
     this.description = '',
@@ -67,6 +74,8 @@ class PlanCreateState {
     this.errorMessage,
     this.existingPlanId,
     this.originalPlan,
+    this.goalTitle = '',
+    this.goalDate,
   });
 
   /// Id of the tile last applied (same string as its workoutType), or null.
@@ -110,6 +119,8 @@ class PlanCreateState {
     // of the finished one.
     Object? existingPlanId = _unset,
     Plan? originalPlan,
+    String? goalTitle,
+    Object? goalDate = _unset,
   }) {
     return PlanCreateState(
       action: action ?? this.action,
@@ -134,6 +145,8 @@ class PlanCreateState {
           ? this.existingPlanId
           : existingPlanId as String?,
       originalPlan: originalPlan ?? this.originalPlan,
+      goalTitle: goalTitle ?? this.goalTitle,
+      goalDate: goalDate == _unset ? this.goalDate : goalDate as DateTime?,
     );
   }
 }
@@ -184,6 +197,23 @@ class SelectWorkoutIntent extends PlanCreateIntent {
 /// Offer the partner's weekdays as the default for a new promise.
 class PrefillPartnerDaysIntent extends PlanCreateIntent {
   const PrefillPartnerDaysIntent();
+}
+
+/// The D-day goal's title was typed or picked from a preset chip.
+class UpdateGoalTitleIntent extends PlanCreateIntent {
+  final String title;
+  const UpdateGoalTitleIntent(this.title);
+}
+
+/// A D-day goal date was picked (only the calendar date is kept).
+class UpdateGoalDateIntent extends PlanCreateIntent {
+  final DateTime date;
+  const UpdateGoalDateIntent(this.date);
+}
+
+/// The D-day goal was removed.
+class ClearGoalIntent extends PlanCreateIntent {
+  const ClearGoalIntent();
 }
 
 class SavePlanIntent extends PlanCreateIntent {

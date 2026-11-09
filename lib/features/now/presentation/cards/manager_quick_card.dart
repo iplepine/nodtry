@@ -168,8 +168,10 @@ class _ManagerQuickCard extends StatelessWidget {
               const SizedBox(height: 4),
             ],
             // Scale & Period
-            if (!isPartnerTodayComplete && model.plan != null)
+            if (!isPartnerTodayComplete && model.plan != null) ...[
               _buildPlanDetails(context, model.plan!, l10n),
+              PlanGoalLabel(plan: model.plan!, topSpacing: 6),
+            ],
             const SizedBox(height: 8),
             // Description (Diff Aware)
             if (!isPartnerTodayComplete &&

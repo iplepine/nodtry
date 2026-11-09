@@ -114,6 +114,8 @@ class _PrimaryExecutorCard extends StatelessWidget {
                   if (timeChipText != null && timeChipType != null)
                     const SizedBox(height: 12),
                   _buildMessage(context, l10n),
+                  if (model.plan != null && _showsGoal.contains(model.state))
+                    PlanGoalLabel(plan: model.plan!, topSpacing: 10),
                   if (_shouldShowActivePromiseChip()) ...[
                     const SizedBox(height: 12),
                     ActivePromiseChip(plan: model.plan!),
@@ -148,6 +150,14 @@ class _PrimaryExecutorCard extends StatelessWidget {
       ),
     );
   }
+
+  /// Card states that carry one running promise, where its D-day shows.
+  static const _showsGoal = {
+    HomeCardState.nowAction,
+    HomeCardState.nextAction,
+    HomeCardState.overdue,
+    HomeCardState.poked,
+  };
 
   bool _shouldShowActivePromiseChip() {
     final plan = model.plan;
