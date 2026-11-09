@@ -5,11 +5,14 @@ import * as admin from "firebase-admin";
 import {FieldValue, Timestamp} from "firebase-admin/firestore";
 import {
     ConnectFailReason,
+    Lang,
     PushCopy,
     actionCompletedCopy,
     clip,
     defaultPokeMessage,
     displayNameOf,
+    fallbackItemTitle,
+    langOf,
     missedCopy,
     partnerConnectFailedCopy,
     partnerConnectedCopy,
@@ -49,6 +52,16 @@ import {
 } from "./schedule";
 import {pairsOf, previousSeoulDay} from "./stats";
 import {NOTIFICATION_ACTIONS_BUILD, buildMessagePayload, quickActionCategory} from "./push";
+import {
+    PUSH_QUOTA_COLLECTION,
+    PUSH_QUOTA_TTL_MS,
+    PushTier,
+    TierHints,
+    coalesceKey,
+    pushTier,
+    quotaDecision,
+    quotaDocId,
+} from "./pushPolicy";
 import {generateUniqueInviteCode, normalizeInviteCode} from "./inviteCode";
 import {FieldOps, SYSTEM_LINK, actionManagerFor, managerStampFor, millisOf, unlinkUpdate} from "./planLinks";
 
@@ -147,25 +160,98 @@ async function sendAndCleanup(
     }
 }
 
+type SendOptions = {
+    /** Tier hints for pushTier (e.g. a cheer that is a 인정). */
+    hints?: TierHints;
+    /**
+     * Send a push with buttons as data-only to builds that draw such pushes
+     * themselves. Off for the pushes that never had it (kept as they were).
+     */
+    allowDataOnly?: boolean;
+};
+
 /**
- * Sends [copy] to the recipient. A push with buttons (see
- * quickActionCategory) carries its category; to builds that draw such
- * pushes themselves it goes data-only, so Android shows the buttons too.
- * Without [recipient] (or on older builds) it stays a plain notification.
+ * The one FCM send path: every push goes through here.
+ *
+ * 1. Coalesces obvious duplicates (coalesceKey: repeated plan_updated).
+ * 2. Applies the per-recipient daily cap on the recipient's local day
+ *    (pushTier / quotaDecision, pushQuota/{uid}_{YYYYMMDD}); a dropped push is
+ *    logged and reported as not delivered.
+ * 3. A push with buttons (see quickActionCategory) carries its category; to
+ *    builds that draw such pushes themselves it goes data-only, so Android
+ *    shows the buttons too. On older builds it stays a plain notification.
  */
 async function sendCopy(
     recipientUserId: string,
     fcmToken: string,
     copy: PushCopy,
     data: {[key: string]: string},
-    recipient: Data | null = null,
+    recipient: Data | null,
+    options: SendOptions = {},
 ): Promise<boolean> {
+    const now = new Date();
+    const coalesce = coalesceKey(recipientUserId, data, now.getTime());
+    if (coalesce && !(await claimLock(coalesce))) {
+        console.log(`Push to ${recipientUserId} coalesced (${data.type}): ${coalesce}`);
+        return false;
+    }
+    const tier = pushTier(data, options.hints);
+    const quota = await takePushQuota(recipientUserId, tier, timeZoneOf(recipient), now, data.type);
+    if (!quota.send) return false;
+
     const category = quickActionCategory(data);
-    const dataOnly = category !== null && clientBuildOf(recipient) >= await notificationActionsBuild();
-    return sendAndCleanup(
+    const dataOnly = options.allowDataOnly === true && category !== null &&
+        clientBuildOf(recipient) >= await notificationActionsBuild();
+    const delivered = await sendAndCleanup(
         buildMessagePayload(fcmToken, copy.title, copy.body, data, {category, dataOnly}),
         recipientUserId,
     );
+    // A push that never reached FCM gives its slot back, so a retried send
+    // (missed notice, verify reminder) is not counted twice.
+    if (!delivered && quota.ref) {
+        await quota.ref.update({count: FieldValue.increment(-1)}).catch(() => undefined);
+    }
+    return delivered;
+}
+
+/**
+ * Counts one push to `uid` on their local day, or drops it when its tier is
+ * over the cap (pushPolicy). Fails open: a quota error never blocks a push.
+ */
+async function takePushQuota(
+    uid: string,
+    tier: PushTier,
+    timeZone: string,
+    now: Date,
+    type: string | undefined,
+): Promise<{send: boolean; ref: admin.firestore.DocumentReference | null}> {
+    const ref = db().collection(PUSH_QUOTA_COLLECTION).doc(quotaDocId(uid, now, timeZone));
+    try {
+        const result = await db().runTransaction(async (tx) => {
+            const snap = await tx.get(ref);
+            const count = snap.exists ? Number(snap.data()?.count) || 0 : 0;
+            const decision = quotaDecision(tier, count);
+            const stamp = {
+                expireAt: Timestamp.fromMillis(now.getTime() + PUSH_QUOTA_TTL_MS),
+                updatedAt: Timestamp.fromDate(now),
+            };
+            if (decision.send) {
+                tx.set(ref, {...stamp, count: count + 1, [tier]: FieldValue.increment(1)}, {merge: true});
+            } else {
+                tx.set(ref, {...stamp, suppressed: FieldValue.increment(1)}, {merge: true});
+            }
+            return {decision, count};
+        });
+        if (!result.decision.send) {
+            console.log(`Push suppressed: daily cap (to=${uid}, type=${type ?? "?"}, tier=${tier}, ` +
+                `sentToday=${result.count}, day=${ref.id})`);
+            return {send: false, ref: null};
+        }
+        return {send: true, ref};
+    } catch (error) {
+        console.warn(`Push quota check failed for ${uid}; sending anyway`, error);
+        return {send: true, ref: null};
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -224,6 +310,11 @@ function clientBuildOf(user: Data | null): number {
 
 function timeZoneOf(user: Data | null): string {
     return resolveTimeZone(user?.timezone);
+}
+
+/** Push copy language of a recipient (users/{uid}.locale). */
+function langOfUser(user: Data | null): Lang {
+    return langOf(user?.locale);
 }
 
 function firstItem(plan: Data | null): PlanItemData {
@@ -719,7 +810,12 @@ async function deleteAsUndone(docs: DocSnap[]): Promise<void> {
     await batch.commit();
 }
 
-async function sendConnectPush(uid: string, copy: PushCopy, data: {[key: string]: string}): Promise<void> {
+/** `copyFor` builds the copy in the recipient's language. */
+async function sendConnectPush(
+    uid: string,
+    copyFor: (lang: Lang) => PushCopy,
+    data: {[key: string]: string},
+): Promise<void> {
     const user = await getUser(uid);
     const token = await tokenOf(uid, user);
     if (!token) return;
@@ -727,7 +823,7 @@ async function sendConnectPush(uid: string, copy: PushCopy, data: {[key: string]
         console.warn(`Connect push to ${uid} skipped: daily limit`);
         return;
     }
-    await sendCopy(uid, token, copy, data);
+    await sendCopy(uid, token, copyFor(langOfUser(user)), data, user);
 }
 
 async function undoLink(
@@ -740,7 +836,7 @@ async function undoLink(
     await setLinkState(key, "undone");
     console.warn(`Relation ${docs.map((doc) => doc.id).join(",")} undone (${why})`);
     if (!notify) return;
-    await sendConnectPush(notify.uid, partnerConnectFailedCopy(notify.reason), {
+    await sendConnectPush(notify.uid, (lang) => partnerConnectFailedCopy(notify.reason, lang), {
         type: "partner_connect_failed",
         reason: notify.reason,
     });
@@ -831,10 +927,10 @@ async function announceLink(outcome: LinkOutcome, a: string, b: string): Promise
         [[outcome.inviterId, outcome.inviteeId]];
     for (const [to, other] of pairs) {
         const [recipient, partner] = await Promise.all([getUser(to), getUser(other)]);
-        await sendConnectPush(to, partnerConnectedCopy(displayNameOf(partner)), {
+        await sendConnectPush(to, (lang) => partnerConnectedCopy(displayNameOf(partner), lang), {
             type: "partner_connected",
             partnerId: other,
-            senderName: partnerLabel(recipient, partner, false),
+            senderName: partnerLabel(recipient, partner, false, langOfUser(recipient)),
         });
     }
 }
@@ -890,13 +986,16 @@ export const onCheerCreated = functions.firestore
             // The plan counts only when it really is one between these two;
             // otherwise a made-up planId would open a fresh poke budget.
             const pairPlan = isPlanBetween(plan, fromUserId, toUserId) ? plan : null;
-            const who = partnerLabel(recipient, sender, await links.nicknameApplies(toUserId, recipient, fromUserId));
-            const workout = workoutInfo(pairPlan?.workoutType);
+            const lang = langOfUser(recipient);
+            const who = partnerLabel(recipient, sender,
+                await links.nicknameApplies(toUserId, recipient, fromUserId), lang);
+            const workout = workoutInfo(pairPlan?.workoutType, lang);
             const timeZone = timeZoneOf(recipient);
             const today = localParts(new Date(), timeZone);
 
             let copy: PushCopy;
             let type: string;
+            let verification = false;
             let message = clip(cheer.message, 120);
             if (reactionType === "poke") {
                 // At most one poke push per plan (or per pair without a plan)
@@ -909,8 +1008,8 @@ export const onCheerCreated = functions.firestore
                     console.log(`Poke rate-limited: ${key}`);
                     return;
                 }
-                message = sanitizePokeMessage(cheer.message, defaultPokeMessage(workout, pairPlan !== null));
-                copy = pokeCopy(who, message);
+                message = sanitizePokeMessage(cheer.message, defaultPokeMessage(workout, pairPlan !== null, lang));
+                copy = pokeCopy(who, message, lang);
                 type = "poke";
             } else {
                 if (!(await takeToken(`cheer_rate_${fromUserId}_${toUserId}_${utcHourKey()}`, CHEERS_PER_HOUR))) {
@@ -918,19 +1017,21 @@ export const onCheerCreated = functions.firestore
                     return;
                 }
                 if (reactionType === "reply") {
-                    copy = pokeReplyCopy(who, cheer.message);
+                    copy = pokeReplyCopy(who, cheer.message, lang);
                     type = "poke_reply";
                 } else {
                     // A reaction on a day the executor already recorded is a
                     // 인정; otherwise it is encouragement.
                     const isVerification = pairPlan !== null && pairPlan.userId === toUserId &&
                         hasDateOn(pairPlan.completedDates, today, timeZone);
+                    verification = isVerification;
                     copy = reactionCopy({
                         who,
                         emoji: reactionEmoji(reactionType),
                         message: cheer.message,
                         isVerification,
                         workout,
+                        lang,
                     });
                     type = "cheer";
                 }
@@ -943,7 +1044,7 @@ export const onCheerCreated = functions.firestore
                 planId: pairPlan ? planId ?? "" : "",
                 senderName: who,
                 message,
-            }, recipient);
+            }, recipient, {hints: {verification}, allowDataOnly: true});
         } catch (error) {
             console.error("Error sending notification:", error);
         }
@@ -976,15 +1077,17 @@ export const onPlanCreated = functions
                 return;
             }
 
-            const who = partnerLabel(manager, sender, await links.nicknameApplies(managerId, manager, userId));
+            const lang = langOfUser(manager);
+            const who = partnerLabel(manager, sender, await links.nicknameApplies(managerId, manager, userId), lang);
             const item = firstItem(plan);
             const copy = planCreatedCopy({
                 who,
-                workout: workoutInfo(plan.workoutType),
+                workout: workoutInfo(plan.workoutType, lang),
                 itemTitle: clip(item.title, 30),
                 days: item.days,
                 notificationTime: item.notificationTime,
                 pendingApproval: plan.state === "pending_approval",
+                lang,
             });
 
             if (!(await claimEvent(context))) return;
@@ -993,7 +1096,7 @@ export const onPlanCreated = functions
                 planId: context.params.planId,
                 senderName: who,
                 userId,
-            });
+            }, manager);
         } catch (error) {
             console.error("Error sending plan notification:", error);
         }
@@ -1036,14 +1139,16 @@ export const onActionCompleted = functions
             const hasProof = typeof action.proofPhotoPath === "string" && action.proofPhotoPath.length > 0;
             // Older builds cannot show the photo, so they get the plain copy.
             const withProof = type === "done" && hasProof && clientBuildOf(manager) >= PIVOT_BUILD;
-            const who = partnerLabel(manager, executor, await links.nicknameApplies(managerId, manager, userId));
+            const lang = langOfUser(manager);
+            const who = partnerLabel(manager, executor, await links.nicknameApplies(managerId, manager, userId), lang);
             const copy = actionCompletedCopy({
                 who,
-                workout: workoutInfo(plan.workoutType),
+                workout: workoutInfo(plan.workoutType, lang),
                 itemTitle: clip(action.title, 30) || clip(firstItem(plan).title, 30),
                 actionType: type,
                 withProof,
                 note: action.note,
+                lang,
             });
             if (!copy) return;
 
@@ -1058,7 +1163,7 @@ export const onActionCompleted = functions
                 // The record's day: an earlier day's opens 기록, not today's card.
                 ...actionDateData(action),
                 hasProof: withProof ? "true" : "false",
-            }, manager);
+            }, manager, {allowDataOnly: true});
         } catch (error) {
             console.error("Error sending completion notification:", error);
         }
@@ -1151,13 +1256,16 @@ export const notifyMissedActions = functions
                 if (lateKey && !(await claimLock(lateKey))) continue;
 
                 const executor = executors.get(userId) ?? null;
-                const who = partnerLabel(manager, executor, await links.nicknameApplies(managerId, manager, userId));
-                const itemTitle = clip(item.title, 30) || (lateDay ? "어제 약속" : "오늘 약속");
+                const lang = langOfUser(manager);
+                const who = partnerLabel(manager, executor,
+                    await links.nicknameApplies(managerId, manager, userId), lang);
+                const itemTitle = clip(item.title, 30) || fallbackItemTitle(lateDay ? "yesterday" : "today", lang);
                 const copy = missedCopy({
                     who,
-                    workout: workoutInfo(plan.workoutType),
+                    workout: workoutInfo(plan.workoutType, lang),
                     itemTitle,
                     day: lateDay ? "yesterday" : "today",
+                    lang,
                 });
 
                 // Send first, then mark dedupe state only on success — a failed
@@ -1169,7 +1277,7 @@ export const notifyMissedActions = functions
                     senderName: who,
                     itemTitle,
                     ...(lateDay ? {day: lateDay} : {}),
-                }, manager);
+                }, manager, {allowDataOnly: true});
                 if (!delivered) {
                     if (lateKey) await releaseLock(lateKey).catch(() => undefined);
                     continue;
@@ -1262,13 +1370,16 @@ export const notifyUnverifiedActions = functions
                     localParts(now, executorTimeZone),
                     executorTimeZone,
                 );
-                const who = partnerLabel(manager, executor, await links.nicknameApplies(managerId, manager, userId));
-                const itemTitle = clip(action.title, 30) || "오늘 약속";
+                const lang = langOfUser(manager);
+                const who = partnerLabel(manager, executor,
+                    await links.nicknameApplies(managerId, manager, userId), lang);
+                const itemTitle = clip(action.title, 30) || fallbackItemTitle("today", lang);
                 const copy = verifyReminderCopy({
                     who,
-                    workout: workoutInfo(plan.workoutType),
+                    workout: workoutInfo(plan.workoutType, lang),
                     itemTitle,
                     daysAgo,
+                    lang,
                 });
 
                 const delivered = await sendCopy(managerId, fcmToken, copy, {
@@ -1280,7 +1391,9 @@ export const notifyUnverifiedActions = functions
                     userId,
                     senderName: who,
                     itemTitle,
-                });
+                }, manager);
+                // Not delivered (or held back by the daily cap): retried by a
+                // later hourly run inside the 72h window.
                 if (!delivered) continue;
 
                 await doc.ref.update({
@@ -1360,8 +1473,9 @@ export const onPlanUpdated = functions
             if (!fcmToken) return;
 
             const nicknameApplies = await links.nicknameApplies(toUserId, recipient, lastUpdatedBy);
-            const who = partnerLabel(recipient, sender, nicknameApplies);
-            const workout = workoutInfo(after.workoutType);
+            const lang = langOfUser(recipient);
+            const who = partnerLabel(recipient, sender, nicknameApplies, lang);
+            const workout = workoutInfo(after.workoutType, lang);
             let copy: PushCopy;
             let type: string;
 
@@ -1375,16 +1489,16 @@ export const onPlanUpdated = functions
                 }
                 copy = pokeCopy(who, sanitizePokeMessage(
                     after.lastPokeMessage || after.lastCheerMessage,
-                    defaultPokeMessage(workout, true),
-                ));
+                    defaultPokeMessage(workout, true, lang),
+                ), lang);
                 type = "poke";
             } else if (isApproved) {
                 // B. Legacy approval of a pending plan.
-                copy = planApprovedCopy(who);
+                copy = planApprovedCopy(who, lang);
                 type = "plan_approved";
             } else if (isRejected) {
                 // C. Legacy request to adjust a pending plan.
-                copy = planRejectedCopy(who, after.lastComment);
+                copy = planRejectedCopy(who, after.lastComment, lang);
                 type = "plan_rejected";
             } else if (isVerified) {
                 // D. 인정 by the manager. When the same write also stamped
@@ -1399,11 +1513,12 @@ export const onPlanUpdated = functions
                     message: after.lastComment !== before.lastComment ? after.lastComment : undefined,
                     isVerification: true,
                     workout,
+                    lang,
                 });
                 type = "action_verified";
             } else {
                 // E. Items / period changed.
-                copy = planChangedCopy(who);
+                copy = planChangedCopy(who, lang);
                 type = "plan_updated";
             }
 
@@ -1414,7 +1529,7 @@ export const onPlanUpdated = functions
                 senderName: who,
                 lastComment: clip(after.lastComment, 120),
                 lastCheerMessage: clip(after.lastCheerMessage, 120),
-            });
+            }, recipient);
         } catch (error) {
             console.error("Error sending update notification:", error);
         }

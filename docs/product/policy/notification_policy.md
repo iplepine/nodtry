@@ -15,7 +15,7 @@
 - 발신자 라벨: 수신자의 `users.partnerNickname` → 발신자 `displayName` → `짝꿍`(`copy.ts` `partnerLabel`). `{name}님` 금지, 푸시에 앱 이름 넣지 않음.
 - `workoutType`이 있으면 운동 카피(타일 이모지·이름, 식단은 `식단`이고 `운동`·`오운완` 안 씀), 없으면 중립 `약속` 카피.
 - 짝꿍 전달 문구는 반말, 시스템 안내는 해요체.
-- 푸시는 현재 한국어만. ko/en 분기(`users.locale`)는 다음 릴리스.
+- 푸시 언어는 수신자 `users.locale`: `en`이면 영어, 그 외·없음은 한국어(functions 1.2.0 배포부터). 수신자 현지 하루 푸시 상한(핵심 루프는 항상 발송)도 같이 들어간다 — `docs/operations/PUSH_POLICY.md`.
 - `data.type` 기존 값은 바꾸지 않는다. 새 타입은 구버전이 무시해도 안전해야 한다.
 
 ## 1. 로컬 알림 (마감 리마인더)

@@ -28,6 +28,7 @@
 | `cheers/{id}` | 보낸·받은 사람 | `fromUserId==me` | ✗ | ✗ |
 | **`config/{doc}`** (신규) | **누구나**(로그인 전 포함) | ✗ | ✗ | ✗ |
 | `serverLocks/{key}` (신규, 서버 전용) | ✗ (match 없음) | ✗ | ✗ | ✗ |
+| `pushQuota/{uid}_{YYYYMMDD}` (1.2.0, 서버 전용) | ✗ (match 없음) | ✗ | ✗ | ✗ |
 | Storage `users/{uid}/*` | 로그인 전체 | 본인·이미지 <5MB | 본인 | 본인 |
 | **Storage `proofs/{ownerUid}/{planId}/{file}`** (신규) | 본인 또는 `plans/{planId}.managerId == me` | 본인·`resource == null`·`image/jpeg`·<3MB·`plans/{planId}.userId == ownerUid` | ✗ | 본인 |
 
@@ -46,6 +47,9 @@
 ### `serverLocks`
 - 서버 전용. 똑똑 하루 1회 제한, 쌍별 연결·해제 이벤트 잠금(2분). `{at, expireAt}`, `firestore.indexes.json`의 TTL 정책(`fieldOverrides`: `serverLocks.expireAt`)으로 자동 삭제.
 - `emulatorPushes`는 에뮬레이터(`FUNCTIONS_EMULATOR=true`)에서만 쓰는 서버 전용 컬렉션.
+
+### `pushQuota`
+- 서버 전용. 수신자 현지 하루 푸시 상한 카운터 `{count, core, standard, secondary, suppressed, updatedAt, expireAt}`. 규칙에 match가 없어 본인 카운터도 클라이언트가 읽거나 쓸 수 없다. TTL 정책 `pushQuota.expireAt`(`firestore.indexes.json` `fieldOverrides`). 상세: `docs/operations/PUSH_POLICY.md`.
 
 ### 클라이언트가 새로 쓰는 필드 (규칙 변경 없이 허용됨)
 - `users`: `partnerNickname`(≤10자 또는 삭제), `pivotNoticeSeen`, `clientBuild`, `timezone`, `locale`
