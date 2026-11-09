@@ -127,6 +127,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: darkColorScheme,
       scaffoldBackgroundColor: AppColors.darkBackground,
+      fontFamily: 'Pretendard',
     );
   }
 }

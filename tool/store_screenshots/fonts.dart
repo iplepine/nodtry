@@ -4,15 +4,18 @@
 // fallback, so every glyph the screenshots show has to come from a font we
 // load by hand:
 //
-// - Korean/Latin text: the app's `Pretendard` family. The committed
-//   assets/fonts/Pretendard-*.otf files are not fonts (they are saved HTML
-//   pages), so we load macOS's Apple SD Gothic Neo instead — the font iOS
-//   itself falls back to when Pretendard is missing — under the family name
-//   `Pretendard`, so the app's theme picks it up unchanged. Each weight is
-//   pulled out of the .ttc collection as its own sfnt, because FontLoader only
-//   reads the first face of a collection.
-// - Emoji: Apple Color Emoji, registered as [kEmojiFontFamily] and added as a
-//   fallback family (see [withScreenshotFontFallback]).
+// - Korean/Latin text: the app's `Pretendard` family from
+//   assets/fonts/Pretendard-*.otf (lightweight subsets, see
+//   tool/fonts/subset_pretendard.py). Hangul outside the subset falls back to
+//   macOS's Apple SD Gothic Neo — the font iOS itself falls back to —
+//   registered as [kHangulFallbackFamily]. If the Pretendard assets are ever
+//   not real fonts again, Apple SD Gothic Neo is loaded under the family name
+//   `Pretendard` instead, so the app's theme picks it up unchanged. Each
+//   weight is pulled out of the .ttc collection as its own sfnt, because
+//   FontLoader only reads the first face of a collection.
+// - Emoji: Apple Color Emoji, registered as [kEmojiFontFamily].
+//   Both fallbacks are added to every text style via
+//   [kScreenshotFallbackFamilies] (see [withScreenshotFontFallback]).
 // - Material icons from the Flutter SDK cache.
 import 'dart:io';
 
@@ -20,6 +23,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 const kEmojiFontFamily = 'ScreenshotEmoji';
+
+/// Hangul the Pretendard subset doesn't carry (rare syllables).
+const kHangulFallbackFamily = 'ScreenshotHangulFallback';
+
+/// Fallback families for every screenshot text style, in order.
+const kScreenshotFallbackFamilies = [kEmojiFontFamily, kHangulFallbackFamily];
 
 /// The app's font family name (lib/theme/app_theme.dart).
 const kAppFontFamily = 'Pretendard';
@@ -62,7 +71,7 @@ Future<ScreenshotFontReport> loadScreenshotFonts() async {
 }
 
 Future<(String, List<int>)> _loadTextFonts() async {
-  // A real Pretendard (if the asset is ever fixed) wins.
+  // The bundled Pretendard subsets, as the app renders them.
   final pretendard = [
     'assets/fonts/Pretendard-Regular.otf',
     'assets/fonts/Pretendard-Medium.otf',
@@ -74,16 +83,33 @@ Future<(String, List<int>)> _loadTextFonts() async {
       loader.addFont(_bytesOf(file));
     }
     await loader.load();
-    return ('Pretendard assets', const [400, 500, 700]);
+    final fallback = await _loadSdGothic(kHangulFallbackFamily);
+    return (
+      fallback.isEmpty
+          ? 'Pretendard assets'
+          : 'Pretendard assets + Apple SD Gothic Neo fallback',
+      const [400, 500, 700],
+    );
   }
 
-  final collection = File(_sdGothicPath);
-  if (!collection.existsSync()) {
+  if (!File(_sdGothicPath).existsSync()) {
     throw StateError(
       'No Korean font: the Pretendard assets are not font files and '
       '$_sdGothicPath is missing. Run the generator on macOS.',
     );
   }
+  final loaded = await _loadSdGothic(kAppFontFamily);
+  if (loaded.isEmpty) {
+    throw StateError('Could not read any face from $_sdGothicPath');
+  }
+  return ('Apple SD Gothic Neo', loaded);
+}
+
+/// Registers Apple SD Gothic Neo's 400..900 faces as [family]; returns the
+/// weights loaded (empty when the system font is missing).
+Future<List<int>> _loadSdGothic(String family) async {
+  final collection = File(_sdGothicPath);
+  if (!collection.existsSync()) return const [];
   final faces = splitFontCollection(collection.readAsBytesSync());
   // One face per weight class; Apple SD Gothic Neo ships 100..900.
   final byWeight = <int, Uint8List>{};
@@ -93,7 +119,7 @@ Future<(String, List<int>)> _loadTextFonts() async {
     byWeight.putIfAbsent(weight, () => face);
   }
   const wanted = [400, 500, 600, 700, 800, 900];
-  final loader = FontLoader(kAppFontFamily);
+  final loader = FontLoader(family);
   final loaded = <int>[];
   for (final weight in wanted) {
     final face = byWeight[weight];
@@ -101,11 +127,8 @@ Future<(String, List<int>)> _loadTextFonts() async {
     loader.addFont(Future.value(ByteData.sublistView(face)));
     loaded.add(weight);
   }
-  if (loaded.isEmpty) {
-    throw StateError('Could not read any face from $_sdGothicPath');
-  }
-  await loader.load();
-  return ('Apple SD Gothic Neo', loaded);
+  if (loaded.isNotEmpty) await loader.load();
+  return loaded;
 }
 
 Future<bool> _loadEmojiFont() async {
@@ -242,11 +265,12 @@ int? readWeightClass(Uint8List font) {
   return null;
 }
 
-/// [theme] with the emoji font as a fallback on every text style, so emoji in
-/// app copy (🏃, ❤️, 🤙 …) render instead of boxes. Button themes that set
-/// their own text style (it replaces the inherited one) get it too.
+/// [theme] with [kScreenshotFallbackFamilies] on every text style, so emoji in
+/// app copy (🏃, ❤️, 🤙 …) and Hangul outside the Pretendard subset render
+/// instead of boxes. Button themes that set their own text style (it replaces
+/// the inherited one) get it too.
 ThemeData withScreenshotFontFallback(ThemeData theme) {
-  const fallback = [kEmojiFontFamily];
+  const fallback = kScreenshotFallbackFamilies;
   ButtonStyle? patch(ButtonStyle? style) {
     final textStyle = style?.textStyle;
     if (style == null || textStyle == null) return style;

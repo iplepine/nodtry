@@ -16,8 +16,8 @@
 // fictional couple/workout fixtures, laid out on a 393×852 phone and framed
 // under a caption. Proof photos are generated illustrations, never people.
 //
-// Fonts: see store_screenshots/fonts.dart (needs macOS system fonts until
-// assets/fonts/Pretendard-*.otf are real font files).
+// Fonts: see store_screenshots/fonts.dart (the bundled Pretendard subsets,
+// plus macOS system fonts for emoji and Hangul outside the subset).
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;

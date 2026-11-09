@@ -89,17 +89,34 @@ P0/P1/P2 개선 스윕에서 **안전하게 완결·검증된 항목은 코드�
 
 ---
 
-## 4. (P2) Pretendard 경량 폰트 자산 복구
+## 4. (P2) Pretendard 경량 폰트 자산 복구 — 코드 완료, 기기 지표 확인 대기
 
-### 현재 상태
-- `assets/fonts/Pretendard-*.otf` 3개는 실제 OpenType 파일이 아니라 GitHub HTML 응답이다.
-- 앱은 플랫폼 폰트로 fallback할 수 있지만, 테스트 기반 스토어 이미지 생성에서는 글자가
-  네모로 렌더링된다.
-- `tool/generate_store_screenshots_test.dart`는 파일 시그니처를 검사하고 macOS 시스템 폰트로
-  대체해 스토어 이미지를 안정적으로 생성한다.
+### 현재 상태 (2026-11-09)
+- `assets/fonts/Pretendard-{Regular,Medium,Bold}.otf`를 실제 CFF OpenType **서브셋**으로
+  교체했다(각 약 340KB — 기존 HTML 파일 298KB와 비슷하고 원본 1.6MB의 약 21%).
+  원본은 git `438b7f7`의 Pretendard 1.301이고, 생성 스크립트는 `tool/fonts/subset_pretendard.py`.
+- 포함 글리프(cmap 2,746개): ASCII·Latin-1·General Punctuation·화살표·①~⑳·CJK 괄호·
+  자주 쓰는 UI 기호, 한글 호환 자모, KS X 1001 완성형 2,350자, 그리고 `lib/`·`tool/`의
+  모든 `.dart`/`.arb` 문자(ARB 문구·Dart 문자열 리터럴·스토어 스크린샷 fixture).
+- 일부러 뺀 것: Emoji 속성 코드포인트(❤ ☀ ♥ ✨ 등 — 넣으면 "❤️"가 컬러 이모지 대신
+  단색 Pretendard 글리프로 그려진다), ZWJ·변이 선택자 등 서식 문자, BMP 밖 문자.
+  이 문자들과 KS X 1001 밖의 드문 음절은 Flutter의 글리프 단위 시스템 폰트 fallback으로
+  그려진다(테마에 `fontFamilyFallback`은 지정하지 않는다).
+- 레이아웃 기능은 kern·mark·mkmk·ccmp·locl·tnum·case만 남기고, 힌팅을 제거하고,
+  AFDKO로 CFF를 다시 서브루틴화했다(TTF 변환은 약 460KB로 더 커서 OTF 유지).
+- 테마: `ThemeData(fontFamily: 'Pretendard')`가 textTheme/primaryTextTheme 전체에 적용된다.
+  미사용이던 `darkTheme`에도 같은 패밀리를 지정했다.
+- 라이선스: `assets/fonts/LICENSE`(SIL OFL 1.1). 폰트 name 테이블의 저작권·라이선스 필드는 유지했다.
+- 테스트: `test/theme/pretendard_font_assets_test.dart`가 OTTO 시그니처·크기 상한(420KB)·
+  weight class·ARB 한글/Latin 문자 커버리지·이모지 제외·테마 적용을 검사한다. ARB에
+  KS X 1001 밖 음절을 넣으면 이 테스트가 실패하므로, 스크립트를 다시 돌려 서브셋을 갱신한다.
+- 스토어 스크린샷 생성기는 이제 번들 Pretendard를 그대로 쓴다. 서브셋 밖 한글은
+  Apple SD Gothic Neo(`ScreenshotHangulFallback`), 이모지는 Apple Color Emoji로 fallback한다.
 
 ### 완료 조건
-1. 실제 Pretendard 파일 또는 필요한 글리프만 포함한 경량 서브셋을 준비한다.
-2. Android 콜드스타트와 ANR 지표가 기존 대비 악화되지 않는지 확인한다.
-3. iOS·Android 한글/영문 렌더링과 스토어 이미지 생성 테스트를 통과한다.
-4. 검증 전에는 과거 1.6MB 폰트 3개를 그대로 복원하지 않는다.
+1. ~~실제 Pretendard 파일 또는 필요한 글리프만 포함한 경량 서브셋을 준비한다.~~ 완료.
+2. Android 콜드스타트와 ANR 지표가 기존 대비 악화되지 않는지 확인한다. — **남음**:
+   1.2.0 내부 테스트 트랙에서 저사양 Android 기기 콜드스타트를 측정하고, 출시 후 Play Console ANR 비율을 확인한다.
+3. iOS·Android 한글/영문 렌더링과 스토어 이미지 생성 테스트를 통과한다. — 스토어 이미지
+   생성 테스트 통과(한글·이모지 정상 렌더 확인). 실기기 iOS·Android 육안 확인은 **남음**.
+4. ~~검증 전에는 과거 1.6MB 폰트 3개를 그대로 복원하지 않는다.~~ 원본은 복원하지 않았다.

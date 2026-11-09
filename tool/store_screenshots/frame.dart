@@ -260,7 +260,7 @@ class _CaptionBlock extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: kAppFontFamily,
-              fontFamilyFallback: const [kEmojiFontFamily],
+              fontFamilyFallback: kScreenshotFallbackFamilies,
               fontSize: 34,
               height: 1.24,
               letterSpacing: -0.8,
@@ -274,7 +274,7 @@ class _CaptionBlock extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: kAppFontFamily,
-              fontFamilyFallback: const [kEmojiFontFamily],
+              fontFamilyFallback: kScreenshotFallbackFamilies,
               fontSize: 16.5,
               height: 1.4,
               letterSpacing: -0.2,
@@ -628,7 +628,7 @@ class PushBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle style(double size, FontWeight weight, Color color) => TextStyle(
       fontFamily: kAppFontFamily,
-      fontFamilyFallback: const [kEmojiFontFamily],
+      fontFamilyFallback: kScreenshotFallbackFamilies,
       fontSize: size,
       fontWeight: weight,
       color: color,
