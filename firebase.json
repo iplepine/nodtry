@@ -24,7 +24,8 @@
         "public": "hosting/public",
         "ignore": [
             "firebase.json",
-            "**/.*",
+            "**/.!(well-known)",
+            "**/.!(well-known)/**",
             "**/node_modules/**"
         ],
         "rewrites": [
@@ -74,6 +75,32 @@
                     {
                         "key": "Cache-Control",
                         "value": "public, max-age=86400"
+                    }
+                ]
+            },
+            {
+                "source": "/.well-known/apple-app-site-association",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Cache-Control",
+                        "value": "public, max-age=3600"
+                    }
+                ]
+            },
+            {
+                "source": "/.well-known/assetlinks.json",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Cache-Control",
+                        "value": "public, max-age=3600"
                     }
                 ]
             }

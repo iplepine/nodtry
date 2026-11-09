@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.devho.nodtry.app",
+      "sha256_cert_fingerprints": [
+        "BE:DE:C6:9F:64:FE:D3:CF:C8:A9:88:33:4D:D5:A3:71:D3:E6:62:89:31:DD:18:DB:99:72:77:9D:77:B2:C9:3D",
+        "6C:05:E5:27:A6:14:B6:EC:4F:91:3B:4E:41:6A:21:AE:88:12:4D:6A:7F:59:FB:0C:1D:67:AC:C9:B7:54:A3:C5"
+      ]
+    }
+  }
+]
