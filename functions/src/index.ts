@@ -53,14 +53,19 @@ import {
 import {pairsOf, previousSeoulDay} from "./stats";
 import {NOTIFICATION_ACTIONS_BUILD, buildMessagePayload, quickActionCategory} from "./push";
 import {
+    PLAN_PROPOSALS_CORE_PER_DAY,
     PUSH_QUOTA_COLLECTION,
     PUSH_QUOTA_TTL_MS,
     PushTier,
     TierHints,
     coalesceKey,
+    planProposalTokenKey,
+    pokeLockKey,
     pushTier,
     quotaDecision,
     quotaDocId,
+    replyCoreLockKey,
+    verifyCoreLockKey,
 } from "./pushPolicy";
 import {generateUniqueInviteCode, normalizeInviteCode} from "./inviteCode";
 import {FieldOps, SYSTEM_LINK, actionManagerFor, managerStampFor, millisOf, unlinkUpdate} from "./planLinks";
@@ -367,6 +372,55 @@ async function releaseLock(key: string): Promise<void> {
 
 async function lockExists(key: string): Promise<boolean> {
     return (await lockRef(key).get()).exists;
+}
+
+/**
+ * claimLock / takeToken for a tier hint (pushPolicy): an error only costs the
+ * push its core tier, it never drops it.
+ */
+async function tierClaim(claim: Promise<boolean>, key: string): Promise<boolean> {
+    try {
+        return await claim;
+    } catch (error) {
+        console.warn(`Tier lock ${key} failed; sending as non-core`, error);
+        return false;
+    }
+}
+
+/** The first 인정 push of `planId` on the recipient's local day `day` (core once). */
+async function firstVerificationToday(planId: string, day: LocalDateParts): Promise<boolean> {
+    const key = verifyCoreLockKey(planId, dayKey(day));
+    return tierClaim(claimLock(key), key);
+}
+
+/**
+ * A reply to a knock: core only when a knock on this plan (or pair) was
+ * delivered on the replier's or recipient's local day, and only for the
+ * first reply to it.
+ */
+async function answersKnockToday(
+    planId: string | null,
+    replierId: string,
+    recipientId: string,
+    days: LocalDateParts[],
+): Promise<boolean> {
+    const keys = [...new Set(days.map((day) => dayKey(day)))];
+    for (const day of keys) {
+        const knocks = planId ?
+            [pokeLockKey(planId, replierId, recipientId, day), pokeLockKey(null, replierId, recipientId, day)] :
+            [pokeLockKey(null, replierId, recipientId, day)];
+        let knocked = false;
+        for (const key of knocks) {
+            if (await tierClaim(lockExists(key), key)) {
+                knocked = true;
+                break;
+            }
+        }
+        if (!knocked) continue;
+        const key = replyCoreLockKey(planId, replierId, recipientId, day);
+        return tierClaim(claimLock(key), key);
+    }
+    return false;
 }
 
 /** Takes one of `max` tokens for `key` (a counter that the TTL sweeps away). */
@@ -1000,10 +1054,7 @@ export const onCheerCreated = functions.firestore
             if (reactionType === "poke") {
                 // At most one poke push per plan (or per pair without a plan)
                 // per recipient-local day.
-                const [x, y] = [fromUserId, toUserId].sort();
-                const key = pairPlan ?
-                    `poke_plan_${planId}_${dayKey(today)}` :
-                    `poke_pair_${x}_${y}_${dayKey(today)}`;
+                const key = pokeLockKey(pairPlan ? planId : null, fromUserId, toUserId, dayKey(today));
                 if (!(await claimLock(key))) {
                     console.log(`Poke rate-limited: ${key}`);
                     return;
@@ -1038,13 +1089,22 @@ export const onCheerCreated = functions.firestore
             }
 
             if (!(await claimEvent(context))) return;
+            // Core only for the loop-critical instance (pushPolicy): the first
+            // 인정 of the plan today, the first reply to a knock delivered today.
+            const hints: TierHints = {};
+            if (type === "cheer" && verification && pairPlan && planId) {
+                hints.verification = await firstVerificationToday(planId, today);
+            } else if (type === "poke_reply") {
+                hints.answersKnock = await answersKnockToday(pairPlan ? planId : null, fromUserId, toUserId,
+                    [localParts(new Date(), timeZoneOf(sender)), today]);
+            }
             await sendCopy(toUserId, fcmToken, copy, {
                 type,
                 // Only a plan of these two is something to open.
                 planId: pairPlan ? planId ?? "" : "",
                 senderName: who,
                 message,
-            }, recipient, {hints: {verification}, allowDataOnly: true});
+            }, recipient, {hints, allowDataOnly: true});
         } catch (error) {
             console.error("Error sending notification:", error);
         }
@@ -1091,12 +1151,17 @@ export const onPlanCreated = functions
             });
 
             if (!(await claimEvent(context))) return;
+            // A few proposals a day are core; a flood of new plans is standard.
+            const proposalKey = planProposalTokenKey(userId, managerId,
+                dayKey(localParts(new Date(), timeZoneOf(manager))));
+            const proposalWithinLimit = await tierClaim(
+                takeToken(proposalKey, PLAN_PROPOSALS_CORE_PER_DAY), proposalKey);
             await sendCopy(managerId, fcmToken, copy, {
                 type: "plan_proposed",
                 planId: context.params.planId,
                 senderName: who,
                 userId,
-            }, manager);
+            }, manager, {hints: {proposalWithinLimit}});
         } catch (error) {
             console.error("Error sending plan notification:", error);
         }
@@ -1482,7 +1547,7 @@ export const onPlanUpdated = functions
             if (hasNewPoke) {
                 // A. 똑똑 — at most one push per plan per recipient-local day.
                 const today = localParts(new Date(), timeZoneOf(recipient));
-                const key = `poke_plan_${planId}_${dayKey(today)}`;
+                const key = pokeLockKey(planId, lastUpdatedBy, toUserId, dayKey(today));
                 if (!(await claimLock(key))) {
                     console.log(`Poke rate-limited: ${key}`);
                     return;
@@ -1523,13 +1588,17 @@ export const onPlanUpdated = functions
             }
 
             if (!(await claimEvent(context))) return;
+            // The first 인정 of the plan today is core (pushPolicy).
+            const hints: TierHints = type === "action_verified" ?
+                {verification: await firstVerificationToday(planId, localParts(new Date(), timeZoneOf(recipient)))} :
+                {};
             await sendCopy(toUserId, fcmToken, copy, {
                 type,
                 planId,
                 senderName: who,
                 lastComment: clip(after.lastComment, 120),
                 lastCheerMessage: clip(after.lastCheerMessage, 120),
-            }, recipient);
+            }, recipient, {hints});
         } catch (error) {
             console.error("Error sending update notification:", error);
         }

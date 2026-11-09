@@ -13,15 +13,18 @@
 | `partner_connect_failed` | `undoLink` → `sendConnectPush` | core | 같음 |
 | `action_completed` (done) | `onActionCompleted` | core | 기록 1건당 1건 |
 | `action_completed` (skipped·rested) | `onActionCompleted` | standard | 기록 1건당 1건 |
-| `cheer` — 인정(오늘 기록이 있는 날의 리액션) | `onCheerCreated` | core | 발신→수신 시간당 20건 |
-| `cheer` — 응원(그 외) | `onCheerCreated` | secondary | 같음 |
-| `action_verified` | `onPlanUpdated` | core | 이벤트당 1건 |
-| `poke_reply` | `onCheerCreated` | core | 시간당 20건 |
+| `cheer` — 그날 첫 인정(오늘 기록이 있는 날의 리액션) | `onCheerCreated` | core | **약속당 수신자 현지 하루 1건**(`verify_core_{planId}_{day}`, `action_verified`와 공유) |
+| `cheer` — 그 뒤 인정·응원(그 외) | `onCheerCreated` | secondary | 발신→수신 시간당 20건 |
+| `action_verified` — 그날 첫 인정 | `onPlanUpdated` | core | 약속당 수신자 현지 하루 1건(위 lock 공유) |
+| `action_verified` — 그 뒤 인정 | `onPlanUpdated` | standard | 이벤트당 1건 |
+| `poke_reply` — 오늘 받은 똑똑에 대한 첫 답장 | `onCheerCreated` | core | **그날 똑똑 lock(`poke_plan_*`/`poke_pair_*`)이 있을 때만, 약속(또는 쌍)당 하루 1건**(`reply_core_*`) |
+| `poke_reply` — 똑똑 없는 답장·두 번째 이후 답장 | `onCheerCreated` | standard | 발신→수신 시간당 20건 |
 | `poke` | `onCheerCreated` / `onPlanUpdated` | standard | 약속(또는 쌍)당 수신자 현지 하루 1건 |
 | `action_missed` | `notifyMissedActions` | core | 약속당 하루 1건 |
 | `verify_reminder` | `notifyUnverifiedActions` | secondary | done 1건당 1회, 수신자 현지 09–22시 |
-| `plan_proposed` | `onPlanCreated` | core | 약속 생성당 1건 |
-| `plan_approved` / `plan_rejected` | `onPlanUpdated` | core | 레거시 승인 흐름 |
+| `plan_proposed` — 그날 3건까지 | `onPlanCreated` | core | **발신→수신 수신자 현지 하루 3건**(`plan_proposed_core_*` 토큰, `PLAN_PROPOSALS_CORE_PER_DAY`) |
+| `plan_proposed` — 4건째부터 | `onPlanCreated` | standard | 약속 생성당 1건 |
+| `plan_approved` / `plan_rejected` | `onPlanUpdated` | core | 레거시 pending → 결정 변경 1회당 1건 |
 | `plan_updated` | `onPlanUpdated` | standard | **신규: 같은 약속·수신자 15분 내 1건으로 합침** |
 | (모르는 타입) | — | secondary | — |
 
@@ -34,7 +37,8 @@
   - **core**: 항상 보낸다(카운트만 올림).
   - **standard**: 오늘 `count < 8`(`DAILY_PUSH_CAP`)일 때만.
   - **secondary**: 오늘 `count < 5`(`SECONDARY_PUSH_LIMIT`)일 때만.
-- 왜 8/5인가: 보통 커플의 하루는 한 사람당 2–5건(짝꿍 인증샷, 내 기록 인정, 가끔 미기록 알림·똑똑·답장). 응원·리마인더 같은 부가 푸시는 5건에서 멈춰 최소 3칸을 핵심 루프에 남기고, 정보성(standard)은 8건에서 멈춘다. 핵심 루프(spec §4: 인증샷 → 인정, 안 하면 짝꿍이 안다, 똑똑 답장, 연결)는 빠지면 제품이 깨지므로 상한으로 막지 않는다 — 대신 각 core 타입에 이미 출처 제한이 있다(위 표).
+- 왜 8/5인가: 보통 커플의 하루는 한 사람당 2–5건(짝꿍 인증샷, 내 기록 인정, 가끔 미기록 알림·똑똑·답장). 응원·리마인더 같은 부가 푸시는 5건에서 멈춰 최소 3칸을 핵심 루프에 남기고, 정보성(standard)은 8건에서 멈춘다. 핵심 루프(spec §4: 인증샷 → 인정, 안 하면 짝꿍이 안다, 똑똑 답장, 연결)는 빠지면 제품이 깨지므로 상한으로 막지 않는다. 대신 **core는 루프에 꼭 필요한 그 1건에만** 붙고 모두 작은 출처 제한이 있다(위 표): 같은 약속의 두 번째 인정, 똑똑 없이 온 답장, 하루 4번째 약속 제안은 core가 아니라 상한을 따른다. 그래서 수다스러운(또는 변조된) 클라이언트가 core로 상한을 넘길 수 없다.
+- core 판정용 lock/토큰(`verify_core_*`, `reply_core_*`, `plan_proposed_core_*`)은 `serverLocks`(기존 TTL `expireAt` 3일)에 둔다. lock 처리에 실패하면 그 푸시는 core만 잃고(상한 적용) 버려지지는 않는다.
 - 상한으로 버리면 로그 `Push suppressed: daily cap (to=…, type=…, tier=…, sentToday=…, day=…)`(info). 합친 경우 `Push to … coalesced (plan_updated)`.
 - 버린 `verify_reminder`는 "보내지 않음"으로 처리돼 `verifyReminderSentAt`이 찍히지 않고, 72시간 창 안에서 다음 시간대 실행(대개 다음 현지일)에 다시 시도된다.
 - FCM 발송이 실패하면 카운트를 1 되돌린다(재시도가 두 번 세지지 않게). 쿼터 트랜잭션 자체가 실패하면 **보낸다**(fail-open, 경고 로그).
