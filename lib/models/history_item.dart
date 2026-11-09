@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../utils/context_free_l10n.dart';
 import 'proof_photo.dart';
+import 'together_log.dart';
 
 /// 기록 상태 (Spec 3.1)
 enum HistoryStatus {
@@ -57,6 +58,18 @@ class HistoryItem {
   /// before we linked). Set by the history view model.
   final bool canVerify;
 
+  /// "같이 했어" on my record: the partner it names
+  /// (`actions.togetherWithUid`).
+  final String? togetherWithUid;
+
+  /// 나도 했어: the partner whose photo this record shows
+  /// (`actions.sharedProofFromUid`). The photo lives under their folder, so
+  /// only they can delete it, and it simply disappears once they do.
+  final String? sharedProofFromUid;
+
+  /// The photo belongs to someone else's record (a shared 같이 했어 photo).
+  bool get hasSharedProof => sharedProofFromUid != null;
+
   const HistoryItem({
     required this.id,
     this.planId,
@@ -76,6 +89,8 @@ class HistoryItem {
     this.proofTakenAt,
     this.reaction,
     this.canVerify = true,
+    this.togetherWithUid,
+    this.sharedProofFromUid,
   });
 
   /// 내가 실천한 기록인지 여부
@@ -112,6 +127,8 @@ class HistoryItem {
           ? (map['proofTakenAt'] as Timestamp).toDate()
           : null,
       reaction: _nonEmptyString(map['reaction']),
+      togetherWithUid: _nonEmptyString(map[kTogetherWithUidField]),
+      sharedProofFromUid: _nonEmptyString(map[kSharedProofFromUidField]),
     );
   }
 
@@ -153,6 +170,8 @@ class HistoryItem {
     DateTime? proofTakenAt,
     String? reaction,
     bool? canVerify,
+    String? togetherWithUid,
+    String? sharedProofFromUid,
     bool clearProofPhoto = false,
   }) {
     return HistoryItem(
@@ -176,6 +195,8 @@ class HistoryItem {
       proofTakenAt: clearProofPhoto ? null : proofTakenAt ?? this.proofTakenAt,
       reaction: reaction ?? this.reaction,
       canVerify: canVerify ?? this.canVerify,
+      togetherWithUid: togetherWithUid ?? this.togetherWithUid,
+      sharedProofFromUid: sharedProofFromUid ?? this.sharedProofFromUid,
     );
   }
 }

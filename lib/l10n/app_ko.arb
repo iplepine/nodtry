@@ -1035,5 +1035,15 @@
   "planWeeklyHint": "요일은 그때그때 골라요. 이번 주를 채우려면 꼭 해야 하는 날에만 마감 알림이 가요",
   "weeklyProgressThisWeek": "이번 주 {done}/{target}회",
   "nowWeeklyGoalMet": "이번 주 목표 달성 🎉",
-  "nowWeeklyGoalMetSub": "더 하면 연속 기록에 더해져요"
+  "nowWeeklyGoalMetSub": "더 하면 연속 기록에 더해져요",
+  "togetherToggleTitle": "🤝 {nameWithParticle} 같이 했어",
+  "togetherToggleHint": "{name}한테도 '나도 했어'로 같이 기록할지 물어볼게요",
+  "togetherClaimTitle": "🤝 {nameWithParticle} 같이 했대요",
+  "togetherClaimBody": "맞으면 한 번만 누르면 내 기록도 남아요",
+  "togetherClaimBodyWithPhoto": "맞으면 한 번만 누르면 내 기록도 남아요. 인증샷도 같이 붙어요",
+  "togetherClaimConfirm": "나도 했어",
+  "togetherConfirmedSnack": "같이 한 운동 기록했어요 💪",
+  "togetherAlreadyLoggedSnack": "오늘 약속은 이미 기록했어요",
+  "togetherUnavailableSnack": "같이 한 기록을 찾지 못했어요",
+  "notifActionTogetherDone": "💪 나도 했어"
 }

@@ -5,6 +5,7 @@ import 'package:image/image.dart' as img;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nod_try/models/together_log.dart';
 import 'package:nod_try/features/now/application/notification_routing.dart';
 import 'package:nod_try/features/now/domain/usecases/get_now_cards_use_case.dart';
 import 'package:nod_try/features/now/presentation/now_tab_screen.dart';
@@ -66,6 +67,7 @@ class _FakeRecordRepository extends Fake implements RecordRepository {
     String planId, {
     String? note,
     ProofPhotoUpload? photo,
+    TogetherTag? together,
   }) async {
     completions.add((planId: planId, note: note, photo: photo));
     return ProofCompletionResult(

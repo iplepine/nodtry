@@ -5461,6 +5461,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Extra workouts still add to your streak'**
   String get nowWeeklyGoalMetSub;
+
+  /// Toggle in the 했어 flow: this workout was done together with the partner. ko uses nameWithParticle (the name + 이랑/랑, built with withJosa); en uses name.
+  ///
+  /// In en, this message translates to:
+  /// **'🤝 Worked out with {name}'**
+  String togetherToggleTitle(String name, String nameWithParticle);
+
+  /// Sub line of the together toggle: the partner is asked (never logged for them)
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll ask {name} to log it too'**
+  String togetherToggleHint(String name);
+
+  /// Now tab card when the partner logged a workout 'together' with me. ko uses nameWithParticle (the name + 이/가); en uses name.
+  ///
+  /// In en, this message translates to:
+  /// **'🤝 {name} says you worked out together'**
+  String togetherClaimTitle(String name, String nameWithParticle);
+
+  /// Body of the together card (no photo)
+  ///
+  /// In en, this message translates to:
+  /// **'If so, one tap logs yours too'**
+  String get togetherClaimBody;
+
+  /// Body of the together card when the partner attached a proof photo
+  ///
+  /// In en, this message translates to:
+  /// **'If so, one tap logs yours too, photo included'**
+  String get togetherClaimBodyWithPhoto;
+
+  /// Button on the together card (partner-to-partner voice): logs my own record for today
+  ///
+  /// In en, this message translates to:
+  /// **'I did too'**
+  String get togetherClaimConfirm;
+
+  /// Snackbar after 나도 했어 saved my record
+  ///
+  /// In en, this message translates to:
+  /// **'Logged — you worked out together 💪'**
+  String get togetherConfirmedSnack;
+
+  /// Snackbar when 나도 했어 finds today already recorded
+  ///
+  /// In en, this message translates to:
+  /// **'You already logged today\'s promise'**
+  String get togetherAlreadyLoggedSnack;
+
+  /// Snackbar when the partner's together record is gone or no longer asks
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t find that shared workout'**
+  String get togetherUnavailableSnack;
+
+  /// Button on a together_log push: logs my own record (opens the app and saves it)
+  ///
+  /// In en, this message translates to:
+  /// **'💪 I did too'**
+  String get notifActionTogetherDone;
 }
 
 class _AppLocalizationsDelegate

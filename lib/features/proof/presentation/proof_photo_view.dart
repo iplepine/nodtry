@@ -44,6 +44,7 @@ class ProofPhoto extends ConsumerStatefulWidget {
     this.borderRadius = 14,
     this.showBadge = true,
     this.resolveMetaFromAction = false,
+    this.hideWhenUnavailable = false,
   });
 
   /// `proofs/{uid}/{planId}/{actionId}.jpg`.
@@ -66,6 +67,13 @@ class ProofPhoto extends ConsumerStatefulWidget {
   /// source and capture time from the action the path points at.
   final bool resolveMetaFromAction;
 
+  /// A shared "같이 했어" photo (someone else's record): show nothing —
+  /// instead of the error box — once it is gone for good
+  /// ([ProofPhotoUnavailableException.isPermanent]), or once its own record
+  /// no longer points at it (the owner deleted it; a cached copy is dropped
+  /// too, so a deleted photo doesn't linger here).
+  final bool hideWhenUnavailable;
+
   @override
   ConsumerState<ProofPhoto> createState() => _ProofPhotoState();
 }
@@ -73,6 +81,8 @@ class ProofPhoto extends ConsumerStatefulWidget {
 class _ProofPhotoState extends ConsumerState<ProofPhoto> {
   Uint8List? _bytes;
   bool _failed = false;
+  bool _gone = false;
+  bool _evicted = false;
   int _request = 0;
 
   @override
@@ -98,6 +108,7 @@ class _ProofPhotoState extends ConsumerState<ProofPhoto> {
     }
     _bytes = null;
     _failed = false;
+    _gone = false;
     cache
         .load(widget.path)
         .then(
@@ -108,9 +119,29 @@ class _ProofPhotoState extends ConsumerState<ProofPhoto> {
           onError: (Object e) {
             debugPrint('[ProofPhoto] load failed: $e');
             if (!mounted || request != _request) return;
-            setState(() => _failed = true);
+            setState(() {
+              _failed = true;
+              _gone = e is ProofPhotoUnavailableException && e.isPermanent;
+            });
           },
         );
+  }
+
+  /// Whether the record the shared photo belongs to no longer shows it
+  /// (deleted photo or record, or no longer readable after a disconnect).
+  bool _ownerDropped() {
+    final actionId = parseProofPhotoPath(widget.path)?.actionId;
+    if (actionId == null) return false;
+    final meta = ref.watch(proofActionMetaProvider(actionId));
+    if (!meta.hasValue || meta.value?.proofPhotoPath == widget.path) {
+      return false;
+    }
+    if (!_evicted) {
+      _evicted = true;
+      final cache = ref.read(proofPhotoCacheProvider);
+      Future.microtask(() => cache.evict(widget.path));
+    }
+    return true;
   }
 
   void _retry() {
@@ -119,6 +150,9 @@ class _ProofPhotoState extends ConsumerState<ProofPhoto> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.hideWhenUnavailable && (_gone || _ownerDropped())) {
+      return const SizedBox.shrink();
+    }
     final l10n = AppLocalizations.of(context)!;
     var source = widget.source;
     var takenAt = widget.takenAt;

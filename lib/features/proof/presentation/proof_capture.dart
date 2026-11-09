@@ -375,6 +375,7 @@ Future<String?> showProofPreviewSheet(
   BuildContext context, {
   required ProofPhotoUpload upload,
   String? title,
+  Widget? footer,
 }) {
   return showModalBottomSheet<String>(
     context: context,
@@ -384,15 +385,24 @@ Future<String?> showProofPreviewSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (context) => ProofPreviewSheet(upload: upload, title: title),
+    builder: (context) =>
+        ProofPreviewSheet(upload: upload, title: title, footer: footer),
   );
 }
 
 class ProofPreviewSheet extends StatefulWidget {
-  const ProofPreviewSheet({super.key, required this.upload, this.title});
+  const ProofPreviewSheet({
+    super.key,
+    required this.upload,
+    this.title,
+    this.footer,
+  });
 
   final ProofPhotoUpload upload;
   final String? title;
+
+  /// Shown above the buttons (e.g. the "같이 했어" toggle).
+  final Widget? footer;
 
   @override
   State<ProofPreviewSheet> createState() => _ProofPreviewSheetState();
@@ -487,6 +497,7 @@ class _ProofPreviewSheetState extends State<ProofPreviewSheet> {
               ),
             ),
             const SizedBox(height: 8),
+            ?widget.footer,
             Row(
               children: [
                 Expanded(

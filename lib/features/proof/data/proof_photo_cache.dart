@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:firebase_core/firebase_core.dart' show FirebaseException;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,6 +22,17 @@ class ProofPhotoUnavailableException implements Exception {
 
   final String path;
   final Object? cause;
+
+  /// The photo is gone for good — its owner deleted it, or this reader may no
+  /// longer see it — rather than a network hiccup worth a retry.
+  bool get isPermanent {
+    final cause = this.cause;
+    if (cause == null) return true;
+    if (cause is FirebaseException) {
+      return cause.code == 'object-not-found' || cause.code == 'unauthorized';
+    }
+    return false;
+  }
 
   @override
   String toString() => 'ProofPhotoUnavailableException($path, $cause)';

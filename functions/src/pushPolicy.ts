@@ -31,6 +31,9 @@
 //   - plan_proposed: PLAN_PROPOSALS_CORE_PER_DAY per sender → recipient per
 //     day; more are standard. The caller sets hints.proposalWithinLimit.
 //   - plan_approved / plan_rejected: one per legacy pending → decided change.
+//   - together_log ("같이 했어", asks the partner to log theirs too): one per
+//     partner plan per partner-local day (together.togetherLockKey) and only
+//     in place of that record's action_completed, so it never adds a push.
 import {LocalDateParts, localParts} from "./time";
 
 export type PushTier = "core" | "standard" | "secondary";
@@ -79,6 +82,10 @@ export function pushTier(data: {[key: string]: string}, hints: TierHints = {}): 
     // information only.
     case "action_completed":
         return data.actionType === "done" ? "core" : "standard";
+    // "같이 했어": the partner's record that also asks for mine (it replaces
+    // that record's action_completed).
+    case "together_log":
+        return "core";
     // 인정 of my proof: the first one of the plan today.
     case "action_verified":
         return hints.verification ? "core" : "standard";

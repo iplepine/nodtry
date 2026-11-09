@@ -243,8 +243,14 @@ class NowTabViewModel extends StreamNotifier<NowTabState> {
             intent.planId,
             note: intent.message,
             photo: intent.photo,
+            together: intent.together,
           );
       if (result.actionId != null) logProofUploaded(result);
+      if (result.actionId != null && intent.together != null) {
+        AnalyticsService.log(AnalyticsEvent.togetherLogged, {
+          'has_photo': result.hasPhoto,
+        });
+      }
 
       // 알람 업데이트: 오늘 알람 건너뛰기
       await _updateAlarmToSkipToday(intent.planId, credited: true);

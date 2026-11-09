@@ -2954,4 +2954,41 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get nowWeeklyGoalMetSub => '더 하면 연속 기록에 더해져요';
+
+  @override
+  String togetherToggleTitle(String name, String nameWithParticle) {
+    return '🤝 $nameWithParticle 같이 했어';
+  }
+
+  @override
+  String togetherToggleHint(String name) {
+    return '$name한테도 \'나도 했어\'로 같이 기록할지 물어볼게요';
+  }
+
+  @override
+  String togetherClaimTitle(String name, String nameWithParticle) {
+    return '🤝 $nameWithParticle 같이 했대요';
+  }
+
+  @override
+  String get togetherClaimBody => '맞으면 한 번만 누르면 내 기록도 남아요';
+
+  @override
+  String get togetherClaimBodyWithPhoto =>
+      '맞으면 한 번만 누르면 내 기록도 남아요. 인증샷도 같이 붙어요';
+
+  @override
+  String get togetherClaimConfirm => '나도 했어';
+
+  @override
+  String get togetherConfirmedSnack => '같이 한 운동 기록했어요 💪';
+
+  @override
+  String get togetherAlreadyLoggedSnack => '오늘 약속은 이미 기록했어요';
+
+  @override
+  String get togetherUnavailableSnack => '같이 한 기록을 찾지 못했어요';
+
+  @override
+  String get notifActionTogetherDone => '💪 나도 했어';
 }

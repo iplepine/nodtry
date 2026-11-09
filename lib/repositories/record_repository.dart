@@ -5,6 +5,7 @@ import '../models/history_item.dart';
 import '../models/plan_model.dart';
 import '../models/promise_model.dart';
 import '../models/proof_photo.dart';
+import '../models/together_log.dart';
 
 /// 이번 주 휴식권을 이미 써서 [RecordRepository.reportRest]가 거절된 경우.
 ///
@@ -99,10 +100,27 @@ abstract class RecordRepository {
   /// The photo is uploaded first (bounded by [kProofUploadTimeout]); if that
   /// fails the record is still saved, without the photo, and the result says
   /// so ([ProofCompletionResult.photoFailed]).
+  ///
+  /// [together] ("같이 했어") tags the record with the partner and their plan
+  /// (`togetherWithUid` / `togetherPartnerPlanId`) and marks my plan
+  /// (`lastTogether`), so the partner is asked to log theirs — never logged
+  /// for them.
   Future<ProofCompletionResult> reportCompletion(
     String planId, {
     String? note,
     ProofPhotoUpload? photo,
+    TogetherTag? together,
+  });
+
+  /// 나도 했어: my own `done` on my plan [planId] for today, answering the
+  /// partner's "같이 했어" record [sourceActionId]. Shares their proof photo
+  /// by reference (`proofPhotoPath` under their folder, their `proofSource`,
+  /// plus `sharedProofFromUid` / `togetherActionId`). Writes nothing when
+  /// that record doesn't ask me about this plan today, or when I already
+  /// recorded the plan today.
+  Future<TogetherConfirmResult> confirmTogether(
+    String planId, {
+    required String sourceActionId,
   });
 
   /// One `actions` record by id (e.g. the one a proof photo belongs to), or

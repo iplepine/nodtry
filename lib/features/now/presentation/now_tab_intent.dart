@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../../../models/promise_model.dart';
 import '../../../models/proof_photo.dart';
+import '../../../models/together_log.dart';
 
 /// Now Tab에서 발생하는 사용자 의도(Intent) 정의
 /// MVI 패턴의 'Intent' 역할
@@ -16,7 +17,15 @@ class CompletePlanIntent extends NowTabIntent {
 
   /// The metadata-stripped photo to upload with the record, if any.
   final ProofPhotoUpload? photo;
-  const CompletePlanIntent(this.planId, {this.message, this.photo});
+
+  /// "같이 했어": the partner and their plan this record also asks about.
+  final TogetherTag? together;
+  const CompletePlanIntent(
+    this.planId, {
+    this.message,
+    this.photo,
+    this.together,
+  });
 
   @override
   bool operator ==(Object other) =>
@@ -25,11 +34,16 @@ class CompletePlanIntent extends NowTabIntent {
           runtimeType == other.runtimeType &&
           planId == other.planId &&
           message == other.message &&
-          identical(photo, other.photo);
+          identical(photo, other.photo) &&
+          together?.partnerPlanId == other.together?.partnerPlanId;
 
   @override
-  int get hashCode =>
-      planId.hashCode ^ message.hashCode ^ identityHashCode(photo);
+  int get hashCode => Object.hash(
+    planId,
+    message,
+    identityHashCode(photo),
+    together?.partnerPlanId,
+  );
 }
 
 /// 파트너 실천 확인 (확인하기/응원하기)

@@ -384,6 +384,90 @@ function actionCompletedCopyEn(input: {
     return null;
 }
 
+/**
+ * A name followed by the subject particle that fits it: "자기가", "짝꿍이",
+ * "Tom이" (mirrors the app's `withJosa(name, '이/가')`, lib/utils/
+ * korean_particle.dart). Used only where a sentence can't be written without
+ * a particle; anything unreadable gets the after-a-vowel form.
+ */
+export function withSubjectJosa(word: string): string {
+    return `${word}${endsInConsonant(word) ? "이" : "가"}`;
+}
+
+function endsInConsonant(word: string): boolean {
+    const chars = Array.from(word);
+    for (let i = chars.length - 1; i >= 0; i--) {
+        const code = chars[i].codePointAt(0) ?? 0;
+        if (code >= 0xac00 && code <= 0xd7a3) return (code - 0xac00) % 28 !== 0;
+        if (code >= 0x3131 && code <= 0x314e) return true;
+        if (code >= 0x314f && code <= 0x3163) return false;
+        if (code >= 0x30 && code <= 0x39) {
+            // 영 일 이 삼 사 오 육 칠 팔 구 (a trailing 0 reads 십/백/천/만).
+            return [true, true, false, true, false, false, true, true, true, false][code - 0x30];
+        }
+        if (/[A-Za-z]/.test(chars[i])) {
+            let start = i;
+            while (start > 0 && /[A-Za-z]/.test(chars[start - 1])) start--;
+            const letters = chars.slice(start, i + 1).join("");
+            if (letters.length <= 4 && letters === letters.toUpperCase()) {
+                return "LMNR".includes(letters[letters.length - 1]);
+            }
+            const lower = letters.toLowerCase();
+            return /(ng|m|n|l|ck)$/.test(lower);
+        }
+        // Other letters (accented Latin, kana, CJK …): the after-a-vowel form.
+        if (code >= 0xc0 && chars[i].toLowerCase() !== chars[i].toUpperCase()) return false;
+        if (code >= 0x3040 && code <= 0x9fff) return false;
+    }
+    return false;
+}
+
+/**
+ * "같이 했어": the partner logged a workout they say we did together and asks
+ * me to log mine (the 나도 했어 button). App voice (해요체) with the
+ * partner's question; workout wording only for workout plans.
+ */
+export function togetherLogCopy(input: {who: string; workout: WorkoutInfo | null; lang?: Lang}): PushCopy {
+    const {who, workout} = input;
+    const isWorkout = workout?.isWorkout === true;
+    if (input.lang === "en") {
+        const Who = capWho(who);
+        return isWorkout ? {
+            title: `🤝 ${Who} logged a workout with you`,
+            body: "Did you work out together? Tap “I did too” to log yours.",
+        } : {
+            title: `🤝 ${Who} logged today's promise with you`,
+            body: "Did you do it together? Tap “I did too” to log yours.",
+        };
+    }
+    return isWorkout ? {
+        title: `🤝 ${withSubjectJosa(who)} 같이 운동했다고 기록했어요`,
+        body: "같이 했어? '나도 했어'를 누르면 내 기록도 남아요",
+    } : {
+        title: `🤝 ${withSubjectJosa(who)} 같이 했다고 기록했어요`,
+        body: "같이 했어? '나도 했어'를 누르면 내 기록도 남아요",
+    };
+}
+
+/**
+ * The partner's 나도 했어 (a confirmation of my "같이 했어"), relayed to me:
+ * partner voice (반말), and no "인증샷 도착" — the shared photo is mine.
+ */
+export function togetherConfirmedCopy(input: {who: string; workout: WorkoutInfo | null; lang?: Lang}): PushCopy {
+    const {who, workout} = input;
+    const isWorkout = workout?.isWorkout === true;
+    if (input.lang === "en") {
+        return {
+            title: `🤝 ${capWho(who)} logged it too!`,
+            body: isWorkout ? "We worked out together. Give me props?" : "We did it together. Give me props?",
+        };
+    }
+    return {
+        title: `🤝 ${who}도 같이 했어!`,
+        body: isWorkout ? "같이 운동한 거 인정해 줄래?" : "같이 한 거 인정해 줄래?",
+    };
+}
+
 /** Poke (똑똑) relayed from the partner. `message` must already be sanitized. */
 export function pokeCopy(who: string, message: string, lang: Lang = "ko"): PushCopy {
     if (lang === "en") return {title: `✊ Knock knock from ${who}`, body: message};

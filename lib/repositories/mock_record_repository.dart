@@ -6,6 +6,7 @@ import '../models/home_state.dart';
 import '../models/history_item.dart';
 import '../models/plan_model.dart';
 import '../models/promise_model.dart';
+import '../models/together_log.dart';
 import '../models/proof_photo.dart';
 import 'record_repository.dart';
 
@@ -472,6 +473,7 @@ class MockRecordRepository implements RecordRepository {
     String planId, {
     String? note,
     ProofPhotoUpload? photo,
+    TogetherTag? together,
   }) async {
     await Future.delayed(const Duration(milliseconds: 500));
     final actionId = 'mock_h_${DateTime.now().microsecondsSinceEpoch}';
@@ -560,6 +562,20 @@ class MockRecordRepository implements RecordRepository {
       actionId: actionId,
       photoPath: photoPath,
       attemptedSource: photo?.source,
+    );
+  }
+
+  /// The mock has no partner records to answer: 나도 했어 just logs the
+  /// plan (without a photo).
+  @override
+  Future<TogetherConfirmResult> confirmTogether(
+    String planId, {
+    required String sourceActionId,
+  }) async {
+    final result = await reportCompletion(planId);
+    return TogetherConfirmResult(
+      TogetherConfirmOutcome.logged,
+      actionId: result.actionId,
     );
   }
 

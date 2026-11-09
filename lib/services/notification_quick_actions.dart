@@ -19,7 +19,11 @@ enum NotificationQuickAction {
   pokePass('quick_poke_pass'),
 
   /// 💪 응원 보내기 on the partner's missed workout.
-  cheer('quick_cheer');
+  cheer('quick_cheer'),
+
+  /// 💪 나도 했어 on the partner's "같이 했어" (`together_log`): logs my own
+  /// record of the plan the push names.
+  togetherDone('quick_together_done');
 
   const NotificationQuickAction(this.id);
 
@@ -41,6 +45,7 @@ enum NotificationQuickAction {
     pokeComing => 'poke_coming',
     pokePass => 'poke_pass',
     cheer => 'cheer',
+    togetherDone => 'together_done',
   };
 }
 
@@ -53,6 +58,7 @@ const Map<String, List<NotificationQuickAction>> kQuickActionCategories = {
     NotificationQuickAction.pokePass,
   ],
   'partner_missed': [NotificationQuickAction.cheer],
+  'together_log': [NotificationQuickAction.togetherDone],
 };
 
 /// The buttons of a push in [category] (`data.category`); none for an

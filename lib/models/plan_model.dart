@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'promise_model.dart';
+import 'together_log.dart';
 import 'weekly_target.dart';
 
 enum PlanState {
@@ -119,6 +120,11 @@ class Plan {
   /// "매일". Optional: written only when set.
   final int? weeklyTarget;
 
+  /// The owner's latest "같이 했어" record (`plans.lastTogether`, build 88+):
+  /// the partner's app shows "{name}가 같이 했대요" while it is today's latest
+  /// `done` ([lastActionId]). Optional; older builds ignore it.
+  final TogetherMark? lastTogether;
+
   Plan({
     this.id,
     required this.userId,
@@ -155,6 +161,7 @@ class Plan {
     this.goalTitle,
     this.goalDate,
     this.weeklyTarget,
+    this.lastTogether,
   });
 
   /// Length of a plan period in days (the 4-week window).
@@ -233,6 +240,7 @@ class Plan {
     String? goalTitle,
     DateTime? goalDate,
     int? weeklyTarget,
+    TogetherMark? lastTogether,
 
     /// Drops [goalTitle] and [goalDate] (a null argument keeps them).
     bool clearGoal = false,
@@ -279,6 +287,7 @@ class Plan {
       weeklyTarget: clearWeeklyTarget
           ? null
           : weeklyTarget ?? this.weeklyTarget,
+      lastTogether: lastTogether ?? this.lastTogether,
     );
   }
 
@@ -325,6 +334,7 @@ class Plan {
       if (goalDate != null && goalTitle != null) 'goalTitle': goalTitle,
       if (goalDate != null) 'goalDate': goalDateToStored(goalDate!),
       if (weeklyTarget != null) 'weeklyTarget': weeklyTarget,
+      if (lastTogether != null) kLastTogetherField: lastTogether!.toMap(),
     };
   }
 
@@ -407,6 +417,7 @@ class Plan {
       goalTitle: _nonEmptyString(map['goalTitle']),
       goalDate: goalDateFromStored(map['goalDate']),
       weeklyTarget: parseWeeklyTarget(map['weeklyTarget']),
+      lastTogether: TogetherMark.fromMap(map[kLastTogetherField]),
     );
   }
 

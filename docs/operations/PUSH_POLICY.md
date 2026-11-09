@@ -13,6 +13,7 @@
 | `partner_connect_failed` | `undoLink` → `sendConnectPush` | core | 같음 |
 | `action_completed` (done) | `onActionCompleted` | core | 기록 1건당 1건 |
 | `action_completed` (skipped·rested) | `onActionCompleted` | standard | 기록 1건당 1건 |
+| `together_log` — "같이 했어"(1.2.0+, 나도 했어 버튼) | `onActionCompleted` | core | **그 기록의 `action_completed`를 대신함**(추가 푸시 아님). 짝꿍 약속당 짝꿍 현지 하루 1건(`together_{planId}_{day}`), 짝꿍 빌드 ≥88·연결됨·짝꿍의 진행 중 약속·오늘 기록 없음일 때만. 그 외엔 평소 `action_completed` |
 | `cheer` — 그날 첫 인정(오늘 기록이 있는 날의 리액션) | `onCheerCreated` | core | **약속당 수신자 현지 하루 1건**(`verify_core_{planId}_{day}`, `action_verified`와 공유) |
 | `cheer` — 그 뒤 인정·응원(그 외) | `onCheerCreated` | secondary | 발신→수신 시간당 20건 |
 | `action_verified` — 그날 첫 인정 | `onPlanUpdated` | core | 약속당 수신자 현지 하루 1건(위 lock 공유) |

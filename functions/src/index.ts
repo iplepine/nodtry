@@ -26,6 +26,8 @@ import {
     reactionCopy,
     reactionEmoji,
     sanitizePokeMessage,
+    togetherConfirmedCopy,
+    togetherLogCopy,
     verifyReminderCopy,
     workoutInfo,
 } from "./copy";
@@ -71,6 +73,14 @@ import {generateUniqueInviteCode, normalizeInviteCode} from "./inviteCode";
 import {FieldOps, SYSTEM_LINK, actionManagerFor, managerStampFor, millisOf, unlinkUpdate} from "./planLinks";
 import {deleteInviteOf, inviteReminderFunction, markInvitesConnected} from "./inviteReminder";
 import {weeklyAllowsMissedNotice, weeklySettlementCorrection, weeklyTargetOf} from "./weekly";
+import {
+    TOGETHER_BUILD,
+    TogetherClaim,
+    isTogetherConfirmation,
+    togetherClaimOf,
+    togetherLockKey,
+    togetherPlanAccepts,
+} from "./together";
 
 admin.initializeApp();
 
@@ -1176,6 +1186,13 @@ export const onPlanCreated = functions
  * have written it already, or not at all — builds ≤80 never do), then relays
  * the owner's record to the manager. Stamping errors are retried; the push
  * is sent once per event.
+ *
+ * A "같이 했어" record (together.ts) goes to the partner it names as ONE
+ * `together_log` push (with the 나도 했어 button) instead of the usual
+ * `action_completed` — when they are linked, the plan is theirs and running,
+ * they haven't recorded it today, their build can confirm, and it is the
+ * first such claim on that plan today. Otherwise the record is relayed as
+ * usual.
  */
 export const onActionCompleted = functions
     .runWith({failurePolicy: true})
@@ -1195,33 +1212,53 @@ export const onActionCompleted = functions
 
         try {
             const plan = await getPlan(planId);
-            const managerId = asId(plan?.managerId);
             // Only the plan owner's own records are relayed.
-            if (!plan || asId(plan.userId) !== userId || !managerId || managerId === userId) return;
+            if (!plan || asId(plan.userId) !== userId) return;
+            const managerId = asId(plan.managerId);
             const links = new Links();
+            const executor = await getUser(userId);
+            const together = await togetherTarget(action, userId, links);
+            if (!together && (!managerId || managerId === userId)) return;
+
+            if (together) {
+                if (!(await claimEvent(context))) return;
+                const sent = await sendTogetherLog(together, {
+                    action, actionId: context.params.actionId, planId, userId, executor, plan, links,
+                });
+                // The partner already got this record (as together_log).
+                if (sent && managerId === together.partnerId) return;
+            }
+            if (!managerId || managerId === userId) return;
             if (!(await links.linked(managerId, userId))) return;
 
-            const [manager, executor] = await Promise.all([getUser(managerId), getUser(userId)]);
+            const manager = await getUser(managerId);
             const fcmToken = await tokenOf(managerId, manager);
             if (!fcmToken) return;
 
             const hasProof = typeof action.proofPhotoPath === "string" && action.proofPhotoPath.length > 0;
+            // 나도 했어 (the partner's confirmation of my "같이 했어"): the photo,
+            // if any, is the manager's own, so no "인증샷 도착".
+            const confirmsTogether = type === "done" && isTogetherConfirmation(action);
             // Older builds cannot show the photo, so they get the plain copy.
-            const withProof = type === "done" && hasProof && clientBuildOf(manager) >= PIVOT_BUILD;
+            const withProof = type === "done" && hasProof && !confirmsTogether &&
+                clientBuildOf(manager) >= PIVOT_BUILD;
             const lang = langOfUser(manager);
             const who = partnerLabel(manager, executor, await links.nicknameApplies(managerId, manager, userId), lang);
-            const copy = actionCompletedCopy({
-                who,
-                workout: workoutInfo(plan.workoutType, lang),
-                itemTitle: clip(action.title, 30) || clip(firstItem(plan).title, 30),
-                actionType: type,
-                withProof,
-                note: action.note,
-                lang,
-            });
+            const workout = workoutInfo(plan.workoutType, lang);
+            const copy = confirmsTogether ?
+                togetherConfirmedCopy({who, workout, lang}) :
+                actionCompletedCopy({
+                    who,
+                    workout,
+                    itemTitle: clip(action.title, 30) || clip(firstItem(plan).title, 30),
+                    actionType: type,
+                    withProof,
+                    note: action.note,
+                    lang,
+                });
             if (!copy) return;
 
-            if (!(await claimEvent(context))) return;
+            if (!together && !(await claimEvent(context))) return;
             await sendCopy(managerId, fcmToken, copy, {
                 type: "action_completed",
                 actionType: type,
@@ -1237,6 +1274,73 @@ export const onActionCompleted = functions
             console.error("Error sending completion notification:", error);
         }
     });
+
+type TogetherTarget = TogetherClaim & {
+    partner: Data;
+    partnerPlan: Data;
+    fcmToken: string;
+    timeZone: string;
+};
+
+/**
+ * The partner a "같이 했어" record should ask, or null when it goes out as a
+ * plain record (no claim, not linked, not their running plan, already
+ * recorded today, a build that can't confirm, or no token). Claims no lock.
+ */
+async function togetherTarget(action: Data, userId: string, links: Links): Promise<TogetherTarget | null> {
+    const claim = togetherClaimOf(action, userId);
+    if (!claim) return null;
+    try {
+        if (!(await links.linked(userId, claim.partnerId))) return null;
+        const [partner, partnerPlan] = await Promise.all([getUser(claim.partnerId), getPlan(claim.partnerPlanId)]);
+        if (!partner || !togetherPlanAccepts(partnerPlan, claim.partnerId)) return null;
+        if (clientBuildOf(partner) < TOGETHER_BUILD) return null;
+        const timeZone = timeZoneOf(partner);
+        if (hasCoveredToday(partnerPlan as Data, localParts(new Date(), timeZone), timeZone)) return null;
+        const fcmToken = await tokenOf(claim.partnerId, partner);
+        if (!fcmToken) return null;
+        return {...claim, partner, partnerPlan: partnerPlan as Data, fcmToken, timeZone};
+    } catch (error) {
+        console.warn(`together_log lookup failed for ${userId}; relaying as a plain record`, error);
+        return null;
+    }
+}
+
+/**
+ * Sends the one `together_log` of the partner's plan today. False when it
+ * didn't go out (another claim took today's, or FCM failed): the caller then
+ * relays the record as a plain action_completed.
+ */
+async function sendTogetherLog(target: TogetherTarget, input: {
+    action: Data;
+    actionId: string;
+    planId: string;
+    userId: string;
+    executor: Data | null;
+    plan: Data;
+    links: Links;
+}): Promise<boolean> {
+    const key = togetherLockKey(target.partnerPlanId, dayKey(localParts(new Date(), target.timeZone)));
+    if (!(await tierClaim(claimLock(key), key))) return false;
+    const lang = langOfUser(target.partner);
+    const nicknameApplies = await input.links.nicknameApplies(target.partnerId, target.partner, input.userId);
+    const who = partnerLabel(target.partner, input.executor, nicknameApplies, lang);
+    const workout = workoutInfo(target.partnerPlan.workoutType ?? input.plan.workoutType, lang);
+    const hasProof = typeof input.action.proofPhotoPath === "string" && input.action.proofPhotoPath.length > 0;
+    const sent = await sendCopy(target.partnerId, target.fcmToken, togetherLogCopy({who, workout, lang}), {
+        type: "together_log",
+        // The recipient's own plan: the card and 나도 했어 are about it.
+        planId: target.partnerPlanId,
+        fromPlanId: input.planId,
+        senderName: who,
+        userId: input.userId,
+        actionId: input.actionId,
+        ...actionDateData(input.action),
+        hasProof: hasProof ? "true" : "false",
+    }, target.partner, {allowDataOnly: true});
+    if (!sent) await releaseLock(key).catch(() => undefined);
+    return sent;
+}
 
 function inPlanPeriod(plan: Data, day: LocalDateParts, timeZone: string): boolean {
     return !isAfterLocalDay(plan.startDate, day, timeZone) && !isBeforeLocalDay(plan.endDate, day, timeZone);

@@ -8,6 +8,7 @@ import '../models/history_item.dart';
 import '../models/plan_model.dart';
 import '../models/promise_model.dart';
 import '../models/proof_photo.dart';
+import '../models/together_log.dart';
 import '../utils/context_free_l10n.dart';
 import '../utils/error_reporter.dart';
 import 'proof_photo_storage.dart';
@@ -1349,6 +1350,7 @@ class RealRecordRepository implements RecordRepository {
     String planId, {
     String? note,
     ProofPhotoUpload? photo,
+    TogetherTag? together,
   }) async {
     debugPrint('[RealRecordRepository] reportCompletion for $planId');
     final user = _auth.currentUser;
@@ -1405,45 +1407,34 @@ class RealRecordRepository implements RecordRepository {
       }
 
       final proofAt = Timestamp.fromDate(now);
-      final managerId = actionManagerStampFor(planData);
-      WriteBatch recordBatch({required bool stamped}) {
-        final batch = _firestore.batch();
-        batch.update(planRef, {
-          'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
-          'lastActionNote': note,
-          'lastActionId': actionRef.id,
+      final queued = await _writeDoneRecord(
+        planRef: planRef,
+        actionRef: actionRef,
+        planData: planData,
+        now: now,
+        title: planTitle,
+        note: note,
+        reason: 'reportCompletionLateCommit',
+        planFields: {
           // Only the Storage path is stored — never a download URL (the path
           // is useless without passing the Storage rules).
           if (photoPath != null) 'lastProofPhotoPath': photoPath,
           if (photoPath != null) 'lastProofAt': proofAt,
-        });
-        batch.set(actionRef, {
-          'userId': user.uid,
-          'planId': planId,
-          'date': Timestamp.fromDate(now),
-          'type': 'done', // HistoryStatus.done
-          'title': planTitle,
-          'note': note, // 저장
-          'createdAt': FieldValue.serverTimestamp(),
-          // Shares the record with the partner right away (rules.next lists
-          // a partner's actions through it); the server keeps it in sync.
-          if (stamped && managerId != null) 'managerId': managerId,
+          if (together != null)
+            kLastTogetherField: TogetherMark(
+              actionId: actionRef.id,
+              withUid: together.partnerUid,
+              planId: together.partnerPlanId,
+              at: now,
+            ).toMap(),
+        },
+        actionFields: {
           if (photoPath != null) 'proofPhotoPath': photoPath,
           if (photoPath != null) 'proofSource': photo!.source.id,
           if (photoPath != null && photo!.takenAt != null)
             'proofTakenAt': Timestamp.fromDate(photo.takenAt!),
-        });
-        return batch;
-      }
-
-      // The write is applied locally right away (the plan stream updates), but
-      // `commit()` only resolves on the server's ack — never, in a gym with no
-      // signal. Don't hold the user (and today's reminder skip) on it: after a
-      // short wait the record counts as queued and syncs on reconnect.
-      final queued = await _commitOrQueue(
-        recordBatch(stamped: true),
-        reason: 'reportCompletionLateCommit',
-        unstamped: managerId == null ? null : () => recordBatch(stamped: false),
+          ...?together?.toActionFields(),
+        },
       );
       debugPrint(
         '[RealRecordRepository] Action added with ID: ${actionRef.id}'
@@ -1457,6 +1448,176 @@ class RealRecordRepository implements RecordRepository {
       );
     } catch (e) {
       debugPrint('[RealRecordRepository] !!! Error reporting completion: $e');
+      rethrow;
+    }
+  }
+
+  /// Writes a `done` record: the plan's `completedDates` / `lastActionNote` /
+  /// `lastActionId` (+ [planFields]) and the action (+ [actionFields]) in one
+  /// batch, stamped with the plan's manager. Returns whether it was queued
+  /// (see [_commitOrQueue]).
+  Future<bool> _writeDoneRecord({
+    required DocumentReference<Map<String, dynamic>> planRef,
+    required DocumentReference<Map<String, dynamic>> actionRef,
+    required Map<String, dynamic>? planData,
+    required DateTime now,
+    required Object title,
+    required String? note,
+    required String reason,
+    Map<String, dynamic> planFields = const {},
+    Map<String, dynamic> actionFields = const {},
+  }) {
+    final user = _auth.currentUser!;
+    final managerId = actionManagerStampFor(planData);
+    WriteBatch recordBatch({required bool stamped}) {
+      final batch = _firestore.batch();
+      batch.update(planRef, {
+        'completedDates': FieldValue.arrayUnion([Timestamp.fromDate(now)]),
+        'lastActionNote': note,
+        'lastActionId': actionRef.id,
+        ...planFields,
+      });
+      batch.set(actionRef, {
+        'userId': user.uid,
+        'planId': planRef.id,
+        'date': Timestamp.fromDate(now),
+        'type': 'done', // HistoryStatus.done
+        'title': title,
+        'note': note, // 저장
+        'createdAt': FieldValue.serverTimestamp(),
+        // Shares the record with the partner right away (rules.next lists
+        // a partner's actions through it); the server keeps it in sync.
+        if (stamped && managerId != null) 'managerId': managerId,
+        ...actionFields,
+      });
+      return batch;
+    }
+
+    // The write is applied locally right away (the plan stream updates), but
+    // `commit()` only resolves on the server's ack — never, in a gym with no
+    // signal. Don't hold the user (and today's reminder skip) on it: after a
+    // short wait the record counts as queued and syncs on reconnect.
+    return _commitOrQueue(
+      recordBatch(stamped: true),
+      reason: reason,
+      unstamped: managerId == null ? null : () => recordBatch(stamped: false),
+    );
+  }
+
+  /// Whether [action] is the partner's "같이 했어" record of [now]'s day that
+  /// asks me ([myUid]) about my plan [planId] — the only record 나도 했어 may
+  /// answer.
+  @visibleForTesting
+  static bool isTogetherClaimFor(
+    Map<String, dynamic>? action, {
+    required String myUid,
+    required String planId,
+    required DateTime now,
+  }) {
+    if (action == null || action['type'] != 'done') return false;
+    final owner = action['userId'];
+    if (owner is! String || owner.isEmpty || owner == myUid) return false;
+    if (action[kTogetherWithUidField] != myUid) return false;
+    if (action[kTogetherPartnerPlanIdField] != planId) return false;
+    // A 나도 했어 itself never asks back.
+    if (action[kSharedProofFromUidField] != null) return false;
+    final date = action['date'];
+    if (date is! Timestamp) return false;
+    final day = date.toDate();
+    return day.year == now.year && day.month == now.month && day.day == now.day;
+  }
+
+  @override
+  Future<TogetherConfirmResult> confirmTogether(
+    String planId, {
+    required String sourceActionId,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return const TogetherConfirmResult(TogetherConfirmOutcome.unavailable);
+    }
+    final now = DateTime.now();
+    final actions = _firestore.collection('actions');
+
+    // The partner's record, read as the manager of their plan (rules). A
+    // denied or missing read means there is nothing to answer.
+    Map<String, dynamic>? source;
+    try {
+      source = (await actions.doc(sourceActionId).get()).data();
+    } on FirebaseException catch (e) {
+      debugPrint('[RealRecordRepository] together source unreadable: $e');
+      return const TogetherConfirmResult(TogetherConfirmOutcome.unavailable);
+    }
+    if (!isTogetherClaimFor(
+      source,
+      myUid: user.uid,
+      planId: planId,
+      now: now,
+    )) {
+      return const TogetherConfirmResult(TogetherConfirmOutcome.unavailable);
+    }
+    final partnerUid = source!['userId'] as String;
+
+    try {
+      final planRef = _firestore.collection('plans').doc(planId);
+      final planData = (await planRef.get()).data();
+      if (planData == null || planData['userId'] != user.uid) {
+        return const TogetherConfirmResult(TogetherConfirmOutcome.unavailable);
+      }
+      final plan = Plan.fromMap(planData, planId);
+      final recordedToday =
+          [
+            ...plan.completedDates,
+            ...plan.skippedDates,
+            ...plan.restedDates,
+          ].any(
+            (d) =>
+                d.year == now.year && d.month == now.month && d.day == now.day,
+          );
+      if (recordedToday) {
+        return const TogetherConfirmResult(
+          TogetherConfirmOutcome.alreadyLogged,
+        );
+      }
+
+      // The shared photo: only one of the partner's own proof paths. The
+      // original proofSource is kept (action values never change).
+      final rawPath = source['proofPhotoPath'];
+      final photoPath =
+          rawPath is String &&
+              parseProofPhotoPath(rawPath)?.ownerUid == partnerUid
+          ? rawPath
+          : null;
+      final proofSource = ProofSource.fromId(source['proofSource'])?.id;
+      final takenAt = source['proofTakenAt'];
+
+      final actionRef = actions.doc();
+      final queued = await _writeDoneRecord(
+        planRef: planRef,
+        actionRef: actionRef,
+        planData: planData,
+        now: now,
+        title: plan.items.firstOrNull?.title ?? _untitledPlanTitle(),
+        note: null,
+        reason: 'confirmTogetherLateCommit',
+        actionFields: {
+          kSharedProofFromUidField: partnerUid,
+          kTogetherActionIdField: sourceActionId,
+          if (photoPath != null) 'proofPhotoPath': photoPath,
+          if (photoPath != null && proofSource != null)
+            'proofSource': proofSource,
+          if (photoPath != null && takenAt is Timestamp)
+            'proofTakenAt': takenAt,
+        },
+      );
+      return TogetherConfirmResult(
+        TogetherConfirmOutcome.logged,
+        actionId: actionRef.id,
+        photoPath: photoPath,
+        queued: queued,
+      );
+    } catch (e, s) {
+      ErrorReporter.record(e, s, reason: 'confirmTogether');
       rethrow;
     }
   }

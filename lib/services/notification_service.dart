@@ -31,6 +31,8 @@ String _notifString(String key) {
       return l10n.notifActionProps;
     case 'actionCheer':
       return l10n.notifActionCheer;
+    case 'actionTogetherDone':
+      return l10n.notifActionTogetherDone;
     case 'actionPokeComing':
       return l10n.nowPokeReplyComing;
     case 'actionPokePass':
@@ -1147,6 +1149,7 @@ class NotificationService implements PlanReminderScheduler {
     NotificationQuickAction.pokeComing => _notifString('actionPokeComing'),
     NotificationQuickAction.pokePass => _notifString('actionPokePass'),
     NotificationQuickAction.cheer => _notifString('actionCheer'),
+    NotificationQuickAction.togetherDone => _notifString('actionTogetherDone'),
   };
 
   bool _remoteMessageOpensInput(RemoteMessage message) {

@@ -10,6 +10,9 @@ import '../features/connect/application/partner_label_provider.dart';
 import '../features/onboarding/presentation/home_prompts.dart';
 import '../features/duo/application/duo_stats_provider.dart';
 import '../features/now/application/notification_routing.dart';
+import '../features/together/application/together_providers.dart';
+import '../features/together/presentation/together_widgets.dart';
+import '../services/notification_quick_actions.dart';
 import '../core/services/notification_service.dart';
 import '../routes/app_router.dart';
 import '../services/notification_service.dart' as local_notifications;
@@ -117,6 +120,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               quickAction: request.quickAction,
             );
       case NotificationOpenTarget.now:
+        // 나도 했어 on a "같이 했어" push: the user's own tap logs their record.
+        if (request.quickAction == NotificationQuickAction.togetherDone &&
+            request.planId != null &&
+            request.actionId != null) {
+          unawaited(
+            confirmTogetherWithFeedback(
+              context,
+              ref,
+              planId: request.planId!,
+              sourceActionId: request.actionId!,
+              surface: TogetherConfirmSurface.notification,
+            ),
+          );
+        }
         // The promise's card (a partner's record, a 인정, a proposal …); one
         // that isn't on today's cards is looked for on 기록.
         if (request.planId != null) {

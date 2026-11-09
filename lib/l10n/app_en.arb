@@ -2834,5 +2834,66 @@
   "nowWeeklyGoalMetSub": "Extra workouts still add to your streak",
   "@nowWeeklyGoalMetSub": {
     "description": "Now tab hero sub line once the weekly target is met"
+  },
+  "togetherToggleTitle": "🤝 Worked out with {name}",
+  "@togetherToggleTitle": {
+    "description": "Toggle in the 했어 flow: this workout was done together with the partner. ko uses nameWithParticle (the name + 이랑/랑, built with withJosa); en uses name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "nameWithParticle": {
+        "type": "String"
+      }
+    }
+  },
+  "togetherToggleHint": "We'll ask {name} to log it too",
+  "@togetherToggleHint": {
+    "description": "Sub line of the together toggle: the partner is asked (never logged for them)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "togetherClaimTitle": "🤝 {name} says you worked out together",
+  "@togetherClaimTitle": {
+    "description": "Now tab card when the partner logged a workout 'together' with me. ko uses nameWithParticle (the name + 이/가); en uses name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "nameWithParticle": {
+        "type": "String"
+      }
+    }
+  },
+  "togetherClaimBody": "If so, one tap logs yours too",
+  "@togetherClaimBody": {
+    "description": "Body of the together card (no photo)"
+  },
+  "togetherClaimBodyWithPhoto": "If so, one tap logs yours too, photo included",
+  "@togetherClaimBodyWithPhoto": {
+    "description": "Body of the together card when the partner attached a proof photo"
+  },
+  "togetherClaimConfirm": "I did too",
+  "@togetherClaimConfirm": {
+    "description": "Button on the together card (partner-to-partner voice): logs my own record for today"
+  },
+  "togetherConfirmedSnack": "Logged — you worked out together 💪",
+  "@togetherConfirmedSnack": {
+    "description": "Snackbar after 나도 했어 saved my record"
+  },
+  "togetherAlreadyLoggedSnack": "You already logged today's promise",
+  "@togetherAlreadyLoggedSnack": {
+    "description": "Snackbar when 나도 했어 finds today already recorded"
+  },
+  "togetherUnavailableSnack": "Couldn't find that shared workout",
+  "@togetherUnavailableSnack": {
+    "description": "Snackbar when the partner's together record is gone or no longer asks"
+  },
+  "notifActionTogetherDone": "💪 I did too",
+  "@notifActionTogetherDone": {
+    "description": "Button on a together_log push: logs my own record (opens the app and saves it)"
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nod_try/models/together_log.dart';
 import 'package:nod_try/features/now/presentation/now_tab_viewmodel.dart';
 import 'package:nod_try/features/now/presentation/now_tab_intent.dart';
 import 'package:nod_try/models/home_state.dart';
@@ -63,6 +64,7 @@ class MockRecordRepository extends Fake implements RecordRepository {
     String planId, {
     String? note,
     ProofPhotoUpload? photo,
+    TogetherTag? together,
   }) async {
     reportCompletionCallCount++;
     lastReportedPlanId = planId;

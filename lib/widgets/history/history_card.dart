@@ -186,7 +186,10 @@ class HistoryCard extends ConsumerWidget {
                         path: item.proofPhotoPath!,
                         source: item.proofSource,
                         takenAt: item.proofTakenAt,
-                        isOwner: isMe,
+                        // A shared "같이 했어" photo is the partner's: only
+                        // they can delete it, and it just goes away then.
+                        isOwner: isMe && !item.hasSharedProof,
+                        hideWhenUnavailable: item.hasSharedProof,
                         height: 200,
                       ),
                     ],

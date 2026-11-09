@@ -3156,4 +3156,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nowWeeklyGoalMetSub => 'Extra workouts still add to your streak';
+
+  @override
+  String togetherToggleTitle(String name, String nameWithParticle) {
+    return '🤝 Worked out with $name';
+  }
+
+  @override
+  String togetherToggleHint(String name) {
+    return 'We\'ll ask $name to log it too';
+  }
+
+  @override
+  String togetherClaimTitle(String name, String nameWithParticle) {
+    return '🤝 $name says you worked out together';
+  }
+
+  @override
+  String get togetherClaimBody => 'If so, one tap logs yours too';
+
+  @override
+  String get togetherClaimBodyWithPhoto =>
+      'If so, one tap logs yours too, photo included';
+
+  @override
+  String get togetherClaimConfirm => 'I did too';
+
+  @override
+  String get togetherConfirmedSnack => 'Logged — you worked out together 💪';
+
+  @override
+  String get togetherAlreadyLoggedSnack =>
+      'You already logged today\'s promise';
+
+  @override
+  String get togetherUnavailableSnack => 'Couldn\'t find that shared workout';
+
+  @override
+  String get notifActionTogetherDone => '💪 I did too';
 }

@@ -10,6 +10,9 @@ class ActionNoteDialog extends StatefulWidget {
   final bool showEmoji;
   final String? initialText;
 
+  /// Shown above the buttons (e.g. the "같이 했어" toggle).
+  final Widget? footer;
+
   const ActionNoteDialog({
     super.key,
     required this.title,
@@ -17,6 +20,7 @@ class ActionNoteDialog extends StatefulWidget {
     this.buttonLabel,
     this.showEmoji = true,
     this.initialText,
+    this.footer,
   });
 
   @override
@@ -173,6 +177,7 @@ class _ActionNoteDialogState extends State<ActionNoteDialog> {
                   textInputAction: TextInputAction.newline,
                 ),
                 const SizedBox(height: 12), // Reduced since counter is there
+                ?widget.footer,
                 // Actions
                 Row(
                   children: [

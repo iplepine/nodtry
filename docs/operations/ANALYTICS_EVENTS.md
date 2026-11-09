@@ -58,6 +58,8 @@
 | `poke_sent` | 기존 | `target`: `user`·`plan`, `has_message`, (`plan`일 때) `has_reward`, `has_penalty` |
 | `poke_acknowledged` | 기존 | 똑똑 카드 확인 |
 | `poke_replied` | 신규 | `kind`: `coming`(지금 간다)·`pass`(오늘은 봐줘) |
+| `together_logged` | 신규(1.2.0+) | "같이 했어" 토글을 켜고 했어 기록 저장: `has_photo` |
+| `together_confirmed` | 신규(1.2.0+) | 짝꿍이 나도 했어를 누름: `surface`: `card`·`notification` / `outcome`: `logged`·`alreadyLogged`·`unavailable` / `has_photo` |
 | `promise_proposed` | 기존 | `has_reward`, `has_penalty` |
 | `promise_responded` | 기존 | `accepted` |
 | `promise_settlement_acknowledged` | 기존 | `has_comment` |
@@ -68,7 +70,7 @@
 ## 4. 알림·설정·기타
 | 이벤트 | 상태 | 파라미터 / 메모 |
 |---|---|---|
-| `notification_opened` | 변경 | `type`(푸시 `data.type`, 신규 `poke_reply`·`partner_connected`·`partner_connect_failed` 포함), `cold_start`, `action`(1.1.1+86~: 알림 버튼 `props`·`poke_coming`·`poke_pass`·`cheer`, 본문 탭은 `none`). 버튼으로 실행된 인정·답장·응원은 각각 `partner_reacted`(`surface: notification`)·`poke_replied`·`cheer_sent`로도 기록 |
+| `notification_opened` | 변경 | `type`(푸시 `data.type`, 신규 `poke_reply`·`partner_connected`·`partner_connect_failed` 포함), `cold_start`, `action`(1.1.1+86~: 알림 버튼 `props`·`poke_coming`·`poke_pass`·`cheer`, 1.2.0+ `together_done`, 본문 탭은 `none`). 버튼으로 실행된 인정·답장·응원은 각각 `partner_reacted`(`surface: notification`)·`poke_replied`·`cheer_sent`로도 기록 |
 | `notification_permission_result` | 기존 | `granted` |
 | `notification_banner_shown`, `notification_banner_tapped` | 기존 | 권한 배너 |
 | `locale_changed` | 기존 | `locale` |

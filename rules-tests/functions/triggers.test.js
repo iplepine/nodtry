@@ -359,6 +359,52 @@ describe("Cloud Functions triggers (emulator)", () => {
         assert.match(proof.notification.body, /인정해 줄래\?/);
     });
 
+    it("같이 했어: one together_log (나도 했어 button) instead of action_completed; old builds keep the plain push", async () => {
+        const {a, b, planId} = await linkedPair();
+        const partnerPlanId = `${b}_plan`;
+        await db.doc(`plans/${partnerPlanId}`).set({
+            userId: b, managerId: a, state: "active", workoutType: "gym", completedDates: [],
+            items: [{title: "헬스", days: [1, 2, 3, 4, 5, 6, 7]}],
+        });
+        const claim = {
+            userId: a, planId, type: "done", title: "러닝", date: Timestamp.now(),
+            togetherWithUid: b, togetherPartnerPlanId: partnerPlanId, createdAt: FieldValue.serverTimestamp(),
+        };
+
+        // A build that can't confirm (no clientBuild): the usual record push.
+        await db.collection("actions").add(claim);
+        let pushes = await expectPushes(b, 1, "old build");
+        assert.equal(pushes[0].data.type, "action_completed");
+
+        await db.doc(`users/${b}`).update({clientBuild: 88});
+        const source = await db.collection("actions").add(claim);
+        pushes = await expectPushes(b, 2, "together_log");
+        const together = pushes.find((p) => p.data.type === "together_log");
+        assert.ok(together, JSON.stringify(pushes));
+        assert.equal(together.data.planId, partnerPlanId);
+        assert.equal(together.data.fromPlanId, planId);
+        assert.equal(together.data.actionId, source.id);
+        assert.equal(together.data.category, "together_log");
+        assert.equal(together.data.title, "🤝 alice가 같이 운동했다고 기록했어요");
+        assert.match(together.data.body, /^같이 했어\?/);
+
+        // A second claim on the same plan today goes out as a plain record.
+        await db.collection("actions").add(claim);
+        pushes = await expectPushes(b, 3, "second claim");
+        assert.equal(pushes.filter((p) => p.data.type === "together_log").length, 1);
+
+        // Bob's 나도 했어 reaches Alice as his record, without "인증샷 도착".
+        await db.collection("actions").add({
+            userId: b, planId: partnerPlanId, type: "done", title: "헬스", date: Timestamp.now(),
+            proofPhotoPath: `proofs/${a}/${planId}/${source.id}.jpg`, proofSource: "camera",
+            sharedProofFromUid: a, togetherActionId: source.id, createdAt: FieldValue.serverTimestamp(),
+        });
+        const confirmed = await waitFor(async () => (await pushesTo(a)).find((p) =>
+            p.data.type === "action_completed" && p.data.userId === b), {label: "나도 했어 push"});
+        assert.equal(confirmed.notification?.title ?? confirmed.data.title, "🤝 bob도 같이 했어!");
+        assert.equal(confirmed.data.hasProof, "false");
+    });
+
     it("onPlanCreated: workout copy for the partner", async () => {
         const {a, b} = await linkedPair();
         await db.doc(`plans/${a}_new`).set({

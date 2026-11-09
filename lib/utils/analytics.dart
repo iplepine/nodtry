@@ -198,6 +198,14 @@ class AnalyticsEvent {
   /// `{surface: missed_card}` — encouragement (not 인정) sent.
   static const cheerSent = 'cheer_sent';
 
+  /// `{has_photo}` — a 했어 record saved with "같이 했어" on (the partner is
+  /// asked to log theirs).
+  static const togetherLogged = 'together_logged';
+
+  /// `{surface: card|notification, outcome: logged|alreadyLogged|unavailable,
+  /// has_photo}` — the partner answered "같이 했어" with 나도 했어.
+  static const togetherConfirmed = 'together_confirmed';
+
   // Focus timer
   static const focusTimerStarted = 'focus_timer_started';
   static const focusTimerCompleted = 'focus_timer_completed';

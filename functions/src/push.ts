@@ -18,6 +18,9 @@ export function quickActionCategory(data: {[key: string]: string}): string | nul
         return data.actionType === "done" ? "partner_proof" : null;
     case "poke":
         return data.planId ? "poke_reply" : null;
+    case "together_log":
+        // 나도 했어: logs my own record of the plan the push names.
+        return data.planId ? "together_log" : null;
     case "action_missed":
         // Today's miss only: yesterday's is answered from 기록.
         return data.day ? null : "partner_missed";

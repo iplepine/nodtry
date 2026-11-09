@@ -32,6 +32,8 @@ import '../../proof/domain/proof_analytics.dart';
 import '../../proof/presentation/proof_capture.dart';
 import '../../proof/presentation/proof_photo_view.dart';
 import '../../proof/presentation/proof_reaction_row.dart';
+import '../../together/application/together_providers.dart';
+import '../../together/presentation/together_widgets.dart';
 import 'cards/check_in_question.dart';
 import 'now_tab_intent.dart';
 import 'now_tab_state.dart';
@@ -304,6 +306,7 @@ class _NowTabState extends ConsumerState<NowTab>
 
     await _runGuarded(_recordKey(planId), () async {
       final l10n = AppLocalizations.of(context)!;
+      final together = TogetherChoice();
       // 1. Show Dialog to input note
       final note = await showDialog<String>(
         context: context,
@@ -314,6 +317,7 @@ class _NowTabState extends ConsumerState<NowTab>
               l10n.homeDidIt,
           showEmoji: false,
           initialText: prefillNote,
+          footer: TogetherToggle(planId: planId, choice: together),
         ),
       );
 
@@ -322,7 +326,11 @@ class _NowTabState extends ConsumerState<NowTab>
         return;
       }
 
-      await _completeCard(targetCard, note: note);
+      await _completeCard(
+        targetCard,
+        note: note,
+        together: together.selection,
+      );
     });
   }
 
@@ -341,13 +349,20 @@ class _NowTabState extends ConsumerState<NowTab>
     await _runGuarded(_recordKey(planId), () async {
       final upload = await captureProofPhoto(context, ref);
       if (upload == null || !mounted) return;
+      final together = TogetherChoice();
       final note = await showProofPreviewSheet(
         context,
         upload: upload,
         title: card.plan?.items.firstOrNull?.title,
+        footer: TogetherToggle(planId: planId, choice: together),
       );
       if (note == null || !mounted) return;
-      await _completeCard(card, note: note, photo: upload);
+      await _completeCard(
+        card,
+        note: note,
+        photo: upload,
+        together: together.selection,
+      );
     });
   }
 
@@ -357,6 +372,7 @@ class _NowTabState extends ConsumerState<NowTab>
     HomeCardModel targetCard, {
     required String note,
     ProofPhotoUpload? photo,
+    TogetherTag? together,
   }) async {
     final planId = targetCard.plan?.id;
     if (planId == null) return;
@@ -378,7 +394,14 @@ class _NowTabState extends ConsumerState<NowTab>
     try {
       final result = await ref
           .read(nowTabViewModelProvider.notifier)
-          .complete(CompletePlanIntent(planId, message: note, photo: photo));
+          .complete(
+            CompletePlanIntent(
+              planId,
+              message: note,
+              photo: photo,
+              together: together,
+            ),
+          );
       // Null result / no action id: nothing was recorded (no state, signed
       // out), so there is no photo outcome to report either.
       if (result == null || result.actionId == null) return;
@@ -718,6 +741,8 @@ class _NowTabState extends ConsumerState<NowTab>
       NotificationQuickAction.pokeComing || NotificationQuickAction.pokePass =>
         showsPokeReplies(plan, now: now) &&
             !ref.read(pokeReplyStoreProvider).hasReplied(plan!.id!, now),
+      // 나도 했어 is answered by the home screen, not on a card.
+      NotificationQuickAction.togetherDone => false,
     };
   }
 
@@ -741,6 +766,8 @@ class _NowTabState extends ConsumerState<NowTab>
         await _handlePokeReply(card, PokeReplyKind.pass);
       case NotificationQuickAction.cheer:
         await _handleSendCheer(card);
+      case NotificationQuickAction.togetherDone:
+        break;
     }
   }
 
@@ -2121,6 +2148,8 @@ class _NowTabState extends ConsumerState<NowTab>
                       children: [
                         // No partner yet: invite first (hidden otherwise).
                         const NowInviteCard(),
+                        // The partner's "같이 했어", waiting for my 나도 했어.
+                        const TogetherClaimCards(),
                         // Executor Area (Primary Action)
                         if (primaryExecutorCard != null) ...[
                           FadeTransition(

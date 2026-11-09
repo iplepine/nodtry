@@ -52,6 +52,8 @@ NotificationOpenTarget notificationOpenTargetFor(String type) {
     case 'plan_approved':
     case 'plan_rejected':
     case 'plan_updated':
+    // "같이 했어": my own promise's card, and the 나도 했어 card.
+    case 'together_log':
       return NotificationOpenTarget.now;
     case 'verify_reminder':
       return NotificationOpenTarget.history;
@@ -225,6 +227,8 @@ bool quickActionFitsArea(NotificationQuickAction action, NowCardArea area) =>
       NotificationQuickAction.cheer => area == NowCardArea.manager,
       NotificationQuickAction.pokeComing ||
       NotificationQuickAction.pokePass => area != NowCardArea.manager,
+      // Not a card's button: the home screen logs it (togetherDone).
+      NotificationQuickAction.togetherDone => false,
     };
 
 /// What to focus on the 기록 tab: a record's id, or [historySummaryKey] of an
