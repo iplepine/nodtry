@@ -206,6 +206,60 @@ void main() {
     });
   });
 
+  group('rate success (capped per week)', () {
+    // 주 3회 done Mon–Thu (4×) every week of the 4-week period.
+    final fourAWeek = weeklyPlan(
+      state: PlanState.completed,
+      completed: [
+        for (final monday in [d(9, 28), d(10, 5), d(10, 12), d(10, 19)])
+          for (var i = 0; i < 4; i++)
+            DateTime(monday.year, monday.month, monday.day + i),
+      ],
+    );
+
+    test('extra workouts do not push the rate above the targets', () {
+      expect(fourAWeek.scheduledDayCount, 12);
+      expect(fourAWeek.completedDayCount(asOf: d(10, 26)), 16);
+      expect(fourAWeek.rateSuccessDayCount(asOf: d(10, 26)), 12);
+    });
+
+    test('a short week is not covered by an extra-heavy one', () {
+      // Week 1: 4 done (counts 3); week 2: 2 done (counts 2).
+      final plan = weeklyPlan(
+        completed: [d(9, 28), d(9, 29), d(9, 30), d(10, 1), d(10, 5), d(10, 6)],
+      );
+      expect(plan.completedDayCount(asOf: d(10, 12)), 6);
+      expect(plan.rateSuccessDayCount(asOf: d(10, 12)), 5);
+      // asOf cuts the count like completedDayCount.
+      expect(plan.rateSuccessDayCount(asOf: d(9, 29)), 2);
+    });
+
+    test('a prorated first week caps at its prorated target', () {
+      // Saturday start: the first weekend asks for 1 of 주 3회.
+      final plan = weeklyPlan(start: d(10, 3), completed: [d(10, 3), d(10, 4)]);
+      expect(plan.completedDayCount(asOf: d(10, 5)), 2);
+      expect(plan.rateSuccessDayCount(asOf: d(10, 5)), 1);
+    });
+
+    test('fixed-weekday plans use the plain done count', () {
+      final plan = Plan(
+        id: 'f',
+        userId: 'me',
+        managerId: 'partner',
+        startDate: d(9, 28),
+        endDate: d(10, 25),
+        state: PlanState.active,
+        items: [
+          PlanItem(title: '러닝', days: const [1, 3, 5], count: 3),
+        ],
+        createdAt: d(9, 28),
+        completedDates: [d(9, 28, 19), d(9, 29, 19), d(9, 30, 19)],
+      );
+      expect(plan.rateSuccessDayCount(asOf: d(10, 1)), 3);
+      expect(plan.completedDayCount(asOf: d(10, 1)), 3);
+    });
+  });
+
   group('plan streak (relative to today)', () {
     final now = DateTime.now();
     final thisMonday = weeklyWeekStartOf(now);

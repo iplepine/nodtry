@@ -638,6 +638,30 @@ class Plan {
     return _uniqueDatesInRange(completedDates, start, cutoff).length;
   }
 
+  /// Done days that count toward a success *rate* over [scheduledDayCount].
+  ///
+  /// Fixed weekdays: [completedDayCount]. Weekly: each Monday–Sunday week
+  /// counts at most its target — extra workouts still count as successes
+  /// ([completedDayCount], the 보상 tally) and lengthen the streak, but a
+  /// 주 3회 plan done 4× a week is 100%, not 133%.
+  int rateSuccessDayCount({DateTime? asOf}) {
+    if (!isWeekly) return completedDayCount(asOf: asOf);
+    final start = _dateOnly(startDate);
+    final cutoff = _cutoffDate(asOf);
+    final done = _uniqueDatesInRange(completedDates, start, cutoff);
+    final perWeek = <DateTime, int>{};
+    for (final date in done) {
+      final monday = weeklyWeekStartOf(date);
+      perWeek[monday] = (perWeek[monday] ?? 0) + 1;
+    }
+    var total = 0;
+    perWeek.forEach((monday, doneInWeek) {
+      final target = weeklyWeekOf(monday)!.target;
+      total += doneInWeek < target ? doneInWeek : target;
+    });
+    return total;
+  }
+
   /// 현재 시점에서 실패로 확정된 예정일 수.
   ///
   /// Weekly: the must-do days before today without a credit.

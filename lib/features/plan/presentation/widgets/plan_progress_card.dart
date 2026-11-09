@@ -99,7 +99,7 @@ class PlanProgressCard extends StatelessWidget {
                 Text(
                   stats.hasVerdict
                       ? l10n.planDetailProgressFractionDays(
-                          stats.success,
+                          stats.rateNumerator,
                           stats.totalForRate,
                         )
                       : l10n.planDetailProgressNoVerdictYet,
@@ -242,10 +242,7 @@ class _PromiseProgressBlock extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               l10n.planDetailPromiseSuccessFailBreakdown(success, failed),
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 11,
-              ),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
             ),
           ],
         ),
@@ -372,7 +369,12 @@ class _PromiseRow extends StatelessWidget {
 }
 
 class _PlanStats {
+  /// Every done day (the 실천 tile; extra workouts included).
   final int success;
+
+  /// Done days counted toward the rate: a weekly week counts at most its
+  /// target ([Plan.rateSuccessDayCount]).
+  final int rateSuccess;
   final int failed;
   final int remaining;
   final int streak;
@@ -381,6 +383,7 @@ class _PlanStats {
 
   const _PlanStats({
     required this.success,
+    required this.rateSuccess,
     required this.failed,
     required this.remaining,
     required this.streak,
@@ -389,10 +392,11 @@ class _PlanStats {
   });
 
   factory _PlanStats.from(Plan plan) {
-    final isCompleted = plan.state == PlanState.completed ||
-        plan.state == PlanState.stopped;
+    final isCompleted =
+        plan.state == PlanState.completed || plan.state == PlanState.stopped;
     return _PlanStats(
       success: plan.completedDayCount(),
+      rateSuccess: plan.rateSuccessDayCount(),
       failed: plan.failedDayCount(),
       remaining: plan.remainingScheduledDayCount(),
       streak: plan.currentStreak,
@@ -406,14 +410,18 @@ class _PlanStats {
   /// - 진행 중: 이미 결과가 나온 날 수 (성공 + 실패)
   int get totalForRate {
     if (isCompleted) return scheduledTotal;
-    return success + failed;
+    return rateSuccess + failed;
   }
 
   bool get hasVerdict => totalForRate > 0;
 
+  /// The "N/M일" numerator, never above the denominator.
+  int get rateNumerator =>
+      rateSuccess > totalForRate ? totalForRate : rateSuccess;
+
   double get successRate {
     if (!hasVerdict) return 0;
-    return success / totalForRate;
+    return (rateSuccess / totalForRate).clamp(0.0, 1.0);
   }
 
   int get successRatePercent => (successRate * 100).round();
