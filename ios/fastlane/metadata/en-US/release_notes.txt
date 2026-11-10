@@ -6,4 +6,5 @@ Working out together just got easier.
 - D-day goals: count down to a trip, wedding or photo shoot.
 - Share cards can include both photos, with your partner's OK.
 - Invite links open the app and connect you right away.
+- Settings > Support: buy the developer a coffee (optional tip).
 - Smarter notifications, now in English too. Bug fixes.

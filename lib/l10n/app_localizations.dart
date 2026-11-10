@@ -1244,6 +1244,12 @@ abstract class AppLocalizations {
   /// **'Can\'t connect to the store. Please check your settings.'**
   String get settingsStoreUnavailable;
 
+  /// Snackbar shown after a coffee tip purchase completes
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for the coffee! ☕'**
+  String get settingsCoffeeThanks;
+
   /// No description provided for @planMine.
   ///
   /// In en, this message translates to:

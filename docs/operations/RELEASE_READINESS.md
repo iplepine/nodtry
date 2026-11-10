@@ -9,9 +9,41 @@
 
 # 출시 준비 체크리스트
 
-마지막 갱신: 2026-10-03
+마지막 갱신: 2026-11-10
 
-## 진행 중 릴리스: 둘운완 피벗 `1.1.0+81` — **미배포**
+## 진행 중 릴리스: `1.2.0+88` — **미배포** (브랜치 `release/1.2.0`, 원격 미푸시)
+- 2026-11-10 23:20 KST, 기준 커밋 `dd05de7`(Flutter 3.47.9 / Firebase Apple 12.19.3 업그레이드 직후) 게이트 A 재검증. **실행·통과**:
+  - `flutter analyze`: 이슈 0
+  - `flutter test`: 933/933 통과
+  - `functions`: `npm run build` OK, `npm test` 94/94, `npm run lint` 0
+  - `flutter build appbundle --release`: OK(78.3MB), `billing_client=8.0.0`. 병합 매니페스트에 `com.google.android.gms.permission.AD_ID`·`CAMERA`·`READ_MEDIA_IMAGES` 없음. `ACCESS_ADSERVICES_AD_ID/ATTRIBUTION`은 play-services-measurement 23.2.0이 넣는 것으로 이전 릴리스에도 있었다(회귀 아님).
+  - `flutter build ios --release --no-codesign`: OK(58.6MB), `DuoWidgetExtension.appex` 포함
+- 2026-11-11 KST, Apple Developer(대표 로그인한 크롬): App Group `group.com.devho.nodtry.app` 등록, `com.devho.nodtry.app`에 Associated Domains·App Groups 켬, 위젯 ID `com.devho.nodtry.app.widget` 등록 + App Groups 지정(API 조회로 확인). 이어서 API 키 자동 서명으로 `xcodebuild archive` + app-store-connect export **성공**(업로드 안 함). IPA entitlement: 앱 = associated-domains 2개 + application-groups, 위젯 = application-groups, 둘 다 `get-task-allow=false`.
+- 2026-11-11 KST, **서버 배포**(대표 승인 "서버 배포 진행", 기준 커밋 `dd05de7`, 프로젝트 `nod-try`):
+  - 사전: 규칙 에뮬레이터 118/118, 트리거 에뮬레이터 43/43(JDK 21+ 필요 — Homebrew `openjdk`, 11/9에 남은 데모 에뮬레이터가 8080을 잡고 있어 다른 포트 임시 설정으로 실행).
+  - Storage 규칙: 1.1.1+85 이후 변경 없음 → 배포 안 함.
+  - Firestore 규칙: 이미 최신본이 게시돼 있어 업로드 생략. 인덱스: `firestore.indexes.json` 배포(삭제 없음, `--non-interactive`). 콘솔에서 새 인덱스 "사용 설정됨" 여부는 **미확인**.
+  - Functions: 15개 전부 "No changes detected" — 운영에 이미 현재 소스가 배포돼 있었음(`sendInviteReminders` 포함). 구버전 앱 영향은 이미 적용 중.
+  - Hosting: 배포 완료. 이전 AASA는 빈 값(`details: []`)이었다. 지금 `nod-try.web.app`·`nod-try.firebaseapp.com`의 AASA·assetlinks가 200 `application/json`이고 로컬 파일과 동일. `/privacy/`(1.2.0 공유 카드 고지 포함)·`/terms/`·`/support/`·`/i/{CODE}`·`/get` 200.
+  - assetlinks의 두 SHA-256 중 하나가 Play 앱 서명 키인지는 **미확인**(Play Console → 앱 무결성에서 대조).
+- **미확인**: 게이트 B 실기기, 시뮬레이터 스모크.
+- 2026-11-11 KST, **스토어 프로덕션 배포**(대표 지시 "바로 프로덕션 배포 진행해줘" — 실기기 확인 전에 진행):
+  - Android: `fastlane production`(AAB = 11/10 23:16 `dd05de7` 빌드, release_status completed). Play API로 production 트랙 versionCode `[88]` 확인(01:13).
+  - iOS: `fastlane release`(심사 제출 + 승인 시 자동 공개) 진행 — 결과는 아래 줄에 덧붙인다.
+  - 결과(11/11 확인): iOS 빌드 88은 **업로드되지 않았다**. ASC 1.2.0은 `PREPARE_FOR_SUBMISSION`, 빌드 미첨부. 원인은 미커밋 Fastfile 수정(`export_xcargs` 중복)으로 추정. iOS는 1.2.0+89로 이어서 낸다.
+- 2026-11-11 KST, **커피 후원 IAP 복구**(대표 지시 "커피 후원 복구해줘", "실제로 결제 가능하게 앱스토어에서도 등록하고 결제 확실히 제공하게 해줘"):
+  - ASC: 소모성 IAP `donation_coffee`를 만들었다(id `6833075811`). ko·en-US 현지화, 기준 국가 KOR ₩1,100(Play와 같음), 175개국, 심사 스크린샷(설정 > 지원). 상태 `READY_TO_SUBMIT`. API 제출은 `FIRST_CONSUMABLE_MUST_BE_SUBMITTED_ON_VERSION`으로 거부됨 → **ASC 웹에서 1.2.0 버전의 "앱 내 구입"에 붙여 버전과 함께 제출해야 한다.**
+  - Play: `donation_coffee`는 원래 ACTIVE(₩1,100). 상품 소개 문구를 ko-KR/en-US로 나눠 고쳤다(전에는 en-US 칸에 한국어).
+  - 앱: `_kShowCoffeeDonation = true`. 결제 처리 수정 — 취소 시 "결제 처리 중"에 멈추던 문제, 취소·오류 거래 미완료(iOS 재전달), 결제 감시를 앱 시작 시 켬(중단된 결제 마무리, Play 3일 자동환불 방지), 상품 미로딩 시 재조회·문구, 완료 시 감사 스낵바. `flutter analyze` 0건, `flutter test` 933/933. 시뮬레이터에서 설정 > 지원 노출 확인. **실결제(샌드박스·실기기)는 미확인.**
+  - 버전 `1.2.0+89`, 변경 내역 89.txt·iOS release_notes에 후원 한 줄. iOS `upload_only` 레인 추가(업로드만, 제출 안 함).
+- 2026-11-11 KST, **Play 1.2.0(88) 업데이트 거부 확인**(Play Console > DuoDone > 정책 상태, 브라우저로 직접 확인): 거부 2건(11/11) — "개발자 프로그램 정책 미준수"(일반 문구)와 "Play Console 요구사항 위반". 사유: **활성 데모/게스트 계정 또는 유효한 로그인 정보 미제공** — 심사관이 이메일 로그인에서 "Sign-in failed"를 봤다. 콘솔의 "로그인 세부정보(구 앱 액세스)"가 **"아니요(제한된 부분 없음)"**로 저장돼 있었다. 이전 버전은 Play에 그대로 남아 있다. 조치: "예"로 바꾸고, 연결된 데모 계정 A·B의 영어 ID/비밀번호와 안내(§E 1~2번)를 넣는다. 자격 증명은 대표가 직접 입력한다. 그 전에는 Android 89를 올리지 않는다(같은 사유로 다시 거부됨).
+- 2026-11-11 KST, **재제출**(대표 지시 "입력 다 했으니까 제출 해줘"): 대표가 Play 로그인 세부정보에 데모 계정(`review@test.com`, 자격 증명은 로컬 `.secrets/review_accounts.md`, gitignore)을 입력·저장. Android 1.2.0+89 AAB를 프로덕션 트랙에 올리고(88 대체, 변경 내역 = 1.2.0 전체 + 커피 후원), Play Console 게시 개요에서 "검토를 위해 변경사항 9개 전송" 완료 → 상태 **검토 중**(프로덕션 1.2.0 전체 출시 + 스토어 등록정보 8건 + 로그인 세부정보). iOS 89 바이너리 업로드 성공(03:06, Apple 처리 대기) — IAP 첨부·심사 제출은 ASC 웹 로그인 후.
+- 2026-11-11 KST, **iOS 심사 제출 완료**(대표 지시 "크롬 탭에서 진행해줘"): API로 1.2.0에 빌드 89 첨부 → Chrome에서 IAP 페이지 "심사에 추가" → 1.2.0 "심사에 추가"(같은 제출 초안) → "심사를 위해 제출". 결과 "2개의 항목 제출됨", ASC 1.2.0 **심사 대기 중**(빌드 89 + `donation_coffee`). 승인 시 자동 출시(`releaseType` AFTER_APPROVAL).
+  - 남은 일: 양 스토어 승인 확인 → 실기기 결제 1회(₩1,100) 확인 → `config/app.latestBuild = 89`. App Store 개인정보 "구입 내역"·Play 콘텐츠 등급 "디지털 상품 구매: 예"는 대표 확인 필요.
+  - 남은 일: Android 89 프로덕션 업로드 → iOS 89 업로드 → ASC 웹에서 빌드 89 + IAP 첨부 후 심사 제출 → 승인 후 실기기 결제 1회 확인. App Store 개인정보 "구입 내역"(Analytics `purchase` 이벤트) 신고 여부, Play 콘텐츠 등급 "디지털 상품 구매: 예" 재답변은 **대표 확인 필요**.
+- 남은 순서: 실기기 확인(초대 링크가 앱으로 열리는지 포함) → `config/app.latestBuild = 89` → (선택·승인) `backfill_plan_actions.js` dry-run.
+
+## 지난 릴리스 기록: 둘운완 피벗 `1.1.0+81` (2026-10-03 시점 기록, 이후 1.1.1+85까지 출시됨)
 - 상태: 코드 완료(브랜치 `feat/couple-workout-pivot`, **미커밋**). 서버·스토어 어디에도 배포하지 않았다. 직전 스토어 빌드는 `1.0.58+80`(2026-08-05 커밋 기준, 이 문서의 상세 배포 기록은 `1.0.52+74`에서 멈춰 있음).
 - 범위: `docs/product/PIVOT_DUOUNWAN_SPEC.md` §6, 요약 `docs/product/MVP_SCOPE.md`. 결정 D-007.
 - **배포 순서·명령·롤백은 [`LAUNCH_RUNBOOK.md`](./LAUNCH_RUNBOOK.md)가 정본이다.** 콘솔 클릭은 [`STORE_CONSOLE_CHECKLIST.md`](./STORE_CONSOLE_CHECKLIST.md).

@@ -13,6 +13,10 @@ String _iapString(String key, [Object? arg]) {
       return isKo ? '결제 요청 실패: $arg' : 'Purchase request failed: $arg';
     case 'unknownError':
       return isKo ? '알 수 없는 오류' : 'Unknown error';
+    case 'productUnavailable':
+      return isKo
+          ? '지금은 후원 상품을 불러올 수 없어요. 잠시 후 다시 시도해 주세요.'
+          : "The tip isn't available right now. Please try again later.";
     default:
       return key;
   }
@@ -24,11 +28,15 @@ class IAPState {
   final String? purchaseError;
   final List<ProductDetails> products;
 
+  /// Bumped once per completed tip, so the UI can thank the user exactly once.
+  final int completedCount;
+
   const IAPState({
     this.isAvailable = false,
     this.isPurchasing = false,
     this.purchaseError,
     this.products = const [],
+    this.completedCount = 0,
   });
 
   IAPState copyWith({
@@ -36,6 +44,7 @@ class IAPState {
     bool? isPurchasing,
     String? purchaseError,
     List<ProductDetails>? products,
+    int? completedCount,
     bool clearError = false,
   }) {
     return IAPState(
@@ -43,6 +52,7 @@ class IAPState {
       isPurchasing: isPurchasing ?? this.isPurchasing,
       purchaseError: clearError ? null : (purchaseError ?? this.purchaseError),
       products: products ?? this.products,
+      completedCount: completedCount ?? this.completedCount,
     );
   }
 
@@ -84,7 +94,13 @@ class IAPService extends Notifier<IAPState> {
 
   Future<void> _loadProducts() async {
     final Set<String> kIds = {_coffeeProductId};
-    final response = await _iap.queryProductDetails(kIds);
+    final ProductDetailsResponse response;
+    try {
+      response = await _iap.queryProductDetails(kIds);
+    } catch (e) {
+      debugPrint('IAP queryProductDetails failed: $e');
+      return;
+    }
 
     if (response.notFoundIDs.isNotEmpty) {
       debugPrint('Products not found: ${response.notFoundIDs}');
@@ -95,9 +111,10 @@ class IAPService extends Notifier<IAPState> {
   }
 
   Future<void> buyCoffee() async {
-    // 상품 확인
+    // 상품이 아직 안 불러와졌으면(네트워크 지연·첫 실행) 한 번 더 시도한다.
+    if (state.products.isEmpty) await _loadProducts();
     if (state.products.isEmpty) {
-      state = state.copyWith(purchaseError: 'Thank you for your support!');
+      state = state.copyWith(purchaseError: _iapString('productUnavailable'));
       debugPrint('IAP Error: No products loaded.');
       return;
     }
@@ -134,33 +151,43 @@ class IAPService extends Notifier<IAPState> {
   Future<void> _listenToPurchaseUpdated(
     List<PurchaseDetails> purchaseDetailsList,
   ) async {
-    for (var purchaseDetails in purchaseDetailsList) {
-      if (purchaseDetails.status == PurchaseStatus.pending) {
-        state = state.copyWith(isPurchasing: true);
-      } else {
-        if (purchaseDetails.status == PurchaseStatus.error) {
+    for (final purchaseDetails in purchaseDetailsList) {
+      switch (purchaseDetails.status) {
+        case PurchaseStatus.pending:
+          state = state.copyWith(isPurchasing: true, clearError: true);
+          continue; // not finished yet — never complete a pending purchase
+        case PurchaseStatus.canceled:
+          state = state.copyWith(isPurchasing: false, clearError: true);
+        case PurchaseStatus.error:
           AnalyticsService.log(AnalyticsEvent.purchaseFailed, {
             'reason': purchaseDetails.error?.code ?? 'unknown',
           });
           state = state.copyWith(
             isPurchasing: false,
-            purchaseError: purchaseDetails.error?.message ?? _iapString('unknownError'),
+            purchaseError:
+                purchaseDetails.error?.message ?? _iapString('unknownError'),
           );
-        } else if (purchaseDetails.status == PurchaseStatus.purchased ||
-            purchaseDetails.status == PurchaseStatus.restored) {
-          // Acknowledgement / Consuming
-          if (purchaseDetails.pendingCompletePurchase) {
-            await _iap.completePurchase(purchaseDetails);
-          }
-
+        case PurchaseStatus.purchased:
+        case PurchaseStatus.restored:
           final product = state.coffeeProduct;
           AnalyticsService.logPurchase(
             value: product?.rawPrice ?? 0,
             currency: product?.currencyCode ?? 'KRW',
             itemId: purchaseDetails.productID,
           );
-
-          state = state.copyWith(isPurchasing: false, clearError: true);
+          state = state.copyWith(
+            isPurchasing: false,
+            clearError: true,
+            completedCount: state.completedCount + 1,
+          );
+      }
+      // Finish every non-pending transaction (including canceled/error on
+      // iOS), or StoreKit keeps redelivering it and Play refunds it.
+      if (purchaseDetails.pendingCompletePurchase) {
+        try {
+          await _iap.completePurchase(purchaseDetails);
+        } catch (e) {
+          debugPrint('IAP completePurchase failed: $e');
         }
       }
     }

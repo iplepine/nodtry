@@ -89,10 +89,11 @@ platform :ios do
     # group.com.devho.nodtry.app; -allowProvisioningUpdates lets xcodebuild
     # register those identifiers/capabilities and create the matching
     # profiles instead of failing on a missing provisioning profile.
-    # On 2026-11-09 xcodebuild rejected this key ("Authentication failed:
-    # Make sure a bearer token was provided") although the same key works for
-    # the App Store Connect API; xcodebuild's provisioning most likely needs
-    # the key's role raised to Admin. XCODE_PROVISIONING_UPDATES=0 skips these
+    # xcodebuild cannot register App Groups itself: when an identifier or
+    # App Group is missing it fails with a misleading "Authentication failed:
+    # Make sure a bearer token was provided" (the key is already Admin). The
+    # App Group and both App IDs were registered in the portal on 2026-11-11;
+    # since then this key signs and exports fine. XCODE_PROVISIONING_UPDATES=0 skips these
     # flags when the identifiers and profiles were set up by hand in the
     # developer portal / Xcode instead.
     auth_key_path = File.expand_path("AuthKey_XXU6VU63TR.p8", __dir__)
@@ -112,7 +113,8 @@ platform :ios do
         signingStyle: "automatic",
         teamID: "TCCFRB2YAV"
       },
-      export_xcargs: signing_xcargs,
+      # No export_xcargs: gym (2.230) already repeats `xcargs` on -exportArchive,
+      # and xcodebuild rejects -authenticationKeyPath given twice.
       output_directory: "../build/ios/ipa",
       output_name: ipa_filename,
       clean: true,
@@ -126,7 +128,7 @@ platform :ios do
       skip_screenshots: false,
       overwrite_screenshots: true,
       skip_metadata: false,
-      submit_for_review: true,
+      submit_for_review: options.fetch(:submit, true),
       automatic_release: options[:automatic_release],
       # Apple Review 거부 후 닫히지 않은 채로 남은 이전 제출이 있으면
       # "review submission already in progress"로 새 제출이 막힌다.
@@ -135,6 +137,13 @@ platform :ios do
       copyright: copyright_text,
       precheck_include_in_app_purchases: false
     )
+  end
+
+  desc "Build and upload binary + metadata WITHOUT submitting. Use when something"
+  desc "must be attached on the web first (e.g. a first consumable IAP, which"
+  desc "Apple only accepts together with an app version), then submit there."
+  lane :upload_only do
+    build_and_submit(automatic_release: true, submit: false)
   end
 
   desc "Build, upload and submit for review; RELEASES AUTOMATICALLY once approved"

@@ -15,13 +15,13 @@ import '../../../../utils/ui_error_codes.dart';
 import '../../../../core/legal_links.dart';
 import '../../../proof/domain/proof_labels.dart' show kSupportEmail;
 
-// App Store Review rejected submission bd240493-bbc3-425f-a286-a8343a50f34f
-// (May 23, 2026, Guideline 2.1(b)) because the in-app "buy the dev a coffee"
-// IAP product (`donation_coffee`) had not been submitted alongside the binary
-// in App Store Connect. Hide the entry point in shipped builds until the IAP
-// is created + approved there; flip this to true and submit IAP metadata
-// (incl. App Review screenshot) at the same time as the next release.
-const bool _kShowCoffeeDonation = false;
+// Coffee tip IAP (`donation_coffee`, consumable). Re-enabled for 1.2.0+89:
+// the product now exists in App Store Connect (id 6833075811) and is
+// submitted together with this app version. History: App Store Review
+// rejected bd240493-bbc3-425f-a286-a8343a50f34f (May 23, 2026, Guideline
+// 2.1(b)) when the entry point shipped without a submitted IAP — never ship
+// this flag on without the IAP attached to the same review.
+const bool _kShowCoffeeDonation = true;
 
 // 둘운완 (D-007) ships one brand palette. The theme picker is hidden and
 // AppSettingsNotifier always starts on AppThemeType.smokyPlum, whose colours
@@ -62,6 +62,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // highlight from the actual locale Flutter is rendering with.
     final effectiveLocale =
         settingsState.currentLocale ?? Localizations.localeOf(context);
+
+    // 커피 후원 결과: 결제 스트림에서 비동기로 도착한다.
+    ref.listen(iapServiceProvider, (previous, next) {
+      final messenger = ScaffoldMessenger.of(context);
+      if (next.completedCount > (previous?.completedCount ?? 0)) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.settingsCoffeeThanks)),
+        );
+      } else if (next.purchaseError != null &&
+          next.purchaseError != previous?.purchaseError) {
+        messenger.showSnackBar(SnackBar(content: Text(next.purchaseError!)));
+      }
+    });
 
     // 연결 끊기 성공 시 토스트 처리 등 (Listen)
     ref.listen(settingsViewModelProvider, (previous, next) {
@@ -851,15 +864,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             return;
           }
           if (iapState.isPurchasing) return;
-
-          // Call notifier method
+          // Errors and the thank-you arrive asynchronously through the
+          // purchase stream; the ref.listen in build() shows them.
           await ref.read(iapServiceProvider.notifier).buyCoffee();
-
-          if (iapState.purchaseError != null && context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(iapState.purchaseError!)));
-          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(

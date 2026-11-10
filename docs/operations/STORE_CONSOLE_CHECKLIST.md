@@ -49,9 +49,9 @@
 
 **1.2.0부터: 초대 링크(Universal Links) 서명 준비.** iOS 빌드 전에 끝낸다.
 
-- [ ] **[사전]** Apple Developer → Identifiers → `com.devho.nodtry.app`에서 **Associated Domains**를 켠다. 위젯이 같은 빌드에 들어가면 **App Groups**(`group.com.devho.nodtry.app`)도 함께 켠다.
+- [x] **[사전]** (2026-11-11 완료: App Group `group.com.devho.nodtry.app` 등록, 앱 ID에 Associated Domains·App Groups 켬, 위젯 ID `com.devho.nodtry.app.widget` 등록 + App Groups 지정) Apple Developer → Identifiers → `com.devho.nodtry.app`에서 **Associated Domains**를 켠다. 위젯이 같은 빌드에 들어가면 **App Groups**(`group.com.devho.nodtry.app`)도 함께 켠다.
   - 이유: `Runner.entitlements`에 `com.apple.developer.associated-domains`가 추가됐다. 이 entitlement가 없는 기존 App Store 프로파일로 빌드하면 `fastlane ios release`의 archive/export가 "Provisioning profile doesn't include the com.apple.developer.associated-domains entitlement"로 실패한다.
-- [ ] **[사전]** 프로파일을 새로 받는다. 방법은 둘 중 하나다.
+- [x] **[사전]** (2026-11-11 완료: ID 등록 뒤 Fastfile의 API 키 `-allowProvisioningUpdates`로 archive·app-store export 성공) 프로파일을 새로 받는다. 방법은 둘 중 하나다.
   - Fastfile `build_and_submit`의 `build_app`에 `-allowProvisioningUpdates`와 App Store Connect API 키 인증을 넣는 변경(위젯 작업 브랜치)을 먼저 머지한다.
   - 또는 로컬 Xcode에서 Runner 타깃 → Signing & Capabilities를 열어 Automatic signing이 프로파일을 한 번 갱신하게 한다.
 - [ ] **[사전]** Hosting 배포 뒤 `https://nod-try.web.app/.well-known/apple-app-site-association`과 `/.well-known/assetlinks.json`이 200, `application/json`으로 열리는지 확인한다(`nod-try.firebaseapp.com`도 같다).
@@ -101,7 +101,7 @@
   - 첫 문장 ko: `그래,해봐가 둘운완이 됐어요. 약속, 기록, 짝꿍 연결은 그대로예요.`
   - 첫 문장 en: `Nodtry is now DuoDone. Your promises, history, and partner connection stay the same.`
 - [ ] **[제출]** 빌드 **81** 선택
-- [ ] **[제출]** 이 버전 제출에 **앱 내 구입 항목이 첨부돼 있지 않은지** 확인한다. 이번 빌드는 팁 IAP UI가 숨겨져 있다(`settings_screen.dart`의 `_kShowCoffeeDonation = false`). §E 심사 메모도 "인앱 구매 없음"으로 적는다.
+- [ ] **[제출]** (1.2.0+89부터) 이 버전의 **앱 내 구입 및 구독**에 `donation_coffee`(소모성, ₩1,100)를 **첨부한다**. 첫 소모성 IAP는 API로 따로 제출할 수 없고 버전과 함께만 심사된다. 팁 UI가 켜져 있다(`_kShowCoffeeDonation = true`). 첨부 없이 제출하면 2026-05 반려(2.1(b))가 반복된다.
 - [ ] **[제출]** 버전 출시: **"이 버전을 수동으로 출시"**. fastlane은 `release_manual` 레인(`automatic_release: false`)을 쓴다. `release` 레인은 승인 즉시 자동 출시한다.
 - [ ] **[제출]** 앱 심사 정보
   - 로그인 필요 체크, 데모 계정 A(대표 직접 입력)
@@ -136,7 +136,7 @@
 - [ ] **[사전]** 콘텐츠 등급 설문을 다시 답한다.
   - 사용자 간 상호작용·콘텐츠(사진) 교환: **예**
   - 사용자 위치 공유: 아니요
-  - 디지털 상품 구매: **아니요**. 이번 빌드는 팁 IAP UI가 숨겨져 있다(`_kShowCoffeeDonation = false`). 플래그를 켠 빌드를 낼 때 "예"로 다시 답한다.
+  - 디지털 상품 구매: **예**(1.2.0+89부터 팁 IAP UI가 켜져 있다, `_kShowCoffeeDonation = true`).
   - 도박·모의 도박: 아니요
 - [ ] **[사전]** 타겟층 및 콘텐츠: **만 18세 이상만**. "아동의 관심을 끌 수 있음"은 아니요로 둔다.
 - [ ] **[사전]** 데이터 보안 갱신. 모두 전송 중 암호화 **예**, 삭제 요청 가능 **예**로 둔다.
@@ -204,7 +204,7 @@ ASC "앱 심사 정보 > 메모"에 붙인다. Play "앱 액세스"에는 1~2번
 메모에는 이번 빌드에서 실제로 참인 내용만 적는다(2026-10-03 기준).
 - **초대 코드**: 서버는 1:1 제한을 강제하고, 연결될 때마다 두 사람의 코드를 새로 발급한다. 하지만 코드가 찍히지 않은 연결 요청은 아직 검사하지 않는다. 그래서 "single-use"는 쓰지 않는다. 서버가 "초대자의 현재 코드와 일치하는 코드"를 필수로 검사하도록 고쳐 배포한 뒤에만, 첫 항목 끝 문장을 `Our server requires the inviter's current code and enforces the 1:1 limit; codes rotate after each connection.`로 바꾼다.
 - **연결 끊기**: 사진 접근은 서버 트리거가 `managerId`를 지운 뒤에 끝난다. 그래서 "immediately"가 아니라 "within seconds"로 쓰고, 사진과 앱 화면에 대해서만 말한다. plans/actions 읽기가 아직 로그인 사용자 전체에 열려 있어서 "약속 접근 차단"은 주장하지 않는다. 읽기를 참여자로 좁힌 뒤에만 `…can no longer open your proof photos or shared promises.`로 바꿀 수 있다.
-- **인앱 구매**: 팁 IAP UI가 숨겨져 있으므로(`_kShowCoffeeDonation = false`) "인앱 구매 없음"으로 적는다. 플래그를 켜는 빌드에서는 이 문장을 다시 쓴다.
+- **인앱 구매**: 1.2.0+89부터 소모성 팁 `donation_coffee` 하나가 있다. 설정 > 지원 > "개발자에게 커피 사주기". 콘텐츠·기능을 열지 않는 선택 후원이다.
 
 ```
 DuoDone (Korean name: 둘운완; formerly "Nodtry") helps couples keep each other accountable for workout promises. Two people connect one-to-one with an invite code, and each sees only the other's progress.

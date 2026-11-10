@@ -610,6 +610,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsStoreUnavailable => '스토어와 연결할 수 없어요. (설정 확인 필요)';
 
   @override
+  String get settingsCoffeeThanks => '커피 고마워요! ☕';
+
+  @override
   String get planMine => '약속 한 줄';
 
   @override

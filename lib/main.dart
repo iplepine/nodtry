@@ -113,6 +113,11 @@ void main() async {
   // - 권한이 이미 grant된 상태면 FCM 토큰만 등록한다 (로그인 후에는
   //   fcmTokenBinderProvider 가 다시 등록한다).
   binding.addPostFrameCallback((_) {
+    // Listen to the store purchase stream from launch, not only when the
+    // settings screen opens: a tip interrupted by an app kill must still be
+    // completed (Play refunds unacknowledged purchases after 3 days; StoreKit
+    // keeps redelivering unfinished transactions).
+    container.read(iapServiceProvider);
     unawaited(local_notifications.NotificationService().init());
     unawaited(
       container

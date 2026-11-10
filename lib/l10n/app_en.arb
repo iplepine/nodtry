@@ -631,6 +631,10 @@
   "@settingsStoreUnavailable": {
     "description": "Snackbar shown when the IAP store is unavailable"
   },
+  "settingsCoffeeThanks": "Thank you for the coffee! ☕",
+  "@settingsCoffeeThanks": {
+    "description": "Snackbar shown after a coffee tip purchase completes"
+  },
   "planMine": "Your promise in one line",
   "planClearAction": "Clear",
   "planPartnerPreviewWithout": "You can start solo. Connect your partner to give each other props and knocks.",

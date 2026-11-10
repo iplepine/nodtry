@@ -66,3 +66,6 @@ android/vendor/
 # Flutter-managed SwiftPM resolution (regenerated on build; consistent with the
 # existing .swiftpm/ ignore above). Enabled by the Flutter 3.44 iOS migration.
 **/xcshareddata/swiftpm/Package.resolved
+
+# Local-only credentials (never commit)
+.secrets/

@@ -623,6 +623,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Can\'t connect to the store. Please check your settings.';
 
   @override
+  String get settingsCoffeeThanks => 'Thank you for the coffee! ☕';
+
+  @override
   String get planMine => 'Your promise in one line';
 
   @override
