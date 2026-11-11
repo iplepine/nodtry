@@ -43,7 +43,8 @@
 | `partner_nickname_set` | 신규 | `kind`: `preset`·`custom`·`removed` (텍스트 미전송) |
 | `partner_disconnected` | 기존 | 내가 연결 해제 |
 | `login` (예약) | 기존 | `login_method`: `google`·`apple`·`anonymous`·`email` |
-| `login_failed` | 기존 | `method`, `reason`(예외 타입) |
+| `login_failed` | 변경 | 공급자 인증 실패만 기록. `method`, `stage=provider`, `reason`(예외 타입), `error_code`(Firebase/플랫폼 코드, 메시지·PII 제외) |
+| `profile_setup_failed` | 신규(1.2.1+) | 인증 성공 뒤 사용자 문서 초기화가 2회 실패. `method`, `stage=profile_setup`, `reason`, `error_code`. 일반 로그인은 실패 세션을 정리하고, 익명·신규 이메일 가입은 UID·계정 복구를 위해 세션 유지 |
 | `logout`, `account_deleted` | 기존 | — |
 
 ## 3. 약속·일일 루프

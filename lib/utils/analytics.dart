@@ -2,6 +2,9 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+typedef AnalyticsTestSink =
+    void Function(String name, Map<String, Object>? parameters);
+
 /// Single seam for product analytics.
 ///
 /// Wraps [FirebaseAnalytics] so call sites never depend on the SDK directly and
@@ -18,6 +21,12 @@ class AnalyticsService {
   static FirebaseAnalytics get _analytics => FirebaseAnalytics.instance;
 
   static FirebaseAnalyticsObserver? _observer;
+  static AnalyticsTestSink? _testSink;
+
+  @visibleForTesting
+  static void setTestSink(AnalyticsTestSink? sink) {
+    _testSink = sink;
+  }
 
   /// Configures collection. Call once, after `Firebase.initializeApp()`.
   /// Collection is disabled while debugging to keep the dashboard to real
@@ -46,10 +55,16 @@ class AnalyticsService {
 
   /// Logs a custom event. Safe to call anywhere; never throws.
   static void log(String name, [Map<String, Object?>? params]) {
+    final sanitized = _sanitize(params);
     try {
-      _analytics.logEvent(name: name, parameters: _sanitize(params));
+      _analytics.logEvent(name: name, parameters: sanitized);
     } catch (_) {
       // Reporting must never break the calling flow.
+    }
+    try {
+      _testSink?.call(name, sanitized);
+    } catch (_) {
+      // A test observer follows the same no-throw contract as Firebase.
     }
     if (kDebugMode) {
       debugPrint('[Analytics] $name ${params ?? ''}');
@@ -60,6 +75,11 @@ class AnalyticsService {
   static void logLogin(String method) {
     try {
       _analytics.logLogin(loginMethod: method);
+    } catch (_) {
+      /* never throw */
+    }
+    try {
+      _testSink?.call('login', {'login_method': method});
     } catch (_) {
       /* never throw */
     }
@@ -129,6 +149,7 @@ class AnalyticsEvent {
 
   // Auth / account
   static const loginFailed = 'login_failed';
+  static const profileSetupFailed = 'profile_setup_failed';
   static const logout = 'logout';
   static const accountDeleted = 'account_deleted';
 

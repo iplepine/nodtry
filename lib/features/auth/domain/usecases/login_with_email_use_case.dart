@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../repositories/user_repository.dart';
 import '../../../../services/auth_service.dart';
+import '../auth_login_result.dart';
 
 class LoginWithEmailUseCase {
   final AuthService _authService;
@@ -8,17 +8,17 @@ class LoginWithEmailUseCase {
 
   LoginWithEmailUseCase(this._authService, this._userRepository);
 
-  Future<UserCredential?> execute(String email, String password) async {
+  Future<AuthLoginResult> execute(String email, String password) async {
     final credential = await _authService.signInWithEmailAndPassword(
       email,
       password,
     );
-    
-    if (credential.user != null) {
-      // 로그인 성공 시 유저 정보 초기화/동기화 (Firestore)
-      await _userRepository.initializeUser(credential.user!);
-    }
-    
-    return credential;
+
+    final user = credential.user;
+    if (user == null) throw StateError('Email sign-in returned no user');
+    return completeAuthenticatedLogin(
+      () => _userRepository.initializeUser(user),
+      cleanUpSession: () => _authService.signOutIfCurrentUser(user.uid),
+    );
   }
 }
