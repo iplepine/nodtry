@@ -1,10 +1,10 @@
 <!-- COMMIT_STATUS START -->
 > **커밋 상태**
-> - 기준 커밋: `ca33b3afce18d181a507f9c3b524991d4fdbb21a` (`feat/couple-workout-pivot`)
-> - 최근 커밋: `ca33b3afce18` docs: 둘운완 pivot spec, decision D-007, launch plan and runbook
-> - 커밋 일시: `2026-10-03T07:18:28+09:00`
-> - 워킹트리: `dirty (17 files)`
-> - 문서 갱신: `2026-10-03 07:18:57 +0900`
+> - 기준 커밋: `63f48fe31a0300ca812a4bc3460889b3a02a1719` (`codex/hotfix-auth-login-1.2.1`)
+> - 최근 커밋: `63f48fe31a03` fix(auth): harden login profile setup
+> - 커밋 일시: `2026-11-12T08:48:56+09:00`
+> - 워킹트리: `dirty (2 files)`
+> - 문서 갱신: `2026-11-12 09:05:51 +0900`
 <!-- COMMIT_STATUS END -->
 
 # 출시 준비 체크리스트
@@ -21,8 +21,13 @@
 - 릴리스 게이트:
   - `flutter analyze`: 이슈 0
   - `flutter test`: 942/942 통과
-  - Android AAB·iOS archive 및 양 스토어 제출: 진행 중
+  - Android AAB: 78.6MB, 운영 업로드 키 SHA1 `40:BF:AD:96:11:D6:0E:B1:88:CB:C7:F0:AF:78:3E:B8:CD:90:7D:C3` 확인
+  - iOS archive·IPA export: 성공, Runner 1.2.1(90)·DuoWidgetExtension 포함
 - 사용자 데이터 마이그레이션과 Firebase 서버 배포는 없다. 앱 클라이언트 핫픽스만 배포한다.
+- 2026-11-12 08:50 KST, 첫 Play 업로드는 전용 워크트리에 운영 서명 설정이 없어 debug 키 SHA1 `A1:8C:CF:A8:F2:C1:4E:D2:AB:22:9D:E3:49:9D:BF:FB:0A:EE:D0:57`로 빌드돼 거절됐다. 운영 `key.properties`와 업로드 키를 연결하고 AAB 인증서 지문을 확인한 뒤 재빌드했다.
+- 2026-11-12 08:52 KST, Android `fastlane production` 성공. Google Play API에서 production 트랙 versionCode `[90]`을 확인했다(`release_status=completed`).
+- 2026-11-12 09:05 KST, iOS `fastlane release` 성공. App Store Connect에서 1.2.1 build 90 처리·선택 후 심사 제출을 완료했고, 승인 시 자동 공개(`automatic_release=true`)로 설정했다.
+- 남은 일: 양 스토어 심사·공개 상태 확인 후 `config/app.latestBuild = 90` 반영. 그 전에는 기존 사용자의 업데이트 유도 기준을 변경하지 않는다.
 
 ## 지난 릴리스: `1.2.0+89` — Android 프로덕션·iOS 배포 완료
 - 2026-11-12 KST 확인: Google Play production versionCode 89가 서비스 중이고, App Store Connect의 1.2.0 build 89는 `Ready for Distribution` 상태다.
