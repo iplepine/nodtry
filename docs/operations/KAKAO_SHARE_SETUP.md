@@ -1,3 +1,12 @@
+<!-- COMMIT_STATUS START -->
+> **커밋 상태**
+> - 기준 커밋: `f7edf13a1e4f2290e55313f2308eba2c886a9692` (`release/1.2.0`)
+> - 최근 커밋: `f7edf13a1e4f` feat(growth): monthly recap, New Year 21-day challenge and KakaoTalk invite card
+> - 커밋 일시: `2026-11-22T10:21:14+09:00`
+> - 워킹트리: `dirty (16 files)`
+> - 문서 갱신: `2026-11-22 10:21:15 +0900`
+<!-- COMMIT_STATUS END -->
+
 # 카카오톡 초대 카드 설정 (Kakao Share)
 
 마지막 갱신: 2026-11-21 · 상태: **코드만 구현, 카카오 앱 미등록 · 실기기 미검증 · 미배포**

@@ -1,3 +1,12 @@
+<!-- COMMIT_STATUS START -->
+> **커밋 상태**
+> - 기준 커밋: `f7edf13a1e4f2290e55313f2308eba2c886a9692` (`release/1.2.0`)
+> - 최근 커밋: `f7edf13a1e4f` feat(growth): monthly recap, New Year 21-day challenge and KakaoTalk invite card
+> - 커밋 일시: `2026-11-22T10:21:14+09:00`
+> - 워킹트리: `dirty (16 files)`
+> - 문서 갱신: `2026-11-22 10:21:15 +0900`
+<!-- COMMIT_STATUS END -->
+
 # Task
 
 ID: `BT-010-growth-features-recap-challenge-kakao`
