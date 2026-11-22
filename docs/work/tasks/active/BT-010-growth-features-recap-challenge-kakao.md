@@ -75,7 +75,8 @@ ID: `BT-010-growth-features-recap-challenge-kakao`
 - [x] `flutter analyze` 0건
 - [x] `flutter test` 전체 통과(1,014건, 2026-11-22 이미지 적용 후 재실행)
 - [x] 실제 폰트 렌더로 리캡 카드·챌린지 배너 4상태·공유 카드 칩 육안 확인(테스트 렌더, 기기 아님)
-- [x] Android 디버그 APK 빌드 · iOS 시뮬레이터 빌드 성공(새 카카오 플러그인 포함, 2026-11-21). 릴리스 빌드와 앱 용량 변화는 미확인
+- [x] Android 디버그 APK 빌드 · iOS 시뮬레이터 빌드 성공(새 카카오 플러그인 포함, 2026-11-21)
+- [x] 릴리스 빌드 성공(2026-11-22, 버전 변경 없이 확인용): Android `flutter build appbundle --release`(난독화 포함) AAB 79.6MB, iOS `flutter build ios --release --no-codesign` Runner.app 59.3MB. 이전 버전 대비 용량 변화는 비교하지 않았다
 - [ ] 실기기 확인: 리캡 공유(인스타·카카오), 챌린지 배너(기기 날짜를 12/27·1/5·1/23으로 바꿔 4상태), 챌린지 약속 생성 후 종료일·알림
 - [ ] 대표: Kakao Developers 앱 등록 → 키 전달(`KAKAO_SHARE_SETUP.md` §1). 그 뒤 카카오 카드 실기기 검증
 - [ ] 대표: 리캡·챌린지·카카오 카드 문구 확인
