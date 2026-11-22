@@ -19,6 +19,7 @@ import '../us_viewmodel.dart';
 import '../widgets/disconnect_partner_dialog.dart';
 import '../../../connect/application/partner_label_provider.dart';
 import '../../../duo/application/duo_stats_provider.dart';
+import '../../../duo/presentation/duo_recap_card.dart';
 import '../../../duo/presentation/duo_share_card.dart';
 import '../../../duo/presentation/duo_widgets.dart';
 import '../../../connect/presentation/widgets/invite_share_panel.dart';
@@ -125,6 +126,9 @@ class _UsScreenState extends ConsumerState<UsScreen> {
                 },
                 orElse: () => const SizedBox.shrink(),
               ),
+
+              // 0-1. 월간 리캡 (약속이 하나라도 있으면, 짝꿍이 없어도)
+              const DuoRecapEntry(),
 
               // 1. Me Section
               usStateAsync.when(

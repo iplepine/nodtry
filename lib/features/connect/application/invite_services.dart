@@ -12,6 +12,7 @@ import '../../../utils/analytics.dart';
 import '../../onboarding/domain/onboarding_gate.dart';
 import '../domain/invite_code.dart';
 import 'invite_tracker.dart';
+import 'kakao_invite_sharer.dart';
 
 // ---------------------------------------------------------------------------
 // Share sheet
@@ -28,7 +29,8 @@ class InviteShareResult {
   /// as sent — Android before 5.1 and some launchers report nothing).
   final bool shared;
 
-  /// `kakao`, `copy`, `other` or `unknown` (see [inviteChannelFromShareRaw]).
+  /// `kakao`, `copy`, `other` or `unknown` (see [inviteChannelFromShareRaw]),
+  /// or [kInviteChannelKakaoCard] for the KakaoTalk card.
   final String channel;
 }
 
@@ -43,6 +45,11 @@ String inviteChannelFromShareRaw(String raw) {
   }
   return 'other';
 }
+
+/// `invite_shared {channel}` of an invite sent as a KakaoTalk card
+/// ([shareMyInviteViaKakao]) — not `kakao`, which is KakaoTalk picked in the
+/// share sheet.
+const String kInviteChannelKakaoCard = 'kakao_card';
 
 /// Opens the system share sheet. Overridden in tests.
 abstract class InviteSharer {
@@ -283,6 +290,79 @@ Future<InviteShareResult> shareMyInvite(
     return InviteShareResult.failed;
   }
   final hasPromise = await _hasActivePromise(ref, profile.uid);
+  return _shareViaSheet(
+    ref,
+    l10n: l10n,
+    surface: surface,
+    uid: profile.uid,
+    code: code,
+    hasPromise: hasPromise,
+    origin: origin,
+  );
+}
+
+/// Sends my invite as a KakaoTalk card ([kakaoInviteCard]); same bookkeeping
+/// as [shareMyInvite], with `channel: kakao_card`.
+///
+/// When KakaoTalk can't take the card — the SDK throws or says no — the
+/// share sheet opens instead, so the invite can always go out.
+Future<InviteShareResult> shareMyInviteViaKakao(
+  WidgetRef ref, {
+  required AppLocalizations l10n,
+  required String surface,
+  Rect? origin,
+}) async {
+  final profile = ref.read(myProfileProvider).value;
+  final code = profile?.inviteCode;
+  if (profile == null || code == null || code.isEmpty) {
+    return InviteShareResult.failed;
+  }
+  final hasPromise = await _hasActivePromise(ref, profile.uid);
+
+  bool sent;
+  try {
+    sent = await ref
+        .read(kakaoInviteSharerProvider)
+        .share(kakaoInviteCard(l10n, code: code, hasPromise: hasPromise));
+  } catch (_) {
+    sent = false;
+  }
+  if (!sent) {
+    return _shareViaSheet(
+      ref,
+      l10n: l10n,
+      surface: surface,
+      uid: profile.uid,
+      code: code,
+      hasPromise: hasPromise,
+      origin: origin,
+    );
+  }
+
+  await _recordInviteSent(
+    ref,
+    uid: profile.uid,
+    code: code,
+    channel: kInviteChannelKakaoCard,
+    surface: surface,
+    hasPromise: hasPromise,
+    legacyMethod: kInviteChannelKakaoCard,
+  );
+  return const InviteShareResult(
+    shared: true,
+    channel: kInviteChannelKakaoCard,
+  );
+}
+
+Future<InviteShareResult> _shareViaSheet(
+  WidgetRef ref, {
+  required AppLocalizations l10n,
+  required String surface,
+  required String uid,
+  required String code,
+  required bool hasPromise,
+  Rect? origin,
+}) async {
   final text = inviteShareMessage(l10n, code: code, hasPromise: hasPromise);
 
   final InviteShareResult result;
@@ -295,15 +375,39 @@ Future<InviteShareResult> shareMyInvite(
   }
   if (!result.shared) return result;
 
+  await _recordInviteSent(
+    ref,
+    uid: uid,
+    code: code,
+    channel: result.channel,
+    surface: surface,
+    hasPromise: hasPromise,
+    legacyMethod: 'share',
+  );
+  return result;
+}
+
+/// What every sent invite leaves behind: "초대 다시 보내기" on this device,
+/// `invites/{uid}` for the server reminder, and the two analytics events.
+Future<void> _recordInviteSent(
+  WidgetRef ref, {
+  required String uid,
+  required String code,
+  required String channel,
+  required String surface,
+  required bool hasPromise,
+  required String legacyMethod,
+}) async {
   await ref.read(inviteSharedAtProvider.notifier).record(DateTime.now());
-  _trackInviteShare(ref, uid: profile.uid, code: code);
+  _trackInviteShare(ref, uid: uid, code: code);
   AnalyticsService.log(AnalyticsEvent.inviteShared, {
-    'channel': result.channel,
+    'channel': channel,
     'surface': surface,
     'has_promise': hasPromise,
   });
-  AnalyticsService.log(AnalyticsEvent.inviteCodeShared, {'method': 'share'});
-  return result;
+  AnalyticsService.log(AnalyticsEvent.inviteCodeShared, {
+    'method': legacyMethod,
+  });
 }
 
 /// Copies my invite code. Returns false when there is no code yet.

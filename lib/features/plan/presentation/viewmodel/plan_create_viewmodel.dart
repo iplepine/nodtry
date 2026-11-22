@@ -10,6 +10,7 @@ import '../../../../providers/home_provider.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../repositories/connect_repository.dart' show ConnectionStatus;
 import '../../../../utils/analytics.dart';
+import '../../../challenge/domain/duo_challenge.dart';
 import '../../domain/plan_goal.dart';
 import '../../domain/workout_template.dart';
 import '../plan_create_state.dart';
@@ -59,6 +60,8 @@ Map<String, Object> planCreatedAnalyticsParams(
     'template_id': template?.id ?? 'none',
     'template_edited':
         template != null && (state.editedAfterTemplate || actionEdited),
+    // Only on a promise made for a seasonal challenge.
+    if (plan.challengeId != null) 'challenge': plan.challengeId!,
   };
 }
 
@@ -74,11 +77,22 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
     return _initialState();
   }
 
-  PlanCreateState _initialState() {
+  PlanCreateState _initialState({DuoChallenge? challenge}) {
     return PlanCreateState(
       selectedDays: _defaultSelectedDays,
       notificationTime: _defaultDeadline(),
+      challenge: challenge,
     );
+  }
+
+  /// The challenge a promise saved at [now] enters: the form's, while it is
+  /// running. One that ended while the form was open is dropped — the
+  /// promise is then an ordinary 28-day one.
+  @visibleForTesting
+  static DuoChallenge? challengeInEffect(PlanCreateState state, DateTime now) {
+    final challenge = state.challenge;
+    if (challenge == null) return null;
+    return challenge.phaseOn(now) == ChallengePhase.running ? challenge : null;
   }
 
   NotificationTime _defaultDeadline() {
@@ -114,8 +128,8 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
     final prevState = state.value!;
 
     switch (intent) {
-      case ResetIntent():
-        state = AsyncValue.data(_initialState());
+      case ResetIntent(:final challenge):
+        state = AsyncValue.data(_initialState(challenge: challenge));
       case UpdateActionIntent(:final action):
         if (action == prevState.action) return;
         // Typing keeps the selected workout; only the analytics flag notices.
@@ -368,7 +382,10 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           now: now,
         ).copyWith(goalTitle: goal.title, goalDate: goal.date);
       } else {
-        final period = Plan.periodStartingOn(now);
+        // A promise made for a challenge runs to the challenge's last day.
+        final challenge = challengeInEffect(prevState, now);
+        final period =
+            challenge?.planPeriodFrom(now) ?? Plan.periodStartingOn(now);
         // New promises start right away, partner or not. The partner is told
         // by the server's creation push; there is no approval step.
         plan = Plan(
@@ -388,6 +405,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
           goalTitle: goal.title,
           goalDate: goal.date,
           weeklyTarget: weeklyTarget,
+          challengeId: challenge?.id,
         );
       }
 
@@ -427,6 +445,15 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
         AnalyticsEvent.planCreated,
         planCreatedAnalyticsParams(prevState, plan, isEdit: isEdit),
       );
+      final enteredChallenge = isEdit ? null : plan.challengeId;
+      if (enteredChallenge != null) {
+        AnalyticsService.log(AnalyticsEvent.challengeJoined, {
+          'challenge': enteredChallenge,
+          'method': 'new_plan',
+          'day': prevState.challenge?.dayNumberOn(now),
+          'has_partner': plan.managerId != null,
+        });
+      }
 
       ref.invalidate(homeCardStateProvider);
       await ref.read(settingAlarmUseCaseProvider).execute(savedPlan);
@@ -548,6 +575,7 @@ class PlanCreateViewModel extends AsyncNotifier<PlanCreateState> {
       lastActionId: original?.lastActionId,
       workoutType: prevState.workoutType?.id ?? original?.workoutType,
       weeklyTarget: prevState.weeklyTarget,
+      challengeId: original?.challengeId,
     );
   }
 }

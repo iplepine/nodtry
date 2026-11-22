@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nod_try/features/challenge/domain/duo_challenge.dart';
 import 'package:nod_try/features/plan/domain/usecases/setting_alarm_use_case.dart';
 import 'package:nod_try/features/plan/domain/workout_template.dart';
 import 'package:nod_try/features/plan/presentation/plan_create_state.dart';
@@ -91,6 +92,7 @@ Future<void> _pumpScreen(
   String? partnerName,
   String? nickname,
   Plan? planToEdit,
+  DuoChallenge? challenge,
 }) async {
   // A phone-sized viewport, so the layout is checked at real width.
   tester.view.physicalSize = const Size(1080, 2340);
@@ -113,8 +115,10 @@ Future<void> _pumpScreen(
       ),
       GoRoute(
         path: '/create',
-        builder: (context, state) =>
-            PlanCreateScreen(planToEdit: state.extra as Plan?),
+        builder: (context, state) => PlanCreateScreen(
+          planToEdit: state.extra as Plan?,
+          challenge: challenge,
+        ),
       ),
     ],
   );
@@ -402,5 +406,32 @@ void main() {
       const PlanCreateIncompleteException(PlanCreateMissing.days).missing,
       PlanCreateMissing.days,
     );
+  });
+  testWidgets('a promise for a challenge says so and shows its last day', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    final challenge = DuoChallenge(
+      id: kNewYear2027Challenge.id,
+      start: DateTime(now.year, now.month, now.day - 2),
+      end: DateTime(2027, 1, 21),
+      teaserFrom: DateTime(now.year, now.month, now.day - 20),
+    );
+    await _pumpScreen(
+      tester,
+      repository: _FakeRecordRepository(),
+      challenge: challenge,
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('새해 둘운완 21일 챌린지 · 1월 21일까지 이어지는 약속이에요'), findsOneWidget);
+    expect(find.textContaining('· 1월 21일까지'), findsWidgets);
+    expect(find.textContaining('28일'), findsNothing);
+  });
+
+  testWidgets('an ordinary promise has no challenge notice', (tester) async {
+    await _pumpScreen(tester, repository: _FakeRecordRepository());
+    expect(find.byKey(const ValueKey('plan-challenge-notice')), findsNothing);
+    expect(find.textContaining('28일'), findsOneWidget);
   });
 }

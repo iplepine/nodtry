@@ -208,27 +208,16 @@ DuoStats computeDuoStats({
   DateTime? linkedSince,
   int lookbackDays = kDuoStreakLookbackDays,
 }) {
-  final day0 = _dateOnly(today);
-  final mine = myPlans.map(_PlanDays.new).toList();
-  final theirs = hasPartner
-      ? partnerPlans.map(_PlanDays.new).toList()
-      : const <_PlanDays>[];
-  // Without a partner the duo surfaces are hidden; keep the old behaviour.
-  var linkDay = hasPartner && linkedSince != null
-      ? _dateOnly(linkedSince)
-      : null;
-  if (linkDay != null && linkDay.isAfter(day0)) linkDay = day0; // clock skew
-
-  bool isBeforeLink(DateTime date) =>
-      linkDay != null && date.isBefore(linkDay);
-
-  DuoDay dayAt(DateTime date) => DuoDay(
-    date: date,
-    me: _personDay(mine, date, day0),
-    partner: _personDay(theirs, date, day0),
-    isToday: date == day0,
-    beforeLink: isBeforeLink(date),
+  final calendar = _DuoCalendar(
+    myPlans: myPlans,
+    partnerPlans: partnerPlans,
+    today: today,
+    hasPartner: hasPartner,
+    linkedSince: linkedSince,
   );
+  final day0 = calendar.today;
+  final linkDay = calendar.linkDay;
+  final dayAt = calendar.dayAt;
 
   // This week, Monday first.
   final monday = DateTime(day0.year, day0.month, day0.day - (day0.weekday - 1));
@@ -240,7 +229,7 @@ DuoStats computeDuoStats({
 
   // Streak: walk back from today until a miss (or before any plan began, or
   // before the couple linked).
-  var earliest = _earliestDay([...mine, ...theirs]);
+  var earliest = calendar.earliestDay;
   if (earliest != null && linkDay != null && linkDay.isAfter(earliest)) {
     earliest = linkDay;
   }
@@ -268,6 +257,81 @@ DuoStats computeDuoStats({
     today: todayDay,
     week: week,
     hasPartner: hasPartner,
+  );
+}
+
+/// Every day from [from] to [to] (inclusive, dates only) as a [DuoDay], by
+/// the same rules as [computeDuoStats]. Days after [today] come out as
+/// upcoming / off. Empty when [to] is before [from]. Drives the monthly
+/// recap (`duo_recap.dart`).
+List<DuoDay> computeDuoDays({
+  required List<Plan> myPlans,
+  required List<Plan> partnerPlans,
+  required DateTime from,
+  required DateTime to,
+  required DateTime today,
+  bool hasPartner = true,
+  DateTime? linkedSince,
+}) {
+  final calendar = _DuoCalendar(
+    myPlans: myPlans,
+    partnerPlans: partnerPlans,
+    today: today,
+    hasPartner: hasPartner,
+    linkedSince: linkedSince,
+  );
+  final first = _dateOnly(from);
+  final last = _dateOnly(to);
+  return [
+    for (
+      var date = first;
+      !date.isAfter(last);
+      date = DateTime(date.year, date.month, date.day + 1)
+    )
+      calendar.dayAt(date),
+  ];
+}
+
+/// Both people's plans indexed by day, shared by [computeDuoStats] and
+/// [computeDuoDays].
+class _DuoCalendar {
+  _DuoCalendar({
+    required List<Plan> myPlans,
+    required List<Plan> partnerPlans,
+    required DateTime today,
+    required bool hasPartner,
+    required DateTime? linkedSince,
+  }) : today = _dateOnly(today),
+       _mine = myPlans.map(_PlanDays.new).toList(),
+       _theirs = hasPartner
+           ? partnerPlans.map(_PlanDays.new).toList()
+           : const <_PlanDays>[] {
+    // Without a partner the duo surfaces are hidden; keep the old behaviour.
+    var link = hasPartner && linkedSince != null
+        ? _dateOnly(linkedSince)
+        : null;
+    if (link != null && link.isAfter(this.today)) link = this.today; // skew
+    linkDay = link;
+  }
+
+  /// Midnight of today (local).
+  final DateTime today;
+  final List<_PlanDays> _mine;
+  final List<_PlanDays> _theirs;
+
+  /// The day the couple linked, or null when unknown / no partner.
+  late final DateTime? linkDay;
+
+  /// The first day any plan of either person can matter, or null without
+  /// plans.
+  DateTime? get earliestDay => _earliestDay([..._mine, ..._theirs]);
+
+  DuoDay dayAt(DateTime date) => DuoDay(
+    date: date,
+    me: _personDay(_mine, date, today),
+    partner: _personDay(_theirs, date, today),
+    isToday: date == today,
+    beforeLink: linkDay != null && date.isBefore(linkDay!),
   );
 }
 

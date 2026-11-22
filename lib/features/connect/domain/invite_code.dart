@@ -24,6 +24,11 @@ const String kInviteLinkBase = 'https://nod-try.web.app/i/';
 /// The link that goes into a shared invite message.
 String inviteLinkFor(String code) => '$kInviteLinkBase$code';
 
+/// "ABCD2345" → "ABCD 2345": easier to read aloud. Typing it back with the
+/// space is fine — codes are normalized before lookup.
+String groupedInviteCode(String code) =>
+    code.length == 8 ? '${code.substring(0, 4)} ${code.substring(4)}' : code;
+
 /// A fresh code from [kInviteCodeAlphabet]. [random] defaults to
 /// [Random.secure]; tests pass a seeded one.
 String generateInviteCode([Random? random]) {

@@ -17,6 +17,7 @@ import 'core/services/notification_service.dart';
 import 'features/proof/data/proof_photo_cache.dart';
 import 'features/connect/application/partner_link_binder.dart';
 import 'features/connect/application/invite_link_binder.dart';
+import 'features/connect/application/kakao_invite_sharer.dart';
 import 'features/plan/application/reminder_copy_refresh.dart';
 import 'features/onboarding/domain/onboarding_gate.dart';
 import 'features/widget_sync/application/duo_widget_binder.dart';
@@ -79,6 +80,11 @@ void main() async {
 
   // Product analytics (collection disabled in debug, same as Crashlytics).
   await AnalyticsService.initialize();
+
+  // KakaoTalk invite card: only when .env has KAKAO_NATIVE_APP_KEY (without
+  // it invites use the share sheet as before). Not awaited, and it never
+  // throws, so it can neither hold up nor break startup.
+  if (kakaoNativeAppKey() != null) unawaited(ensureKakaoShareSdk());
 
   final prefs = await SharedPreferences.getInstance();
 

@@ -126,6 +126,13 @@ class Plan {
   /// `done` ([lastActionId]). Optional; older builds ignore it.
   final TogetherMark? lastTogether;
 
+  /// The seasonal challenge this promise was entered into
+  /// (`DuoChallenge.id`, e.g. `newyear2027_duo21`), or null. A promise made
+  /// for a challenge runs to the challenge's last day instead of the usual
+  /// 28 days; an existing promise can be entered as it is. Optional: written
+  /// only when set, so older app builds and the server are unaffected.
+  final String? challengeId;
+
   /// The record arrays as stored on the plan document, when the five record
   /// fields above were merged with the plan's `actions`
   /// (`plan_action_records.dart`); null when they are the stored arrays.
@@ -182,6 +189,7 @@ class Plan {
     this.goalDate,
     this.weeklyTarget,
     this.lastTogether,
+    this.challengeId,
     this.storedRecordDates,
   });
 
@@ -262,6 +270,7 @@ class Plan {
     DateTime? goalDate,
     int? weeklyTarget,
     TogetherMark? lastTogether,
+    String? challengeId,
 
     /// Replaces [storedRecordDates]. Without it a copy keeps them — unless a
     /// record list is replaced, which makes the new lists the stored ones.
@@ -313,6 +322,7 @@ class Plan {
           ? null
           : weeklyTarget ?? this.weeklyTarget,
       lastTogether: lastTogether ?? this.lastTogether,
+      challengeId: challengeId ?? this.challengeId,
       storedRecordDates:
           storedRecordDates ??
           (completedDates != null ||
@@ -376,6 +386,7 @@ class Plan {
       if (goalDate != null) 'goalDate': goalDateToStored(goalDate!),
       if (weeklyTarget != null) 'weeklyTarget': weeklyTarget,
       if (lastTogether != null) kLastTogetherField: lastTogether!.toMap(),
+      if (challengeId != null) 'challengeId': challengeId,
     };
   }
 
@@ -459,6 +470,7 @@ class Plan {
       goalDate: goalDateFromStored(map['goalDate']),
       weeklyTarget: parseWeeklyTarget(map['weeklyTarget']),
       lastTogether: TogetherMark.fromMap(map[kLastTogetherField]),
+      challengeId: _nonEmptyString(map['challengeId']),
     );
   }
 

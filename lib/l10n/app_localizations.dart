@@ -4520,6 +4520,48 @@ abstract class AppLocalizations {
   /// **'DuoDone invite'**
   String get inviteShareSubject;
 
+  /// Primary invite button when KakaoTalk is installed: sends the invite as a KakaoTalk card
+  ///
+  /// In en, this message translates to:
+  /// **'Send invite on KakaoTalk'**
+  String get inviteKakaoButton;
+
+  /// Now tab invite card, after an invite already went out, when KakaoTalk is installed
+  ///
+  /// In en, this message translates to:
+  /// **'Send again on KakaoTalk'**
+  String get inviteKakaoResend;
+
+  /// Secondary invite button shown under the KakaoTalk button: opens the system share sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Send with another app'**
+  String get inviteShareOtherApps;
+
+  /// Title of the KakaoTalk invite card (couple tone) when I already have a workout promise. It comes from me, so it never names me.
+  ///
+  /// In en, this message translates to:
+  /// **'I made a workout promise 🤙 Back me up!'**
+  String get inviteKakaoCardTitle;
+
+  /// Title of the KakaoTalk invite card when I have no workout promise yet.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m making a workout promise 🤙 Back me up!'**
+  String get inviteKakaoCardTitleNoPromise;
+
+  /// Description line of the KakaoTalk invite card. The code is grouped for reading, e.g. ABCD 2345.
+  ///
+  /// In en, this message translates to:
+  /// **'Get DuoDone and enter code {code} to connect'**
+  String inviteKakaoCardDescription(String code);
+
+  /// The one button on the KakaoTalk invite card: opens the invite link
+  ///
+  /// In en, this message translates to:
+  /// **'Open invite'**
+  String get inviteKakaoCardButton;
+
   /// Small link for invited users: skips ahead to code entry
   ///
   /// In en, this message translates to:
@@ -4957,6 +4999,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'DuoDone share card'**
   String get shareCardSemantics;
+
+  /// Us tab row that opens the monthly recap; month is a month name
+  ///
+  /// In en, this message translates to:
+  /// **'{month} recap'**
+  String recapEntryTitle(String month);
+
+  /// Us tab recap row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Your month of workouts on one card'**
+  String get recapEntrySubtitle;
+
+  /// Recap sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly recap'**
+  String get recapSheetTitle;
+
+  /// Recap sheet title when offered at the start of a month
+  ///
+  /// In en, this message translates to:
+  /// **'Your {month} recap is here 🎉'**
+  String recapSheetTitleOffer(String month);
+
+  /// Recap card title for a couple
+  ///
+  /// In en, this message translates to:
+  /// **'Our {month}'**
+  String recapTitleDuo(String month);
+
+  /// Recap card title without a partner
+  ///
+  /// In en, this message translates to:
+  /// **'My {month}'**
+  String recapTitleSolo(String month);
+
+  /// Recap card headline: days both kept their promises
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 DuoDone day} other{{count} DuoDone days}}'**
+  String recapHeadlineDuo(int count);
+
+  /// Recap card headline without a partner
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 workout day} other{{count} workout days}}'**
+  String recapHeadlineSolo(int count);
+
+  /// Recap card: workout days of one person
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {count, plural, =1{1 day} other{{count} days}}'**
+  String recapPersonDays(String name, int count);
+
+  /// Recap card: workout days and most frequent workout of one person
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {count, plural, =1{1 day} other{{count} days}} · {workout}'**
+  String recapPersonDaysWorkout(String name, int count, String workout);
+
+  /// Recap card: longest run inside the month
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Best streak: 1 day} other{Best streak: {count} days}}'**
+  String recapBestStreak(int count);
+
+  /// Recap card note while the month is still running
+  ///
+  /// In en, this message translates to:
+  /// **'Through {date}'**
+  String recapSoFar(String date);
+
+  /// Recap sheet empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No workouts recorded this month.'**
+  String get recapEmpty;
+
+  /// Recap calendar legend: a day both kept their promises
+  ///
+  /// In en, this message translates to:
+  /// **'DuoDone'**
+  String get recapLegendDuoDay;
+
+  /// Recap calendar legend without a partner
+  ///
+  /// In en, this message translates to:
+  /// **'Workout day'**
+  String get recapLegendSoloDay;
+
+  /// Recap calendar legend: only one person worked out
+  ///
+  /// In en, this message translates to:
+  /// **'One of us'**
+  String get recapLegendOneOnly;
+
+  /// Recap sheet button
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get recapPrevMonth;
+
+  /// Recap sheet button
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get recapNextMonth;
+
+  /// Screen-reader label of the recap card
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly recap card'**
+  String get recapSemantics;
+
+  /// Title of the seasonal challenge newyear2027_duo21
+  ///
+  /// In en, this message translates to:
+  /// **'New Year 21-day DuoDone challenge'**
+  String get challengeNewYear2027Title;
+
+  /// Hashtag of the challenge newyear2027_duo21 on the share card
+  ///
+  /// In en, this message translates to:
+  /// **'#NewYearDuoDone'**
+  String get challengeNewYear2027Hashtag;
+
+  /// Challenge banner before it starts (couple)
+  ///
+  /// In en, this message translates to:
+  /// **'From {date}, keep your workout promises together for {days} days.'**
+  String challengeTeaserBody(String date, int days);
+
+  /// Challenge banner before it starts (no partner)
+  ///
+  /// In en, this message translates to:
+  /// **'From {date}, keep your workout promise for {days} days.'**
+  String challengeTeaserBodySolo(String date, int days);
+
+  /// Challenge banner chip: days until the challenge starts
+  ///
+  /// In en, this message translates to:
+  /// **'D-{days}'**
+  String challengeTeaserDday(int days);
+
+  /// Challenge banner while it runs and I have not joined
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{Start today: 1 day until {date}.} other{Start today: {days} days until {date}.}}'**
+  String challengeJoinBody(String date, int days);
+
+  /// Challenge banner button
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get challengeJoinCta;
+
+  /// Challenge banner after joining
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} of {total}'**
+  String challengeProgress(int day, int total);
+
+  /// Challenge banner after the last day
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge complete 🎉'**
+  String get challengeResultTitle;
+
+  /// Tooltip of the button that closes the challenge banner
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get challengeDismiss;
+
+  /// Title of the sheet that asks how to join a challenge
+  ///
+  /// In en, this message translates to:
+  /// **'How do you want to join?'**
+  String get challengeJoinSheetTitle;
+
+  /// Join sheet option: enter the running promise as it is
+  ///
+  /// In en, this message translates to:
+  /// **'Join with my current promise'**
+  String get challengeJoinExisting;
+
+  /// Join sheet option detail; title is the promise line
+  ///
+  /// In en, this message translates to:
+  /// **'{title} · its period stays the same'**
+  String challengeJoinExistingSub(String title);
+
+  /// Join sheet option: create a promise for the challenge
+  ///
+  /// In en, this message translates to:
+  /// **'Make a new promise for the challenge'**
+  String get challengeJoinNew;
+
+  /// Join sheet option detail
+  ///
+  /// In en, this message translates to:
+  /// **'Runs until {date}'**
+  String challengeJoinNewSub(String date);
+
+  /// Snackbar after joining a challenge
+  ///
+  /// In en, this message translates to:
+  /// **'You are in 💪'**
+  String get challengeJoined;
+
+  /// Snackbar when joining a challenge failed
+  ///
+  /// In en, this message translates to:
+  /// **'Could not join. Please try again in a moment.'**
+  String get challengeJoinFailed;
+
+  /// Notice on the create-promise screen when the promise is made for a challenge
+  ///
+  /// In en, this message translates to:
+  /// **'{title} · this promise runs until {date}'**
+  String planChallengeNotice(String title, String date);
+
+  /// Create-promise summary for a challenge promise
+  ///
+  /// In en, this message translates to:
+  /// **'{days} · {time} · until {date}'**
+  String planPreviewMetaUntil(String days, String time, String date);
+
+  /// Share card chip during a challenge
+  ///
+  /// In en, this message translates to:
+  /// **'{hashtag} · day {day}'**
+  String shareCardChallengeDay(String hashtag, int day);
+
+  /// Share card chip after a challenge ended
+  ///
+  /// In en, this message translates to:
+  /// **'{hashtag} · complete'**
+  String shareCardChallengeDone(String hashtag);
 
   /// One-tap reply to a knock (partner-to-partner tone)
   ///

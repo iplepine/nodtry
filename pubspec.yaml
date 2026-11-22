@@ -77,6 +77,10 @@ dependencies:
   cloud_functions: ^6.5.1
   home_widget: ^0.10.0
   app_links: ^7.2.2
+  # KakaoTalk invite card (FeedTemplate). Only the share module, not the full
+  # kakao_flutter_sdk. Off unless .env has KAKAO_NATIVE_APP_KEY — see
+  # docs/operations/KAKAO_SHARE_SETUP.md.
+  kakao_flutter_sdk_share: ^2.1.0
 
 dev_dependencies:
   flutter_test:

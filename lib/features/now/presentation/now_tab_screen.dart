@@ -20,6 +20,7 @@ import '../../../models/promise_model.dart';
 import '../../../models/proof_photo.dart';
 import '../../../repositories/record_repository.dart';
 import '../../connect/application/partner_label_provider.dart';
+import '../../challenge/presentation/challenge_banner.dart';
 import '../../connect/presentation/widgets/now_invite_card.dart';
 import '../../duo/application/duo_stats_provider.dart';
 import '../../duo/presentation/duo_widgets.dart';
@@ -451,6 +452,9 @@ class _NowTabState extends ConsumerState<NowTab>
                       children: [
                         // No partner yet: invite first (hidden otherwise).
                         const NowInviteCard(),
+                        // The seasonal challenge, while one is announced,
+                        // running or just over (hidden otherwise).
+                        const ChallengeBanner(),
                         // The partner's "같이 했어", waiting for my 나도 했어.
                         const TogetherClaimCards(),
                         // Executor Area (Primary Action)

@@ -2120,6 +2120,39 @@
   "@inviteShareSubject": {
     "description": "Subject line used by share targets that support one (e.g. email)"
   },
+  "inviteKakaoButton": "Send invite on KakaoTalk",
+  "@inviteKakaoButton": {
+    "description": "Primary invite button when KakaoTalk is installed: sends the invite as a KakaoTalk card"
+  },
+  "inviteKakaoResend": "Send again on KakaoTalk",
+  "@inviteKakaoResend": {
+    "description": "Now tab invite card, after an invite already went out, when KakaoTalk is installed"
+  },
+  "inviteShareOtherApps": "Send with another app",
+  "@inviteShareOtherApps": {
+    "description": "Secondary invite button shown under the KakaoTalk button: opens the system share sheet"
+  },
+  "inviteKakaoCardTitle": "I made a workout promise 🤙 Back me up!",
+  "@inviteKakaoCardTitle": {
+    "description": "Title of the KakaoTalk invite card (couple tone) when I already have a workout promise. It comes from me, so it never names me."
+  },
+  "inviteKakaoCardTitleNoPromise": "I'm making a workout promise 🤙 Back me up!",
+  "@inviteKakaoCardTitleNoPromise": {
+    "description": "Title of the KakaoTalk invite card when I have no workout promise yet."
+  },
+  "inviteKakaoCardDescription": "Get DuoDone and enter code {code} to connect",
+  "@inviteKakaoCardDescription": {
+    "description": "Description line of the KakaoTalk invite card. The code is grouped for reading, e.g. ABCD 2345.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteKakaoCardButton": "Open invite",
+  "@inviteKakaoCardButton": {
+    "description": "The one button on the KakaoTalk invite card: opens the invite link"
+  },
   "inviteHaveCodeLink": "I got an invite code",
   "@inviteHaveCodeLink": {
     "description": "Small link for invited users: skips ahead to code entry"
@@ -2488,6 +2521,304 @@
   "shareCardSemantics": "DuoDone share card",
   "@shareCardSemantics": {
     "description": "Screen-reader label of the share card"
+  },
+  "recapEntryTitle": "{month} recap",
+  "@recapEntryTitle": {
+    "description": "Us tab row that opens the monthly recap; month is a month name",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "recapEntrySubtitle": "Your month of workouts on one card",
+  "@recapEntrySubtitle": {
+    "description": "Us tab recap row subtitle"
+  },
+  "recapSheetTitle": "Monthly recap",
+  "@recapSheetTitle": {
+    "description": "Recap sheet title"
+  },
+  "recapSheetTitleOffer": "Your {month} recap is here 🎉",
+  "@recapSheetTitleOffer": {
+    "description": "Recap sheet title when offered at the start of a month",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "recapTitleDuo": "Our {month}",
+  "@recapTitleDuo": {
+    "description": "Recap card title for a couple",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "recapTitleSolo": "My {month}",
+  "@recapTitleSolo": {
+    "description": "Recap card title without a partner",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "recapHeadlineDuo": "{count, plural, =1{1 DuoDone day} other{{count} DuoDone days}}",
+  "@recapHeadlineDuo": {
+    "description": "Recap card headline: days both kept their promises",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapHeadlineSolo": "{count, plural, =1{1 workout day} other{{count} workout days}}",
+  "@recapHeadlineSolo": {
+    "description": "Recap card headline without a partner",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapPersonDays": "{name} · {count, plural, =1{1 day} other{{count} days}}",
+  "@recapPersonDays": {
+    "description": "Recap card: workout days of one person",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapPersonDaysWorkout": "{name} · {count, plural, =1{1 day} other{{count} days}} · {workout}",
+  "@recapPersonDaysWorkout": {
+    "description": "Recap card: workout days and most frequent workout of one person",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "workout": {
+        "type": "String"
+      }
+    }
+  },
+  "recapBestStreak": "{count, plural, =1{Best streak: 1 day} other{Best streak: {count} days}}",
+  "@recapBestStreak": {
+    "description": "Recap card: longest run inside the month",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapSoFar": "Through {date}",
+  "@recapSoFar": {
+    "description": "Recap card note while the month is still running",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recapEmpty": "No workouts recorded this month.",
+  "@recapEmpty": {
+    "description": "Recap sheet empty state"
+  },
+  "recapLegendDuoDay": "DuoDone",
+  "@recapLegendDuoDay": {
+    "description": "Recap calendar legend: a day both kept their promises"
+  },
+  "recapLegendSoloDay": "Workout day",
+  "@recapLegendSoloDay": {
+    "description": "Recap calendar legend without a partner"
+  },
+  "recapLegendOneOnly": "One of us",
+  "@recapLegendOneOnly": {
+    "description": "Recap calendar legend: only one person worked out"
+  },
+  "recapPrevMonth": "Previous month",
+  "@recapPrevMonth": {
+    "description": "Recap sheet button"
+  },
+  "recapNextMonth": "Next month",
+  "@recapNextMonth": {
+    "description": "Recap sheet button"
+  },
+  "recapSemantics": "Monthly recap card",
+  "@recapSemantics": {
+    "description": "Screen-reader label of the recap card"
+  },
+  "challengeNewYear2027Title": "New Year 21-day DuoDone challenge",
+  "@challengeNewYear2027Title": {
+    "description": "Title of the seasonal challenge newyear2027_duo21"
+  },
+  "challengeNewYear2027Hashtag": "#NewYearDuoDone",
+  "@challengeNewYear2027Hashtag": {
+    "description": "Hashtag of the challenge newyear2027_duo21 on the share card"
+  },
+  "challengeTeaserBody": "From {date}, keep your workout promises together for {days} days.",
+  "@challengeTeaserBody": {
+    "description": "Challenge banner before it starts (couple)",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "challengeTeaserBodySolo": "From {date}, keep your workout promise for {days} days.",
+  "@challengeTeaserBodySolo": {
+    "description": "Challenge banner before it starts (no partner)",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "challengeTeaserDday": "D-{days}",
+  "@challengeTeaserDday": {
+    "description": "Challenge banner chip: days until the challenge starts",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "challengeJoinBody": "{days, plural, =1{Start today: 1 day until {date}.} other{Start today: {days} days until {date}.}}",
+  "@challengeJoinBody": {
+    "description": "Challenge banner while it runs and I have not joined",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "challengeJoinCta": "Join",
+  "@challengeJoinCta": {
+    "description": "Challenge banner button"
+  },
+  "challengeProgress": "Day {day} of {total}",
+  "@challengeProgress": {
+    "description": "Challenge banner after joining",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "challengeResultTitle": "Challenge complete 🎉",
+  "@challengeResultTitle": {
+    "description": "Challenge banner after the last day"
+  },
+  "challengeDismiss": "Close",
+  "@challengeDismiss": {
+    "description": "Tooltip of the button that closes the challenge banner"
+  },
+  "challengeJoinSheetTitle": "How do you want to join?",
+  "@challengeJoinSheetTitle": {
+    "description": "Title of the sheet that asks how to join a challenge"
+  },
+  "challengeJoinExisting": "Join with my current promise",
+  "@challengeJoinExisting": {
+    "description": "Join sheet option: enter the running promise as it is"
+  },
+  "challengeJoinExistingSub": "{title} · its period stays the same",
+  "@challengeJoinExistingSub": {
+    "description": "Join sheet option detail; title is the promise line",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "challengeJoinNew": "Make a new promise for the challenge",
+  "@challengeJoinNew": {
+    "description": "Join sheet option: create a promise for the challenge"
+  },
+  "challengeJoinNewSub": "Runs until {date}",
+  "@challengeJoinNewSub": {
+    "description": "Join sheet option detail",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "challengeJoined": "You are in 💪",
+  "@challengeJoined": {
+    "description": "Snackbar after joining a challenge"
+  },
+  "challengeJoinFailed": "Could not join. Please try again in a moment.",
+  "@challengeJoinFailed": {
+    "description": "Snackbar when joining a challenge failed"
+  },
+  "planChallengeNotice": "{title} · this promise runs until {date}",
+  "@planChallengeNotice": {
+    "description": "Notice on the create-promise screen when the promise is made for a challenge",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planPreviewMetaUntil": "{days} · {time} · until {date}",
+  "@planPreviewMetaUntil": {
+    "description": "Create-promise summary for a challenge promise",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "shareCardChallengeDay": "{hashtag} · day {day}",
+  "@shareCardChallengeDay": {
+    "description": "Share card chip during a challenge",
+    "placeholders": {
+      "hashtag": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "shareCardChallengeDone": "{hashtag} · complete",
+  "@shareCardChallengeDone": {
+    "description": "Share card chip after a challenge ended",
+    "placeholders": {
+      "hashtag": {
+        "type": "String"
+      }
+    }
   },
   "nowPokeReplyComing": "On my way 🏃",
   "@nowPokeReplyComing": {

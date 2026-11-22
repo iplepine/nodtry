@@ -852,6 +852,7 @@ class RealRecordRepository implements RecordRepository {
       goalTitle: original.goalTitle,
       goalDate: original.goalDate,
       weeklyTarget: original.weeklyTarget,
+      challengeId: original.challengeId,
       storedRecordDates: original.storedRecordDates,
     );
   }
@@ -1096,6 +1097,13 @@ class RealRecordRepository implements RecordRepository {
   Future<void> clearWeeklyTarget(String planId) async {
     await _firestore.collection('plans').doc(planId).update({
       'weeklyTarget': FieldValue.delete(),
+    });
+  }
+
+  @override
+  Future<void> setPlanChallenge(String planId, String challengeId) async {
+    await _firestore.collection('plans').doc(planId).update({
+      'challengeId': challengeId,
     });
   }
 

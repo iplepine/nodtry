@@ -4,7 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../providers/repository_provider.dart';
 import '../../../utils/analytics.dart';
+import '../presentation/duo_recap_card.dart';
 import '../presentation/duo_share_card.dart';
+import 'duo_recap_provider.dart';
 import 'duo_stats_provider.dart';
 import 'review_prompt.dart';
 
@@ -22,6 +24,9 @@ abstract final class DuoMomentPrefKeys {
 
   /// 'yyyy-mm-dd' of the last day `duo_done_day` was logged.
   static const doneDayLogged = 'duo.done_day_logged_v1';
+
+  /// 'yyyy-mm' of the last month whose recap was offered by itself.
+  static const recapOfferedMonth = 'duo.recap_offered_month_v1';
 }
 
 String duoDayKey(DateTime d) =>
@@ -95,6 +100,12 @@ class DuoMomentsStore {
 
   Future<void> markDoneDayLogged(String day) =>
       _prefs.setString(DuoMomentPrefKeys.doneDayLogged, day);
+
+  String? get recapOfferedMonth =>
+      _prefs.getString(DuoMomentPrefKeys.recapOfferedMonth);
+
+  Future<void> markRecapOffered(String monthKey) =>
+      _prefs.setString(DuoMomentPrefKeys.recapOfferedMonth, monthKey);
 }
 
 /// Logs `duo_done_day {streak}` once per day when today is a duo day.
@@ -109,9 +120,10 @@ Future<bool> logDuoDoneDayOnce(DuoStats stats, DuoMomentsStore store) async {
 }
 
 /// The duo step of the home prompts: logs the duo day, offers the share card
-/// (once a day / once per milestone), then — never blocking — asks for a
-/// store review after the first duo day or the 3rd 인정. Returns whether a
-/// sheet was shown.
+/// (once a day / once per milestone) or — on the first days of a month, when
+/// no share card was offered — last month's recap (once per month), then —
+/// never blocking — asks for a store review after the first duo day or the
+/// 3rd 인정. Returns whether a sheet was shown.
 Future<bool> runDuoMomentPrompts(BuildContext context, WidgetRef ref) async {
   final SharedPreferences prefs;
   try {
@@ -139,6 +151,36 @@ Future<bool> runDuoMomentPrompts(BuildContext context, WidgetRef ref) async {
     if (!context.mounted) return false;
     await showDuoShareCardSheet(context, ref, trigger: offer.trigger);
     shown = true;
+  }
+
+  // Last month's recap, at the start of a month. Never on top of the share
+  // card: one sheet per visit.
+  if (!shown && context.mounted) {
+    final today = stats.today.date;
+    DuoRecap? lastMonth;
+    try {
+      lastMonth = ref.read(
+        duoRecapProvider(recapMonthOf(today, monthsAgo: 1)),
+      );
+    } catch (e) {
+      debugPrint('[DuoMoments] no recap offer: $e');
+    }
+    if (lastMonth != null &&
+        shouldOfferRecap(
+          lastMonth: lastMonth,
+          today: today,
+          offeredMonthKey: store.recapOfferedMonth,
+        )) {
+      await store.markRecapOffered(recapMonthKey(lastMonth.month));
+      if (!context.mounted) return false;
+      await showDuoRecapSheet(
+        context,
+        ref,
+        source: DuoRecapSource.prompt,
+        monthsAgo: 1,
+      );
+      shown = true;
+    }
   }
 
   // After the share sheet is gone, so the OS dialog never covers it.

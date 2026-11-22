@@ -14,6 +14,8 @@ import '../../../models/proof_photo.dart';
 import '../../../providers/repository_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/analytics.dart';
+import '../../challenge/application/challenge_providers.dart';
+import '../../challenge/presentation/challenge_labels.dart';
 import '../../connect/application/partner_label_provider.dart';
 import '../../plan/domain/workout_template.dart';
 import '../../proof/data/proof_photo_cache.dart';
@@ -61,6 +63,7 @@ class DuoShareCardData {
     required this.partner,
     this.photo,
     this.partnerPhoto,
+    this.challengeLabel,
   });
 
   final int streak;
@@ -76,6 +79,10 @@ class DuoShareCardData {
   /// My partner's 인증샷, only when they allowed it. With [photo] it makes
   /// the together layout; alone it is never shown.
   final Uint8List? partnerPhoto;
+
+  /// The seasonal challenge's frame ("#새해둘운완 7일째"), while one I
+  /// entered runs or shows its result; null otherwise.
+  final String? challengeLabel;
 
   ShareCardLayout get layout => photo != null && partnerPhoto != null
       ? ShareCardLayout.together
@@ -277,6 +284,28 @@ class DuoShareCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (data.challengeLabel case final challenge?) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      key: const ValueKey('share-card-challenge'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        challenge,
+                        style: TextStyle(
+                          color: AppColors.primaryPressed,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
                   if (photo == null)
                     // No photo: the day's workouts, big, instead of an
                     // empty gradient.
@@ -617,7 +646,18 @@ DuoShareCardData? duoShareCardDataOf(WidgetRef ref, AppLocalizations l10n) {
         l10n.partnerFallbackLabelStart,
     me: stats.today.me,
     partner: stats.today.partner,
+    challengeLabel: _challengeLabelOf(ref, l10n),
   );
+}
+
+/// The challenge frame for the card; a failing challenge lookup just means
+/// a card without it.
+String? _challengeLabelOf(WidgetRef ref, AppLocalizations l10n) {
+  try {
+    return challengeShareLabel(l10n, ref.read(challengeStatusProvider));
+  } catch (_) {
+    return null;
+  }
 }
 
 /// Shows the share card with [공유하기] / [다음에]. Returns whether it was
@@ -795,6 +835,7 @@ class _DuoShareSheetState extends ConsumerState<DuoShareSheet> {
       partnerLabel: data.partnerLabel,
       me: data.me,
       partner: data.partner,
+      challengeLabel: data.challengeLabel,
       photo: _effectiveLayout == ShareCardLayout.together
           ? _togetherMine
           : _photo,

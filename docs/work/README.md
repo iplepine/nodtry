@@ -19,6 +19,8 @@
 
 현재 active task: [`BT-009-pivot-release-prep`](./tasks/active/BT-009-pivot-release-prep.md) — 통합 검증, 열린 이슈, 대표 결정, 서버 배포, 심사 제출(수동 출시)
 
+추가 active task(2026-11-21): [`BT-010-growth-features-recap-challenge-kakao`](./tasks/active/BT-010-growth-features-recap-challenge-kakao.md) — 월간 리캡, 새해 21일 챌린지 약속, 카카오톡 초대 카드. 코드 완료·커밋(2026-11-22)·미배포.
+
 다음 후보 task(미생성): 소프트 런칭 운영(11/3~11/23, Gate 1 11/17) → 버스트 1(11/24~30) → 버스트 2(1/1~7). 일정 정본 `docs/go-to-market/LAUNCH_PLAN_DUOUNWAN.md` §2.
 
 ## 현재 제품 방향 (D-007, 2026-10-02)

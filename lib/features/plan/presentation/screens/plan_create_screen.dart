@@ -12,6 +12,8 @@ import '../../../../services/notification_service.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../utils/error_reporter.dart';
 import '../../../../utils/korean_particle.dart';
+import '../../../challenge/domain/duo_challenge.dart';
+import '../../../challenge/presentation/challenge_labels.dart';
 import '../../../connect/application/partner_label_provider.dart';
 import '../../../connect/presentation/widgets/invite_share_panel.dart';
 import '../../../onboarding/domain/onboarding_gate.dart';
@@ -29,6 +31,10 @@ class PlanCreateScreen extends ConsumerStatefulWidget {
   /// The plan to edit, or an id-less copy of one to start again from.
   final Plan? planToEdit;
 
+  /// The seasonal challenge a new promise is made for (it then runs to the
+  /// challenge's last day). Ignored with [planToEdit].
+  final DuoChallenge? challenge;
+
   /// Kept for route compatibility (`?startAtLastStep=true`); the screen has a
   /// single step, so there is nothing to jump to.
   final bool startAtLastStep;
@@ -36,6 +42,7 @@ class PlanCreateScreen extends ConsumerStatefulWidget {
   const PlanCreateScreen({
     super.key,
     this.planToEdit,
+    this.challenge,
     this.startAtLastStep = false,
   });
 
@@ -75,7 +82,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
       } else {
         // The provider outlives the screen: start clean, then offer the
         // partner's weekdays as the default.
-        _viewModel.dispatch(const ResetIntent());
+        _viewModel.dispatch(ResetIntent(challenge: widget.challenge));
         unawaited(_viewModel.dispatch(const PrefillPartnerDaysIntent()));
       }
     });
@@ -323,14 +330,7 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
                 ),
               ),
               _BottomBar(
-                summary: l10n.planPreviewMeta(
-                  planState.weeklyTarget != null
-                      ? l10n.planWeeklyTargetLabel(planState.weeklyTarget!)
-                      : planState.selectedDays.isEmpty
-                      ? '-'
-                      : planDaysLabel(l10n, planState.selectedDays),
-                  planDeadlineLabel(l10n, planState.notificationTime),
-                ),
+                summary: _summary(l10n, planState),
                 partnerNotice: hasPartner
                     ? l10n.planCreatePartnerNotice(partnerName)
                     : null,
@@ -346,15 +346,70 @@ class _PlanCreateScreenState extends ConsumerState<PlanCreateScreen> {
     );
   }
 
+  /// "월·수·금 · 오후 9시 · 28일", or "… · 1월 21일까지" for a promise made
+  /// for a challenge.
+  String _summary(AppLocalizations l10n, PlanCreateState planState) {
+    final days = planState.weeklyTarget != null
+        ? l10n.planWeeklyTargetLabel(planState.weeklyTarget!)
+        : planState.selectedDays.isEmpty
+        ? '-'
+        : planDaysLabel(l10n, planState.selectedDays);
+    final time = planDeadlineLabel(l10n, planState.notificationTime);
+    final challenge = _isEditing ? null : planState.challenge;
+    if (challenge == null) return l10n.planPreviewMeta(days, time);
+    return l10n.planPreviewMetaUntil(
+      days,
+      time,
+      challengeDateLabel(l10n, challenge.end),
+    );
+  }
+
   Widget _buildForm(
     AppLocalizations l10n,
     PlanCreateState planState, {
     required bool hasPartner,
     required String partnerName,
   }) {
+    final challenge = _isEditing ? null : planState.challenge;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (challenge != null) ...[
+          Container(
+            key: const ValueKey('plan-challenge-notice'),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.primarySoft,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.emoji_events_rounded,
+                  size: 18,
+                  color: AppColors.primaryPressed,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.planChallengeNotice(
+                      challengeTitle(l10n, challenge),
+                      challengeDateLabel(l10n, challenge.end),
+                    ),
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.35,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryPressed,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
         Text(
           hasPartner && !_isEditing
               ? l10n.planCreateHeaderWithPartner(partnerName)

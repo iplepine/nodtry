@@ -25,7 +25,7 @@
 ## 1. 피벗 퍼널 (스펙 §6의 8종 ★)
 | 이벤트 | 상태 | 언제 | 파라미터 |
 |---|---|---|---|
-| `invite_shared` ★ | 신규 | 초대 메시지 공유 완료 또는 코드 복사 | `channel`: `kakao`·`other`·`unknown`·`copy` / `surface`: `connect`·`onboarding`·`now_card`·`us` / `has_promise`(공유 시트만, 0·1) |
+| `invite_shared` ★ | 신규 | 초대 메시지 공유 완료 또는 코드 복사 | `channel`: `kakao`·`other`·`unknown`·`copy`·`kakao_card` / `surface`: `connect`·`onboarding`·`now_card`·`us` / `has_promise`(공유 시트·카카오톡 카드, 0·1). `kakao_card` = 카카오톡 초대 카드(카카오톡 공유 SDK, `KAKAO_NATIVE_APP_KEY` 설정 + 카카오톡 설치 시만). 카카오톡 친구 선택 화면이 열린 시점에 기록 — SDK가 실제 전송 여부를 알려 주지 않아 선택 화면에서 취소해도 셈. `kakao` = 공유 시트에서 카카오톡 선택(카드 실패 시 대체 경로 포함). 미배포·실기기 미검증([KAKAO_SHARE_SETUP.md](./KAKAO_SHARE_SETUP.md)) |
 | `invite_code_detected` ★ | 신규 | 코드를 찾거나 입력해 소유자 조회 | `source`: `clipboard`·`manual`·`link` / `matched`(0·1) |
 | `partner_connected` ★ | 변경 | 라이브 연결 순간 1회(앱 루트 `partnerLinkBinderProvider`) | `role`: `inviter`·`invitee`. 초대자 앱이 꺼져 있으면 초대자 쪽은 기록 안 됨 |
 | `proof_uploaded` ★ | 신규 | 했어 기록마다(사진 유무 무관) | `has_photo`(0·1) / `source`: `camera`·`gallery`·`none`. `has_photo=0`+`source≠none` = 업로드 실패 |
@@ -37,13 +37,15 @@
 ## 2. 연결·계정
 | 이벤트 | 상태 | 파라미터 / 메모 |
 |---|---|---|
-| `invite_code_shared` | 기존(유지) | `method`: `share`·`copy`. `invite_shared`와 함께 기록, 과거 퍼널 연속용 |
+| `invite_code_shared` | 기존(유지) | `method`: `share`·`copy`·`kakao_card`(카카오톡 초대 카드). `invite_shared`와 함께 기록, 과거 퍼널 연속용 |
 | `connect_code_submitted` | 변경 | `source`: `clipboard`·`manual`·`link` (신규) |
 | `connect_failed` | 변경 | `reason`: `not_found`(신규)·`self_code`(신규)·`owner_taken`(신규, 상대가 이미 다른 짝꿍과 연결)·`self_taken`(신규, 내가 이미 연결됨)·`exception` |
 | `partner_nickname_set` | 신규 | `kind`: `preset`·`custom`·`removed` (텍스트 미전송) |
 | `partner_disconnected` | 기존 | 내가 연결 해제 |
 | `login` (예약) | 기존 | `login_method`: `google`·`apple`·`anonymous`·`email` |
 | `login_failed` | 기존 | `method`, `reason`(예외 타입) |
+
+> GA 맞춤 측정기준(이벤트 범위, 2026-11-13 등록): `method`, `stage`, `reason`, `error_code`. 등록 이후 수집분부터 보고서에서 볼 수 있다.
 | `logout`, `account_deleted` | 기존 | — |
 
 ## 3. 약속·일일 루프
@@ -66,6 +68,17 @@
 | `pilot_settlement_recorded` | 기존 | 4주 정산 카드: `next_plan_intent`, `exit_reason`(없으면 `none`). 이름은 레거시 유지 |
 | `plan_approved`, `plan_rejected` | 레거시 | 구버전 승인 대기 약속에서만. `plan_rejected`: `has_reason` |
 | `partner_checked`, `partner_verified` | 미발생 | 해당 인텐트가 UI에서 더 이상 도달 불가 |
+
+## 3-1. 월간 리캡·기간 챌린지 (BT-010, 다음 릴리스)
+| 이벤트 | 상태 | 파라미터 / 메모 |
+|---|---|---|
+| `recap_opened` | 신규 | 리캡 시트를 열었다. `source`: `us`(우리 탭)·`prompt`(월초 자동 제안), `months_ago`(0 = 이번 달), `days`(그 달의 둘운완 날, 혼자면 운동한 날), `has_partner` |
+| `recap_shared` | 신규 | 리캡 카드를 공유했다. `target`(공유 카드와 같은 값), `source`, `months_ago`, `days`, `has_partner` |
+| `challenge_joined` | 신규 | 약속을 챌린지에 넣었다. `challenge`(`newyear2027_duo21`), `method`: `new_plan`·`existing_plan`, `day`(챌린지 며칠째), `has_partner` |
+| `challenge_banner_dismissed` | 신규 | 챌린지 배너를 직접 닫았다. `challenge`, `phase`: `teaser`·`running`·`result` |
+| `plan_created` | 변경 | 챌린지용 약속일 때만 `challenge` 파라미터가 붙는다 |
+
+GA 맞춤 측정기준으로 `source`, `months_ago`, `challenge`, `phase`를 등록해야 보고서에서 나눠 볼 수 있다(미등록).
 
 ## 4. 알림·설정·기타
 | 이벤트 | 상태 | 파라미터 / 메모 |

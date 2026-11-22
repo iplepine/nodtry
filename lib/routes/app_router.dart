@@ -4,6 +4,7 @@ import '../features/connect/presentation/screens/connect_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/developer_screen.dart';
 import '../features/plan/presentation/screens/plan_create_screen.dart';
+import '../features/challenge/domain/duo_challenge.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../features/settings/presentation/screens/notification_settings_screen.dart';
 import '../features/tutorial/presentation/tutorial_screen.dart';
@@ -256,11 +257,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.planCreate,
         name: 'plan-create',
         builder: (context, state) {
-          final planToEdit = state.extra as Plan?;
+          // A plan to edit / start again from, or the seasonal challenge a
+          // new promise is made for.
+          final extra = state.extra;
           final startAtLastStep =
               state.uri.queryParameters['startAtLastStep'] == 'true';
           return PlanCreateScreen(
-            planToEdit: planToEdit,
+            planToEdit: extra is Plan ? extra : null,
+            challenge: extra is DuoChallenge ? extra : null,
             startAtLastStep: startAtLastStep,
           );
         },

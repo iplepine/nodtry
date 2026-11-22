@@ -75,6 +75,11 @@ abstract class RecordRepository {
   /// leaves fields missing from `toMap` alone, so it can't drop it.
   Future<void> clearWeeklyTarget(String planId);
 
+  /// Enters the plan into a seasonal challenge (`plans.challengeId`,
+  /// `DuoChallenge.id`). Only that field is written, so a stale copy of the
+  /// plan can never overwrite its records.
+  Future<void> setPlanChallenge(String planId, String challengeId);
+
   /// 특정 계획을 삭제합니다.
   Future<void> deletePlan(String planId);
 

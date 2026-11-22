@@ -61,6 +61,9 @@
 | `assets/brand/splash_android12.png` | 1152 캔버스, 중앙 2/3 원 안에 그라데이션 원 + 마크 | Android 12+ 스플래시 |
 | `assets/brand/svg/*.svg` | 위 파일들의 벡터 원본 + `ic_stat_duodone.svg` | 수정·재출력용 |
 | `assets/images/app_icon.png` | 512 둥근 타일(투명 모서리) | 앱 안 로고(스플래시 화면·로그인) |
+| `assets/brand/challenge_newyear2027_1024.png` | 새해 21일 챌린지 대표 이미지 원본(21일 메달, 흰 배경, 1024). 코덱스 생성, 2026-11-22 대표 확정 | `assets/images/challenge_newyear2027.png`(256px로 줄인 앱 번들본)과 인앱 이벤트 이미지의 기준 |
+| `assets/images/challenge_newyear2027.png` | 위 원본을 256px로 줄인 것 | Now 탭 챌린지 배너(40pt)·참여 시트(72pt) |
+| `assets/brand/events/newyear2027/*.png` | 인앱 이벤트 ② 카드 16:9(1920×1080)·상세 9:16(1080×1920). 알파 없음 | App Store Connect 인앱 이벤트 미디어(수동 업로드) |
 | `android/app/src/main/res/drawable-*/ic_stat_duodone.png` | 흰색 실루엣, 24dp(2dp 여백) | 알림 작은 아이콘, FCM 기본 아이콘 |
 | `android/fastlane/metadata/android/*/images/icon.png` | 512 불투명 | Play 스토어 아이콘 |
 | `android/fastlane/metadata/android/*/images/featureGraphic.png` | 1024×500, ko `둘이 보면, 진짜 하게 돼요` / en `Workouts you actually do, together` | Play 피처 그래픽 |

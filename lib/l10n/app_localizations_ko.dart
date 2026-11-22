@@ -2433,6 +2433,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String get inviteShareSubject => '둘운완 초대';
 
   @override
+  String get inviteKakaoButton => '카카오톡으로 초대 보내기';
+
+  @override
+  String get inviteKakaoResend => '카카오톡으로 다시 보내기';
+
+  @override
+  String get inviteShareOtherApps => '다른 앱으로 보내기';
+
+  @override
+  String get inviteKakaoCardTitle => '나 운동 약속 걸었어 🤙 진짜 하는지 봐줘!';
+
+  @override
+  String get inviteKakaoCardTitleNoPromise => '나 운동 약속 걸 거야 🤙 진짜 하는지 봐줘!';
+
+  @override
+  String inviteKakaoCardDescription(String code) {
+    return '둘운완 깔고 코드 $code 넣으면 바로 연결돼';
+  }
+
+  @override
+  String get inviteKakaoCardButton => '초대 확인하기';
+
+  @override
   String get inviteHaveCodeLink => '초대 코드 받았어요';
 
   @override
@@ -2676,6 +2699,168 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get shareCardSemantics => '둘운완 공유 카드';
+
+  @override
+  String recapEntryTitle(String month) {
+    return '$month 리캡';
+  }
+
+  @override
+  String get recapEntrySubtitle => '한 달 운동을 카드 한 장으로 모아 봐요';
+
+  @override
+  String get recapSheetTitle => '월간 리캡';
+
+  @override
+  String recapSheetTitleOffer(String month) {
+    return '$month 리캡이 나왔어요 🎉';
+  }
+
+  @override
+  String recapTitleDuo(String month) {
+    return '우리의 $month';
+  }
+
+  @override
+  String recapTitleSolo(String month) {
+    return '나의 $month';
+  }
+
+  @override
+  String recapHeadlineDuo(int count) {
+    return '둘운완 $count일';
+  }
+
+  @override
+  String recapHeadlineSolo(int count) {
+    return '운동한 날 $count일';
+  }
+
+  @override
+  String recapPersonDays(String name, int count) {
+    return '$name $count일';
+  }
+
+  @override
+  String recapPersonDaysWorkout(String name, int count, String workout) {
+    return '$name $count일 · $workout';
+  }
+
+  @override
+  String recapBestStreak(int count) {
+    return '최장 연속 $count일';
+  }
+
+  @override
+  String recapSoFar(String date) {
+    return '$date까지';
+  }
+
+  @override
+  String get recapEmpty => '이 달에는 운동 기록이 없어요.';
+
+  @override
+  String get recapLegendDuoDay => '둘운완';
+
+  @override
+  String get recapLegendSoloDay => '운동한 날';
+
+  @override
+  String get recapLegendOneOnly => '한 명만';
+
+  @override
+  String get recapPrevMonth => '이전 달';
+
+  @override
+  String get recapNextMonth => '다음 달';
+
+  @override
+  String get recapSemantics => '월간 리캡 카드';
+
+  @override
+  String get challengeNewYear2027Title => '새해 둘운완 21일 챌린지';
+
+  @override
+  String get challengeNewYear2027Hashtag => '#새해둘운완';
+
+  @override
+  String challengeTeaserBody(String date, int days) {
+    return '$date부터 $days일, 둘이 운동 약속 지키기';
+  }
+
+  @override
+  String challengeTeaserBodySolo(String date, int days) {
+    return '$date부터 $days일, 운동 약속 지키기';
+  }
+
+  @override
+  String challengeTeaserDday(int days) {
+    return 'D-$days';
+  }
+
+  @override
+  String challengeJoinBody(String date, int days) {
+    return '오늘 시작하면 $date까지 $days일이에요.';
+  }
+
+  @override
+  String get challengeJoinCta => '참여하기';
+
+  @override
+  String challengeProgress(int day, int total) {
+    return '$day일째 · 전체 $total일';
+  }
+
+  @override
+  String get challengeResultTitle => '챌린지를 마쳤어요 🎉';
+
+  @override
+  String get challengeDismiss => '닫기';
+
+  @override
+  String get challengeJoinSheetTitle => '어떻게 참여할까요?';
+
+  @override
+  String get challengeJoinExisting => '지금 약속으로 참여하기';
+
+  @override
+  String challengeJoinExistingSub(String title) {
+    return '$title · 기간은 그대로예요';
+  }
+
+  @override
+  String get challengeJoinNew => '챌린지용 새 약속 만들기';
+
+  @override
+  String challengeJoinNewSub(String date) {
+    return '$date까지 이어지는 약속이에요';
+  }
+
+  @override
+  String get challengeJoined => '챌린지에 참여했어요 💪';
+
+  @override
+  String get challengeJoinFailed => '참여하지 못했어요. 잠시 후 다시 시도해 주세요.';
+
+  @override
+  String planChallengeNotice(String title, String date) {
+    return '$title · $date까지 이어지는 약속이에요';
+  }
+
+  @override
+  String planPreviewMetaUntil(String days, String time, String date) {
+    return '$days · $time · $date까지';
+  }
+
+  @override
+  String shareCardChallengeDay(String hashtag, int day) {
+    return '$hashtag $day일째';
+  }
+
+  @override
+  String shareCardChallengeDone(String hashtag) {
+    return '$hashtag 완주';
+  }
 
   @override
   String get nowPokeReplyComing => '지금 간다 🏃';

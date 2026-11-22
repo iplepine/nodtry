@@ -133,10 +133,14 @@ class AnalyticsEvent {
   static const accountDeleted = 'account_deleted';
 
   // Activation — partner connect
-  /// Legacy name kept for funnel continuity: `{method: copy|share}`.
+  /// Legacy name kept for funnel continuity:
+  /// `{method: copy|share|kakao_card}`.
   static const inviteCodeShared = 'invite_code_shared';
 
-  /// An invite went out: `{channel: kakao|other|unknown|copy, surface}`.
+  /// An invite went out:
+  /// `{channel: kakao|other|unknown|copy|kakao_card, surface}`. `kakao_card`
+  /// is the KakaoTalk invite card (Kakao Share); `kakao` is KakaoTalk picked
+  /// in the share sheet.
   static const inviteShared = 'invite_shared';
 
   /// A code was found or typed and looked up:
@@ -187,6 +191,23 @@ class AnalyticsEvent {
   /// today|milestone|manual, streak, layout: single|together}` — the share
   /// card went out.
   static const shareCardShared = 'share_card_shared';
+
+  /// `{challenge, method: new_plan|existing_plan, day, has_partner}` — a
+  /// promise was entered into a seasonal challenge (`day` = which day of the
+  /// challenge it was).
+  static const challengeJoined = 'challenge_joined';
+
+  /// `{challenge, phase: teaser|running|result}` — the Now tab's challenge
+  /// banner was closed by hand.
+  static const challengeBannerDismissed = 'challenge_banner_dismissed';
+
+  /// `{source: us|prompt, months_ago, days, has_partner}` — the monthly recap
+  /// sheet was opened (`days` = that month's headline days).
+  static const recapOpened = 'recap_opened';
+
+  /// `{target, source: us|prompt, months_ago, days, has_partner}` — the
+  /// monthly recap card went out.
+  static const recapShared = 'recap_shared';
 
   /// `{trigger: first_duo_day|third_props, count}` — in_app_review was asked
   /// (the OS decides whether it actually shows).

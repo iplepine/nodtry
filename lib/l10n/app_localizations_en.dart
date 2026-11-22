@@ -2561,6 +2561,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteShareSubject => 'DuoDone invite';
 
   @override
+  String get inviteKakaoButton => 'Send invite on KakaoTalk';
+
+  @override
+  String get inviteKakaoResend => 'Send again on KakaoTalk';
+
+  @override
+  String get inviteShareOtherApps => 'Send with another app';
+
+  @override
+  String get inviteKakaoCardTitle => 'I made a workout promise 🤙 Back me up!';
+
+  @override
+  String get inviteKakaoCardTitleNoPromise =>
+      'I\'m making a workout promise 🤙 Back me up!';
+
+  @override
+  String inviteKakaoCardDescription(String code) {
+    return 'Get DuoDone and enter code $code to connect';
+  }
+
+  @override
+  String get inviteKakaoCardButton => 'Open invite';
+
+  @override
   String get inviteHaveCodeLink => 'I got an invite code';
 
   @override
@@ -2832,6 +2856,205 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareCardSemantics => 'DuoDone share card';
+
+  @override
+  String recapEntryTitle(String month) {
+    return '$month recap';
+  }
+
+  @override
+  String get recapEntrySubtitle => 'Your month of workouts on one card';
+
+  @override
+  String get recapSheetTitle => 'Monthly recap';
+
+  @override
+  String recapSheetTitleOffer(String month) {
+    return 'Your $month recap is here 🎉';
+  }
+
+  @override
+  String recapTitleDuo(String month) {
+    return 'Our $month';
+  }
+
+  @override
+  String recapTitleSolo(String month) {
+    return 'My $month';
+  }
+
+  @override
+  String recapHeadlineDuo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count DuoDone days',
+      one: '1 DuoDone day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recapHeadlineSolo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count workout days',
+      one: '1 workout day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recapPersonDays(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$name · $_temp0';
+  }
+
+  @override
+  String recapPersonDaysWorkout(String name, int count, String workout) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$name · $_temp0 · $workout';
+  }
+
+  @override
+  String recapBestStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Best streak: $count days',
+      one: 'Best streak: 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recapSoFar(String date) {
+    return 'Through $date';
+  }
+
+  @override
+  String get recapEmpty => 'No workouts recorded this month.';
+
+  @override
+  String get recapLegendDuoDay => 'DuoDone';
+
+  @override
+  String get recapLegendSoloDay => 'Workout day';
+
+  @override
+  String get recapLegendOneOnly => 'One of us';
+
+  @override
+  String get recapPrevMonth => 'Previous month';
+
+  @override
+  String get recapNextMonth => 'Next month';
+
+  @override
+  String get recapSemantics => 'Monthly recap card';
+
+  @override
+  String get challengeNewYear2027Title => 'New Year 21-day DuoDone challenge';
+
+  @override
+  String get challengeNewYear2027Hashtag => '#NewYearDuoDone';
+
+  @override
+  String challengeTeaserBody(String date, int days) {
+    return 'From $date, keep your workout promises together for $days days.';
+  }
+
+  @override
+  String challengeTeaserBodySolo(String date, int days) {
+    return 'From $date, keep your workout promise for $days days.';
+  }
+
+  @override
+  String challengeTeaserDday(int days) {
+    return 'D-$days';
+  }
+
+  @override
+  String challengeJoinBody(String date, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Start today: $days days until $date.',
+      one: 'Start today: 1 day until $date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get challengeJoinCta => 'Join';
+
+  @override
+  String challengeProgress(int day, int total) {
+    return 'Day $day of $total';
+  }
+
+  @override
+  String get challengeResultTitle => 'Challenge complete 🎉';
+
+  @override
+  String get challengeDismiss => 'Close';
+
+  @override
+  String get challengeJoinSheetTitle => 'How do you want to join?';
+
+  @override
+  String get challengeJoinExisting => 'Join with my current promise';
+
+  @override
+  String challengeJoinExistingSub(String title) {
+    return '$title · its period stays the same';
+  }
+
+  @override
+  String get challengeJoinNew => 'Make a new promise for the challenge';
+
+  @override
+  String challengeJoinNewSub(String date) {
+    return 'Runs until $date';
+  }
+
+  @override
+  String get challengeJoined => 'You are in 💪';
+
+  @override
+  String get challengeJoinFailed =>
+      'Could not join. Please try again in a moment.';
+
+  @override
+  String planChallengeNotice(String title, String date) {
+    return '$title · this promise runs until $date';
+  }
+
+  @override
+  String planPreviewMetaUntil(String days, String time, String date) {
+    return '$days · $time · until $date';
+  }
+
+  @override
+  String shareCardChallengeDay(String hashtag, int day) {
+    return '$hashtag · day $day';
+  }
+
+  @override
+  String shareCardChallengeDone(String hashtag) {
+    return '$hashtag · complete';
+  }
 
   @override
   String get nowPokeReplyComing => 'On my way 🏃';

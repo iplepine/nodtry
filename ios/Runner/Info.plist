@@ -38,6 +38,13 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<!-- KakaoTalk Share: lets the Kakao SDK see whether KakaoTalk is
+		     installed (kakaolink://send) before offering the invite card.
+		     docs/operations/KAKAO_SHARE_SETUP.md -->
+		<string>kakaolink</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBonjourServices</key>

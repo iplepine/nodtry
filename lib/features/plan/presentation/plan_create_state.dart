@@ -1,4 +1,5 @@
 import '../../../models/plan_model.dart';
+import '../../challenge/domain/duo_challenge.dart';
 import '../domain/workout_template.dart';
 
 const _unset = Object();
@@ -65,6 +66,11 @@ class PlanCreateState {
   /// The optional D-day goal (a calendar date). Null = no goal.
   final DateTime? goalDate;
 
+  /// The seasonal challenge this new promise is made for: it then runs to
+  /// the challenge's last day instead of 28 days. Null for an ordinary
+  /// promise and when editing.
+  final DuoChallenge? challenge;
+
   const PlanCreateState({
     this.action = '',
     this.description = '',
@@ -83,6 +89,7 @@ class PlanCreateState {
     this.originalPlan,
     this.goalTitle = '',
     this.goalDate,
+    this.challenge,
   });
 
   /// Id of the tile last applied (same string as its workoutType), or null.
@@ -164,6 +171,7 @@ class PlanCreateState {
       originalPlan: originalPlan ?? this.originalPlan,
       goalTitle: goalTitle ?? this.goalTitle,
       goalDate: goalDate == _unset ? this.goalDate : goalDate as DateTime?,
+      challenge: challenge,
     );
   }
 }
@@ -249,6 +257,9 @@ class SavePlanIntent extends PlanCreateIntent {
   const SavePlanIntent();
 }
 
+/// Start over with an empty form — for [challenge] when the promise is made
+/// to enter one.
 class ResetIntent extends PlanCreateIntent {
-  const ResetIntent();
+  final DuoChallenge? challenge;
+  const ResetIntent({this.challenge});
 }
