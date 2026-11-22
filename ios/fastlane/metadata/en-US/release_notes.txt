@@ -1,5 +1,5 @@
-Login is now more reliable.
+Look back on your month, and get ready for the New Year.
 
-- Temporary profile setup failures are retried automatically.
-- Cancelled sign-ins are no longer treated as a success or failure.
-- Improved diagnostics help us identify and resolve login issues faster.
+- Monthly recap: the days you both worked out, each person's days and your longest streak on one card you can share. Find it in the Us tab any time.
+- New Year 21-day DuoDone challenge: keep your workout promise together from Jan 1 to 21. It appears on the Now tab from Dec 18.
+- More reliable sign-in and small fixes.
