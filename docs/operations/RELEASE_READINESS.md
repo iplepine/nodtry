@@ -9,9 +9,25 @@
 
 # 출시 준비 체크리스트
 
-마지막 갱신: 2026-11-12
+마지막 갱신: 2026-11-22
 
-## 진행 중 릴리스: `1.2.1+90` — 로그인 안정화 핫픽스
+## 진행 중 릴리스: `1.3.0+91` — 월간 리캡·새해 21일 챌린지(·카카오 초대 카드는 꺼진 채)
+- 대표 승인: 2026-11-22 "프로덕션 출시까지 진행해". 버전 번호 1.3.0은 기능 추가라 minor로 올렸다(기술실 판단).
+- 범위(BT-010): 월간 리캡, 새해 21일 챌린지 배너·참여(12/18부터 보임), 카카오톡 초대 카드 코드(`.env`에 `KAKAO_NATIVE_APP_KEY`가 없어 **꺼진 상태**로 나감), 챌린지 대표 이미지. `codex/hotfix-auth-login-1.2.1`(1.2.1+90 로그인 핫픽스)을 `release/1.2.0`에 병합한 뒤 빌드했다.
+- 릴리스 게이트:
+  - `flutter analyze`: 이슈 0
+  - `flutter test`: 1,023/1,023 통과(병합 후)
+  - Android AAB: 79.6MB, versionCode 91, 운영 업로드 키 SHA1 `40:BF:AD:96:11:D6:0E:B1:88:CB:C7:F0:AF:78:3E:B8:CD:90:7D:C3` 확인. 카카오 SDK는 권한을 추가하지 않고 `<queries>`만 추가한다. `com.google.android.gms.permission.AD_ID`는 계속 제거된 상태.
+  - iOS archive·IPA export: 성공, Runner 1.3.0(91)·DuoWidgetExtension 포함
+  - iOS 시뮬레이터(디버그 빌드, 기존 로그인 계정) 실행 확인: 앱 시작, 지금 탭(11/22라 챌린지 배너 없음이 정상), 우리 탭의 `11월 리캡` 진입, 리캡 카드 11월·10월 전환. 공유 버튼은 누르지 않았다.
+  - **미확인**: 실기기, 리캡 공유 시트, 챌린지 배너의 실제 화면(테스트와 테스트 렌더로만 확인), 카카오 전송.
+- 사용자 데이터 마이그레이션과 Firebase 서버 배포는 없다(`plans.challengeId`는 선택 필드, 규칙·함수 변경 없음).
+- 릴리스에서 뺀 것: 워킹트리에 있던 미커밋 작업(정책 링크의 회사 사이트 전환 `lib/core/legal_links.dart`, fastlane `*_url.txt`)은 빌드·메타데이터 업로드 동안 `git stash`로 빼 두었다가 복원했다. 이번 바이너리와 스토어 URL에는 들어가지 않았다.
+- 2026-11-22 10:44 KST, Android `fastlane production` 성공. Google Play API에서 production 트랙 versionCode `[91]`을 확인했다(`release_status=completed`, 출시 노트 ko-KR·en-US).
+- 2026-11-22 10:53 KST, iOS `fastlane release`가 메타데이터·스크린샷·바이너리 업로드까지 마쳤으나(`UPLOAD SUCCEEDED with no errors`) altool의 `CDUploaderStateInfoResumeFilePath` 부수 오류를 fastlane이 실패로 처리해 심사 제출 전에 멈췄다. 새 레인 `fastlane submit_uploaded`(재빌드·재업로드 없이 올라간 빌드 제출)로 10:56 KST 1.3.0 build 91 선택·**심사 제출 완료**. 승인 시 자동 공개(`automatic_release=true`).
+- 남은 일: 양 스토어 심사·공개 상태 확인 후 `config/app.latestBuild = 91` 반영(대표 승인 사항). In-App Event ②(12/15 제출)와 이벤트 이미지 확인. Kakao Developers 등록은 보류.
+
+## 지난 릴리스: `1.2.1+90` — 로그인 안정화 핫픽스
 - 2026-11-12 KST, Firebase Analytics의 `login_failed`를 점검했다. 최근 원시 이벤트 6건 중 4건은 인증 성공 뒤 Firestore 프로필 초기화가 실패한 경우였고, Android Firebase Auth 실패 1건과 iOS Apple 로그인 실패 추정 1건이 있었다. 기존 집계 28건/15명에는 실제 인증 실패와 후속 초기화 실패가 섞여 있어 로그인 장애율로 그대로 해석할 수 없다.
 - 수정 범위:
   - 인증 제공자 실패는 `login_failed`, 인증 성공 뒤 프로필 초기화 실패는 `profile_setup_failed`로 분리하고 `method`, `stage`, `reason`, `error_code`만 기록한다. 취소는 실패 이벤트에서 제외한다.

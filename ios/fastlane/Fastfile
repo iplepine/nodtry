@@ -152,6 +152,31 @@ platform :ios do
     build_and_submit(automatic_release: true)
   end
 
+  desc "Submit the build that is ALREADY uploaded for this pubspec version (no rebuild, no re-upload);"
+  desc "releases automatically once approved. For when `release` uploaded the binary but stopped before"
+  desc "submitting (e.g. altool printed UPLOAD SUCCEEDED and then a ContentDelivery resume-file error)."
+  lane :submit_uploaded do
+    api_key = app_store_connect_api_key(
+      key_id: "XXU6VU63TR",
+      issuer_id: "6b17b540-3b79-4d8c-beaf-ca1c83e566f1",
+      key_filepath: "./fastlane/AuthKey_XXU6VU63TR.p8"
+    )
+    upload_to_app_store(
+      api_key: api_key,
+      app_version: app_store_version,
+      build_number: build_number,
+      force: true,
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      skip_metadata: false,
+      submit_for_review: true,
+      automatic_release: true,
+      reject_if_possible: true,
+      copyright: copyright_text,
+      precheck_include_in_app_purchases: false
+    )
+  end
+
   desc "Build, upload and submit for review; you release manually in App Store Connect after approval"
   lane :release_manual do
     build_and_submit(automatic_release: false)

@@ -83,7 +83,8 @@ ID: `BT-010-growth-features-recap-challenge-kakao`
 - [x] 대표: 챌린지 대표 이미지 2차 C안(21일 메달) 확정(2026-11-22)
 - [ ] 대표: 인앱 이벤트 이미지 2종(카드 16:9, 상세 9:16) 확인
 - [x] 커밋·푸시(대표 요청, 2026-11-22, `release/1.2.0`)
-- [ ] 버전 번호 결정, 스토어 제출(대표 승인)
+- [x] 프로덕션 출시(대표 승인 2026-11-22): `1.3.0+91`. Google Play 프로덕션 반영, App Store 심사 제출(승인 시 자동 공개). 상세 `docs/operations/RELEASE_READINESS.md`
+- [ ] 스토어 심사·공개 확인 후 `config/app.latestBuild = 91`(대표 승인)
 
 ## 열린 이슈 · 위험
 
