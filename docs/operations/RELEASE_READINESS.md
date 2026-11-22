@@ -1,17 +1,36 @@
 <!-- COMMIT_STATUS START -->
 > **커밋 상태**
-> - 기준 커밋: `ca33b3afce18d181a507f9c3b524991d4fdbb21a` (`feat/couple-workout-pivot`)
-> - 최근 커밋: `ca33b3afce18` docs: 둘운완 pivot spec, decision D-007, launch plan and runbook
-> - 커밋 일시: `2026-10-03T07:18:28+09:00`
-> - 워킹트리: `dirty (17 files)`
-> - 문서 갱신: `2026-10-03 07:18:57 +0900`
+> - 기준 커밋: `63f48fe31a0300ca812a4bc3460889b3a02a1719` (`codex/hotfix-auth-login-1.2.1`)
+> - 최근 커밋: `63f48fe31a03` fix(auth): harden login profile setup
+> - 커밋 일시: `2026-11-12T08:48:56+09:00`
+> - 워킹트리: `dirty (2 files)`
+> - 문서 갱신: `2026-11-12 09:05:51 +0900`
 <!-- COMMIT_STATUS END -->
 
 # 출시 준비 체크리스트
 
-마지막 갱신: 2026-11-10
+마지막 갱신: 2026-11-12
 
-## 진행 중 릴리스: `1.2.0+88` — **미배포** (브랜치 `release/1.2.0`, 원격 미푸시)
+## 진행 중 릴리스: `1.2.1+90` — 로그인 안정화 핫픽스
+- 2026-11-12 KST, Firebase Analytics의 `login_failed`를 점검했다. 최근 원시 이벤트 6건 중 4건은 인증 성공 뒤 Firestore 프로필 초기화가 실패한 경우였고, Android Firebase Auth 실패 1건과 iOS Apple 로그인 실패 추정 1건이 있었다. 기존 집계 28건/15명에는 실제 인증 실패와 후속 초기화 실패가 섞여 있어 로그인 장애율로 그대로 해석할 수 없다.
+- 수정 범위:
+  - 인증 제공자 실패는 `login_failed`, 인증 성공 뒤 프로필 초기화 실패는 `profile_setup_failed`로 분리하고 `method`, `stage`, `reason`, `error_code`만 기록한다. 취소는 실패 이벤트에서 제외한다.
+  - 프로필 초기화를 한 번 재시도한다. Google/Apple/이메일 로그인은 최종 실패 시 세션을 정리하고, 익명 사용자는 UID 유실을 막기 위해 세션을 유지한다.
+  - 이메일 가입은 계정 생성 뒤 프로필 초기화만 실패한 경우 다음 시도에서 기존 인증 세션으로 초기화만 재시도해 `email-already-in-use`로 막히지 않게 했다.
+  - Apple 로그인 오류 코드를 보존하고, 표시 이름 갱신 실패가 정상 로그인을 실패로 바꾸지 않게 했다.
+- 릴리스 게이트:
+  - `flutter analyze`: 이슈 0
+  - `flutter test`: 942/942 통과
+  - Android AAB: 78.6MB, 운영 업로드 키 SHA1 `40:BF:AD:96:11:D6:0E:B1:88:CB:C7:F0:AF:78:3E:B8:CD:90:7D:C3` 확인
+  - iOS archive·IPA export: 성공, Runner 1.2.1(90)·DuoWidgetExtension 포함
+- 사용자 데이터 마이그레이션과 Firebase 서버 배포는 없다. 앱 클라이언트 핫픽스만 배포한다.
+- 2026-11-12 08:50 KST, 첫 Play 업로드는 전용 워크트리에 운영 서명 설정이 없어 debug 키 SHA1 `A1:8C:CF:A8:F2:C1:4E:D2:AB:22:9D:E3:49:9D:BF:FB:0A:EE:D0:57`로 빌드돼 거절됐다. 운영 `key.properties`와 업로드 키를 연결하고 AAB 인증서 지문을 확인한 뒤 재빌드했다.
+- 2026-11-12 08:52 KST, Android `fastlane production` 성공. Google Play API에서 production 트랙 versionCode `[90]`을 확인했다(`release_status=completed`).
+- 2026-11-12 09:05 KST, iOS `fastlane release` 성공. App Store Connect에서 1.2.1 build 90 처리·선택 후 심사 제출을 완료했고, 승인 시 자동 공개(`automatic_release=true`)로 설정했다.
+- 남은 일: 양 스토어 심사·공개 상태 확인 후 `config/app.latestBuild = 90` 반영. 그 전에는 기존 사용자의 업데이트 유도 기준을 변경하지 않는다.
+
+## 지난 릴리스: `1.2.0+89` — Android 프로덕션·iOS 배포 완료
+- 2026-11-12 KST 확인: Google Play production versionCode 89가 서비스 중이고, App Store Connect의 1.2.0 build 89는 `Ready for Distribution` 상태다.
 - 2026-11-10 23:20 KST, 기준 커밋 `dd05de7`(Flutter 3.47.9 / Firebase Apple 12.19.3 업그레이드 직후) 게이트 A 재검증. **실행·통과**:
   - `flutter analyze`: 이슈 0
   - `flutter test`: 933/933 통과

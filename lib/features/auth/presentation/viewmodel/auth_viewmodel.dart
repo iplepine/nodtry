@@ -1,18 +1,22 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/auth_failure_telemetry.dart';
+import '../../domain/auth_login_result.dart';
 import '../auth_state.dart';
 import '../../../../providers/repository_provider.dart';
 import '../../../../utils/analytics.dart';
 import '../../../../utils/error_reporter.dart';
 import '../../../../utils/ui_error_codes.dart';
+
 // Removed unused AuthService import
 
 /// Maps a failure to a stable code the widget layer turns into localized copy.
 /// Firebase's own messages are English-only implementation detail — they used to
 /// be shown verbatim ("[firebase_auth/wrong-password] The password is invalid…").
 String _authErrorCodeFor(Object error) {
-  if (error is! FirebaseAuthException) return AuthErrorCode.generic;
+  if (error is TimeoutException) return AuthErrorCode.network;
+  if (error is! FirebaseException) return AuthErrorCode.generic;
   return switch (error.code) {
     // Recent Firebase versions collapse wrong-password/user-not-found into
     // invalid-credential; keep the older codes mapped for older SDK responses.
@@ -22,7 +26,9 @@ String _authErrorCodeFor(Object error) {
     'invalid-email' => AuthErrorCode.invalidEmail,
     'weak-password' => AuthErrorCode.weakPassword,
     'too-many-requests' => AuthErrorCode.tooManyRequests,
-    'network-request-failed' => AuthErrorCode.network,
+    'network-request-failed' ||
+    'unavailable' ||
+    'deadline-exceeded' => AuthErrorCode.network,
     _ => AuthErrorCode.generic,
   };
 }
@@ -39,6 +45,21 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
 
   Future<void> dispatch(AuthIntent intent) async {
     final prevState = state.value ?? const AuthState();
+    final isLoginIntent = switch (intent) {
+      LoginWithGoogleIntent() ||
+      LoginWithAppleIntent() ||
+      LoginGuestIntent() ||
+      LoginWithEmailIntent() ||
+      SignUpWithEmailIntent() => true,
+      _ => false,
+    };
+    final isLoginInProgress =
+        prevState.isAutoLoggingIn ||
+        prevState.isGoogleLoading ||
+        prevState.isAppleLoading ||
+        prevState.isGuestLoading ||
+        prevState.isEmailLoading;
+    if (isLoginIntent && isLoginInProgress) return;
 
     try {
       if (intent is CheckAuthIntent) {
@@ -65,13 +86,23 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
         SignUpWithEmailIntent() => 'email',
         _ => null,
       };
+      final telemetry = authFailureTelemetry(e, stack);
       if (failedMethod != null) {
-        AnalyticsService.log(AnalyticsEvent.loginFailed, {
+        final eventName = telemetry.stage == AuthFailureStage.profileSetup
+            ? AnalyticsEvent.profileSetupFailed
+            : AnalyticsEvent.loginFailed;
+        AnalyticsService.log(eventName, {
           'method': failedMethod,
-          'reason': e.runtimeType.toString(),
+          'stage': telemetry.stage.analyticsValue,
+          'reason': telemetry.reason,
+          'error_code': telemetry.errorCode,
         });
       }
-      ErrorReporter.record(e, stack, reason: 'authDispatch:$failedMethod');
+      ErrorReporter.record(
+        telemetry.error,
+        telemetry.stackTrace,
+        reason: 'authDispatch:$failedMethod:${telemetry.stage.analyticsValue}',
+      );
       // Publish the failure exactly once. Emitting AsyncError here *and* then
       // AsyncData below made the splash listener fire on both branches, so a
       // single failed login queued two identical snackbars.
@@ -82,7 +113,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
           isAppleLoading: false,
           isGuestLoading: false,
           isEmailLoading: false,
-          errorCode: _authErrorCodeFor(e),
+          errorCode: _authErrorCodeFor(telemetry.error),
         ),
       );
     }
@@ -111,9 +142,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
       }
     } else {
       // 사용자가 없는 경우(로그아웃 상태 등)에 대비하여 로딩 상태를 false로 유지
-      state = AsyncValue.data(
-        state.value!.copyWith(isAutoLoggingIn: false),
-      );
+      state = AsyncValue.data(state.value!.copyWith(isAutoLoggingIn: false));
     }
   }
 
@@ -123,8 +152,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
     );
     try {
       final useCase = ref.read(loginWithGoogleUseCaseProvider);
-      await useCase.execute();
-      AnalyticsService.logLogin('google');
+      await _handleLoginResult(await useCase.execute(), 'google');
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isGoogleLoading: false));
     }
@@ -136,8 +164,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
     );
     try {
       final useCase = ref.read(loginWithAppleUseCaseProvider);
-      await useCase.execute();
-      AnalyticsService.logLogin('apple');
+      await _handleLoginResult(await useCase.execute(), 'apple');
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isAppleLoading: false));
     }
@@ -148,9 +175,10 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
       state.value!.copyWith(isGuestLoading: true, errorCode: null),
     );
     try {
-      await ref.read(guestLoginUseCaseProvider).execute();
-      ref.invalidate(myProfileProvider);
-      AnalyticsService.logLogin('anonymous');
+      await _handleLoginResult(
+        await ref.read(guestLoginUseCaseProvider).execute(),
+        'anonymous',
+      );
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isGuestLoading: false));
     }
@@ -162,8 +190,7 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
     );
     try {
       final useCase = ref.read(loginWithEmailUseCaseProvider);
-      await useCase.execute(email, password);
-      AnalyticsService.logLogin('email');
+      await _handleLoginResult(await useCase.execute(email, password), 'email');
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isEmailLoading: false));
     }
@@ -175,10 +202,27 @@ class AuthViewModel extends AsyncNotifier<AuthState> {
     );
     try {
       final useCase = ref.read(signUpWithEmailUseCaseProvider);
-      await useCase.execute(email, password);
-      AnalyticsService.logLogin('email');
+      await _handleLoginResult(await useCase.execute(email, password), 'email');
     } finally {
       state = AsyncValue.data(state.value!.copyWith(isEmailLoading: false));
+    }
+  }
+
+  Future<void> _handleLoginResult(AuthLoginResult result, String method) async {
+    switch (result.outcome) {
+      case AuthLoginOutcome.success:
+        ref.invalidate(myProfileProvider);
+        AnalyticsService.logLogin(method);
+        return;
+      case AuthLoginOutcome.cancelled:
+        return;
+      case AuthLoginOutcome.profileSetupFailed:
+        final error = result.error!;
+        final stackTrace = result.stackTrace!;
+        Error.throwWithStackTrace(
+          AuthProfileSetupException(error, stackTrace),
+          stackTrace,
+        );
     }
   }
 }

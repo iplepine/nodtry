@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math' as math;
+
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -7,12 +8,14 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../features/auth/domain/apple_sign_in_exception.dart';
+import '../utils/error_reporter.dart';
+
 /// Auth error messages — service runs without BuildContext, so we localize by
 /// device locale. Why: error strings end up in SnackBars via splash_screen
 /// listen; localizing here keeps the service self-contained.
 String _authString(String key) {
-  final locale =
-      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  final locale = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
   final isKo = locale.startsWith('ko');
   switch (key) {
     case 'appleDisabled':
@@ -32,9 +35,7 @@ String _authString(String key) {
           ? 'Apple 로그인 중 오류가 발생했습니다.'
           : 'An error occurred during Apple sign-in.';
     case 'appleCancelled':
-      return isKo
-          ? 'Apple 로그인이 취소되었습니다.'
-          : 'Apple sign-in was cancelled.';
+      return isKo ? 'Apple 로그인이 취소되었습니다.' : 'Apple sign-in was cancelled.';
     case 'appleExportFailed':
       return isKo
           ? 'Apple 로그인 자격 증명을 내보내는 중 오류가 발생했습니다.'
@@ -153,7 +154,9 @@ class AuthService {
       case 'missing-or-invalid-nonce':
         return Exception(_authString('appleNonceFailed'));
       default:
-        return Exception(e.message ?? '${_authString('appleGenericCode')} (${e.code})');
+        return Exception(
+          e.message ?? '${_authString('appleGenericCode')} (${e.code})',
+        );
     }
   }
 
@@ -187,7 +190,10 @@ class AuthService {
     try {
       final isAvailable = await SignInWithApple.isAvailable();
       if (!isAvailable) {
-        throw Exception(_authString('appleUnavailable'));
+        throw AppleSignInException(
+          code: 'unavailable',
+          message: _authString('appleUnavailable'),
+        );
       }
 
       final rawNonce = _generateNonce();
@@ -203,7 +209,10 @@ class AuthService {
 
       final identityToken = appleCredential.identityToken;
       if (identityToken == null || identityToken.isEmpty) {
-        throw Exception(_authString('appleNoToken'));
+        throw AppleSignInException(
+          code: 'missing-identity-token',
+          message: _authString('appleNoToken'),
+        );
       }
 
       final oauthCredential = AppleAuthProvider.credentialWithIDToken(
@@ -228,7 +237,13 @@ class AuthService {
             familyName,
           ].where((s) => s != null && s.isNotEmpty).join(' ');
           if (displayName.isNotEmpty) {
-            await userCredential.user?.updateDisplayName(displayName);
+            try {
+              await userCredential.user?.updateDisplayName(displayName);
+            } catch (e) {
+              // The Firebase session is valid. A cosmetic profile update must
+              // not turn a successful Apple sign-in into a login failure.
+              debugPrint('Apple display name update failed (ignored): $e');
+            }
           }
         }
       }
@@ -236,18 +251,16 @@ class AuthService {
       return userCredential;
     } on FirebaseAuthException catch (e) {
       debugPrint("Error signing in with Apple: $e");
-      throw _mapAppleFirebaseException(e);
+      rethrow;
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) {
         return null;
       }
       debugPrint("Error signing in with Apple: $e");
-      throw _mapAppleAuthorizationException(e);
+      rethrow;
     } on PlatformException catch (e) {
       debugPrint("Error signing in with Apple: $e");
-      throw Exception(
-        e.message ?? '${_authString('applePlatformError')} (${e.code})',
-      );
+      rethrow;
     } catch (e) {
       debugPrint("Error signing in with Apple: $e");
       rethrow;
@@ -345,14 +358,55 @@ class AuthService {
 
   /// 로그아웃
   Future<void> signOut() async {
+    await _signOutFirebaseAndGoogle();
+  }
+
+  /// Signs out only when the session still belongs to the login attempt that
+  /// requested cleanup. A newer successful login must never be signed out by
+  /// an older attempt finishing its profile setup late.
+  Future<void> signOutIfCurrentUser(String expectedUid) async {
+    if (_auth.currentUser?.uid != expectedUid) return;
+    try {
+      await _auth.signOut();
+    } catch (error, stackTrace) {
+      ErrorReporter.record(
+        error,
+        stackTrace,
+        reason: 'authProfileSetupSessionCleanup',
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> _signOutFirebaseAndGoogle() async {
+    Object? firebaseError;
+    StackTrace? firebaseStackTrace;
+    Object? googleError;
+    StackTrace? googleStackTrace;
+
+    try {
+      await _auth.signOut();
+    } catch (error, stackTrace) {
+      firebaseError = error;
+      firebaseStackTrace = stackTrace;
+      debugPrint('Error signing out of Firebase: $error');
+    }
+
     try {
       if (_googleSignIn.currentUser != null) {
         await _googleSignIn.signOut();
       }
-      await _auth.signOut();
-    } catch (e) {
-      debugPrint("Error signing out: $e");
-      rethrow;
+    } catch (error, stackTrace) {
+      googleError = error;
+      googleStackTrace = stackTrace;
+      debugPrint('Error signing out of Google: $error');
+    }
+
+    if (firebaseError != null) {
+      Error.throwWithStackTrace(firebaseError, firebaseStackTrace!);
+    }
+    if (googleError != null) {
+      Error.throwWithStackTrace(googleError, googleStackTrace!);
     }
   }
 

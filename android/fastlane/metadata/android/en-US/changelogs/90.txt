@@ -1,0 +1,5 @@
+Login is now more reliable.
+
+- Temporary profile setup failures are retried automatically.
+- Cancelled sign-ins are no longer treated as a success or failure.
+- Improved diagnostics help us identify and resolve login issues faster.
